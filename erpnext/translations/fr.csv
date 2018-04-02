@@ -90,7 +90,6 @@ b'DocType: Lab Prescription',b'Lab Prescription',b'Prescription de laboratoire'
 b'apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26',b'Service Expense',b'Frais de Service'
 b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +899',b'Serial Number: {0} is already referenced in Sales Invoice: {1}',b'Num\xc3\xa9ro de S\xc3\xa9rie: {0} est d\xc3\xa9j\xc3\xa0 r\xc3\xa9f\xc3\xa9renc\xc3\xa9 dans la Facture de Vente: {1}'
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +889',b'Invoice',b'Facture'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +145',b'Make Retention Stock Entry',b'Faire une entr\xc3\xa9e en stock de r\xc3\xa9tention'
 b'DocType: Purchase Invoice Item',b'Item Weight Details',b'D\xc3\xa9tails du poids de l&#39;article'
 b'DocType: Asset Maintenance Log',b'Periodicity',b'P\xc3\xa9riodicit\xc3\xa9'
 b'apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +21',b'Fiscal Year {0} is required',b'Exercice Fiscal {0} est n\xc3\xa9cessaire'
@@ -108,7 +107,6 @@ b'apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.
 b'DocType: Work Order Operation',b'Work In Progress',b'Travaux En Cours'
 b'apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py +13',b'Please select date',b'Veuillez s\xc3\xa9lectionner une date'
 b'DocType: Daily Work Summary Group',b'Holiday List',b'Liste de Vacances'
-b'apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88',b'Please setup numbering series for Attendance via Setup &gt; Numbering Series',b'Veuillez configurer la s\xc3\xa9rie de num\xc3\xa9ros pour la pr\xc3\xa9sence via Setup&gt; S\xc3\xa9rie de num\xc3\xa9ros'
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +127',b'Accountant',b'Comptable'
 b'DocType: Hub Settings',b'Selling Price List',b'Liste de prix de vente'
 b'DocType: Patient',b'Tobacco Current Use',b'Consommation actuelle de tabac'
@@ -222,7 +220,7 @@ b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +41',b'Pharmaceu
 b'DocType: Purchase Invoice Item',b'Is Fixed Asset',b'Est Immobilisation'
 b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +273',"b'Available qty is {0}, you need {1}'","b'Qt\xc3\xa9 disponible est {0}, vous avez besoin de {1}'"
 b'DocType: Expense Claim Detail',b'Claim Amount',b'Montant R\xc3\xa9clam\xc3\xa9'
-b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +653',b'Work Order has been {0}',b'Le bon de travail a \xc3\xa9t\xc3\xa9 {0}'
+b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +657',b'Work Order has been {0}',b'Le bon de travail a \xc3\xa9t\xc3\xa9 {0}'
 b'apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +56',b'Duplicate customer group found in the cutomer group table',b'Groupe de clients en double trouv\xc3\xa9 dans le tableau des groupes de clients'
 b'apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +31',b'Supplier Type / Supplier',b'Fournisseur / Type de Fournisseur'
 b'DocType: Naming Series',b'Prefix',b'Pr\xc3\xa9fixe'
@@ -252,13 +250,13 @@ b'DocType: Lab Test UOM',b'Lab Test UOM',b'UDM de test de laboratoire'
 b'DocType: Delivery Note',b'Installation Status',"b""Etat de l'Installation"""
 b'DocType: BOM',b'Quality Inspection Template',b'Mod\xc3\xa8le d&#39;inspection de la qualit\xc3\xa9'
 b'apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js +135',b'Do you want to update attendance?<br>Present: {0}\\\n\t\t\t\t\t<br>Absent: {1}',b'Voulez-vous mettre \xc3\xa0 jour la fr\xc3\xa9quentation? <br> Pr\xc3\xa9sents: {0} \\ <br> Absent: {1}'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +334',b'Accepted + Rejected Qty must be equal to Received quantity for Item {0}',"b""La Qt\xc3\xa9 Accept\xc3\xa9e + Rejet\xc3\xa9e doit \xc3\xaatre \xc3\xa9gale \xc3\xa0 la quantit\xc3\xa9 Re\xc3\xa7ue pour l'Article {0}"""
+b'apps/erpnext/erpnext/controllers/buying_controller.py +350',b'Accepted + Rejected Qty must be equal to Received quantity for Item {0}',"b""La Qt\xc3\xa9 Accept\xc3\xa9e + Rejet\xc3\xa9e doit \xc3\xaatre \xc3\xa9gale \xc3\xa0 la quantit\xc3\xa9 Re\xc3\xa7ue pour l'Article {0}"""
 b'DocType: Request for Quotation',b'RFQ-',b'RFQ-'
 b'DocType: Item',b'Supply Raw Materials for Purchase',"b""Fournir les Mati\xc3\xa8res Premi\xc3\xa8res pour l'Achat"""
 b'DocType: Agriculture Analysis Criteria',b'Fertilizer',b'Engrais'
 b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +152',b'At least one mode of payment is required for POS invoice.',b'Au moins un mode de paiement est n\xc3\xa9cessaire pour une facture de PDV'
 b'DocType: Products Settings',b'Show Products as a List',b'Afficher les Produits en Liste'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +532',b'Item {0} is not active or end of life has been reached',"b""L'article {0} n\xe2\x80\x99est pas actif ou sa fin de vie a \xc3\xa9t\xc3\xa9 atteinte"""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +534',b'Item {0} is not active or end of life has been reached',"b""L'article {0} n\xe2\x80\x99est pas actif ou sa fin de vie a \xc3\xa9t\xc3\xa9 atteinte"""
 b'DocType: Student Admission Program',b'Minimum Age',b'\xc3\x82ge Minimum'
 b'apps/erpnext/erpnext/utilities/user_progress.py +190',b'Example: Basic Mathematics',b'Exemple : Math\xc3\xa9matiques de Base'
 b'DocType: Customer',b'Primary Address',b'Adresse principale'
@@ -312,7 +310,7 @@ b'DocType: Job Offer',b'Select Terms and Conditions',b'S\xc3\xa9lectionner les T
 b'apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +72',b'Out Value',b'Valeur Sortante'
 b'DocType: Production Plan',b'Sales Orders',b'Commandes Clients'
 b'DocType: Purchase Taxes and Charges',b'Valuation',b'Valorisation'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +390',b'Set as Default',b'D\xc3\xa9finir par d\xc3\xa9faut'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +394',b'Set as Default',b'D\xc3\xa9finir par d\xc3\xa9faut'
 b'DocType: Production Plan',b'PLN-',b'PLN-'
 ,b'Purchase Order Trends',b'Tendances des Bons de Commande'
 b'apps/erpnext/erpnext/utilities/user_progress.py +78',b'Go to Customers',b'Aller aux Clients'
@@ -326,6 +324,7 @@ b'DocType: Email Digest',b'New Sales Orders',b'Nouvelles Commandes Client'
 b'DocType: Bank Guarantee',b'Bank Account',b'Compte Bancaire'
 b'DocType: Leave Type',b'Allow Negative Balance',b'Autoriser un Solde N\xc3\xa9gatif'
 b'apps/erpnext/erpnext/projects/doctype/project_type/project_type.py +13',"b""You cannot delete Project Type 'External'""","b""Vous ne pouvez pas supprimer le Type de Projet 'Externe'"""
+b'apps/erpnext/erpnext/public/js/utils.js +194',b'Select Alternate Item',b'S\xc3\xa9lectionnez un autre \xc3\xa9l\xc3\xa9ment'
 b'DocType: Employee',b'Create User',b'Cr\xc3\xa9er un Utilisateur'
 b'DocType: Selling Settings',b'Default Territory',b'R\xc3\xa9gion par D\xc3\xa9faut'
 b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +53',b'Television',b'T\xc3\xa9l\xc3\xa9vision'
@@ -349,7 +348,7 @@ b'apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production
 b'DocType: Delivery Note Item',b'Against Sales Invoice Item',"b""Pour l'Article de la Facture de Vente"""
 b'DocType: Agriculture Analysis Criteria',b'Linked Doctype',b'Doctype li\xc3\xa9'
 b'apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +44',b'Net Cash from Financing',b'Tr\xc3\xa9sorerie Nette des Financements'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2375',"b'LocalStorage is full , did not save'","b'Le Stockage Local est plein, l\xe2\x80\x99enregistrement n\xe2\x80\x99a pas fonctionn\xc3\xa9'"
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2371',"b'LocalStorage is full , did not save'","b'Le Stockage Local est plein, l\xe2\x80\x99enregistrement n\xe2\x80\x99a pas fonctionn\xc3\xa9'"
 b'DocType: Lead',b'Address & Contact',b'Adresse &amp; Contact'
 b'DocType: Leave Allocation',b'Add unused leaves from previous allocations',b'Ajouter les cong\xc3\xa9s inutilis\xc3\xa9s des pr\xc3\xa9c\xc3\xa9dentes allocations'
 b'DocType: Sales Partner',b'Partner website',b'Site Partenaire'
@@ -357,7 +356,7 @@ b'DocType: Restaurant Order Entry',b'Add Item',b'Ajouter un Article'
 b'DocType: Lab Test',b'Custom Result',b'R\xc3\xa9sultat Personnalis\xc3\xa9'
 b'DocType: Delivery Stop',b'Contact Name',b'Nom du Contact'
 b'DocType: Course Assessment Criteria',b'Course Assessment Criteria',"b""Crit\xc3\xa8res d'\xc3\x89valuation du Cours"""
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +18',b'Tax Id: ',b'Num\xc3\xa9ro d&#39;identification fiscale'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +27',b'Tax Id: ',b'Num\xc3\xa9ro d&#39;identification fiscale'
 b'apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +216',b'Student ID: ',b'Carte d&#39;\xc3\xa9tudiant:'
 b'DocType: POS Customer Group',b'POS Customer Group',b'Groupe Clients PDV'
 b'DocType: Land Unit',b'Land Unit describing various land assets',b'Parcelle d\xc3\xa9crivant divers biens fonciers'
@@ -404,7 +403,7 @@ b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1064',b'
 b'DocType: Bank Reconciliation',b'Update Clearance Date',b'Mettre \xc3\xa0 Jour la Date de Compensation'
 ,b'GSTR-2',b'GSTR-2'
 b'DocType: Item',b'Purchase Details',"b""D\xc3\xa9tails de l'Achat"""
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +407',"b""Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}""","b""Article {0} introuvable dans la table 'Mati\xc3\xa8res Premi\xc3\xa8res Fournies' dans la Commande d'Achat {1}"""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +408',"b""Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}""","b""Article {0} introuvable dans la table 'Mati\xc3\xa8res Premi\xc3\xa8res Fournies' dans la Commande d'Achat {1}"""
 b'DocType: Salary Slip',b'Total Principal Amount',b'Montant total du capital'
 b'DocType: Student Guardian',b'Relation',b'Relation'
 b'DocType: Student Guardian',b'Mother',b'M\xc3\xa8re'
@@ -413,7 +412,7 @@ b'DocType: Crop',b'Biennial',b'Biennal'
 b'apps/erpnext/erpnext/config/selling.py +18',b'Confirmed orders from Customers.',b'Commandes confirm\xc3\xa9es des clients.'
 b'DocType: Purchase Receipt Item',b'Rejected Quantity',b'Quantit\xc3\xa9 Rejet\xc3\xa9e'
 b'apps/erpnext/erpnext/education/doctype/fees/fees.py +80',b'Payment request {0} created',b'Demande de paiement {0} cr\xc3\xa9\xc3\xa9e'
-b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +72',b'Open Orders',b'Commandes ouvertes'
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77',b'Open Orders',b'Commandes ouvertes'
 b'apps/erpnext/erpnext/healthcare/setup.py +255',b'Low Sensitivity',b'Faible Sensibilit\xc3\xa9'
 b'DocType: Notification Control',b'Notification Control',b'Contr\xc3\xb4le de Notification'
 b'apps/erpnext/erpnext/templates/emails/training_event.html +17',b'Please confirm once you have completed your training',b'Veuillez confirmer une fois que vous avez termin\xc3\xa9 votre formation'
@@ -475,7 +474,7 @@ b'DocType: Consultation',b'Encounter Impression',b'Impression de la Visite'
 b'apps/erpnext/erpnext/config/learn.py +82',b'Setting up Taxes',b'Configuration des Imp\xc3\xb4ts'
 b'apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +134',b'Cost of Sold Asset',b'Co\xc3\xbbt des Immobilisations Vendus'
 b'DocType: Volunteer',b'Morning',b'Matin'
-b'apps/erpnext/erpnext/accounts/utils.py +350',b'Payment Entry has been modified after you pulled it. Please pull it again.',b'L\xe2\x80\x99\xc3\x89criture de Paiement a \xc3\xa9t\xc3\xa9 modifi\xc3\xa9 apr\xc3\xa8s que vous l\xe2\x80\x99ayez r\xc3\xa9cup\xc3\xa9r\xc3\xa9e. Veuillez la r\xc3\xa9cup\xc3\xa9rer \xc3\xa0 nouveau.'
+b'apps/erpnext/erpnext/accounts/utils.py +345',b'Payment Entry has been modified after you pulled it. Please pull it again.',b'L\xe2\x80\x99\xc3\x89criture de Paiement a \xc3\xa9t\xc3\xa9 modifi\xc3\xa9 apr\xc3\xa8s que vous l\xe2\x80\x99ayez r\xc3\xa9cup\xc3\xa9r\xc3\xa9e. Veuillez la r\xc3\xa9cup\xc3\xa9rer \xc3\xa0 nouveau.'
 b'DocType: Program Enrollment Tool',b'New Student Batch',"b""Nouveau groupe d'\xc3\xa9tudiants"""
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +479',b'{0} entered twice in Item Tax',"b""{0} est entr\xc3\xa9 deux fois dans la Taxe de l'Article"""
 b'apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +113',b'Summary for this week and pending activities',b'R\xc3\xa9sum\xc3\xa9 de la semaine et des activit\xc3\xa9s en suspens'
@@ -515,7 +514,7 @@ b'apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +426',b'Please see 
 b'DocType: Purchase Order',b'% Received',b'% Re\xc3\xa7u'
 b'apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +3',b'Create Student Groups',"b""Cr\xc3\xa9er des Groupes d'\xc3\x89tudiants"""
 b'DocType: Volunteer',b'Weekends',b'Fins de semaine'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +118',b'Credit Note Amount',b'Montant de la Note de Cr\xc3\xa9dit'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127',b'Credit Note Amount',b'Montant de la Note de Cr\xc3\xa9dit'
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +187',b'{0} ({1}) cannot be greater than planned quanitity ({2}) in Work Order {3}',b'{0} ({1}) ne peut pas \xc3\xaatre sup\xc3\xa9rieur \xc3\xa0 la quantit\xc3\xa9 planifi\xc3\xa9e ({2}) dans le bon de travail {3}'
 b'DocType: Setup Progress Action',b'Action Document',"b""Document d'Action"""
 b'DocType: Chapter Member',b'Website URL',b'URL de site web'
@@ -546,7 +545,7 @@ b'DocType: Employee',b'Widowed',b'Veuf'
 b'DocType: Request for Quotation',b'Request for Quotation',"b""Appel d'Offre"""
 b'DocType: Healthcare Settings',b'Require Lab Test Approval',"b""N\xc3\xa9cessite l'Approbation du Test de Laboratoire"""
 b'DocType: Salary Slip Timesheet',b'Working Hours',b'Heures de Travail'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +59',b'Total Outstanding',b'Total en suspens'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +68',b'Total Outstanding',b'Total en suspens'
 b'DocType: Naming Series',b'Change the starting / current sequence number of an existing series.',"b""Changer le num\xc3\xa9ro initial/actuel d'une s\xc3\xa9rie existante."""
 b'DocType: Dosage Strength',b'Strength',b'Force'
 b'apps/erpnext/erpnext/accounts/page/pos/pos.js +1534',b'Create a new Customer',b'Cr\xc3\xa9er un nouveau Client'
@@ -562,7 +561,7 @@ b'DocType: Student Log',b'Medical',b'M\xc3\xa9dical'
 b'apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +175',b'Reason for losing',b'Raison de perdre'
 b'apps/erpnext/erpnext/accounts/doctype/account/account.js +52',b'Update Account Number',b'Mettre \xc3\xa0 jour le num\xc3\xa9ro'
 b'apps/erpnext/erpnext/crm/doctype/lead/lead.py +44',b'Lead Owner cannot be same as the Lead',b'Le Responsable du Prospect ne peut pas \xc3\xaatre identique au Prospect'
-b'apps/erpnext/erpnext/accounts/utils.py +356',b'Allocated amount can not greater than unadjusted amount',b'Le montant allou\xc3\xa9 ne peut pas \xc3\xaatre plus grand que le montant non ajust\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/utils.py +351',b'Allocated amount can not greater than unadjusted amount',b'Le montant allou\xc3\xa9 ne peut pas \xc3\xaatre plus grand que le montant non ajust\xc3\xa9'
 b'DocType: Announcement',b'Receiver',b'R\xc3\xa9cepteur'
 b'apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +83',b'Workstation is closed on the following dates as per Holiday List: {0}',b'Le bureau est ferm\xc3\xa9 aux dates suivantes selon la Liste de Vacances : {0}'
 b'apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +32',b'Opportunities',b'Opportunit\xc3\xa9s'
@@ -599,7 +598,7 @@ b'apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollm
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +220',b'{0} {1} is not associated with {2} {3}',b'{0} {1} n&#39;est pas associ\xc3\xa9 \xc3\xa0 {2} {3}'
 b'DocType: Notification Control',b'Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.',"b""Personnaliser le texte d'introduction qui fera partie de cet Email. Chaque transaction a une introduction s\xc3\xa9par\xc3\xa9e."""
 b'apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +176',b'Please set default payable account for the company {0}',b'Veuillez d\xc3\xa9finir le compte cr\xc3\xa9diteur par d\xc3\xa9faut pour la soci\xc3\xa9t\xc3\xa9 {0}'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +511',b'Transaction not allowed against stopped Work Order {0}',b'La transaction n&#39;est pas autoris\xc3\xa9e sur l&#39;ordre de travail arr\xc3\xaat\xc3\xa9 {0}'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +513',b'Transaction not allowed against stopped Work Order {0}',b'La transaction n&#39;est pas autoris\xc3\xa9e sur l&#39;ordre de travail arr\xc3\xaat\xc3\xa9 {0}'
 b'DocType: Setup Progress Action',b'Min Doc Count',b'Compte de Document Minimum'
 b'apps/erpnext/erpnext/config/manufacturing.py +84',b'Global settings for all manufacturing processes.',b'Param\xc3\xa8tres globaux pour tous les processus de fabrication.'
 b'DocType: Accounts Settings',b'Accounts Frozen Upto',"b""Comptes Gel\xc3\xa9s Jusqu'au"""
@@ -683,7 +682,7 @@ b'DocType: Purchase Invoice Item',b'Item',b'Article'
 b'apps/erpnext/erpnext/healthcare/setup.py +256',b'High Sensitivity',b'Haute Sensibilit\xc3\xa9'
 b'apps/erpnext/erpnext/config/non_profit.py +48',b'Volunteer Type information.',b'Volontaire Type d&#39;information.'
 b'DocType: Cash Flow Mapping Template',b'Cash Flow Mapping Template',b'Mod\xc3\xa8le de cartographie des flux de tr\xc3\xa9sorerie'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2555',b'Serial no item cannot be a fraction',"b""N\xc2\xb0 de s\xc3\xa9rie de l'article ne peut pas \xc3\xaatre une fraction"""
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2551',b'Serial no item cannot be a fraction',"b""N\xc2\xb0 de s\xc3\xa9rie de l'article ne peut pas \xc3\xaatre une fraction"""
 b'DocType: Journal Entry',b'Difference (Dr - Cr)',b'\xc3\x89cart (Dr - Cr )'
 b'DocType: Account',b'Profit and Loss',b'Pertes et Profits'
 b'apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +104',"b'Not permitted, configure Lab Test Template as required'","b'Non autoris\xc3\xa9, configurez le mod\xc3\xa8le de test de laboratoire au besoin'"
@@ -691,7 +690,7 @@ b'DocType: Patient',b'Risk Factors',b'Facteurs de Risque'
 b'DocType: Patient',b'Occupational Hazards and Environmental Factors',b'Dangers Professionnels et Facteurs Environnementaux'
 b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +239',b'Stock Entries already created for Work Order ',b'Entr\xc3\xa9es de stock d\xc3\xa9j\xc3\xa0 cr\xc3\xa9\xc3\xa9es pour l&#39;ordre de travail'
 b'DocType: Vital Signs',b'Respiratory rate',b'Fr\xc3\xa9quence Respiratoire'
-b'apps/erpnext/erpnext/config/stock.py +334',b'Managing Subcontracting',b'Gestion de la Sous-traitance'
+b'apps/erpnext/erpnext/config/stock.py +338',b'Managing Subcontracting',b'Gestion de la Sous-traitance'
 b'DocType: Vital Signs',b'Body Temperature',b'Temp\xc3\xa9rature Corporelle'
 b'DocType: Project',b'Project will be accessible on the website to these users',b'Le Projet sera accessible sur le site web \xc3\xa0 ces utilisateurs'
 b'DocType: Detected Disease',b'Disease',b'Maladie'
@@ -711,6 +710,7 @@ b'DocType: Crop',b'Produced Items',b'Articles produits'
 b'DocType: Sales Order Item',b'Gross Profit',b'B\xc3\xa9n\xc3\xa9fice Brut'
 b'apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49',b'Increment cannot be 0',b'Incr\xc3\xa9ment ne peut pas \xc3\xaatre 0'
 b'DocType: Company',b'Delete Company Transactions',b'Supprimer les Transactions de la Soci\xc3\xa9t\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48',b'Item Code &gt; Item Group &gt; Brand',b'Code de l&#39;article&gt; Groupe de produits&gt; Marque'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364',b'Reference No and Reference Date is mandatory for Bank transaction',b'Le N\xc2\xb0 de R\xc3\xa9f\xc3\xa9rence et la Date de R\xc3\xa9f\xc3\xa9rence sont n\xc3\xa9cessaires pour une Transaction Bancaire'
 b'DocType: Purchase Receipt',b'Add / Edit Taxes and Charges',b'Ajouter / Modifier Taxes et Charges'
 b'DocType: Payment Entry Reference',b'Supplier Invoice No',b'N\xc2\xb0 de Facture du Fournisseur'
@@ -727,7 +727,7 @@ b'DocType: Budget',b'Ignore',b'Ignorer'
 b'apps/erpnext/erpnext/accounts/party.py +396',b'{0} {1} is not active',"b""{0} {1} n'est pas actif"""
 b'apps/erpnext/erpnext/config/accounts.py +272',b'Setup cheque dimensions for printing',"b""Configurez les dimensions du ch\xc3\xa8que pour l'impression"""
 b'DocType: Salary Slip',b'Salary Slip Timesheet',b'Feuille de Temps de la Fiche de Paie'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +160',b'Supplier Warehouse mandatory for sub-contracted Purchase Receipt',"b""Entrep\xc3\xb4t Fournisseur obligatoire pour les Re\xc3\xa7us d'Achat sous-trait\xc3\xa9s"""
+b'apps/erpnext/erpnext/controllers/buying_controller.py +161',b'Supplier Warehouse mandatory for sub-contracted Purchase Receipt',"b""Entrep\xc3\xb4t Fournisseur obligatoire pour les Re\xc3\xa7us d'Achat sous-trait\xc3\xa9s"""
 b'DocType: Pricing Rule',b'Valid From',b'Valide \xc3\xa0 Partir de'
 b'DocType: Sales Invoice',b'Total Commission',b'Total de la Commission'
 b'DocType: Pricing Rule',b'Sales Partner',b'Partenaire Commercial'
@@ -766,6 +766,7 @@ b'DocType: Sales Invoice',b'Shipping Bill Date',b'Date de facturation'
 b'DocType: Production Plan',b'Production Plan',b'Plan de production'
 b'DocType: Opening Invoice Creation Tool',b'Opening Invoice Creation Tool',b'Ouverture de l&#39;outil de cr\xc3\xa9ation de facture'
 b'apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853',b'Sales Return',b'Retour de Ventes'
+b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54',b'Supplier &gt; Supplier Type',b'Fournisseur&gt; Type de fournisseur'
 b'apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96',"b""Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period""",b'Remarque : Le total des cong\xc3\xa9s allou\xc3\xa9s {0} ne doit pas \xc3\xaatre inf\xc3\xa9rieur aux cong\xc3\xa9s d\xc3\xa9j\xc3\xa0 approuv\xc3\xa9s {1} pour la p\xc3\xa9riode'
 ,b'Total Stock Summary',"b""R\xc3\xa9capitulatif de l'Inventaire Total"""
 b'DocType: Announcement',b'Posted By',b'Post\xc3\xa9 par'
@@ -778,7 +779,7 @@ b'DocType: Quotation',b'Quotation To',b'Devis Pour'
 b'DocType: Lead',b'Middle Income',b'Revenu Interm\xc3\xa9diaire'
 b'apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +228',b'Opening (Cr)',b'Ouverture (Cr)'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +872',b'Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.',b'L\xe2\x80\x99Unit\xc3\xa9 de Mesure par D\xc3\xa9faut pour l\xe2\x80\x99Article {0} ne peut pas \xc3\xaatre modifi\xc3\xa9e directement parce que vous avez d\xc3\xa9j\xc3\xa0 fait une (des) transaction (s) avec une autre unit\xc3\xa9 de mesure. Vous devez cr\xc3\xa9er un nouvel article pour utiliser une UDM par d\xc3\xa9faut diff\xc3\xa9rente.'
-b'apps/erpnext/erpnext/accounts/utils.py +354',b'Allocated amount can not be negative',b'Le montant allou\xc3\xa9 ne peut \xc3\xaatre n\xc3\xa9gatif'
+b'apps/erpnext/erpnext/accounts/utils.py +349',b'Allocated amount can not be negative',b'Le montant allou\xc3\xa9 ne peut \xc3\xaatre n\xc3\xa9gatif'
 b'apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +11',b'Please set the Company',b'Veuillez d\xc3\xa9finir la Soci\xc3\xa9t\xc3\xa9'
 b'DocType: Share Balance',b'Share Balance',b'Partager le solde'
 b'DocType: Purchase Order Item',b'Billed Amt',b'Mnt Factur\xc3\xa9'
@@ -812,7 +813,7 @@ b'DocType: Training Event',b'Conference',b'Conf\xc3\xa9rence'
 b'DocType: Timesheet',b'Billed',b'Factur\xc3\xa9'
 b'DocType: Batch',b'Batch Description',b'Description du Lot'
 b'apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +12',b'Creating student groups',b'Cr\xc3\xa9er des groupes d&#39;\xc3\xa9tudiants'
-b'apps/erpnext/erpnext/accounts/utils.py +727',"b'Payment Gateway Account not created, please create one manually.'","b'Le Compte Passerelle de Paiement n\xe2\x80\x99existe pas, veuillez en cr\xc3\xa9er un manuellement.'"
+b'apps/erpnext/erpnext/accounts/utils.py +720',"b'Payment Gateway Account not created, please create one manually.'","b'Le Compte Passerelle de Paiement n\xe2\x80\x99existe pas, veuillez en cr\xc3\xa9er un manuellement.'"
 b'DocType: Supplier Scorecard',b'Per Year',b'Par An'
 b'apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +51',b'Not eligible for the admission in this program as per DOB',"b""Non admissible \xc3\xa0 l'admission dans ce programme d'apr\xc3\xa8s sa date de naissance"""
 b'DocType: Sales Invoice',b'Sales Taxes and Charges',b'Taxes et Frais de Vente'
@@ -890,7 +891,7 @@ b'DocType: BOM Operation',b'Operation Time',"b""Heure de l'Op\xc3\xa9ration"""
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +316',b'Finish',b'Terminer'
 b'apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +412',b'Base',b'Base'
 b'DocType: Timesheet',b'Total Billed Hours',b'Total des Heures Factur\xc3\xa9es'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1530',b'Write Off Amount',b'Montant de la Reprise'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1551',b'Write Off Amount',b'Montant de la Reprise'
 b'DocType: Leave Block List Allow',b'Allow User',"b""Autoriser l'Utilisateur"""
 b'DocType: Journal Entry',b'Bill No',b'Num\xc3\xa9ro de Facture'
 b'DocType: Company',b'Gain/Loss Account on Asset Disposal',b'Compte de Cessions des Immobilisations'
@@ -923,7 +924,6 @@ b'apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +303'
 b'DocType: Request for Quotation',b'Get Suppliers',b'Obtenir des Fournisseurs'
 b'DocType: Purchase Receipt Item Supplied',b'Current Stock',b'Stock Actuel'
 b'apps/erpnext/erpnext/controllers/accounts_controller.py +610',b'Row #{0}: Asset {1} does not linked to Item {2}',"b""Ligne #{0} : L\xe2\x80\x99Actif {1} n\xe2\x80\x99est pas li\xc3\xa9 \xc3\xa0 l'Article {2}"""
-b'apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15',b'Please setup Instructor Naming System in Education &gt; Education Settings',b'Veuillez configurer le syst\xc3\xa8me de nommage de l&#39;instructeur dans Education&gt; Param\xc3\xa8tres de l&#39;\xc3\xa9ducation'
 b'apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +394',b'Preview Salary Slip',b'Aper\xc3\xa7u Fiche de Salaire'
 b'apps/erpnext/erpnext/accounts/doctype/budget/budget.py +54',b'Account {0} has been entered multiple times',b'Le compte {0} a \xc3\xa9t\xc3\xa9 entr\xc3\xa9 plusieurs fois'
 b'DocType: Account',b'Expenses Included In Valuation',b'Charges Incluses dans la Valorisation'
@@ -998,7 +998,7 @@ b'apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +78',"b""{0
 b'DocType: Special Test Items',b'Particulars',b'Particularit\xc3\xa9s'
 b'apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +24',b'{0}: From {0} of type {1}',b'{0} : Du {0} de type {1}'
 b'DocType: Warranty Claim',b'CI-',b'CI-'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +300',b'Row {0}: Conversion Factor is mandatory',b'Ligne {0} : Le Facteur de Conversion est obligatoire'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +316',b'Row {0}: Conversion Factor is mandatory',b'Ligne {0} : Le Facteur de Conversion est obligatoire'
 b'DocType: Student',b'A+',b'A +'
 b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +344',"b'Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}'","b'Plusieurs R\xc3\xa8gles de Prix existent avec les m\xc3\xaames crit\xc3\xa8res, veuillez r\xc3\xa9soudre les conflits en attribuant des priorit\xc3\xa9s. R\xc3\xa8gles de Prix : {0}'"
 b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +519',b'Cannot deactivate or cancel BOM as it is linked with other BOMs',"b""D\xc3\xa9sactivation ou annulation de la LDM impossible car elle est li\xc3\xa9e avec d'autres LDMs"""
@@ -1007,7 +1007,7 @@ b'DocType: Item Attribute Value',b'Item Attribute Value',"b""Valeur de l'Attribu
 b'apps/erpnext/erpnext/projects/doctype/project/project.py +406',b'Please Update your Project Status',b'Veuillez mettre \xc3\xa0 jour votre statut de projet'
 b'DocType: Item',b'Maximum sample quantity that can be retained',b'Quantit\xc3\xa9 maximale d&#39;\xc3\xa9chantillon pouvant \xc3\xaatre conserv\xc3\xa9e'
 b'DocType: Project Update',b'How is the Project Progressing Right Now?',b'Comment le projet progresse-t-il maintenant?'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +418',b'Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}',b'La ligne {0} # article {1} ne peut pas \xc3\xaatre transf\xc3\xa9r\xc3\xa9e plus de {2} par commande d&#39;achat {3}'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +419',b'Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}',b'La ligne {0} # article {1} ne peut pas \xc3\xaatre transf\xc3\xa9r\xc3\xa9e plus de {2} par commande d&#39;achat {3}'
 b'apps/erpnext/erpnext/config/selling.py +158',b'Sales campaigns.',b'Campagnes de vente.'
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +117',b'Make Timesheet',b'Cr\xc3\xa9er une Feuille de Temps'
 b'DocType: Sales Taxes and Charges Template',"b'Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.'","b'Mod\xc3\xa8le de la taxe standard qui peut \xc3\xaatre appliqu\xc3\xa9 \xc3\xa0 toutes les Op\xc3\xa9rations d\'Achat. Ce mod\xc3\xa8le peut contenir la liste des titres d\'imp\xc3\xb4ts ainsi que d\'autres titre de charges comme ""Livraison"", ""Assurance"", ""Gestion"", etc. \n\n#### Remarque \n\nLe taux d\'imposition que vous d\xc3\xa9finissez ici sera le taux d\'imposition standard pour tous les **Articles**. S\'il y a des **Articles** qui ont des taux diff\xc3\xa9rents, ils doivent \xc3\xaatre ajout\xc3\xa9s dans la table **Taxe de l\'Article** dans les donn\xc3\xa9es de base **Article**.\n\n#### Description des Colonnes\n\n1. Type de Calcul : \n    - Cela peut \xc3\xaatre le **Total Net** (qui est la somme des montants de base).\n    - **Total / Montant Sur la Ligne Pr\xc3\xa9c\xc3\xa9dente** (pour les taxes ou frais accumul\xc3\xa9s). Si vous s\xc3\xa9lectionnez cette option, la taxe sera appliqu\xc3\xa9e en pourcentage du montant ou du total de la ligne pr\xc3\xa9c\xc3\xa9dente (dans la table d\'imp\xc3\xb4ts).\n    - **R\xc3\xa9el** (comme mentionn\xc3\xa9).\n2. Titre du Compte : Le journal comptable dans lequel cette taxe sera comptabilis\xc3\xa9e\n3. Centre de Co\xc3\xbbt : Si la taxe / redevance est un revenu (comme la livraison) ou une charge, elle doit \xc3\xaatre comptabilis\xc3\xa9e dans un Centre de Co\xc3\xbbts.\n4. Description : Description de la taxe (qui sera imprim\xc3\xa9e sur les factures / devis).\n5. Taux : Le taux d\'imposition.\n6. Montant : Le montant de la taxe.\n7. Total : Total accumul\xc3\xa9 \xc3\xa0 ce point.\n8. Entrez la Ligne : Si elle est bas\xc3\xa9e sur ""Total de la Ligne Pr\xc3\xa9c\xc3\xa9dente"" vous pouvez s\xc3\xa9lectionner le num\xc3\xa9ro de la ligne qui sera pris comme base pour ce calcul (par d\xc3\xa9faut la ligne pr\xc3\xa9c\xc3\xa9dente).\n9. Consid\xc3\xa9rez Taxe ou Charge pour : Dans cette section, vous pouvez sp\xc3\xa9cifier si la taxe / redevance est seulement pour la valorisation (pas une partie du total) ou seulement pour le total (n\'ajoute pas de la valeur \xc3\xa0 l\'article) ou pour les deux.\n10. Ajouter ou D\xc3\xa9duire : Ce que vous voulez ajouter ou d\xc3\xa9duire de la taxe.'"
@@ -1033,9 +1033,8 @@ b'DocType: Account',b'Liability',b'Passif'
 b'apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +220',b'Sanctioned Amount cannot be greater than Claim Amount in Row {0}.',b'Le Montant Approuv\xc3\xa9 ne peut pas \xc3\xaatre sup\xc3\xa9rieur au Montant R\xc3\xa9clam\xc3\xa9 \xc3\xa0 la ligne {0}.'
 b'apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +11',b'Academic Term: ',b'Terme acad\xc3\xa9mique'
 b'DocType: Salary Detail',b'Do not include in total',b'Ne pas inclure au total'
-b'apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206',b'Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series',b'Veuillez d\xc3\xa9finir la s\xc3\xa9rie de d\xc3\xa9nomination pour {0} via Configuration&gt; Param\xc3\xa8tres&gt; Naming Series'
 b'DocType: Company',b'Default Cost of Goods Sold Account',b'Compte de Co\xc3\xbbts des Marchandises Vendues par D\xc3\xa9faut'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1019',b'Sample quantity {0} cannot be more than received quantity {1}',b'La quantit\xc3\xa9 d&#39;\xc3\xa9chantillon {0} ne peut pas d\xc3\xa9passer la quantit\xc3\xa9 re\xc3\xa7ue {1}'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1063',b'Sample quantity {0} cannot be more than received quantity {1}',b'La quantit\xc3\xa9 d&#39;\xc3\xa9chantillon {0} ne peut pas d\xc3\xa9passer la quantit\xc3\xa9 re\xc3\xa7ue {1}'
 b'apps/erpnext/erpnext/stock/get_item_details.py +369',b'Price List not selected',b'Liste des Prix non s\xc3\xa9lectionn\xc3\xa9e'
 b'DocType: Employee',b'Family Background',b'Ant\xc3\xa9c\xc3\xa9dents Familiaux'
 b'DocType: Request for Quotation Supplier',b'Send Email',b'Envoyer un Email'
@@ -1099,7 +1098,7 @@ b'DocType: Hotel Room Pricing Item',b'Hotel Room Pricing Item',b'Objet de prix d
 b'DocType: HR Settings',b'Enter retirement age in years',"b""Entrez l'\xc3\xa2ge de la retraite en ann\xc3\xa9es"""
 b'DocType: Crop',b'Target Warehouse',b'Entrep\xc3\xb4t Cible'
 b'DocType: Payroll Employee Detail',b'Payroll Employee Detail',"b""D\xc3\xa9tails de la paye de l'employ\xc3\xa9"""
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +128',b'Please select a warehouse',b'Veuillez s\xc3\xa9lectionner un entrep\xc3\xb4t'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +133',b'Please select a warehouse',b'Veuillez s\xc3\xa9lectionner un entrep\xc3\xb4t'
 b'DocType: Cheque Print Template',b'Starting location from left edge',b'Position initiale depuis bord gauche'
 b'DocType: Item',b'Allow over delivery or receipt upto this percent',"b""Autoriser le d\xc3\xa9passement des capacit\xc3\xa9s livraison ou de r\xc3\xa9ception jusqu'\xc3\xa0 ce pourcentage"""
 b'DocType: Stock Entry',b'STE-',b'STE-'
@@ -1117,7 +1116,7 @@ b'apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +48',b'Projecte
 b'DocType: Sales Invoice',b'Payment Due Date',"b""Date d'\xc3\x89ch\xc3\xa9ance de Paiement"""
 b'DocType: Drug Prescription',b'Interval UOM',"b""UDM d'Intervalle"""
 b'DocType: Customer',"b'Reselect, if the chosen address is edited after save'","b'Res\xc3\xa9lectionner, si l&#39;adresse choisie est \xc3\xa9dit\xc3\xa9e apr\xc3\xa8s sauvegarde'"
-b'apps/erpnext/erpnext/stock/doctype/item/item.js +522',b'Item Variant {0} already exists with same attributes',"b""La Variante de l'Article {0} existe d\xc3\xa9j\xc3\xa0 avec les m\xc3\xaames caract\xc3\xa9ristiques"""
+b'apps/erpnext/erpnext/stock/doctype/item/item.js +544',b'Item Variant {0} already exists with same attributes',"b""La Variante de l'Article {0} existe d\xc3\xa9j\xc3\xa0 avec les m\xc3\xaames caract\xc3\xa9ristiques"""
 b'DocType: Item',b'Hub Publishing Details',b'D\xc3\xa9tails Publi\xc3\xa9s sur le Hub'
 b'apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +117',"b""'Opening'""","b""'Ouverture'"""
 b'apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130',b'Open To Do',b'Ouvrir To Do'
@@ -1169,6 +1168,7 @@ b'DocType: HR Settings',b'Include holidays in Total no. of Working Days',b'Inclu
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/sample_data.py +108',b'Setup your Institute in ERPNext',b'Configurez votre institut dans ERPNext'
 b'DocType: Agriculture Analysis Criteria',b'Plant Analysis',b'Analyse des plantes'
 b'DocType: Job Applicant',b'Hold',b'Tenir'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +127',b'Alternate Item',b'Autre article'
 b'DocType: Project Update',b'Progress Details',b'D\xc3\xa9tails du progr\xc3\xa8s'
 b'DocType: Employee',b'Date of Joining',"b""Date d'Embauche"""
 b'DocType: Naming Series',b'Update Series',b'Mettre \xc3\xa0 Jour les S\xc3\xa9ries'
@@ -1184,7 +1184,7 @@ b'apps/erpnext/erpnext/stock/report/warehouse_wise_item_balance_age_and_value/wa
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +341',b'Unable to find Time Slot in the next {0} days for Operation {1}',"b""Impossible de trouver le Cr\xc3\xa9neau Horaires dans les {0} prochains jours pour l'Op\xc3\xa9ration {1}"""
 b'DocType: Work Order',b'Plan material for sub-assemblies',b'Plan de mat\xc3\xa9riaux pour les sous-ensembles'
 b'apps/erpnext/erpnext/config/selling.py +97',b'Sales Partners and Territory',b'Partenaires Commerciaux et R\xc3\xa9gions'
-b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +600',b'BOM {0} must be active',b'LDM {0} doit \xc3\xaatre active'
+b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +601',b'BOM {0} must be active',b'LDM {0} doit \xc3\xaatre active'
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +414',b'No Items available for transfer',b'Aucun article disponible pour le transfert'
 b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218',b'Closing (Opening + Total)',b'Fermeture (ouverture + total)'
 b'DocType: Journal Entry',b'Depreciation Entry',b'Ecriture d\xe2\x80\x99Amortissement'
@@ -1253,7 +1253,6 @@ b'DocType: Cheque Print Template',b'Has Print Format',"b""A un Format d'Impressi
 b'DocType: Employee Loan',b'Sanctioned',b'Sanctionn\xc3\xa9'
 b'apps/erpnext/erpnext/accounts/page/pos/pos.js +75',b' is mandatory. Maybe Currency Exchange record is not created for ',"b""est obligatoire. Peut-\xc3\xaatre que le Taux de Change n'est pas cr\xc3\xa9\xc3\xa9 pour"""
 b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +139',b'Row #{0}: Please specify Serial No for Item {1}',"b""Ligne # {0} : Veuillez Indiquer le N\xc2\xb0 de s\xc3\xa9rie pour l'article {1}"""
-b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54',b'Supplier &gt; Supplier Type',b'Fournisseur&gt; Type de fournisseur'
 b'DocType: Crop Cycle',b'Crop Cycle',b'Cycle de r\xc3\xa9colte'
 b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +633',"b""For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.""","b'Pour les articles ""Ensembles de Produits"", l\xe2\x80\x99Entrep\xc3\xb4t, le N\xc2\xb0 de S\xc3\xa9rie et le N\xc2\xb0 de Lot proviendront de la table ""Liste de Colisage"". Si l\xe2\x80\x99Entrep\xc3\xb4t et le N\xc2\xb0 de Lot sont les m\xc3\xaames pour tous les produits colis\xc3\xa9s d\xe2\x80\x99un m\xc3\xaame article \'Produit Group\xc3\xa9\', ces valeurs peuvent \xc3\xaatre entr\xc3\xa9es dans la table principale de l\xe2\x80\x99article et elles seront copi\xc3\xa9es dans la table ""Liste de Colisage"".'"
 b'DocType: Student Admission',b'Publish on website',b'Publier sur le site web'
@@ -1347,7 +1346,7 @@ b'DocType: Production Plan',b'Get Sales Orders',b'Obtenir les Commandes Client'
 b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +68',b'{0} can not be negative',b'{0} ne peut pas \xc3\xaatre n\xc3\xa9gatif'
 b'DocType: Training Event',b'Self-Study',b'Autoformation'
 b'apps/erpnext/erpnext/agriculture/doctype/soil_texture/soil_texture.py +27',b'Soil compositions do not add up to 100',b'Les compositions de sol ne totalisent pas 100'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +558',b'Discount',b'Remise'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +567',b'Discount',b'Remise'
 b'DocType: Membership',b'Membership',b'Adh\xc3\xa9sion'
 b'DocType: Asset',b'Total Number of Depreciations',b'Nombre Total d\xe2\x80\x99Amortissements'
 b'DocType: Sales Invoice Item',b'Rate With Margin',b'Tarif Avec Marge'
@@ -1356,7 +1355,7 @@ b'DocType: Asset Maintenance',b'Maintenance Manager Name',b'Nom du responsable d
 b'DocType: Agriculture Task',b'Urgent',b'Urgent'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +174',b'Please specify a valid Row ID for row {0} in table {1}',b'Veuillez sp\xc3\xa9cifier un N\xc2\xb0 de Ligne valide pour la ligne {0} de la table {1}'
 b'apps/erpnext/erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py +84',b'Unable to find variable: ',b'Impossible de trouver une variable:'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +794',b'Please select a field to edit from numpad',b'Veuillez s\xc3\xa9lectionner un champ \xc3\xa0 modifier sur le pav\xc3\xa9 num\xc3\xa9rique'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +807',b'Please select a field to edit from numpad',b'Veuillez s\xc3\xa9lectionner un champ \xc3\xa0 modifier sur le pav\xc3\xa9 num\xc3\xa9rique'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +264',b'Cannot be a fixed asset item as Stock Ledger is created.',b'Ne peut pas \xc3\xaatre un article immobilis\xc3\xa9 car un Journal de Stock a \xc3\xa9t\xc3\xa9 cr\xc3\xa9\xc3\xa9.'
 b'apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23',b'Go to the Desktop and start using ERPNext',b'Acc\xc3\xa9dez au bureau et commencez \xc3\xa0 utiliser ERPNext'
 b'DocType: Item',b'Manufacturer',b'Fabricant'
@@ -1393,7 +1392,7 @@ b'DocType: Sales Partner',b'Implementation Partner',"b""Partenaire d'Impl\xc3\xa
 b'apps/erpnext/erpnext/accounts/page/pos/pos.js +1624',b'ZIP Code',b'Code Postal'
 b'apps/erpnext/erpnext/controllers/selling_controller.py +252',b'Sales Order {0} is {1}',b'Commande Client {0} est {1}'
 b'DocType: Opportunity',b'Contact Info',b'Information du Contact'
-b'apps/erpnext/erpnext/config/stock.py +319',b'Making Stock Entries',b'Faire des \xc3\x89critures de Stock'
+b'apps/erpnext/erpnext/config/stock.py +323',b'Making Stock Entries',b'Faire des \xc3\x89critures de Stock'
 b'DocType: Packing Slip',b'Net Weight UOM',b'UDM Poids Net'
 b'DocType: Item',b'Default Supplier',b'Fournisseur par D\xc3\xa9faut'
 b'DocType: Manufacturing Settings',b'Over Production Allowance Percentage',"b""Pourcentage d'Allocation en cas de Surproduction"""
@@ -1430,7 +1429,8 @@ b'apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +159',b'Quantity must b
 b'DocType: SMS Center',b'Total Characters',b'Nombre de Caract\xc3\xa8res'
 b'DocType: Employee Advance',b'Claimed',b'R\xc3\xa9clam\xc3\xa9'
 b'DocType: Crop',b'Row Spacing',b'\xc3\x89cartement des rangs'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +164',b'Please select BOM in BOM field for Item {0}',b'Veuillez s\xc3\xa9lectionner une LDM dans le champ LDM pour l\xe2\x80\x99Article {0}'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +165',b'Please select BOM in BOM field for Item {0}',b'Veuillez s\xc3\xa9lectionner une LDM dans le champ LDM pour l\xe2\x80\x99Article {0}'
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +22',"b""There isn't any item variant for the selected item""",b'Il n&#39;y a pas de variante d&#39;article pour l&#39;article s\xc3\xa9lectionn\xc3\xa9'
 b'DocType: C-Form Invoice Detail',b'C-Form Invoice Detail',b'Formulaire-C D\xc3\xa9tail de la Facture'
 b'DocType: Payment Reconciliation Invoice',b'Payment Reconciliation Invoice',b'Facture de R\xc3\xa9conciliation des Paiements'
 b'apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +38',b'Contribution %',b'Contribution %'
@@ -1448,7 +1448,7 @@ b'DocType: Leave Allocation',b'LAL/',b'LAL/'
 b'DocType: Setup Progress Action',b'Action Name',"b""Nom de l'Action"""
 b'apps/erpnext/erpnext/public/js/financial_statements.js +75',b'Start Year',b'Ann\xc3\xa9e de D\xc3\xa9but'
 b'apps/erpnext/erpnext/regional/india/utils.py +25',b'First 2 digits of GSTIN should match with State number {0}',"b""Les 2 premiers chiffres du GSTIN doivent correspondre au num\xc3\xa9ro de l'\xc3\x89tat {0}"""
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +68',b'PDC/LC',b'PDC / LC'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +77',b'PDC/LC',b'PDC / LC'
 b'DocType: Purchase Invoice',"b""Start date of current invoice's period""",b'Date de d\xc3\xa9but de la p\xc3\xa9riode de facturation en cours'
 b'DocType: Salary Slip',b'Leave Without Pay',b'Cong\xc3\xa9 Sans Solde'
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385',b'Capacity Planning Error',b'Erreur de Planification de Capacit\xc3\xa9'
@@ -1456,7 +1456,7 @@ b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385',b'Ca
 b'DocType: Lead',b'Consultant',b'Consultant'
 b'apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +356',b'Parents Teacher Meeting Attendance',b'Participation des parents \xc3\xa0 la r\xc3\xa9union des enseignants'
 b'DocType: Salary Slip',b'Earnings',b'B\xc3\xa9n\xc3\xa9fices'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +441',b'Finished Item {0} must be entered for Manufacture type entry',b'Le Produit Fini {0} doit \xc3\xaatre saisi pour une \xc3\xa9criture de type de Fabrication'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +443',b'Finished Item {0} must be entered for Manufacture type entry',b'Le Produit Fini {0} doit \xc3\xaatre saisi pour une \xc3\xa9criture de type de Fabrication'
 b'apps/erpnext/erpnext/config/learn.py +87',b'Opening Accounting Balance',"b""Solde d'Ouverture de Comptabilit\xc3\xa9"""
 ,b'GST Sales Register',b'Registre de Vente GST'
 b'DocType: Sales Invoice Advance',b'Sales Invoice Advance',b'Avance sur Facture de Vente'
@@ -1488,14 +1488,14 @@ b'DocType: Account',b'Balance Sheet',b'Bilan'
 b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +750',"b""Cost Center For Item with Item Code '""","b""Centre de Co\xc3\xbbts Pour Article ayant un Code Article '"""
 b'DocType: Fee Validity',b'Valid Till',"b""Valable Jusqu'au"""
 b'DocType: Student Report Generation Tool',b'Total Parents Teacher Meeting',b'R\xc3\xa9union des enseignants Total Parents'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2516',"b'Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.'",b'Le Mode de Paiement n\xe2\x80\x99est pas configur\xc3\xa9. Veuillez v\xc3\xa9rifier si le compte a \xc3\xa9t\xc3\xa9 r\xc3\xa9gl\xc3\xa9 sur Mode de Paiement ou sur Profil de Point de Vente.'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2512',"b'Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.'",b'Le Mode de Paiement n\xe2\x80\x99est pas configur\xc3\xa9. Veuillez v\xc3\xa9rifier si le compte a \xc3\xa9t\xc3\xa9 r\xc3\xa9gl\xc3\xa9 sur Mode de Paiement ou sur Profil de Point de Vente.'
 b'apps/erpnext/erpnext/buying/utils.py +74',b'Same item cannot be entered multiple times.',b'Le m\xc3\xaame article ne peut pas \xc3\xaatre entr\xc3\xa9 plusieurs fois.'
 b'apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +30',"b'Further accounts can be made under Groups, but entries can be made against non-Groups'","b""D'autres comptes individuels peuvent \xc3\xaatre cr\xc3\xa9\xc3\xa9s dans les groupes, mais les \xc3\xa9critures ne peuvent \xc3\xaatre faites que sur les comptes individuels"""
 b'DocType: Lead',b'Lead',b'Prospect'
 b'DocType: Email Digest',b'Payables',b'Dettes'
 b'DocType: Course',b'Course Intro',b'Intro du Cours'
 b'apps/erpnext/erpnext/stock/doctype/batch/batch.js +105',b'Stock Entry {0} created',b'\xc3\x89criture de Stock {0} cr\xc3\xa9\xc3\xa9e'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +306',b'Row #{0}: Rejected Qty can not be entered in Purchase Return',b'Ligne #{0} : Qt\xc3\xa9 Rejet\xc3\xa9e ne peut pas \xc3\xaatre entr\xc3\xa9e dans le Retour d\xe2\x80\x99Achat'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +322',b'Row #{0}: Rejected Qty can not be entered in Purchase Return',b'Ligne #{0} : Qt\xc3\xa9 Rejet\xc3\xa9e ne peut pas \xc3\xaatre entr\xc3\xa9e dans le Retour d\xe2\x80\x99Achat'
 b'apps/erpnext/erpnext/stock/doctype/item/item.js +182',b'Changing Customer Group for the selected Customer is not allowed.',b'Le changement de groupe de clients pour le client s\xc3\xa9lectionn\xc3\xa9 n&#39;est pas autoris\xc3\xa9.'
 ,b'Purchase Order Items To Be Billed',b'Articles \xc3\xa0 Facturer du Bon de Commande'
 b'apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +63',b'Updating estimated arrival times.',b'Mise \xc3\xa0 jour des heures d&#39;arriv\xc3\xa9e estim\xc3\xa9es.'
@@ -1539,7 +1539,7 @@ b'apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41',b'Earliest
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +526',"b'An Item Group exists with same name, please change the item name or rename the item group'","b""Un Groupe d'Article existe avec le m\xc3\xaame nom, veuillez changer le nom de l'article ou renommer le groupe d'article"""
 b'DocType: Crop Cycle',b'Less than a year',b'Moins d&#39;un an'
 b'apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py +52',b'Student Mobile No.',"b""N\xc2\xb0 de Mobile de l'\xc3\x89tudiant"""
-b'apps/erpnext/erpnext/setup/setup_wizard/operations/defaults_setup.py +105',b'Rest Of The World',b'Reste du Monde'
+b'apps/erpnext/erpnext/setup/setup_wizard/operations/defaults_setup.py +104',b'Rest Of The World',b'Reste du Monde'
 b'apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +81',b'The Item {0} cannot have Batch',"b""L'Article {0} ne peut \xc3\xaatre en Lot"""
 b'DocType: Crop',b'Yield UOM',b'UOM de rendement'
 ,b'Budget Variance Report',b'Rapport d\xe2\x80\x99\xc3\x89carts de Budget'
@@ -1604,7 +1604,7 @@ b'DocType: Employee',b'Place of Issue',"b""Lieu d'\xc3\x89mission"""
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +101',b'Contract',b'Contrat'
 b'DocType: Plant Analysis',b'Laboratory Testing Datetime',b'Test de laboratoire Datetime'
 b'DocType: Email Digest',b'Add Quote',b'Ajouter une Citation'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +987',b'UOM coversion factor required for UOM: {0} in Item: {1}',"b""Facteur de coversion UDM requis pour l'UDM : {0} dans l'Article : {1}"""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1031',b'UOM coversion factor required for UOM: {0} in Item: {1}',"b""Facteur de coversion UDM requis pour l'UDM : {0} dans l'Article : {1}"""
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +92',b'Indirect Expenses',b'Charges Indirectes'
 b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +98',b'Row {0}: Qty is mandatory',b'Ligne {0} : Qt\xc3\xa9 obligatoire'
 b'DocType: Agriculture Analysis Criteria',b'Agriculture',b'Agriculture'
@@ -1669,7 +1669,8 @@ b'DocType: Workstation',b'Workstation Name',b'Nom du Bureau'
 b'DocType: Grading Scale Interval',b'Grade Code',b'Code de la Note'
 b'DocType: POS Item Group',b'POS Item Group',"b""Groupe d'Articles PDV"""
 b'apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +17',b'Email Digest:',b'Compte Rendu par Email :'
-b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +613',b'BOM {0} does not belong to Item {1}',"b""LDM {0} n\xe2\x80\x99appartient pas \xc3\xa0 l'article {1}"""
+b'apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +23',b'Alternative item must not be same as item code',b'L&#39;article alternatif ne doit pas \xc3\xaatre le m\xc3\xaame que le code article'
+b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +617',b'BOM {0} does not belong to Item {1}',"b""LDM {0} n\xe2\x80\x99appartient pas \xc3\xa0 l'article {1}"""
 b'DocType: Sales Partner',b'Target Distribution',b'Distribution Cible'
 b'DocType: Purchase Invoice',b'06-Finalization of Provisional assessment',b'06-Finalisation de l&#39;\xc3\xa9valuation provisoire'
 b'DocType: Salary Slip',b'Bank Account No.',b'N\xc2\xb0 de Compte Bancaire'
@@ -1720,13 +1721,13 @@ b'DocType: Purchase Invoice Item',b'UOM',b'UDM'
 b'DocType: Rename Tool',b'Utilities',b'Utilitaires'
 b'DocType: POS Profile',b'Accounting',b'Comptabilit\xc3\xa9'
 b'DocType: Employee',b'EMP/',b'EMP/'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +133',b'Please select batches for batched item ',b'Veuillez s\xc3\xa9lectionner les lots pour les articles en lots'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +138',b'Please select batches for batched item ',b'Veuillez s\xc3\xa9lectionner les lots pour les articles en lots'
 b'DocType: Asset',b'Depreciation Schedules',"b""Calendriers d'Amortissement"""
 b'apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py +192',b'Following accounts might be selected in GST Settings:',b'Les comptes suivants peuvent \xc3\xaatre s\xc3\xa9lectionn\xc3\xa9s dans les param\xc3\xa8tres de TPS:'
 b'apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +70',b'Application period cannot be outside leave allocation period',"b""La p\xc3\xa9riode de la demande ne peut pas \xc3\xaatre hors de la p\xc3\xa9riode d'allocation de cong\xc3\xa9"""
 b'DocType: Activity Cost',b'Projects',b'Projets'
 b'DocType: Payment Request',b'Transaction Currency',b'Devise de la Transaction'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +30',b'From {0} | {1} {2}',b'Du {0} | {1} {2}'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +31',b'From {0} | {1} {2}',b'Du {0} | {1} {2}'
 b'DocType: Work Order Operation',b'Operation Description',"b""Description de l'Op\xc3\xa9ration"""
 b'apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +34',b'Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.',"b""Impossible de modifier les dates de d\xc3\xa9but et de fin d'exercice une fois que l'exercice est enregistr\xc3\xa9."""
 b'DocType: Quotation',b'Shopping Cart',b'Panier'
@@ -1768,7 +1769,7 @@ b'DocType: Employee',b'Better Prospects',b'Meilleures Perspectives'
 b'apps/erpnext/erpnext/stock/doctype/batch/batch.py +217',"b'Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches'","b""Ligne # {0}: Le lot {1} n'a que {2} qt\xc3\xa9(s). Veuillez s\xc3\xa9lectionner un autre lot contenant {3} qt\xc3\xa9s disponible ou diviser la rang\xc3\xa9e en plusieurs lignes, pour livrer / \xc3\xa9mettre \xc3\xa0 partir de plusieurs lots"""
 b'DocType: Vehicle',b'License Plate',"b""Plaque d'Immatriculation"""
 b'DocType: Appraisal',b'Goals',b'Objectifs'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +353',b'Select POS Profile',b'S\xc3\xa9lectionnez le profil POS'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +357',b'Select POS Profile',b'S\xc3\xa9lectionnez le profil POS'
 b'DocType: Warranty Claim',b'Warranty / AMC Status',b'Garantie / Statut AMC'
 ,b'Accounts Browser',b'Navigateur des Comptes'
 b'DocType: Payment Entry Reference',b'Payment Entry Reference',b'R\xc3\xa9f\xc3\xa9rence d\xe2\x80\x99\xc3\x89criture de Paiement'
@@ -1834,7 +1835,7 @@ b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +147',b
 b'apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +40',b'Expense Claim {0} already exists for the Vehicle Log',"b""Note de Frais {0} existe d\xc3\xa9j\xc3\xa0 pour l'Ind\xc3\xa9mnit\xc3\xa9 Kilom\xc3\xa9trique"""
 b'apps/erpnext/erpnext/public/js/setup_wizard.js +64',b'Institute Name',b'Nom de l&#39;Institut'
 b'apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +117',b'Please enter repayment Amount',b'Veuillez entrer le Montant de remboursement'
-b'apps/erpnext/erpnext/config/stock.py +309',b'Item Variants',"b""Variantes de l'Article"""
+b'apps/erpnext/erpnext/config/stock.py +313',b'Item Variants',"b""Variantes de l'Article"""
 b'apps/erpnext/erpnext/public/js/setup_wizard.js +29',b'Services',b'Services'
 b'DocType: HR Settings',b'Email Salary Slip to Employee',"b""Envoyer la Fiche de Paie \xc3\xa0 l'Employ\xc3\xa9 par Mail"""
 b'DocType: Cost Center',b'Parent Cost Center',b'Centre de Co\xc3\xbbts Parent'
@@ -1865,7 +1866,7 @@ b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +27',b'Executive
 b'apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +55',b'Setting defaults',b'D\xc3\xa9finition des valeurs par d\xc3\xa9faut'
 b'apps/erpnext/erpnext/utilities/activation.py +63',b'Create Leads',b'Cr\xc3\xa9er des Prospects'
 b'DocType: Maintenance Schedule',b'Schedules',b'Horaires'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +468',b'POS Profile is required to use Point-of-Sale',b'Un profil PDV est requis pour utiliser le point de vente'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +472',b'POS Profile is required to use Point-of-Sale',b'Un profil PDV est requis pour utiliser le point de vente'
 b'DocType: Purchase Invoice Item',b'Net Amount',b'Montant Net'
 b'apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +141',b'{0} {1} has not been submitted so the action cannot be completed',"b""{0} {1} n'a pas \xc3\xa9t\xc3\xa9 soumis, donc l'action ne peut pas \xc3\xaatre compl\xc3\xa9t\xc3\xa9e"""
 b'DocType: Purchase Order Item Supplied',b'BOM Detail No',b'N\xc2\xb0 de D\xc3\xa9tail LDM'
@@ -1882,6 +1883,7 @@ b'DocType: Sales Invoice Item',b'Available Batch Qty at Warehouse',"b""Qt\xc3\xa
 b'apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +9',b'Update Print Format',"b""Mettre \xc3\xa0 Jour le Format d'Impression"""
 b'DocType: Landed Cost Voucher',b'Landed Cost Help',b'Aide Co\xc3\xbbts Logistiques'
 b'DocType: Purchase Invoice',b'Select Shipping Address',"b""S\xc3\xa9lectionner l'Adresse de Livraison"""
+b'DocType: Timesheet Detail',b'Expected Hrs',b'Heures attendues'
 b'apps/erpnext/erpnext/config/non_profit.py +28',b'Memebership Details',b'D\xc3\xa9tails de Memebership'
 b'DocType: Leave Block List',b'Block Holidays on important days.',b'Bloquer les Vacances sur les jours importants.'
 b'apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +220',b'Please input all required Result Value(s)',b'Veuillez entrer toutes les valeurs de r\xc3\xa9sultat requises'
@@ -1898,6 +1900,7 @@ b'DocType: Delivery Note',b'In Words will be visible once you save the Delivery 
 b'DocType: Expense Claim',b'EXP',b'EXP'
 b'DocType: Water Analysis',b'Container',b'R\xc3\xa9cipient'
 b'apps/erpnext/erpnext/education/utils.py +50',b'Student {0} - {1} appears Multiple times in row {2} & {3}',b'\xc3\x89tudiant {0} - {1} appara\xc3\xaet Plusieurs fois dans la ligne {2} & {3}'
+b'DocType: Item Alternative',b'Two-way',b'Deux voies'
 b'DocType: Project',b'Day to Send',b'Jour pour envoyer'
 b'DocType: Healthcare Settings',b'Manage Sample Collection',"b""Gestion des collections d'\xc3\xa9chantillons"""
 b'DocType: Production Plan',b'Ignore Existing Ordered Quantity',b'Ignorer la quantit\xc3\xa9 command\xc3\xa9e existante'
@@ -1906,7 +1909,7 @@ b'DocType: Patient',b'Tobacco Past Use',b'Consommation pass\xc3\xa9e de tabac'
 b'DocType: Sales Invoice Item',b'Brand Name',b'Nom de la Marque'
 b'DocType: Purchase Receipt',b'Transporter Details',b'D\xc3\xa9tails du Transporteur'
 b'apps/erpnext/erpnext/healthcare/doctype/physician/physician.py +55',b'User {0} is already assigned to Physician {1}',"b""L'Utilisateur {0} est d\xc3\xa9j\xc3\xa0 affect\xc3\xa9 au M\xc3\xa9decin {1}"""
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2700',b'Default warehouse is required for selected item',b'Un Entrep\xc3\xb4t par d\xc3\xa9faut est n\xc3\xa9cessaire pour l\xe2\x80\x99Article s\xc3\xa9lectionn\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2696',b'Default warehouse is required for selected item',b'Un Entrep\xc3\xb4t par d\xc3\xa9faut est n\xc3\xa9cessaire pour l\xe2\x80\x99Article s\xc3\xa9lectionn\xc3\xa9'
 b'apps/erpnext/erpnext/utilities/user_progress.py +146',b'Box',b'Bo\xc3\xaete'
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1038',b'Possible Supplier',b'Fournisseur Potentiel'
 b'DocType: Budget',b'Monthly Distribution',b'R\xc3\xa9partition Mensuelle'
@@ -1929,12 +1932,12 @@ b'DocType: Healthcare Settings',b'Reminder Message',b'Message de Rappel'
 ,b'Lead Name',b'Nom du Prospect'
 ,b'POS',b'PDV'
 b'DocType: C-Form',b'III',b'III'
-b'apps/erpnext/erpnext/config/stock.py +314',b'Opening Stock Balance',"b""Solde d'Ouverture des Stocks"""
+b'apps/erpnext/erpnext/config/stock.py +318',b'Opening Stock Balance',"b""Solde d'Ouverture des Stocks"""
 b'apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +58',b'{0} must appear only once',"b""{0} ne doit appara\xc3\xaetre qu'une seule fois"""
 b'apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +59',b'Leaves Allocated Successfully for {0}',b'Cong\xc3\xa9s Attribu\xc3\xa9s avec Succ\xc3\xa8s pour {0}'
 b'apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +42',b'No Items to pack',b'Pas d\xe2\x80\x99Articles \xc3\xa0 emballer'
 b'DocType: Shipping Rule Condition',b'From Value',b'De la Valeur'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +606',b'Manufacturing Quantity is mandatory',b'Quantit\xc3\xa9 de Fabrication est obligatoire'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +608',b'Manufacturing Quantity is mandatory',b'Quantit\xc3\xa9 de Fabrication est obligatoire'
 b'DocType: Employee Loan',b'Repayment Method',b'M\xc3\xa9thode de Remboursement'
 b'DocType: Products Settings',"b'If checked, the Home page will be the default Item Group for the website'","b""Si coch\xc3\xa9e, la page d'Accueil pour le site sera le Groupe d'Article par d\xc3\xa9faut"""
 b'DocType: Quality Inspection Reading',b'Reading 4',b'Reading 4'
@@ -1947,7 +1950,7 @@ b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +196',b'Row {0}: 
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +145',b'Stock Liabilities',b'Passif du Stock'
 b'DocType: Purchase Invoice',b'Supplier Warehouse',b'Entrep\xc3\xb4t Fournisseur'
 b'DocType: Opportunity',b'Contact Mobile No',b'N\xc2\xb0 de Portable du Contact'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +399',b'Select Company',b'S\xc3\xa9lectionnez une entreprise'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +403',b'Select Company',b'S\xc3\xa9lectionnez une entreprise'
 ,b'Material Requests for which Supplier Quotations are not created',b'Demandes de Mat\xc3\xa9riel dont les Devis Fournisseur ne sont pas cr\xc3\xa9\xc3\xa9s'
 b'DocType: Student Report Generation Tool',b'Print Section',b'Section impression'
 b'apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +34',"b""User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.""",b'L&#39;utilisateur {0} n&#39;a aucun profil POS par d\xc3\xa9faut. V\xc3\xa9rifiez par d\xc3\xa9faut \xc3\xa0 la ligne {1} pour cet utilisateur.'
@@ -1975,7 +1978,7 @@ b'apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_
 b'apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +100',b'Net Change in Cash',b'Variation Nette de Tr\xc3\xa9sorerie'
 b'DocType: Assessment Plan',b'Grading Scale',b'\xc3\x89chelle de Notation'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +438',b'Unit of Measure {0} has been entered more than once in Conversion Factor Table',"b""Unit\xc3\xa9 de Mesure {0} a \xc3\xa9t\xc3\xa9 saisie plus d'une fois dans la Table de Facteur de Conversion"""
-b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +639',b'Already completed',b'D\xc3\xa9j\xc3\xa0 termin\xc3\xa9'
+b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +643',b'Already completed',b'D\xc3\xa9j\xc3\xa0 termin\xc3\xa9'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +33',b'Stock In Hand',b'Stock Existant'
 b'apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +64',b'Import Successful!',b'Importation R\xc3\xa9ussie !'
 b'apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +29',b'Payment Request already exists {0}',b'Demande de Paiement existe d\xc3\xa9j\xc3\xa0 {0}'
@@ -1983,7 +1986,7 @@ b'apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_
 b'DocType: Physician',b'Hospital',b'H\xc3\xb4pital'
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +385',b'Quantity must not be more than {0}',b'Quantit\xc3\xa9 ne doit pas \xc3\xaatre plus de {0}'
 b'apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +117',b'Previous Financial Year is not closed',b'L\xe2\x80\x99Exercice Financier Pr\xc3\xa9c\xc3\xa9dent n\xe2\x80\x99est pas ferm\xc3\xa9'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +46',b'Age (Days)',b'\xc3\x82ge (Jours)'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +68',b'Age (Days)',b'\xc3\x82ge (Jours)'
 b'DocType: Quotation Item',b'Quotation Item',b'Article du Devis'
 b'DocType: Customer',b'Customer POS Id',b'ID PDV du Client'
 b'DocType: Account',b'Account Name',b'Nom du Compte'
@@ -2064,7 +2067,7 @@ b'apps/erpnext/erpnext/healthcare/setup.py +257',b'Moderate Sensitivity',b'Sensi
 b'DocType: Leave Type',b'Include holidays within leaves as leaves',b'Inclure les vacances dans les cong\xc3\xa9s en tant que cong\xc3\xa9s'
 b'DocType: Sales Invoice',b'Packed Items',b'Articles Emball\xc3\xa9s'
 b'apps/erpnext/erpnext/config/support.py +27',b'Warranty Claim against Serial No.',b'R\xc3\xa9clamation de Garantie pour le N\xc2\xb0 de S\xc3\xa9rie.'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +197',"b""'Total'""","b""'Total'"""
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +211',"b""'Total'""","b""'Total'"""
 b'DocType: Shopping Cart Settings',b'Enable Shopping Cart',b'Activer Panier'
 b'DocType: Employee',b'Permanent Address',b'Adresse Permanente'
 b'apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +260',b'Advance paid against {0} {1} cannot be greater \\\n\t\t\t\t\t\tthan Grand Total {2}',"b""L'avance vers\xc3\xa9e pour {0} {1} ne peut \xc3\xaatre sup\xc3\xa9rieure \\ au Total G\xc3\xa9n\xc3\xa9ral {2}"""
@@ -2106,7 +2109,7 @@ b'DocType: Employee',b'Date Of Retirement',b'Date de D\xc3\xa9part \xc3\xa0 la R
 b'DocType: Upload Attendance',b'Get Template',b'Obtenir Mod\xc3\xa8le'
 b'DocType: Material Request',b'Transferred',b'Transf\xc3\xa9r\xc3\xa9'
 b'DocType: Vehicle',b'Doors',b'Portes'
-b'apps/erpnext/erpnext/setup/setup_wizard/operations/defaults_setup.py +117',b'ERPNext Setup Complete!',"b""Installation d'ERPNext Termin\xc3\xa9e!"""
+b'apps/erpnext/erpnext/setup/setup_wizard/operations/defaults_setup.py +116',b'ERPNext Setup Complete!',"b""Installation d'ERPNext Termin\xc3\xa9e!"""
 b'DocType: Healthcare Settings',b'Collect Fee for Patient Registration',"b""Collecter les honoraires pour l'inscription des patients"""
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +678',b'Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item',"b""Impossible de modifier les attributs suite \xc3\xa0 des mouvements d'inventaire. Faites un nouvel article et transf\xc3\xa9rez la quantit\xc3\xa9 en main au nouvel article"""
 b'DocType: Course Assessment Criteria',b'Weightage',b'Poids'
@@ -2124,7 +2127,7 @@ b'DocType: Quality Inspection Reading',b'Reading 2',b'Lecture 2'
 b'DocType: Stock Entry',b'Material Receipt',b'R\xc3\xa9ception Mat\xc3\xa9riel'
 b'DocType: Homepage',b'Products',b'Produits'
 b'DocType: Announcement',b'Instructor',b'Instructeur'
-b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js +61',b'Select Item (optional)',"b""S\xc3\xa9lectionnez l'Article (facultatif)"""
+b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js +95',b'Select Item (optional)',"b""S\xc3\xa9lectionnez l'Article (facultatif)"""
 b'DocType: Fee Schedule Student Group',b'Fee Schedule Student Group',b'Groupe \xc3\x89tudiant Calendrier des Honoraires'
 b'DocType: Student',b'AB+',b'AB+'
 b'DocType: Item',"b'If this item has variants, then it cannot be selected in sales orders etc.'","b'Si cet article a des variantes, alors il ne peut pas \xc3\xaatre s\xc3\xa9lectionn\xc3\xa9 dans les commandes clients, etc.'"
@@ -2157,7 +2160,7 @@ b'DocType: Employee',b'Leave Encashed?',b'Laisser Encaiss\xc3\xa9 ?'
 b'apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32',b'Opportunity From field is mandatory',b'Le champ Opportunit\xc3\xa9 De est obligatoire'
 b'DocType: Email Digest',b'Annual Expenses',b'Charges Annuelles'
 b'DocType: Item',b'Variants',b'Variantes'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1148',b'Make Purchase Order',b'Faire un Bon de Commande'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1149',b'Make Purchase Order',b'Faire un Bon de Commande'
 b'DocType: SMS Center',b'Send To',b'Envoyer \xc3\x80'
 b'apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +133',b'There is not enough leave balance for Leave Type {0}',"b""Il n'y a pas assez de solde de cong\xc3\xa9s pour les Cong\xc3\xa9s de Type {0}"""
 b'DocType: Payment Reconciliation Payment',b'Allocated amount',b'Montant allou\xc3\xa9'
@@ -2181,14 +2184,14 @@ b'apps/erpnext/erpnext/hr/doctype/employee/employee.py +167',b'Please enter ',b'
 b'apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +43',b'Maintenance Log',b'Journal de maintenance'
 b'apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +236',b'Please set filter based on Item or Warehouse',"b""Veuillez d\xc3\xa9finir un filtre bas\xc3\xa9 sur l'Article ou l'Entrep\xc3\xb4t"""
 b'DocType: Packing Slip',b'The net weight of this package. (calculated automatically as sum of net weight of items)',b'Le poids net de ce paquet. (Calcul\xc3\xa9 automatiquement comme la somme du poids net des articles)'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +802',b'Discount amount cannot be greater than 100%',b'Le montant de l&#39;escompte ne peut pas \xc3\xaatre sup\xc3\xa9rieur \xc3\xa0 100%'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +815',b'Discount amount cannot be greater than 100%',b'Le montant de l&#39;escompte ne peut pas \xc3\xaatre sup\xc3\xa9rieur \xc3\xa0 100%'
 b'DocType: Sales Order',b'To Deliver and Bill',b'\xc3\x80 Livrer et Facturer'
 b'DocType: Student Group',b'Instructors',b'Instructeurs'
 b'DocType: GL Entry',b'Credit Amount in Account Currency',b'Montant du Cr\xc3\xa9dit dans la Devise du Compte'
-b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +603',b'BOM {0} must be submitted',b'LDM {0} doit \xc3\xaatre soumise'
+b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +604',b'BOM {0} must be submitted',b'LDM {0} doit \xc3\xaatre soumise'
 b'apps/erpnext/erpnext/config/accounts.py +460',b'Share Management',b'Gestion des partages'
 b'DocType: Authorization Control',b'Authorization Control',"b""Contr\xc3\xb4le d'Autorisation"""
-b'apps/erpnext/erpnext/controllers/buying_controller.py +317',b'Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}',b'Ligne #{0} : Entrep\xc3\xb4t de Rejet est obligatoire pour l\xe2\x80\x99Article rejet\xc3\xa9 {1}'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +333',b'Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}',b'Ligne #{0} : Entrep\xc3\xb4t de Rejet est obligatoire pour l\xe2\x80\x99Article rejet\xc3\xa9 {1}'
 b'apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +810',b'Payment',b'Paiement'
 b'apps/erpnext/erpnext/controllers/stock_controller.py +92',"b'Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.'","b""L'Entrep\xc3\xb4t {0} n'est li\xc3\xa9 \xc3\xa0 aucun compte, veuillez mentionner ce compte dans la fiche de l'Entrep\xc3\xb4t ou d\xc3\xa9finir un compte d'Entrep\xc3\xb4t par d\xc3\xa9faut dans la Soci\xc3\xa9t\xc3\xa9 {1}."""
 b'apps/erpnext/erpnext/utilities/activation.py +81',b'Manage your orders',b'G\xc3\xa9rer vos commandes'
@@ -2211,8 +2214,8 @@ b'DocType: Hub Category',b'Hub Node',b'Noeud du Hub'
 b'apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78',b'You have entered duplicate items. Please rectify and try again.',b'Vous avez entr\xc3\xa9 un doublon. Veuillez rectifier et essayer \xc3\xa0 nouveau.'
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +129',b'Associate',b'Associ\xc3\xa9'
 b'DocType: Asset Movement',b'Asset Movement',"b""Mouvement d'Actif"""
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +508',b'Work Order {0} must be submitted',b'Le bon de travail {0} doit \xc3\xaatre soumis'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2214',b'New Cart',b'Nouveau Panier'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +510',b'Work Order {0} must be submitted',b'Le bon de travail {0} doit \xc3\xaatre soumis'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2210',b'New Cart',b'Nouveau Panier'
 b'apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +44',b'Item {0} is not a serialized Item',"b""L'article {0} n'est pas un Article avec un num\xc3\xa9ro de serie"""
 b'DocType: SMS Center',b'Create Receiver List',b'Cr\xc3\xa9er une Liste de R\xc3\xa9ception'
 b'DocType: Vehicle',b'Wheels',b'Roues'
@@ -2248,7 +2251,7 @@ b'DocType: Student',b'Student Mobile Number',"b""Num\xc3\xa9ro de Mobile de l'\x
 b'DocType: Item',b'Has Variants',b'A Variantes'
 b'apps/erpnext/erpnext/controllers/accounts_controller.py +488',"b'Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings'","b'Impossible de surfacturer pour l&#39;article {0} de la ligne {1} plus de {2}. Pour autoriser la surfacturation, veuillez d\xc3\xa9finir les param\xc3\xa8tres de stock.'"
 b'apps/erpnext/erpnext/templates/emails/training_event.html +11',b'Update Response',b'Mettre \xc3\xa0 jour la R\xc3\xa9ponse'
-b'apps/erpnext/erpnext/public/js/utils.js +232',b'You have already selected items from {0} {1}',b'Vous avez d\xc3\xa9j\xc3\xa0 choisi des articles de {0} {1}'
+b'apps/erpnext/erpnext/public/js/utils.js +374',b'You have already selected items from {0} {1}',b'Vous avez d\xc3\xa9j\xc3\xa0 choisi des articles de {0} {1}'
 b'DocType: Monthly Distribution',b'Name of the Monthly Distribution',b'Nom de la R\xc3\xa9partition Mensuelle'
 b'apps/erpnext/erpnext/stock/doctype/batch/batch.py +95',b'Batch ID is mandatory',b'Le N\xc2\xb0 du lot est obligatoire'
 b'DocType: Sales Person',b'Parent Sales Person',b'Commercial Parent'
@@ -2257,6 +2260,7 @@ b'DocType: Project',b'Collect Progress',b'Collecter les progr\xc3\xa8s'
 b'apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +24',b'Select the program first',b'S\xc3\xa9lectionnez d&#39;abord le programme'
 b'DocType: Patient Appointment',b'Patient Age',b'\xc3\x82ge du patient'
 b'apps/erpnext/erpnext/config/learn.py +253',b'Managing Projects',b'Gestion de Projets'
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +224',b'Serial no {0} has been already returned',b'Le num\xc3\xa9ro de s\xc3\xa9rie {0} a d\xc3\xa9j\xc3\xa0 \xc3\xa9t\xc3\xa9 renvoy\xc3\xa9'
 b'DocType: Supplier',b'Supplier of Goods or Services.',b'Fournisseur de Biens ou Services.'
 b'DocType: Budget',b'Fiscal Year',b'Exercice Fiscal'
 b'DocType: Asset Maintenance Log',b'Planned',b'Pr\xc3\xa9vu'
@@ -2430,7 +2434,7 @@ b'DocType: HR Settings',b'HR Settings',b'Param\xc3\xa8tres RH'
 b'DocType: Salary Slip',b'net pay info',b'Info de salaire net'
 b'DocType: Lab Test Template',b'This value is updated in the Default Sales Price List.',b'Cette valeur est mise \xc3\xa0 jour dans la liste de prix de vente par d\xc3\xa9faut.'
 b'DocType: Email Digest',b'New Expenses',b'Nouvelles Charges'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +79',b'PDC/LC Amount',b'PDC / LC Montant'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101',b'PDC/LC Amount',b'PDC / LC Montant'
 b'DocType: Shareholder',b'Shareholder',b'Actionnaire'
 b'DocType: Purchase Invoice',b'Additional Discount Amount',b'Montant de la Remise Suppl\xc3\xa9mentaire'
 b'DocType: Cash Flow Mapper',b'Position',b'Position'
@@ -2479,7 +2483,7 @@ b'DocType: Stock Reconciliation Item',b'Amount Difference',b'Diff\xc3\xa9rence d
 b'apps/erpnext/erpnext/stock/get_item_details.py +356',b'Item Price added for {0} in Price List {1}',"b""Prix de l'Article ajout\xc3\xa9 pour {0} dans la Liste de Prix {1}"""
 b'apps/erpnext/erpnext/setup/doctype/sales_person/sales_person_tree.js +8',b'Please enter Employee Id of this sales person',b'Veuillez entrer l\xe2\x80\x99ID Employ\xc3\xa9 de ce commercial'
 b'DocType: Territory',b'Classification of Customers by region',b'Classification des Clients par r\xc3\xa9gion'
-b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +71',b'In Production',b'En production'
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +76',b'In Production',b'En production'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +65',b'Difference Amount must be zero',b'L\xe2\x80\x99\xc3\x89cart de Montant doit \xc3\xaatre \xc3\xa9gal \xc3\xa0 z\xc3\xa9ro'
 b'DocType: Project',b'Gross Margin',b'Marge Brute'
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +61',b'Please enter Production Item first',"b""Veuillez d\xe2\x80\x99abord entrer l'Article en Production"""
@@ -2527,7 +2531,7 @@ b'apps/erpnext/erpnext/hooks.py +109',b'Shipments',b'Livraisons'
 b'DocType: Payment Entry',b'Total Allocated Amount (Company Currency)',b'Montant Total Allou\xc3\xa9 (Devise Soci\xc3\xa9t\xc3\xa9)'
 b'DocType: Purchase Order Item',b'To be delivered to customer',b'\xc3\x80 livrer \xc3\xa0 la client\xc3\xa8le'
 b'DocType: BOM',b'Scrap Material Cost',b'Co\xc3\xbbt de Mise au Rebut des Mat\xc3\xa9riaux'
-b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +227',b'Serial No {0} does not belong to any Warehouse',b'N\xc2\xb0 de S\xc3\xa9rie {0} ne fait partie de aucun Entrep\xc3\xb4t'
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +233',b'Serial No {0} does not belong to any Warehouse',b'N\xc2\xb0 de S\xc3\xa9rie {0} ne fait partie de aucun Entrep\xc3\xb4t'
 b'DocType: Grant Application',b'Email Notification Sent',b'Notification par e-mail envoy\xc3\xa9e'
 b'DocType: Purchase Invoice',b'In Words (Company Currency)',b'En Toutes Lettres (Devise Soci\xc3\xa9t\xc3\xa9)'
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1018',"b'Item Code, warehouse, quantity are required on row'","b'Le code d&#39;article, l&#39;entrep\xc3\xb4t, la quantit\xc3\xa9 sont requis sur la rang\xc3\xa9e'"
@@ -2588,7 +2592,7 @@ b'apps/erpnext/erpnext/config/accounts.py +75',b'Tree of financial accounts.',b'
 b'DocType: Cash Flow Mapping',b'Cash Flow Mapping',b'Cartographie des flux de tr\xc3\xa9sorerie'
 b'apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +364',b'{0} against Sales Order {1}',b'{0} pour la Commande Client {1}'
 b'DocType: Account',b'Fixed Asset',b'Actif Immobilis\xc3\xa9'
-b'apps/erpnext/erpnext/config/stock.py +324',b'Serialized Inventory',b'Inventaire S\xc3\xa9rialis\xc3\xa9'
+b'apps/erpnext/erpnext/config/stock.py +328',b'Serialized Inventory',b'Inventaire S\xc3\xa9rialis\xc3\xa9'
 b'apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74',b'Email not found in default contact',b'Email non trouv\xc3\xa9 dans le contact par d\xc3\xa9faut'
 b'DocType: Employee Loan',b'Account Info',b'Information du Compte'
 b'DocType: Activity Type',b'Default Billing Rate',b'Prix de Facturation par D\xc3\xa9faut'
@@ -2645,7 +2649,7 @@ b'DocType: Hub Settings',b'Unregister from Hub',b'Annuler l&#39;inscription de H
 b'apps/erpnext/erpnext/public/js/utils.js +108',b'Total Unpaid: {0}',b'Total des Impay\xc3\xa9s : {0}'
 b'DocType: BOM Website Operation',b'BOM Website Operation',b'Op\xc3\xa9ration de LDM du Site Internet'
 b'DocType: Supplier Scorecard',b'Supplier Score',b'Note du Fournisseur'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +213',b'Total Invoiced Amt',b'Mnt Total Factur\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227',b'Total Invoiced Amt',b'Mnt Total Factur\xc3\xa9'
 b'DocType: Supplier',b'Warn RFQs',"b""Avertir lors des Appels d'Offres"""
 b'DocType: BOM',b'Conversion Rate',b'Taux de Conversion'
 b'apps/erpnext/erpnext/templates/pages/product_search.html +3',b'Product Search',b'Recherche de Produit'
@@ -2663,7 +2667,7 @@ b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +127',b'Row {0}: 
 b'DocType: Manufacturing Settings',b'Allow Overtime',b'Autoriser les Heures Suppl\xc3\xa9mentaires'
 b'apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +148',"b'Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry'","b""L'Article S\xc3\xa9rialis\xc3\xa9 {0} ne peut pas \xc3\xaatre mis \xc3\xa0 jour en utilisant la r\xc3\xa9conciliation des stocks, veuillez utiliser l'entr\xc3\xa9e de stock"""
 b'DocType: Training Event Employee',b'Training Event Employee',b'\xc3\x89v\xc3\xa8nement de Formation \xe2\x80\x93 Employ\xc3\xa9'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1031',b'Maximum Samples - {0} can be retained for Batch {1} and Item {2}.',b'Maximum d&#39;\xc3\xa9chantillons - {0} peut \xc3\xaatre conserv\xc3\xa9 pour le lot {1} et l&#39;article {2}.'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1075',b'Maximum Samples - {0} can be retained for Batch {1} and Item {2}.',b'Maximum d&#39;\xc3\xa9chantillons - {0} peut \xc3\xaatre conserv\xc3\xa9 pour le lot {1} et l&#39;article {2}.'
 b'apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +7',b'Add Time Slots',b'Ajouter des Cr\xc3\xa9neaux'
 b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +201',b'{0} Serial Numbers required for Item {1}. You have provided {2}.',b'{0} Num\xc3\xa9ros de S\xc3\xa9rie requis pour objet {1}. Vous en avez fourni {2}.'
 b'DocType: Stock Reconciliation Item',b'Current Valuation Rate',b'Taux de Valorisation Actuel'
@@ -2682,6 +2686,7 @@ b'apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49',"b""Pleas
 b'apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24',b'Further cost centers can be made under Groups but entries can be made against non-Groups',"b""D'autres centres de co\xc3\xbbts peuvent \xc3\xaatre cr\xc3\xa9\xc3\xa9s dans des Groupes, mais des \xc3\xa9critures ne peuvent \xc3\xaatre faites que sur des centres de co\xc3\xbbts individuels."""
 b'apps/erpnext/erpnext/config/setup.py +66',b'Users and Permissions',b'Utilisateurs et Autorisations'
 b'DocType: Vehicle Log',b'VLOG.',b'VLOG.'
+b'apps/erpnext/erpnext/hr/doctype/employee/employee.py +24',b'Please setup Employee Naming System in Human Resource &gt; HR Settings',b'Veuillez configurer le syst\xc3\xa8me de d\xc3\xa9nomination des employ\xc3\xa9s dans Ressources humaines&gt; Param\xc3\xa8tres RH'
 b'DocType: Branch',b'Branch',b'Branche'
 b'DocType: Soil Analysis',b'Ca/(K+Ca+Mg)',b'Ca / (K + Ca + Mg)'
 b'DocType: Delivery Trip',b'Fulfillment User',b'Utilisateur Fulfillment'
@@ -2728,7 +2733,7 @@ b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/stand
 b'apps/erpnext/erpnext/crm/doctype/lead/lead.py +53',b'Next Contact Date cannot be in the past',b'La Date de Prochain Contact ne peut pas \xc3\xaatre dans le pass\xc3\xa9'
 b'DocType: Company',b'For Reference Only.',b'Pour R\xc3\xa9f\xc3\xa9rence Seulement.'
 b'apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +112',b'Physician {0} not available on {1}',"b""Le m\xc3\xa9decin {0} n'est pas disponible le {1}"""
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2581',b'Select Batch No',b'S\xc3\xa9lectionnez le N\xc2\xb0 de Lot'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2577',b'Select Batch No',b'S\xc3\xa9lectionnez le N\xc2\xb0 de Lot'
 b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +61',b'Invalid {0}: {1}',b'Invalide {0} : {1}'
 ,b'GSTR-1',b'GSTR-1'
 b'DocType: Purchase Invoice',b'PINV-RET-',b'PINV-RET-'
@@ -2787,16 +2792,15 @@ b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/stand
 b'DocType: Sales Invoice',b' Shipping Bill Number',b'Num\xc3\xa9ro de facture d&#39;exp\xc3\xa9dition'
 b'apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +34',b'Traceability',b'Tra\xc3\xa7abilit\xc3\xa9'
 b'DocType: Asset Maintenance Log',b'Actions performed',b'Actions r\xc3\xa9alis\xc3\xa9es'
-b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51',b'Customer &gt; Customer Group &gt; Territory',b'Client&gt; Groupe de clients&gt; Territoire'
 b'DocType: Cash Flow Mapper',b'Section Leader',b'Chef de section'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +137',b'Source of Funds (Liabilities)',b'Source des Fonds (Passif)'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +431',b'Quantity in row {0} ({1}) must be same as manufactured quantity {2}',b'Quantit\xc3\xa9 \xc3\xa0 la ligne {0} ({1}) doit \xc3\xaatre \xc3\xa9gale a la quantit\xc3\xa9 fabriqu\xc3\xa9e {2}'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +433',b'Quantity in row {0} ({1}) must be same as manufactured quantity {2}',b'Quantit\xc3\xa9 \xc3\xa0 la ligne {0} ({1}) doit \xc3\xaatre \xc3\xa9gale a la quantit\xc3\xa9 fabriqu\xc3\xa9e {2}'
 b'DocType: Supplier Scorecard Scoring Standing',b'Employee',b'Employ\xc3\xa9'
 b'DocType: Asset Repair',b'Failure Date',b'Date d&#39;\xc3\xa9chec'
 b'DocType: Sample Collection',b'Collected Time',b'Heure de Collecte'
 b'DocType: Company',b'Sales Monthly History',b'Historique des Ventes Mensuel'
 b'DocType: Asset Maintenance Task',b'Next Due Date',b'prochaine date d&#39;\xc3\xa9ch\xc3\xa9ance'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +214',b'Select Batch',b'S\xc3\xa9lectionnez le Lot'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +240',b'Select Batch',b'S\xc3\xa9lectionnez le Lot'
 b'apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +244',b'{0} {1} is fully billed',b'{0} {1} est enti\xc3\xa8rement factur\xc3\xa9'
 b'apps/erpnext/erpnext/healthcare/doctype/consultation/consultation.js +31',b'Vital Signs',b'Signes Vitaux'
 b'DocType: Training Event',b'End Time',b'Heure de Fin'
@@ -2804,7 +2808,7 @@ b'apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +63',b'Ac
 b'DocType: Payment Entry',b'Payment Deductions or Loss',b'D\xc3\xa9ductions sur le Paiement ou Perte'
 b'DocType: Soil Analysis',b'Soil Analysis Criterias',b'Crit\xc3\xa8res d&#39;analyse des sols'
 b'apps/erpnext/erpnext/config/setup.py +42',b'Standard contract terms for Sales or Purchase.',b'Termes contractuels standards pour Ventes ou Achats'
-b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +112',b'Group by Voucher',b'Groupe par Bon'
+b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +114',b'Group by Voucher',b'Groupe par Bon'
 b'apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +233',b'Are you sure you want to cancel this appointment?',b'\xc3\x8ates-vous s\xc3\xbbr de vouloir annuler ce rendez-vous?'
 b'DocType: Hotel Room Pricing Package',b'Hotel Room Pricing Package',b'Forfait de prix de chambre d&#39;h\xc3\xb4tel'
 b'apps/erpnext/erpnext/config/crm.py +6',b'Sales Pipeline',b'Pipeline de Ventes'
@@ -2813,7 +2817,7 @@ b'apps/erpnext/erpnext/templates/form_grid/material_request_grid.html +7',b'Requ
 b'DocType: Rename Tool',b'File to Rename',b'Fichier \xc3\xa0 Renommer'
 b'apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +200',b'Please select BOM for Item in Row {0}',b'Veuillez s\xc3\xa9lectionnez une LDM pour l\xe2\x80\x99Article \xc3\xa0 la Ligne {0}'
 b'apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +28',b'Account {0} does not match with Company {1} in Mode of Account: {2}',b'Le Compte {0} ne correspond pas \xc3\xa0 la Soci\xc3\xa9t\xc3\xa9 {1} dans le Mode de Compte : {2}'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +464',b'Specified BOM {0} does not exist for Item {1}',"b""La LDM {0} sp\xc3\xa9cifi\xc3\xa9e n'existe pas pour l'Article {1}"""
+b'apps/erpnext/erpnext/controllers/buying_controller.py +480',b'Specified BOM {0} does not exist for Item {1}',"b""La LDM {0} sp\xc3\xa9cifi\xc3\xa9e n'existe pas pour l'Article {1}"""
 b'apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +301',b'Course: ',b'Cours:'
 b'DocType: Soil Texture',b'Sandy Loam',b'terreau arigileux'
 b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +232',b'Maintenance Schedule {0} must be cancelled before cancelling this Sales Order',"b""L'\xc3\x89ch\xc3\xa9ancier d'Entretien {0} doit \xc3\xaatre annul\xc3\xa9 avant d'annuler cette Commande Client"""
@@ -2885,8 +2889,8 @@ b'DocType: Authorization Rule',b'Authorized Value',b'Valeur Autoris\xc3\xa9e'
 b'DocType: BOM',b'Show Operations',b'Afficher Op\xc3\xa9rations'
 ,b'Minutes to First Response for Opportunity',b'Minutes avant la Premi\xc3\xa8re R\xc3\xa9ponse \xc3\xa0 une Opportunit\xc3\xa9'
 b'apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +68',b'Total Absent',b'Total des Absences'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +862',b'Item or Warehouse for row {0} does not match Material Request',"b""L'Article ou l'Entrep\xc3\xb4t pour la ligne {0} ne correspond pas avec la Requ\xc3\xaate de Mat\xc3\xa9riel"""
-b'apps/erpnext/erpnext/config/stock.py +191',b'Unit of Measure',b'Unit\xc3\xa9 de Mesure'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +881',b'Item or Warehouse for row {0} does not match Material Request',"b""L'Article ou l'Entrep\xc3\xb4t pour la ligne {0} ne correspond pas avec la Requ\xc3\xaate de Mat\xc3\xa9riel"""
+b'apps/erpnext/erpnext/config/stock.py +195',b'Unit of Measure',b'Unit\xc3\xa9 de Mesure'
 b'DocType: Fiscal Year',b'Year End Date',"b""Date de Fin de l'Exercice"""
 b'DocType: Task Depends On',b'Task Depends On',b'T\xc3\xa2che D\xc3\xa9pend De'
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1026',b'Opportunity',b'Opportunit\xc3\xa9'
@@ -2930,7 +2934,7 @@ b'apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +21
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +796',b'Please supply the specified items at the best possible rates',b'Veuillez fournir les articles sp\xc3\xa9cifi\xc3\xa9s aux meilleurs tarifs possibles'
 b'DocType: Membership',b'USD',b'USD'
 b'apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +28',b'Make Invoice',b'Faire une Facture'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +80',b'Remaining Balance',b'Solde restant'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102',b'Remaining Balance',b'Solde restant'
 b'DocType: Selling Settings',b'Auto close Opportunity after 15 days',b'Fermer automatiquement les Opportunit\xc3\xa9s apr\xc3\xa8s 15 jours'
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +86',b'Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.',"b""Les Bons de Commande ne sont pas autoris\xc3\xa9s pour {0} en raison d'une note sur la fiche d'\xc3\xa9valuation de {1}."""
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +498',b'Barcode {0} is not a valid {1} code',b'Le code \xc3\xa0 barres {0} n&#39;est pas un code {1} valide'
@@ -2952,6 +2956,7 @@ b'DocType: Purchase Taxes and Charges Template',"b'Standard tax template that ca
 b'DocType: Homepage',b'Homepage',"b""Page d'Accueil"""
 b'apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +68',b'Select Physician...',b'S\xc3\xa9lectionnez le M\xc3\xa9decin...'
 b'DocType: Grant Application',b'Grant Application Details ',b'D\xc3\xa9tails de la demande de subvention'
+b'DocType: Stock Entry Detail',b'Original Item',b'Article original'
 b'DocType: Purchase Receipt Item',b'Recd Quantity',b'Quantit\xc3\xa9 Re\xc3\xa7ue'
 b'apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +65',b'Fee Records Created - {0}',"b""Archive d'Honoraires Cr\xc3\xa9\xc3\xa9e - {0}"""
 b'DocType: Asset Category Account',b'Asset Category Account',"b""Compte de Cat\xc3\xa9gorie d'Actif"""
@@ -3058,7 +3063,7 @@ b'DocType: Bin',b'Reserved Quantity',b'Quantit\xc3\xa9 R\xc3\xa9serv\xc3\xa9e'
 b'apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +34',b'Please enter valid email address',b'Entrez une adresse email valide'
 b'DocType: Volunteer Skill',b'Volunteer Skill',b'Comp\xc3\xa9tence b\xc3\xa9n\xc3\xa9vole'
 b'DocType: Bank Reconciliation',b'Include POS Transactions',b'Inclure les transactions POS'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +784',b'Please select an item in the cart',b'Veuillez s\xc3\xa9lectionner un article dans le panier'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +797',b'Please select an item in the cart',b'Veuillez s\xc3\xa9lectionner un article dans le panier'
 b'DocType: Landed Cost Voucher',b'Purchase Receipt Items',b'Articles du Re\xc3\xa7u d\xe2\x80\x99Achat'
 b'apps/erpnext/erpnext/config/learn.py +21',b'Customizing Forms',b'Personnalisation des Formulaires'
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +74',b'Arrear',b'Arri\xc3\xa9r\xc3\xa9'
@@ -3083,7 +3088,8 @@ b'apps/erpnext/erpnext/non_profit/doctype/grant_application/grant_application.js
 b'apps/erpnext/erpnext/accounts/page/pos/pos.js +848',"b'LocalStorage is full, did not save'","b'Le Stockage Local est plein, sauvegarde impossible'"
 b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +100',b'Row {0}: UOM Conversion Factor is mandatory',b'Ligne {0} : Facteur de Conversion LDM est obligatoire'
 b'apps/erpnext/erpnext/utilities/user_progress.py +235',b'Room Capacity',b'Capacit\xc3\xa9 de la Salle'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +95',b'Ref',b'R\xc3\xa9f'
+b'apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +28',b'Already record exists for the item {0}',b'L&#39;enregistrement existe d\xc3\xa9j\xc3\xa0 pour l&#39;\xc3\xa9l\xc3\xa9ment {0}'
+b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +28',b'Ref',b'R\xc3\xa9f'
 b'DocType: Lab Test',b'LP-',b'LP-'
 b'DocType: Healthcare Settings',b'Registration Fee',"b""Frais d'Inscription"""
 b'DocType: Budget',b'Cost Center',b'Centre de Co\xc3\xbbts'
@@ -3110,6 +3116,7 @@ b'apps/erpnext/erpnext/accounts/doctype/account/account.py +183',"b'Merging is o
 b'DocType: Vehicle',b'Electric',b'\xc3\x89lectrique'
 b'DocType: Task',b'% Progress',b'% de Progression'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +123',b'Gain/Loss on Asset Disposal',b'Gain/Perte sur Cessions des Immobilisations'
+b'apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.js +21',"b'Only the Student Applicant with the status ""Approved"" will be selected in the table below.'",b'Seul le candidat \xc3\xa9tudiant avec le statut \xc2\xabApprouv\xc3\xa9\xc2\xbb sera s\xc3\xa9lectionn\xc3\xa9 dans le tableau ci-dessous.'
 b'apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +117',b'Account number for account {0} is not available.<br> Please setup your Chart of Accounts correctly.',"b""Le num\xc3\xa9ro de compte du compte {0} n'est pas disponible. <br> Veuillez configurer votre plan de comptes correctement."""
 b'DocType: Task',b'Depends on Tasks',b'D\xc3\xa9pend des T\xc3\xa2ches'
 b'apps/erpnext/erpnext/config/selling.py +36',b'Manage Customer Group Tree.',"b""G\xc3\xa9rer l'Arborescence des Groupes de Clients."""
@@ -3172,7 +3179,7 @@ b'DocType: Project Update',b'Project Update',b'Mise \xc3\xa0 jour'
 b'DocType: Fees',b'Fees',b'Honoraires'
 b'DocType: Currency Exchange',b'Specify Exchange Rate to convert one currency into another',b'Sp\xc3\xa9cifier le Taux de Change pour convertir une monnaie en une autre'
 b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +159',b'Quotation {0} is cancelled',b'Devis {0} est annul\xc3\xa9e'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +119',b'Total Outstanding Amount',b'Encours Total'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +128',b'Total Outstanding Amount',b'Encours Total'
 b'DocType: Sales Partner',b'Targets',b'Cibles'
 b'apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +54',b'Please register the SIREN number in the company information file',b'Veuillez enregistrer le num\xc3\xa9ro SIREN dans le fichier d&#39;information de l&#39;entreprise'
 b'DocType: Price List',b'Price List Master',b'Donn\xc3\xa9es de Base des Listes de Prix'
@@ -3209,7 +3216,7 @@ b'apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_orde
 ,b'Salary Register',b'Registre du Salaire'
 b'DocType: Warehouse',b'Parent Warehouse',b'Entrep\xc3\xb4t Parent'
 b'DocType: C-Form Invoice Detail',b'Net Total',b'Total Net'
-b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +546',b'Default BOM not found for Item {0} and Project {1}',"b""La LDM par d\xc3\xa9faut n'a pas \xc3\xa9t\xc3\xa9 trouv\xc3\xa9e pour l'Article {0} et le Projet {1}"""
+b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +549',b'Default BOM not found for Item {0} and Project {1}',"b""La LDM par d\xc3\xa9faut n'a pas \xc3\xa9t\xc3\xa9 trouv\xc3\xa9e pour l'Article {0} et le Projet {1}"""
 b'apps/erpnext/erpnext/config/hr.py +168',b'Define various loan types',b'D\xc3\xa9finir diff\xc3\xa9rents types de pr\xc3\xaats'
 b'DocType: Bin',b'FCFS Rate',b'Montant PAPS'
 b'DocType: Opening Invoice Creation Tool Item',b'Outstanding Amount',b'Montant d\xc3\xbb'
@@ -3222,7 +3229,7 @@ b'apps/erpnext/erpnext/buying/doctype/supplier_scorecard_period/supplier_scoreca
 b'apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +122',b'Cost as on',b'Co\xc3\xbbt \xc3\xa0 partir de'
 b'DocType: Healthcare Settings',b'Out Patient Settings',b'Param\xc3\xa8tres de Patients Externes'
 b'DocType: Account',b'Round Off',b'Arrondi'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +259',b'Quantity must be positive',b'La quantit\xc3\xa9 doit \xc3\xaatre positive'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +263',b'Quantity must be positive',b'La quantit\xc3\xa9 doit \xc3\xaatre positive'
 b'DocType: Material Request Plan Item',b'Requested Qty',b'Qt\xc3\xa9 Demand\xc3\xa9e'
 b'apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +96',b'The fields From Shareholder and To Shareholder cannot be blank',b'Les champs De l&#39;actionnaire et de l&#39;actionnaire ne peuvent pas \xc3\xaatre vides'
 b'DocType: Tax Rule',b'Use for Shopping Cart',b'Utiliser pour le Panier'
@@ -3270,7 +3277,7 @@ b'apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +40
 b'DocType: Lab Test',b'LabTest Approver',b'Approbateur de test de laboratoire'
 b'apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py +61',b'You have already assessed for the assessment criteria {}.',b'Vous avez d\xc3\xa9j\xc3\xa0 \xc3\xa9valu\xc3\xa9 les crit\xc3\xa8res d&#39;\xc3\xa9valuation {}.'
 b'DocType: Vehicle Service',b'Engine Oil',b'Huile Moteur'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1005',b'Work Orders Created: {0}',b'Ordres de travail cr\xc3\xa9\xc3\xa9s: {0}'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1006',b'Work Orders Created: {0}',b'Ordres de travail cr\xc3\xa9\xc3\xa9s: {0}'
 b'DocType: Sales Invoice',b'Sales Team1',b'\xc3\x89quipe des Ventes 1'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +547',b'Item {0} does not exist',"b""Article {0} n'existe pas"""
 b'DocType: Sales Invoice',b'Customer Address',b'Adresse du Client'
@@ -3345,7 +3352,7 @@ b'DocType: Purchase Invoice',b'Availed ITC Cess',b'Cess ITC Cess'
 ,b'Student Monthly Attendance Sheet',b'Feuille de Pr\xc3\xa9sence Mensuelle des \xc3\x89tudiants'
 b'apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +96',b'Shipping rule only applicable for Selling',b'R\xc3\xa8gle d&#39;exp\xc3\xa9dition applicable uniquement pour la vente'
 b'apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30',b'Project Start Date',b'Date de D\xc3\xa9but du Projet'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +23',b'Until',"b""Jusqu'\xc3\xa0"""
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +32',b'Until',"b""Jusqu'\xc3\xa0"""
 b'DocType: Rename Tool',b'Rename Log',b'Journal des Renommages'
 b'apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27',b'Student Group or Course Schedule is mandatory',"b""Le Ggroupe d'\xc3\x89tudiants ou le Calendrier des Cours est obligatoire"""
 b'DocType: HR Settings',b'Maintain Billing Hours and Working Hours Same on Timesheet',b'Maintenir les Heures Facturables et les Heures de Travail sur la m\xc3\xaame Feuille de Temps'
@@ -3359,7 +3366,7 @@ b'apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +134',b'Warehouses w
 b'DocType: Assessment Result Tool',b'Result HTML',b'R\xc3\xa9sultat HTML'
 b'apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +35',b'Expires On',b'Expire Le'
 b'apps/erpnext/erpnext/utilities/activation.py +117',b'Add Students',b'Ajouter des \xc3\x89tudiants'
-b'apps/erpnext/erpnext/public/js/utils.js +270',b'Please select {0}',b'Veuillez s\xc3\xa9lectionner {0}'
+b'apps/erpnext/erpnext/public/js/utils.js +412',b'Please select {0}',b'Veuillez s\xc3\xa9lectionner {0}'
 b'DocType: C-Form',b'C-Form No',b'Formulaire-C N\xc2\xba'
 b'DocType: BOM',b'Exploded_items',b'Articles-\xc3\xa9clat\xc3\xa9s'
 b'apps/erpnext/erpnext/utilities/user_progress.py +139',b'List your products or services that you buy or sell.',b'Listez les produits ou services que vous achetez ou vendez.'
@@ -3378,7 +3385,7 @@ b'apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +29',b'Failed to insta
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +44',"b'{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution.'","b""{0} est actuellement associ\xc3\xa9e avec une fiche d'\xc3\xa9valuation fournisseur {1}. Les appels d'offres pour ce fournisseur doivent \xc3\xaatre \xc3\xa9dit\xc3\xa9s avec pr\xc3\xa9caution."""
 b'DocType: Chapter',b'Non Profit Manager',b'Gestionnaire \xc3\xa0 but non lucratif'
 b'DocType: BOM',b'Total Cost(Company Currency)',b'Co\xc3\xbbt Total (Devise Soci\xc3\xa9t\xc3\xa9)'
-b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +315',b'Serial No {0} created',b'N\xc2\xb0 de S\xc3\xa9rie {0} cr\xc3\xa9\xc3\xa9'
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +321',b'Serial No {0} created',b'N\xc2\xb0 de S\xc3\xa9rie {0} cr\xc3\xa9\xc3\xa9'
 b'DocType: Homepage',b'Company Description for website homepage',"b""Description de la Soci\xc3\xa9t\xc3\xa9 pour la page d'accueil du site web"""
 b'DocType: Item Customer Detail',"b'For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes'","b""Pour la commodit\xc3\xa9 des clients, ces codes peuvent \xc3\xaatre utilis\xc3\xa9s dans des formats d'impression comme les Factures et les Bons de Livraison"""
 b'apps/erpnext/erpnext/accounts/report/purchase_order_items_to_be_billed/purchase_order_items_to_be_billed.py +18',b'Suplier Name',b'Nom du Fournisseur'
@@ -3401,7 +3408,7 @@ b'DocType: Purchase Receipt Item Supplied',b'Purchase Receipt Item Supplied',b'A
 b'apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24',b'To Datetime',b'\xc3\x80 la Date'
 b'apps/erpnext/erpnext/config/selling.py +302',b'Logs for maintaining sms delivery status',b'Journaux pour maintenir le statut de livraison des sms'
 b'DocType: Accounts Settings',b'Make Payment via Journal Entry',b'Effectuer un Paiement par une \xc3\x89criture de Journal'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +223',b'Printed On',b'Imprim\xc3\xa9 sur'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +237',b'Printed On',b'Imprim\xc3\xa9 sur'
 b'DocType: Item',b'Inspection Required before Delivery',b'Inspection Requise avant Livraison'
 b'DocType: Item',b'Inspection Required before Purchase',b'Inspection Requise avant Achat'
 b'apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +93',b'Pending Activities',b'Activit\xc3\xa9s en Attente'
@@ -3451,7 +3458,7 @@ b'apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +51',b'Reserved
 b'DocType: Payment Reconciliation Invoice',b'Invoice Number',b'Num\xc3\xa9ro de Facture'
 b'DocType: Shopping Cart Settings',b'Orders',b'Commandes'
 b'DocType: Employee Leave Approver',b'Leave Approver',b'Approbateur de Cong\xc3\xa9s'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +285',b'Please select a batch',b'Veuillez s\xc3\xa9lectionner un lot'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +314',b'Please select a batch',b'Veuillez s\xc3\xa9lectionner un lot'
 b'apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +42',b'JournalLib',b'JournalLib'
 b'DocType: Assessment Group',b'Assessment Group Name',"b""Nom du Groupe d'\xc3\x89valuation"""
 b'DocType: Manufacturing Settings',b'Material Transferred for Manufacture',b'Mat\xc3\xa9riel Transf\xc3\xa9r\xc3\xa9 pour la Fabrication'
@@ -3473,9 +3480,9 @@ b'apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_
 b'DocType: Employee Attendance Tool',b'Employee Attendance Tool',b'Outil de Gestion des Pr\xc3\xa9sences des Employ\xc3\xa9s'
 b'DocType: Guardian Student',b'Guardian Student',"b""Tuteur de l'\xc3\x89tudiant"""
 b'DocType: Supplier',b'Credit Limit',b'Limite de cr\xc3\xa9dit'
-b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +70',b'Avg. Selling Price List Rate',b'Taux moyen de la liste de prix de vente'
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75',b'Avg. Selling Price List Rate',b'Taux moyen de la liste de prix de vente'
 b'DocType: Salary Component',b'Salary Component',b'Composante Salariale'
-b'apps/erpnext/erpnext/accounts/utils.py +495',b'Payment Entries {0} are un-linked',b'\xc3\x89critures de Paiement {0} ne sont pas li\xc3\xa9es'
+b'apps/erpnext/erpnext/accounts/utils.py +490',b'Payment Entries {0} are un-linked',b'\xc3\x89critures de Paiement {0} ne sont pas li\xc3\xa9es'
 b'DocType: GL Entry',b'Voucher No',b'N\xc2\xb0 de R\xc3\xa9f\xc3\xa9rence'
 ,b'Lead Owner Efficiency',b'Efficacit\xc3\xa9 des Responsables des Prospects'
 b'DocType: Leave Allocation',b'Leave Allocation',b'Allocation de Cong\xc3\xa9s'
@@ -3508,7 +3515,7 @@ b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +110',b'P
 b'DocType: Quality Inspection',b'Outgoing',b'Sortant'
 b'DocType: Material Request',b'Requested For',b'Demand\xc3\xa9 Pour'
 b'DocType: Quotation Item',b'Against Doctype',b'Contre Doctype'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +404',b'{0} {1} is cancelled or closed',b'{0} {1} est annul\xc3\xa9 ou ferm\xc3\xa9'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +420',b'{0} {1} is cancelled or closed',b'{0} {1} est annul\xc3\xa9 ou ferm\xc3\xa9'
 b'DocType: Asset',b'Calculate Depreciation',b'Calculer la d\xc3\xa9pr\xc3\xa9ciation'
 b'DocType: Delivery Note',b'Track this Delivery Note against any Project',b'Suivre ce Bon de Livraison pour tous les Projets'
 b'apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +35',b'Net Cash from Investing',b'Tr\xc3\xa9sorerie Nette des Investissements'
@@ -3532,7 +3539,7 @@ b'DocType: Supplier Scorecard Period',b'Variables',b'Variables'
 b'DocType: Employee Internal Work History',b'Employee Internal Work History',"b""Ant\xc3\xa9c\xc3\xa9dents Professionnels Interne de l'Employ\xc3\xa9"""
 b'apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +249',b'Closing (Dr)',b'Fermeture (Dr)'
 b'DocType: Cheque Print Template',b'Cheque Size',b'Taille du Ch\xc3\xa8que'
-b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +232',b'Serial No {0} not in stock',"b""N\xc2\xb0 de S\xc3\xa9rie {0} n'est pas en stock"""
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +238',b'Serial No {0} not in stock',"b""N\xc2\xb0 de S\xc3\xa9rie {0} n'est pas en stock"""
 b'apps/erpnext/erpnext/config/selling.py +169',b'Tax template for selling transactions.',b'Mod\xc3\xa8le de taxe pour les op\xc3\xa9rations de vente.'
 b'DocType: Sales Invoice',b'Write Off Outstanding Amount',b'Encours de Reprise'
 b'apps/erpnext/erpnext/hr/doctype/expense_claim_type/expense_claim_type.py +27',b'Account {0} does not match with Company {1}',b'Le Compte {0} ne correspond pas \xc3\xa0 la Soci\xc3\xa9t\xc3\xa9 {1}'
@@ -3559,7 +3566,7 @@ b'apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96',b'{0} {1}: Acc
 b'apps/erpnext/erpnext/stock/doctype/item/item.js +397',b'Select at least one value from each of the attributes.',b'S\xc3\xa9lectionnez au moins une valeur de chacun des attributs.'
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +166',b'Material Request {0} is cancelled or stopped',b'Demande de Mat\xc3\xa9riel {0} est annul\xc3\xa9 ou arr\xc3\xaat\xc3\xa9'
 b'apps/erpnext/erpnext/config/hr.py +314',b'Leave Management',b'Gestion des Cong\xc3\xa9s'
-b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +118',b'Group by Account',b'Grouper par Compte'
+b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +120',b'Group by Account',b'Grouper par Compte'
 b'apps/erpnext/erpnext/education/doctype/instructor/instructor.py +21',b'Please select Employee',b'Veuillez s\xc3\xa9lectionner un employ\xc3\xa9'
 b'DocType: Sales Order',b'Fully Delivered',b'Enti\xc3\xa8rement Livr\xc3\xa9'
 b'DocType: Lead',b'Lower Income',b'Revenu bas'
@@ -3582,7 +3589,7 @@ b'DocType: Sales Invoice',"b""Customer's Purchase Order""",b'N\xc2\xb0 de Bon de
 b'DocType: Consultation',b'Patient',b'Patient'
 b'apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +47',b'Bypass credit check at Sales Order ',b'Contr\xc3\xb4le de cr\xc3\xa9dit de contournement \xc3\xa0 la commande client'
 b'DocType: Land Unit',b'Check if it is a hydroponic unit',b'V\xc3\xa9rifiez s&#39;il s&#39;agit d&#39;une unit\xc3\xa9 hydroponique'
-b'apps/erpnext/erpnext/config/stock.py +109',b'Serial No and Batch',b'N\xc2\xb0 de S\xc3\xa9rie et lot'
+b'apps/erpnext/erpnext/config/stock.py +113',b'Serial No and Batch',b'N\xc2\xb0 de S\xc3\xa9rie et lot'
 b'DocType: Warranty Claim',b'From Company',b'De la Soci\xc3\xa9t\xc3\xa9'
 b'apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py +52',b'Sum of Scores of Assessment Criteria needs to be {0}.',"b""Somme des Scores de Crit\xc3\xa8res d'\xc3\x89valuation doit \xc3\xaatre {0}."""
 b'apps/erpnext/erpnext/assets/doctype/asset/asset.py +77',b'Please set Number of Depreciations Booked',b'Veuillez d\xc3\xa9finir le Nombre d\xe2\x80\x99Amortissements Comptabilis\xc3\xa9s'
@@ -3614,7 +3621,7 @@ b'DocType: Patient',b'Medical History',b'Ant\xc3\xa9c\xc3\xa9dents m\xc3\xa9dica
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +157',b'Bank Overdraft Account',b'Compte de D\xc3\xa9couvert Bancaire'
 b'DocType: Patient',b'Patient ID',b'Identification du patient'
 b'DocType: Physician Schedule',b'Schedule Name',b'Nom du calendrier'
-b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js +48',b'Make Salary Slip',b'Cr\xc3\xa9er une Fiche de Paie'
+b'apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js +49',b'Make Salary Slip',b'Cr\xc3\xa9er une Fiche de Paie'
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +840',b'Add All Suppliers',b'Ajouter tous les Fournisseurs'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +94',b'Row #{0}: Allocated Amount cannot be greater than outstanding amount.',b'Ligne # {0}: montant attribu\xc3\xa9 ne peut pas \xc3\xaatre sup\xc3\xa9rieur au montant en souffrance.'
 b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +75',b'Browse BOM',b'Parcourir la LDM'
@@ -3623,7 +3630,7 @@ b'DocType: Purchase Invoice',b'Edit Posting Date and Time',"b""Modifier la Date 
 b'apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +101',b'Please set Depreciation related Accounts in Asset Category {0} or Company {1}',b'Veuillez d\xc3\xa9finir le Compte relatif aux Amortissements dans la Cat\xc3\xa9gorie d\xe2\x80\x99Actifs {0} ou la Soci\xc3\xa9t\xc3\xa9 {1}'
 b'DocType: Lab Test Groups',b'Normal Range',b'Plage normale'
 b'DocType: Academic Term',b'Academic Year',b'Ann\xc3\xa9e Acad\xc3\xa9mique'
-b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +72',b'Available Selling',b'Vente disponible'
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77',b'Available Selling',b'Vente disponible'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +169',b'Opening Balance Equity',b'Ouverture de la Balance des Capitaux Propres'
 b'DocType: Lead',b'CRM',b'CRM'
 b'DocType: Purchase Invoice',b'N',b'N'
@@ -3633,6 +3640,7 @@ b'DocType: Purchase Invoice',b'GST Details',b'D\xc3\xa9tails de la GST'
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +156',b'Email sent to supplier {0}',b'Email envoy\xc3\xa9 au fournisseur {0}'
 b'DocType: Item',b'Default Sales Unit of Measure',b'Unit\xc3\xa9 de Mesure par d\xc3\xa9faut \xc3\xa0 la Vente'
 b'apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +9',b'Academic Year: ',b'Ann\xc3\xa9e acad\xc3\xa9mique:'
+b'apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +19',b'Not allow to set alternative item for the item {0}',b'Ne permet pas de d\xc3\xa9finir un autre \xc3\xa9l\xc3\xa9ment pour l&#39;\xc3\xa9l\xc3\xa9ment {0}'
 b'DocType: Opportunity',b'OPTY-',b'OPTY-'
 b'apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py +19',b'Date is repeated',b'La Date est r\xc3\xa9p\xc3\xa9t\xc3\xa9e'
 b'apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +27',b'Authorized Signatory',b'Signataire Autoris\xc3\xa9'
@@ -3717,7 +3725,7 @@ b'apps/erpnext/erpnext/templates/includes/product_list.js +45',b'Nothing more to
 b'DocType: Lead',b'From Customer',b'Du Client'
 b'apps/erpnext/erpnext/demo/setup/setup_data.py +327',b'Calls',b'Appels'
 b'apps/erpnext/erpnext/utilities/user_progress.py +143',b'A Product',b'Un Produit'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +207',b'Batches',b'Lots'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +233',b'Batches',b'Lots'
 b'apps/erpnext/erpnext/education/doctype/fee_structure/fee_structure.js +34',b'Make Fee Schedule',"b""Faire un Ech\xc3\xa9ancier d'Honoraires"""
 b'DocType: Purchase Order Item Supplied',b'Stock UOM',b'UDM du Stock'
 b'apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +233',b'Purchase Order {0} is not submitted',b'Le Bon de Commande {0} n\xe2\x80\x99est pas soumis'
@@ -3725,7 +3733,7 @@ b'DocType: Vital Signs',b'Normal reference range for an adult is 16\xe2\x80\x932
 b'DocType: Customs Tariff Number',b'Tariff Number',b'Tarif'
 b'DocType: Work Order Item',b'Available Qty at WIP Warehouse',"b""Qt\xc3\xa9 disponible \xc3\xa0 l'Entrep\xc3\xb4t de Travaux en Cours"""
 b'apps/erpnext/erpnext/stock/doctype/item/item.js +39',b'Projected',b'Projet\xc3\xa9'
-b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +222',b'Serial No {0} does not belong to Warehouse {1}',b'N\xc2\xb0 de S\xc3\xa9rie {0} ne fait pas partie de l\xe2\x80\x99Entrep\xc3\xb4t {1}'
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +228',b'Serial No {0} does not belong to Warehouse {1}',b'N\xc2\xb0 de S\xc3\xa9rie {0} ne fait pas partie de l\xe2\x80\x99Entrep\xc3\xb4t {1}'
 b'apps/erpnext/erpnext/controllers/status_updater.py +177',b'Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0',b'Remarque : Le syst\xc3\xa8me ne v\xc3\xa9rifiera pas les sur-livraisons et les sur-r\xc3\xa9servations pour l\xe2\x80\x99Article {0} car la quantit\xc3\xa9 ou le montant est \xc3\xa9gal \xc3\xa0 0'
 b'DocType: Notification Control',b'Quotation Message',b'Message du Devis'
 b'DocType: Employee Loan',b'Employee Loan Application',"b""Demande de Pr\xc3\xaat d'un Employ\xc3\xa9"""
@@ -3748,13 +3756,13 @@ b'DocType: Purchase Invoice Item',b'Landed Cost Voucher Amount',b'Montant de la 
 ,b'Item Balance (Simple)',b'Solde de l&#39;objet (simple)'
 b'apps/erpnext/erpnext/config/accounts.py +17',b'Bills raised by Suppliers.',b'Factures \xc3\xa9mises par des Fournisseurs.'
 b'DocType: POS Profile',b'Write Off Account',b'Compte de Reprise'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +215',b'Debit Note Amt',b'Mnt de la Note de D\xc3\xa9bit'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229',b'Debit Note Amt',b'Mnt de la Note de D\xc3\xa9bit'
 b'apps/erpnext/erpnext/templates/print_formats/includes/taxes.html +5',b'Discount Amount',b'Remise'
 b'DocType: Purchase Invoice',b'Return Against Purchase Invoice',b'Retour contre Facture d\xe2\x80\x99Achat'
 b'DocType: Item',b'Warranty Period (in days)',b'P\xc3\xa9riode de Garantie (en jours)'
 b'apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +61',b'Failed to set defaults',b'\xc3\x89chec de la d\xc3\xa9finition des valeurs par d\xc3\xa9faut'
 b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +56',b'Relation with Guardian1',b'Relation avec Tuteur1'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +786',b'Please select BOM against item {0}',b'Veuillez s\xc3\xa9lectionner la nomenclature par rapport \xc3\xa0 l&#39;\xc3\xa9l\xc3\xa9ment {0}'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +787',b'Please select BOM against item {0}',b'Veuillez s\xc3\xa9lectionner la nomenclature par rapport \xc3\xa0 l&#39;\xc3\xa9l\xc3\xa9ment {0}'
 b'apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js +18',b'Make Invoices',b'Faire des factures'
 b'apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23',b'Net Cash from Operations',b'Tr\xc3\xa9sorerie Nette des Op\xc3\xa9rations'
 b'apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26',b'Item 4',b'Article 4'
@@ -3765,7 +3773,7 @@ b'apps/erpnext/erpnext/education/doctype/academic_year/academic_year.js +3',b'St
 b'DocType: Shopping Cart Settings',b'Quotation Series',b'S\xc3\xa9ries de Devis'
 b'apps/erpnext/erpnext/setup/doctype/item_group/item_group.py +57',"b'An item exists with same name ({0}), please change the item group name or rename the item'","b""Un article existe avec le m\xc3\xaame nom ({0}), veuillez changer le nom du groupe d'article ou renommer l'article"""
 b'DocType: Soil Analysis Criteria',b'Soil Analysis Criteria',b'Crit\xc3\xa8res d&#39;analyse des sols'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2041',b'Please select customer',b'Veuillez s\xc3\xa9lectionner un client'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2037',b'Please select customer',b'Veuillez s\xc3\xa9lectionner un client'
 b'DocType: C-Form',b'I',b'I'
 b'DocType: Company',b'Asset Depreciation Cost Center',"b""Centre de Co\xc3\xbbts de l'Amortissement d'Actifs"""
 b'DocType: Production Plan Sales Order',b'Sales Order Date',b'Date de la Commande Client'
@@ -3793,7 +3801,7 @@ b'DocType: Pricing Rule',b'Margin',b'Marge'
 b'apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +57',b'New Customers',b'Nouveaux Clients'
 b'apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +74',b'Gross Profit %',b'B\xc3\xa9n\xc3\xa9fice Brut %'
 b'DocType: Appraisal Goal',b'Weightage (%)',b'Poids (%)'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +503',b'Change POS Profile',b'Modifier le profil POS'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +512',b'Change POS Profile',b'Modifier le profil POS'
 b'DocType: Bank Reconciliation Detail',b'Clearance Date',b'Date de Compensation'
 b'apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +7',b'Assessment Report',"b""Rapport d'\xc3\x89valuation"""
 b'apps/erpnext/erpnext/assets/doctype/asset/asset.py +59',b'Gross Purchase Amount is mandatory',"b""Montant d'Achat Brut est obligatoire"""
@@ -3807,7 +3815,6 @@ b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37',b'Atle
 b'apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +290',b'Select an employee to get the employee advance.',b'S\xc3\xa9lectionnez un employ\xc3\xa9 pour faire avancer l&#39;employ\xc3\xa9.'
 b'apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56',b'Please select a valid Date',b'S&#39;il vous pla\xc3\xaet s\xc3\xa9lectionnez une date valide'
 b'apps/erpnext/erpnext/public/js/setup_wizard.js +36',b'Select the nature of your business.',b'S\xc3\xa9lectionner la nature de votre entreprise.'
-b'apps/erpnext/erpnext/hr/doctype/employee/employee.py +24',b'Please setup Employee Naming System in Human Resource &gt; HR Settings',b'Veuillez configurer le syst\xc3\xa8me de d\xc3\xa9nomination des employ\xc3\xa9s dans Ressources humaines&gt; Param\xc3\xa8tres RH'
 b'DocType: Lab Test Template',"b'Single for results which require only a single input, result UOM and normal value \n<br>\nCompound for results which require multiple input fields with corresponding event names, result UOMs and normal values\n<br>\nDescriptive for tests which have multiple result components and corresponding result entry fields. \n<br>\nGrouped for test templates which are a group of other test templates.\n<br>\nNo Result for tests with no results. Also, no Lab Test is created. e.g.. Sub Tests for Grouped results.'","b""Single pour les r\xc3\xa9sultats qui ne n\xc3\xa9cessitent qu'une seule entr\xc3\xa9e, r\xc3\xa9sultat UOM et valeur normale <br> Compos\xc3\xa9 pour les r\xc3\xa9sultats qui n\xc3\xa9cessitent plusieurs champs d'entr\xc3\xa9e avec les noms d'\xc3\xa9v\xc3\xa9nement correspondants, les UOM de r\xc3\xa9sultat et les valeurs normales <br> Descriptif pour les tests qui ont plusieurs composants de r\xc3\xa9sultat et les champs de saisie des r\xc3\xa9sultats correspondants. <br> Group\xc3\xa9s pour les mod\xc3\xa8les de test qui sont un groupe d'autres mod\xc3\xa8les de test. <br> Aucun r\xc3\xa9sultat pour les tests sans r\xc3\xa9sultat. En outre, aucun test de laboratoire n'est cr\xc3\xa9\xc3\xa9. par exemple. Sous-tests pour les r\xc3\xa9sultats group\xc3\xa9s."""
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +86',b'Row #{0}: Duplicate entry in References {1} {2}',b'Ligne # {0}: entr\xc3\xa9e en double dans les r\xc3\xa9f\xc3\xa9rences {1} {2}'
 b'apps/erpnext/erpnext/config/manufacturing.py +57',b'Where manufacturing operations are carried.',b'L\xc3\xa0 o\xc3\xb9 les op\xc3\xa9rations de fabrication sont r\xc3\xa9alis\xc3\xa9es.'
@@ -3848,7 +3855,7 @@ b'DocType: Daily Work Summary Group User',b'Daily Work Summary Group User',b'Uti
 b'DocType: Territory',b'Territory Targets',b'Objectifs R\xc3\xa9gionaux'
 b'DocType: Soil Analysis',b'Ca/Mg',b'Ca / Mg'
 b'DocType: Delivery Note',b'Transporter Info',b'Infos Transporteur'
-b'apps/erpnext/erpnext/accounts/utils.py +502',b'Please set default {0} in Company {1}',b'Veuillez d\xc3\xa9finir {0} par d\xc3\xa9faut dans la Soci\xc3\xa9t\xc3\xa9 {1}'
+b'apps/erpnext/erpnext/accounts/utils.py +497',b'Please set default {0} in Company {1}',b'Veuillez d\xc3\xa9finir {0} par d\xc3\xa9faut dans la Soci\xc3\xa9t\xc3\xa9 {1}'
 b'DocType: Cheque Print Template',b'Starting position from top edge',b'Position initiale depuis bord haut'
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +33',b'Same supplier has been entered multiple times',b'Le m\xc3\xaame fournisseur a \xc3\xa9t\xc3\xa9 saisi plusieurs fois'
 b'apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152',b'Gross Profit / Loss',b'B\xc3\xa9n\xc3\xa9fice/Perte Brut'
@@ -3870,7 +3877,7 @@ b'apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39',b'BOM Rate',
 b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +225',"b'Stopped Work Order cannot be cancelled, Unstop it first to cancel'","b'Ordre de travail arr\xc3\xaat\xc3\xa9 ne peut \xc3\xaatre annul\xc3\xa9, D\xc3\xa9truire le premier \xc3\xa0 annuler'"
 b'DocType: Asset',b'Journal Entry for Scrap',b'\xc3\x89criture de Journal pour la Mise au Rebut'
 b'apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +83',b'Please pull items from Delivery Note',b'Veuillez r\xc3\xa9cup\xc3\xa9rer les articles des Bons de Livraison'
-b'apps/erpnext/erpnext/accounts/utils.py +472',b'Journal Entries {0} are un-linked',b'Les \xc3\x89critures de Journal {0} ne sont pas li\xc3\xa9es'
+b'apps/erpnext/erpnext/accounts/utils.py +467',b'Journal Entries {0} are un-linked',b'Les \xc3\x89critures de Journal {0} ne sont pas li\xc3\xa9es'
 b'apps/erpnext/erpnext/config/crm.py +92',"b'Record of all communications of type email, phone, chat, visit, etc.'","b'Enregistrement de toutes les communications de type email, t\xc3\xa9l\xc3\xa9phone, chat, visite, etc.'"
 b'DocType: Supplier Scorecard Scoring Standing',b'Supplier Scorecard Scoring Standing',"b""Classement de la Fiche d'\xc3\x89valuation Fournisseur"""
 b'DocType: Manufacturer',b'Manufacturers used in Items',b'Fabricants utilis\xc3\xa9s dans les Articles'
@@ -3880,6 +3887,7 @@ b'apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.
 b'DocType: Academic Term',b'Term Name',b'Nom du Terme'
 b'apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +332',b'Credit ({0})',b'Cr\xc3\xa9dit ({0})'
 b'DocType: Buying Settings',b'Purchase Order Required',b'Bon de Commande Requis'
+b'apps/erpnext/erpnext/public/js/projects/timer.js +5',b'Timer',b'Minuteur'
 ,b'Item-wise Sales History',b'Historique des Ventes par Article'
 b'DocType: Expense Claim',b'Total Sanctioned Amount',b'Montant Total Valid\xc3\xa9'
 b'DocType: Land Unit',b'Land Unit',b'Parcelle'
@@ -3923,7 +3931,7 @@ b'apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py 
 b'apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +26',"b""Name of new Account. Note: Please don't create accounts for Customers and Suppliers""",b'Nom du Nouveau Compte. Note: Veuillez ne pas cr\xc3\xa9er de comptes Clients et Fournisseurs'
 b'apps/erpnext/erpnext/config/setup.py +37',b'Country wise default Address Templates',"b""Mod\xc3\xa8les d'Adresse par d\xc3\xa9faut en fonction du pays"""
 b'DocType: Water Analysis',b'Appearance',b'Apparence'
-b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +70',b'Avg. Buying Price List Rate',"b""Moyenne de la liste de prix d'achat"""
+b'apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75',b'Avg. Buying Price List Rate',"b""Moyenne de la liste de prix d'achat"""
 b'DocType: Sales Order Item',b'Supplier delivers to Customer',b'Fournisseur livre au Client'
 b'apps/erpnext/erpnext/config/non_profit.py +23',b'Member information.',b'Informations sur le membre'
 b'apps/erpnext/erpnext/utilities/bot.py +34',b'[{0}](#Form/Item/{0}) is out of stock',b'[{0}] (#Formulaire/Article/{0}) est en rupture de stock'
@@ -4019,11 +4027,11 @@ b'apps/erpnext/erpnext/assets/doctype/asset/asset.py +43',b'Item {0} must be a F
 b'apps/erpnext/erpnext/stock/doctype/item/item.js +372',b'Make Variants',b'Faire des variantes'
 b'DocType: Item',b'Default BOM',b'LDM par D\xc3\xa9faut'
 b'DocType: Project',b'Total Billed Amount (via Sales Invoices)',b'Montant total factur\xc3\xa9 (via les factures de vente)'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +118',b'Debit Note Amount',b'Montant de la Note de D\xc3\xa9bit'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127',b'Debit Note Amount',b'Montant de la Note de D\xc3\xa9bit'
 b'DocType: Project Update',b'Not Updated',b'Pas \xc3\xa0 jour'
 b'apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +106',"b'There are inconsistencies between the rate, no of shares and the amount calculated'","b'Il existe des incoh\xc3\xa9rences entre le taux, le nombre d&#39;actions et le montant calcul\xc3\xa9'"
 b'apps/erpnext/erpnext/setup/doctype/company/company.js +89',b'Please re-type company name to confirm',b'Veuillez saisir \xc3\xa0 nouveau le nom de la soci\xc3\xa9t\xc3\xa9 pour confirmer'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +216',b'Total Outstanding Amt',b'Encours Total'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +230',b'Total Outstanding Amt',b'Encours Total'
 b'DocType: Journal Entry',b'Printing Settings',"b""R\xc3\xa9glages d'Impression"""
 b'DocType: Employee Advance',b'Advance Account',b'Compte d&#39;avances'
 b'DocType: Job Offer',b'Job Offer Terms',b'Conditions d&#39;offre d&#39;emploi'
@@ -4091,7 +4099,7 @@ b'DocType: Purchase Invoice',b'Items',b'Articles'
 b'apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +34',b'Student is already enrolled.',"b""L'\xc3\xa9tudiant est d\xc3\xa9j\xc3\xa0 inscrit."""
 b'DocType: Fiscal Year',b'Year Name',"b""Nom de l'Ann\xc3\xa9e"""
 b'apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +241',b'There are more holidays than working days this month.',b'Il y a plus de vacances que de jours travaill\xc3\xa9s ce mois-ci.'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +78',b'PDC/LC Ref',b'PDC / LC Ref'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +100',b'PDC/LC Ref',b'PDC / LC Ref'
 b'DocType: Product Bundle Item',b'Product Bundle Item',"b""Article d'un Ensemble de Produits"""
 b'DocType: Sales Partner',b'Sales Partner Name',b'Nom du Partenaire de Vente'
 b'apps/erpnext/erpnext/hooks.py +136',b'Request for Quotations',b'Appel d\xe2\x80\x99Offres'
@@ -4111,6 +4119,7 @@ b'apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_
 b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46',b'Securities & Commodity Exchanges',b'Bourses de Valeurs Mobili\xc3\xa8res et de Marchandises'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +689',"b""Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'""","b""L\xe2\x80\x99Unit\xc3\xa9 de mesure par d\xc3\xa9faut pour la variante '{0}' doit \xc3\xaatre la m\xc3\xaame que dans le Mod\xc3\xa8le '{1}'"""
 b'DocType: Shipping Rule',b'Calculate Based On',b'Calculer en fonction de'
+b'apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88',b'Please setup numbering series for Attendance via Setup &gt; Numbering Series',b'Veuillez configurer la s\xc3\xa9rie de num\xc3\xa9ros pour la pr\xc3\xa9sence via Setup&gt; S\xc3\xa9rie de num\xc3\xa9ros'
 b'DocType: Delivery Note Item',b'From Warehouse',"b""De l'Entrep\xc3\xb4t"""
 b'apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59',b'No employees for the mentioned criteria',b'Aucun employ\xc3\xa9 pour les crit\xc3\xa8res mentionn\xc3\xa9s'
 b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955',b'No Items with Bill of Materials to Manufacture',b'Aucun Article avec une Liste de Mat\xc3\xa9riel \xc3\xa0 Fabriquer'
@@ -4118,6 +4127,7 @@ b'DocType: Hotel Settings',b'Default Customer',b'Client par D\xc3\xa9faut'
 b'DocType: Assessment Plan',b'Supervisor Name',b'Nom du Superviseur'
 b'DocType: Healthcare Settings',b'Do not confirm if appointment is created for the same day',b'Ne confirmez pas si le rendez-vous est cr\xc3\xa9\xc3\xa9 pour le m\xc3\xaame jour'
 b'DocType: Program Enrollment Course',b'Program Enrollment Course',"b""Cours d'Inscription au Programme"""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +164',b'Make Sample Retention Stock Entry',b'Faire une entr\xc3\xa9e de stock de r\xc3\xa9tention d&#39;\xc3\xa9chantillon'
 b'DocType: Purchase Taxes and Charges',b'Valuation and Total',b'Valorisation et Total'
 b'apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py +11',b'Scorecards',"b""Fiches d'\xc3\x89valuation"""
 b'DocType: Tax Rule',b'Shipping City',b'Ville de Livraison'
@@ -4128,7 +4138,7 @@ b'DocType: Patient Relation',b'Spouse',b'\xc3\x89poux'
 b'DocType: Lab Test Groups',b'Add Test',b'Ajouter un Test'
 b'DocType: Manufacturer',b'Limited to 12 characters',b'Limit\xc3\xa9 \xc3\xa0 12 caract\xc3\xa8res'
 b'DocType: Journal Entry',b'Print Heading',b'Imprimer Titre'
-b'apps/erpnext/erpnext/config/stock.py +146',b'Delivery Trip service tours to customers.',b'Service de livraison aux clients.'
+b'apps/erpnext/erpnext/config/stock.py +150',b'Delivery Trip service tours to customers.',b'Service de livraison aux clients.'
 b'apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +57',b'Total cannot be zero',b'Total ne peut pas \xc3\xaatre z\xc3\xa9ro'
 b'apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +16',"b""'Days Since Last Order' must be greater than or equal to zero""","b""'Jours Depuis La Derni\xc3\xa8re Commande' doit \xc3\xaatre sup\xc3\xa9rieur ou \xc3\xa9gal \xc3\xa0 z\xc3\xa9ro"""
 b'DocType: Plant Analysis Criteria',b'Maximum Permissible Value',b'Valeur maximale autoris\xc3\xa9e'
@@ -4140,7 +4150,7 @@ b'DocType: Leave Application',b'Follow via Email',b'Suivre par E-mail'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +55',b'Plants and Machineries',b'Usines et Machines'
 b'DocType: Purchase Taxes and Charges',b'Tax Amount After Discount Amount',b'Montant de la Taxe apr\xc3\xa8s Remise'
 b'DocType: Daily Work Summary Settings',b'Daily Work Summary Settings',b'Param\xc3\xa8tres du R\xc3\xa9capitulatif Quotidien'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +447',b'Please enter Reqd by Date',b'Veuillez entrer Reqd par date'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +463',b'Please enter Reqd by Date',b'Veuillez entrer Reqd par date'
 b'DocType: Payment Entry',b'Internal Transfer',b'Transfert Interne'
 b'DocType: Asset Maintenance',b'Maintenance Tasks',b'T\xc3\xa2ches de maintenance'
 b'apps/erpnext/erpnext/setup/doctype/territory/territory.py +19',b'Either target qty or target amount is mandatory',b'Soit la qt\xc3\xa9 cible soit le montant cible est obligatoire'
@@ -4158,7 +4168,7 @@ b'DocType: Training Event',b'Trainer Name',b'Nom du Formateur'
 b'DocType: Mode of Payment',b'General',b'G\xc3\xa9n\xc3\xa9ral'
 b'apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py +28',b'Last Communication',b'Derni\xc3\xa8re Communication'
 b'apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +372',"b""Cannot deduct when category is for 'Valuation' or 'Valuation and Total'""","b""D\xc3\xa9duction impossible lorsque la cat\xc3\xa9gorie est pour '\xc3\x89valuation' ou 'Vaulation et Total'"""
-b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +234',b'Serial Nos Required for Serialized Item {0}',b'N\xc2\xb0 de S\xc3\xa9ries Requis pour Article S\xc3\xa9rialis\xc3\xa9 {0}'
+b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +240',b'Serial Nos Required for Serialized Item {0}',b'N\xc2\xb0 de S\xc3\xa9ries Requis pour Article S\xc3\xa9rialis\xc3\xa9 {0}'
 b'apps/erpnext/erpnext/config/accounts.py +144',b'Match Payments with Invoices',b'Rapprocher les Paiements avec les Factures'
 b'DocType: Journal Entry',b'Bank Entry',b'\xc3\x89criture Bancaire'
 b'DocType: Authorization Rule',b'Applicable To (Designation)',b'Applicable \xc3\x80 (D\xc3\xa9signation)'
@@ -4175,6 +4185,7 @@ b'DocType: Production Plan',b'Get Material Request',b'Obtenir la Demande de Mat\
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111',b'Postal Expenses',b'Frais Postaux'
 b'apps/erpnext/erpnext/controllers/trends.py +19',b'Total(Amt)',b'Total (Mnt)'
 b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26',b'Entertainment & Leisure',b'Divertissement et Loisir'
+b'apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15',b'Please setup Instructor Naming System in Education &gt; Education Settings',b'Veuillez configurer le syst\xc3\xa8me de nommage de l&#39;instructeur dans Education&gt; Param\xc3\xa8tres de l&#39;\xc3\xa9ducation'
 ,b'Item Variant Details',b'D\xc3\xa9tails de la variante de l&#39;article'
 b'DocType: Quality Inspection',b'Item Serial No',"b""No de S\xc3\xa9rie de l'Article"""
 b'apps/erpnext/erpnext/utilities/activation.py +135',b'Create Employee Records',b'Cr\xc3\xa9er les Dossiers des Employ\xc3\xa9s'
@@ -4182,7 +4193,7 @@ b'apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_she
 b'apps/erpnext/erpnext/config/accounts.py +105',b'Accounting Statements',b'\xc3\x89tats Financiers'
 b'DocType: Drug Prescription',b'Hour',b'Heure'
 b'DocType: Restaurant Order Entry',b'Last Sales Invoice',b'Derni\xc3\xa8re Facture de Vente'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +788',b'Please select Qty against item {0}',b'Veuillez s\xc3\xa9lectionner Qt\xc3\xa9 par rapport \xc3\xa0 l&#39;\xc3\xa9l\xc3\xa9ment {0}'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +789',b'Please select Qty against item {0}',b'Veuillez s\xc3\xa9lectionner Qt\xc3\xa9 par rapport \xc3\xa0 l&#39;\xc3\xa9l\xc3\xa9ment {0}'
 b'apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29',b'New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt',"b""Les Nouveaux N\xc2\xb0 de S\xc3\xa9rie ne peuvent avoir d'entrepot. L'Entrep\xc3\xb4t doit \xc3\xaatre \xc3\xa9tabli par \xc3\x89criture de Stock ou Re\xc3\xa7us d'Achat"""
 b'DocType: Lead',b'Lead Type',b'Type de Prospect'
 b'apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +114',b'You are not authorized to approve leaves on Block Dates',"b""Vous n'\xc3\xaates pas autoris\xc3\xa9 \xc3\xa0 approuver les cong\xc3\xa9s sur les Dates Bloqu\xc3\xa9es"""
@@ -4218,7 +4229,7 @@ b'DocType: Batch',b'Source Document Name',b'Nom du Document Source'
 b'DocType: Production Plan',b'Get Raw Materials For Production',b'Obtenez des mati\xc3\xa8res premi\xc3\xa8res pour la production'
 b'DocType: Job Opening',b'Job Title',"b""Titre de l'Emploi"""
 b'apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py +84',"b'{0} indicates that {1} will not provide a quotation, but all items \\\n\t\t\t\t\thave been quoted. Updating the RFQ quote status.'","b'{0} indique que {1} ne fournira pas de devis, mais tous les articles \\ ont \xc3\xa9t\xc3\xa9 \xc3\xa9valu\xc3\xa9s. Mise \xc3\xa0 jour du statut de devis RFQ.'"
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1026',b'Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.',b'Nombre maximum d&#39;\xc3\xa9chantillons - {0} ont d\xc3\xa9j\xc3\xa0 \xc3\xa9t\xc3\xa9 conserv\xc3\xa9s pour le lot {1} et l&#39;article {2} dans le lot {3}.'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1070',b'Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.',b'Nombre maximum d&#39;\xc3\xa9chantillons - {0} ont d\xc3\xa9j\xc3\xa0 \xc3\xa9t\xc3\xa9 conserv\xc3\xa9s pour le lot {1} et l&#39;article {2} dans le lot {3}.'
 b'apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +125',b'Please Set Supplier Type in Buying Settings.',b'Veuillez d\xc3\xa9finir le type de fournisseur dans les param\xc3\xa8tres d&#39;achat.'
 b'DocType: Manufacturing Settings',b'Update BOM Cost Automatically',b'Mettre \xc3\xa0 jour automatiquement le co\xc3\xbbt de la LDM'
 b'DocType: Lab Test',b'Test Name',b'Nom du Test'
@@ -4245,6 +4256,7 @@ b'DocType: Daily Work Summary Group',b'Send Emails At',b'Envoyer Emails \xc3\x80
 b'DocType: Quotation',b'Quotation Lost Reason',b'Raison de la Perte du Devis'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +381',b'Transaction reference no {0} dated {1}',b'R\xc3\xa9f\xc3\xa9rence de la transaction n\xc2\xb0 {0} dat\xc3\xa9e du {1}'
 b'apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5',b'There is nothing to edit.',"b""Il n'y a rien \xc3\xa0 modifier."""
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +499',b'Form View',b'Vue de Formulaire'
 b'apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +116',b'Summary for this month and pending activities',b'R\xc3\xa9sum\xc3\xa9 du mois et des activit\xc3\xa9s en suspens'
 b'apps/erpnext/erpnext/utilities/user_progress.py +248',"b'Add users to your organization, other than yourself.'","b'Ajoutez des utilisateurs, autres que vous-m\xc3\xaame, \xc3\xa0 votre organisation.'"
 b'DocType: Customer Group',b'Customer Group Name',b'Nom du Groupe Client'
@@ -4274,7 +4286,7 @@ b'DocType: Agriculture Task',b'Start Day',b'Commence jour'
 b'DocType: Vehicle',b'Chassis No',b'N \xc2\xb0 de Ch\xc3\xa2ssis'
 b'DocType: Payment Request',b'Initiated',b'Initi\xc3\xa9'
 b'DocType: Production Plan Item',b'Planned Start Date',b'Date de D\xc3\xa9but Pr\xc3\xa9vue'
-b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +618',b'Please select a BOM',b'Veuillez s\xc3\xa9lectionner une LDM'
+b'apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +622',b'Please select a BOM',b'Veuillez s\xc3\xa9lectionner une LDM'
 b'DocType: Purchase Invoice',b'Availed ITC Integrated Tax',b'Avoir int\xc3\xa9gr\xc3\xa9 l&#39;imp\xc3\xb4t int\xc3\xa9gr\xc3\xa9 de l&#39;ITC'
 b'DocType: Serial No',b'Creation Document Type',b'Type de Document de Cr\xc3\xa9ation'
 b'DocType: Project Task',b'View Timesheet',b'Afficher la feuille de temps'
@@ -4292,6 +4304,7 @@ b'apps/erpnext/erpnext/utilities/user_progress_utils.py +29',b'Commercial',b'Com
 b'DocType: Patient',b'Alcohol Current Use',"b""Consommation Actuelle d'Alcool"""
 b'DocType: Student Admission Program',b'Student Admission Program',b'Programme d&#39;admission des \xc3\xa9tudiants'
 b'DocType: Payment Entry',b'Account Paid To',b'Compte Pay\xc3\xa9 Au'
+b'DocType: Item Alternative',b'Alternative Item Name',b'Nom de l&#39;article alternatif'
 b'apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +24',b'Parent Item {0} must not be a Stock Item',"b""L'Article Parent {0} ne doit pas \xc3\xaatre un \xc3\x89l\xc3\xa9ment de Stock"""
 b'apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +466',b'Could not submit any Salary Slip <br>\\\n\t\t\tPossible reasons: <br>\\\n\t\t\t1. Net pay is less than 0. <br>\\\n\t\t\t2. Company Email Address specified in employee master is not valid. <br>',"b""Impossible de soumettre un bordereau de salaire <br> \\ Raisons possibles: <br> \\ 1. Le salaire net est inf\xc3\xa9rieur \xc3\xa0 0. <br> \\ 2. L'adresse e-mail de l'entreprise sp\xc3\xa9cifi\xc3\xa9e dans la fiche employ\xc3\xa9 n'est pas valide. <br>"""
 b'apps/erpnext/erpnext/config/selling.py +57',b'All Products or Services.',b'Tous les Produits ou Services.'
@@ -4303,6 +4316,7 @@ b'apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balanc
 b'apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6',b'and unchcked Disabled in the',b'et d\xc3\xa9sactiv\xc3\xa9 dans le'
 b'apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41',b'Series is mandatory',b'S\xc3\xa9rie est obligatoire'
 b'apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28',b'Financial Services',b'Services Financiers'
+b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51',b'Customer &gt; Customer Group &gt; Territory',b'Client&gt; Groupe de clients&gt; Territoire'
 b'DocType: Student Sibling',b'Student ID',"b""Carte d'\xc3\x89tudiant"""
 b'apps/erpnext/erpnext/config/projects.py +51',b'Types of activities for Time Logs',"b""Types d'activit\xc3\xa9s pour Journaux de Temps"""
 b'DocType: Opening Invoice Creation Tool',b'Sales',b'Ventes'
@@ -4331,7 +4345,7 @@ b'DocType: Shareholder',b'Contact HTML',b'HTML du Contact'
 b'apps/erpnext/erpnext/healthcare/doctype/healthcare_settings/healthcare_settings.py +19',b'Registration fee can not be Zero',b'Les frais d&#39;inscription ne peuvent pas \xc3\xaatre z\xc3\xa9ro'
 b'DocType: Disease',b'Treatment Period',b'P\xc3\xa9riode de traitement'
 b'apps/erpnext/erpnext/education/api.py +338',b'Result already Submitted',b'R\xc3\xa9sultat d\xc3\xa9j\xc3\xa0 soumis'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +169',b'Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied',b'L&#39;entrep\xc3\xb4t r\xc3\xa9serv\xc3\xa9 est obligatoire pour l&#39;article {0} dans les mati\xc3\xa8res premi\xc3\xa8res fournies'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +170',b'Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied',b'L&#39;entrep\xc3\xb4t r\xc3\xa9serv\xc3\xa9 est obligatoire pour l&#39;article {0} dans les mati\xc3\xa8res premi\xc3\xa8res fournies'
 ,b'Inactive Customers',b'Clients Inactifs'
 b'DocType: Student Admission Program',b'Maximum Age',b'\xc3\x82ge Maximum'
 b'apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +28',b'Please wait 3 days before resending the reminder.',b'Veuillez patienter 3 jours avant de renvoyer le rappel.'
@@ -4372,8 +4386,8 @@ b'DocType: Lab Prescription',b'Test Code',b'Code de Test'
 b'apps/erpnext/erpnext/config/website.py +11',b'Settings for website homepage',"b""R\xc3\xa9glages pour la page d'accueil du site"""
 b'apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +40',b'RFQs are not allowed for {0} due to a scorecard standing of {1}',"b""Les Appels d'Offres ne sont pas autoris\xc3\xa9s pour {0} en raison d'une note de {1} sur la fiche d'\xc3\xa9valuation"""
 b'DocType: Job Offer',b'Awaiting Response',b'Attente de R\xc3\xa9ponse'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +60',b'Above',b'Au-dessus'
-b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1466',b'Total Amount {0}',b'Montant Total {0}'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +82',b'Above',b'Au-dessus'
+b'apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1487',b'Total Amount {0}',b'Montant Total {0}'
 b'apps/erpnext/erpnext/controllers/item_variant.py +306',b'Invalid attribute {0} {1}',b'Attribut invalide {0} {1}'
 b'DocType: Supplier',b'Mention if non-standard payable account',"b""Veuillez mentionner s'il s'agit d'un compte cr\xc3\xa9diteur non standard"""
 b'apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.py +25',"b""Please select the assessment group other than 'All Assessment Groups'""","b""S\xc3\xa9lectionnez un groupe d'\xc3\xa9valuation autre que \xc2\xabTous les Groupes d'\xc3\x89valuation\xc2\xbb"""
@@ -4406,7 +4420,7 @@ b'DocType: Project User',b'Project User',b'Utilisateur du Projet'
 b'apps/erpnext/erpnext/stock/doctype/batch/batch.js +72',b'Split',b'Fractionner'
 b'DocType: GL Entry',b'Is Advance',b'Est Accompte'
 b'apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21',b'Attendance From Date and Attendance To Date is mandatory',"b""La Date de Pr\xc3\xa9sence Depuis et la Date de Pr\xc3\xa9sence Jusqu'\xc3\xa0 sont obligatoires"""
-b'apps/erpnext/erpnext/controllers/buying_controller.py +156',"b""Please enter 'Is Subcontracted' as Yes or No""","b""Veuillez entrer Oui ou Non pour 'Est sous-trait\xc3\xa9e'"""
+b'apps/erpnext/erpnext/controllers/buying_controller.py +157',"b""Please enter 'Is Subcontracted' as Yes or No""","b""Veuillez entrer Oui ou Non pour 'Est sous-trait\xc3\xa9e'"""
 b'DocType: Item',b'Default Purchase Unit of Measure',"b""Unit\xc3\xa9 de Mesure par d\xc3\xa9faut \xc3\xa0 l'Achat"""
 b'apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py +29',b'Last Communication Date',b'Date de la Derni\xc3\xa8re Communication'
 b'DocType: Sales Team',b'Contact No.',b'N\xc2\xb0 du Contact'
@@ -4463,7 +4477,7 @@ b'apps/erpnext/erpnext/config/hr.py +60',b'Applications for leave.',b'Demandes d
 b'apps/erpnext/erpnext/accounts/doctype/account/account.py +164',b'Account with existing transaction can not be deleted',b'Un compte contenant une transaction ne peut pas \xc3\xaatre supprim\xc3\xa9'
 b'DocType: Vehicle',b'Last Carbon Check',b'Derni\xc3\xa8re V\xc3\xa9rification Carbone'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102',b'Legal Expenses',b'Frais Juridiques'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +140',b'Please select quantity on row ',b'Veuillez s\xc3\xa9lectionner la quantit\xc3\xa9 sur la ligne'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +145',b'Please select quantity on row ',b'Veuillez s\xc3\xa9lectionner la quantit\xc3\xa9 sur la ligne'
 b'apps/erpnext/erpnext/config/accounts.py +277',b'Make Opening Sales and Purchase Invoices',b'Faire l&#39;ouverture des ventes et des factures d&#39;achat'
 b'DocType: Purchase Invoice',b'Posting Time',b'Heure de Publication'
 b'DocType: Timesheet',b'% Amount Billed',b'% Montant Factur\xc3\xa9'
@@ -4493,7 +4507,7 @@ b'apps/erpnext/erpnext/config/hr.py +115',b'Salary Components',b'Composantes Sal
 b'DocType: Program Enrollment Tool',b'New Academic Year',b'Nouvelle Ann\xc3\xa9e Acad\xc3\xa9mique'
 b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +811',b'Return / Credit Note',b'Retour / Note de Cr\xc3\xa9dit'
 b'DocType: Stock Settings',b'Auto insert Price List rate if missing',b'Insertion automatique du taux de la Liste de Prix si manquante'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +117',b'Total Paid Amount',b'Montant Total Pay\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +126',b'Total Paid Amount',b'Montant Total Pay\xc3\xa9'
 b'DocType: GST Settings',b'B2C Limit',b'Limite B2C'
 b'DocType: Work Order Item',b'Transferred Qty',b'Quantit\xc3\xa9 Transf\xc3\xa9r\xc3\xa9e'
 b'apps/erpnext/erpnext/config/learn.py +11',b'Navigating',b'Naviguer'
@@ -4554,7 +4568,7 @@ b'DocType: Products Settings',b'Products Settings',b'R\xc3\xa9glages des Produit
 b'DocType: Lab Prescription',b'Test Created',b'Test Cr\xc3\xa9\xc3\xa9'
 b'DocType: Healthcare Settings',b'Custom Signature in Print',b'Signature personnalis\xc3\xa9e dans l&#39;impression'
 b'DocType: Account',b'Temporary',b'Temporaire'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +107',b'Customer LPO No.',b'Num\xc3\xa9ro d&#39;ordre client'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +116',b'Customer LPO No.',b'Num\xc3\xa9ro d&#39;ordre client'
 b'DocType: Program',b'Courses',b'Cours'
 b'DocType: Monthly Distribution Percentage',b'Percentage Allocation',b'Allocation en Pourcentage'
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +128',b'Secretary',b'Secr\xc3\xa9taire'
@@ -4589,7 +4603,7 @@ b'DocType: Hotel Room',b'Extra Bed Capacity',b'Capacit\xc3\xa9 de lit suppl\xc3\
 b'DocType: Item',b'Opening Stock',"b""Stock d'Ouverture"""
 b'apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20',b'Customer is required',b'Client est requis'
 b'DocType: Lab Test',b'Result Date',b'Date de R\xc3\xa9sultat'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +77',b'PDC/LC Date',b'PDC / LC Date'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +99',b'PDC/LC Date',b'PDC / LC Date'
 b'apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +20',b'{0} is mandatory for Return',b'{0} est obligatoire pour un Retour'
 b'DocType: Purchase Order',b'To Receive',b'\xc3\x80 Recevoir'
 b'apps/erpnext/erpnext/utilities/user_progress.py +252',b'user@example.com',b'utilisateur@exemple.com'
@@ -4761,7 +4775,7 @@ b'apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +14',"b'Edit in full 
 b'apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py +10',b'Appointments and Consultations',b'Rendez-Vous et Consultations'
 b'apps/erpnext/erpnext/education/doctype/student_group/student_group.py +41',b'{0} - {1} is not enrolled in the Batch {2}',"b""{0} - {1} n'est pas inscrit dans le Lot {2}"""
 b'apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +113',"b'Asset {0} cannot be scrapped, as it is already {1}'","b""L'actif {0} ne peut pas \xc3\xaatre mis au rebut, car il est d\xc3\xa9j\xc3\xa0 {1}"""
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +77',b'Cheques Required',b'Ch\xc3\xa8ques requis'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +86',b'Cheques Required',b'Ch\xc3\xa8ques requis'
 b'DocType: Task',b'Total Expense Claim (via Expense Claim)',b'Total des Notes de Frais (via Note de Frais)'
 b'apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177',b'Mark Absent',b'Marquer Absent'
 b'apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +40',b'Failed to setup company',b'\xc3\x89chec de la configuration de la soci\xc3\xa9t\xc3\xa9'
@@ -4814,7 +4828,7 @@ b'DocType: Agriculture Task',b'Previous Business Day',b'Jour ouvrable pr\xc3\xa9
 b'DocType: Employee Loan',b'Repay Fixed Amount per Period',b'Rembourser un Montant Fixe par P\xc3\xa9riode'
 b'DocType: Employee',b'Health Insurance No',b'Assurance-maladie Non'
 b'apps/erpnext/erpnext/buying/utils.py +47',b'Please enter quantity for Item {0}',"b""Veuillez entrer une quantit\xc3\xa9 pour l'article {0}"""
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +215',b'Credit Note Amt',b'Mnt de la Note de Cr\xc3\xa9dit'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229',b'Credit Note Amt',b'Mnt de la Note de Cr\xc3\xa9dit'
 b'DocType: Employee External Work History',b'Employee External Work History',"b""Ant\xc3\xa9c\xc3\xa9dents Professionnels de l'Employ\xc3\xa9"""
 b'DocType: Opening Invoice Creation Tool',b'Purchase',b'Achat'
 b'apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +37',b'Balance Qty',b'Solde de la Qt\xc3\xa9'
@@ -4843,7 +4857,7 @@ b'DocType: GST Account',b'CGST Account',b'Compte CGST'
 b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +53',b'Student Email ID',"b""ID Email de l'\xc3\x89tudiant"""
 b'DocType: Employee',b'Notice (days)',b'Pr\xc3\xa9avis (jours)'
 b'DocType: Tax Rule',b'Sales Tax Template',b'Mod\xc3\xa8le de la Taxe de Vente'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2510',b'Select items to save the invoice',b'S\xc3\xa9lectionner les articles pour sauvegarder la facture'
+b'apps/erpnext/erpnext/accounts/page/pos/pos.js +2506',b'Select items to save the invoice',b'S\xc3\xa9lectionner les articles pour sauvegarder la facture'
 b'DocType: Employee',b'Encashment Date',"b""Date de l'Encaissement"""
 b'DocType: Training Event',b'Internet',b'Internet'
 b'DocType: Special Test Template',b'Special Test Template',b'Mod\xc3\xa8le de Test Sp\xc3\xa9cial'
@@ -4883,7 +4897,7 @@ b'apps/erpnext/erpnext/stock/doctype/item/item.js +80',b'This Item is a Variant 
 b'DocType: Workstation',b'per hour',b'par heure'
 b'apps/erpnext/erpnext/config/buying.py +7',b'Purchasing',b'Achat'
 b'DocType: Announcement',b'Announcement',b'Annonce'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84',b'Customer LPO',b'LPO client'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +106',b'Customer LPO',b'LPO client'
 b'DocType: Education Settings',"b'For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.'","b'Pour un groupe \xc3\xa9tudiant bas\xc3\xa9 sur un lot, le lot \xc3\xa9tudiant sera valid\xc3\xa9 pour chaque \xc3\xa9l\xc3\xa8ve inscrit au programme.'"
 b'apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +50',b'Warehouse can not be deleted as stock ledger entry exists for this warehouse.',"b""L'entrep\xc3\xb4t ne peut pas \xc3\xaatre supprim\xc3\xa9 car une \xc3\xa9criture existe dans le Livre d'Inventaire pour cet entrep\xc3\xb4t."""
 b'apps/erpnext/erpnext/public/js/setup_wizard.js +25',b'Distribution',b'Distribution'
@@ -4900,8 +4914,9 @@ b'DocType: Crop',b'Produce',b'Produire'
 b'DocType: Hotel Settings',b'Default Taxes and Charges',b'Taxes et frais de d\xc3\xa9faut'
 b'DocType: Account',b'Receivable',b'Cr\xc3\xa9ance'
 b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +308',b'Row #{0}: Not allowed to change Supplier as Purchase Order already exists',b'Ligne #{0} : Changement de Fournisseur non autoris\xc3\xa9 car un Bon de Commande existe d\xc3\xa9j\xc3\xa0'
+b'DocType: Item Alternative',b'Alternative Item Code',b'Code d&#39;article alternatif'
 b'DocType: Accounts Settings',b'Role that is allowed to submit transactions that exceed credit limits set.',b'R\xc3\xb4le qui est autoris\xc3\xa9 \xc3\xa0 soumettre des transactions qui d\xc3\xa9passent les limites de cr\xc3\xa9dit fix\xc3\xa9es.'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +989',b'Select Items to Manufacture',b'S\xc3\xa9lectionner les Articles \xc3\xa0 Fabriquer'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +990',b'Select Items to Manufacture',b'S\xc3\xa9lectionner les Articles \xc3\xa0 Fabriquer'
 b'DocType: Delivery Stop',b'Delivery Stop',b'Arr\xc3\xaat de Livraison'
 b'apps/erpnext/erpnext/accounts/page/pos/pos.js +963',"b'Master data syncing, it might take some time'","b'Donn\xc3\xa9es de base en cours de synchronisation, cela peut prendre un certain temps'"
 b'DocType: Item',b'Material Issue',b'Sortie de Mat\xc3\xa9riel'
@@ -5024,7 +5039,7 @@ b'DocType: Task',b'Is Milestone',b'Est un Jalon'
 b'DocType: Delivery Stop',b'Email Sent To',b'Email Envoy\xc3\xa9 \xc3\x80'
 b'DocType: Budget',b'Warn',b'Avertir'
 b'apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +81',b'Are you sure you want to unregister?',b'\xc3\x8ates-vous s\xc3\xbbr de vouloir vous d\xc3\xa9sinscrire?'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +797',b'All items have already been transferred for this Work Order.',b'Tous les articles ont d\xc3\xa9j\xc3\xa0 \xc3\xa9t\xc3\xa9 transf\xc3\xa9r\xc3\xa9s pour ce bon de travail.'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +812',b'All items have already been transferred for this Work Order.',b'Tous les articles ont d\xc3\xa9j\xc3\xa0 \xc3\xa9t\xc3\xa9 transf\xc3\xa9r\xc3\xa9s pour ce bon de travail.'
 b'DocType: Appraisal',"b'Any other remarks, noteworthy effort that should go in the records.'","b'Toute autre remarque, effort remarquable qui devrait aller dans les dossiers.'"
 b'DocType: Asset Maintenance',b'Manufacturing User',b'Charg\xc3\xa9 de Fabrication'
 b'DocType: Purchase Invoice',b'Raw Materials Supplied',b'Mati\xc3\xa8res Premi\xc3\xa8res Fournies'
@@ -5047,7 +5062,7 @@ b'DocType: Item Attribute Value',b'Attribute Value',"b""Valeur de l'Attribut"""
 b'DocType: Salary Detail',b'Salary Detail',b'D\xc3\xa9tails du Salaire'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1070',b'Please select {0} first',b'Veuillez d\xe2\x80\x99abord s\xc3\xa9lectionner {0}'
 b'DocType: Appointment Type',b'Physician',b'M\xc3\xa9decin'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +872',b'Batch {0} of Item {1} has expired.',"b""Lot {0} de l'Article {1} a expir\xc3\xa9."""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +891',b'Batch {0} of Item {1} has expired.',"b""Lot {0} de l'Article {1} a expir\xc3\xa9."""
 b'apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11',b'Consultations',b'Consultations'
 b'DocType: Sales Invoice',b'Commission',b'Commission'
 b'apps/erpnext/erpnext/config/manufacturing.py +27',b'Time Sheet for manufacturing.',b'Feuille de Temps pour la Fabrication.'
@@ -5174,7 +5189,7 @@ b'DocType: Cost Center',b'Cost Center Name',b'Nom du centre de co\xc3\xbbts'
 b'DocType: Student',b'B+',b'B +'
 b'DocType: HR Settings',b'Max working hours against Timesheet',b'Heures de Travail Max pour une Feuille de Temps'
 b'DocType: Maintenance Schedule Detail',b'Scheduled Date',b'Date Pr\xc3\xa9vue'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +214',b'Total Paid Amt',b'Mnt Total Pay\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +228',b'Total Paid Amt',b'Mnt Total Pay\xc3\xa9'
 b'DocType: SMS Center',b'Messages greater than 160 characters will be split into multiple messages',b'Message de plus de 160 caract\xc3\xa8res sera d\xc3\xa9coup\xc3\xa9 en plusieurs messages'
 b'DocType: Purchase Receipt Item',b'Received and Accepted',b'Re\xc3\xa7us et Accept\xc3\xa9s'
 b'DocType: Hub Settings',b'Company and Seller Profile',b'Profil de l&#39;entreprise et du vendeur'
@@ -5276,7 +5291,7 @@ b'DocType: Shipping Rule',b'Restrict to Countries',b'Restreindre aux pays'
 b'DocType: Purchase Invoice',b'Write Off Amount (Company Currency)',b'Montant de la Reprise (Devise Soci\xc3\xa9t\xc3\xa9)'
 b'DocType: Sales Invoice Timesheet',b'Billing Hours',b'Heures Factur\xc3\xa9es'
 b'DocType: Project',b'Total Sales Amount (via Sales Order)',b'Montant total des ventes (via la commande client)'
-b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +548',b'Default BOM for {0} not found',b'LDM par d\xc3\xa9faut {0} introuvable'
+b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +551',b'Default BOM for {0} not found',b'LDM par d\xc3\xa9faut {0} introuvable'
 b'apps/erpnext/erpnext/stock/doctype/item/item.py +514',b'Row #{0}: Please set reorder quantity',b'Ligne #{0} : Veuillez d\xc3\xa9finir la quantit\xc3\xa9 de r\xc3\xa9approvisionnement'
 b'apps/erpnext/erpnext/public/js/pos/pos.html +20',b'Tap items to add them here',b'Choisissez des articles pour les ajouter ici'
 b'DocType: Fees',b'Program Enrollment',b'Inscription au Programme'
@@ -5292,7 +5307,6 @@ b'DocType: Payment Entry',b'Allocate Payment Amount',b'Allouer le Montant du Pai
 b'DocType: Employee External Work History',b'Salary',b'Salaire'
 b'DocType: Serial No',b'Delivery Document Type',b'Type de Document de Livraison'
 b'DocType: Sales Order',b'Partly Delivered',b'Livr\xc3\xa9 en Partie'
-b'apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48',b'Item Code &gt; Item Group &gt; Brand',b'Code de l&#39;article&gt; Groupe de produits&gt; Marque'
 b'DocType: Item Variant Settings',b'Do not update variants on save',b'Ne pas mettre \xc3\xa0 jour les variantes lors de la sauvegarde'
 b'DocType: Email Digest',b'Receivables',b'Cr\xc3\xa9ances'
 b'DocType: Lead Source',b'Lead Source',b'Source du Prospect'
@@ -5308,13 +5322,13 @@ b'apps/erpnext/erpnext/selling/doctype/customer/customer.py +122',b'Please menti
 b'apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156',b'Start date should be less than end date for Item {0}',"b""La date de d\xc3\xa9but doit \xc3\xaatre ant\xc3\xa9rieure \xc3\xa0 la date de fin pour l'Article {0}"""
 b'DocType: Item',"b'Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.'","b""Exemple:. ABCD ##### Si la s\xc3\xa9rie est d\xc3\xa9finie et que le N\xc2\xb0 de s\xc3\xa9rie n'est pas mentionn\xc3\xa9 dans les transactions, alors un num\xc3\xa9ro de s\xc3\xa9rie automatique sera cr\xc3\xa9\xc3\xa9 bas\xc3\xa9 sur cette s\xc3\xa9rie. Si vous voulez toujours mentionner explicitement les num\xc3\xa9ros de s\xc3\xa9rie pour ce produit. laissez ce champ vide."""
 b'DocType: Upload Attendance',b'Upload Attendance',b'Charger Fr\xc3\xa9quentation'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +579',b'BOM and Manufacturing Quantity are required',b'LDM et Quantit\xc3\xa9 de Fabrication sont n\xc3\xa9cessaires'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +604',b'BOM and Manufacturing Quantity are required',b'LDM et Quantit\xc3\xa9 de Fabrication sont n\xc3\xa9cessaires'
 b'apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +50',b'Ageing Range 2',b'Balance Ag\xc3\xa9e 2'
 b'DocType: SG Creation Tool Course',b'Max Strength',b'Force Max'
 b'apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +28',b'Installing presets',b'Installation de presets'
 b'apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +85',b'No Delivery Note selected for Customer {}',b'Aucun bon de livraison s\xc3\xa9lectionn\xc3\xa9 pour le client {}'
 b'apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +25',b'BOM replaced',b'LDM Remplac\xc3\xa9e'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1052',b'Select Items based on Delivery Date',b'S\xc3\xa9lectionnez les articles en fonction de la Date de Livraison'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1053',b'Select Items based on Delivery Date',b'S\xc3\xa9lectionnez les articles en fonction de la Date de Livraison'
 b'DocType: Grant Application',b'Has any past Grant Record',b'A un record de subvention pass\xc3\xa9'
 ,b'Sales Analytics',b'Analyse des Ventes'
 b'apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +127',b'Available {0}',b'Disponible {0}'
@@ -5401,7 +5415,7 @@ b'DocType: Shareholder',b'Hidden list maintaining the list of contacts linked to
 b'apps/erpnext/erpnext/config/non_profit.py +63',b'Donor Type information.',b'Informations sur le type de donneur.'
 b'DocType: Request for Quotation',b'Supplier Detail',b'D\xc3\xa9tails du Fournisseur'
 b'apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +100',b'Error in formula or condition: {0}',b'Erreur dans la formule ou dans la condition : {0}'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +99',b'Invoiced Amount',b'Montant Factur\xc3\xa9'
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +108',b'Invoiced Amount',b'Montant Factur\xc3\xa9'
 b'apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +47',b'Criteria weights must add up to 100%',b'Le total des pond\xc3\xa9rations des crit\xc3\xa8res doit \xc3\xaatre \xc3\xa9gal \xc3\xa0 100%'
 b'apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.js +7',b'Attendance',b'Pr\xc3\xa9sence'
 b'apps/erpnext/erpnext/public/js/pos/pos.html +115',b'Stock Items',b'Articles de Stock'
@@ -5409,7 +5423,7 @@ b'DocType: BOM',b'Materials',b'Mat\xc3\xa9riels'
 b'DocType: Leave Block List',"b'If not checked, the list will have to be added to each Department where it has to be applied.'","b'Si d\xc3\xa9coch\xc3\xa9e, la liste devra \xc3\xaatre ajout\xc3\xa9e \xc3\xa0 chaque d\xc3\xa9partement o\xc3\xb9 elle doit \xc3\xaatre appliqu\xc3\xa9e.'"
 b'apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +111',b'Creating {0}',b'Cr\xc3\xa9ation de {0}'
 b'apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py +28',b'Source and Target Warehouse cannot be same',b'Entrep\xc3\xb4t Source et Destination ne peuvent pas \xc3\xaatre le m\xc3\xaame'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +586',b'Posting date and posting time is mandatory',b'La Date et l\xe2\x80\x99heure de comptabilisation sont obligatoires'
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +588',b'Posting date and posting time is mandatory',b'La Date et l\xe2\x80\x99heure de comptabilisation sont obligatoires'
 b'apps/erpnext/erpnext/config/buying.py +76',b'Tax template for buying transactions.',b'Mod\xc3\xa8le de taxe pour les op\xc3\xa9rations d\xe2\x80\x99achat.'
 ,b'Item Prices',b'Prix des Articles'
 b'DocType: Purchase Order',b'In Words will be visible once you save the Purchase Order.',b'En Toutes Lettres. Sera visible une fois que vous enregistrerez le Bon de Commande.'
@@ -5419,6 +5433,7 @@ b'apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +185',b
 b'DocType: Dosage Form',b'Dosage Form',b'Formulaire de Dosage'
 b'apps/erpnext/erpnext/config/selling.py +67',b'Price List master.',b'Donn\xc3\xa9es de Base des Listes de Prix'
 b'DocType: Task',b'Review Date',b'Date de Revue'
+b'DocType: BOM',b'Allow Alternative Item',b'Autoriser l&#39;\xc3\xa9l\xc3\xa9ment alternatif'
 b'DocType: Company',b'Series for Asset Depreciation Entry (Journal Entry)',"b""S\xc3\xa9rie pour la D\xc3\xa9pr\xc3\xa9ciation d'Actifs (Entr\xc3\xa9e de Journal)"""
 b'DocType: Membership',b'Member Since',b'Membre depuis'
 b'DocType: Purchase Invoice',b'Advance Payments',b'Paiements Anticip\xc3\xa9s'
@@ -5444,7 +5459,7 @@ b'DocType: Packing Slip',b'Gross Weight UOM',b'UDM du Poids Brut'
 b'DocType: Asset Maintenance Task',b'Preventive Maintenance',b'Maintenance pr\xc3\xa9ventive'
 b'DocType: Delivery Note Item',b'Against Sales Invoice',b'Pour la Facture de Vente'
 b'DocType: Purchase Invoice',b'07-Others',b'07-Autres'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +151',b'Please enter serial numbers for serialized item ',"b""Veuillez entrer les num\xc3\xa9ros de s\xc3\xa9rie pour l'\xc3\xa9l\xc3\xa9ment s\xc3\xa9rialis\xc3\xa9"""
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +156',b'Please enter serial numbers for serialized item ',"b""Veuillez entrer les num\xc3\xa9ros de s\xc3\xa9rie pour l'\xc3\xa9l\xc3\xa9ment s\xc3\xa9rialis\xc3\xa9"""
 b'DocType: Bin',b'Reserved Qty for Production',b'Qt\xc3\xa9 R\xc3\xa9serv\xc3\xa9e pour la Production'
 b'apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +43',b'EcritureNum',b'EcritureNum'
 b'DocType: Student Group Creation Tool',"b""Leave unchecked if you don't want to consider batch while making course based groups. """,b'Laisser d\xc3\xa9sactiv\xc3\xa9 si vous ne souhaitez pas consid\xc3\xa9rer les lots en faisant des groupes bas\xc3\xa9s sur les cours.'
@@ -5573,7 +5588,7 @@ b'apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +534',b'R
 b'DocType: Patient Service Unit',b'Medical Administrator',b'Administrateur m\xc3\xa9dical'
 b'DocType: Assessment Plan',b'Schedule',b'Calendrier'
 b'DocType: Account',b'Parent Account',b'Compte Parent'
-b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +266',b'Available',b'disponible'
+b'apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +295',b'Available',b'disponible'
 b'DocType: Quality Inspection Reading',b'Reading 3',b'Reading 3'
 b'DocType: Stock Entry',b'Source Warehouse Address',b'Adresse de l&#39;entrep\xc3\xb4t source'
 ,b'Hub',b'Hub'
@@ -5584,6 +5599,8 @@ b'apps/erpnext/erpnext/public/js/pos/pos_selected_item.html +15',b'Price',b'Prix
 b'apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267',"b""Employee relieved on {0} must be set as 'Left'""","b""Employ\xc3\xa9 d\xc3\xa9gag\xc3\xa9 de {0} doit \xc3\xaatre d\xc3\xa9fini comme 'Gauche'"""
 b'DocType: Hub Settings',b'Last Sync On',b'Derni\xc3\xa8re synchronisation le'
 b'DocType: Guardian',b'Guardian',b'Tuteur'
+b'DocType: Item Alternative',b'Item Alternative',b'Article Alternative'
+b'apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206',b'Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series',b'Veuillez d\xc3\xa9finir la s\xc3\xa9rie de d\xc3\xa9nomination pour {0} via Configuration&gt; Param\xc3\xa8tres&gt; Naming Series'
 b'DocType: Opening Invoice Creation Tool',b'Create missing customer or supplier.',b'Cr\xc3\xa9er un client ou un fournisseur manquant'
 b'apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42',b'Appraisal {0} created for Employee {1} in the given date range',"b""\xc3\x89valuation {0} cr\xc3\xa9\xc3\xa9e pour l'Employ\xc3\xa9 {1} dans l'intervalle de dates donn\xc3\xa9"""
 b'DocType: Academic Term',b'Education',b'Education'
@@ -5612,7 +5629,7 @@ b'DocType: Employee',b'Current Address',b'Adresse Actuelle'
 b'DocType: Item',"b'If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified'","b""Si l'article est une variante d'un autre article, alors la description, l'image, le prix, les taxes etc seront fix\xc3\xa9s \xc3\xa0 partir du mod\xc3\xa8le sauf si sp\xc3\xa9cifi\xc3\xa9s explicitement"""
 b'DocType: Serial No',b'Purchase / Manufacture Details',b'Achat / Fabrication D\xc3\xa9tails'
 b'DocType: Assessment Group',b'Assessment Group',"b""Groupe d'\xc3\x89valuation"""
-b'apps/erpnext/erpnext/config/stock.py +329',b'Batch Inventory',b'Inventaire du Lot'
+b'apps/erpnext/erpnext/config/stock.py +333',b'Batch Inventory',b'Inventaire du Lot'
 b'DocType: Employee',b'Contract End Date',b'Date de Fin de Contrat'
 b'DocType: Sales Order',b'Track this Sales Order against any Project',b'Suivre cette Commande de Vente pour tous les Projets'
 b'DocType: Sales Invoice Item',b'Discount and Margin',b'Remise et Marge'
@@ -5644,7 +5661,7 @@ b'DocType: Salary Detail',b'Statistical Component',b'Composante Statistique'
 b'DocType: Warranty Claim',b'If different than customer address',"b""Si diff\xc3\xa9rente de l'adresse du client"""
 b'DocType: Purchase Invoice',b'Without Payment of Tax',b'Sans Paiement de Taxe'
 b'DocType: BOM Operation',b'BOM Operation',b'Op\xc3\xa9ration LDM'
-b'apps/erpnext/erpnext/config/stock.py +141',b'Fulfilment',b'Accomplissement'
+b'apps/erpnext/erpnext/config/stock.py +145',b'Fulfilment',b'Accomplissement'
 b'DocType: Purchase Taxes and Charges',b'On Previous Row Amount',b'Le Montant de la Rang\xc3\xa9e Pr\xc3\xa9c\xc3\xa9dente'
 b'DocType: Item',b'Has Expiry Date',"b""A une date d'expiration"""
 b'apps/erpnext/erpnext/assets/doctype/asset/asset.js +282',b'Transfer Asset',"b""Transfert d'Actifs"""
@@ -5663,11 +5680,12 @@ b'DocType: Item',b'Item Tax',"b""Taxe sur l'Article"""
 b'apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +883',b'Material to Supplier',b'Du Mat\xc3\xa9riel au Fournisseur'
 b'DocType: Soil Texture',b'Loamy Sand',b'Sable limoneux'
 b'DocType: Production Plan',b'Material Request Planning',b'Planification des demandes de mat\xc3\xa9riel'
-b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +638',b'Excise Invoice',"b""Facture d'Accise"""
+b'apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +663',b'Excise Invoice',"b""Facture d'Accise"""
 b'apps/erpnext/erpnext/education/doctype/grading_scale/grading_scale.py +16',b'Treshold {0}% appears more than once',"b""Le seuil {0}% appara\xc3\xaet plus d'une fois"""
 b'DocType: Expense Claim',b'Employees Email Id',b'Identifiants Email des employ\xc3\xa9s'
 b'DocType: Employee Attendance Tool',b'Marked Attendance',b'Pr\xc3\xa9sence Valid\xc3\xa9e'
 b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +138',b'Current Liabilities',b'Dettes Actuelles'
+b'apps/erpnext/erpnext/public/js/projects/timer.js +138',b'Timer exceeded the given hours.',b'La minuterie a d\xc3\xa9pass\xc3\xa9 les heures donn\xc3\xa9es.'
 b'apps/erpnext/erpnext/config/selling.py +297',b'Send mass SMS to your contacts',b'Envoyer un SMS en masse \xc3\xa0 vos contacts'
 b'DocType: Patient',b'A Positive',b'A Positif'
 b'DocType: Program',b'Program Name',b'Nom du Programme'
@@ -5698,7 +5716,7 @@ b'apps/erpnext/erpnext/public/js/setup_wizard.js +56',b'Attach Logo',b'Joindre l
 b'apps/erpnext/erpnext/stock/doctype/batch/batch.js +51',b'Stock Levels',b'Niveaux du Stocks'
 b'DocType: Customer',b'Commission Rate',b'Taux de Commission'
 b'apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +187',b'Created {0} scorecards for {1} between: ',"b""{0} fiches d'\xc3\xa9valuations cr\xc3\xa9\xc3\xa9es pour {1} entre:"""
-b'apps/erpnext/erpnext/stock/doctype/item/item.js +505',b'Make Variant',b'Faire une Variante'
+b'apps/erpnext/erpnext/stock/doctype/item/item.js +527',b'Make Variant',b'Faire une Variante'
 b'apps/erpnext/erpnext/config/hr.py +87',b'Block leave applications by department.',b'Bloquer les demandes de cong\xc3\xa9 par d\xc3\xa9partement'
 b'apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +155',"b'Payment Type must be one of Receive, Pay and Internal Transfer'","b'Type de Paiement doit \xc3\xaatre Recevoir, Payer ou Transfert Interne'"
 b'apps/erpnext/erpnext/config/selling.py +184',b'Analytics',b'Analytique'
@@ -5719,12 +5737,12 @@ b'DocType: Payment Gateway Account',b'Payment Gateway Account',b'Compte Passerel
 b'DocType: Shopping Cart Settings',b'After payment completion redirect user to selected page.',"b""Le paiement termin\xc3\xa9, rediriger l'utilisateur vers la page s\xc3\xa9lectionn\xc3\xa9e."""
 b'DocType: Company',b'Existing Company',b'Soci\xc3\xa9t\xc3\xa9 Existante'
 b'DocType: Healthcare Settings',b'Result Emailed',b'R\xc3\xa9sultat envoy\xc3\xa9 par Email'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +87',"b'Tax Category has been changed to ""Total"" because all the Items are non-stock items'","b'La Cat\xc3\xa9gorie de Taxe a \xc3\xa9t\xc3\xa9 chang\xc3\xa9e \xc3\xa0 ""Total"" car tous les articles sont des articles hors stock'"
+b'apps/erpnext/erpnext/controllers/buying_controller.py +88',"b'Tax Category has been changed to ""Total"" because all the Items are non-stock items'","b'La Cat\xc3\xa9gorie de Taxe a \xc3\xa9t\xc3\xa9 chang\xc3\xa9e \xc3\xa0 ""Total"" car tous les articles sont des articles hors stock'"
 b'apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +103',b'Please select a csv file',b'Veuillez s\xc3\xa9lectionner un fichier csv'
 b'DocType: Student Leave Application',b'Mark as Present',b'Marquer comme Pr\xc3\xa9sent'
 b'DocType: Supplier Scorecard',b'Indicator Color',"b""Couleur de l'Indicateur"""
 b'DocType: Purchase Order',b'To Receive and Bill',b'\xc3\x80 Recevoir et Facturer'
-b'apps/erpnext/erpnext/controllers/buying_controller.py +445',b'Row #{0}: Reqd by Date cannot be before Transaction Date',b'La ligne # {0}: Reqd par date ne peut pas \xc3\xaatre ant\xc3\xa9rieure \xc3\xa0 la date de la transaction'
+b'apps/erpnext/erpnext/controllers/buying_controller.py +461',b'Row #{0}: Reqd by Date cannot be before Transaction Date',b'La ligne # {0}: Reqd par date ne peut pas \xc3\xaatre ant\xc3\xa9rieure \xc3\xa0 la date de la transaction'
 b'apps/erpnext/erpnext/templates/pages/home.html +14',b'Featured Products',b'Produits Pr\xc3\xa9sent\xc3\xa9s'
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +136',b'Designer',b'Designer'
 b'apps/erpnext/erpnext/config/selling.py +163',b'Terms and Conditions Template',b'Mod\xc3\xa8le des Termes et Conditions'
