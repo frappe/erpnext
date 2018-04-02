@@ -4,7 +4,7 @@ b'apps/erpnext/erpnext/config/selling.py +153',b'Default settings for selling tr
 b'DocType: Timesheet',b'% Amount Billed',b'% Bel\xc3\xb8b Billed'
 b'DocType: Purchase Order',b'% Billed',b'% Billed'
 ,b'Lead Id',b'Bly Id'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +197',"b""'Total'""","b""'Total'"""
+b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +211',"b""'Total'""","b""'Total'"""
 b'DocType: Selling Settings',b'Selling Settings',b'Salg af indstillinger'
 b'apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71',b'Selling Amount',b'Selling Bel\xc3\xb8b'
 b'apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192',b'Lead must be set if Opportunity is made from Lead',"b'Bly skal indstilles, hvis Opportunity er lavet af Lead'"
