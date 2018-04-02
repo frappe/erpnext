@@ -177,4 +177,7 @@ def get_children(doctype, parent, is_root=False):
 
 	# return nodes
 	return land_units
-		
+
+
+def on_doctype_update():
+	frappe.db.add_index("Land Unit", ["lft", "rgt"])
