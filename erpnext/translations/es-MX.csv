@@ -29,4 +29,4 @@ b'apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +
 b'DocType: Education Settings',"b'For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.'","b'Para Grupo de Estudiantes por Curso, el Curso ser\xc3\xa1 validado para cada Estudiante de los Cursos inscritos en la Inscripci\xc3\xb3n del Programa.'"
 b'DocType: Education Settings',"b'For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.'","b'Para grupo de estudiantes por lotes, el lote de estudiantes se validar\xc3\xa1 para cada estudiante de la inscripci\xc3\xb3n del programa.'"
 b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +75',b'Leave Encashment',b'Cobro de Permiso'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1052',b'Select Items based on Delivery Date',b'Seleccionar Art\xc3\xadculos seg\xc3\xban la fecha de entrega'
+b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1053',b'Select Items based on Delivery Date',b'Seleccionar Art\xc3\xadculos seg\xc3\xban la fecha de entrega'
