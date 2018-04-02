@@ -203,7 +203,7 @@ agriculture.TernaryPlot = class TernaryPlot {
 				fill: this.get_color(soil_type),
 				stroke: frappe.ui.color.get('black')
 			});
-			let text = this.paper.text(5+offset, 16+index*20, __(soil_type)).attr({
+			let text = this.paper.text(5+offset, 16+index*20, soil_type).attr({
 				fill: frappe.ui.color.get('black'),
 				'font-size': 12
 			});
