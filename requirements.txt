@@ -2,3 +2,6 @@ frappe
 unidecode
 pygithub
 googlemaps
+python-stdnum
+braintree
+gocardless_pro

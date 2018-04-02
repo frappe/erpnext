@@ -6,15 +6,15 @@ You can create a Patient Appointment from
 
 You can book appointments for a registered Patient by searching and selecting the Patient field. You can search the Patient by Patient ID, Name, Email or Mobile number. You can also register a new Patient from the Appointment screen by selecting "Create a new patient" in the Patient field.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/appointment_1.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/appointment_1.png">
 
 If you have a front desk executive to manage your appointments, you can configure a user role to have access to Patient Appointment so that she can do the bookings by selecting the Physician whom the Patient wish to consult and the date for booking. "Check Availability" button will pop up all the available time slots with status indicators for the date. She can select a time slot and "Book" the Appointment for the Patient.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/appointment_2.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/appointment_2.png">
 
 After Booking, the scheduled time of the Appointment and duration will be updated and seved in the document.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/appointment_3.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/appointment_3.png">
 
 You can configure ERPNext to send an SMS alert to the Patient about the booking confirmation or a reminder on the day of Appointment by doing necessary configurations in -
 

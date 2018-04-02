@@ -13,27 +13,27 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 def work():
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
 	if random.random() < 0.5:
-		for i in xrange(random.randint(1,7)):
+		for i in range(random.randint(1,7)):
 			make_opportunity()
 
 	if random.random() < 0.5:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			make_quotation()
 
 	# lost quotations / inquiries
 	if random.random() < 0.3:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			quotation = get_random('Quotation', doc=True)
 			if quotation and quotation.status == 'Submitted':
 				quotation.declare_order_lost('Did not ask')
 
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			opportunity = get_random('Opportunity', doc=True)
 			if opportunity and opportunity.status in ('Open', 'Replied'):
 				opportunity.declare_enquiry_lost('Did not ask')
 
 	if random.random() < 0.3:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			make_sales_order()
 
 	if random.random() < 0.1:

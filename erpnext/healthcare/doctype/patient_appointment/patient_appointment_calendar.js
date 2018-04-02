@@ -5,7 +5,8 @@ frappe.views.calendar["Patient Appointment"] = {
 		"end": "end",
 		"id": "name",
 		"title": "patient",
-		"allDay": "allDay"
+		"allDay": "allDay",
+		"eventColor": "color"
 	},
 	gantt: true,
 	get_events_method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_events",

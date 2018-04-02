@@ -286,17 +286,57 @@ def get_data():
 		{
 			"module_name": "Healthcare",
 			"color": "#FF888B",
-			"icon": "octicon octicon-plus",
+			"icon": "fa fa-heartbeat",
 			"type": "module",
 			"label": _("Healthcare"),
 			"hidden": 1
 		},
+        {
+			"module_name": "Patient",
+			"color": "#6BE273",
+			"icon": "fa fa-user",
+			"doctype": "Patient",
+			"type": "link",
+			"link": "List/Patient",
+			"label": _("Patient"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Patient Appointment",
+			"color": "#934F92",
+			"icon": "fa fa-calendar-plus-o",
+			"doctype": "Patient Appointment",
+			"type": "link",
+			"link": "List/Patient Appointment",
+			"label": _("Patient Appointment"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Consultation",
+			"color": "#2ecc71",
+			"icon": "fa fa-stethoscope",
+			"doctype": "Consultation",
+			"type": "link",
+			"link": "List/Consultation",
+			"label": _("Consultation"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Lab Test",
+			"color": "#7578f6",
+			"icon": "octicon octicon-beaker",
+			"doctype": "Lab Test",
+			"type": "list",
+			"link": "List/Lab Test",
+			"label": _("Lab Test"),
+			"hidden": 1
+        },
 		{
 			"module_name": "Hub",
 			"color": "#009248",
 			"icon": "/assets/erpnext/images/hub_logo.svg",
 			"type": "page",
-			"link": "hub",
+			"link": "Hub/Home",
 			"label": _("Hub")
 		},
 		{
@@ -317,6 +357,14 @@ def get_data():
 			"type": "list",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Hotels",
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"label": _("Hotels"),
 			"hidden": 1
 		},
 		{

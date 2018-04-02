@@ -8,7 +8,7 @@ You can create a Sales Invoice directly from
 
 or you can Make a new Sales Invoice after you submit the Delivery Note.
 
-<img class="screenshot" alt="Sales Invoice" src="/docs/assets/img/accounts/sales-invoice.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/accounts/sales-invoice.png">
 
 #### Accounting Impact
 
@@ -64,7 +64,7 @@ is checked. The batch number will be fetched on a First Expiring First Out
 (FEFO) basis. This is a variant of First In First Out (FIFO) that gives 
 highest priority to the soonest to expire Items. 
 
-<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/sales-invoice-fetch-batch.png">
+<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/sales-invoice-fetch-batch.png">
 
 Note that if the first batch in the queue cannot satisfy the order on the invoice, 
 the next batch in the queue that can satisfy the order will be selected. If there is 
@@ -79,7 +79,7 @@ into the Sales Invoice and you can easily make payments.
 Also, if you check the **Update Stock** the stock will also update automatically,
 without the need of a Delivery Note.
 
-<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/pos-sales-invoice.png">
+<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/pos-sales-invoice.png">
 
 #### Billing Timesheet with Project
 
@@ -88,7 +88,7 @@ they can fill out Timesheets which consists their billing rate. When you make a 
 Sales Invoice, select the Project for which the billing is to be made, and the
 corresponding Timesheet entries for that Project will be fetched.
 
-<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/billing-timesheet-sales-invoice.png">
+<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/billing-timesheet-sales-invoice.png">
 
 * * *
 

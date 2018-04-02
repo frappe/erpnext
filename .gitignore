@@ -8,3 +8,7 @@ latest_updates.json
 *.egg-info
 dist/
 erpnext/docs/current
+*.swp
+*.swo
+__pycache__
+*~

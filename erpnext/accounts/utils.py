@@ -663,7 +663,7 @@ def get_companies():
 
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False):
-	from erpnext.accounts.report.financial_statements import sort_root_accounts
+	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
@@ -678,9 +678,6 @@ def get_children(doctype, parent, company, is_root=False):
 			and `company` = %s	and docstatus<2
 			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
 				company, as_dict=1)
-
-		if parent=="Accounts":
-			sort_root_accounts(acc)
 	else:
 		# other
 		fields = ", account_currency" if doctype=="Account" else ""
@@ -693,6 +690,7 @@ def get_children(doctype, parent, company, is_root=False):
 				parent, as_dict=1)
 
 	if doctype == 'Account':
+		sort_accounts(acc, is_root, key="value")
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency

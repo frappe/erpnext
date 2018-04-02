@@ -13,11 +13,11 @@ Donor Management, Event and Grant etc
 <div class="section" style="padding-top: 0px; margin-top: -30px;">
 	<div class="fake-browser-frame">
 		<img class="img-responsive browser-image feature-image" alt="Non Profit Domain"
-			src="/docs/assets/img/non_profit/non_profit_domain.png">
+			src="{{docs_base_url}}/assets/img/non_profit/non_profit_domain.png">
 	</div>
 </div>
 
 ### Non Profit Domain
-<img class="screenshot" alt="Non Profit" src="/docs/assets/img/non_profit/module.png">
+<img class="screenshot" alt="Non Profit" src="{{docs_base_url}}/assets/img/non_profit/module.png">
 
 {index}

@@ -16,7 +16,7 @@ Following are the steps to add new Company.
 
 Company will be saved with Company Name provided.
 
-<img alt="New Company" class="screenshot" src="/docs/assets/img/articles/new-company-1.png">
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-1.png">
 
 Also, you can define other properties for new company like:
 
@@ -28,12 +28,12 @@ Also, you can define other properties for new company like:
 
 Value will be auto-filled in most of these field to define company-wise defaults. You can edit/customize it as per your requirement. 
 
-<img alt="New Company" class="screenshot" src="/docs/assets/img/articles/new-company-2.png">
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-2.png">
 
 ####Chart of Account for New Company
 
 A separate Chart of Account master will be set for each company in the ERPNext. This allows you managing Accounts/Ledger master separately for each company. Also it allows you avail financial statement and reports like Balance Sheet and Profit and Loss Statement separately for each company.
 
-<img alt="New Company" class="screenshot" src="/docs/assets/img/articles/new-company-3.png">
+<img alt="New Company" class="screenshot" src="{{docs_base_url}}/assets/img/articles/new-company-3.png">
 
 <!-- markdown -->

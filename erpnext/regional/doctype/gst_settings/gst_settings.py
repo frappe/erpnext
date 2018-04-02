@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe, os
+from frappe import _
 from frappe.utils import get_url, nowdate, date_diff
 from frappe.model.document import Document
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -24,13 +25,13 @@ def send_reminder():
 
 	last_sent = frappe.db.get_single_value('GST Settings', 'gstin_email_sent_on')
 	if last_sent and date_diff(nowdate(), last_sent) < 3:
-		frappe.throw("Please wait 3 days before resending the reminder.")
+		frappe.throw(_("Please wait 3 days before resending the reminder."))
 
 	frappe.db.set_value('GST Settings', 'GST Settings', 'gstin_email_sent_on', nowdate())
 
 	# enqueue if large number of customers, suppliser
 	frappe.enqueue('erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder_to_all_parties')
-	frappe.msgprint('Email Reminders will be sent to all parties with email contacts')
+	frappe.msgprint(_('Email Reminders will be sent to all parties with email contacts'))
 
 def send_gstin_reminder_to_all_parties():
 	parties = []
@@ -60,7 +61,7 @@ def send_gstin_reminder(party_type, party):
 	frappe.has_permission(party_type, throw=True)
 	email = _send_gstin_reminder(party_type ,party)
 	if email:
-		frappe.msgprint('Reminder to update GSTIN Sent', title='Reminder sent', indicator='green')
+		frappe.msgprint(_('Reminder to update GSTIN Sent'), title='Reminder sent', indicator='green')
 
 def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None):
 	'''Send GST Reminder email'''
@@ -70,7 +71,7 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 		email_id = default_email_id
 
 	if not email_id:
-		frappe.throw('Email not found in default contact', exc=EmailMissing)
+		frappe.throw(_('Email not found in default contact'), exc=EmailMissing)
 
 	if sent_to and email_id in sent_to:
 		return

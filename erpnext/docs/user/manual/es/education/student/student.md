@@ -5,6 +5,6 @@ El doctype de Estudiante mantiene los detalles personales de los estudiantes.
 
 Puedes ver todo lo relacionado a un estudiante en particular en esta página. Ejemplo: Pagos, Grupo de Estudiante, etc.
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/education/student/student.png">
+<img class="screenshot" alt="Student" src="{{docs_base_url}}/assets/img/education/student/student.png">
 
 {next}

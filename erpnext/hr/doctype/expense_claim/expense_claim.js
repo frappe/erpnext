@@ -38,13 +38,8 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc) {
-	if(!doc.approval_status)
-		cur_frm.set_value("approval_status", "Draft");
-
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
-		if(doc.amended_from)
-			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
 
@@ -53,12 +48,6 @@ cur_frm.cscript.onload = function(doc) {
 			query: "erpnext.controllers.queries.employee_query"
 		};
 	};
-
-	cur_frm.set_query("exp_approver", function() {
-		return {
-			query: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver"
-		};
-	});
 };
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
@@ -75,13 +64,8 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
-		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
-		cur_frm.toggle_enable("approval_status", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
 
-		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.approval_status=="Approved")
-			cur_frm.savesubmit();
-
-		if (doc.docstatus===1 && doc.approval_status=="Approved") {
+		if (doc.docstatus===1) {
 			/* eslint-disable */
 			// no idea how `me` works here
 			var entry_doctype, entry_reference_doctype, entry_reference_name;
@@ -114,14 +98,6 @@ cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"));
-	} else {
-		if(doc.docstatus==0 && doc.approval_status=="Draft") {
-			if(frappe.session.user==doc.exp_approver) {
-				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
-			} else {
-				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can update status."));
-			}
-		}
 	}
 };
 
@@ -183,7 +159,7 @@ frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
-		if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
+		if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
@@ -194,7 +170,7 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
-		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+		if (frm.doc.docstatus===1
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
@@ -311,7 +287,7 @@ frappe.ui.form.on("Expense Claim Advance", {
 	employee_advance: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if(!frm.doc.employee){
-			frappe.msgprint('Select an employee to get the employee advance.');
+			frappe.msgprint(__('Select an employee to get the employee advance.'));
 			frm.doc.advances = [];
 			refresh_field("advances");
 		}

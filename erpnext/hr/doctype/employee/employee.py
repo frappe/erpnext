@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import getdate, validate_email_add, today, add_years
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 import frappe.permissions
 from frappe.model.document import Document
@@ -24,7 +24,7 @@ class Employee(NestedSet):
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method == 'Naming Series':
-				self.name = make_autoname(self.naming_series + '.####')
+				set_name_by_naming_series(self)
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
 			elif naming_method == 'Full Name':
@@ -72,7 +72,7 @@ class Employee(NestedSet):
 		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
-			user.add_roles("Employee")
+			user.append_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name and not (user.first_name and user.last_name):
@@ -330,3 +330,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 	# return employee
 	return employee
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])

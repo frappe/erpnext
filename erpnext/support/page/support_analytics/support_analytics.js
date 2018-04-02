@@ -33,7 +33,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		{fieldname: "range", fieldtype:"Select", label: __("Range"),
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"], default_value: "Monthly"}
 	],
-	
+
 	init_filter_values: function() {
 		this._super();
 		this.filter_inputs.range.val('Monthly');
@@ -41,8 +41,6 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
 			{id: "name", name: __("Status"), field: "name", width: 100},
 		];
 		this.make_date_range_columns();

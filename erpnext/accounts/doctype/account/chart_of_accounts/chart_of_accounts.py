@@ -176,3 +176,21 @@ def build_account_tree(tree, parent, all_accounts):
 			
 		# call recursively to build a subtree for current account
 		build_account_tree(tree[child.account_name], child, all_accounts)
+
+@frappe.whitelist()
+def validate_bank_account(coa, bank_account):
+	accounts = []
+	chart = get_chart(coa)
+	
+	if chart:
+		def _get_account_names(account_master):
+			for account_name, child in account_master.items():
+				if account_name not in ["account_number", "account_type",
+					"root_type", "is_group", "tax_rate"]:
+					accounts.append(account_name)
+
+					_get_account_names(child)
+
+		_get_account_names(chart)
+
+	return (bank_account in accounts)

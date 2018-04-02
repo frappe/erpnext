@@ -14,7 +14,7 @@ form_grid_templates = {
 class BankReconciliation(Document):
 	def get_payment_entries(self):
 		if not (self.bank_account and self.from_date and self.to_date):
-			msgprint("Bank Account, From Date and To Date are Mandatory")
+			msgprint(_("Bank Account, From Date and To Date are Mandatory"))
 			return
 
 		condition = ""

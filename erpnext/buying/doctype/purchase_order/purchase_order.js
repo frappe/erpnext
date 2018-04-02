@@ -13,6 +13,15 @@ frappe.ui.form.on("Purchase Order", {
 			'Stock Entry': 'Material to Supplier'
 		}
 
+		frm.set_query("reserve_warehouse", "supplied_items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
@@ -211,7 +220,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		me.dialog = new frappe.ui.Dialog({
 			title: title, fields: fields
-			});
+		});
 
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {

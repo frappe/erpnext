@@ -51,8 +51,8 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+	accounts = frappe.db.sql("""select name, parent_account, account_name, account_number, root_type, report_type, lft, rgt
+		from `tabAccount` where company=%s order by account_name, lft""", filters.company, as_dict=True)
 	company_currency = erpnext.get_company_currency(filters.company)
 
 	if not accounts:
@@ -175,6 +175,9 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
+	tmpaccnt = sorted(accounts, key = lambda account: account.name)
+	if not (accounts[0].account_number is None):
+		accounts = tmpaccnt
 	
 	for d in accounts:
 		has_value = False
