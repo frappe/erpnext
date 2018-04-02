@@ -14,8 +14,8 @@ class ShareDontExists(ValidationError): pass
 class ShareTransfer(Document):
 	def before_submit(self):
 		if self.transfer_type == 'Issue':
-			company_doc = self.get_shareholder_doc(self.company)
-			company_doc.append('share_balance', {
+			shareholder = self.get_shareholder_doc(self.company)
+			shareholder.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
 				'to_no': self.to_no,
@@ -25,7 +25,7 @@ class ShareTransfer(Document):
 				'is_company': 1,
 				'current_state': 'Issued'
 			})
-			company_doc.save()
+			shareholder.save()
 
 			doc = frappe.get_doc('Shareholder', self.to_shareholder)
 			doc.append('share_balance', {
@@ -60,13 +60,13 @@ class ShareTransfer(Document):
 		self.folio_no_validation()
 		if self.transfer_type == 'Issue':
 			if not self.get_shareholder_doc(self.company):
-				company_doc = frappe.get_doc({
+				shareholder = frappe.get_doc({
 					'doctype': 'Shareholder',
 					'title': self.company,
 					'company': self.company,
 					'is_company': 1
 				})
-				company_doc.insert()
+				shareholder.insert()
 			# validate share doesnt exist in company
 			ret_val = self.share_exists(self.get_shareholder_doc(self.company).name)
 			if ret_val != False:

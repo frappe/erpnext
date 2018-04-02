@@ -19,15 +19,17 @@ frappe.ui.form.on('Share Transfer', {
 		frm.set_query("equity_account", function() {
 			return {
 				filters: {
+					"is_group":0,
 					"root_type":"Equity",
 					"company": frm.doc.company
 				}
 			};
 		});
-		frm.set_query("asset_account", function() {
+		frm.set_query("liability_account", function() {
 			return {
 				filters: {
-					"root_type":"Asset",
+					"is_group":0,
+					"root_type":"Liability",
 					"company": frm.doc.company
 				}
 			};
