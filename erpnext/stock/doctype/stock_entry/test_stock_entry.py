@@ -12,7 +12,6 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFre
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make_item_variant, create_item
-from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
@@ -34,10 +33,6 @@ class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
-
-		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctypes="Stock Entry", role=role,
-				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -485,10 +480,6 @@ class TestStockEntry(unittest.TestCase):
 
 	# permission tests
 	def test_warehouse_user(self):
-		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctypes="Stock Entry", role=role,
-				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
-
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
 		test_user = frappe.get_doc("User", "test@example.com")
@@ -619,10 +610,10 @@ class TestStockEntry(unittest.TestCase):
 	def test_retain_sample(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
-		
+
 		create_warehouse("Test Warehouse for Sample Retention")
 		frappe.db.set_value("Stock Settings", None, "sample_retention_warehouse", "Test Warehouse for Sample Retention - _TC")
-		
+
 		item = frappe.new_doc("Item")
 		item.item_code = "Retain Sample Item"
 		item.item_name = "Retain Sample Item"
@@ -667,7 +658,7 @@ class TestStockEntry(unittest.TestCase):
 
 		qty_in_usable_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "_Test Warehouse - _TC", "_Test Item")
 		qty_in_retention_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "Test Warehouse for Sample Retention - _TC", "_Test Item")
-		
+
 		self.assertEqual(qty_in_usable_warehouse, 36)
 		self.assertEqual(qty_in_retention_warehouse, 4)
 
