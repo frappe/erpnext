@@ -713,7 +713,6 @@ DocType: Crop,Produced Items,آیتم های تولید شده
 DocType: Sales Order Item,Gross Profit,سود ناخالص
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,افزایش نمی تواند 0
 DocType: Company,Delete Company Transactions,حذف معاملات شرکت
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,کد مورد&gt; گروه مورد&gt; نام تجاری
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,مرجع و تاریخ در مرجع برای معامله بانک الزامی است
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,افزودن / ویرایش مالیات ها و هزینه ها
 DocType: Payment Entry Reference,Supplier Invoice No,تامین کننده فاکتور بدون
@@ -769,7 +768,6 @@ DocType: Sales Invoice,Shipping Bill Date,تاریخ ارسال بیل
 DocType: Production Plan,Production Plan,برنامه تولید
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,افتتاح حساب ایجاد ابزار
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,برگشت فروش
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,تامین کننده&gt; نوع تامین کننده
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,توجه: مجموع برگ اختصاص داده {0} نباید کمتر از برگ حال حاضر مورد تایید {1} برای دوره
 ,Total Stock Summary,خلاصه سهام مجموع
 DocType: Announcement,Posted By,ارسال شده توسط
@@ -1419,6 +1417,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,کد پستی
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},سفارش فروش {0} است {1}
 DocType: Opportunity,Contact Info,اطلاعات تماس
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,ساخت نوشته های سهام
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,لطفا سیستم نامگذاری کارمندان را در منابع انسانی تنظیم کنید&gt; تنظیمات HR
 DocType: Packing Slip,Net Weight UOM,وزن خالص UOM
 DocType: Item,Default Supplier,به طور پیش فرض تامین کننده
 DocType: Manufacturing Settings,Over Production Allowance Percentage,بر تولید درصد کمک هزینه
@@ -2298,6 +2297,7 @@ DocType: Budget,Fiscal Year,سال مالی
 DocType: Asset Maintenance Log,Planned,برنامه ریزی شده
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,حساب های دریافتی قابل پیش بینی که باید در بیمار برای هزینه های مشاوره در نظر گرفته شوند استفاده می شود.
 DocType: Vehicle Log,Fuel Price,قیمت سوخت
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,مشتری&gt; گروه مشتری&gt; قلمرو
 DocType: Budget,Budget,بودجه
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,تنظیم باز کنید
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,مورد دارائی های ثابت باید یک آیتم غیر سهام باشد.
@@ -2720,7 +2720,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,مراکز هزینه به علاوه می تواند در زیر گروه ساخته شده اما مطالب را می توان در برابر غیر گروه ساخته شده
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,کاربران و ویرایش
 DocType: Vehicle Log,VLOG.,را ثبت کنید.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,لطفا سیستم نامگذاری کارمندان را در منابع انسانی تنظیم کنید&gt; تنظیمات HR
 DocType: Branch,Branch,شاخه
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,کاربر اجرای
@@ -4155,6 +4154,7 @@ DocType: Material Request Item,For Warehouse,ذخیره سازی
 DocType: Employee,Offer Date,پیشنهاد عضویت
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,نقل قول
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,شما در حالت آفلاین می باشد. شما نمی قادر خواهد بود به بارگذاری مجدد تا زمانی که شما به شبکه وصل شوید.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,تامین کننده&gt; نوع تامین کننده
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,بدون تشکل های دانشجویی ایجاد شده است.
 DocType: Purchase Invoice Item,Serial No,شماره سریال
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,میزان بازپرداخت ماهانه نمی تواند بیشتر از وام مبلغ
@@ -4193,7 +4193,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,اوراق بهادار و بورس کالا
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',واحد اندازه گیری پیش فرض برای متغیر &#39;{0}&#39; باید همان است که در الگو: &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,محاسبه بر اساس
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,لطفا شماره سریال را برای شرکت کنندگان از طریق Setup&gt; Numbering Series نصب کنید
 DocType: Delivery Note Item,From Warehouse,از انبار
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,هیچ کارمند برای معیارهای ذکر شده
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,هیچ موردی با بیل از مواد برای تولید
@@ -4259,7 +4258,6 @@ DocType: Production Plan,Get Material Request,دریافت درخواست موا
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,هزینه پستی
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),مجموع (AMT)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,سرگرمی و اوقات فراغت
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,لطفا سیستم نامگذاری مربیان را در آموزش و پرورش&gt; تنظیمات تحصیلی تنظیم کنید
 ,Item Variant Details,مورد Variant جزئیات
 DocType: Quality Inspection,Item Serial No,مورد سریال بدون
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,درست کارمند سوابق
@@ -4344,6 +4342,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,لطفا انتخاب کنید حمل به جلو اگر شما نیز می خواهید که شامل تعادل سال گذشته مالی برگ به سال مالی جاری
 DocType: GL Entry,Against Voucher Type,در برابر نوع کوپن
 DocType: Physician,Phone (R),تلفن (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,کد مورد&gt; گروه مورد&gt; نام تجاری
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,اسلات زمان اضافه شده است
 DocType: Item,Attributes,ویژگی های
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,فعال کردن الگو
@@ -4394,7 +4393,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,و غیرفعال شده غیر فعال در
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,سری الزامی است
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,خدمات مالی
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,مشتری&gt; گروه مشتری&gt; قلمرو
 DocType: Student Sibling,Student ID,ID دانش آموز
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,نوع فعالیت برای سیاهههای مربوط زمان
 DocType: Opening Invoice Creation Tool,Sales,فروش
@@ -4566,6 +4564,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,گسترش اطلاعیه
 DocType: Payment Entry,Difference Amount (Company Currency),تفاوت در مقدار (شرکت ارز)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,هزینه های مستقیم
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,لطفا مجموعه نامگذاری را برای {0} از طریق تنظیمات&gt; تنظیمات&gt; نامگذاری سری
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,جدید درآمد و ضوابط
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,هزینه های سفر
 DocType: Maintenance Visit,Breakdown,تفکیک
@@ -4592,6 +4591,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,ناوبری
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,برنامه ریزی
 DocType: Share Balance,Issued,صادر
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,فعالیت دانشجویی
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,لطفا سیستم نامگذاری مربیان را در آموزش و پرورش&gt; تنظیمات تحصیلی تنظیم کنید
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,تامین کننده کد
 DocType: Payment Request,Payment Gateway Details,پرداخت جزئیات دروازه
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,تعداد باید بیشتر از 0 باشد
@@ -5210,6 +5210,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04 اصلاح در صورتح
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,سفارش کار برای همه موارد با BOM ایجاد شده است
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,گزارش جزئیات متغیر
 DocType: Setup Progress Action,Setup Progress Action,راه اندازی پیشرفت اقدام
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,لطفا شماره سریال را برای شرکت کنندگان از طریق Setup&gt; Numbering Series نصب کنید
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,لیست قیمت خرید
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,حذف آیتم اگر از اتهامات عنوان شده و قابل انطباق با آن قلم نمی
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,لطفا وضعیت تعمیر و نگهداری را به عنوان تکمیل کنید یا تاریخ تکمیل را حذف کنید
@@ -5686,7 +5687,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,آخرین همگام سازی در
 DocType: Guardian,Guardian,نگهبان
 DocType: Item Alternative,Item Alternative,مورد جایگزین
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,لطفا مجموعه نامگذاری را برای {0} از طریق تنظیمات&gt; تنظیمات&gt; نامگذاری سری
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,ایجاد مشتری یا فروشنده گمشده.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,ارزیابی {0} برای کارمند {1} در محدوده تاریخ ایجاد شود
 DocType: Academic Term,Education,آموزش و پرورش

@@ -713,7 +713,6 @@ DocType: Crop,Produced Items,Παραγόμενα στοιχεία
 DocType: Sales Order Item,Gross Profit,Μικτό κέρδος
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Προσαύξηση δεν μπορεί να είναι 0
 DocType: Company,Delete Company Transactions,Διαγραφή Συναλλαγές Εταιρείας
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Κωδικός στοιχείου&gt; Ομάδα στοιχείων&gt; Μάρκα
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Αριθμός αναφοράς και ημερομηνία αναφοράς είναι υποχρεωτική για την Τράπεζα συναλλαγών
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Προσθήκη / επεξεργασία φόρων και επιβαρύνσεων
 DocType: Payment Entry Reference,Supplier Invoice No,Αρ. τιμολογίου του προμηθευτή
@@ -769,7 +768,6 @@ DocType: Sales Invoice,Shipping Bill Date,Ημερομηνία αποστολή�
 DocType: Production Plan,Production Plan,Σχέδιο παραγωγής
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Άνοιγμα εργαλείου δημιουργίας τιμολογίου
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Επιστροφή πωλήσεων
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Προμηθευτής&gt; Τύπος προμηθευτή
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,Σημείωση: Σύνολο των κατανεμημένων φύλλα {0} δεν πρέπει να είναι μικρότερη από τα φύλλα που έχουν ήδη εγκριθεί {1} για την περίοδο
 ,Total Stock Summary,Συνολική σύνοψη μετοχών
 DocType: Announcement,Posted By,Αναρτήθηκε από
@@ -1438,6 +1436,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Ταχυδρομι�
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Πωλήσεις Τάξης {0} είναι {1}
 DocType: Opportunity,Contact Info,Πληροφορίες επαφής
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Κάνοντας Χρηματιστήριο Καταχωρήσεις
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εργαζομένων σε Ανθρώπινο Δυναμικό&gt; Ρυθμίσεις HR
 DocType: Packing Slip,Net Weight UOM,Μ.Μ. Καθαρού βάρους
 DocType: Item,Default Supplier,Προεπιλεγμένος προμηθευτής
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Πάνω Παραγωγής Επίδομα Ποσοστό
@@ -2317,6 +2316,7 @@ DocType: Budget,Fiscal Year,Χρήση
 DocType: Asset Maintenance Log,Planned,Σχεδιασμένος
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,Προκαθορισμένοι εισπρακτέοι λογαριασμοί που πρέπει να χρησιμοποιηθούν εάν δεν έχουν οριστεί στον Ασθενή για την κράτηση των τελών διαβούλευσης.
 DocType: Vehicle Log,Fuel Price,των τιμών των καυσίμων
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Πελάτης&gt; Ομάδα πελατών&gt; Επικράτεια
 DocType: Budget,Budget,Προϋπολογισμός
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Ορίστε Άνοιγμα
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Πάγιο περιουσιακό στοιχείο πρέπει να είναι ένα στοιχείο μη διαθέσιμο.
@@ -2739,7 +2739,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,"Περαιτέρω κέντρα κόστους μπορεί να γίνει κάτω από ομάδες, αλλά εγγραφές μπορούν να γίνουν με την μη Ομάδες"
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Χρήστες και δικαιώματα
 DocType: Vehicle Log,VLOG.,Vlog.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εργαζομένων σε Ανθρώπινο Δυναμικό&gt; Ρυθμίσεις HR
 DocType: Branch,Branch,Υποκατάστημα
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (Κ + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,Χρήστης εκπλήρωσης
@@ -4206,6 +4205,7 @@ DocType: Material Request Item,For Warehouse,Για αποθήκη
 DocType: Employee,Offer Date,Ημερομηνία προσφοράς
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Προσφορές
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Βρίσκεστε σε λειτουργία χωρίς σύνδεση. Δεν θα είστε σε θέση να φορτώσετε εκ νέου έως ότου έχετε δίκτυο.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Προμηθευτής&gt; Τύπος προμηθευτή
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Δεν Ομάδες Φοιτητών δημιουργήθηκε.
 DocType: Purchase Invoice Item,Serial No,Σειριακός αριθμός
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,Μηνιαία επιστροφή ποσό δεν μπορεί να είναι μεγαλύτερη από Ποσό δανείου
@@ -4244,7 +4244,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Κινητές αξίες & χρηματιστήρια εμπορευμάτων
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Προεπιλεγμένη μονάδα μέτρησης για την παραλλαγή &#39;{0}&#39; πρέπει να είναι ίδιο με το πρότυπο &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,Υπολογισμός με βάση:
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Παρακαλούμε ρυθμίστε τη σειρά αρίθμησης για τη συμμετοχή μέσω του Setup&gt; Series Numbering
 DocType: Delivery Note Item,From Warehouse,Από Αποθήκης
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Δεν υπάρχουν υπάλληλοι για τα προαναφερθέντα κριτήρια
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Δεν Αντικείμενα με τον Bill Υλικών για Κατασκευή
@@ -4310,7 +4309,6 @@ DocType: Production Plan,Get Material Request,Πάρτε Αίτημα Υλικό
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,Ταχυδρομικές δαπάνες
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Σύνολο (ποσό)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Διασκέδαση & ψυχαγωγία
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εκπαιδευτών στην Εκπαίδευση&gt; Ρυθμίσεις Εκπαίδευσης
 ,Item Variant Details,Λεπτομέρειες παραλλαγής στοιχείου
 DocType: Quality Inspection,Item Serial No,Σειριακός αριθμός είδους
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,Δημιουργήστε τα αρχεία των εργαζομένων
@@ -4395,6 +4393,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Παρακαλώ επιλέξτε μεταφορά εάν θέλετε επίσης να περιλαμβάνεται το ισοζύγιο από το προηγούμενο οικονομικό έτος σε αυτό η χρήση
 DocType: GL Entry,Against Voucher Type,Κατά τον τύπο αποδεικτικού
 DocType: Physician,Phone (R),Τηλέφωνο (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Κωδικός στοιχείου&gt; Ομάδα στοιχείων&gt; Μάρκα
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Προστέθηκαν χρονικά διαθέσιμα
 DocType: Item,Attributes,Γνωρίσματα
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Ενεργοποιήστε το πρότυπο
@@ -4445,7 +4444,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,και απενεργοποιημένος Απενεργοποιημένος στο
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Η σειρά είναι απαραίτητη
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Χρηματοοικονομικές υπηρεσίες
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Πελάτης&gt; Ομάδα πελατών&gt; Επικράτεια
 DocType: Student Sibling,Student ID,φοιτητής ID
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Τύποι δραστηριοτήτων για την Ώρα των αρχείων καταγραφής
 DocType: Opening Invoice Creation Tool,Sales,Πωλήσεις
@@ -4617,6 +4615,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,Ανοίξτε Ειδοποιήσεις
 DocType: Payment Entry,Difference Amount (Company Currency),Διαφορά Ποσό (Εταιρεία νομίσματος)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Άμεσες δαπάνες
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ορίστε την Ονοματοδοσία Series για {0} μέσω του Setup&gt; Settings&gt; Naming Series
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Νέα έσοδα πελατών
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Έξοδα μετακίνησης
 DocType: Maintenance Visit,Breakdown,Ανάλυση
@@ -4643,6 +4642,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Πλοήγηση
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Προγραμματισμός
 DocType: Share Balance,Issued,Εκδόθηκε
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Δραστηριότητα σπουδαστών
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εκπαιδευτών στην Εκπαίδευση&gt; Ρυθμίσεις Εκπαίδευσης
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,ID προμηθευτή
 DocType: Payment Request,Payment Gateway Details,Πληρωμή Gateway Λεπτομέρειες
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Ποσότητα θα πρέπει να είναι μεγαλύτερη από 0
@@ -5262,6 +5262,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-Διόρθωση στο τ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Παραγγελία εργασίας που έχει ήδη δημιουργηθεί για όλα τα στοιχεία με BOM
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Αναφορά λεπτομερειών παραλλαγής
 DocType: Setup Progress Action,Setup Progress Action,Ενέργεια προόδου εγκατάστασης
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Παρακαλούμε ρυθμίστε τη σειρά αρίθμησης για τη συμμετοχή μέσω του Setup&gt; Series Numbering
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Αγορά Τιμοκατάλογων
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,Αφαιρέστε το είδος εάν οι επιβαρύνσεις δεν ισχύουν για αυτό το είδος
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Επιλέξτε Κατάσταση συντήρησης ως Ολοκληρώθηκε ή αφαιρέστε Ημερομηνία ολοκλήρωσης
@@ -5738,7 +5739,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Ο τελευταίος συγχρονισμός είναι ενεργοποιημένος
 DocType: Guardian,Guardian,Κηδεμόνας
 DocType: Item Alternative,Item Alternative,Στοιχείο Εναλλακτική
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ορίστε την Ονοματοδοσία Series για {0} μέσω του Setup&gt; Settings&gt; Naming Series
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Δημιουργία πελάτη ή προμηθευτή που λείπει.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Αξιολόγηση {0} δημιουργήθηκε για τον υπάλληλο {1} στο συγκεκριμένο εύρος ημερομηνιών
 DocType: Academic Term,Education,Εκπαίδευση

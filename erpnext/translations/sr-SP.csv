@@ -841,6 +841,7 @@ apps/erpnext/erpnext/config/stock.py +318,Opening Stock Balance,Početno stanje 
 ,Customer Credit Balance,Kreditni limit kupca
 apps/erpnext/erpnext/public/js/templates/address_list.html +20,No address added yet.,Adresa još nije dodata.
 DocType: C-Form Invoice Detail,Net Total,Ukupno bez PDV-a
+DocType: Sales Invoice,Total Qty,Ukupna kol.
 DocType: Purchase Invoice,Return,Povraćaj
 DocType: Sales Order Item,Delivery Warehouse,Skladište dostave
 DocType: Purchase Invoice,Total (Company Currency),Ukupno bez PDV-a (Valuta)

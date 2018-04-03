@@ -720,7 +720,6 @@ DocType: Crop,Produced Items,Sản phẩm Sản phẩm
 DocType: Sales Order Item,Gross Profit,Lợi nhuận gộp
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Tăng không thể là 0
 DocType: Company,Delete Company Transactions,Xóa Giao dịch Công ty
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Mã hàng&gt; Nhóm mặt hàng&gt; Thương hiệu
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Số tham khảo và Kỳ hạn tham khảo là bắt buộc đối với giao dịch ngân hàng
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Thêm / Sửa Thuế và phí
 DocType: Payment Entry Reference,Supplier Invoice No,Nhà cung cấp hóa đơn Không
@@ -776,7 +775,6 @@ DocType: Sales Invoice,Shipping Bill Date,Ngày gửi hóa đơn
 DocType: Production Plan,Production Plan,Kế hoạch sản xuất
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Mở Công cụ Tạo Hóa Đơn
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Bán hàng trở lại
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Nhà cung cấp&gt; Loại nhà cung cấp
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,Lưu ý: Tổng di dời phân bổ {0} không được nhỏ hơn các di dời đã được phê duyệt {1} cho giai đoạn
 ,Total Stock Summary,Tóm tắt Tổng số
 DocType: Announcement,Posted By,Gửi bởi
@@ -1435,6 +1433,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Mã Bưu Chính
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Đơn hàng {0} là {1}
 DocType: Opportunity,Contact Info,Thông tin Liên hệ
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Làm Bút toán tồn kho
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Vui lòng cài đặt Hệ thống Đặt tên Nhân viên trong Nguồn nhân lực&gt; Cài đặt Nhân sự
 DocType: Packing Slip,Net Weight UOM,Trọng lượng  tịnh UOM
 DocType: Item,Default Supplier,Nhà cung cấp mặc định
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Phần trăm sản xuất vượt mức cho phép
@@ -2331,6 +2330,7 @@ DocType: Budget,Fiscal Year,Năm tài chính
 DocType: Asset Maintenance Log,Planned,Kế hoạch
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,Tài khoản phải thu mặc định sẽ được sử dụng nếu không đặt trong Bệnh nhân để ghi chi phí tư vấn.
 DocType: Vehicle Log,Fuel Price,nhiên liệu Giá
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Khách hàng&gt; Nhóm Khách hàng&gt; Lãnh thổ
 DocType: Budget,Budget,Ngân sách
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Đặt Mở
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Tài sản cố định mục phải là một mẫu hàng không tồn kho.
@@ -2762,7 +2762,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,các trung tâm chi phí  khác có thể được tạo ra bằng các nhóm nhưng các bút toán có thể được tạo ra với các nhóm không tồn tại
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Người sử dụng và Quyền
 DocType: Vehicle Log,VLOG.,Vlog.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Vui lòng cài đặt Hệ thống Đặt tên Nhân viên trong Nguồn nhân lực&gt; Cài đặt Nhân sự
 DocType: Branch,Branch,Chi Nhánh
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,Người thực hiện Hoàn thành
@@ -4226,6 +4225,7 @@ DocType: Material Request Item,For Warehouse,Cho kho hàng
 DocType: Employee,Offer Date,Kỳ hạn Yêu cầu
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Các bản dự kê giá
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Bạn đang ở chế độ offline. Bạn sẽ không thể để lại cho đến khi bạn có mạng.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Nhà cung cấp&gt; Loại nhà cung cấp
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Không có nhóm học sinh được tạo ra.
 DocType: Purchase Invoice Item,Serial No,Không nối tiếp
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,SỐ tiền trả  hàng tháng không thể lớn hơn Số tiền vay
@@ -4265,7 +4265,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Chứng khoán và Sở Giao dịch hàng hóa
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Mặc định Đơn vị đo lường cho Variant &#39;{0}&#39; phải giống như trong Template &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,Tính toán dựa trên
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Xin vui lòng thiết lập số cho loạt bài tham dự thông qua Setup&gt; Numbering Series
 DocType: Delivery Note Item,From Warehouse,Từ kho
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Không có nhân viên nào cho các tiêu chí đã đề cập
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Không có mẫu hàng với hóa đơn nguyên liệu để sản xuất
@@ -4333,7 +4332,6 @@ DocType: Production Plan,Get Material Request,Nhận Chất liệu Yêu cầu
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,Chi phí bưu điện
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Tổng số (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Giải trí & Giải trí
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Vui lòng thiết lập Hệ thống Đặt tên Người dạy học trong Giáo dục&gt; Cài đặt Giáo dục
 ,Item Variant Details,Chi tiết biến thể của Chi tiết
 DocType: Quality Inspection,Item Serial No,Sê ri mẫu hàng số
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,Tạo nhân viên ghi
@@ -4421,6 +4419,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Vui lòng chọn Carry Forward nếu bạn cũng muốn bao gồm cân bằng tài chính của năm trước để lại cho năm tài chính này
 DocType: GL Entry,Against Voucher Type,Loại chống lại Voucher
 DocType: Physician,Phone (R),Điện thoại (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Mã hàng&gt; Nhóm mặt hàng&gt; Thương hiệu
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Đã thêm khe thời gian
 DocType: Item,Attributes,Thuộc tính
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Bật Mẫu
@@ -4471,7 +4470,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,và unchcked Disabled trong
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Series là bắt buộc
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Dịch vụ tài chính
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Khách hàng&gt; Nhóm Khách hàng&gt; Lãnh thổ
 DocType: Student Sibling,Student ID,thẻ học sinh
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Các loại hoạt động Thời gian Logs
 DocType: Opening Invoice Creation Tool,Sales,Bán hàng
@@ -4647,6 +4645,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},K
 DocType: Email Digest,Open Notifications,Mở các Thông Báo
 DocType: Payment Entry,Difference Amount (Company Currency),Chênh lệch Số tiền (Công ty ngoại tệ)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Chi phí trực tiếp
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Vui lòng đặt Naming Series cho {0} qua Cài đặt&gt; Cài đặt&gt; Đặt tên Series
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Doanh thu khách hàng mới
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Chi phí đi lại
 DocType: Maintenance Visit,Breakdown,Hỏng
@@ -4673,6 +4672,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Thông qua
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Hoạch định
 DocType: Share Balance,Issued,Ban hành
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Hoạt động của sinh viên
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Vui lòng thiết lập Hệ thống Đặt tên Người dạy học trong Giáo dục&gt; Cài đặt Giáo dục
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Nhà cung cấp Id
 DocType: Payment Request,Payment Gateway Details,Chi tiết Cổng thanh toán
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Số lượng phải lớn hơn 0
@@ -5296,6 +5296,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-Chỉnh sửa trong Hóa �
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Đơn hàng công việc đã được tạo cho tất cả các mặt hàng có Hội đồng quản trị
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Báo cáo chi tiết về biến thể
 DocType: Setup Progress Action,Setup Progress Action,Thiết lập Tiến hành Tiến bộ
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Xin vui lòng thiết lập số cho loạt bài tham dự thông qua Setup&gt; Numbering Series
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Bảng giá mua
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,Xóa VTHH nếu chi phí là không áp dụng đối với VTHH đó
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Vui lòng chọn Trạng thái Bảo trì đã hoàn thành hoặc xóa Ngày Hoàn thành
@@ -5783,7 +5784,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Đồng bộ lần cuối cùng
 DocType: Guardian,Guardian,người bảo vệ
 DocType: Item Alternative,Item Alternative,Mục Thay thế
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Vui lòng đặt Naming Series cho {0} qua Cài đặt&gt; Cài đặt&gt; Đặt tên Series
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Tạo khách hàng hoặc nhà cung cấp bị thiếu
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Đánh giá {0} được tạo ra cho nhân viên {1} trong phạm vi ngày nhất định
 DocType: Academic Term,Education,Đào tạo
