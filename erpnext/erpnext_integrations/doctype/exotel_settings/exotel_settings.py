@@ -12,12 +12,47 @@ import requests
 class ExotelSettings(Document):
 	def validate(self):
 		self.validate_credentials()
+		self.create_delete_custom_fields()
 
 	def validate_credentials(self):
-		response = requests.get('https://api.exotel.com/v1/Accounts/{sid}'.format(sid = self.exotel_sid),
-			auth=(self.exotel_sid, self.exotel_token))
-		if(response.status_code != 200):
-			frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
+		if self.enable:
+			response = requests.get('https://api.exotel.com/v1/Accounts/{sid}'.format(sid = self.exotel_sid),
+				auth=(self.exotel_sid, self.exotel_token))
+			if(response.status_code != 200):
+				frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
+
+	def create_delete_custom_fields(self):
+		if self.enable:
+			# create
+			create_custom_fields = False
+			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url"]
+
+			for i in names:
+				if not frappe.get_value("Custom Field",{"name":i}):
+					create_custom_fields = True
+					break;
+
+			if create_custom_fields:
+				labels = ["Call Details","Exophone","SID","Recording URL"]
+				types = ["Section Break","Read Only","Read Only","Long Text"]
+
+				insert_after = ["field_request","call_details","exophone","sid"]
+				for i in zip(labels,types):
+					custom = frappe.new_doc("Custom Field")
+					custom.dt = "Communication"
+					custom.label = i[0]
+					custom.fieldtype = i[1]
+					# need to add insert_after
+					custom.read_only = 1
+					custom.save()
+
+		elif not self.enable:
+			# delete
+			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url"]
+			for name in names:
+				frappe.delete_doc("Custom Field",name)
+
+		frappe.db.commit()
 
 def make_popup(caller_no):
 	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no}, ignore_permissions=True)
