@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
+
 import unittest
 import frappe, erpnext
 import frappe.defaults
@@ -12,7 +12,7 @@ from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
-
+from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -180,7 +180,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_return_for_serialized_items(self):
 		def _check_serial_no_values(serial_no, field_values):
 			serial_no = frappe.get_doc("Serial No", serial_no)
-			for field, value in field_values.items():
+			for field, value in iteritems(field_values):
 				self.assertEqual(cstr(serial_no.get(field)), value)
 
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -217,7 +217,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		return_pr = make_purchase_receipt(item_code=item_code, qty=-10, uom="Unit",
 			stock_uom="Box", conversion_factor=0.1, is_return=1, return_against=pr.name)
 
-		self.assertEquals(abs(return_pr.items[0].stock_qty), 1.0)
+		self.assertEqual(abs(return_pr.items[0].stock_qty), 1.0)
 
 	def test_closed_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status

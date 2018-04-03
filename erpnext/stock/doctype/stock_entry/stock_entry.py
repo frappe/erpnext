@@ -14,7 +14,7 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.stock.utils import get_bin
 import json
 
-from six import string_types
+from six import string_types, itervalues, iteritems
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForWorkOrderError(frappe.ValidationError): pass
@@ -595,7 +595,7 @@ class StockEntry(StockController):
 				if self.work_order and self.purpose == "Material Transfer for Manufacture":
 					item_dict = self.get_pending_raw_materials()
 					if self.to_warehouse and self.pro_doc:
-						for item in item_dict.values():
+						for item in itervalues(item_dict):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
@@ -617,7 +617,7 @@ class StockEntry(StockController):
 							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 							where po.name = poitemsup.parent
 								and po.name = %s""",self.purchase_order))
-					for item in item_dict.values():
+					for item in itervalues(item_dict):
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
@@ -629,7 +629,7 @@ class StockEntry(StockController):
 
 					if self.purpose != "Subcontract":
 						scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-						for item in scrap_item_dict.values():
+						for item in itervalues(scrap_item_dict):
 							if self.pro_doc and self.pro_doc.scrap_warehouse:
 								item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
@@ -697,7 +697,7 @@ class StockEntry(StockController):
 			fetch_exploded = self.use_multi_level_bom)
 
 		used_alternative_items = get_used_alternative_items(work_order = self.work_order)
-		for item in item_dict.values():
+		for item in itervalues(item_dict):
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			if item["allow_alternative_item"]:
 				item["allow_alternative_item"] = frappe.db.get_value('Work Order',
@@ -722,7 +722,7 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = 0, fetch_scrap_items = 1)
 
-		for item in item_dict.values():
+		for item in itervalues(item_dict):
 			item.from_warehouse = ""
 		return item_dict
 
@@ -791,7 +791,7 @@ class StockEntry(StockController):
 		"""
 		item_dict = self.get_pro_order_required_items()
 		max_qty = flt(self.pro_doc.qty)
-		for item, item_details in item_dict.items():
+		for item, item_details in iteritems(item_dict):
 			pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
 			desire_to_transfer = flt(self.fg_completed_qty) * flt(item_details.required_qty) / max_qty
 

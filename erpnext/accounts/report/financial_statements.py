@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 
 import re
 from past.builtins import cmp
@@ -13,6 +13,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate)
 
+from six import itervalues
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
@@ -166,7 +167,7 @@ def get_appropriate_currency(company, filters=None):
 
 def calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
-	for entries in gl_entries_by_account.values():
+	for entries in itervalues(gl_entries_by_account):
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:

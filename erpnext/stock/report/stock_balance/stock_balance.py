@@ -182,7 +182,7 @@ def filter_items_with_no_transactions(iwb_map):
 		
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
-		for key, val in qty_dict.items():
+		for key, val in iteritems(qty_dict):
 			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
@@ -209,7 +209,7 @@ def get_item_details(filters):
 	item_details = dict((d.name , d) for d in items)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		variant_values = get_variant_values_for(item_details.keys())
+		variant_values = get_variant_values_for(list(item_details))
 		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details

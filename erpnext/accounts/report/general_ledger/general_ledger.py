@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
@@ -9,6 +9,7 @@ from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
+from six import iteritems
 
 def execute(filters=None):
 	account_details = {}
@@ -176,7 +177,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data.append(totals.opening)
 
 	if filters.get("group_by_account"):
-		for acc, acc_dict in gle_map.items():
+		for acc, acc_dict in iteritems(gle_map):
 			if acc_dict.entries:
 				# opening
 				data.append({})
