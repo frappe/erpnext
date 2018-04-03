@@ -721,7 +721,6 @@ DocType: Crop,Produced Items,Вироблені предмети
 DocType: Sales Order Item,Gross Profit,Загальний прибуток
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Приріст не може бути 0
 DocType: Company,Delete Company Transactions,Видалити операції компанії
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Код товару&gt; Група предметів&gt; Бренд
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Посилання № та дата Reference є обов&#39;язковим для операції банку
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Додати / редагувати податки та збори
 DocType: Payment Entry Reference,Supplier Invoice No,Номер рахунку постачальника
@@ -777,7 +776,6 @@ DocType: Sales Invoice,Shipping Bill Date,Дата про доставку
 DocType: Production Plan,Production Plan,План виробництва
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Інструмент створення відкритого рахунку-фактури
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Продажі Повернутися
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Постачальник&gt; Тип постачальника
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,"Примітка: Сумарна кількість виділених листя {0} не повинно бути менше, ніж вже затверджених листя {1} на період"
 ,Total Stock Summary,Всі Резюме Фото
 DocType: Announcement,Posted By,Автор
@@ -1434,6 +1432,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Поштовий і
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Замовлення клієнта {0} {1}
 DocType: Opportunity,Contact Info,Контактна інформація
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Створення Руху ТМЦ
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Будь ласка, встановіть систему найменування працівників у людських ресурсах&gt; Параметри персоналу"
 DocType: Packing Slip,Net Weight UOM,Вага нетто Одиниця виміру
 DocType: Item,Default Supplier,Постачальник за замовчуванням
 DocType: Manufacturing Settings,Over Production Allowance Percentage,За квота на виробництво Відсоток
@@ -2327,6 +2326,7 @@ DocType: Budget,Fiscal Year,Бюджетний період
 DocType: Asset Maintenance Log,Planned,Запланований
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"Дебіторська заборгованість за замовчуванням, яка використовується, якщо не встановлено в Пацієнтці, щоб замовити консультаційні витрати."
 DocType: Vehicle Log,Fuel Price,паливо Ціна
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Клієнт&gt; Група клієнтів&gt; Територія
 DocType: Budget,Budget,Бюджет
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Встановити Відкрити
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Основний засіб повинен бути нескладським .
@@ -2757,7 +2757,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,"Наступні центри витрат можна створювати під групами, але у проводках використовуються не-групи"
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Люди і дозволу
 DocType: Vehicle Log,VLOG.,Відеоблогу.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Будь ласка, встановіть систему найменування працівників у людських ресурсах&gt; Параметри персоналу"
 DocType: Branch,Branch,Філія
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,Виконання користувача
@@ -4209,6 +4208,7 @@ DocType: Material Request Item,For Warehouse,Для складу
 DocType: Employee,Offer Date,Дата пропозиції
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Пропозиції
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Ви перебуваєте в автономному режимі. Ви не зможете оновити доки не відновите зв’язок.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Постачальник&gt; Тип постачальника
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Жоден студент групи не створено.
 DocType: Purchase Invoice Item,Serial No,Серійний номер
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,"Щомісячне погашення Сума не може бути більше, ніж сума позики"
@@ -4248,7 +4248,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Цінні папери та бірж
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',"За од.вим. за замовчуванням для варіанту '{0}' має бути такою ж, як в шаблоні ""{1} '"
 DocType: Shipping Rule,Calculate Based On,"Розрахувати, засновані на"
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Будь ласка, налаштуйте серію нумерації для участі в Наборі&gt; Нумерована серія"
 DocType: Delivery Note Item,From Warehouse,Від Склад
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Немає працівників за вказаними критеріями
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Ні предметів з Біллом матеріалів не повинна Manufacture
@@ -4316,7 +4315,6 @@ DocType: Production Plan,Get Material Request,Отримати Замовлен�
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,Поштові витрати
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Разом (Сум)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Розваги і дозвілля
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Будь-ласка, встановіть систему іменування інструкторів в освіті&gt; Параметри освіти"
 ,Item Variant Details,Пункт Варіант Детальніше
 DocType: Quality Inspection,Item Serial No,Серійний номер номенклатурної позиції
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,Створення Employee записів
@@ -4404,6 +4402,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year
 DocType: GL Entry,Against Voucher Type,Згідно док-ту типу
 DocType: Physician,Phone (R),Телефон (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Код товару&gt; Група предметів&gt; Бренд
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Часові інтервали додані
 DocType: Item,Attributes,Атрибути
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Увімкнути шаблон
@@ -4454,7 +4453,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,і незафіксований. вимкнено в
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Серії є обов'язковими
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Фінансові послуги
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Клієнт&gt; Група клієнтів&gt; Територія
 DocType: Student Sibling,Student ID,Student ID
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Види діяльності для Час Журнали
 DocType: Opening Invoice Creation Tool,Sales,Продаж
@@ -4630,6 +4628,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,Відкриті Повідомлення
 DocType: Payment Entry,Difference Amount (Company Currency),Різниця на суму (у валюті компанії)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Прямі витрати
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Будь-ласка, встановіть серію імен для {0} через Налаштування&gt; Налаштування&gt; Серія імен"
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Виручка від нових клієнтів
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Витрати на відрядження
 DocType: Maintenance Visit,Breakdown,Зламатися
@@ -4656,6 +4655,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Навігаційний
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Планування
 DocType: Share Balance,Issued,Виданий
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Студентська діяльність
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Будь-ласка, встановіть систему іменування інструкторів в освіті&gt; Параметри освіти"
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Id постачальника
 DocType: Payment Request,Payment Gateway Details,Деталі платіжного шлюзу
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,"Кількість повинна бути більше, ніж 0"
@@ -5278,6 +5278,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-виправлення в 
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Замовлення на роботу вже створено для всіх елементів з BOM
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Звіт про деталі варіантів
 DocType: Setup Progress Action,Setup Progress Action,Налаштування виконання дій
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Будь ласка, налаштуйте серію нумерації для участі в Наборі&gt; Нумерована серія"
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Купівля прайс-листа
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,"Видалити елемент, якщо стяхгнення не застосовуються до нього"
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,"Будь-ласка, виберіть технічне обслуговування як завершено або видаліть дату завершення"
@@ -5762,7 +5763,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Остання синхронізація включена
 DocType: Guardian,Guardian,охоронець
 DocType: Item Alternative,Item Alternative,Елемент Альтернатива
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Будь-ласка, встановіть серію імен для {0} через Налаштування&gt; Налаштування&gt; Серія імен"
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Створіть відсутніх клієнтів або постачальників.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Оцінка {0} створений для працівника {1} в зазначений діапазон дат
 DocType: Academic Term,Education,Освіта

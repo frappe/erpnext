@@ -721,7 +721,6 @@ DocType: Crop,Produced Items,รายการที่ผลิต
 DocType: Sales Order Item,Gross Profit,กำไรขั้นต้น
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,ไม่สามารถเพิ่มเป็น 0
 DocType: Company,Delete Company Transactions,ลบรายการที่ บริษัท
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,รหัสรายการ&gt; กลุ่มสินค้า&gt; แบรนด์
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,อ้างอิงและการอ้างอิงวันที่มีผลบังคับใช้สำหรับการทำธุรกรรมธนาคาร
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,เพิ่ม / แก้ไข ภาษีและค่าธรรมเนียม
 DocType: Payment Entry Reference,Supplier Invoice No,ใบแจ้งหนี้ที่ผู้ผลิตไม่มี
@@ -777,7 +776,6 @@ DocType: Sales Invoice,Shipping Bill Date,วันที่จัดส่ง�
 DocType: Production Plan,Production Plan,แผนการผลิต
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,เปิดเครื่องมือสร้างใบแจ้งหนี้
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,ขายกลับ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,ผู้จัดจำหน่าย&gt; ประเภทผู้จัดจำหน่าย
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,หมายเหตุ: ใบที่จัดสรรทั้งหมด {0} ไม่ควรจะน้อยกว่าใบอนุมัติแล้ว {1} สําหรับงวด
 ,Total Stock Summary,สรุปสต็อคทั้งหมด
 DocType: Announcement,Posted By,โพสโดย
@@ -1454,6 +1452,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,รหัสไป�
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},ใบสั่งขาย {0} เป็น {1}
 DocType: Opportunity,Contact Info,ข้อมูลการติดต่อ
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,ทำรายการสต็อก
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,กรุณาติดตั้ง System Employee Naming System ใน Human Resource&gt; HR Settings
 DocType: Packing Slip,Net Weight UOM,UOM น้ำหนักสุทธิ
 DocType: Item,Default Supplier,ผู้ผลิตเริ่มต้น
 DocType: Manufacturing Settings,Over Production Allowance Percentage,การผลิตกว่าร้อยละค่าเผื่อ
@@ -2348,6 +2347,7 @@ DocType: Budget,Fiscal Year,ปีงบประมาณ
 DocType: Asset Maintenance Log,Planned,วางแผน
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,บัญชีลูกหนี้ผิดนัดที่จะใช้หากไม่ได้ระบุไว้ในสมุดรายชื่อผู้ป่วย
 DocType: Vehicle Log,Fuel Price,ราคาน้ำมัน
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ลูกค้า&gt; กลุ่มลูกค้า&gt; เขตแดน
 DocType: Budget,Budget,งบประมาณ
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,ตั้งค่าเปิด
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,รายการสินทรัพย์ถาวรจะต้องเป็นรายการที่ไม่สต็อก
@@ -2778,7 +2778,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,ศูนย์ต้นทุนเพิ่มเติมสามารถทำภายใต้กลุ่ม แต่รายการที่สามารถทำกับกลุ่มที่ไม่
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,ผู้ใช้และสิทธิ์
 DocType: Vehicle Log,VLOG.,VLOG
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,กรุณาติดตั้ง System Employee Naming System ใน Human Resource&gt; HR Settings
 DocType: Branch,Branch,สาขา
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,ผู้ใช้ Fulfillment
@@ -4262,6 +4261,7 @@ DocType: Material Request Item,For Warehouse,สำหรับโกดัง
 DocType: Employee,Offer Date,ข้อเสนอ วันที่
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,ใบเสนอราคา
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,คุณกำลังอยู่ในโหมดออฟไลน์ คุณจะไม่สามารถที่จะโหลดจนกว่าคุณจะมีเครือข่าย
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,ผู้จัดจำหน่าย&gt; ประเภทผู้จัดจำหน่าย
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,ไม่มีกลุ่มนักศึกษาสร้าง
 DocType: Purchase Invoice Item,Serial No,อนุกรมไม่มี
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,จำนวนเงินที่ชำระหนี้รายเดือนไม่สามารถจะสูงกว่าจำนวนเงินกู้
@@ -4301,7 +4301,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,หลักทรัพย์และ การแลกเปลี่ยน สินค้าโภคภัณฑ์
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',เริ่มต้นหน่วยวัดสำหรับตัวแปร &#39;{0}&#39; จะต้องเป็นเช่นเดียวกับในแม่แบบ &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,การคำนวณพื้นฐานตาม
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,กรุณาตั้งหมายเลขชุดสำหรับการเข้าร่วมประชุมผ่านทาง Setup&gt; Numbering Series
 DocType: Delivery Note Item,From Warehouse,จากคลังสินค้า
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,ไม่มีพนักงานสำหรับเกณฑ์ดังกล่าว
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,ไม่มีรายการที่มี Bill of Materials การผลิต
@@ -4368,7 +4367,6 @@ DocType: Production Plan,Get Material Request,ได้รับวัสดุ�
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,ค่าใช้จ่าย ไปรษณีย์
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),รวม (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,บันเทิงและ การพักผ่อน
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,โปรดตั้งค่าระบบการตั้งชื่อผู้สอนในการศึกษา&gt; การตั้งค่าการศึกษา
 ,Item Variant Details,รายละเอียดรายละเอียดของรายการ
 DocType: Quality Inspection,Item Serial No,รายการ Serial No.
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,สร้างประวัติพนักงาน
@@ -4456,6 +4454,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,เลือกดำเนินการต่อถ้าคุณยังต้องการที่จะรวมถึงความสมดุลในปีงบประมาณก่อนหน้านี้ออกไปในปีงบการเงิน
 DocType: GL Entry,Against Voucher Type,กับประเภทบัตร
 DocType: Physician,Phone (R),โทรศัพท์ (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,รหัสรายการ&gt; กลุ่มสินค้า&gt; แบรนด์
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,เพิ่มช่องเวลาแล้ว
 DocType: Item,Attributes,คุณลักษณะ
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,เปิดใช้เทมเพลต
@@ -4506,7 +4505,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,และยกเลิกการปิดใช้งานใน
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,ชุด มีผลบังคับใช้
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,บริการทางการเงิน
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ลูกค้า&gt; กลุ่มลูกค้า&gt; เขตแดน
 DocType: Student Sibling,Student ID,รหัสนักศึกษา
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,ประเภทของกิจกรรมสำหรับบันทึกเวลา
 DocType: Opening Invoice Creation Tool,Sales,ขาย
@@ -4683,6 +4681,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,เปิดการแจ้งเตือน
 DocType: Payment Entry,Difference Amount (Company Currency),ความแตกต่างจำนวนเงิน ( บริษัท สกุล)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,ค่าใช้จ่าย โดยตรง
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,โปรดตั้งค่าชุดการตั้งชื่อสำหรับ {0} ผ่านการตั้งค่า&gt; การตั้งค่า&gt; การตั้งชื่อซีรี่ส์
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,รายได้ลูกค้าใหม่
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,ค่าใช้จ่ายใน การเดินทาง
 DocType: Maintenance Visit,Breakdown,การเสีย
@@ -4709,6 +4708,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,การนำ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,การวางแผน
 DocType: Share Balance,Issued,ออก
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,กิจกรรมนักศึกษา
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,โปรดตั้งค่าระบบการตั้งชื่อผู้สอนในการศึกษา&gt; การตั้งค่าการศึกษา
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Id ผู้ผลิต
 DocType: Payment Request,Payment Gateway Details,การชำระเงินรายละเอียดเกตเวย์
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,ปริมาณที่ควรจะเป็นมากกว่า 0
@@ -5332,6 +5332,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04- แก้ไขในใ�
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,สั่งซื้องานที่สร้างไว้แล้วสำหรับทุกรายการที่มี BOM
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,รายงานรายละเอียดชุดค่าผสม
 DocType: Setup Progress Action,Setup Progress Action,ตั้งค่าความคืบหน้าการดำเนินการ
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,กรุณาตั้งหมายเลขชุดสำหรับการเข้าร่วมประชุมผ่านทาง Setup&gt; Numbering Series
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,รายการราคาซื้อ
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,ลบรายการค่าใช้จ่ายถ้าไม่สามารถใช้ได้กับรายการที่
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,โปรดเลือกสถานะการซ่อมบำรุงเป็นเสร็จสิ้นหรือลบวันที่เสร็จสิ้น
@@ -5819,7 +5820,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,ซิงค์ล่าสุดเปิด
 DocType: Guardian,Guardian,ผู้ปกครอง
 DocType: Item Alternative,Item Alternative,รายการทางเลือก
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,โปรดตั้งค่าชุดการตั้งชื่อสำหรับ {0} ผ่านการตั้งค่า&gt; การตั้งค่า&gt; การตั้งชื่อซีรี่ส์
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,สร้างลูกค้าหรือผู้จัดหาที่ขาดหายไป
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,ประเมิน {0} สร้างขึ้นสำหรับ พนักงาน {1} ใน ช่วงวันที่ ที่กำหนด
 DocType: Academic Term,Education,การศึกษา

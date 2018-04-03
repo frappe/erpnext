@@ -722,7 +722,6 @@ DocType: Crop,Produced Items,தயாரிக்கப்பட்ட பொ�
 DocType: Sales Order Item,Gross Profit,மொத்த இலாபம்
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,சம்பள உயர்வு 0 இருக்க முடியாது
 DocType: Company,Delete Company Transactions,நிறுவனத்தின் பரிவர்த்தனைகள் நீக்கு
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,பொருள் குறியீடு&gt; பொருள் குழு&gt; பிராண்ட்
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,குறிப்பு இல்லை மற்றும் பரிந்துரை தேதி வங்கி பரிவர்த்தனை அத்தியாவசியமானதாகும்
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,வரிகள் மற்றும் கட்டணங்கள் சேர்க்க / திருத்தவும்
 DocType: Payment Entry Reference,Supplier Invoice No,வழங்குபவர் விலைப்பட்டியல் இல்லை
@@ -778,7 +777,6 @@ DocType: Sales Invoice,Shipping Bill Date,கப்பல் பில் தே
 DocType: Production Plan,Production Plan,உற்பத்தி திட்டம்
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,விலைப்பட்டியல் உருவாக்கம் கருவியைத் திறக்கிறது
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,விற்பனை Return
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,சப்ளையர்&gt; சப்ளையர் வகை
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,குறிப்பு: மொத்த ஒதுக்கீடு இலைகள் {0} ஏற்கனவே ஒப்புதல் இலைகள் குறைவாக இருக்க கூடாது {1} காலம்
 ,Total Stock Summary,மொத்த பங்கு சுருக்கம்
 DocType: Announcement,Posted By,பதிவிட்டவர்
@@ -1454,6 +1452,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,ஜிப் கு
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},விற்பனை ஆணை {0} {1}
 DocType: Opportunity,Contact Info,தகவல் தொடர்பு
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,பங்கு பதிவுகள் செய்தல்
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,மனித வளத்தில் பணியாளர் பெயரிடும் அமைப்பை அமைத்தல்&gt; HR அமைப்புகள்
 DocType: Packing Slip,Net Weight UOM,நிகர எடை UOM
 DocType: Item,Default Supplier,இயல்புநிலை சப்ளையர்
 DocType: Manufacturing Settings,Over Production Allowance Percentage,உற்பத்தி கொடுப்பனவான சதவீதம் ஓவர்
@@ -2346,6 +2345,7 @@ DocType: Budget,Fiscal Year,நிதியாண்டு
 DocType: Asset Maintenance Log,Planned,திட்டமிட்ட
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"ஆலோசனைக் கட்டணம் கட்டாயமாக நோயாளிக்கு அமைக்கப்படாவிட்டால், இயலக்கூடிய பெறத்தக்க கணக்குகள் பயன்படுத்தப்பட வேண்டும்."
 DocType: Vehicle Log,Fuel Price,எரிபொருள் விலை
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,வாடிக்கையாளர்&gt; வாடிக்கையாளர் குழு&gt; மண்டலம்
 DocType: Budget,Budget,வரவு செலவு திட்டம்
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,திறந்த அமை
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,நிலையான சொத்து பொருள் அல்லாத பங்கு உருப்படியை இருக்க வேண்டும்.
@@ -2776,7 +2776,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,மேலும் செலவு மையங்கள் குழுக்கள் கீழ் செய்யப்பட்ட ஆனால் உள்ளீடுகளை அல்லாத குழுக்கள் எதிராகவும் முடியும்
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,பயனர்கள் மற்றும் அனுமதிகள்
 DocType: Vehicle Log,VLOG.,பதிவின்.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,மனித வளத்தில் பணியாளர் பெயரிடும் அமைப்பை அமைத்தல்&gt; HR அமைப்புகள்
 DocType: Branch,Branch,கிளை
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (k + ca + எம்ஜி)
 DocType: Delivery Trip,Fulfillment User,பூர்த்தி செய்த பயனர்
@@ -4258,6 +4257,7 @@ DocType: Material Request Item,For Warehouse,கிடங்கு
 DocType: Employee,Offer Date,சலுகை  தேதி
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,மேற்கோள்கள்
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,நீங்கள் ஆஃப்லைனில் உள்ளன. நீங்கள் பிணைய வேண்டும் வரை ஏற்றவும் முடியாது.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,சப்ளையர்&gt; சப்ளையர் வகை
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,மாணவர் குழுக்கள் உருவாக்கப்படவில்லை.
 DocType: Purchase Invoice Item,Serial No,இல்லை தொடர்
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,மாதாந்திர கட்டுந்தொகை கடன் தொகை அதிகமாக இருக்கக் கூடாது முடியும்
@@ -4297,7 +4297,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,செக்யூரிட்டிஸ் & பண்ட பரிமாற்ற
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',மாற்று அளவீடு இயல்புநிலை யூனிட் &#39;{0}&#39; டெம்ப்ளேட் அதே இருக்க வேண்டும் &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,ஆனால் அடிப்படையில் கணக்கிட
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,அமைவு&gt; எண் வரிசை தொடர் மூலம் கலந்துரையாடலுக்கான வரிசை எண்ணை அமைக்கவும்
 DocType: Delivery Note Item,From Warehouse,கிடங்கில் இருந்து
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,குறிப்பிடப்பட்ட அளவுகோல்களுக்கு ஊழியர்கள் இல்லை
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,பொருட்களை பில் கொண்டு உருப்படிகள் இல்லை தயாரிப்பதற்கான
@@ -4365,7 +4364,6 @@ DocType: Production Plan,Get Material Request,பொருள் வேண்
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,தபால் செலவுகள்
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),மொத்தம் (விவரங்கள்)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,பொழுதுபோக்கு & ஓய்வு
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,தயவுசெய்து கல்வி&gt; கல்வி அமைப்புகளில் கல்வி பயிற்றுவிப்பாளரை அமைத்தல்
 ,Item Variant Details,பொருள் மாறுபாடு விவரங்கள்
 DocType: Quality Inspection,Item Serial No,பொருள் தொடர் எண்
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,பணியாளர் ரெக்கார்ட்ஸ் உருவாக்கவும்
@@ -4452,6 +4450,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,நீங்கள் முந்தைய நிதி ஆண்டின் இருப்புநிலை இந்த நிதி ஆண்டு விட்டு சேர்க்க விரும்பினால் முன் எடுத்து கொள்ளவும்
 DocType: GL Entry,Against Voucher Type,வவுச்சர் வகை எதிராக
 DocType: Physician,Phone (R),தொலைபேசி (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,பொருள் குறியீடு&gt; பொருள் குழு&gt; பிராண்ட்
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,நேர இடங்கள் சேர்க்கப்பட்டன
 DocType: Item,Attributes,கற்பிதங்கள்
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,டெம்ப்ளேட் இயக்கு
@@ -4502,7 +4501,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,மற்றும் unchcked இல் முடக்கப்பட்டது
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,தொடர் கட்டாயமாகும்
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,நிதி சேவைகள்
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,வாடிக்கையாளர்&gt; வாடிக்கையாளர் குழு&gt; மண்டலம்
 DocType: Student Sibling,Student ID,மாணவர் அடையாளம்
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,நேரம் பதிவேடுகளுக்கு நடவடிக்கைகள் வகைகள்
 DocType: Opening Invoice Creation Tool,Sales,விற்பனை
@@ -4677,6 +4675,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,திறந்த அறிவிப்புகள்
 DocType: Payment Entry,Difference Amount (Company Currency),வேறுபாடு தொகை (நிறுவனத்தின் நாணய)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,நேரடி செலவுகள்
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,அமைவு&gt; அமைப்புகள்&gt; பெயரிடும் தொடர்கள் வழியாக {0} பெயரிடும் தொடர்களை அமைக்கவும்
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,புதிய வாடிக்கையாளர் வருவாய்
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,போக்குவரத்து செலவுகள்
 DocType: Maintenance Visit,Breakdown,முறிவு
@@ -4703,6 +4702,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,வழிநடத்தல�
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,திட்டமிடல்
 DocType: Share Balance,Issued,வெளியிடப்படுகிறது
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,மாணவர் நடவடிக்கை
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,தயவுசெய்து கல்வி&gt; கல்வி அமைப்புகளில் கல்வி பயிற்றுவிப்பாளரை அமைத்தல்
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,வழங்குபவர் அடையாளம்
 DocType: Payment Request,Payment Gateway Details,பணம் நுழைவாயில் விபரங்கள்
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,அளவு 0 அதிகமாக இருக்க வேண்டும்
@@ -5324,6 +5324,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,விலைப்பட்�
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,வேலை ஆர்டர் ஏற்கனவே BOM உடன் அனைத்து பொருட்களுக்கும் உருவாக்கப்பட்டது
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,மாறுபட்ட விவரங்கள் அறிக்கை
 DocType: Setup Progress Action,Setup Progress Action,முன்னேற்றம் செயல்முறை அமைவு
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,அமைவு&gt; எண் வரிசை தொடர் மூலம் கலந்துரையாடலுக்கான வரிசை எண்ணை அமைக்கவும்
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,விலை பட்டியல் வாங்குவது
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,குற்றச்சாட்டுக்கள் அந்த பொருளை பொருந்தாது என்றால் உருப்படியை அகற்று
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,பராமரிப்பு நிலைமையை நிறைவு செய்து முடிக்க அல்லது நிறைவு தேதி முடிக்க
@@ -5809,7 +5810,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,கடைசி ஒத்திசைவு
 DocType: Guardian,Guardian,பாதுகாவலர்
 DocType: Item Alternative,Item Alternative,பொருள் மாற்று
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,அமைவு&gt; அமைப்புகள்&gt; பெயரிடும் தொடர்கள் வழியாக {0} பெயரிடும் தொடர்களை அமைக்கவும்
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,காணாமல் போன வாடிக்கையாளர் அல்லது வழங்குநரை உருவாக்கவும்.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,மதிப்பீடு {0} {1} தேதியில் வரம்பில் பணியாளர் உருவாக்கப்பட்டது
 DocType: Academic Term,Education,கல்வி

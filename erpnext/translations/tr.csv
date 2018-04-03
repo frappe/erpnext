@@ -812,7 +812,6 @@ DocType: Crop,Produced Items,Üretilen Ürünler
 DocType: Sales Order Item,Gross Profit,Brüt Kar
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Artım 0 olamaz
 DocType: Company,Delete Company Transactions,Şirket İşlemleri sil
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Ürün Kodu&gt; Ürün Grubu&gt; Marka
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Referans No ve Referans Tarih Banka işlem için zorunludur
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Ekle / Düzenle Vergi ve Harçlar
 DocType: Payment Entry Reference,Supplier Invoice No,Tedarikçi Fatura No
@@ -878,7 +877,6 @@ DocType: Sales Invoice,Shipping Bill Date,Nakliye Faturası Tarihi
 DocType: Production Plan,Production Plan,Üretim planı
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Fatura Yaratma Aracını Açma
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Satış İade
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Tedarikçi&gt; Tedarikçi Türü
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,Not: Toplam tahsis edilen yaprakları {0} zaten onaylanmış yaprakları daha az olmamalıdır {1} dönem için
 ,Total Stock Summary,Toplam Stok Özeti
 DocType: Announcement,Posted By,Tarafından gönderildi
@@ -1626,6 +1624,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Posta Kodu
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Satış Sipariş {0} {1}
 DocType: Opportunity,Contact Info,İletişim Bilgileri
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Stok Girişleri Yapımı
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Lütfen İnsan Kaynağında Çalışan Adlandırma Sistemini Kurun&gt; HR Ayarları
 DocType: Packing Slip,Net Weight UOM,Net Ağırlık Ölçü Birimi
 DocType: Item,Default Supplier,Standart Tedarikçi
 DocType: Item,Default Supplier,Standart Tedarikçi
@@ -2621,6 +2620,7 @@ DocType: Budget,Fiscal Year,Mali yıl
 DocType: Asset Maintenance Log,Planned,planlı
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"Hastada Danışma masraflarını karşılamak için ayarlanmamışsa, kullanılacak varsayılan alacak hesapları."
 DocType: Vehicle Log,Fuel Price,yakıt Fiyatı
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Müşteri&gt; Müşteri Grubu&gt; Bölge
 DocType: Budget,Budget,Bütçe
 DocType: Budget,Budget,Bütçe
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Aç ayarla
@@ -3097,7 +3097,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,"Daha fazla masraf Gruplar altında yapılabilir, ancak girişleri olmayan Gruplar karşı yapılabilir"
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Kullanıcılar ve İzinler
 DocType: Vehicle Log,VLOG.,VLOG.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Lütfen İnsan Kaynağında Çalışan Adlandırma Sistemini Kurun&gt; HR Ayarları
 DocType: Branch,Branch,Şube
 DocType: Soil Analysis,Ca/(K+Ca+Mg),"Ca / (K +, Ca + Mg)"
 DocType: Delivery Trip,Fulfillment User,Yerine getirme kullanıcısı
@@ -4717,6 +4716,7 @@ DocType: Employee,Offer Date,Teklif Tarihi
 DocType: Employee,Offer Date,Teklif Tarihi
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Özlü Sözler
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Çevrimdışı moddasınız. Bağlantıyı sağlayıncaya kadar yenileneme yapamayacaksınız.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Tedarikçi&gt; Tedarikçi Türü
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Hiçbir Öğrenci Grupları oluşturuldu.
 DocType: Purchase Invoice Item,Serial No,Seri No
 DocType: Purchase Invoice Item,Serial No,Seri No
@@ -4760,7 +4760,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Teminatlar ve Emtia Borsaları
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Variant için Ölçü Varsayılan Birim &#39;{0}&#39; Şablon aynı olmalıdır &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,Tabanlı hesaplayın
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Lütfen Kurulum&gt; Numaralandırma Serileri ile Katılım için numaralandırma dizisini ayarlayın
 DocType: Delivery Note Item,From Warehouse,Atölyesi&#39;nden
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Sözü edilen ölçütler için çalışan yok
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Malzeme Listesine Öğe Yok İmalat için
@@ -4838,7 +4837,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Toplam (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Eğlence ve Boş Zaman
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Eğlence ve Boş Zaman
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Lütfen Eğitimde Eğitmen Adlandırma Sistemi&gt; Eğitim Ayarları&#39;nı kurun
 ,Item Variant Details,Öğe Varyant Detayları
 DocType: Quality Inspection,Item Serial No,Ürün Seri No
 DocType: Quality Inspection,Item Serial No,Ürün Seri No
@@ -4933,6 +4931,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Geçen mali yılın bakiyelerini bu mali yıla dahil etmek isterseniz Lütfen İleri Taşıyı seçin
 DocType: GL Entry,Against Voucher Type,Dekont Tipi karşılığı
 DocType: Physician,Phone (R),Telefon (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Ürün Kodu&gt; Ürün Grubu&gt; Marka
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Zaman aralıkları eklendi
 DocType: Item,Attributes,Nitelikler
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Şablonu Etkinleştir
@@ -4989,7 +4988,6 @@ apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unch
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Seri zorunludur
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Finansal Hizmetler
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Finansal Hizmetler
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Müşteri&gt; Müşteri Grubu&gt; Bölge
 DocType: Student Sibling,Student ID,Öğrenci Kimliği
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Zaman Kayıtlar faaliyetleri Türleri
 DocType: Opening Invoice Creation Tool,Sales,Satışlar
@@ -5182,6 +5180,7 @@ DocType: Email Digest,Open Notifications,Açık Bildirimler
 DocType: Payment Entry,Difference Amount (Company Currency),Fark Tutarı (Şirket Para Birimi)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Doğrudan Giderler
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Doğrudan Giderler
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Lütfen {0} için İsimlendirme Serisini Kurulum&gt; Ayarlar&gt; İsimlendirme Dizisi ile ayarlayın
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Yeni Müşteri Gelir
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Seyahat Giderleri
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Seyahat Giderleri
@@ -5212,6 +5211,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Plan
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Planlama
 DocType: Share Balance,Issued,Veriliş
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Öğrenci Etkinliği
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Lütfen Eğitimde Eğitmen Adlandırma Sistemi&gt; Eğitim Ayarları&#39;nı kurun
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Tedarikçi Kimliği
 DocType: Payment Request,Payment Gateway Details,Ödeme Gateway Detayları
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Miktar 0&#39;dan büyük olmalıdır
@@ -5907,6 +5907,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-Faturada Düzeltme
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,BOM ile tüm öğeler için önceden oluşturulmuş olan İş Emri
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Varyant Detayları Raporu
 DocType: Setup Progress Action,Setup Progress Action,Kurulum İlerleme Eylemi
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Lütfen Kurulum&gt; Numaralandırma Serileri ile Katılım için numaralandırma dizisini ayarlayın
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Alış Fiyatı Listesi
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,Ücretleri bu öğeye geçerli değilse öğeyi çıkar
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Lütfen Bakım Durumunu Tamamlandı olarak seçin veya Bitiş Tarihi kaldırın
@@ -6451,7 +6452,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Son Senkronizasyon Açık
 DocType: Guardian,Guardian,vasi
 DocType: Item Alternative,Item Alternative,Öğe alternatif
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Lütfen {0} için İsimlendirme Serisini Kurulum&gt; Ayarlar&gt; İsimlendirme Dizisi ile ayarlayın
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Kayıp müşteri veya tedarikçi yaratın.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Verilen aralıkta Çalışan {1} için oluşturulan değerlendirme {0}
 DocType: Academic Term,Education,Eğitim
