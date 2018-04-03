@@ -29,4 +29,13 @@ def get_data():
 				}
 			]
 		},
+		{
+			"label": _("Settings"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Woocommerce Settings"
+				}
+			]
+		}
 	]

@@ -274,3 +274,7 @@ def get_name_with_number(new_account, account_number):
 	if account_number and not new_account[0].isdigit():
 		new_account = account_number + " - " + new_account
 	return new_account
+
+
+def on_doctype_update():
+	frappe.db.add_index("Account", ["lft", "rgt"])

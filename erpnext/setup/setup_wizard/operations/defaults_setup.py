@@ -27,7 +27,6 @@ def set_default_settings(args):
 
 	domain_settings = frappe.get_single('Domain Settings')
 	domain_settings.set_active_domains(args.get('domains'))
-	domain_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
