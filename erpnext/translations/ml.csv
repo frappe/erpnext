@@ -720,7 +720,6 @@ DocType: Crop,Produced Items,ഉല്പന്ന വസ്തുക്കൾ
 DocType: Sales Order Item,Gross Profit,മൊത്തം ലാഭം
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,വർദ്ധന 0 ആയിരിക്കും കഴിയില്ല
 DocType: Company,Delete Company Transactions,കമ്പനി ഇടപാടുകൾ ഇല്ലാതാക്കുക
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,ഇനം കോഡ്&gt; ഇനം ഗ്രൂപ്പ്&gt; ബ്രാൻഡ്
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,യാതൊരു പരാമർശവുമില്ല ആൻഡ് റഫറൻസ് തീയതി ബാങ്ക് ഇടപാട് നിര്ബന്ധമാണ്
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,/ എഡിറ്റ് നികുതികളും ചുമത്തിയിട്ടുള്ള ചേർക്കുക
 DocType: Payment Entry Reference,Supplier Invoice No,വിതരണക്കമ്പനിയായ ഇൻവോയിസ് ഇല്ല
@@ -776,7 +775,6 @@ DocType: Sales Invoice,Shipping Bill Date,ഷിപ്പിംഗ് ബിൽ 
 DocType: Production Plan,Production Plan,ഉല്പാദന പദ്ധതി
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,ഇൻവോയ്സ് ക്രിയേഷൻ ടൂൾ തുറക്കുന്നു
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,സെയിൽസ് മടങ്ങിവരവ്
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,വിതരണക്കാരൻ&gt; വിതരണക്കാരൻ തരം
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,ശ്രദ്ധിക്കുക: നീക്കിവെച്ചത് മൊത്തം ഇല {0} കാലയളവിൽ {1} ഇതിനകം അംഗീകാരം ഇല കുറവ് പാടില്ല
 ,Total Stock Summary,ആകെ ഓഹരി ചുരുക്കം
 DocType: Announcement,Posted By,പോസ്റ്റ് ചെയ്തത്
@@ -1432,6 +1430,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,സിപ്പ് 
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},സെയിൽസ് ഓർഡർ {0} {1} ആണ്
 DocType: Opportunity,Contact Info,ബന്ധപ്പെടുന്നതിനുള്ള വിവരം
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,സ്റ്റോക്ക് എൻട്രികളിൽ ഉണ്ടാക്കുന്നു
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,മാനവ വിഭവശേഷി&gt; എച്ച്ആർ സജ്ജീകരണങ്ങളിൽ ദയവായി എംപ്ലോയീ നെയിമിങ് സിസ്റ്റം സെറ്റപ്പ് ചെയ്യുക
 DocType: Packing Slip,Net Weight UOM,മൊത്തം ഭാരം UOM
 DocType: Item,Default Supplier,സ്ഥിരസ്ഥിതി വിതരണക്കാരൻ
 DocType: Manufacturing Settings,Over Production Allowance Percentage,പ്രൊഡക്ഷൻ അലവൻസ് ശതമാനം ഓവര്
@@ -2319,6 +2318,7 @@ DocType: Budget,Fiscal Year,സാമ്പത്തിക വർഷം
 DocType: Asset Maintenance Log,Planned,ആസൂത്രിതമായ
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,കൺസൾട്ടൻസി ചാർജ് ബുക്കു ചെയ്യാനായി രോഗിയിൽ സജ്ജമാക്കാതിരിക്കുകയാണെങ്കിൽ സ്വീകാര്യമായ സ്വീകാര്യമായ അക്കൗണ്ടുകൾ ഉപയോഗിക്കും.
 DocType: Vehicle Log,Fuel Price,ഇന്ധന വില
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ഉപഭോക്താവ്&gt; കസ്റ്റമർ ഗ്രൂപ്പ്&gt; ടെറിട്ടറി
 DocType: Budget,Budget,ബജറ്റ്
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,തുറക്കുക സജ്ജമാക്കുക
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,ഫിക്സ്ഡ് അസറ്റ് ഇനം ഒരു നോൺ-സ്റ്റോക്ക് ഇനം ആയിരിക്കണം.
@@ -2747,7 +2747,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,പ്രശ്നപരിഹാരത്തിനായി കുറഞ്ഞ കേന്ദ്രങ്ങൾ ഗ്രൂപ്പുകൾ കീഴിൽ കഴിയും പക്ഷേ എൻട്രികൾ നോൺ-ഗ്രൂപ്പുകൾ നേരെ കഴിയും
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,ഉപയോക്താക്കൾ അനുമതികളും
 DocType: Vehicle Log,VLOG.,Vlog.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,മാനവ വിഭവശേഷി&gt; എച്ച്ആർ സജ്ജീകരണങ്ങളിൽ ദയവായി എംപ്ലോയീ നെയിമിങ് സിസ്റ്റം സെറ്റപ്പ് ചെയ്യുക
 DocType: Branch,Branch,ബ്രാഞ്ച്
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,പൂരിപ്പിക്കൽ ഉപയോക്താവ്
@@ -4197,6 +4196,7 @@ DocType: Material Request Item,For Warehouse,വെയർഹൗസ് വേണ�
 DocType: Employee,Offer Date,ആഫര് തീയതി
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,ഉദ്ധരണികളും
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,നിങ്ങൾ ഓഫ്ലൈൻ മോഡിലാണ്. നിങ്ങൾ നെറ്റ്വർക്ക് ഞങ്ങൾക്കുണ്ട് വരെ ലോഡുചെയ്യണോ കഴിയില്ല.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,വിതരണക്കാരൻ&gt; വിതരണക്കാരൻ തരം
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,ഇല്ല സ്റ്റുഡന്റ് ഗ്രൂപ്പുകൾ സൃഷ്ടിച്ചു.
 DocType: Purchase Invoice Item,Serial No,സീരിയൽ ഇല്ല
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,പ്രതിമാസ തിരിച്ചടവ് തുക വായ്പാ തുക ശ്രേഷ്ഠ പാടില്ല
@@ -4236,7 +4236,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,സെക്യൂരിറ്റീസ് &amp; ചരക്ക് കൈമാറ്റ
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',മോഡലിന് അളവു യൂണിറ്റ് &#39;{0}&#39; ഫലകം അതേ ആയിരിക്കണം &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,അടിസ്ഥാനത്തിൽ ഓൺ കണക്കുകൂട്ടുക
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,സെറ്റപ്പ്&gt; നമ്പറിംഗ് സീരീസുകൾ വഴി ഹാജരാക്കാനായി സെറ്റപ്പ് നമ്പറുകൾ ക്രമീകരിക്കുക
 DocType: Delivery Note Item,From Warehouse,വെയർഹൗസിൽ നിന്ന്
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,പരാമർശിക്കപ്പെട്ട മാനദണ്ഡത്തിനായി ജീവനക്കാർ ഇല്ല
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,നിർമ്മിക്കാനുള്ള വസ്തുക്കളുടെ ബിൽ കൂടിയ ഇനങ്ങൾ ഇല്ല
@@ -4304,7 +4303,6 @@ DocType: Production Plan,Get Material Request,മെറ്റീരിയൽ അ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,തപാൽ ചെലവുകൾ
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),ആകെ (ശാരീരിക)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,വിനോദം &amp; ഒഴിവുസമയ
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,ദയവായി വിദ്യാഭ്യാസം&gt; വിദ്യാഭ്യാസ സജ്ജീകരണങ്ങളിൽ സജ്ജീകരണ അധ്യാപിക നാമനിർദേശം ചെയ്യുന്ന സംവിധാനം
 ,Item Variant Details,ഇനം വ്യത്യാസത്തിന്റെ വിശദാംശങ്ങൾ
 DocType: Quality Inspection,Item Serial No,ഇനം സീരിയൽ പോസ്റ്റ്
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,ജീവനക്കാരുടെ റെക്കോർഡ്സ് സൃഷ്ടിക്കുക
@@ -4390,6 +4388,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,നിങ്ങൾക്ക് മുൻ സാമ്പത്തിക വർഷത്തെ ബാലൻസ് ഈ സാമ്പത്തിക വർഷം വിട്ടുതരുന്നു ഉൾപ്പെടുത്താൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ മുന്നോട്ട് തിരഞ്ഞെടുക്കുക
 DocType: GL Entry,Against Voucher Type,വൗച്ചർ തരം എഗെൻസ്റ്റ്
 DocType: Physician,Phone (R),ഫോൺ (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,ഇനം കോഡ്&gt; ഇനം ഗ്രൂപ്പ്&gt; ബ്രാൻഡ്
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,ടൈം സ്ലോട്ടുകൾ ചേർത്തു
 DocType: Item,Attributes,വിശേഷണങ്ങൾ
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,ടെംപ്ലേറ്റ് പ്രാപ്തമാക്കുക
@@ -4440,7 +4439,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,ഒപ്പം അൺചെക്കുചെയ്തത് അപ്രാപ്തമാക്കി
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,സീരീസ് നിർബന്ധമാണ്
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,സാമ്പത്തിക സേവനങ്ങൾ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ഉപഭോക്താവ്&gt; കസ്റ്റമർ ഗ്രൂപ്പ്&gt; ടെറിട്ടറി
 DocType: Student Sibling,Student ID,സ്റ്റുഡന്റ് ഐഡി
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,സമയം ലോഗുകൾക്കായി പ്രവർത്തനങ്ങൾ തരങ്ങൾ
 DocType: Opening Invoice Creation Tool,Sales,സെയിൽസ്
@@ -4614,6 +4612,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,ഓപ്പൺ അറിയിപ്പുകൾ
 DocType: Payment Entry,Difference Amount (Company Currency),വ്യത്യാസം തുക (കമ്പനി കറൻസി)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,നേരിട്ടുള്ള ചെലവുകൾ
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Setup&gt; Settings&gt; Naming Series വഴി {0} നാമത്തിനായുള്ള പരമ്പര സജ്ജീകരിക്കുക
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,പുതിയ കസ്റ്റമർ റവന്യൂ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,യാത്രാ ചെലവ്
 DocType: Maintenance Visit,Breakdown,പ്രവർത്തന രഹിതം
@@ -4640,6 +4639,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,നീങ്ങുന്ന�
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,ആസൂത്രണ
 DocType: Share Balance,Issued,ഇഷ്യൂചെയ്തു
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,വിദ്യാർത്ഥിയുടെ പ്രവർത്തനം
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,ദയവായി വിദ്യാഭ്യാസം&gt; വിദ്യാഭ്യാസ സജ്ജീകരണങ്ങളിൽ സജ്ജീകരണ അധ്യാപിക നാമനിർദേശം ചെയ്യുന്ന സംവിധാനം
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,വിതരണക്കമ്പനിയായ ഐഡി
 DocType: Payment Request,Payment Gateway Details,പേയ്മെന്റ് ഗേറ്റ്വേ വിവരങ്ങൾ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,ക്വാണ്ടിറ്റി 0 കൂടുതലായിരിക്കണം
@@ -5262,6 +5262,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-ഇൻവോയ്സി�
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,BOM- ൽ ഉള്ള എല്ലാ ഇനങ്ങൾക്കുമായി സൃഷ്ടിച്ച ഓർഡർ ഇതിനകം സൃഷ്ടിച്ചു
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,വേരിയന്റ് വിശദാംശങ്ങൾ റിപ്പോർട്ട് ചെയ്യുക
 DocType: Setup Progress Action,Setup Progress Action,സെറ്റപ്പ് പുരോഗതി ആക്ഷൻ
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,സെറ്റപ്പ്&gt; നമ്പറിംഗ് സീരീസുകൾ വഴി ഹാജരാക്കാനായി സെറ്റപ്പ് നമ്പറുകൾ ക്രമീകരിക്കുക
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,വിലവിപണി വാങ്ങൽ
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,ചാർജ് ആ ഇനത്തിനും ബാധകമായ എങ്കിൽ ഇനം നീക്കം
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,മെയിന്റനന്റ് സ്റ്റാറ്റസ് പൂർത്തിയാക്കുക അല്ലെങ്കിൽ പൂർത്തിയാക്കൽ തീയതി നീക്കം ചെയ്യുക തിരഞ്ഞെടുക്കുക
@@ -5746,7 +5747,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,അവസാനമായി സമന്വയിപ്പിക്കുക ഓണാണ്
 DocType: Guardian,Guardian,ഗാർഡിയൻ
 DocType: Item Alternative,Item Alternative,ഇനം ബദൽ
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Setup&gt; Settings&gt; Naming Series വഴി {0} നാമത്തിനായുള്ള പരമ്പര സജ്ജീകരിക്കുക
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,നഷ്ടപ്പെട്ട ഉപഭോക്താവ് അല്ലെങ്കിൽ വിതരണക്കാരൻ സൃഷ്ടിക്കുക.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,മൂല്യനിർണയം {0} നൽകിയ തീയതി പരിധി എംപ്ലോയിസ് {1} വേണ്ടി സൃഷ്ടിച്ചു
 DocType: Academic Term,Education,വിദ്യാഭ്യാസം

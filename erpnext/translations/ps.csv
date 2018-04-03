@@ -718,7 +718,6 @@ DocType: Crop,Produced Items,تولید شوي توکي
 DocType: Sales Order Item,Gross Profit,ټولټال ګټه
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,بهرمن نه شي کولای 0 وي
 DocType: Company,Delete Company Transactions,شرکت معاملې ړنګول
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,د توکو کود&gt; توکي ګروپ&gt; برنامه
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,ماخذ نه او ماخذ نېټه د بانک د راکړې ورکړې الزامی دی
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Add / سمول مالیات او په تور
 DocType: Payment Entry Reference,Supplier Invoice No,عرضه صورتحساب نه
@@ -774,7 +773,6 @@ DocType: Sales Invoice,Shipping Bill Date,د تیلو لیږد نیټه
 DocType: Production Plan,Production Plan,د تولید پلان
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,د انوائس د جوړولو وسیله پرانیزي
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,خرڅلاو Return
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,عرضه کوونکي&gt; د عرضه کوونکي ډول
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,نوټ: ټولې اختصاص پاڼي {0} بايد نه مخکې تصویب پاڼو څخه کم وي {1} د مودې لپاره
 ,Total Stock Summary,Total سټاک لنډيز
 DocType: Announcement,Posted By,خپرندوی
@@ -1430,6 +1428,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,زیپ کوډ
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},خرڅلاو نظم {0} دی {1}
 DocType: Opportunity,Contact Info,تماس پيژندنه
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,جوړول دحمل توکي
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,مهرباني وکړئ د بشري منابعو&gt; بشري سیسټمونو کې د کارمندانو نومونې سیستم ترتیب کړئ
 DocType: Packing Slip,Net Weight UOM,خالص وزن UOM
 DocType: Item,Default Supplier,default عرضه
 DocType: Manufacturing Settings,Over Production Allowance Percentage,تولید امتياز سلنه
@@ -2315,6 +2314,7 @@ DocType: Budget,Fiscal Year,پولي کال، مالي کال
 DocType: Asset Maintenance Log,Planned,پلان شوی
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,د رسیدونکي اصلي رسیدونکي حسابونه باید وکارول شي که چیرې ناروغانو ته د مشورې ورکولو تورونه ونه سپارل شي.
 DocType: Vehicle Log,Fuel Price,د ګازو د بیو
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,پېرودونکي&gt; پیرودونکي ګروپ&gt; ساحه
 DocType: Budget,Budget,د بودجې د
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,پرانيستی
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,د ثابت د شتمنیو د قالب باید یو غیر سټاک وي.
@@ -2744,7 +2744,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,لا لګښت مرکزونه کولای شي ډلو لاندې کړې خو زياتونې شي غیر ډلو په وړاندې د
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,کارنان او حلال
 DocType: Vehicle Log,VLOG.,VLOG.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,مهرباني وکړئ د بشري منابعو&gt; بشري سیسټمونو کې د کارمندانو نومونې سیستم ترتیب کړئ
 DocType: Branch,Branch,څانګه
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,بشپړ کونکي
@@ -4187,6 +4186,7 @@ DocType: Material Request Item,For Warehouse,د ګدام
 DocType: Employee,Offer Date,وړاندیز نېټه
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Quotations
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,تاسو په نالیکي اکر کې دي. تاسو به ونه کړای شي تر هغه وخته چې د شبکې لري بيا راولېښئ.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,عرضه کوونکي&gt; د عرضه کوونکي ډول
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,نه د زده کوونکو ډلو جوړ.
 DocType: Purchase Invoice Item,Serial No,پر له پسې ګڼه
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,میاشتنی پور بيرته مقدار نه شي کولای د پور مقدار زیات شي
@@ -4226,7 +4226,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,امنيت &amp; Commodity exchanges
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',د variant اندازه Default واحد &#39;{0}&#39; باید په کينډۍ ورته وي &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,محاسبه په اساس
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,مهرباني وکړئ د سیٹ اپ&gt; شمېره لړۍ له لارې د حاضریدو لړۍ سیسټم
 DocType: Delivery Note Item,From Warehouse,له ګدام
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,د ذکر شویو معیارونو لپاره هیڅ کارمندان نشته
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,سره د توکو بیل نه توکي تولید
@@ -4293,7 +4292,6 @@ DocType: Production Plan,Get Material Request,د موادو غوښتنه ترل�
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,د پستي داخراجاتو
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Total (نننیو)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,ساعتېري &amp; تفريح
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,مهرباني وکړئ په تعلیم کې د ښوونکي د نومونې سیسټم جوړ کړئ&gt; د زده کړې ترتیبات
 ,Item Variant Details,د توکي ډول توکی
 DocType: Quality Inspection,Item Serial No,د قالب شعبه
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,کارکوونکی سوابق جوړول
@@ -4381,6 +4379,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,مهرباني غوره مخ په وړاندې ترسره کړي که تاسو هم غواړي چې عبارت دي د تېر مالي کال د توازن د دې مالي کال ته روان شو
 DocType: GL Entry,Against Voucher Type,په وړاندې د ګټمنو ډول
 DocType: Physician,Phone (R),تلیفون (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,د توکو کود&gt; توکي ګروپ&gt; برنامه
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,د وخت وختونه شامل دي
 DocType: Item,Attributes,صفات
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,کينډۍ فعالول
@@ -4431,7 +4430,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,او په معلول معلولیت لرونکی
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,لړۍ الزامی دی
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,مالي خدمتونه
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,پېرودونکي&gt; پیرودونکي ګروپ&gt; ساحه
 DocType: Student Sibling,Student ID,زده کوونکي د پیژندنې
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,لپاره د وخت کندي د فعالیتونو ډولونه
 DocType: Opening Invoice Creation Tool,Sales,خرڅلاو
@@ -4608,6 +4606,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,د پرانستې د خبرتیا
 DocType: Payment Entry,Difference Amount (Company Currency),توپیر رقم (شرکت د اسعارو)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,مستقیم لګښتونه
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,مهرباني وکړئ د سایټ نوم نومول د Setup&gt; ترتیباتو له لارې {0} لپاره د نومونې لړۍ وټاکئ
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,نوي پېرېدونکي د عوایدو
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,د سفر لګښت
 DocType: Maintenance Visit,Breakdown,د ماشین یا د ګاډي ناڅاپه خرابېدل
@@ -4634,6 +4633,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigating
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,د پلان
 DocType: Share Balance,Issued,صادر شوی
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,د زده کونکو د فعالیت
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,مهرباني وکړئ په تعلیم کې د ښوونکي د نومونې سیسټم جوړ کړئ&gt; د زده کړې ترتیبات
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,عرضه Id
 DocType: Payment Request,Payment Gateway Details,د پیسو ليدونکی نورولوله
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,مقدار باید په پرتله ډيره وي 0
@@ -5254,6 +5254,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-په انوائس کې ا�
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,د کار امر مخکې له دې د BOM سره د ټولو شیانو لپاره جوړ شو
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,د توپیر تفصیلات
 DocType: Setup Progress Action,Setup Progress Action,د پرمختګ پرمختګ
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,مهرباني وکړئ د سیٹ اپ&gt; شمېره لړۍ له لارې د حاضریدو لړۍ سیسټم
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,د نرخ لیست
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,توکی لرې که په تور د تطبیق وړ نه دی چې توکی
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,مهرباني وکړئ د بشپړولو په حال کې د ساتنې وضعیت غوره کړئ یا د ختم نیټه نیټه
@@ -5736,7 +5737,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,وروستنۍ هممهال
 DocType: Guardian,Guardian,ګارډین
 DocType: Item Alternative,Item Alternative,د توکو بدیل
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,مهرباني وکړئ د سایټ نوم نومول د Setup&gt; ترتیباتو له لارې {0} لپاره د نومونې لړۍ وټاکئ
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,د ورکړې وړ پیرودونکي یا عرضه کوونکي جوړ کړئ.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,ارزونې {0} په ټاکلې نیټه لړ {1} لپاره د کارګر جوړ
 DocType: Academic Term,Education,ښوونه

@@ -713,7 +713,6 @@ DocType: Crop,Produced Items,Producerede varer
 DocType: Sales Order Item,Gross Profit,Gross Profit
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Tilvækst kan ikke være 0
 DocType: Company,Delete Company Transactions,Slet Company Transaktioner
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Varenummer&gt; Varegruppe&gt; Mærke
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Referencenummer og reference Dato er obligatorisk for Bank transaktion
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Tilføj / rediger Skatter og Afgifter
 DocType: Payment Entry Reference,Supplier Invoice No,Leverandør fakturanr.
@@ -769,7 +768,6 @@ DocType: Sales Invoice,Shipping Bill Date,Fragtregningsdato
 DocType: Production Plan,Production Plan,Produktionsplan
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Åbning af fakturaoprettelsesværktøj
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Salg Return
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Leverandør&gt; Leverandør Type
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,Bemærk: I alt tildelt blade {0} bør ikke være mindre end allerede godkendte blade {1} for perioden
 ,Total Stock Summary,Samlet lageroversigt
 DocType: Announcement,Posted By,Bogført af
@@ -1419,6 +1417,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Postnummer
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Salgsordre {0} er {1}
 DocType: Opportunity,Contact Info,Kontaktinformation
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Making Stock Angivelser
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Opsæt venligst medarbejdernavnesystem i menneskelige ressourcer&gt; HR-indstillinger
 DocType: Packing Slip,Net Weight UOM,Nettovægt vægtenhed
 DocType: Item,Default Supplier,Standard Leverandør
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Over Produktion GODTGØRELSESPROCENT
@@ -2298,6 +2297,7 @@ DocType: Budget,Fiscal Year,Regnskabsår
 DocType: Asset Maintenance Log,Planned,planlagt
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"Standardfordelbare konti, der skal bruges, hvis de ikke er indstillet til patienten for at bestille konsultationsafgifter."
 DocType: Vehicle Log,Fuel Price,Brændstofpris
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Kunde&gt; Kundegruppe&gt; Territorium
 DocType: Budget,Budget,Budget
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Sæt Åbn
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Anlægsaktiv-varen skal være en ikke-lagervare.
@@ -2720,7 +2720,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,Yderligere omkostninger centre kan foretages under Grupper men indtastninger kan foretages mod ikke-grupper
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Brugere og tilladelser
 DocType: Vehicle Log,VLOG.,Vlog.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Opsæt venligst medarbejdernavnesystem i menneskelige ressourcer&gt; HR-indstillinger
 DocType: Branch,Branch,Filial
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,Fulfillment User
@@ -4156,6 +4155,7 @@ DocType: Material Request Item,For Warehouse,Til lager
 DocType: Employee,Offer Date,Dato
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Tilbud
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,"Du er i offline-tilstand. Du vil ikke være i stand til at genindlæse, indtil du har netværk igen."
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Leverandør&gt; Leverandør Type
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Ingen elevgrupper oprettet.
 DocType: Purchase Invoice Item,Serial No,Serienummer
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,Månedlig tilbagebetaling beløb kan ikke være større end Lånebeløb
@@ -4194,7 +4194,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Værdipapirer og Commodity Exchanges
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Standard måleenhed for Variant &#39;{0}&#39; skal være samme som i skabelon &#39;{1}&#39;
 DocType: Shipping Rule,Calculate Based On,Beregn baseret på
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Venligst opsæt nummereringsserier for Tilstedeværelse via Opsætning&gt; Nummereringsserie
 DocType: Delivery Note Item,From Warehouse,Fra lager
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Ingen ansatte for de nævnte kriterier
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Ingen stykliste-varer at fremstille
@@ -4260,7 +4259,6 @@ DocType: Production Plan,Get Material Request,Hent materialeanmodning
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,Portoudgifter
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),I alt (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Entertainment &amp; Leisure
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Indstil venligst instruktørens navngivningssystem under Uddannelse&gt; Uddannelsesindstillinger
 ,Item Variant Details,Varevarianter Detaljer
 DocType: Quality Inspection,Item Serial No,Serienummer til varer
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,Opret Medarbejder Records
@@ -4345,6 +4343,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,"Vælg dette felt, hvis du også ønsker at inkludere foregående regnskabsår fraværssaldo til indeværende regnskabsår"
 DocType: GL Entry,Against Voucher Type,Mod Bilagstype
 DocType: Physician,Phone (R),Telefon (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Varenummer&gt; Varegruppe&gt; Mærke
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Time slots tilføjet
 DocType: Item,Attributes,Attributter
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Aktivér skabelon
@@ -4395,7 +4394,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,og unchcked Disabled in the
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Nummerserien er obligatorisk
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Financial Services
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Kunde&gt; Kundegruppe&gt; Territorium
 DocType: Student Sibling,Student ID,Studiekort
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Typer af aktiviteter for Time Logs
 DocType: Opening Invoice Creation Tool,Sales,Salg
@@ -4567,6 +4565,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},I
 DocType: Email Digest,Open Notifications,Åbne Meddelelser
 DocType: Payment Entry,Difference Amount (Company Currency),Differencebeløb (firmavaluta)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Direkte udgifter
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Indstil navngivningsserien for {0} via Setup&gt; Settings&gt; Naming Series
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Omsætning nye kunder
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Rejseudgifter
 DocType: Maintenance Visit,Breakdown,Sammenbrud
@@ -4593,6 +4592,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigering
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Planlægning
 DocType: Share Balance,Issued,Udstedt
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Studentaktivitet
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Indstil venligst instruktørens navngivningssystem under Uddannelse&gt; Uddannelsesindstillinger
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Leverandør id
 DocType: Payment Request,Payment Gateway Details,Betaling Gateway Detaljer
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Mængde bør være større end 0
@@ -5211,6 +5211,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-korrektion i fakturaen
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Arbejdsordre allerede oprettet for alle varer med BOM
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Variant Details Report
 DocType: Setup Progress Action,Setup Progress Action,Setup Progress Action
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Venligst opsæt nummereringsserier for Tilstedeværelse via Opsætning&gt; Nummereringsserie
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Købsprisliste
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,"Fjern element, hvis afgifter ikke finder anvendelse på denne post"
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Vælg venligst Vedligeholdelsesstatus som Afsluttet eller fjern Afslutningsdato
@@ -5687,7 +5688,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Sidste synkronisering
 DocType: Guardian,Guardian,Guardian
 DocType: Item Alternative,Item Alternative,Vare Alternativ
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Indstil navngivningsserien for {0} via Setup&gt; Settings&gt; Naming Series
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Opret manglende kunde eller leverandør.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Vurdering {0} dannet for medarbejder {1} i det givne datointerval
 DocType: Academic Term,Education,Uddannelse
