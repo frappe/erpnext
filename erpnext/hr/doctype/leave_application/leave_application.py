@@ -924,12 +924,14 @@ def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
 				prev_year_total_leaves_allocated = prev_year_allocation_records[employee]["Annual Leave - اجازة اعتيادية"].total_leaves_allocated
 				prev_year_applied_days = get_approved_leaves_for_period(employee, "Annual Leave - اجازة اعتيادية", from_date, to_date)
 				prev_year_remain_balance = prev_year_total_leaves_allocated - prev_year_applied_days
+				if prev_year_remain_balance >= 11:
+					prev_year_remain_balance = 11
 			else:
 				prev_year_remain_balance = 0
-
-			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/360)+prev_year_remain_balance
-			if period_balance > 33:
-				period_balance=33
+			# frappe.throw(str((date_dif) * (22/360)))
+			period_balance = ((date_dif) * (0.061111111)) + prev_year_remain_balance
+			# if period_balance > 33:
+			# 	period_balance=33
 			balance = period_balance - applied_days - total_leave_days
 			# getdate(to_date).month
 			
