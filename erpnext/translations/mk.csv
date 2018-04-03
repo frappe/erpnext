@@ -721,7 +721,6 @@ DocType: Crop,Produced Items,Произведени предмети
 DocType: Sales Order Item,Gross Profit,Бруто добивка
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +49,Increment cannot be 0,Зголемување не може да биде 0
 DocType: Company,Delete Company Transactions,Избриши компанијата Трансакции
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Код на ставка&gt; Група на производи&gt; Бренд
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +364,Reference No and Reference Date is mandatory for Bank transaction,Референтен број и референтен датум е задолжително за банкарски трансакции
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Додај / Уреди даноци и такси
 DocType: Payment Entry Reference,Supplier Invoice No,Добавувачот Фактура бр
@@ -777,7 +776,6 @@ DocType: Sales Invoice,Shipping Bill Date,Предавање Бил Датум
 DocType: Production Plan,Production Plan,План за производство
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Отворање алатка за создавање фактура
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +853,Sales Return,Продажбата Враќање
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Добавувачот&gt; Тип на добавувач
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +96,Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period,Забелешка: Вкупно распределени лисја {0} не треба да биде помал од веќе одобрен лисја {1} за периодот
 ,Total Stock Summary,Вкупно Акции Резиме
 DocType: Announcement,Posted By,Испратено од
@@ -1436,6 +1434,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Поштенски
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Продај Побарувања {0} е {1}
 DocType: Opportunity,Contact Info,Контакт инфо
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Акции правење записи
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ве молиме подесете Систем за имиџ на вработените во човечки ресурси&gt; Поставувања за човечки ресурси
 DocType: Packing Slip,Net Weight UOM,Нето тежина UOM
 DocType: Item,Default Supplier,Стандардно Добавувачот
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Во текот на производство Додаток Процент
@@ -2329,6 +2328,7 @@ DocType: Budget,Fiscal Year,Фискална година
 DocType: Asset Maintenance Log,Planned,Планирано
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,Ненаплатени сметки што треба да се користат ако не се поставени во Пациентот за да се резервираат трошоци за консултации.
 DocType: Vehicle Log,Fuel Price,гориво Цена
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Клиент&gt; Група на клиенти&gt; Територија
 DocType: Budget,Budget,Буџет
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Поставете го отворен
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Фиксни средства точка мора да биде точка на не-парк.
@@ -2759,7 +2759,6 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +49,Please speci
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +24,Further cost centers can be made under Groups but entries can be made against non-Groups,Понатаму центри цена може да се направи под Групи но записи може да се направи врз несрпското групи
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,Корисници и дозволи
 DocType: Vehicle Log,VLOG.,Vlog.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ве молиме подесете Систем за имиџ на вработените во човечки ресурси&gt; Поставувања за човечки ресурси
 DocType: Branch,Branch,Филијали
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
 DocType: Delivery Trip,Fulfillment User,Исполнет корисник
@@ -4210,6 +4209,7 @@ DocType: Material Request Item,For Warehouse,За Магацински
 DocType: Employee,Offer Date,Датум на понуда
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Понуди
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Вие сте моментално во режим без мрежа. Вие нема да бидете во можност да ја превчитате додека имате мрежа.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Добавувачот&gt; Тип на добавувач
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Не студентски групи создадени.
 DocType: Purchase Invoice Item,Serial No,Сериски Не
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,Месечна отплата износ не може да биде поголем од кредит Износ
@@ -4249,7 +4249,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +46,Securities & Commodity Exchanges,Хартии од вредност и стоковни берзи
 apps/erpnext/erpnext/stock/doctype/item/item.py +689,Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',Стандардно единица мерка за Варијанта &#39;{0}&#39; мора да биде иста како и во Мострата &quot;{1}&quot;
 DocType: Shipping Rule,Calculate Based On,Се пресмета врз основа на
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ве молиме наместете серија за нумерација за Присуство преку Поставување&gt; Нумерирање
 DocType: Delivery Note Item,From Warehouse,Од Магацин
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,Нема вработени за наведените критериуми
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +955,No Items with Bill of Materials to Manufacture,Нема предмети со Бил на материјали за производство на
@@ -4317,7 +4316,6 @@ DocType: Production Plan,Get Material Request,Земете материјал Б
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +111,Postal Expenses,Поштенски трошоци
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Вкупно (Износ)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +26,Entertainment & Leisure,Забава &amp; Leisure
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Ве молиме поставете Систем за именување на инструктори во образованието&gt; Образование
 ,Item Variant Details,Детали за варијанта на точка
 DocType: Quality Inspection,Item Serial No,Точка Сериски Не
 apps/erpnext/erpnext/utilities/activation.py +135,Create Employee Records,Креирај вработените рекорди
@@ -4405,6 +4403,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Ве молиме изберете ја носи напред ако вие исто така сакаат да се вклучат во претходната фискална година биланс остава на оваа фискална година
 DocType: GL Entry,Against Voucher Type,Против ваучер Тип
 DocType: Physician,Phone (R),Телефон (R)
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Код на ставка&gt; Група на производи&gt; Бренд
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Додадени се временски слотови
 DocType: Item,Attributes,Атрибути
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Овозможи дефиниција
@@ -4455,7 +4454,6 @@ apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unchcked Disabled in the,и unchcked Исклучено во
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Серија е задолжително
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Финансиски Услуги
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Клиент&gt; Група на клиенти&gt; Територија
 DocType: Student Sibling,Student ID,студентски проект
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Типови на активности за Време на дневници
 DocType: Opening Invoice Creation Tool,Sales,Продажба
@@ -4632,6 +4630,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},�
 DocType: Email Digest,Open Notifications,Отворен Известувања
 DocType: Payment Entry,Difference Amount (Company Currency),Разликата Износ (Фирма валута)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Директни трошоци
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ве молиме наместете го Селектирањето за {0} преку Setup&gt; Settings&gt; Series за именување
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Нов корисник приходи
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Патни трошоци
 DocType: Maintenance Visit,Breakdown,Дефект
@@ -4658,6 +4657,7 @@ apps/erpnext/erpnext/config/learn.py +11,Navigating,Навигацијата
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Планирање
 DocType: Share Balance,Issued,Издадени
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,студент активност
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Ве молиме поставете Систем за именување на инструктори во образованието&gt; Образование
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Id снабдувач
 DocType: Payment Request,Payment Gateway Details,Исплата Портал Детали
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Количина треба да биде поголем од 0
@@ -5281,6 +5281,7 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-корекција во ф
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Работниот ред е веќе креиран за сите предмети со BOM
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Извештај за детали од варијанта
 DocType: Setup Progress Action,Setup Progress Action,Поставување Акција за напредок
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ве молиме наместете серија за нумерација за Присуство преку Поставување&gt; Нумерирање
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Купување на ценовник
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,Отстрани точка ако обвиненијата не се применува на таа ставка
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Ве молиме изберете Maintenance Status as Completed или отстранете го датумот на комплетирање
@@ -5767,7 +5768,6 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Employee relieve
 DocType: Hub Settings,Last Sync On,Последно синхронизирање е вклучено
 DocType: Guardian,Guardian,Гардијан
 DocType: Item Alternative,Item Alternative,Позиција Алтернатива
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ве молиме наместете го Селектирањето за {0} преку Setup&gt; Settings&gt; Series за именување
 DocType: Opening Invoice Creation Tool,Create missing customer or supplier.,Креирај недостасува купувач или добавувач.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Процена {0} создадена за вработените {1} во дадениот период
 DocType: Academic Term,Education,Образование

@@ -76,6 +76,7 @@ apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +22,Sam
 DocType: Patient,Married,Casado
 apps/erpnext/erpnext/accounts/party.py +41,Not permitted for {0},Não permitido para {0}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +467,Stock cannot be updated against Delivery Note {0},Banco não pode ser atualizado contra nota de entrega {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +91,Next Depreciation Date cannot be before Purchase Date,A data da Próxima Depreciação não pode ser antes Data da compra
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +184,Salary Structure Missing,Estrutura salarial ausente
 DocType: Sales Invoice Item,Sales Invoice Item,Item da Fatura de Venda
 DocType: POS Profile,Write Off Cost Center,Centro de custo do abatimento
@@ -110,6 +111,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +273,"Available qt
 DocType: Expense Claim Detail,Claim Amount,Valor Requerido
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +31,Supplier Type / Supplier,Fornecedor Tipo / Fornecedor
 DocType: Assessment Result,Grade,Nota de Avaliação
+DocType: Restaurant Table,No of Seats,Número de assentos
 DocType: Sales Invoice Item,Delivered By Supplier,Proferido por Fornecedor
 DocType: SMS Center,All Contact,Todo o Contato
 DocType: Daily Work Summary,Daily Work Summary,Resumo de Trabalho Diário
@@ -906,6 +908,7 @@ DocType: Attendance,HR Manager,Gerente de RH
 apps/erpnext/erpnext/accounts/party.py +175,Please select a Company,"Por favor, selecione uma empresa"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +92,Privilege Leave,Privilege Deixar
 DocType: Purchase Invoice,Supplier Invoice Date,Data de emissão da nota fiscal
+DocType: Stock Settings,Naming Series Prefix,Prefixo do código de documentos
 DocType: Appraisal Template Goal,Appraisal Template Goal,Meta do Modelo de Avaliação
 DocType: Salary Component,Earning,Ganho
 DocType: Purchase Invoice,Party Account Currency,Moeda do Sujeito
@@ -1312,6 +1315,7 @@ DocType: Leave Control Panel,Leave blank if considered for all employee types,De
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuir encargos baseado em
 DocType: Projects Settings,Timesheets,Registros de Tempo
 DocType: HR Settings,HR Settings,Configurações de RH
+DocType: Salary Slip,net pay info,Informações de remuneração líquida
 DocType: Purchase Invoice,Additional Discount Amount,Total do Desconto Adicional
 apps/erpnext/erpnext/controllers/accounts_controller.py +596,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Linha #{0}: A qtde deve ser 1, pois o item é um ativo imobilizado. Por favor, utilize uma linha separada para múltiplas qtdes."
 DocType: Leave Block List Allow,Leave Block List Allow,Deixe Lista de Bloqueios Permitir
@@ -1472,6 +1476,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +137,Maxiumm discount for
 DocType: Sales Partner,Address & Contacts,Endereços e Contatos
 DocType: POS Profile,[Select],[ Selecionar]
 DocType: Payment Request,Make Sales Invoice,Fazer Fatura de Venda
+apps/erpnext/erpnext/crm/doctype/lead/lead.py +53,Next Contact Date cannot be in the past,A Próxima Data de Contato não pode ocorrer no passado
 DocType: Company,For Reference Only.,Apenas para referência.
 DocType: Purchase Invoice,PINV-RET-,NFC-DEV-
 DocType: Sales Invoice Advance,Advance Amount,Valor Adiantado
@@ -1930,6 +1935,7 @@ DocType: GL Entry,Voucher No,Nº do Comprovante
 DocType: Leave Allocation,Leave Allocation,Alocação de Licenças
 DocType: Training Event,Trainer Email,Email do Instrutor
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +550,Material Requests {0} created,Requisições de Material {0} criadas
+DocType: Restaurant Reservation,No of People,Número de pessoas
 DocType: Purchase Invoice,Address and Contact,Endereço e Contato
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +276,Stock cannot be updated against Purchase Receipt {0},O estoque não pode ser atualizado em relação ao Recibo de Compra {0}
 DocType: Support Settings,Auto close Issue after 7 days,Fechar atuomaticamente o incidente após 7 dias
@@ -2235,6 +2241,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You 
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Não foi criado nenhum grupo de alunos.
 DocType: Purchase Invoice Item,Serial No,Nº de Série
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +143,Please enter Maintaince Details first,"Por favor, indique Maintaince Detalhes primeiro"
+DocType: Subscription,Next Schedule Date,Próxima data programada
 DocType: Stock Entry,Including items for sub assemblies,Incluindo itens para subconjuntos
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +34,Student is already enrolled.,Aluno já está inscrito.
 DocType: Fiscal Year,Year Name,Nome do ano
