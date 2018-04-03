@@ -13,7 +13,7 @@ def get_slide_settings():
 
 	doc = frappe.get_doc("Setup Progress")
 	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"]
-	
+
 	if len(item):
 		item = item[0]
 		if not item.action_document:

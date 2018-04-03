@@ -330,3 +330,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 	# return employee
 	return employee
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])
