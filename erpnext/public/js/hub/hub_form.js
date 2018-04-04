@@ -1,12 +1,31 @@
 frappe.provide('erpnext.hub');
 
-erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
+erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList {
 	setup_defaults() {
 		super.setup_defaults();
 		this.method = 'erpnext.hub_node.get_details';
 		const route = frappe.get_route();
 		this.page_name = route[2];
 	}
+
+	setup_fields() {
+		return this.get_meta()
+			.then(r => {
+				this.meta = r.message.meta || this.meta;
+				this.categories = r.message.categories || [];
+				this.bootstrap_data(r.message);
+
+				this.getFormFields();
+			});
+	}
+
+	bootstrap_data() { }
+
+	get_meta() {
+		return new Promise(resolve =>
+			frappe.call('erpnext.hub_node.get_meta', {doctype: 'Hub ' + this.doctype}, resolve));
+	}
+
 
 	set_breadcrumbs() {
 		frappe.breadcrumbs.add({
@@ -21,11 +40,54 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 			wrapper: this.$page.find('.layout-side-section'),
 			css_class: 'hub-form-sidebar'
 		});
+
+		this.attachFooter();
+		this.attachTimeline();
+		this.attachReviewArea();
 	}
 
 	setup_filter_area() { }
 
 	setup_sort_selector() { }
+
+	// let category = this.quick_view.get_values().hub_category;
+	// return new Promise((resolve, reject) => {
+	// 	frappe.call({
+	// 		method: 'erpnext.hub_node.update_category',
+	// 		args: {
+	// 			hub_item_code: values.hub_item_code,
+	// 			category: category,
+	// 		},
+	// 		callback: (r) => {
+	// 			resolve();
+	// 		},
+	// 		freeze: true
+	// 	}).fail(reject);
+	// });
+
+	get_timeline() {
+		return `<div class="timeline">
+			<div class="timeline-head">
+			</div>
+			<div class="timeline-new-email">
+				<button class="btn btn-default btn-reply-email btn-xs">
+					${__("Reply")}
+				</button>
+			</div>
+			<div class="timeline-items"></div>
+		</div>`;
+	}
+
+	get_footer() {
+		return `<div class="form-footer">
+			<div class="after-save">
+				<div class="form-comments"></div>
+			</div>
+			<div class="pull-right scroll-to-top">
+				<a onclick="frappe.utils.scroll_to(0)"><i class="fa fa-chevron-up text-muted"></i></a>
+			</div>
+		</div>`;
+	}
 
 	get_args() {
 		return {
@@ -48,108 +110,296 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 			<span class="helper"></span>` :
 			`<div class="standard-image">${frappe.get_abbr(this.page_title)}</div>`;
 
+		this.sidebar.remove_item('image');
 		this.sidebar.add_item({
+			name: 'image',
 			label: image_html
 		});
 
-		let fields = this.get_field_configs();
+		if(!this.form) {
+			let fields = this.formFields;
+			this.form = new frappe.ui.FieldGroup({
+				parent: this.$result,
+				fields
+			});
+			this.form.make();
+		}
 
-		this.form = new frappe.ui.FieldGroup({
-			parent: this.$result,
-			fields
-		});
+		if(this.data.hub_category) {
+			this.form.fields_dict.set_category.hide();
+		}
 
-		this.form.make();
 		this.form.set_values(this.data);
+		this.$result.show();
+
+		this.$timelineList.empty();
+		if(this.data.reviews.length) {
+			this.data.reviews.map(review => {
+				this.addReviewToTimeline(review);
+			})
+		}
+
+		this.postRender()
 	}
 
-	toggle_result_area() {
-		this.$result.toggle(this.unique_id);
-		this.$paging_area.toggle(this.data.length > 0);
-		this.$no_result.toggle(this.data.length == 0);
+	postRender() {}
 
-		const show_more = (this.start + this.page_length) <= this.data.length;
-		this.$paging_area.find('.btn-more')
-			.toggle(show_more);
+	attachFooter() {
+		let footerHtml = `<div class="form-footer">
+			<div class="form-comments"></div>
+			<div class="pull-right scroll-to-top">
+				<a onclick="frappe.utils.scroll_to(0)"><i class="fa fa-chevron-up text-muted"></i></a>
+			</div>
+		</div>`;
+
+		let parent = $('<div>').appendTo(this.page.main.parent());
+		this.$footer = $(footerHtml).appendTo(parent);
+	}
+
+	attachTimeline() {
+		let timelineHtml = `<div class="timeline">
+			<div class="timeline-head">
+			</div>
+			<div class="timeline-new-email">
+				<button class="btn btn-default btn-reply-email btn-xs">
+					${ __("Reply") }
+				</button>
+			</div>
+			<div class="timeline-items"></div>
+		</div>`;
+
+		let parent = this.$footer.find(".form-comments");
+		this.$timeline = $(timelineHtml).appendTo(parent);
+
+		this.$timelineList = this.$timeline.find(".timeline-items");
+	}
+
+	attachReviewArea() {
+		this.comment_area = new frappe.ui.ReviewArea({
+			parent: this.$footer.find('.timeline-head'),
+			mentions: [],
+			on_submit: (val) => {
+				val.user = frappe.session.user;
+				val.username = frappe.session.user_fullname;
+				frappe.call({
+					method: 'erpnext.hub_node.send_review',
+					args: {
+						hub_item_code: this.data.hub_item_code,
+						review: val
+					},
+					callback: (r) => {
+						this.refresh();
+						this.comment_area.reset();
+					},
+					freeze: true
+				});
+			}
+		});
+	}
+
+	addReviewToTimeline(data) {
+		let username = data.username || data.user || __("Anonymous")
+		let imageHtml = data.user_image
+			? `<div class="avatar-frame" style="background-image: url(${data.user_image})"></div>`
+			: `<div class="standard-image" style="background-color: #fafbfc">${frappe.get_abbr(username)}</div>`
+
+		let editHtml = data.own
+			? `<div class="pull-right hidden-xs close-btn-container">
+				<span class="small text-muted">
+					${'data.delete'}
+				</span>
+			</div>
+			<div class="pull-right edit-btn-container">
+				<span class="small text-muted">
+					${'data.edit'}
+				</span>
+			</div>`
+			: '';
+
+		let ratingHtml = '';
+
+		for(var i = 0; i < 5; i++) {
+			let starIcon = 'fa-star-o'
+			if(i < data.rating) {
+				starIcon = 'fa-star';
+			}
+			ratingHtml += `<i class="fa fa-fw ${starIcon} star-icon" data-idx='${i}'></i>`;
+		}
+
+		$(this.getTimelineItem(data, imageHtml, editHtml, ratingHtml))
+			.appendTo(this.$timelineList);
+	}
+
+	getTimelineItem(data, imageHtml, editHtml, ratingHtml) {
+		return `<div class="media timeline-item user-content" data-doctype="${''}" data-name="${''}">
+			<span class="pull-left avatar avatar-medium hidden-xs" style="margin-top: 1px">
+				${imageHtml}
+			</span>
+
+			<div class="pull-left media-body">
+				<div class="media-content-wrapper">
+					<div class="action-btns">${editHtml}</div>
+
+					<div class="comment-header clearfix small ${'linksActive'}">
+						<span class="pull-left avatar avatar-small visible-xs">
+							${imageHtml}
+						</span>
+
+						<div class="asset-details">
+							<span class="author-wrap">
+								<i class="octicon octicon-quote hidden-xs fa-fw"></i>
+								<span>${data.username}</span>
+							</span>
+								<a href="#Form/${''}" class="text-muted">
+									<span class="text-muted hidden-xs">&ndash;</span>
+									<span class="indicator-right ${'green'}
+										delivery-status-indicator">
+										<span class="hidden-xs">${data.pretty_date}</span>
+									</span>
+								</a>
+
+								<a class="text-muted reply-link pull-right timeline-content-show"
+								title="${__('Reply')}"> ${''} </a>
+							<span class="comment-likes hidden-xs">
+								<i class="octicon octicon-heart like-action text-extra-muted not-liked fa-fw">
+								</i>
+								<span class="likes-count text-muted">10</span>
+							</span>
+						</div>
+					</div>
+					<div class="reply timeline-content-show">
+						<div class="timeline-item-content">
+								<p class="text-muted small">
+									<b>${data.subject}</b>
+								</p>
+
+								<hr>
+
+								<p class="text-muted small">
+									${ratingHtml}
+								</p>
+
+								<hr>
+								<p>
+									${data.content}
+								</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	}
+
+	prepareFormFields(fields, fieldnames) {
+		return fields
+		.filter(field => fieldnames.includes(field.fieldname))
+		.map(field => {
+			let {
+				label,
+				fieldname,
+				fieldtype,
+			} = field;
+			let read_only = 1;
+			return {
+				label,
+				fieldname,
+				fieldtype,
+				read_only,
+			};
+		});
 	}
 };
 
-erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubForm{
+erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
+	constructor(opts) {
+		super(opts);
+
+		this.show();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Item';
 		this.image_field_name = 'image';
 	}
 
-	get_field_configs() {
-		let fields = [];
-		this.fields.map(fieldname => {
-			fields.push({
-				label: toTitle(frappe.model.unscrub(fieldname)),
-				fieldname,
+	postRender() {
+		this.categoryDialog = new frappe.ui.Dialog({
+			title: __('Suggest Category'),
+			fields: [
+				{
+					label: __('Category'),
+					fieldname: 'category',
+					fieldtype: 'Autocomplete',
+					options: this.categories,
+					reqd: 1
+				}
+			],
+			primary_action_label: __("Send"),
+			primary_action: () => {
+				let values = this.categoryDialog.get_values();
+				frappe.call({
+					method: 'erpnext.hub_node.update_category',
+					args: {
+						hub_item_code: this.data.hub_item_code,
+						category: values.category
+					},
+					callback: () => {
+						this.refresh();
+					},
+					freeze: true
+				}).fail(() => {});
+			}
+		});
+	}
+
+	getFormFields() {
+		let colOneFieldnames = ['item_name', 'item_code', 'description'];
+		let colTwoFieldnames = ['seller', 'company_name', 'country'];
+		let colOneFields = this.prepareFormFields(this.meta.fields, colOneFieldnames);
+		let colTwoFields = this.prepareFormFields(this.meta.fields, colTwoFieldnames);
+
+		let miscFields = [
+			{
+				label: __('Category'),
+				fieldname: 'hub_category',
 				fieldtype: 'Data',
 				read_only: 1
-			});
-		});
+			},
 
-		let category_field = {
-			label: 'Hub Category',
-			fieldname: 'hub_category',
-			fieldtype: 'Data'
-		}
+			{
+				label: __('Suggest Category?'),
+				fieldname: 'set_category',
+				fieldtype: 'Button',
+				click: () => {
+					this.categoryDialog.show();
+				}
+			},
 
-		if(this.data.company_name === this.hub_settings.company) {
-			this.page.set_primary_action(__('Update'), () => {
-				this.update_on_hub();
-			}, 'octicon octicon-plus');
-		} else {
-			category_field.read_only = 1;
-		}
-
-		fields.unshift(category_field);
-
-		return fields;
-	}
-
-	update_on_hub() {
-		return new Promise((resolve, reject) => {
-			frappe.call({
-				method: 'erpnext.hub_node.update_category',
-				args: { item: this.unique_id, category: this.form.get_value('hub_category') },
-				callback: resolve,
-				freeze: true
-			}).fail(reject);
-		});
-	}
-
-	setup_fields() {
-		this.fields = ['hub_item_code', 'item_name', 'item_code', 'description',
-			'seller', 'company_name', 'country'];
+			{
+				fieldname: 'cb1',
+				fieldtype: 'Column Break'
+			}
+		];
+		this.formFields = colOneFields.concat(miscFields, colTwoFields);
 	}
 }
 
-erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubForm{
+erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
+	constructor(opts) {
+		super(opts);
+
+		this.show();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Company';
 		this.image_field_name = 'company_logo';
 	}
 
-	get_field_configs() {
-		let fields = [];
-		this.fields.map(fieldname => {
-			fields.push({
-				label: toTitle(frappe.model.unscrub(fieldname)),
-				fieldname,
-				fieldtype: 'Data',
-				read_only: 1
-			});
-		});
-
-		return fields;
-	}
-
-	setup_fields() {
-		this.fields = ['company_name', 'description', 'route', 'country', 'seller', 'site_name'];
+	getFormFields() {
+		let fieldnames = ['company_name', 'description', 'route', 'country', 'seller', 'site_name'];;
+		this.formFields = this.prepareFormFields(this.meta.fields, fieldnames);
 	}
 }

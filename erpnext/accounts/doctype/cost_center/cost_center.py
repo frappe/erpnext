@@ -64,3 +64,6 @@ class CostCenter(NestedSet):
 		if not merge:
 			frappe.db.set_value("Cost Center", newdn, "cost_center_name",
 				" - ".join(newdn.split(" - ")[:-1]))
+
+def on_doctype_update():
+	frappe.db.add_index("Cost Center", ["lft", "rgt"])

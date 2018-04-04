@@ -17,6 +17,5 @@ class SalaryComponent(Document):
 				self.salary_component.split()]).upper()
 
 		self.salary_component_abbr = self.salary_component_abbr.strip()
-
-		self.salary_component_abbr = append_number_if_name_exists('Salary Component',
-			self.salary_component_abbr, 'salary_component_abbr', separator='_')
+		self.salary_component_abbr = append_number_if_name_exists('Salary Component', self.salary_component_abbr,
+			'salary_component_abbr', separator='_', filters={"name": ["!=", self.name]})
