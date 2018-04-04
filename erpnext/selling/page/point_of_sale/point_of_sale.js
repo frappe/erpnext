@@ -886,9 +886,11 @@ class POSCart {
 		const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
+		const batch_no = item.batch_no || '';
+
 		return `
 			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}"
-				data-batch-no="${item.batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
+				data-batch-no="${batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
