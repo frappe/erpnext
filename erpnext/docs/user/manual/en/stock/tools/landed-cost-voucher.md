@@ -24,7 +24,7 @@ In the document, you can select multiple Purchase Receipts and fetch all items f
 
 <img class="screenshot" alt="Landed Cost Vouher" src="/docs/assets/img/stock/landed-cost.png">
 
-### What happend on submission?
+### What happens on submission?
 
 1. On submission of Landed Cost Voucher, the applicable landed cost charges are updated in Purchase Receipt Item table.
 

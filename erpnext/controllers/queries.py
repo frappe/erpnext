@@ -152,6 +152,11 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	description_cond = ''
+	if frappe.db.count('Item', cache=True) < 50000:
+		# scan description only if items are less than 50000
+		description_cond = 'or tabItem.description LIKE %(txt)s'
+
 	return frappe.db.sql("""select tabItem.name, tabItem.item_group,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -166,7 +171,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
 				or tabItem.barcode LIKE %(txt)s
-				or tabItem.description LIKE %(txt)s)
+				{description_cond})
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -176,7 +181,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		limit %(start)s, %(page_len)s """.format(
 			key=searchfield,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
-			mcond=get_match_cond(doctype).replace('%', '%%')),
+			mcond=get_match_cond(doctype).replace('%', '%%'),
+			description_cond = description_cond),
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,
