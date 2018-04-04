@@ -71,7 +71,7 @@ def get_stock_ledger_entries(filters, item_conditions, item_details):
 		.format(
 			sle_conditions=get_sle_conditions(filters),
 			item_conditions_sql = item_conditions_sql
-		), filters, as_dict=1, debug=1)
+		), filters, as_dict=1)
 
 def get_item_details(filters, item_conditions):
 	item_details = {}
