@@ -16,20 +16,20 @@ frappe.ui.form.on('Share Transfer', {
 				};
 			};
 		});
-		frm.set_query("equity_account", function() {
+		frm.set_query("equity_or_liability_account", function() {
 			return {
 				filters: {
 					"is_group":0,
-					"root_type":"Equity",
+					"root_type": ["in",["Equity","Liability"]],
 					"company": frm.doc.company
 				}
 			};
 		});
-		frm.set_query("liability_account", function() {
+		frm.set_query("asset_account", function() {
 			return {
 				filters: {
 					"is_group":0,
-					"root_type":"Liability",
+					"root_type":"Asset",
 					"company": frm.doc.company
 				}
 			};
