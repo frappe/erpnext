@@ -17,6 +17,7 @@ class Asset(Document):
 		self.validate_item()
 		self.set_missing_values()
 		self.validate_asset_values()
+		self.validate_pi_linked_asset()
 		if self.calculate_depreciation:
 			self.make_depreciation_schedule()
 			self.set_accumulated_depreciation()
@@ -96,6 +97,25 @@ class Asset(Document):
 		if (flt(self.value_after_depreciation) > flt(self.expected_value_after_useful_life)
 			and not self.next_depreciation_date and self.calculate_depreciation):
 				frappe.throw(_("Please set Next Depreciation Date"))
+
+	def validate_pi_linked_asset(self):
+		if self.purchase_invoice:
+			pi_doc = frappe.get_doc("Purchase Invoice",self.purchase_invoice)
+
+			if self.company != pi_doc.company:
+				frappe.throw(_("Asset {0} does not belong to company {1} set on Purchase Invoice {2}")
+					.format(self.name, pi_doc.company, self.purchase_invoice))
+
+			elif self.is_existing_asset:
+				frappe.throw(_("Purchase Invoice linked asset cannot be marked as an existing asset {0}").format(self.name))
+
+			validate_item_code = False
+			for d in pi_doc.get("items"):
+				if d.item_code == self.item_code:
+					validate_item_code = True
+
+			if not validate_item_code:
+				frappe.throw(_("Item Code {0} in asset should exist in Purchase Invoice {1}").format(self.item_code, self.purchase_invoice))
 
 	def make_depreciation_schedule(self):
 
