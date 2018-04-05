@@ -6,9 +6,9 @@ frappe.ui.form.on("Hub Settings", {
 			}));
 
 		frm.trigger("enabled");
+		frm.add_custom_button(__('View Hub'),
+			() => frappe.set_route('Hub', 'Item'));
 		if (frm.doc.enabled) {
-			frm.add_custom_button(__('View Hub'),
-				() => frappe.set_route('Hub', 'Item'));
 			frm.add_custom_button(__('Sync'),
 				() => frm.call('sync'));
 		}
