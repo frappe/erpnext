@@ -22,7 +22,7 @@ frappe.ui.form.on('Clinical Procedure', {
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
 					filters: filters
-				}
+				};
 			}
 		});
 	},
@@ -202,7 +202,7 @@ cur_frm.set_query("procedure_template", function(doc) {
 	};
 });
 
-me.frm.set_query("appointment", function() {
+cur_frm.set_query("appointment", function() {
 	return {
 		filters: {
 			status:['in',["Open"]]
