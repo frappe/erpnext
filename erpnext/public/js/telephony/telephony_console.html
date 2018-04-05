@@ -1,87 +1,87 @@
 <div id="cc_console">
-	<ul class="list-group">
-		{% if(info.title == "Unknown Caller") { %}
-		<li class="list-group-item">
-		<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
-			New Caller
-		</span>
-		</li>
-		<li class="list-group-item">
-			<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
-		</li>
-		<li class="list-group-item">
-			<button id="new_lead" class="btn btn-sm btn-primary">Create Lead</button>
-			<button id="service_for_new_caller" class="btn btn-sm btn-primary">Customer + Schedule Service</button>
-			<button id="new_caller_issue" class="btn btn-sm btn-primary">Log Issue</button>
-		</li>
-		{% } else if (info.title == "Customer") { %}
-		<li class="list-group-item">
-			<span class="h4">Customer</span>
-			<span style="margin-left: 10px" class="muted">Services: <span class="strong">{%= info.service_count %}</span></span>
-		</li>
-		<li class="list-group-item">
+	<div class="col-xs-4" style="padding:0px;">
+		<ul class="list-group">
+			{% if(info.title == "Unknown Caller") { %}
+			<li class="list-group-item">
 			<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
-				<a href="/desk#Form/Customer/{{ info.name }}">{{ info.name }}</a>
+				New Caller
 			</span>
-			{% if (info.member_status == 1) { %}
-				<span class="label label-success h3">Member</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="new_lead" class="btn btn-sm btn-primary">Create Lead</button>
+				<button id="service_for_new_caller" class="btn btn-sm btn-primary">Customer</button>
+				<button id="new_caller_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
+			{% } else if (info.title == "Customer") { %}
+			<li class="list-group-item">
+				<span class="h4">Customer</span>
+				<span style="margin-left: 10px" class="muted">Services: <span class="strong">{%= info.service_count %}</span></span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
+					<a href="/desk#Form/Customer/{{ info.name }}">{{ info.name }}</a>
+				</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="service_for_customer" class="btn btn-sm btn-primary">Schedule Service</button>
+				<button id="customer_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
+			{% } else if (info.title == "Lead") { %}
+			<li class="list-group-item"><h4>Lead</h4></li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
+					<a href="/desk#Form/Lead/{{ info.name }}">{{ info.lead_name }}</a>
+				</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="lead_to_service" class="btn btn-sm btn-primary">Customer</button>
+				<button id="lead_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
 			{% } %}
-			{% if (info.vip == 1) { %}
-				<span class="label label-warning h3">VIP</span>
-			{% } %}
-		</li>
-		<li class="list-group-item">
-			<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
-		</li>
+		</ul>
+	</div>
+	<div class="col-xs-8" style="padding:0px;">
 		<li class="list-group-item">
 			<ul class="list-group">
-			{% for(i=0,l=info.address_list.length-1;i<=l;i++) { %}	
 				<li class="list-group-item">
 					<div class="row">
-						<div class="col-xs-2">
-							<input type="radio" name="selected_address" id={{info.address_list[i].name}} class="radio" data-service-hub="{{info.address_list[i].service_hub}}">
-						</div>
-						<div class="col-xs-3 strong">
-							<span><a href="/desk#Form/Address/{%= info.address_list[i].name %}">{%= info.address_list[i].name %}</a></span>
-							<span>
-								{%= info.address_list[i].address_type %}
-							</span>
-						</div>
-						<div class="col-xs-5">
-							{%= info.address_list[i].address %}
-						</div>
-						<div class="col-xs-2 text-muted">
-							{%= info.address_list[i].service_hub %}
+						<!-- Open issues come here -->
+						<div class="col-xs-12">
+							Issue name 1
 						</div>
 					</div>
 				</li>
-			{% } %}
+				<li class="list-group-item">
+					<div class="row">
+						<!-- Open issues come here -->
+						<div class="col-xs-12">
+							Issue name 2
+						</div>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<div class="row">
+						<!-- Open issues come here -->
+						<div class="col-xs-12">
+							Issue name 3
+						</div>
+					</div>
+				</li>
 			</ul>
 		</li>
-		<li class="list-group-item">
-			<button id="service_for_customer" class="btn btn-sm btn-primary">Schedule Service</button>
-			<button id="customer_issue" class="btn btn-sm btn-primary">Log Issue</button>
-		</li>
-		{% } else if (info.title == "Lead") { %}
-		<li class="list-group-item"><h4>Lead</h4></li>
-		<li class="list-group-item">
-			<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
-				<a href="/desk#Form/Lead/{{ info.name }}">{{ info.lead_name }}</a>
-			</span>
-		</li>
-		<li class="list-group-item">
-			<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
-		</li>
-		<li class="list-group-item">
-			<button id="lead_to_service" class="btn btn-sm btn-primary">Customer + Schedule Service</button>
-			<button id="lead_issue" class="btn btn-sm btn-primary">Log Issue</button>
-		</li>
-		{% } %}
-	</ul>
+	</div>	
 </div>
 
-<style>
-
+<!-- <style>
 .addr_cards{
 	font-size:15px;background-color:#f5f5f5;
 	border:1px solid #c6c6c6;border-radius:3px;min-height:200px;
@@ -105,4 +105,4 @@
 	-ms-transition: box-shadow 0.2s ease-in-out 0s;
 	transition: box-shadow 0.2s ease-in-out 0s;
 }
-</style>
+</style> -->
