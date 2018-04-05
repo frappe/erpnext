@@ -43,7 +43,7 @@ frappe.ui.form.on('Physician Schedule', {
 								let to_time = cur_time.clone().add(values.duration, 'minutes');
 								if(to_time <= end_time) {
 									if(frm.doc.time_slots){
-										frm.doc.time_slots.forEach(function(slot, i) {
+										frm.doc.time_slots.forEach(function(slot) {
 											if(slot.day == week_day){
 												let slot_from_moment = moment(slot.from_time, 'HH:mm:ss');
 												let slot_to_moment = moment(slot.to_time, 'HH:mm:ss');
@@ -53,7 +53,7 @@ frappe.ui.form.on('Physician Schedule', {
 													if(add_slots_to_child){
 														frappe.show_alert({
 															message:__('Time slot skiped, the slot {0} to {1} overlap exisiting slot {2} to {3}',
-															[cur_time.format('HH:mm:ss'),	to_time.format('HH:mm:ss'),	slot.from_time,	slot.to_time]),
+																[cur_time.format('HH:mm:ss'),	to_time.format('HH:mm:ss'),	slot.from_time,	slot.to_time]),
 															indicator:'orange'
 														});
 														add_to_child = false;
@@ -81,17 +81,18 @@ frappe.ui.form.on('Physician Schedule', {
 							let end_time = moment(values.to_time, 'HH:mm:ss');
 							if(check_overlap_or_add_slot(week_day, cur_time, end_time, false)){
 								frappe.confirm(__('Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?',	[week_day]),
-								function() {
-									// if Yes
-									check_overlap_or_add_slot(week_day, cur_time, end_time, true);
-								},
-								function() {
-									// if No
-									frappe.show_alert({
-										message:__('Slots for {0} are not added to the schedule',	[week_day]),
-										indicator:'red'
-									});
-								});
+									function() {
+										// if Yes
+										check_overlap_or_add_slot(week_day, cur_time, end_time, true);
+									},
+									function() {
+										// if No
+										frappe.show_alert({
+											message:__('Slots for {0} are not added to the schedule',	[week_day]),
+											indicator:'red'
+										});
+									}
+								);
 							}
 							else{
 								check_overlap_or_add_slot(week_day, cur_time, end_time, true);

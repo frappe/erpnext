@@ -2,7 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Clinical Procedure Template', {
-	//Refernce item.js Ln90
 	template: function(frm) {
 		if(!frm.doc.item_code)
 			frm.set_value("item_code", frm.doc.template);
@@ -51,71 +50,71 @@ var mark_change_in_item = function(frm) {
 	if(!frm.doc.__islocal){
 		frm.doc.change_in_item = 1;
 	}
-}
+};
 
 var disable_template = function(doc){
 	frappe.call({
 		method: "erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.disable_enable_template",
 		args: {status: 1, name: doc.name, item_code: doc.item_code, is_billable: doc.is_billable},
-		callback: function(r){
+		callback: function(){
 			cur_frm.reload_doc();
 		}
 	});
-}
+};
 
 var enable_template = function(doc){
 	frappe.call({
 		method: "erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.disable_enable_template",
 		args: {status: 0, name: doc.name, item_code: doc.item_code, is_billable: doc.is_billable},
-		callback: function(r){
+		callback: function(){
 			cur_frm.reload_doc();
 		}
 	});
-}
+};
 
 
 var change_template_code = function(doc){
 	var d = new frappe.ui.Dialog({
-			title:__("Change Template Code"),
-			fields:[
-				{
-					"fieldtype": "Data",
-					"label": "Template Code",
-					"fieldname": "Item Code",
-					reqd:1
-				},
-				{
-					"fieldtype": "Button",
-					"label": __("Change Code"),
-					click: function() {
-						var values = d.get_values();
-						if(!values)
-							return;
-						change_item_code_from_template(values["Item Code"], doc);
-						d.hide();
-					}
+		title:__("Change Template Code"),
+		fields:[
+			{
+				"fieldtype": "Data",
+				"label": "Template Code",
+				"fieldname": "Item Code",
+				reqd:1
+			},
+			{
+				"fieldtype": "Button",
+				"label": __("Change Code"),
+				click: function() {
+					var values = d.get_values();
+					if(!values)
+					return;
+					change_item_code_from_template(values["Item Code"], doc);
+					d.hide();
 				}
-			]
-		})
-		d.show();
-		d.set_values({
-			'Item Code': doc.item_code
-		})
-}
+			}
+		]
+	});
+	d.show();
+	d.set_values({
+		'Item Code': doc.item_code
+	})
+};
 
 var change_item_code_from_template = function(item_code, doc){
 	frappe.call({
 		"method": "erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.change_item_code_from_template",
 		"args": {item_code: item_code, doc: doc},
-		callback: function (data) {
+		callback: function () {
 			cur_frm.reload_doc();
 			frappe.show_alert({
-			message: "Item Code renamed successfully",
-			indicator: "green"
-		})
+				message: "Item Code renamed successfully",
+				indicator: "green"
+			});
 		}
-	})
-}
+	});
+};
 
 frappe.ui.form.on('Clinical Procedure Item', {
 	qty: function(frm, cdt, cdn){
@@ -166,8 +165,8 @@ frappe.ui.form.on('Clinical Procedure Item', {
 		}
 	}
 });
-//List Stock items
-cur_frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+// List Stock items
+cur_frm.set_query("item_code", "items", function() {
 	return {
 		filters: {
 			is_stock_item:1

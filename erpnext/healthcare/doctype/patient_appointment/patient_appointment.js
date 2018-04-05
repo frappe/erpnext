@@ -42,8 +42,8 @@ frappe.ui.form.on('Patient Appointment', {
 
 			if(frm.doc.procedure_template){
 				frm.add_custom_button(__("Procedure"),function(){
-		 			btn_create_procedure(frm);
-			 	},"Create");
+					btn_create_procedure(frm);
+				},"Create");
 			}
 			else{
 				frm.add_custom_button(__("Consultation"),function(){
@@ -229,7 +229,7 @@ var btn_create_procedure = function(frm){
 			}
 		}
 	});
-}
+};
 
 var btn_create_consultation = function(frm){
 	var doc = frm.doc;

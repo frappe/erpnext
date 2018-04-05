@@ -36,7 +36,7 @@ frappe.ui.form.on('Consultation', {
 		},"Create");
 
 		frm.add_custom_button(__("Procedure"),function(){
-		 	btn_create_procedure(frm);
+			btn_create_procedure(frm);
 		},"Create");
 
 		frm.set_query("patient", function () {

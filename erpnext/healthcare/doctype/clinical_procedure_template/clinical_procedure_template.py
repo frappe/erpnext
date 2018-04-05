@@ -29,7 +29,7 @@ class ClinicalProcedureTemplate(Document):
 		if(self.item):
 			try:
 				frappe.delete_doc("Item",self.item)
-			except Exception, e:
+			except Exception:
 				frappe.throw("""Not permitted. Please disable the Procedure Template""")
 
 	def get_item_details(self, args=None, for_update=False):

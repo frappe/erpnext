@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt, getdate, nowdate
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account, get_receivable_account,get_income_account
+from frappe.utils import cint, flt, getdate, nowdate
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account, get_income_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
+from erpnext.stock.stock_ledger import get_previous_sle
 
 class ClinicalProcedure(Document):
 	def validate(self):
