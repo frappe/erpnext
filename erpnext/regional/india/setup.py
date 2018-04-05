@@ -184,7 +184,7 @@ def make_custom_fields():
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1, 
-				depends_on='eval:doc.salary_mode == 'Bank'') ]
+				depends_on='eval:doc.salary_mode == "Bank"') ]
 	}
 
 	create_custom_fields(custom_fields)
