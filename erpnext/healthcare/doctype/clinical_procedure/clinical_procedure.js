@@ -30,7 +30,7 @@ frappe.ui.form.on('Clinical Procedure', {
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}
-			}
+			};
 		});
 		frm.set_query("appointment", function () {
 			return {
@@ -38,7 +38,7 @@ frappe.ui.form.on('Clinical Procedure', {
 					"procedure_template": ["not in", null],
 					"status": ['in', 'Open, Scheduled']
 				}
-			}
+			};
 		});
 		if(frm.doc.consume_stock){
 			frm.set_indicator_formatter('item_code',
