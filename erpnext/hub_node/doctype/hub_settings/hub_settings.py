@@ -10,11 +10,9 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-# hub_url = "https://hubmarket.org"
-hub_url = "http://159.89.175.122"
+hub_url = "https://hubmarket.org"
+# hub_url = "http://159.89.175.122"
 # hub_url = "http://erpnext.hub:8000"
-
-# test_hub_url = "https://hubmarket.org"
 
 class OAuth2Session():
 	def __init__(self, headers):
