@@ -1,0 +1,20 @@
+{
+ "content": null, 
+ "creation": "2018-03-12 16:00:55.143341", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-phone-square", 
+ "idx": 0, 
+ "modified": "2018-04-04 15:40:13.543863", 
+ "modified_by": "Administrator", 
+ "module": "ERPNext Integrations", 
+ "name": "CRM dashboard", 
+ "owner": "Administrator", 
+ "page_name": "CRM dashboard", 
+ "roles": [], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "CRM Dashboard"
+}
