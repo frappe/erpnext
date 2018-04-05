@@ -307,10 +307,7 @@ def get_price_list_rate(args, item_doc, out):
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
-		print(">> Price List Rate", price_list_rate)
 
-		# insert in database
-		#if not price_list_rate:
 		insert_item_price(args)
 
 		# variant
@@ -410,7 +407,7 @@ def get_item_price(args, item_code):
 		:param item_code: str, Item Doctype field item_code
     """
     args['item_code'] = item_code
-    has_item_price_record = frappe.get_all('Item Price', 
+    has_item_price_record = frappe.get_all('Item Price',
     		filters={'item_code': item_code, 'price_list': args.get('price_list')})
     if not has_item_price_record:
     	return
@@ -440,7 +437,7 @@ def get_item_price(args, item_code):
 	    	select name, price_list_rate
 	    	from `tabItem Price` {conditions}
 	    	order by min_qty desc
-		""".format(conditions=conditions), 
+		""".format(conditions=conditions),
 		args)
 
 def get_price_list_rate_for(args, item_code):
@@ -472,9 +469,9 @@ def get_price_list_rate_for(args, item_code):
 		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			return price_list_rate[0][1]
 	else:
-		values = {'item_code': item_code, 
-				  'uom': args.get("uom"), 
-				  'price_list': args.get("price_list"), 
+		values = {'item_code': item_code,
+				  'uom': args.get("uom"),
+				  'price_list': args.get("price_list"),
 				  'transaction_date': args.get("transaction_date", None)}
 		general_price_list_rate = frappe.db.sql(
 			"""
