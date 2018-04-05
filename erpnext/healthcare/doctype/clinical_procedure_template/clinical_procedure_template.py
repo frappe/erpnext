@@ -32,7 +32,7 @@ class ClinicalProcedureTemplate(Document):
 			except Exception:
 				frappe.throw("""Not permitted. Please disable the Procedure Template""")
 
-	def get_item_details(self, args=None, for_update=False):
+	def get_item_details(self, args=None):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s
@@ -52,9 +52,6 @@ class ClinicalProcedureTemplate(Document):
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1
 		}
-		# update uom
-		if args.get("uom") and for_update:
-			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('quantity')))
 		return ret
 
 def updating_item(self):

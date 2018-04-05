@@ -89,7 +89,7 @@ var change_template_code = function(doc){
 				click: function() {
 					var values = d.get_values();
 					if(!values)
-					return;
+						return;
 					change_item_code_from_template(values["Item Code"], doc);
 					d.hide();
 				}
@@ -99,7 +99,7 @@ var change_template_code = function(doc){
 	d.show();
 	d.set_values({
 		'Item Code': doc.item_code
-	})
+	});
 };
 
 var change_item_code_from_template = function(item_code, doc){

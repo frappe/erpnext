@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, nowdate
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account, get_income_account
+from frappe.utils import cint, flt, nowdate
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
 
@@ -89,7 +89,7 @@ class ClinicalProcedure(Document):
 				se_child.expense_account = expense_account
 		return stock_entry.as_dict()
 
-	def get_item_details(self, args=None, for_update=False):
+	def get_item_details(self, args=None):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s
@@ -109,9 +109,6 @@ class ClinicalProcedure(Document):
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1
 		}
-		# update uom
-		if args.get("uom") and for_update:
-			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('quantity')))
 		return ret
 
 

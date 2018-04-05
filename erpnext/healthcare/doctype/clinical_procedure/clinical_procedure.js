@@ -17,7 +17,7 @@ frappe.ui.form.on('Clinical Procedure', {
 				} else {
 					filters = {
 						'item_code': item.item_code
-					}
+					};
 				}
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
@@ -42,7 +42,7 @@ frappe.ui.form.on('Clinical Procedure', {
 		});
 		if(frm.doc.consume_stock){
 			frm.set_indicator_formatter('item_code',
-				function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" });
+				function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" ; });
 		}
 
 		if (!frm.doc.__islocal && frm.doc.status == 'In Progress'){
@@ -94,14 +94,14 @@ frappe.ui.form.on('Clinical Procedure', {
 											}
 										});
 									}
-								)
+								);
 							}else{
 								cur_frm.reload_doc();
 							}
 						}
 					}
 				});
-			})
+			});
 		}
 		if (frm.doc.__islocal){
 			frm.set_df_property("consumables", "hidden", 1);
@@ -172,8 +172,8 @@ frappe.ui.form.on('Clinical Procedure', {
 					name: frm.doc.procedure_template
 				},
 				callback: function (data) {
-					frm.set_value("medical_department", data.message.medical_department)
-					frm.set_value("consume_stock", data.message.consume_stock)
+					frm.set_value("medical_department", data.message.medical_department);
+					frm.set_value("consume_stock", data.message.consume_stock);
 					if(!frm.doc.warehouse){
 						frappe.call({
 							method: "frappe.client.get_value",
@@ -182,14 +182,14 @@ frappe.ui.form.on('Clinical Procedure', {
 								fieldname: "default_warehouse"
 							},
 							callback: function (data) {
-								frm.set_value("warehouse", data.message.default_warehouse)
+								frm.set_value("warehouse", data.message.default_warehouse);
 							}
 						});
 					}
 				}
 			});
 		}else{
-			frm.set_value("consume_stock", 0)
+			frm.set_value("consume_stock", 0);
 		}
 	}
 });
@@ -202,7 +202,7 @@ cur_frm.set_query("procedure_template", function(doc) {
 	};
 });
 
-me.frm.set_query("appointment", function(doc, cdt, cdn) {
+me.frm.set_query("appointment", function() {
 	return {
 		filters: {
 			status:['in',["Open"]]
@@ -235,6 +235,7 @@ frappe.ui.form.on('Clinical Procedure Item', {
 	},
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
+		let args = null;
 		if(d.item_code) {
 			args = {
 				'item_code'			: d.item_code,
@@ -261,15 +262,15 @@ frappe.ui.form.on('Clinical Procedure Item', {
 });
 
 var calculate_age = function(birth) {
-  var ageMS = Date.parse(Date()) - Date.parse(birth);
-  var age = new Date();
-  age.setTime(ageMS);
-  var years =  age.getFullYear() - 1970
-  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
+	var ageMS = Date.parse(Date()) - Date.parse(birth);
+	var age = new Date();
+	age.setTime(ageMS);
+	var years =  age.getFullYear() - 1970;
+	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 };
 
-//List Stock items
-cur_frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+// List Stock items
+cur_frm.set_query("item_code", "items", function() {
 	return {
 		filters: {
 			is_stock_item:1
