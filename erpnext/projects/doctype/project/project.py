@@ -267,12 +267,128 @@ class Project(Document):
 				task_doc.save()
 
 def get_timeline_data(doctype, name):
-	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
+	'''returns timeline data based on linked records in dashboard'''
+	from six import iteritems
+	from frappe.utils import get_timestamp
+
+	out = {}
+
+	'''timesheets'''
+	items = dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
 		from `tabTimesheet Detail` where project=%s
 			and from_time > date_sub(curdate(), interval 1 year)
 			and docstatus < 2
 			group by date(from_time)''', name))
+
+	for date, count in items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	'''task'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabTask` where project=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''expense claim'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabExpense Claim` where project=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''issue'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabIssue` where project=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''sales order'''
+	items = dict(frappe.db.sql('''select transaction_date, count(*)
+		from `tabSales Order` where project=%s
+			and transaction_date > date_sub(curdate(), interval 1 year)
+			group by transaction_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''delivery note'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabDelivery Note` where project=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''sales invoice'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabSales Invoice` where project=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''bom'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabBOM` where project=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''stock entry'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabStock Entry` where project=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	return out
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	return frappe.db.sql('''select distinct project.*
