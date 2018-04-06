@@ -167,12 +167,141 @@ class Employee(NestedSet):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
 
 def get_timeline_data(doctype, name):
-	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
+	'''returns timeline data based on linked records in dashboard'''
+	from six import iteritems
+	from frappe.utils import get_timestamp
+	
+	out = {}
+	
+	'''Attendance'''
+	items = dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
 		from `tabAttendance` where employee=%s
 			and attendance_date > date_sub(curdate(), interval 1 year)
 			and status in ('Present', 'Half Day')
 			group by attendance_date''', name))
+
+	for date, count in items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	'''leave application'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabLeave Application` where employee=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''leave allocation'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabLeave Allocation` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''training event'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabTraining Event Employee` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''training result'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabTraining Result Employee` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''appraisal'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabAppraisal` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''Salary Structure'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabSalary Structure Employee` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''Salary slip'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabSalary Slip` where employee=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''timesheet'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabTimesheet` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''expense claim'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabExpense Claim` where employee=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	return out
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
