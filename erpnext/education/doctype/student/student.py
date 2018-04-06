@@ -45,10 +45,87 @@ class Student(Document):
 			frappe.db.set_value("Student Applicant", self.student_applicant, "application_status", "Admitted")
 
 def get_timeline_data(doctype, name):
-	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(`date`), count(*)
+	'''returns timeline data based on membership'''
+	from six import iteritems
+	from frappe.utils import get_timestamp
+
+	out = {}
+	
+	'''attendance'''
+	items = dict(frappe.db.sql('''select unix_timestamp(`date`), count(*)
 		from `tabStudent Attendance` where
 			student=%s
 			and `date` > date_sub(curdate(), interval 1 year)
 			and status = 'Present'
 			group by date''', name))
+
+	for date, count in items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	'''Program Enrollment'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabProgram Enrollment` where student=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''assessment result'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabAssessment Result` where student=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''fees'''
+	items = dict(frappe.db.sql('''select posting_date, count(*)
+		from `tabFees` where student=%s
+			and posting_date > date_sub(curdate(), interval 1 year)
+			group by posting_date''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''student log'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabStudent Log` where student=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''student leave application'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabStudent Leave Application` where student=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	return out
