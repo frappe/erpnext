@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
+from six import iteritems
 from six.moves import zip
 
 class AccountsReceivableSummary(ReceivablePayableReport):
