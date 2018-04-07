@@ -8,5 +8,4 @@ bulk-rename
 renaming-documents
 search-filter
 tree-master-renaming
-pos-view
 letter-head-in-the-report
