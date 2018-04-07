@@ -252,16 +252,11 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
-	if getattr(ac, 'is_root', None):
-		ac.parent_account=''
-
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
-	else:
-		ac.root_type = None
 
 	ac.insert()
 
@@ -663,7 +658,7 @@ def get_companies():
 
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False):
-	from erpnext.accounts.report.financial_statements import sort_root_accounts
+	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
@@ -678,9 +673,6 @@ def get_children(doctype, parent, company, is_root=False):
 			and `company` = %s	and docstatus<2
 			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
 				company, as_dict=1)
-
-		if parent=="Accounts":
-			sort_root_accounts(acc)
 	else:
 		# other
 		fields = ", account_currency" if doctype=="Account" else ""
@@ -693,6 +685,7 @@ def get_children(doctype, parent, company, is_root=False):
 				parent, as_dict=1)
 
 	if doctype == 'Account':
+		sort_accounts(acc, is_root, key="value")
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency

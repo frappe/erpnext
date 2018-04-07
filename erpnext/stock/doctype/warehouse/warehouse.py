@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, validate_email_add
+from frappe.utils import cint
 from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
@@ -22,7 +22,7 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_warehouse_account(self.name, self.company)
+		account = self.account or get_warehouse_account(self)
 
 		if account:
 			self.set_onload('account', account)

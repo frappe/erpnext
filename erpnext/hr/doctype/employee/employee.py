@@ -42,7 +42,7 @@ class Employee(NestedSet):
 		self.validate_status()
 		self.validate_employee_leave_approver()
 		self.validate_reports_to()
-		self.validate_prefered_email()
+		self.validate_preferred_email()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -63,6 +63,7 @@ class Employee(NestedSet):
 			self.update_user_permissions()
 
 	def update_user_permissions(self):
+		if not self.create_user_permission: return
 		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
 		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
 
@@ -162,7 +163,7 @@ class Employee(NestedSet):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
 
-	def validate_prefered_email(self):
+	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
 
@@ -330,3 +331,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 	# return employee
 	return employee
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])

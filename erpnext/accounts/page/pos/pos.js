@@ -1302,10 +1302,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			}
 		});
 
-		if (field == 'qty') {
-			this.remove_zero_qty_item();
-		}
-
 		this.update_paid_amount_status(false)
 	},
 

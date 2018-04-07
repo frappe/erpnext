@@ -50,7 +50,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 	var currentIncrement = timestamp;
 	var initialised = row ? true : false;
 	var clicked = false;
-
+	var flag = true; // Alert only once
 	// If row with not completed status, initialize timer with the time elapsed on click of 'Start Timer'.
 	if (row) {
 		initialised = true;
@@ -66,7 +66,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 			// New activity if no activities found
 			var args = dialog.get_values();
 			if(!args) return;
-			if (!frm.doc.time_logs[0].activity_type) {
+			if (frm.doc.time_logs.length <= 1 && !frm.doc.time_logs[0].activity_type && !frm.doc.time_logs[0].from_time) {
 				frm.doc.time_logs = [];
 			}
 			row = frappe.model.add_child(frm.doc, "Timesheet Detail", "time_logs");
@@ -130,8 +130,15 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 		if (!$('.modal-dialog').is(':visible')) {
 			reset();
 		}
-		if(hours > 99)
+		if(hours > 99999)
 			reset();
+		if(cur_dialog && cur_dialog.get_value('expected_hours') > 0) {
+			if(flag && (currentIncrement >= (cur_dialog.get_value('expected_hours') * 3600))) {
+				frappe.utils.play_sound("alert");
+				frappe.msgprint(__("Timer exceeded the given hours."));
+				flag = false;
+			}
+		}
 		$(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
 		$(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
 		$(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());

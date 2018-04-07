@@ -39,6 +39,16 @@ frappe.ui.form.on('Salary Structure', {
 				}
 			}
 		});
+		frm.set_query("payment_account", function () {
+			var account_types = ["Bank", "Cash"];
+			return {
+				filters: {
+					"account_type": ["in", account_types],
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
