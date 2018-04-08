@@ -1520,7 +1520,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-04-08 13:47:58.110714", 
+ "modified": "2018-04-08 15:39:12.334587", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 
@@ -1528,7 +1528,6 @@
  "permissions": [
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -1548,7 +1547,6 @@
   }, 
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -1568,7 +1566,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
