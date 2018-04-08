@@ -40,6 +40,7 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
+		self.update_loan()
 		if not self.title:
 			self.title = self.get_title()
 
@@ -48,7 +49,6 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_loan()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -519,6 +519,10 @@ class JournalEntry(AccountsController):
 				update_reimbursed_amount(doc)
 
 	def update_loan(self):
+		if self.paid_loan:
+			paid_loan = json.loads(self.paid_loan)
+			for name in paid_loan:
+				frappe.db.set_value("Repayment Schedule", name, "paid", 1)
 		for d in self.accounts:
 			if d.reference_type=="Loan" and flt(d.debit) > 0:
 				doc = frappe.get_doc("Loan", d.reference_name)
