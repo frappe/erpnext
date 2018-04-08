@@ -36,23 +36,40 @@ def get_data():
 				},
 			]
 		},
+		# {
+		# 	"label": _("Time Tracking"),
+		# 	"items": [
+		# 		{
+		# 			"type": "doctype",
+		# 			"name": "Timesheet",
+		# 			"description": _("Timesheet for tasks."),
+		# 		},
+		# 		{
+		# 			"type": "doctype",
+		# 			"name": "Activity Type",
+		# 			"description": _("Types of activities for Time Logs"),
+		# 		},
+		# 		{
+		# 			"type": "doctype",
+		# 			"name": "Activity Cost",
+		# 			"description": _("Cost of various activities"),
+		# 		},
+		# 	]
+		# },
 		{
-			"label": _("Time Tracking"),
+			"label": _("Projects Control"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Timesheet",
-					"description": _("Timesheet for tasks."),
+					"name": "Project Billing Control",
+					"label": _("Projects Billing Control"),
+					"description": _("Project Billing Control."),
 				},
 				{
 					"type": "doctype",
-					"name": "Activity Type",
-					"description": _("Types of activities for Time Logs"),
-				},
-				{
-					"type": "doctype",
-					"name": "Activity Cost",
-					"description": _("Cost of various activities"),
+					"name": "Projects Procurement Control",
+					"label": _("Projects Procurement Control"),
+					"description": _("Projects Procurement Control."),
 				},
 			]
 		},
