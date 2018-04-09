@@ -193,7 +193,6 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("closure", false);
             frm.toggle_display("project_management_plan_section", false);
             frm.toggle_display("scope_of_work", false);
-            frm.toggle_display("procurement_plan_section", false);
             frm.toggle_display("quality_management_plan", false);
             frm.toggle_display("risk_register_section", false);
             frm.toggle_display("responsibilities", false);
@@ -203,6 +202,9 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("customer_decision", false);
             frm.toggle_display("approvals", false);
             frm.toggle_display("section_break_133", false);
+            frm.toggle_display("section_break_165", false);
+            frm.toggle_display("section_break_268", false);
+            frm.toggle_display("previous_project_schedules", false);
 
             frm.toggle_display("project_initiation", true);
             frm.toggle_display("customer_details", true);
@@ -210,7 +212,7 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", true);
             frm.toggle_display("section_8", true);
             frm.toggle_display("charter", true);
-            frm.toggle_display("project_initiation_header", true);
+            frm.toggle_display("section_break_1", true);
 
         });
 
@@ -228,17 +230,19 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("project_initiation_header", false);
+            frm.toggle_display("section_break_1", false);
+            frm.toggle_display("section_break_165", false);
+            frm.toggle_display("previous_project_schedules", false);
 
             frm.toggle_display("planning", true);
             frm.toggle_display("communication_management_plan", true);
             frm.toggle_display("project_management_plan_section", true);
             frm.toggle_display("scope_of_work", true);
-            frm.toggle_display("procurement_plan_section", true);
             frm.toggle_display("quality_management_plan", true);
             frm.toggle_display("risk_register_section", true);
             frm.toggle_display("responsibilities", true);
             frm.toggle_display("section_break_133", true);
+            frm.toggle_display("section_break_268", true);
 
         });
 
@@ -250,7 +254,6 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("closure", false);
             frm.toggle_display("project_management_plan_section", false);
             frm.toggle_display("scope_of_work", false);
-            frm.toggle_display("procurement_plan_section", false);
             frm.toggle_display("quality_management_plan", false);
             frm.toggle_display("risk_register_section", false);
             frm.toggle_display("responsibilities", false);
@@ -261,12 +264,15 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("project_initiation_header", false);
+            frm.toggle_display("section_break_1", false);
             frm.toggle_display("section_break_133", false);
+            frm.toggle_display("section_break_268", false);
             
             frm.toggle_display("control", true);
             frm.toggle_display("hd_cheanging_request", true);
             frm.toggle_display("project_issues_summary", true);
+            frm.toggle_display("section_break_165", true);
+            frm.toggle_display("previous_project_schedules", true);
 
         });
 
@@ -278,7 +284,6 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("control", false);
             frm.toggle_display("project_management_plan_section", false);
             frm.toggle_display("scope_of_work", false);
-            frm.toggle_display("procurement_plan_section", false);
             frm.toggle_display("quality_management_plan", false);
             frm.toggle_display("risk_register_section", false);
             frm.toggle_display("responsibilities", false);
@@ -288,8 +293,11 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("project_initiation_header", false);
+            frm.toggle_display("section_break_1", false);
             frm.toggle_display("section_break_133", false);
+            frm.toggle_display("section_break_165", false);
+            frm.toggle_display("section_break_268", false);
+            frm.toggle_display("previous_project_schedules", false);
 
             frm.toggle_display("closure", true);
             frm.toggle_display("project_information", true);
@@ -609,7 +617,7 @@ frappe.ui.form.on("Project Costing Schedule", "cost_value", function(frm, cdt, c
 frappe.ui.form.on('Project Financial Details', {
     selling_price: function (frm, cdt, cdn) {
         var row = locals[cdt][cdn];
-        if(row.selling_price && row.additions_value){
+        if(row.selling_price || row.additions_value){
 			frappe.model.set_value(cdt, cdn, "final_selling_price", row.selling_price + row.additions_value);
 
 		}
@@ -617,7 +625,7 @@ frappe.ui.form.on('Project Financial Details', {
     },
     additions_value: function (frm, cdt, cdn) {
         var row = locals[cdt][cdn];
-        if(row.selling_price && row.additions_value){
+        if(row.selling_price || row.additions_value){
 			frappe.model.set_value(cdt, cdn, "final_selling_price", row.selling_price + row.additions_value);
 
 		}
@@ -714,7 +722,7 @@ frappe.ui.form.on('Project Costing Schedule', {
         cost = []
         for(var i = 0; i < item_length; i++){
         	item.push(cur_frm.doc.project_financial_detail[i].scope_item)
-        	cost.push(cur_frm.doc.project_financial_detail[i].final_selling_price)
+        	cost.push(cur_frm.doc.project_financial_detail[i].cost_price)
         }
         frappe.model.set_value(cdt, cdn, "items_cost_price", cost[item.indexOf(row.scope_item)]);
 

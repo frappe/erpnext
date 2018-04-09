@@ -39,33 +39,35 @@ class TrainingTrip(Document):
 
 
 	def validate_emp(self):
-		if self.get('__islocal'):
-			if (u'CEO' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
-				self.workflow_state = "Create By CEO"
-			elif u'CEO' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By CEO"
-			# elif (self.handled_by=="Director") and (self.assignment_type=="Internal") and (self.days>=5):
-			# 	self.workflow_state = "Approved By Director(CEO+INT)"
-			# elif (self.handled_by=="Director") and (self.assignment_type=="External") and (self.days>=5):
-			# 	self.workflow_state = "Approved By Director(CEO+X)"
-			# elif (self.handled_by=="Director") and (self.assignment_type=="Internal"):
-			# 	self.workflow_state = "Approved By Director(INT)"
-			# elif (self.handled_by=="Director") and (self.assignment_type=="External"):
-			# 	self.workflow_state = "Approved By Director(X)"
-			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="Internal") and (self.days>=5):
-				self.workflow_state = "Created By Director(CEO+INT)"
-			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External") and (self.days>=5):
-				self.workflow_state = "Created By Director(CEO+X)"
-			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="Internal"):
-				self.workflow_state = "Created By Director(INT)"
-			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
-				self.workflow_state = "Created By Director(X)"
-			elif u'Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Manager"
-			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Line Manager"
-			elif u'Employee' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Pending"
+		if self.employee:
+			employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
+			if self.get('__islocal') and employee_user:
+				if (u'CEO' in frappe.get_roles(employee_user)) and (self.assignment_type=="External"):
+					self.workflow_state = "Create By CEO"
+				elif u'CEO' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By CEO"
+				# elif (self.handled_by=="Director") and (self.assignment_type=="Internal") and (self.days>=5):
+				# 	self.workflow_state = "Approved By Director(CEO+INT)"
+				# elif (self.handled_by=="Director") and (self.assignment_type=="External") and (self.days>=5):
+				# 	self.workflow_state = "Approved By Director(CEO+X)"
+				# elif (self.handled_by=="Director") and (self.assignment_type=="Internal"):
+				# 	self.workflow_state = "Approved By Director(INT)"
+				# elif (self.handled_by=="Director") and (self.assignment_type=="External"):
+				# 	self.workflow_state = "Approved By Director(X)"
+				elif (u'Director' in frappe.get_roles(employee_user)) and (self.assignment_type=="Internal") and (self.days>=5):
+					self.workflow_state = "Created By Director(CEO+INT)"
+				elif (u'Director' in frappe.get_roles(employee_user)) and (self.assignment_type=="External") and (self.days>=5):
+					self.workflow_state = "Created By Director(CEO+X)"
+				elif (u'Director' in frappe.get_roles(employee_user)) and (self.assignment_type=="Internal"):
+					self.workflow_state = "Created By Director(INT)"
+				elif (u'Director' in frappe.get_roles(employee_user)) and (self.assignment_type=="External"):
+					self.workflow_state = "Created By Director(X)"
+				elif u'Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Manager"
+				elif u'Line Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Line Manager"
+				elif u'Employee' in frappe.get_roles(employee_user):
+					self.workflow_state = "Pending"
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
