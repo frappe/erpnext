@@ -64,7 +64,7 @@ class WorkOrder(Document):
 						so.name, so_item.delivery_date, so.project
 					from
 						`tabSales Order` so, `tabSales Order Item` so_item, `tabPacked Item` packed_item
-					where so.name=%s 
+					where so.name=%s
 						and so.name=so_item.parent
 						and so.name=packed_item.parent
 						and so_item.item_code = packed_item.parent_item
@@ -88,7 +88,7 @@ class WorkOrder(Document):
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
-	
+
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
 		for d in self.get("required_items"):
@@ -184,7 +184,7 @@ class WorkOrder(Document):
 				and purpose=%s""", (self.name, purpose))[0][0])
 
 			if qty > self.qty:
-				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Work Order {3}").format(\
+				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
 					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
@@ -449,6 +449,9 @@ class WorkOrder(Document):
 			# update in bin
 			self.update_reserved_qty_for_production()
 
+		# calculate consumed qty based on submitted stock entries
+		self.update_consumed_qty_for_required_items()
+
 	def update_reserved_qty_for_production(self, items=None):
 		'''update reserved_qty_for_production in bins'''
 		for d in self.required_items:
@@ -514,6 +517,24 @@ class WorkOrder(Document):
 					})[0][0]
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
+
+	def update_consumed_qty_for_required_items(self):
+		'''update consumed qty from submitted stock entries for that item against
+			the work order'''
+
+		for d in self.required_items:
+			consumed_qty = frappe.db.sql('''select sum(qty)
+				from `tabStock Entry` entry, `tabStock Entry Detail` detail
+				where
+					entry.work_order = %s
+					and (entry.purpose = "Material Consumption for Manufacture"
+					or entry.purpose = "Manufacture")
+					and entry.docstatus = 1
+					and detail.parent = entry.name
+					and detail.item_code = %s''', (self.name, d.item_code))[0][0]
+
+			d.db_set('consumed_qty', flt(consumed_qty), update_modified = False)
+
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
@@ -600,9 +621,10 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	else:
 		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
-		additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 		stock_entry.project = work_order.project
-		stock_entry.set("additional_costs", additional_costs)
+		if purpose=="Manufacture":
+			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
+			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.get_items()
 	return stock_entry.as_dict()
@@ -668,5 +690,5 @@ def query_sales_order(production_item):
 		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
 		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
 	""", (production_item, production_item))
-	
+
 	return out
