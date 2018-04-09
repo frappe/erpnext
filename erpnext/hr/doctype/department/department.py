@@ -12,10 +12,10 @@ class Department(NestedSet):
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
-	
+
 	def on_update(self):
 		self.update_nsm_model()
-	
+
 	def on_trash(self):
 		super(Department, self).on_trash()
  		delete_events(self.doctype, self.name)
