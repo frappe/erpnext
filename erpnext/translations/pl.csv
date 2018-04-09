@@ -57,7 +57,7 @@ DocType: SMS Center,All Supplier Contact,Dane wszystkich dostawców
 DocType: Support Settings,Support Settings,Ustawienia wsparcia
 apps/erpnext/erpnext/projects/doctype/project/project.py +75,Expected End Date can not be less than Expected Start Date,Spodziewana data końcowa nie może być mniejsza od spodziewanej daty startowej
 apps/erpnext/erpnext/utilities/transaction_base.py +121,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,"Wiersz # {0}: Cena musi być taki sam, jak {1}: {2} ({3} / {4})"
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +241,New Leave Application,Druk Nowego Zwolnienia
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +241,New Leave Application,Nowe Zgłoszenie Nieobecności
 ,Batch Item Expiry Status,Batch Przedmiot status ważności
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +184,Bank Draft,Przekaz bankowy
 DocType: Membership,membership validaty section,sekcja zatwierdzania członkostwa
@@ -79,7 +79,7 @@ apps/erpnext/erpnext/templates/includes/product_page.js +25,In Stock,W magazynie
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +16,Primary Contact Details,Podstawowe dane kontaktowe
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,Otwarte kwestie
 DocType: Production Plan Item,Production Plan Item,Przedmiot planu produkcji
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +149,User {0} is already assigned to Employee {1},Użytkownik {0} jest już przyporządkowany do Pracownika {1}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +150,User {0} is already assigned to Employee {1},Użytkownik {0} jest już przyporządkowany do Pracownika {1}
 DocType: Lab Test Groups,Add new line,Dodaj nową linię
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +31,Health Care,Opieka zdrowotna
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +65,Delay in payment (Days),Opóźnienie w płatności (dni)
@@ -103,6 +103,7 @@ DocType: Timesheet,Total Costing Amount,Łączna kwota Costing
 DocType: Delivery Note,Vehicle No,Nr pojazdu
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +163,Please select Price List,Wybierz Cennik
 DocType: Accounts Settings,Currency Exchange Settings,Ustawienia wymiany walut
+apps/erpnext/erpnext/public/js/hub/hub_factory.js +61,Please check your network connection.,Sprawdź połączenie sieciowe.
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +94,Row #{0}: Payment document is required to complete the trasaction,Wiersz # {0}: dokument płatności jest wymagane do ukończenia trasaction
 DocType: Work Order Operation,Work In Progress,Produkty w toku
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py +13,Please select date,Proszę wybrać datę
@@ -128,7 +129,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan_dashb
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +43,Attendance date can not be less than employee's joining date,data frekwencja nie może być mniejsza niż data łączącej pracownika
 DocType: Grading Scale,Grading Scale Name,Skala ocen Nazwa
 DocType: Subscription,Repeat on Day,Powtórz w dzień
-apps/erpnext/erpnext/accounts/doctype/account/account.js +41,This is a root account and cannot be edited.,To jest konto root i nie może być edytowane.
+apps/erpnext/erpnext/accounts/doctype/account/account.js +37,This is a root account and cannot be edited.,To jest konto root i nie może być edytowane.
 DocType: Sales Invoice,Company Address,adres spółki
 DocType: BOM,Operations,Działania
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,Cannot set authorization on basis of Discount for {0},Nie można ustawić autoryzacji na podstawie Zniżki dla {0}
@@ -218,9 +219,9 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +44,Real Estate,Ni
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +1,Statement of Account,Wyciąg z rachunku
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +41,Pharmaceuticals,Farmaceutyczne
 DocType: Purchase Invoice Item,Is Fixed Asset,Czy trwałego
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +273,"Available qty is {0}, you need {1}","Ilość dostępnych jest {0}, musisz {1}"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +313,"Available qty is {0}, you need {1}","Ilość dostępnych jest {0}, musisz {1}"
 DocType: Expense Claim Detail,Claim Amount,Kwota roszczenia
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +657,Work Order has been {0},Zamówienie pracy zostało {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +679,Work Order has been {0},Zamówienie pracy zostało {0}
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +56,Duplicate customer group found in the cutomer group table,Duplikat grupa klientów znajduje się w tabeli grupy cutomer
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +31,Supplier Type / Supplier,Typ dostawy / dostawca
 DocType: Naming Series,Prefix,Prefix
@@ -228,7 +229,7 @@ apps/erpnext/erpnext/hr/email_alert/training_scheduled/training_scheduled.html +
 DocType: Asset Settings,Asset Settings,Ustawienia zasobów
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +68,Consumable,Konsumpcyjny
 DocType: Student,B-,B-
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +98,Successfully unregistered.,Pomyślnie wyrejestrowana.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +140,Successfully unregistered.,Pomyślnie wyrejestrowana.
 DocType: Assessment Result,Grade,Stopień
 DocType: Restaurant Table,No of Seats,Liczba miejsc
 DocType: Subscription,"To add dynamic subject, use jinja tags like
@@ -260,13 +261,13 @@ DocType: Item,Supply Raw Materials for Purchase,Dostawa surowce Skupu
 DocType: Agriculture Analysis Criteria,Fertilizer,Nawóz
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +152,At least one mode of payment is required for POS invoice.,Co najmniej jeden tryb płatności POS jest wymagane dla faktury.
 DocType: Products Settings,Show Products as a List,Wyświetl produkty w układzie listy
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +534,Item {0} is not active or end of life has been reached,"Element {0} nie jest aktywny, lub osiągnął datę przydatności"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +574,Item {0} is not active or end of life has been reached,"Element {0} nie jest aktywny, lub osiągnął datę przydatności"
 DocType: Student Admission Program,Minimum Age,Minimalny wiek
 apps/erpnext/erpnext/utilities/user_progress.py +190,Example: Basic Mathematics,Przykład: Podstawowe Matematyka
 DocType: Customer,Primary Address,adres główny
 DocType: Production Plan,Material Request Detail,Szczegółowy wniosek o materiał
 DocType: Selling Settings,Default Quotation Validity Days,Domyślne dni ważności ofert
-apps/erpnext/erpnext/controllers/accounts_controller.py +800,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",
+apps/erpnext/erpnext/controllers/accounts_controller.py +802,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",
 apps/erpnext/erpnext/config/hr.py +223,Settings for HR Module,Ustawienia dla modułu HR
 DocType: SMS Center,SMS Center,Centrum SMS
 DocType: Sales Invoice,Change Amount,Zmień Kwota
@@ -286,7 +287,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +191,Exec
 apps/erpnext/erpnext/config/manufacturing.py +62,Details of the operations carried out.,Szczegóły dotyczące przeprowadzonych operacji.
 DocType: Asset Maintenance Log,Maintenance Status,Status Konserwacji
 apps/erpnext/erpnext/non_profit/doctype/member/member_dashboard.py +10,Membership Details,Dane dotyczące członkostwa
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +56,{0} {1}: Supplier is required against Payable account {2},{0} {1}: Dostawca jest zobowiązany wobec Płatne konta {2}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +56,{0} {1}: Supplier is required against Payable account {2},{0} {1}: Dostawca jest wymagany w odniesieniu do konta z możliwością opłacenia {2}
 apps/erpnext/erpnext/config/selling.py +52,Items and Pricing,Produkty i cennik
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +2,Total hours: {0},Całkowita liczba godzin: {0}
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +43,From Date should be within the Fiscal Year. Assuming From Date = {0},"""Data od"" powinna być w tym roku podatkowym. Przyjmując Datę od = {0}"
@@ -312,6 +313,7 @@ apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +112,Item Template,Szab
 apps/erpnext/erpnext/healthcare/setup.py +215,Biochemistry,Biochemia
 DocType: Job Offer,Select Terms and Conditions,Wybierz Regulamin
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +72,Out Value,Brak Wartości
+DocType: Woocommerce Settings,Woocommerce Settings,Ustawienia Woocommerce
 DocType: Production Plan,Sales Orders,Zlecenia sprzedaży
 DocType: Purchase Taxes and Charges,Valuation,Wycena
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +394,Set as Default,
@@ -322,7 +324,7 @@ DocType: Hotel Room Reservation,Late Checkin,Późne zameldowanie
 apps/erpnext/erpnext/templates/emails/request_for_quotation.html +7,The request for quotation can be accessed by clicking on the following link,Wniosek o cytat można uzyskać klikając na poniższy link
 apps/erpnext/erpnext/config/hr.py +81,Allocate leaves for the year.,Przydziel zwolnienia dla roku.
 DocType: SG Creation Tool Course,SG Creation Tool Course,SG Stworzenie narzędzia golfowe
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +275,Insufficient Stock,Niewystarczający zapas
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +315,Insufficient Stock,Niewystarczający zapas
 DocType: Manufacturing Settings,Disable Capacity Planning and Time Tracking,Wyłącz Planowanie Pojemność i Time Tracking
 DocType: Email Digest,New Sales Orders,
 DocType: Bank Guarantee,Bank Account,Konto bankowe
@@ -360,7 +362,7 @@ DocType: Restaurant Order Entry,Add Item,Dodaj Przedmiot
 DocType: Lab Test,Custom Result,Wynik niestandardowy
 DocType: Delivery Stop,Contact Name,Nazwa kontaktu
 DocType: Course Assessment Criteria,Course Assessment Criteria,Kryteria oceny kursu
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +27,Tax Id: ,Identyfikator podatkowy:
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +25,Tax Id: ,Identyfikator podatkowy:
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +216,Student ID: ,Legitymacja studencka:
 DocType: POS Customer Group,POS Customer Group,POS Grupa klientów
 DocType: Land Unit,Land Unit describing various land assets,Jednostka lądowa opisująca różne aktywa ziemne
@@ -374,7 +376,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +6,This is ba
 DocType: Payment Term,Credit Months,Miesiące kredytowe
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +409,Net Pay cannot be less than 0,Wynagrodzenie netto nie może być mniejsza niż 0
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +5,"To stop sending repetitive error notifications from the system, we have checked Disabled field in the subscription","Aby zatrzymać wysyłanie powtarzających się powiadomień o błędach z systemu, sprawdziliśmy pole Wyłączone w subskrypcji"
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +121,Relieving Date must be greater than Date of Joining,Data zwolnienia musi być większa od Daty Wstąpienia
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +122,Relieving Date must be greater than Date of Joining,Data zwolnienia musi być większa od Daty Wstąpienia
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +240,Leaves per Year,Urlopy na Rok
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +130,Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Wiersz {0}: Proszę sprawdzić ""Czy Advance"" przeciw konta {1}, jeśli jest to zaliczka wpis."
 apps/erpnext/erpnext/stock/utils.py +219,Warehouse {0} does not belong to company {1},Magazyn {0} nie należy do firmy {1}
@@ -407,7 +409,7 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1064,Mater
 DocType: Bank Reconciliation,Update Clearance Date,Aktualizacja daty rozliczenia
 ,GSTR-2,GSTR-2
 DocType: Item,Purchase Details,Szczegóły zakupu
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +408,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},Element {0} nie znajdują się w &quot;materiały dostarczane&quot; tabeli w Zamówieniu {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +448,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},Element {0} nie znajdują się w &quot;materiały dostarczane&quot; tabeli w Zamówieniu {1}
 DocType: Salary Slip,Total Principal Amount,Łączna kwota główna
 DocType: Student Guardian,Relation,Relacja
 DocType: Student Guardian,Mother,Mama
@@ -416,7 +418,7 @@ DocType: Crop,Biennial,Dwuletni
 apps/erpnext/erpnext/config/selling.py +18,Confirmed orders from Customers.,Potwierdzone zamówienia od klientów
 DocType: Purchase Receipt Item,Rejected Quantity,Odrzucona Ilość
 apps/erpnext/erpnext/education/doctype/fees/fees.py +80,Payment request {0} created,Żądanie zapłaty {0} zostało utworzone
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Open Orders,Otwarte zlecenia
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +79,Open Orders,Otwarte zlecenia
 apps/erpnext/erpnext/healthcare/setup.py +255,Low Sensitivity,Mała czułość
 DocType: Notification Control,Notification Control,Kontrola Wypowiedzenia
 apps/erpnext/erpnext/templates/emails/training_event.html +17,Please confirm once you have completed your training,Potwierdź po zakończeniu szkolenia
@@ -452,7 +454,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Item,Synced With Hub,Synchronizowane z Hub
 DocType: Driver,Fleet Manager,Menadżer floty
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +542,Row #{0}: {1} can not be negative for item {2},Wiersz # {0}: {1} nie może być negatywne dla pozycji {2}
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +59,Wrong Password,Niepoprawne hasło
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +86,Wrong Password,Niepoprawne hasło
 DocType: Item,Variant Of,Wariant
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +406,Completed Qty can not be greater than 'Qty to Manufacture',"Zakończono Ilość nie może być większa niż ""Ilość w produkcji"""
 DocType: Period Closing Voucher,Closing Account Head,
@@ -519,8 +521,7 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +426,Please see attac
 DocType: Purchase Order,% Received,% Otrzymanych
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +3,Create Student Groups,Tworzenie grup studenckich
 DocType: Volunteer,Weekends,Weekendy
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127,Credit Note Amount,Kwota kredytu
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +187,{0} ({1}) cannot be greater than planned quanitity ({2}) in Work Order {3},{0} ({1}) nie może być większe niż planowana liczba ({2}) w zleceniu pracy {3}
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +125,Credit Note Amount,Kwota kredytu
 DocType: Setup Progress Action,Action Document,Dokument roboczy
 DocType: Chapter Member,Website URL,URL strony WWW
 ,Finished Goods,Ukończone dobra
@@ -552,7 +553,7 @@ DocType: Employee,Widowed,Wdowiec / Wdowa
 DocType: Request for Quotation,Request for Quotation,Zapytanie ofertowe
 DocType: Healthcare Settings,Require Lab Test Approval,Wymagaj zatwierdzenia testu laboratoryjnego
 DocType: Salary Slip Timesheet,Working Hours,Godziny pracy
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +68,Total Outstanding,Total Outstanding
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +66,Total Outstanding,Total Outstanding
 DocType: Naming Series,Change the starting / current sequence number of an existing series.,Zmień początkowy / obecny numer seryjny istniejącej serii.
 DocType: Dosage Strength,Strength,Wytrzymałość
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1534,Create a new Customer,Tworzenie nowego klienta
@@ -566,7 +567,7 @@ DocType: Workstation,Consumable Cost,Koszt Konsumpcyjny
 DocType: Purchase Receipt,Vehicle Date,Pojazd Data
 DocType: Student Log,Medical,Medyczny
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +175,Reason for losing,Powód straty
-apps/erpnext/erpnext/accounts/doctype/account/account.js +52,Update Account Number,Zaktualizuj numer konta
+apps/erpnext/erpnext/accounts/doctype/account/account.js +46,Update Account Number,Zaktualizuj numer konta
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Lead Owner cannot be same as the Lead,Ołów Właściciel nie może być taka sama jak Lead
 apps/erpnext/erpnext/accounts/utils.py +351,Allocated amount can not greater than unadjusted amount,Przyznana kwota nie może większa niż ilość niewyrównanej
 DocType: Announcement,Receiver,Odbiorca
@@ -606,7 +607,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollmen
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +220,{0} {1} is not associated with {2} {3},{0} {1} nie jest powiązane z {2} {3}
 DocType: Notification Control,Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +176,Please set default payable account for the company {0},Proszę ustawić domyślne konto płatne dla firmy {0}
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +513,Transaction not allowed against stopped Work Order {0},Transakcja nie jest dozwolona w przypadku zatrzymanego zlecenia pracy {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +553,Transaction not allowed against stopped Work Order {0},Transakcja nie jest dozwolona w przypadku zatrzymanego zlecenia pracy {0}
 DocType: Setup Progress Action,Min Doc Count,Min Doc Count
 apps/erpnext/erpnext/config/manufacturing.py +84,Global settings for all manufacturing processes.,Globalne ustawienia dla wszystkich procesów produkcyjnych.
 DocType: Accounts Settings,Accounts Frozen Upto,Konta zamrożone do
@@ -646,6 +647,7 @@ apps/erpnext/erpnext/config/hr.py +24,Attendance record.,Wpis Obecności
 DocType: Salary Structure,Salary Component for timesheet based payroll.,Składnik wynagrodzenia za płac opartego grafik.
 DocType: Sales Order Item,Used for Production Plan,Używane do Planu Produkcji
 DocType: Employee Loan,Total Payment,Całkowita płatność
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +99,Cannot cancel transaction for Completed Work Order.,Nie można anulować transakcji dotyczącej ukończonego zlecenia pracy.
 DocType: Manufacturing Settings,Time Between Operations (in mins),Czas między operacjami (w min)
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +132,{0} {1} is cancelled so the action cannot be completed,"{0} {1} jest anulowany, więc działanie nie może zostać zakończone"
 DocType: Customer,Buyer of Goods and Services.,Nabywca towarów i usług.
@@ -699,7 +701,7 @@ DocType: Account,Profit and Loss,Zyski i Straty
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +104,"Not permitted, configure Lab Test Template as required","Niedozwolone, w razie potrzeby skonfiguruj szablon testu laboratorium"
 DocType: Patient,Risk Factors,Czynniki ryzyka
 DocType: Patient,Occupational Hazards and Environmental Factors,Zagrożenia zawodowe i czynniki środowiskowe
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +239,Stock Entries already created for Work Order ,Wpisy magazynowe już utworzone dla zlecenia pracy
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +279,Stock Entries already created for Work Order ,Wpisy magazynowe już utworzone dla zlecenia pracy
 DocType: Vital Signs,Respiratory rate,Oddechowy
 apps/erpnext/erpnext/config/stock.py +338,Managing Subcontracting,Zarządzanie Podwykonawstwo
 DocType: Vital Signs,Body Temperature,Temperatura ciała
@@ -735,6 +737,7 @@ DocType: Installation Note Item,Installation Note Item,
 DocType: Production Plan Item,Pending Qty,Oczekuje szt
 DocType: Budget,Ignore,Ignoruj
 apps/erpnext/erpnext/accounts/party.py +396,{0} {1} is not active,{0} {1} jest nieaktywny
+DocType: Woocommerce Settings,Freight and Forwarding Account,Konto spedycyjne i spedycyjne
 apps/erpnext/erpnext/config/accounts.py +272,Setup cheque dimensions for printing,Wymiary Sprawdź konfigurację do druku
 DocType: Salary Slip,Salary Slip Timesheet,Slip Wynagrodzenie grafiku
 apps/erpnext/erpnext/controllers/buying_controller.py +161,Supplier Warehouse mandatory for sub-contracted Purchase Receipt,
@@ -743,7 +746,7 @@ DocType: Sales Invoice,Total Commission,Całkowita kwota prowizji
 DocType: Pricing Rule,Sales Partner,Partner Sprzedaży
 apps/erpnext/erpnext/config/buying.py +150,All Supplier scorecards.,Wszystkie karty oceny dostawcy.
 DocType: Buying Settings,Purchase Receipt Required,Wymagane Potwierdzenie Zakupu
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +188,Target warehouse in row {0} must be same as Work Order,"Docelowy magazyn w wierszu {0} musi być taki sam, jak zlecenie pracy"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +228,Target warehouse in row {0} must be same as Work Order,"Docelowy magazyn w wierszu {0} musi być taki sam, jak zlecenie pracy"
 apps/erpnext/erpnext/stock/doctype/item/item.py +155,Valuation Rate is mandatory if Opening Stock entered,"Wycena Cena jest obowiązkowe, jeżeli wprowadzone Otwarcie Zdjęcie"
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +143,No records found in the Invoice table,Nie znaleziono w tabeli faktury rekordy
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js +34,Please select Company and Party Type first,"Najpierw wybierz typ firmy, a Party"
@@ -827,6 +830,7 @@ apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group
 apps/erpnext/erpnext/accounts/utils.py +720,"Payment Gateway Account not created, please create one manually.","Payment Gateway konta nie jest tworzony, należy utworzyć ręcznie."
 DocType: Supplier Scorecard,Per Year,Na rok
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +51,Not eligible for the admission in this program as per DOB,Nie kwalifikuje się do przyjęcia w tym programie zgodnie z DOB
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Kod towaru&gt; Grupa produktów&gt; Marka
 DocType: Sales Invoice,Sales Taxes and Charges,Podatki i Opłaty od Sprzedaży
 DocType: Employee,Organization Profile,Profil organizacji
 DocType: Vital Signs,Height (In Meter),Wysokość (w metrze)
@@ -876,6 +880,7 @@ DocType: Activity Cost,Activity Type,Rodzaj aktywności
 DocType: Request for Quotation,For individual supplier,Dla indywidualnego dostawcy
 DocType: BOM Operation,Base Hour Rate(Company Currency),Baza Hour Rate (Spółka waluty)
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +47,Delivered Amount,Dostarczone Ilość
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +14,Lab Tests,Badania laboratoryjne
 DocType: Quotation Item,Item Balance,Bilans Item
 DocType: Sales Invoice,Packing List,Lista przedmiotów do spakowania
 apps/erpnext/erpnext/config/buying.py +28,Purchase Orders given to Suppliers.,Zamówienia Kupna dane Dostawcom
@@ -899,10 +904,10 @@ DocType: Employee Loan,Total Interest Payable,Razem odsetki płatne
 DocType: Landed Cost Taxes and Charges,Landed Cost Taxes and Charges,Koszt podatków i opłat
 DocType: Work Order Operation,Actual Start Time,Rzeczywisty Czas Rozpoczęcia
 DocType: BOM Operation,Operation Time,Czas operacji
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +316,Finish,koniec
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +412,Base,Baza
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +337,Finish,koniec
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +422,Base,Baza
 DocType: Timesheet,Total Billed Hours,Wszystkich Zafakturowane Godziny
-apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1551,Write Off Amount,Wartość Odpisu
+apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1553,Write Off Amount,Wartość Odpisu
 DocType: Leave Block List Allow,Allow User,Zezwól Użytkownikowi
 DocType: Journal Entry,Bill No,Numer Rachunku
 DocType: Company,Gain/Loss Account on Asset Disposal,Konto Zysk / Strata na Aktywów pozbywaniu
@@ -937,7 +942,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +303,Pa
 DocType: Request for Quotation,Get Suppliers,Dostaj Dostawców
 DocType: Purchase Receipt Item Supplied,Current Stock,Bieżący asortyment
 apps/erpnext/erpnext/controllers/accounts_controller.py +610,Row #{0}: Asset {1} does not linked to Item {2},Wiersz # {0}: {1} aktywami nie związane w pozycji {2}
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +394,Preview Salary Slip,Podgląd Zarobki Slip
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +404,Preview Salary Slip,Podgląd Zarobki Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +54,Account {0} has been entered multiple times,Konto {0} zostało wprowadzone wielokrotnie
 DocType: Account,Expenses Included In Valuation,Zaksięgowane wydatki w wycenie
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +37,You can only renew if your membership expires within 30 days,Przedłużenie członkostwa można odnowić w ciągu 30 dni
@@ -980,7 +985,7 @@ DocType: Driver,License Details,Szczegóły licencji
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +85,The field From Shareholder cannot be blank,Pole Od Akcjonariusza nie może być puste
 DocType: Purchase Order,Supply Raw Materials,Zaopatrzenia w surowce
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +10,Current Assets,Aktywa finansowe
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +121,{0} is not a stock Item,{0} nie jest przechowywany na magazynie
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +133,{0} is not a stock Item,{0} nie jest przechowywany na magazynie
 apps/erpnext/erpnext/hr/email_alert/training_feedback/training_feedback.html +6,Please share your feedback to the training by clicking on 'Training Feedback' and then 'New',"Podziel się swoją opinią na szkolenie, klikając link &quot;Szkolenia zwrotne&quot;, a następnie &quot;Nowy&quot;"
 DocType: Mode of Payment Account,Default Account,Domyślne konto
 apps/erpnext/erpnext/stock/doctype/item/item.py +273,Please select Sample Retention Warehouse in Stock Settings first,Najpierw wybierz Sample Retention Warehouse w ustawieniach magazynowych
@@ -1021,7 +1026,7 @@ DocType: Item Attribute Value,Item Attribute Value,Pozycja wartość atrybutu
 apps/erpnext/erpnext/projects/doctype/project/project.py +406,Please Update your Project Status,Zaktualizuj swój status projektu
 DocType: Item,Maximum sample quantity that can be retained,"Maksymalna ilość próbki, którą można zatrzymać"
 DocType: Project Update,How is the Project Progressing Right Now?,W jaki sposób projekt rozwija się teraz?
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +419,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},Wiersz {0} # Element {1} nie może zostać przeniesiony więcej niż {2} na zamówienie {3}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +459,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},Wiersz {0} # Element {1} nie może zostać przeniesiony więcej niż {2} na zamówienie {3}
 apps/erpnext/erpnext/config/selling.py +158,Sales campaigns.,Kampanie sprzedażowe
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +117,Make Timesheet,Bądź grafiku
 DocType: Sales Taxes and Charges Template,"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
@@ -1086,13 +1091,14 @@ apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +220,Sanctioned A
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +11,Academic Term: ,Okres akademicki:
 DocType: Salary Detail,Do not include in total,Nie obejmują łącznie
 DocType: Company,Default Cost of Goods Sold Account,Domyślne Konto Wartości Dóbr Sprzedanych
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1063,Sample quantity {0} cannot be more than received quantity {1},Ilość próbki {0} nie może być większa niż ilość odebranej {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1177,Sample quantity {0} cannot be more than received quantity {1},Ilość próbki {0} nie może być większa niż ilość odebranej {1}
 apps/erpnext/erpnext/stock/get_item_details.py +369,Price List not selected,Cennik nie wybrany
 DocType: Employee,Family Background,Tło rodzinne
 DocType: Request for Quotation Supplier,Send Email,Wyślij E-mail
 apps/erpnext/erpnext/stock/doctype/item/item.py +228,Warning: Invalid Attachment {0},Warning: Invalid Załącznik {0}
 DocType: Item,Max Sample Quantity,Maksymalna ilość próbki
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +766,No Permission,Brak uprawnień
+apps/erpnext/erpnext/public/js/hub/hub_form.js +351,Quote Requested,Zapytanie o wycenę
 DocType: Vital Signs,Heart Rate / Pulse,Częstość tętna / impuls
 DocType: Company,Default Bank Account,Domyślne konto bankowe
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +59,"To filter based on Party, select Party Type first","Aby filtrować na podstawie partii, wybierz Party Wpisz pierwsze"
@@ -1171,7 +1177,7 @@ DocType: Drug Prescription,Interval UOM,Interwał UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Ponownie wybierz, jeśli wybrany adres jest edytowany po zapisaniu"
 apps/erpnext/erpnext/stock/doctype/item/item.js +544,Item Variant {0} already exists with same attributes,Pozycja Wersja {0} istnieje już z samymi atrybutami
 DocType: Item,Hub Publishing Details,Szczegóły publikacji wydawnictwa Hub
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +117,'Opening',&quot;Otwarcie&quot;
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +123,'Opening',&quot;Otwarcie&quot;
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130,Open To Do,Otwarty na uwagi
 DocType: Notification Control,Delivery Note Message,Wiadomość z Dowodu Dostawy
 DocType: Lab Test Template,Result Format,Format wyników
@@ -1215,13 +1221,13 @@ DocType: Salary Slip,Working Days,Dni robocze
 DocType: Serial No,Incoming Rate,
 DocType: Packing Slip,Gross Weight,Waga brutto
 ,Final Assessment Grades,Oceny końcowe
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +47,Enable Hub,Włącz koncentrator
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +60,Enable Hub,Włącz koncentrator
 apps/erpnext/erpnext/public/js/setup_wizard.js +110,The name of your company for which you are setting up this system.,Nazwa firmy / organizacji dla której uruchamiasz niniejszy system.
 DocType: HR Settings,Include holidays in Total no. of Working Days,Dolicz święta do całkowitej liczby dni pracujących
 apps/erpnext/erpnext/setup/setup_wizard/operations/sample_data.py +108,Setup your Institute in ERPNext,Skonfiguruj swój Instytut w ERPNext
 DocType: Agriculture Analysis Criteria,Plant Analysis,Analiza roślin
 DocType: Job Applicant,Hold,Trzymaj
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +127,Alternate Item,Alternatywna pozycja
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +128,Alternate Item,Alternatywna pozycja
 DocType: Project Update,Progress Details,Szczegóły postępu
 DocType: Employee,Date of Joining,Data Wstąpienia
 DocType: Naming Series,Update Series,Zaktualizuj Serię
@@ -1247,6 +1253,8 @@ DocType: Crop Cycle,ISO 8016 standard,Norma ISO 8016
 DocType: Pricing Rule,Rate or Discount,Stawka lub zniżka
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +213,Serial No {0} does not belong to Item {1},Nr seryjny {0} nie należy do żadnej rzeczy {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Wymagana ilość
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +58,Favourites,Ulubione
+DocType: Hub Settings,Custom Data,Dane niestandardowe
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +126,Warehouses with existing transaction can not be converted to ledger.,Magazyny z istniejącymi transakcji nie mogą być konwertowane do księgi głównej.
 DocType: Bank Reconciliation,Total Amount,Wartość całkowita
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +32,Internet Publishing,Wydawnictwa internetowe
@@ -1268,6 +1276,7 @@ DocType: Supplier,Default Payable Accounts,Domyślne konta Rozrachunki z dostawc
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +49,Employee {0} is not active or does not exist,Pracownik {0} jest nieaktywny lub nie istnieje
 DocType: Fee Structure,Components,składniki
 DocType: Item Barcode,Item Barcode,Kod kreskowy
+DocType: Woocommerce Settings,Endpoints,Punkty końcowe
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +329,Please enter Asset Category in Item {0},Proszę podać kategorię aktywów w pozycji {0}
 apps/erpnext/erpnext/stock/doctype/item/item.py +661,Item Variants {0} updated,Pozycja Warianty {0} zaktualizowane
 DocType: Quality Inspection Reading,Reading 6,Odczyt 6
@@ -1283,9 +1292,11 @@ DocType: Employee,Permanent Address Is,Stały adres to
 DocType: Work Order Operation,Operation completed for how many finished goods?,Operacja zakończona na jak wiele wyrobów gotowych?
 DocType: Payment Terms Template,Payment Terms Template,Szablon warunków płatności
 apps/erpnext/erpnext/public/js/setup_wizard.js +51,The Brand,Marka
+DocType: Manufacturing Settings,Allow Multiple Material Consumption,Zezwalaj na wielokrotne zużycie materiałów
 DocType: Employee,Exit Interview Details,Wyjdź z szczegółów wywiadu
 DocType: Item,Is Purchase Item,Jest pozycją kupowalną
 DocType: Journal Entry Account,Purchase Invoice,Faktura zakupu
+DocType: Manufacturing Settings,Allow multiple Material Consumption against a Work Order,Zezwalaj na wielokrotne zużycie materiałów w stosunku do zlecenia pracy
 DocType: Stock Ledger Entry,Voucher Detail No,Nr Szczegółu Bonu
 apps/erpnext/erpnext/accounts/page/pos/pos.js +789,New Sales Invoice,Nowa faktura sprzedaży
 DocType: Stock Entry,Total Outgoing Value,Całkowita wartość wychodząca
@@ -1308,7 +1319,7 @@ DocType: Guardian,Guardian Name,Nazwa Stróża
 DocType: Cheque Print Template,Has Print Format,Ma format wydruku
 DocType: Employee Loan,Sanctioned,usankcjonowane
 apps/erpnext/erpnext/accounts/page/pos/pos.js +75, is mandatory. Maybe Currency Exchange record is not created for ,jest obowiązkowe. Może rekord Wymiana walut nie jest stworzony dla
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +139,Row #{0}: Please specify Serial No for Item {1},Wiersz # {0}: Proszę podać nr seryjny dla pozycji {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +151,Row #{0}: Please specify Serial No for Item {1},Wiersz # {0}: Proszę podać nr seryjny dla pozycji {1}
 DocType: Crop Cycle,Crop Cycle,Crop Cycle
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +633,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Dla pozycji &quot;Produkt Bundle&quot;, magazyn, nr seryjny i numer partii będą rozpatrywane z &quot;packing list&quot; tabeli. Jeśli magazynowe oraz Batch Nie są takie same dla wszystkich elementów Opakowanie do pozycji każdego &quot;produkt Bundle&quot;, wartości te mogą zostać wpisane do tabeli głównej pozycji, wartości zostaną skopiowane do &quot;packing list&quot; tabeli."
 DocType: Student Admission,Publish on website,Publikuje na stronie internetowej
@@ -1345,7 +1356,7 @@ apps/erpnext/erpnext/agriculture/doctype/water_analysis/water_analysis.py +23,La
 DocType: HR Settings,Don't send Employee Birthday Reminders,Nie wysyłaj przypomnień o urodzinach Pracowników
 DocType: Expense Claim,Total Advance Amount,Łączna kwota zaliczki
 DocType: Delivery Stop,Estimated Arrival,Szacowany przyjazd
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +34,Save Settings,Zapisz ustawienia
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +47,Save Settings,Zapisz ustawienia
 DocType: Delivery Stop,Notified by Email,Powiadomienie przez e-mail
 DocType: Item,Inspection Criteria,Kryteria kontrolne
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Przeniesione
@@ -1355,7 +1366,7 @@ DocType: Timesheet Detail,Bill,Rachunek
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +88,Next Depreciation Date is entered as past date,Następny Amortyzacja Data jest wpisana w minionym dniem
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +208,White,Biały
 DocType: SMS Center,All Lead (Open),Wszystkie Leady (Otwarte)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +270,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Wiersz {0}: Ilość nie jest dostępny dla {4} w magazynie {1} w delegowania chwili wejścia ({2} {3})
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +310,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Wiersz {0}: Ilość nie jest dostępny dla {4} w magazynie {1} w delegowania chwili wejścia ({2} {3})
 apps/erpnext/erpnext/accounts/doctype/cash_flow_mapping/cash_flow_mapping.py +18,You can only select a maximum of one option from the list of check boxes.,Możesz wybrać maksymalnie jedną opcję z listy pól wyboru.
 DocType: Purchase Invoice,Get Advances Paid,Uzyskaj opłacone zaliczki
 DocType: Item,Automatically Create New Batch,Automatyczne tworzenie nowych partii
@@ -1381,7 +1392,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +236,Stoc
 DocType: Buying Settings,Disable Fetching Last Purchase Details in Purchase Order,Wyłącz pobieranie ostatnich szczegółów zakupu w zamówieniu
 DocType: Journal Entry Account,Expense Claim,Zwrot Kosztów
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +267,Do you really want to restore this scrapped asset?,Czy na pewno chcesz przywrócić złomowane atut?
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +381,Qty for {0},Ilość dla {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +402,Qty for {0},Ilość dla {0}
 DocType: Leave Application,Leave Application,Wniosek o Urlop
 DocType: Patient,Patient Relation,Relacja pacjenta
 apps/erpnext/erpnext/config/hr.py +80,Leave Allocation Tool,Narzędzie do przydziału urlopu
@@ -1453,7 +1464,6 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Kod pocztowy
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Zamówienie sprzedaży jest {0} {1}
 DocType: Opportunity,Contact Info,Dane kontaktowe
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Dokonywanie stockowe Wpisy
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Proszę ustawić system nazewnictwa pracownika w dziale Zasoby ludzkie&gt; Ustawienia HR
 DocType: Packing Slip,Net Weight UOM,Jednostka miary wagi netto
 DocType: Item,Default Supplier,Domyślny dostawca
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Nad zasiłkach Procent Produkcji
@@ -1463,7 +1473,7 @@ DocType: Holiday List,Get Weekly Off Dates,Pobierz Tygodniowe zestawienie dat
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +33,End Date can not be less than Start Date,"Data zakończenia nie może być wcześniejsza, niż data rozpoczęcia"
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +337,Invoice can't be made for zero billing hour,Faktura nie może zostać wystawiona na zero godzin rozliczeniowych
 DocType: Sales Person,Select company name first.,Wybierz najpierw nazwę firmy
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +189,Email sent to {0},Wiadomość wysłana do {0}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +182,Email sent to {0},Wiadomość wysłana do {0}
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Wyceny otrzymane od dostawców
 apps/erpnext/erpnext/config/manufacturing.py +74,Replace BOM and update latest price in all BOMs,Zastąp BOM i zaktualizuj ostatnią cenę we wszystkich materiałach
 apps/erpnext/erpnext/controllers/selling_controller.py +27,To {0} | {1} {2},Do {0} | {1} {2}
@@ -1510,7 +1520,7 @@ DocType: Leave Allocation,LAL/,LAL /
 DocType: Setup Progress Action,Action Name,Nazwa akcji
 apps/erpnext/erpnext/public/js/financial_statements.js +75,Start Year,Rok rozpoczęcia
 apps/erpnext/erpnext/regional/india/utils.py +25,First 2 digits of GSTIN should match with State number {0},Pierwsze 2 cyfry GSTIN powinny odpowiadać numerowi państwa {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +77,PDC/LC,PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +75,PDC/LC,PDC / LC
 DocType: Purchase Invoice,Start date of current invoice's period,Początek okresu rozliczeniowego dla faktury
 DocType: Salary Slip,Leave Without Pay,Urlop bezpłatny
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385,Capacity Planning Error,Planowanie zdolności błąd
@@ -1518,7 +1528,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385,Capacit
 DocType: Lead,Consultant,Konsultant
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +356,Parents Teacher Meeting Attendance,Spotkanie wychowawców rodziców
 DocType: Salary Slip,Earnings,Dochody
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +443,Finished Item {0} must be entered for Manufacture type entry,Zakończone Pozycja {0} musi być wprowadzony do wejścia typu Produkcja
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +483,Finished Item {0} must be entered for Manufacture type entry,Zakończone Pozycja {0} musi być wprowadzony do wejścia typu Produkcja
 apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Stan z bilansu otwarcia
 ,GST Sales Register,Rejestr sprzedaży GST
 DocType: Sales Invoice Advance,Sales Invoice Advance,Faktura Zaliczkowa
@@ -1631,7 +1641,7 @@ DocType: Opportunity Item,Opportunity Item,Przedmiot Szansy
 ,Student and Guardian Contact Details,Uczeń i opiekun Dane kontaktowe
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +53,Row {0}: For supplier {0} Email Address is required to send email,Wiersz {0}: Dla dostawcy {0} adres email jest wymagany do wysyłania wiadomości e-mail
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +72,Temporary Opening,Tymczasowe otwarcia
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +10,View Hub,Wyświetl centrum
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +9,View Hub,Wyświetl centrum
 ,Employee Leave Balance,Bilans zwolnień pracownika
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +147,Balance for Account {0} must always be {1},Bilans dla Konta {0} zawsze powinien wynosić {1}
 DocType: Patient Appointment,More Info,Więcej informacji
@@ -1669,9 +1679,9 @@ DocType: Employee,Place of Issue,Miejsce wydania
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +101,Contract,Kontrakt
 DocType: Plant Analysis,Laboratory Testing Datetime,Testowanie laboratoryjne Datetime
 DocType: Email Digest,Add Quote,Dodaj Cytat
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1031,UOM coversion factor required for UOM: {0} in Item: {1},Współczynnik konwersji jednostki miary jest wymagany dla jednostki miary: {0} w Przedmiocie: {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1145,UOM coversion factor required for UOM: {0} in Item: {1},Współczynnik konwersji jednostki miary jest wymagany dla jednostki miary: {0} w Przedmiocie: {1}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +92,Indirect Expenses,Wydatki pośrednie
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +98,Row {0}: Qty is mandatory,Wiersz {0}: Ilość jest obowiązkowe
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +110,Row {0}: Qty is mandatory,Wiersz {0}: Ilość jest obowiązkowe
 DocType: Agriculture Analysis Criteria,Agriculture,Rolnictwo
 apps/erpnext/erpnext/accounts/page/pos/pos.js +794,Sync Master Data,Sync Master Data
 DocType: Asset Repair,Repair Cost,koszty naprawy
@@ -1798,6 +1808,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +70,Appli
 DocType: Activity Cost,Projects,Projekty
 DocType: Payment Request,Transaction Currency,walucie transakcji
 apps/erpnext/erpnext/controllers/buying_controller.py +31,From {0} | {1} {2},Od {0} | {1} {2}
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +341,Removed from Favourites,Usunięto z ulubionych
 DocType: Work Order Operation,Operation Description,Opis operacji
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +34,Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,"Nie można zmienić Rok obrotowy Data rozpoczęcia i Data zakończenia roku obrotowego, gdy rok obrotowy jest zapisane."
 DocType: Quotation,Shopping Cart,Koszyk
@@ -1817,8 +1828,8 @@ DocType: Employee,Prefered Email,Zalecany email
 DocType: Student Admission,Eligibility and Details,Kwalifikowalność i szczegóły
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Net Change in Fixed Asset,Zmiana netto stanu trwałego
 DocType: Leave Control Panel,Leave blank if considered for all designations,Zostaw puste jeśli jest to rozważane dla wszystkich nominacji
-apps/erpnext/erpnext/controllers/accounts_controller.py +806,Charge of type 'Actual' in row {0} cannot be included in Item Rate,
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +382,Max: {0},Max: {0}
+apps/erpnext/erpnext/controllers/accounts_controller.py +808,Charge of type 'Actual' in row {0} cannot be included in Item Rate,
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +403,Max: {0},Max: {0}
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,From Datetime,Od DateTime
 DocType: Email Digest,For Company,Dla firmy
 apps/erpnext/erpnext/config/support.py +17,Communication log.,Rejestr komunikacji
@@ -1855,7 +1866,7 @@ DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a s
 Used for Taxes and Charges","Podatki pobierane z tabeli szczegółów mistrza poz jako ciąg znaków i przechowywane w tej dziedzinie.
  Służy do podatkach i opłatach"
 DocType: Supplier Scorecard Period,SSC-,SSC-
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +159,Employee cannot report to himself.,Pracownik nie może odpowiadać do samego siebie.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +160,Employee cannot report to himself.,Pracownik nie może odpowiadać do samego siebie.
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.","Jeśli konto jest zamrożone, zapisy mogą wykonywać tylko wyznaczone osoby."
 DocType: Email Digest,Bank Balance,Saldo bankowe
 apps/erpnext/erpnext/accounts/party.py +240,Accounting Entry for {0}: {1} can only be made in currency: {2},Wprowadzenia danych księgowych dla {0}: {1} może być dokonywane wyłącznie w walucie: {2}
@@ -1867,8 +1878,9 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +53,{0} {1}: Customer
 DocType: Purchase Invoice,Total Taxes and Charges (Company Currency),Łączna kwota podatków i opłat (wg Firmy)
 DocType: Weather,Weather Parameter,Parametr pogody
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Pokaż niezamkniętych rok obrotowy za P &amp; L sald
+apps/erpnext/erpnext/public/js/hub/hub_form.js +336,Request a Quote,Poprosić o wycenę
 DocType: Lab Test Template,Collection Details,Szczegóły kolekcji
-DocType: POS Profile,Allow Print Before Pay,Pozwól drukować przed zapłatą
+DocType: POS Profile,Allow Print Before Pay,Pozwól na drukowanie przed zapłatą
 DocType: Land Unit,Linked Soil Texture,Połączona tekstura gleby
 DocType: Shipping Rule,Shipping Account,Konto dostawy
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +92,{0} {1}: Account {2} is inactive,{0} {1}: Rachunek {2} jest nieaktywny
@@ -1882,7 +1894,7 @@ DocType: Asset,Asset Name,Zaleta Nazwa
 DocType: Project,Task Weight,zadanie Waga
 DocType: Shipping Rule Condition,To Value,Określ wartość
 DocType: Asset Movement,Stock Manager,Kierownik magazynu
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +171,Source warehouse is mandatory for row {0},Magazyn źródłowy jest obowiązkowy dla wiersza {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Source warehouse is mandatory for row {0},Magazyn źródłowy jest obowiązkowy dla wiersza {0}
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py +38,The Payment Term at row {0} is possibly a duplicate.,Termin płatności w wierszu {0} jest prawdopodobnie duplikatem.
 apps/erpnext/erpnext/public/js/setup_wizard.js +30,Agriculture (beta),Rolnictwo (beta)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +863,Packing Slip,List przewozowy
@@ -1946,7 +1958,6 @@ DocType: Landed Cost Voucher,Additional Charges,Dodatkowe koszty
 DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Dodatkowa kwota rabatu (waluta firmy)
 DocType: Supplier Scorecard,Supplier Scorecard,Dostawca Scorecard
 DocType: Plant Analysis,Result Datetime,Wynik Datetime
-apps/erpnext/erpnext/accounts/doctype/account/account.js +21,Please create new account from Chart of Accounts.,Proszę utworzyć nowe konto wg planu kont.
 ,Support Hour Distribution,Dystrybucja godzin wsparcia
 DocType: Maintenance Visit,Maintenance Visit,Wizyta Konserwacji
 DocType: Student,Leaving Certificate Number,Pozostawiając numer certyfikatu
@@ -1962,7 +1973,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +220,Please input a
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +106,Accounts Receivable Summary,Należności Podsumowanie
 DocType: Employee Loan,Monthly Repayment Amount,Miesięczna kwota spłaty
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Otwieranie faktur
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +195,Please set User ID field in an Employee record to set Employee Role,Proszę ustawić pole ID użytkownika w rekordzie pracownika do roli pracownika zestawu
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +196,Please set User ID field in an Employee record to set Employee Role,Proszę ustawić pole ID użytkownika w rekordzie pracownika do roli pracownika zestawu
 DocType: UOM,UOM Name,Nazwa Jednostki Miary
 DocType: GST HSN Code,HSN Code,Kod HSN
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +39,Contribution Amount,Kwota udziału
@@ -1970,6 +1981,7 @@ DocType: Purchase Invoice,Shipping Address,Adres dostawy
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,To narzędzie pomaga uaktualnić lub ustalić ilość i wycenę akcji w systemie. To jest zwykle używany do synchronizacji wartości systemowych i co rzeczywiście istnieje w magazynach.
 DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,
 DocType: Expense Claim,EXP,EXP
+apps/erpnext/erpnext/erpnext_integrations/connectors/woocommerce_connection.py +21,Unverified Webhook Data,Niezweryfikowane dane z Webhook
 DocType: Water Analysis,Container,Pojemnik
 apps/erpnext/erpnext/education/utils.py +50,Student {0} - {1} appears Multiple times in row {2} & {3},Student {0} - {1} pojawia się wielokrotnie w wierszu {2} i {3}
 DocType: Item Alternative,Two-way,Dwukierunkowy
@@ -2010,7 +2022,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +58,{0} must
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +59,Leaves Allocated Successfully for {0},Urlop przedzielony z powodzeniem dla {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +42,No Items to pack,Brak Przedmiotów do pakowania
 DocType: Shipping Rule Condition,From Value,Od wartości
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +608,Manufacturing Quantity is mandatory,Ilość wyprodukowanych jest obowiązkowa
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +655,Manufacturing Quantity is mandatory,Ilość wyprodukowanych jest obowiązkowa
 DocType: Employee Loan,Repayment Method,Sposób spłaty
 DocType: Products Settings,"If checked, the Home page will be the default Item Group for the website","Jeśli zaznaczone, strona główna będzie Grupa domyślna pozycja na stronie"
 DocType: Quality Inspection Reading,Reading 4,Odczyt 4
@@ -2051,13 +2063,13 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +100,Net Change in Cash,Zmiana netto stanu środków pieniężnych
 DocType: Assessment Plan,Grading Scale,Skala ocen
 apps/erpnext/erpnext/stock/doctype/item/item.py +438,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Jednostka miary {0} została wprowadzona więcej niż raz w Tabelce Współczynnika Konwersji
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +643,Already completed,Zakończone
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +665,Already completed,Zakończone
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +33,Stock In Hand,W Parze
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +64,Import Successful!,Import powiódł się!
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +29,Payment Request already exists {0},Płatność Zapytanie już istnieje {0}
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Koszt Emitowanych Przedmiotów
 DocType: Physician,Hospital,Szpital
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +385,Quantity must not be more than {0},Ilość nie może być większa niż {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +406,Quantity must not be more than {0},Ilość nie może być większa niż {0}
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +117,Previous Financial Year is not closed,Poprzedni rok finansowy nie jest zamknięta
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +68,Age (Days),Wiek (dni)
 DocType: Quotation Item,Quotation Item,Przedmiot oferty
@@ -2065,6 +2077,7 @@ DocType: Customer,Customer POS Id,Identyfikator klienta klienta
 DocType: Account,Account Name,Nazwa konta
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +40,From Date cannot be greater than To Date,Data od - nie może być późniejsza niż Data do
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Serial No {0} quantity {1} cannot be a fraction,Nr seryjny {0} dla ilości {1} nie może być ułamkiem
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +96,Please enter Woocommerce Server URL,Wprowadź adres URL serwera Woocommerce
 apps/erpnext/erpnext/config/buying.py +43,Supplier Type master.,
 DocType: Purchase Order Item,Supplier Part Number,Numer katalogowy dostawcy
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +108,Conversion rate cannot be 0 or 1,Wartością konwersji nie może być 0 ani 1
@@ -2093,7 +2106,7 @@ apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.js +49,Make Disburse
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +138,Row {0}: Advance against Supplier must be debit,Wiersz {0}: Advance przed Dostawcę należy obciążyć
 DocType: Company,Default Values,Domyślne Wartości
 DocType: Membership,INR,INR
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +60,{frequency} Digest,{Frequency} Digest
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +60,{frequency} Digest,{Frequency} skrót
 DocType: Expense Claim,Total Amount Reimbursed,Całkowitej kwoty zwrotów
 apps/erpnext/erpnext/hr/doctype/vehicle/vehicle_dashboard.py +5,This is based on logs against this Vehicle. See timeline below for details,Opiera się to na dzienniki przeciwko tego pojazdu. Zobacz harmonogram poniżej w szczegółach
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +90,Against Supplier Invoice {0} dated {1},Przeciwko Dostawcę faktury {0} {1} dnia
@@ -2103,6 +2116,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +51,You cannot 
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,A customer with the same name already exists,Klient o tej samej nazwie już istnieje
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +185,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,Spowoduje to wysłanie Salary Slips i utworzenie wpisu księgowego. Czy chcesz kontynuować?
 DocType: Purchase Invoice,Total Net Weight,Całkowita waga netto
+DocType: Purchase Order,Order Confirmation No,Potwierdzenie nr
 DocType: Purchase Invoice,Eligibility For ITC,Uprawnienia do ITC
 DocType: Journal Entry,Entry Type,Rodzaj wpisu
 ,Customer Credit Balance,Saldo kredytowe klienta
@@ -2141,7 +2155,7 @@ apps/erpnext/erpnext/healthcare/setup.py +257,Moderate Sensitivity,Średnia czu�
 DocType: Leave Type,Include holidays within leaves as leaves,Dołączaj święta w ciągu urlopu
 DocType: Sales Invoice,Packed Items,Przedmioty pakowane
 apps/erpnext/erpnext/config/support.py +27,Warranty Claim against Serial No.,Roszczenie gwarancyjne z numerem seryjnym
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +211,'Total',&#39;Całkowity&#39;
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +209,'Total',&#39;Całkowity&#39;
 DocType: Shopping Cart Settings,Enable Shopping Cart,Włącz Koszyk
 DocType: Employee,Permanent Address,Stały adres
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +260,"Advance paid against {0} {1} cannot be greater \
@@ -2157,7 +2171,7 @@ DocType: GST Settings,GST Accounts,Konta GST
 DocType: Payment Entry,Paid Amount (Company Currency),Zapłacona kwota (waluta firmy)
 DocType: Purchase Invoice,Additional Discount,Dodatkowe zniżki
 DocType: Selling Settings,Selling Settings,Ustawienia Sprzedaży
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +83,Confirm Action,Potwierdź działanie
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +110,Confirm Action,Potwierdź działanie
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +39,Online Auctions,Aukcje Online
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +100,Please specify either Quantity or Valuation Rate or both,Podaj dokładnie Ilość lub Stawkę lub obie
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order_dashboard.py +18,Fulfillment,Spełnienie
@@ -2259,7 +2273,7 @@ apps/erpnext/erpnext/hr/doctype/training_program/training_program_dashboard.py +
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +205,Duplicate Serial No entered for Item {0},Zduplikowany Nr Seryjny wprowadzony dla przedmiotu {0}
 apps/erpnext/erpnext/config/selling.py +179,Track Leads by Lead Source.,Śledzenie potencjalnych klientów przez źródło potencjalnych klientów.
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Warunki wysyłki
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +167,Please enter ,Podaj
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +168,Please enter ,Podaj
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +43,Maintenance Log,Dziennik konserwacji
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +236,Please set filter based on Item or Warehouse,Proszę ustawić filtr na podstawie pkt lub magazynie
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),Masa netto tego pakietu. (Obliczone automatycznie jako suma masy netto poszczególnych pozycji)
@@ -2293,7 +2307,7 @@ DocType: Hub Category,Hub Node,Hub Węzeł
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78,You have entered duplicate items. Please rectify and try again.,Wprowadziłeś duplikat istniejących rzeczy. Sprawdź i spróbuj ponownie
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +129,Associate,Współpracownik
 DocType: Asset Movement,Asset Movement,Zaleta Ruch
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +510,Work Order {0} must be submitted,Zamówienie pracy {0} musi zostać przesłane
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +550,Work Order {0} must be submitted,Zamówienie pracy {0} musi zostać przesłane
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2210,New Cart,Nowy Koszyk
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +44,Item {0} is not a serialized Item,
 DocType: SMS Center,Create Receiver List,Stwórz listę odbiorców
@@ -2309,7 +2323,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +52,Telecommunicat
 apps/erpnext/erpnext/accounts/party.py +263,Billing currency must be equal to either default company's currency or party account currency,Waluta rozliczeniowa musi być równa domyślnej walucie firmy lub walucie konta strony
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),"Wskazuje, że pakiet jest częścią tej dostawy (Tylko projektu)"
 DocType: Soil Texture,Loam,Ił
-apps/erpnext/erpnext/controllers/accounts_controller.py +705,Row {0}: Due Date cannot be before posting date,Wiersz {0}: termin płatności nie może być wcześniejszy niż data księgowania
+apps/erpnext/erpnext/controllers/accounts_controller.py +707,Row {0}: Due Date cannot be before posting date,Wiersz {0}: termin płatności nie może być wcześniejszy niż data księgowania
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +36,Make Payment Entry,Wprowadź wpływ płatności
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +129,Quantity for Item {0} must be less than {1},Ilość dla Przedmiotu {0} musi być mniejsza niż {1}
 ,Sales Invoice Trends,
@@ -2326,6 +2340,7 @@ apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +33,Item {0} appears
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +41,"Selling must be checked, if Applicable For is selected as {0}","Sprzedaż musi być sprawdzona, jeśli dotyczy wybrano jako {0}"
 DocType: Production Plan Material Request,Material Request Date,Materiał Zapytanie Data
 DocType: Purchase Order Item,Supplier Quotation Item,
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +181,Material Consumption is not set in Manufacturing Settings.,Zużycie materiału nie jest ustawione w Ustawieniach produkcyjnych.
 DocType: Student,Student Mobile Number,Student Mobile Number
 DocType: Item,Has Variants,Ma Warianty
 apps/erpnext/erpnext/controllers/accounts_controller.py +488,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings","Nie można przeliterować dla elementu {0} w wierszu {1} więcej niż {2}. Aby umożliwić zawyżanie opłat, ustaw w Ustawieniach fotografii"
@@ -2346,7 +2361,6 @@ DocType: Budget,Fiscal Year,Rok Podatkowy
 DocType: Asset Maintenance Log,Planned,Zaplanowany
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"Domyślne konta należności, które mają być wykorzystane, jeśli nie zostały ustawione w Księdze Pacjenta, aby zarezerwować opłaty Konsultacyjne."
 DocType: Vehicle Log,Fuel Price,Cena paliwa
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Klient&gt; Grupa klientów&gt; Terytorium
 DocType: Budget,Budget,Budżet
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Ustaw Otwórz
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Trwałego Rzecz musi być element non-stock.
@@ -2388,6 +2402,7 @@ DocType: Employee,Salary Information,Informacja na temat wynagrodzenia
 DocType: Sales Person,Name and Employee ID,Imię i Identyfikator Pracownika
 apps/erpnext/erpnext/accounts/party.py +308,Due Date cannot be before Posting Date,Termin nie może być po Dacie Umieszczenia
 DocType: Website Item Group,Website Item Group,Grupa przedmiotów strony WWW
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +339,Added to Favourites,Dodano do ulubionych
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +463,No salary slip found to submit for the above selected criteria OR salary slip already submitted,Nie znaleziono pokwitowania wypłaty za wyżej wymienione kryteria LUB wniosek o wypłatę wynagrodzenia już przesłano
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +150,Duties and Taxes,Podatki i cła
 DocType: Projects Settings,Projects Settings,Ustawienia projektów
@@ -2432,6 +2447,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +15,{0} hou
 DocType: Course,Default Grading Scale,Domyślna Skala ocen
 DocType: Appraisal,For Employee Name,Dla Imienia Pracownika
 DocType: Holiday List,Clear Table,Wyczyść tabelę
+DocType: Woocommerce Settings,Tax Account,Konto podatkowe
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +119,Available slots,Dostępne gniazda
 DocType: C-Form Invoice Detail,Invoice No,Nr faktury
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +363,Make Payment,Dokonać płatności
@@ -2471,6 +2487,7 @@ DocType: Delivery Note,Excise Page Number,Akcyza numeru strony
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +227,"Company, From Date and To Date is mandatory",Spółka Od Data i do tej pory jest obowiązkowe
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +33,Get from Consultation,Uzyskać od konsultacji
 DocType: Asset,Purchase Date,Data zakupu
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +33,Could not generate Secret,Nie można wygenerować Tajnego
 DocType: Volunteer,Volunteer Type,Typ wolontariusza
 DocType: Student,Personal Details,Dane Osobowe
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +193,Please set 'Asset Depreciation Cost Center' in Company {0},Proszę ustawić &quot;aktywa Amortyzacja Cost Center&quot; w towarzystwie {0}
@@ -2517,6 +2534,7 @@ DocType: Landed Cost Voucher,Distribute Charges Based On,Rozpowszechnianie opła
 DocType: Projects Settings,Timesheets,ewidencja czasu pracy
 DocType: HR Settings,HR Settings,Ustawienia HR
 DocType: Salary Slip,net pay info,Informacje o wynagrodzeniu netto
+DocType: Woocommerce Settings,Enable Sync,Włącz synchronizację
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Ta wartość jest aktualizowana w Domyślnym Cenniku Sprzedaży.
 DocType: Email Digest,New Expenses,Nowe wydatki
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Amount,Kwota PDC / LC
@@ -2529,7 +2547,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +596,"Row #{0}: Qty must
 DocType: Leave Block List Allow,Leave Block List Allow,Możesz opuścić Blok Zablokowanych List
 apps/erpnext/erpnext/setup/doctype/company/company.py +317,Abbr can not be blank or space,Skrót nie może być pusty lub być spacją
 DocType: Patient Medical Record,Patient Medical Record,Medyczny dokument medyczny pacjenta
-apps/erpnext/erpnext/accounts/doctype/account/account.js +68,Group to Non-Group,Grupa do Non-Group
+apps/erpnext/erpnext/accounts/doctype/account/account.js +62,Group to Non-Group,Grupa do Non-Group
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +50,Sports,Sporty
 DocType: Loan Type,Loan Name,pożyczka Nazwa
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +56,Total Actual,Razem Rzeczywisty
@@ -2549,6 +2567,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.js +45,Expense Claims,Roszczenia
 DocType: Issue,Support,Wsparcie
 ,BOM Search,BOM Szukaj
 DocType: Project,Total Consumed Material Cost  (via Stock Entry),Całkowity koszt materiałów konsumpcyjnych (poprzez wprowadzenie do magazynu)
+DocType: Hub Settings,Company Registered,Firma zarejestrowana
 DocType: Item,"Publish ""In Stock"" or ""Not in Stock"" on Hub based on stock available in this warehouse.",Opublikuj &quot;W magazynie&quot; lub &quot;Nie w magazynie&quot; w Hub na podstawie zapasów dostępnych w tym magazynie.
 DocType: Vehicle,Fuel Type,Typ paliwa
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +27,Please specify currency in Company,Proszę określić walutę w Spółce
@@ -2557,6 +2576,7 @@ apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,Niniejszy materiał Wnioski zostały podniesione automatycznie na podstawie poziomu ponownego zamówienia elementu
 DocType: Email Digest,Pending Sales Orders,W oczekiwaniu zleceń sprzedaży
 apps/erpnext/erpnext/controllers/accounts_controller.py +312,Account {0} is invalid. Account Currency must be {1},Konto {0} jest nieprawidłowe. Walutą konta musi być {1}
+DocType: Employee,Create User Permission,Utwórz uprawnienia użytkownika
 DocType: Healthcare Settings,Remind Before,Przypomnij wcześniej
 apps/erpnext/erpnext/buying/utils.py +34,UOM Conversion factor is required in row {0},Współczynnik konwersji jednostki miary jest wymagany w rzędzie {0}
 DocType: Production Plan Item,material_request_item,material_request_item
@@ -2568,7 +2588,7 @@ DocType: Stock Reconciliation Item,Amount Difference,kwota różnicy
 apps/erpnext/erpnext/stock/get_item_details.py +356,Item Price added for {0} in Price List {1},Pozycja Cena dodany do {0} w Cenniku {1}
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person_tree.js +8,Please enter Employee Id of this sales person,Proszę podać ID pracownika tej osoby ze sprzedaży
 DocType: Territory,Classification of Customers by region,Klasyfikacja Klientów od regionu
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +76,In Production,W produkcji
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +78,In Production,W produkcji
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +65,Difference Amount must be zero,Różnica Kwota musi wynosić zero
 DocType: Project,Gross Margin,Marża brutto
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +61,Please enter Production Item first,Wprowadź jako pierwszą Produkowaną Rzecz
@@ -2682,6 +2702,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +364,{0} ag
 DocType: Account,Fixed Asset,Trwała własność
 apps/erpnext/erpnext/config/stock.py +328,Serialized Inventory,Inwentaryzacja w odcinkach
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74,Email not found in default contact,Nie znaleziono wiadomości e-mail w domyślnym kontakcie
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +23,Generate Secret,Generuj sekret
 DocType: Employee Loan,Account Info,Informacje o koncie
 DocType: Activity Type,Default Billing Rate,Domyślnie Cena płatności
 DocType: Fees,Include Payment,Dołącz płatności
@@ -2738,7 +2759,7 @@ DocType: Hub Settings,Unregister from Hub,Wyrejestruj się z Hub
 apps/erpnext/erpnext/public/js/utils.js +108,Total Unpaid: {0},Razem Niepłatny: {0}
 DocType: BOM Website Operation,BOM Website Operation,BOM Operacja WWW
 DocType: Supplier Scorecard,Supplier Score,Ocena Dostawcy
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Total Invoiced Amt,Razem zafakturowane Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +225,Total Invoiced Amt,Razem zafakturowane Amt
 DocType: Supplier,Warn RFQs,Ostrzegaj RFQ
 DocType: BOM,Conversion Rate,Współczynnik konwersji
 apps/erpnext/erpnext/templates/pages/product_search.html +3,Product Search,Wyszukiwarka produktów
@@ -2747,7 +2768,7 @@ DocType: Authorization Rule,Approving Role (above authorized value),Zatwierdzani
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +118,Credit To account must be a Payable account,Kredytowane Konto powinno być kontem typu Zobowiązania
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +43,Please select Student Admission which is mandatory for the paid student applicant,"Wybierz Wstęp studenta, który jest obowiązkowy dla płatnego studenta"
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +355,BOM recursion: {0} cannot be parent or child of {2},
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +21,Please select a Price List to publish pricing,"Wybierz cennik, aby opublikować wycenę"
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +36,Please select a Price List to publish pricing,"Wybierz cennik, aby opublikować wycenę"
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +38,Budget List,Lista budżetu
 DocType: Work Order Operation,Completed Qty,Ukończona wartość
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +148,"For {0}, only debit accounts can be linked against another credit entry","Dla {0}, tylko rachunki płatnicze mogą być połączone z innym wejściem kredytową"
@@ -2757,7 +2778,7 @@ DocType: Manufacturing Settings,Allow Overtime,Pozwól Nadgodziny
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +148,"Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry","Nie można zaktualizować elementu seryjnego {0} za pomocą funkcji zgrupowania, proszę użyć wpisu fotografii"
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +148,"Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry","Nie można zaktualizować elementu seryjnego {0} za pomocą funkcji zgrupowania, proszę użyć wpisu fotografii"
 DocType: Training Event Employee,Training Event Employee,Training Event urzędnik
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1075,Maximum Samples - {0} can be retained for Batch {1} and Item {2}.,Maksymalne próbki - {0} mogą zostać zachowane dla Batch {1} i Item {2}.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1189,Maximum Samples - {0} can be retained for Batch {1} and Item {2}.,Maksymalne próbki - {0} mogą zostać zachowane dla Batch {1} i Item {2}.
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +7,Add Time Slots,Dodaj gniazda czasowe
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +201,{0} Serial Numbers required for Item {1}. You have provided {2}.,{0} Numery seryjne wymagane dla pozycji {1}. Podałeś {2}.
 DocType: Stock Reconciliation Item,Current Valuation Rate,Aktualny Wycena Cena
@@ -2803,10 +2824,12 @@ DocType: Sales Order,Not Delivered,Nie dostarczony
 ,Bank Clearance Summary,Rozliczenia bankowe
 apps/erpnext/erpnext/config/setup.py +106,"Create and manage daily, weekly and monthly email digests.",
 DocType: Appraisal Goal,Appraisal Goal,Cel oceny
+apps/erpnext/erpnext/public/js/hub/hub_form.js +420,Suggest Category?,Zaproponuj kategorię?
 DocType: Stock Reconciliation Item,Current Amount,Aktualny Kwota
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +58,Buildings,Budynki
 DocType: Fee Schedule,Fee Structure,Struktura opłat
 DocType: Timesheet Detail,Costing Amount,Kwota zestawienia kosztów
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Dostawca&gt; Dostawca Typ
 DocType: Student Admission Program,Application Fee,Opłata za zgłoszenie
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +52,Submit Salary Slip,Zatwierdź potrącenie z pensji
 apps/erpnext/erpnext/controllers/selling_controller.py +137,Maxiumm discount for Item {0} is {1}%,Maksymalny rabat dla produktu {0} to {1}%
@@ -2835,6 +2858,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Journal Entry,Reference Number,Numer Odniesienia
 DocType: Employee,Employment Details,Szczegóły zatrudnienia
 DocType: Employee,New Workplace,Nowe Miejsce Pracy
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +330,Material Consumption,Zużycie materiału
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +17,Set as Closed,Ustaw jako Zamknięty
 apps/erpnext/erpnext/stock/get_item_details.py +127,No Item with Barcode {0},Nie istnieje Przedmiot o kodzie kreskowym {0}
 DocType: Normal Test Items,Require Result Value,Wymagaj wartości
@@ -2857,13 +2881,13 @@ DocType: Cost Center,Track separate Income and Expense for product verticals or 
 DocType: Rename Tool,Rename Tool,Zmień nazwę narzędzia
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +72,Update Cost,Zaktualizuj Koszt
 DocType: Item Reorder,Item Reorder,Element Zamów ponownie
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +463,Show Salary Slip,Slip Pokaż Wynagrodzenie
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +473,Show Salary Slip,Slip Pokaż Wynagrodzenie
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +849,Transfer Material,Transfer materiału
 DocType: Fees,Send Payment Request,Wyślij żądanie płatności
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.",
 DocType: Water Analysis,Origin,Pochodzenie
 apps/erpnext/erpnext/controllers/status_updater.py +204,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,Niniejszy dokument ma na granicy przez {0} {1} dla pozycji {4}. Robisz kolejny {3} przeciwko samo {2}?
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1154,Please set recurring after saving,Proszę ustawić cykliczne po zapisaniu
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1155,Please set recurring after saving,Proszę ustawić cykliczne po zapisaniu
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +769,Select change amount account,Wybierz opcję Zmień konto kwotę
 DocType: Purchase Invoice,Price List Currency,Waluta cennika
 DocType: Naming Series,User must always select,Użytkownik musi zawsze zaznaczyć
@@ -2884,7 +2908,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +34,Traceability,Śled
 DocType: Asset Maintenance Log,Actions performed,Wykonane akcje
 DocType: Cash Flow Mapper,Section Leader,Kierownik sekcji
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +137,Source of Funds (Liabilities),Pasywa
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +433,Quantity in row {0} ({1}) must be same as manufactured quantity {2},Ilość w rzędzie  {0} ({1}) musi być taka sama jak wyprodukowana ilość {2}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +473,Quantity in row {0} ({1}) must be same as manufactured quantity {2},Ilość w rzędzie  {0} ({1}) musi być taka sama jak wyprodukowana ilość {2}
 DocType: Supplier Scorecard Scoring Standing,Employee,Pracownik
 DocType: Asset Repair,Failure Date,Data awarii
 DocType: Sample Collection,Collected Time,Zbierz czas
@@ -2980,7 +3004,7 @@ DocType: Authorization Rule,Authorized Value,Autoryzowany Wartość
 DocType: BOM,Show Operations,Pokaż Operations
 ,Minutes to First Response for Opportunity,Minutes to pierwsza odpowiedź na szansy
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +68,Total Absent,Razem Nieobecny
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +881,Item or Warehouse for row {0} does not match Material Request,
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +995,Item or Warehouse for row {0} does not match Material Request,
 apps/erpnext/erpnext/config/stock.py +195,Unit of Measure,Jednostka miary
 DocType: Fiscal Year,Year End Date,Data końca roku
 DocType: Task Depends On,Task Depends On,Zadanie Zależy od
@@ -3032,7 +3056,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +498,Barcode {0} is not a valid 
 apps/erpnext/erpnext/public/js/financial_statements.js +83,End Year,koniec roku
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Kwota / kwota procentowa
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Kwota / kwota procentowa
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +124,Contract End Date must be greater than Date of Joining,Końcowa data kontraktu musi być większa od Daty Członkowstwa
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +125,Contract End Date must be greater than Date of Joining,Końcowa data kontraktu musi być większa od Daty Członkowstwa
 DocType: Driver,Driver,Kierowca
 DocType: Vital Signs,Nutrition Values,Wartości odżywcze
 DocType: Lab Test Template,Is billable,Jest rozliczalny
@@ -3087,6 +3111,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
  10. Dodać lub odjąć: Czy chcesz dodać lub odjąć podatek."
 DocType: Homepage,Homepage,Strona główna
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +68,Select Physician...,Wybierz lekarza ...
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +606,Back to Products,Powrót do produktów
 DocType: Grant Application,Grant Application Details ,Przyznaj szczegóły aplikacji
 DocType: Stock Entry Detail,Original Item,Oryginalna pozycja
 DocType: Purchase Receipt Item,Recd Quantity,Zapisana Ilość
@@ -3164,11 +3189,11 @@ DocType: Purchase Invoice,Total Taxes and Charges,Łączna kwota podatków i op�
 DocType: Employee,Emergency Contact,Kontakt na wypadek nieszczęśliwych wypadków
 DocType: Bank Reconciliation Detail,Payment Entry,Płatność
 ,sales-browser,sprzedaży przeglądarkami
-apps/erpnext/erpnext/accounts/doctype/account/account.js +79,Ledger,Rejestr
+apps/erpnext/erpnext/accounts/doctype/account/account.js +73,Ledger,Rejestr
 DocType: Patient Medical Record,PMR-,PMR-
 DocType: Drug Prescription,Drug Code,Kodeks Leków
 DocType: Target Detail,Target  Amount,Kwota docelowa
-DocType: POS Profile,Print Format for Online,Format drukowania w trybie online
+DocType: POS Profile,Print Format for Online,Drukuj Format dla wersji Online
 DocType: Shopping Cart Settings,Shopping Cart Settings,Koszyk Ustawienia
 DocType: Journal Entry,Accounting Entries,Zapisy księgowe
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +17,"If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Jeśli wybrana zostanie reguła cenowa dla &quot;Stawka&quot;, nadpisze ona Cennik. Stawka za ustalanie stawek jest ostateczną stawką, więc nie należy stosować dodatkowej zniżki. W związku z tym w transakcjach takich jak zamówienie sprzedaży, zamówienie itp. Zostanie ono pobrane w polu &quot;stawka&quot;, a nie w polu &quot;cennik ofert&quot;."
@@ -3217,17 +3242,16 @@ apps/erpnext/erpnext/utilities/activation.py +127,"Student Batches help you trac
 DocType: Payment Entry,Total Allocated Amount,Łączna kwota przyznanego wsparcia
 apps/erpnext/erpnext/setup/doctype/company/company.py +151,Set default inventory account for perpetual inventory,Ustaw domyślne konto zapasów dla zasobów reklamowych wieczystych
 DocType: Item Reorder,Material Request Type,Typ zamówienia produktu
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252,Accural Journal Entry for salaries from {0} to {1},Accural Journal Entry na wynagrodzenia z {0} {1}
 apps/erpnext/erpnext/non_profit/doctype/grant_application/grant_application.js +17,Send Grant Review Email,Wyślij wiadomość e-mail dotyczącą oceny grantu
 apps/erpnext/erpnext/accounts/page/pos/pos.js +848,"LocalStorage is full, did not save","LocalStorage jest pełna, nie oszczędzać"
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +100,Row {0}: UOM Conversion Factor is mandatory,Wiersz {0}: JM Współczynnik konwersji jest obowiązkowe
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +112,Row {0}: UOM Conversion Factor is mandatory,Wiersz {0}: JM Współczynnik konwersji jest obowiązkowe
 apps/erpnext/erpnext/utilities/user_progress.py +235,Room Capacity,Pojemność pokoju
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +28,Already record exists for the item {0},Już istnieje rekord dla elementu {0}
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +28,Ref,Ref
 DocType: Lab Test,LP-,LP-
 DocType: Healthcare Settings,Registration Fee,Opłata za rejestrację
 DocType: Budget,Cost Center,Centrum kosztów
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +45,Voucher #,Bon #
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +46,Voucher #,Bon #
 DocType: Notification Control,Purchase Order Message,Wiadomość Zamówienia Kupna
 DocType: Tax Rule,Shipping Country,Wysyłka Kraj
 DocType: Selling Settings,Hide Customer's Tax Id from Sales Transactions,Ukryj NIP Klienta z transakcji sprzedaży
@@ -3241,7 +3265,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +72,Incom
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,Śledź leady przez typy przedsiębiorstw
 apps/erpnext/erpnext/utilities/user_progress.py +101,Go to Letterheads,Idź do Blankiety firmowe
 DocType: Item Supplier,Item Supplier,Dostawca
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1255,Please enter Item Code to get batch no,Proszę wprowadzić Kod Produktu w celu przyporządkowania serii
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1256,Please enter Item Code to get batch no,Proszę wprowadzić Kod Produktu w celu przyporządkowania serii
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +880,Please select a value for {0} quotation_to {1},Proszę wprowadzić wartość dla wyceny {0} {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +419,No Items selected for transfer,Nie wybrano pozycji do przeniesienia
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,Wszystkie adresy
@@ -3313,7 +3337,7 @@ DocType: Project Update,Project Update,Aktualizacja projektu
 DocType: Fees,Fees,Opłaty
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Określ Kursy walut konwersji jednej waluty w drugą
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +159,Quotation {0} is cancelled,Oferta {0} jest anulowana
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +128,Total Outstanding Amount,Łączna kwota
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +126,Total Outstanding Amount,Łączna kwota
 DocType: Sales Partner,Targets,Cele
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +54,Please register the SIREN number in the company information file,Zarejestruj numer SIREN w pliku z informacjami o firmie
 DocType: Price List,Price List Master,Ustawienia Cennika
@@ -3375,7 +3399,7 @@ apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_
 ,Salary Register,wynagrodzenie Rejestracja
 DocType: Warehouse,Parent Warehouse,Dominująca Magazyn
 DocType: C-Form Invoice Detail,Net Total,Łączna wartość netto
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +549,Default BOM not found for Item {0} and Project {1},Domyślnie nie znaleziono elementu BOM dla elementu {0} i projektu {1}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +570,Default BOM not found for Item {0} and Project {1},Domyślnie nie znaleziono elementu BOM dla elementu {0} i projektu {1}
 apps/erpnext/erpnext/config/hr.py +168,Define various loan types,Definiować różne rodzaje kredytów
 DocType: Bin,FCFS Rate,Pierwsza rata
 DocType: Opening Invoice Creation Tool Item,Outstanding Amount,Zaległa Ilość
@@ -3412,6 +3436,7 @@ DocType: Employee Loan,Repaid/Closed,Spłacone / Zamknięte
 DocType: Item,Total Projected Qty,Łącznej prognozowanej szt
 DocType: Monthly Distribution,Distribution Name,Nazwa Dystrybucji
 apps/erpnext/erpnext/stock/stock_ledger.py +477,"Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry","Nie ustalono stawki za element {0}, który jest wymagany do wpisów księgowych dla {1} {2}. Jeśli transakcja jest transakcją jako element zerowej stawki wyceny w {1}, wspomnij, że w tabeli {1} pozycji. W przeciwnym razie należy utworzyć transakcję przychodzącą na akcje dla elementu lub wymienić wskaźnik wyceny w rekordzie Element, a następnie spróbować poddać lub anulować ten wpis"
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ustaw Serię Nazewnictwa na {0} za pomocą Setup&gt; Settings&gt; Naming Series
 DocType: Course,Course Code,Kod kursu
 apps/erpnext/erpnext/controllers/stock_controller.py +337,Quality Inspection required for Item {0},Kontrola jakości wymagana dla przedmiotu {0}
 DocType: POS Settings,Use POS in Offline Mode,Użyj POS w trybie offline
@@ -3456,10 +3481,10 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +136,Row # {0}: Ca
 DocType: Item Group,Show this slideshow at the top of the page,Pokaż slideshow na górze strony
 DocType: BOM,Item UOM,Jednostka miary produktu
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),Kwota podatku po uwzględnieniu rabatu (waluta firmy)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +177,Target warehouse is mandatory for row {0},Magazyn docelowy jest obowiązkowy dla wiersza {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +217,Target warehouse is mandatory for row {0},Magazyn docelowy jest obowiązkowy dla wiersza {0}
 DocType: Cheque Print Template,Primary Settings,Ustawienia podstawowe
 DocType: Purchase Invoice,Select Supplier Address,Wybierz Dostawca Adres
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +397,Add Employees,Dodaj Pracownikom
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +407,Add Employees,Dodaj Pracownikom
 DocType: Purchase Invoice Item,Quality Inspection,Kontrola jakości
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +196,Extra Small,Extra Small
 DocType: Company,Standard Template,Szablon Standardowy
@@ -3484,6 +3509,7 @@ DocType: Crop,Crop Name,Nazwa uprawy
 DocType: SMS Log,No of Sent SMS,Numer wysłanego Sms
 DocType: Antibiotic,Healthcare Administrator,Administrator Ochrony Zdrowia
 apps/erpnext/erpnext/utilities/user_progress.py +47,Set a Target,Ustaw cel
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Proszę ustawić serię numerów dla Obecności za pośrednictwem Setup&gt; Numbering Series
 DocType: Dosage Strength,Dosage Strength,Siła dawkowania
 DocType: Account,Expense Account,Konto Wydatków
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +49,Software,Oprogramowanie
@@ -3511,7 +3537,7 @@ DocType: Purchase Invoice,Availed ITC Cess,Korzystał z ITC Cess
 ,Student Monthly Attendance Sheet,Student miesięczny Obecność Sheet
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +96,Shipping rule only applicable for Selling,Reguła wysyłki dotyczy tylko sprzedaży
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Data startu projektu
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +32,Until,Do
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +30,Until,Do
 DocType: Rename Tool,Rename Log,Zmień nazwę dziennika
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Plan zajęć dla studentów lub kurs jest obowiązkowy
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Plan zajęć dla studentów lub kurs jest obowiązkowy
@@ -3562,14 +3588,14 @@ DocType: Project,Total Costing Amount (via Timesheets),Łączna kwota kosztów (
 DocType: Employee Advance,Expense Approver,Osoba zatwierdzająca wydatki
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +136,Row {0}: Advance against Customer must be credit,Wiersz {0}: Advance wobec Klienta musi być kredytowej
 DocType: Project,Hourly,Cogodzinny
-apps/erpnext/erpnext/accounts/doctype/account/account.js +89,Non-Group to Group,Dla grupy do grupy
+apps/erpnext/erpnext/accounts/doctype/account/account.js +83,Non-Group to Group,Dla grupy do grupy
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +58,Batch is mandatory in row {0},Batch jest obowiązkowy w rzędzie {0}
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +58,Batch is mandatory in row {0},Batch jest obowiązkowy w rzędzie {0}
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,Rachunek Kupna Zaopatrzenia
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,To Datetime,Aby DateTime
 apps/erpnext/erpnext/config/selling.py +302,Logs for maintaining sms delivery status,Logi do utrzymania sms stan przesyłki
 DocType: Accounts Settings,Make Payment via Journal Entry,Wykonywanie płatności za pośrednictwem Zapisów Księgowych dziennika
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +237,Printed On,wydrukowane na
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +235,Printed On,wydrukowane na
 DocType: Item,Inspection Required before Delivery,Wymagane Kontrola przed dostawą
 DocType: Item,Inspection Required before Purchase,Wymagane Kontrola przed zakupem
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +93,Pending Activities,Oczekujące Inne
@@ -3579,7 +3605,7 @@ DocType: Chapter Member,Chapter Member,Członek rozdziału
 DocType: Material Request Plan Item,Minimum Order Quantity,Minimalna ilość zamówienia
 apps/erpnext/erpnext/public/js/setup_wizard.js +106,Your Organization,Twoja organizacja
 DocType: Fee Component,Fees Category,Opłaty Kategoria
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +134,Please enter relieving date.,
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,Please enter relieving date.,
 apps/erpnext/erpnext/controllers/trends.py +149,Amt,Amt
 DocType: Supplier Scorecard,Notify Employee,Powiadom o pracowniku
 DocType: Opportunity,Enter name of campaign if source of enquiry is campaign,Wpisz nazwę przeprowadzanej kampanii jeżeli źródło pytania jest kampanią
@@ -3607,6 +3633,7 @@ apps/erpnext/erpnext/assets/doctype/asset_repair/asset_repair.py +14,Please sele
 DocType: Student Batch Attendance Tool,Student Batch Attendance Tool,Student Batch Obecność narzędzia
 apps/erpnext/erpnext/controllers/status_updater.py +213,Limit Crossed,Limit Crossed
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.js +22,Scheduled Upto,Zaplanowane Upto
+DocType: Woocommerce Settings,Secret,Sekret
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +55,Venture Capital,Kapitał wysokiego ryzyka
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +40,An academic term with this 'Academic Year' {0} and 'Term Name' {1} already exists. Please modify these entries and try again.,Semestr z tym &quot;Roku Akademickiego&quot; {0} i &#39;Nazwa Termin&#39; {1} już istnieje. Proszę zmodyfikować te dane i spróbuj jeszcze raz.
 DocType: UOM,Must be Whole Number,Musi być liczbą całkowitą
@@ -3641,7 +3668,7 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 DocType: Employee Attendance Tool,Employee Attendance Tool,Narzędzie Frekwencji
 DocType: Guardian Student,Guardian Student,opiekun studenta
 DocType: Supplier,Credit Limit,
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75,Avg. Selling Price List Rate,Śr. Wskaźnik cen sprzedaży
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Avg. Selling Price List Rate,Śr. Wskaźnik cen sprzedaży
 DocType: Salary Component,Salary Component,Wynagrodzenie Komponent
 apps/erpnext/erpnext/accounts/utils.py +490,Payment Entries {0} are un-linked,Wpisy płatności {0} są un-linked
 DocType: GL Entry,Voucher No,Nr Podstawy księgowania
@@ -3660,6 +3687,7 @@ DocType: Support Settings,Auto close Issue after 7 days,Auto blisko Issue po 7 d
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +71,"Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Urlopu nie może być przyznane przed {0}, a bilans urlopu zostało już przeniesionych przekazywane w przyszłości rekordu alokacji urlopu {1}"
 apps/erpnext/erpnext/accounts/party.py +317,Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s),Uwaga: Ze względu / Data odniesienia przekracza dozwolony dzień kredytowej klienta przez {0} dni (s)
 apps/erpnext/erpnext/education/doctype/program/program.js +8,Student Applicant,Student Wnioskodawca
+DocType: Hub Tracked Item,Hub Tracked Item,Hub Tracked Item
 DocType: Purchase Invoice,ORIGINAL FOR RECIPIENT,ORYGINAŁ DO ODBIORU
 DocType: Asset Category Account,Accumulated Depreciation Account,Skumulowana Amortyzacja konta
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +11,This email is autogenerated,Ten e-mail jest autotrenerowany
@@ -3735,7 +3763,7 @@ apps/erpnext/erpnext/education/doctype/instructor/instructor.py +21,Please selec
 DocType: Sales Order,Fully Delivered,Całkowicie dostarczono
 DocType: Lead,Lower Income,Niższy przychód
 DocType: Restaurant Order Entry,Current Order,Aktualne zamówienie
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +196,Source and target warehouse cannot be same for row {0},Źródło i magazyn docelowy nie mogą być takie sama dla wiersza {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +236,Source and target warehouse cannot be same for row {0},Źródło i magazyn docelowy nie mogą być takie sama dla wiersza {0}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +243,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Konto różnica musi być kontem typu aktywami / pasywami, ponieważ Zdjęcie Pojednanie jest Wejście otwarcia"
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +107,Disbursed Amount cannot be greater than Loan Amount {0},Wypłacona kwota nie może być wyższa niż Kwota kredytu {0}
 apps/erpnext/erpnext/utilities/user_progress.py +176,Go to Programs,Przejdź do Programów
@@ -3762,6 +3790,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +86,Va
 DocType: Payment Terms Template,Payment Terms,Zasady płatności
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +449,Productions Orders cannot be raised for:,Produkcje Zamówienia nie mogą być podnoszone przez:
 apps/erpnext/erpnext/utilities/user_progress.py +147,Minute,Minuta
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Proszę ustawić system nazewnictwa pracownika w dziale Zasoby ludzkie&gt; Ustawienia HR
 DocType: Purchase Invoice,Purchase Taxes and Charges,Podatki i opłaty kupna
 DocType: Chapter,Meetup Embed HTML,Meetup Osadź HTML
 apps/erpnext/erpnext/utilities/user_progress.py +121,Go to Suppliers,Przejdź do Dostawców
@@ -3795,7 +3824,7 @@ DocType: Purchase Invoice,Edit Posting Date and Time,Edit data księgowania i cz
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +101,Please set Depreciation related Accounts in Asset Category {0} or Company {1},Proszę ustawić amortyzacyjny dotyczący Konta aktywów z kategorii {0} lub {1} Spółki
 DocType: Lab Test Groups,Normal Range,Normalny zakres
 DocType: Academic Term,Academic Year,Rok akademicki
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Available Selling,Dostępne sprzedawanie
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +79,Available Selling,Dostępne sprzedawanie
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +169,Opening Balance Equity,Bilans otwarcia Kapitału własnego
 DocType: Lead,CRM,CRM
 DocType: Purchase Invoice,N,N
@@ -3812,7 +3841,7 @@ apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_recei
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +64,Create Fees,Utwórz opłaty
 DocType: Project,Total Purchase Cost (via Purchase Invoice),Całkowity koszt zakupu (faktura zakupu za pośrednictwem)
 DocType: Training Event,Start Time,Czas rozpoczęcia
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +400,Select Quantity,Wybierz ilość
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +421,Select Quantity,Wybierz ilość
 DocType: Customs Tariff Number,Customs Tariff Number,Numer taryfy celnej
 DocType: Patient Appointment,Patient Appointment,Powtarzanie Pacjenta
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +34,Approving Role cannot be same as role the rule is Applicable To,Rola Zatwierdzająca nie może być taka sama jak rola którą zatwierdza
@@ -3856,6 +3885,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +137,Delivery wa
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),Waga brutto opakowania. Zazwyczaj waga netto + waga materiału z jakiego jest wykonane opakowanie. (Do druku)
 DocType: Assessment Plan,Program,Program
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Użytkownicy z tą rolą mogą ustawiać zamrożone konta i tworzyć / modyfikować wpisy księgowe dla zamrożonych kont
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Proszę ustawić Instruktorski System Nazw w Edukacji&gt; Ustawienia edukacyjne
 DocType: Serial No,Is Cancelled,
 DocType: Student Group,Group Based On,Grupa oparta na
 DocType: Journal Entry,Bill Date,Data Rachunku
@@ -3881,6 +3911,7 @@ DocType: Payment Gateway Account,Default Payment Request Message,Domyślnie Pła
 DocType: Item Group,Check this if you want to show in website,Zaznacz czy chcesz uwidocznić to na stronie WWW
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +338,Balance ({0}),Saldo ({0})
 apps/erpnext/erpnext/config/accounts.py +134,Banking and Payments,Operacje bankowe i płatności
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +99,Please enter API Consumer Key,Wprowadź klucz klienta API
 ,Welcome to ERPNext,Zapraszamy do ERPNext
 apps/erpnext/erpnext/config/learn.py +102,Lead to Quotation,Trop do Wyceny
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +34,Email Reminders will be sent to all parties with email contacts,Przypomnienia e-mailem będą wysyłane do wszystkich stron z kontaktami e-mail
@@ -3922,13 +3953,13 @@ DocType: Purchase Invoice Item,Landed Cost Voucher Amount,Kwota Kosztu Voucheru
 ,Item Balance (Simple),Bilans przedmiotu (prosty)
 apps/erpnext/erpnext/config/accounts.py +17,Bills raised by Suppliers.,Rachunki od dostawców.
 DocType: POS Profile,Write Off Account,Konto Odpisu
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229,Debit Note Amt,Nota debetowa Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Debit Note Amt,Nota debetowa Amt
 apps/erpnext/erpnext/templates/print_formats/includes/taxes.html +5,Discount Amount,Wartość zniżki
 DocType: Purchase Invoice,Return Against Purchase Invoice,Powrót Against dowodu zakupu
 DocType: Item,Warranty Period (in days),Okres gwarancji (w dniach)
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +61,Failed to set defaults,Nie udało się ustawić wartości domyślnych
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +56,Relation with Guardian1,Relacja z Guardian1
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +787,Please select BOM against item {0},Wybierz zestawienie materiałów w odniesieniu do pozycji {0}
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +791,Please select BOM against item {0},Wybierz zestawienie materiałów w odniesieniu do pozycji {0}
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js +18,Make Invoices,Twórz faktury
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Cash from Operations,Środki pieniężne netto z działalności operacyjnej
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Pozycja 4
@@ -3949,7 +3980,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient/patient.py +90,Customer {0} is c
 DocType: Stock Settings,Limit Percent,Limit Procent
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +82, Currently no stock available in any warehouse,Obecnie brak dostępnych zasobów w magazynach
 ,Payment Period Based On Invoice Date,Termin Płatności oparty na dacie faktury
-DocType: Sample Collection,No. of print,Liczba wydruków
+DocType: Sample Collection,No. of print,Liczba kopii
 DocType: Hotel Room Reservation Item,Hotel Room Reservation Item,Rezerwacja pokoju hotelowego
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +58,Missing Currency Exchange Rates for {0},Brakujące Wymiana walut stawki dla {0}
 DocType: Health Insurance,Health Insurance Name,Nazwa ubezpieczenia zdrowotnego
@@ -3975,7 +4006,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js +95,Company name not same,
 DocType: Lead,Address Desc,Opis adresu
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +113,Party is mandatory,Partia jest obowiązkowe
 DocType: Journal Entry,JV-,V-
-apps/erpnext/erpnext/controllers/accounts_controller.py +712,Rows with duplicate due dates in other rows were found: {list},Znaleziono wiersze z powtarzającymi się datami w innych wierszach: {list}
+apps/erpnext/erpnext/controllers/accounts_controller.py +714,Rows with duplicate due dates in other rows were found: {list},Znaleziono wiersze z powtarzającymi się datami w innych wierszach: {list}
 DocType: Topic,Topic Name,Nazwa tematu
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast one of the Selling or Buying must be selected,Conajmniej jeden sprzedaż lub zakup musi być wybrany
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +290,Select an employee to get the employee advance.,"Wybierz pracownika, aby uzyskać awans pracownika."
@@ -4012,19 +4043,20 @@ DocType: Production Plan,Sales Orders Detail,Szczegóły zamówienia sprzedaży
 DocType: Bin,Requested Quantity,Oczekiwana ilość
 DocType: Patient,Marital Status,Stan cywilny
 DocType: Stock Settings,Auto Material Request,Zapytanie Auto Materiał
+DocType: Woocommerce Settings,API consumer secret,Tajny klucz klienta API
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,Ilosc w serii dostępne z magazynu
 DocType: Customer,CUST-,CUST-
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +50,Idevise,Idealizm
 DocType: Salary Slip,Gross Pay - Total Deduction - Loan Repayment,Gross Pay - Razem Odliczenie - Spłata kredytu
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +29,Current BOM and New BOM can not be same,
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py +47,Salary Slip ID,Wynagrodzenie Slip ID
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +118,Date Of Retirement must be greater than Date of Joining,Data przejścia na emeryturę musi być większa niż Data wstąpienia
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +119,Date Of Retirement must be greater than Date of Joining,Data przejścia na emeryturę musi być większa niż Data wstąpienia
 apps/erpnext/erpnext/stock/doctype/item/item.js +68,Multiple Variants,Wiele wariantów
 DocType: Sales Invoice,Against Income Account,Konto przychodów
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +117,{0}% Delivered,{0}% dostarczono
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +107,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,Element {0}: Zamówione szt {1} nie może być mniejsza niż minimalna Ilość zamówień {2} (określonego w pkt).
 DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,Miesięczny rozkład procentowy
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +49,Please login as another user.,Zaloguj się jako inny użytkownik.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +62,Please login as another user.,Zaloguj się jako inny użytkownik.
 DocType: Daily Work Summary Group User,Daily Work Summary Group User,Codzienny użytkownik grupy roboczej
 DocType: Territory,Territory Targets,Cele Regionalne
 DocType: Soil Analysis,Ca/Mg,Ca / Mg
@@ -4036,7 +4068,7 @@ apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analys
 ,Warehouse wise Item Balance Age and Value,Magazyn mądry Pozycja Bilans Wiek i wartość
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Zamówienie Kupna Zaopatrzenia
 apps/erpnext/erpnext/public/js/setup_wizard.js +94,Company Name cannot be Company,Nazwa firmy nie może być firma
-apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Nagłówki to wzorów druku
+apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Nagłówki dla szablonów druku
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,Tytuł szablonu wydruku np.: Faktura Proforma
 DocType: Program Enrollment,Walking,Pieszy
 DocType: Student Guardian,Student Guardian,Student Stróża
@@ -4078,7 +4110,7 @@ DocType: Asset Settings,Number of Days in Fiscal Year,Liczba dni w roku podatkow
 apps/erpnext/erpnext/templates/includes/cart/cart_items.html +29,Rate: {0},Cena: {0}
 DocType: Company,Exchange Gain / Loss Account,Wymiana Zysk / strat
 apps/erpnext/erpnext/config/hr.py +7,Employee and Attendance,Pracownik i obecność
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +93,Purpose must be one of {0},Cel musi być jednym z {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +105,Purpose must be one of {0},Cel musi być jednym z {0}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +100,Fill the form and save it,Wypełnij formularz i zapisz
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Społeczność Forum
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +52,Actual qty in stock,Rzeczywista ilość w magazynie
@@ -4105,15 +4137,17 @@ apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +16,{0}: F
 DocType: Task,depends_on,zależy_od
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +60,Queued for updating latest price in all Bill of Materials. It may take a few minutes.,Usługa kolejkowania aktualizacji najnowszej ceny we wszystkich materiałach. Może potrwać kilka minut.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +26,Name of new Account. Note: Please don't create accounts for Customers and Suppliers,Nazwa nowego konta. Uwaga: Proszę nie tworzyć konta dla odbiorców i dostawców
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Klient&gt; Grupa klientów&gt; Terytorium
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,Szablony Adresów na dany kraj
 DocType: Water Analysis,Appearance,Wygląd
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75,Avg. Buying Price List Rate,Śr. Kupowanie kursu cenowego
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Avg. Buying Price List Rate,Śr. Kupowanie kursu cenowego
 DocType: Sales Order Item,Supplier delivers to Customer,Dostawca dostarcza Klientowi
 apps/erpnext/erpnext/config/non_profit.py +23,Member information.,Informacje o członkach.
 apps/erpnext/erpnext/utilities/bot.py +34,[{0}](#Form/Item/{0}) is out of stock,[{0}] (# Postać / poz / {0}) jest niedostępne
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +58,Asset Maintenance,Konserwacja aktywów
 ,Sales Payment Summary,Podsumowanie płatności za sprzedaż
 DocType: Restaurant,Restaurant,Restauracja
+DocType: Woocommerce Settings,API consumer key,Klucz konsumenta API
 apps/erpnext/erpnext/accounts/party.py +320,Due / Reference Date cannot be after {0},Data referencyjne / Termin nie może być po {0}
 apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,Import i eksport danych
 DocType: Patient,Account Details,Szczegóły konta
@@ -4132,6 +4166,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +584,Please
 DocType: Program Enrollment,School House,school House
 DocType: Serial No,Out of AMC,
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +82,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,Ilość amortyzacją Zarezerwowane nie może być większa od ogólnej liczby amortyzacją
+DocType: Purchase Order,Order Confirmation Date,Zamów datę potwierdzenia
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,Stwórz Wizytę Konserwacji
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +215,Please contact to the user who have Sales Master Manager {0} role,Proszę się skontaktować z użytkownikiem pełniącym rolę Główny Menadżer Sprzedaży {0}
 DocType: Company,Default Cash Account,Domyślne Konto Gotówkowe
@@ -4159,7 +4194,7 @@ DocType: Fee Schedule,Fee Schedule,Harmonogram opłat
 DocType: Hub Settings,Publish Availability,Publikowanie dostępność
 DocType: Company,Create Chart Of Accounts Based On,Tworzenie planu kont w oparciu o
 apps/erpnext/erpnext/projects/doctype/task/task.js +91,Cannot convert it to non-group. Child Tasks exist.,Nie można przekonwertować go na grupę inną niż grupa. Zadania dla dzieci istnieją.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +112,Date of Birth cannot be greater than today.,Data urodzenia nie może być większa niż data dzisiejsza.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +113,Date of Birth cannot be greater than today.,Data urodzenia nie może być większa niż data dzisiejsza.
 ,Stock Ageing,Starzenie się zapasów
 apps/erpnext/erpnext/education/doctype/student/student.py +40,Student {0} exist against student applicant {1},Student {0} istnieć przed studenta wnioskodawcy {1}
 DocType: Purchase Invoice,Rounding Adjustment (Company Currency),Korekta zaokrąglenia (waluta firmy)
@@ -4191,6 +4226,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 
 apps/erpnext/erpnext/utilities/user_progress.py +247,Add Users,Dodaj użytkowników
 DocType: POS Item Group,Item Group,Kategoria
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +16,Student Group: ,Grupa studencka:
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +388,Select Country,Wybierz kraj
 DocType: Item,Safety Stock,Bezpieczeństwo Zdjęcie
 DocType: Healthcare Settings,Healthcare Settings,Ustawienia opieki zdrowotnej
 apps/erpnext/erpnext/projects/doctype/task/task.py +54,Progress % for a task cannot be more than 100.,Postęp% dla zadania nie może zawierać więcej niż 100.
@@ -4203,11 +4239,11 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +43,Item {0} must be a Fixed 
 apps/erpnext/erpnext/stock/doctype/item/item.js +372,Make Variants,Stwórz warianty
 DocType: Item,Default BOM,Domyślne Zestawienie Materiałów
 DocType: Project,Total Billed Amount (via Sales Invoices),Całkowita kwota faktury (za pośrednictwem faktur sprzedaży)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127,Debit Note Amount,Kwota debetowa Kwota
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +125,Debit Note Amount,Kwota debetowa Kwota
 DocType: Project Update,Not Updated,Nie są aktualizowane
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +106,"There are inconsistencies between the rate, no of shares and the amount calculated","Występują niespójności między stopą, liczbą akcji i obliczoną kwotą"
 apps/erpnext/erpnext/setup/doctype/company/company.js +89,Please re-type company name to confirm,"Proszę ponownie wpisz nazwę firmy, aby potwierdzić"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +230,Total Outstanding Amt,Razem Najlepszy Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +228,Total Outstanding Amt,Razem Najlepszy Amt
 DocType: Journal Entry,Printing Settings,Ustawienia drukowania
 DocType: Employee Advance,Advance Account,Rachunek zaawansowany
 DocType: Job Offer,Job Offer Terms,Warunki oferty pracy
@@ -4216,7 +4252,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +292,Total 
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +11,Automotive,
 DocType: Vehicle,Insurance Company,Firma ubezpieczeniowa
 DocType: Asset Category Account,Fixed Asset Account,Konto trwałego
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +414,Variable,Zmienna
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +424,Variable,Zmienna
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.js +47,From Delivery Note,Od dowodu dostawy
 DocType: Chapter,Members,Członkowie
 DocType: Student,Student Email Address,Student adres email
@@ -4248,7 +4284,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +122,Reference No is mandatory if you entered Reference Date,Nr Odniesienia jest obowiązkowy jest wprowadzono Datę Odniesienia
 DocType: Bank Reconciliation Detail,Payment Document,Płatność Dokument
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py +37,Error evaluating the criteria formula,Błąd podczas oceny formuły kryterium
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +115,Date of Joining must be greater than Date of Birth,Data Wstąpienie musi być większa niż Data Urodzenia
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +116,Date of Joining must be greater than Date of Birth,Data Wstąpienie musi być większa niż Data Urodzenia
 DocType: Salary Slip,Salary Structure,Struktura Wynagrodzenia
 DocType: Account,Bank,Bank
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +9,Airline,Linia lotnicza
@@ -4258,7 +4294,6 @@ DocType: Material Request Item,For Warehouse,Dla magazynu
 DocType: Employee,Offer Date,Data oferty
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Notowania
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,Jesteś w trybie offline. Nie będzie mógł przeładować dopóki masz sieć.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Dostawca&gt; Dostawca Typ
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Brak grup studenckich utworzony.
 DocType: Purchase Invoice Item,Serial No,Nr seryjny
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,Miesięczna kwota spłaty nie może być większa niż Kwota kredytu
@@ -4306,9 +4341,10 @@ DocType: Assessment Plan,Supervisor Name,Nazwa Supervisor
 DocType: Healthcare Settings,Do not confirm if appointment is created for the same day,"Nie potwierdzaj, czy spotkanie zostanie utworzone na ten sam dzień"
 DocType: Program Enrollment Course,Program Enrollment Course,Kurs rejestracyjny programu
 DocType: Program Enrollment Course,Program Enrollment Course,Kurs rekrutacji
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +164,Make Sample Retention Stock Entry,Wykonaj wpis dotyczący przechowywania próbek
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +165,Make Sample Retention Stock Entry,Wykonaj wpis dotyczący przechowywania próbek
 DocType: Purchase Taxes and Charges,Valuation and Total,Wycena i kwota całkowita
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py +11,Scorecards,Karty wyników
+DocType: Employee,This will restrict user access to other employee records,To ograniczy dostęp użytkowników do innych rekordów pracowników
 DocType: Tax Rule,Shipping City,Wysyłka Miasto
 DocType: Notification Control,Customize the Notification,Dostosuj powiadomienie
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +24,Cash Flow from Operations,Przepływy środków pieniężnych z działalności
@@ -4372,7 +4408,7 @@ apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet
 apps/erpnext/erpnext/config/accounts.py +105,Accounting Statements,Raporty księgowe
 DocType: Drug Prescription,Hour,Godzina
 DocType: Restaurant Order Entry,Last Sales Invoice,Ostatnia sprzedaż faktury
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +789,Please select Qty against item {0},Wybierz Qty przeciwko pozycji {0}
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +793,Please select Qty against item {0},Wybierz Qty przeciwko pozycji {0}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Nowy nr seryjny nie może mieć Magazynu. Magazyn musi być ustawiona przez Zasoby lub  na podstawie Paragonu Zakupu
 DocType: Lead,Lead Type,Typ Tropu
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +114,You are not authorized to approve leaves on Block Dates,Nie masz uprawnień do zatwierdzania tych urlopów
@@ -4411,7 +4447,7 @@ DocType: Production Plan,Get Raw Materials For Production,Zdobądź surowce do p
 DocType: Job Opening,Job Title,Nazwa stanowiska pracy
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py +84,"{0} indicates that {1} will not provide a quotation, but all items \
 					have been quoted. Updating the RFQ quote status.","{0} wskazuje, że {1} nie poda cytatu, ale wszystkie cytaty \ zostały cytowane. Aktualizowanie stanu cytatu RFQ."
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1070,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Maksymalne próbki - {0} zostały już zachowane dla Partii {1} i pozycji {2} w Partii {3}.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1184,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Maksymalne próbki - {0} zostały już zachowane dla Partii {1} i pozycji {2} w Partii {3}.
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +125,Please Set Supplier Type in Buying Settings.,Proszę ustawić opcję Dostawca w Ustawieniach zakupów.
 DocType: Manufacturing Settings,Update BOM Cost Automatically,Zaktualizuj automatycznie koszt BOM
 DocType: Lab Test,Test Name,Nazwa testu
@@ -4424,7 +4460,7 @@ apps/erpnext/erpnext/config/maintenance.py +17,Visit report for maintenance call
 DocType: Stock Entry,Update Rate and Availability,Aktualizuj cenę i dostępność
 DocType: Stock Settings,Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,"Procent który wolno Ci otrzymać lub dostarczyć ponad zamówioną ilość. Na przykład: jeśli zamówiłeś 100 jednostek i Twój procent wynosi 10% oznacza to, że możesz otrzymać 110 jednostek"
 DocType: POS Customer Group,Customer Group,Grupa Klientów
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +217,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs,Wiersz nr {0}: operacja {1} nie została ukończona dla {2} ilości gotowych towarów w kolejności roboczej nr {3}. Zaktualizuj status operacji za pomocą dzienników czasowych
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +258,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs,Wiersz nr {0}: operacja {1} nie została ukończona dla {2} ilości gotowych towarów w kolejności roboczej nr {3}. Zaktualizuj status operacji za pomocą dzienników czasowych
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +128,New Batch ID (Optional),Nowy identyfikator partii (opcjonalnie)
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +128,New Batch ID (Optional),Nowy identyfikator partii (opcjonalnie)
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +201,Expense account is mandatory for item {0},Konto wydatków jest obowiązkowe dla przedmiotu {0}
@@ -4452,7 +4488,6 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Proszę wybrać Przeniesienie jeżeli chcesz uwzględnić balans poprzedniego roku rozliczeniowego do tego roku rozliczeniowego
 DocType: GL Entry,Against Voucher Type,Rodzaj dowodu
 DocType: Physician,Phone (R),Telefon (R)
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Kod towaru&gt; Grupa produktów&gt; Marka
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Dodano gniazda czasowe
 DocType: Item,Attributes,Atrybuty
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Włącz szablon
@@ -4504,6 +4539,7 @@ apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unch
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Serie jest obowiązkowa
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Usługi finansowe
 DocType: Student Sibling,Student ID,legitymacja studencka
+apps/erpnext/erpnext/public/js/hub/hub_form.js +445,Supplier Email,Adres e-mail dostawcy
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Rodzaje działalności za czas Logi
 DocType: Opening Invoice Creation Tool,Sales,Sprzedaż
 DocType: Stock Entry Detail,Basic Amount,Kwota podstawowa
@@ -4547,7 +4583,7 @@ apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +38
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +212,Row {0}: Invalid reference {1},Wiersz {0}: Nieprawidłowy odniesienia {1}
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Szablon Podatków i Opłat kupna
 DocType: Timesheet,TS-,TS-
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Kwota kredytowa lub debetowa jest wymagana dla {2}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Debet lub wielkość kredytu jest wymagana dla {2}
 DocType: GL Entry,Remarks,Uwagi
 DocType: Hotel Room Amenity,Hotel Room Amenity,Udogodnienia w pokoju hotelowym
 DocType: Payment Entry,Account Paid From,Konto do płatności
@@ -4555,7 +4591,7 @@ DocType: Purchase Order Item Supplied,Raw Material Item Code,Kod surowca
 DocType: Task,Parent Task,Zadanie rodzica
 DocType: Journal Entry,Write Off Based On,Odpis bazowano na
 apps/erpnext/erpnext/utilities/activation.py +65,Make Lead,Dokonaj Lead
-apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +112,Print and Stationery,Druk i papiernicze
+apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +112,Print and Stationery,Druk i Materiały Biurowe
 DocType: Stock Settings,Show Barcode Field,Pokaż pole kodu kreskowego
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +809,Send Supplier Emails,Wyślij e-maile Dostawca
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +96,"Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.",Wynagrodzenie już przetwarzane w okresie od {0} i {1} Zostaw okresu stosowania nie może być pomiędzy tym zakresie dat.
@@ -4574,12 +4610,13 @@ apps/erpnext/erpnext/config/website.py +11,Settings for website homepage,Ustawie
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +40,RFQs are not allowed for {0} due to a scorecard standing of {1},Zlecenia RFQ nie są dozwolone w {0} z powodu karty wyników {1}
 DocType: Job Offer,Awaiting Response,Oczekuje na Odpowiedź
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +82,Above,Powyżej
-apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1487,Total Amount {0},Łączna kwota {0}
+apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1489,Total Amount {0},Łączna kwota {0}
 apps/erpnext/erpnext/controllers/item_variant.py +306,Invalid attribute {0} {1},Nieprawidłowy atrybut {0} {1}
 DocType: Supplier,Mention if non-standard payable account,"Wspomnij, jeśli nietypowe konto płatne"
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.py +25,Please select the assessment group other than 'All Assessment Groups',Proszę wybrać grupę oceniającą inną niż &quot;Wszystkie grupy oceny&quot;
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +67,Row {0}: Cost center is required for an item {1},Wiersz {0}: wymagany jest koszt centrum dla elementu {1}
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +43,EcritureDate,EcritureDate
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +6,This is based on transactions against this Physician.,Jest to oparte na transakcjach przeciwko temu lekarzowi.
 DocType: Training Event Employee,Optional,Opcjonalny
 DocType: Salary Slip,Earning & Deduction,Dochód i Odliczenie
 DocType: Agriculture Analysis Criteria,Water Analysis,Analiza wody
@@ -4643,7 +4680,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +28,Cannot conv
 DocType: Production Plan,Total Planned Qty,Całkowita planowana ilość
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +68,Opening Value,Wartość otwarcia
 DocType: Salary Detail,Formula,Formuła
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +47,Serial #,Seryjny #
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +48,Serial #,Seryjny #
 DocType: Lab Test Template,Lab Test Template,Szablon testu laboratoryjnego
 apps/erpnext/erpnext/setup/doctype/company/company.py +181,Sales Account,Konto sprzedaży
 DocType: Purchase Invoice Item,Total Weight,Waga całkowita
@@ -4656,7 +4693,8 @@ DocType: Restaurant Order Entry,Restaurant Order Entry,Wprowadzanie do restaurac
 apps/erpnext/erpnext/accounts/general_ledger.py +134,Debit and Credit not equal for {0} #{1}. Difference is {2}.,Debetowe i kredytowe nie równe dla {0} # {1}. Różnica jest {2}.
 DocType: Asset Maintenance Task,Assign To Name,Przypisywanie do nazwy
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +98,Entertainment Expenses,Wydatki na reprezentację
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +98,Make Material Request,Materiał uczynić żądanie
+DocType: Hub Settings,Enabled Users,Włączone Użytkownicy
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +99,Make Material Request,Materiał uczynić żądanie
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom_item_preview.html +20,Open Item {0},Pozycja otwarta {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +222,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Faktura Sprzedaży {0} powinna być anulowana przed anulowaniem samego Zlecenia Sprzedaży
 DocType: Consultation,Age,Wiek
@@ -4679,12 +4717,11 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},B
 DocType: Email Digest,Open Notifications,Otwarte Powiadomienia
 DocType: Payment Entry,Difference Amount (Company Currency),Różnica Kwota (waluta firmy)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Wydatki bezpośrednie
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ustaw Serię Nazewnictwa na {0} za pomocą Setup&gt; Settings&gt; Naming Series
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Nowy Przychody klienta
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Wydatki na podróże
 DocType: Maintenance Visit,Breakdown,Rozkład
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +50,Add custom field Subscription in the doctype {0},Dodaj niestandardowe pole Subskrypcja w typie dokumentu {0}
-apps/erpnext/erpnext/controllers/accounts_controller.py +820,Account: {0} with currency: {1} can not be selected,Konto: {0} z waluty: nie można wybrać {1}
+apps/erpnext/erpnext/controllers/accounts_controller.py +822,Account: {0} with currency: {1} can not be selected,Konto: {0} z waluty: nie można wybrać {1}
 DocType: Purchase Receipt Item,Sample Quantity,Ilość próbki
 DocType: Manufacturing Settings,"Update BOM cost automatically via Scheduler, based on latest valuation rate / price list rate / last purchase rate of raw materials.","Zaktualizuj koszt BOM automatycznie za pomocą harmonogramu, w oparciu o ostatnią wycenę / kurs cen / ostatni kurs zakupu surowców."
 DocType: Bank Reconciliation Detail,Cheque Date,Data czeku
@@ -4699,14 +4736,13 @@ apps/erpnext/erpnext/config/hr.py +115,Salary Components,składników wynagrodze
 DocType: Program Enrollment Tool,New Academic Year,Nowy rok akademicki
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +811,Return / Credit Note,Powrót / Credit Note
 DocType: Stock Settings,Auto insert Price List rate if missing,Automatycznie wstaw wartość z cennika jeśli jej brakuje
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +126,Total Paid Amount,Kwota całkowita Płatny
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +124,Total Paid Amount,Kwota całkowita Płatny
 DocType: GST Settings,B2C Limit,Limit B2C
 DocType: Work Order Item,Transferred Qty,Przeniesione ilości
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Nawigacja
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Planowanie
 DocType: Share Balance,Issued,Wydany
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Działalność uczniowska
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Proszę ustawić Instruktorski System Nazw w Edukacji&gt; Ustawienia edukacyjne
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,ID Dostawcy
 DocType: Payment Request,Payment Gateway Details,Payment Gateway Szczegóły
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Ilość powinna być większa niż 0
@@ -4752,7 +4788,7 @@ DocType: Stock Settings,Role Allowed to edit frozen stock,Rola Zezwala na edycj�
 ,Territory Target Variance Item Group-Wise,
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +143,All Customer Groups,Wszystkie grupy klientów
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +114,Accumulated Monthly,skumulowane miesięcznie
-apps/erpnext/erpnext/controllers/accounts_controller.py +781,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,"{0} jest obowiązkowe. Możliwe, że rekord Wymiana walut nie jest utworzony dla {1} do {2}."
+apps/erpnext/erpnext/controllers/accounts_controller.py +783,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,"{0} jest obowiązkowe. Możliwe, że rekord Wymiana walut nie jest utworzony dla {1} do {2}."
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +44,Tax Template is mandatory.,Szablon podatkowa jest obowiązkowe.
 apps/erpnext/erpnext/accounts/doctype/account/account.py +44,Account {0}: Parent account {1} does not exist,Konto {0}: Konto nadrzędne {1} nie istnieje
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Wartość w cenniku (waluta firmy)
@@ -4761,7 +4797,7 @@ DocType: Products Settings,Products Settings,produkty Ustawienia
 DocType: Lab Prescription,Test Created,Utworzono test
 DocType: Healthcare Settings,Custom Signature in Print,Podpis niestandardowy w druku
 DocType: Account,Temporary,Tymczasowy
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +116,Customer LPO No.,Numer klienta LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +114,Customer LPO No.,Numer klienta LPO
 DocType: Program,Courses,Pola
 DocType: Monthly Distribution Percentage,Percentage Allocation,Przydział Procentowy
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +128,Secretary,Sekretarka
@@ -4817,7 +4853,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +567,POS Pr
 DocType: Program Enrollment Tool,Enroll Students,zapisać studentów
 DocType: Lab Test,Approved Date,Zatwierdzona data
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,Standard sprzedaży
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +165,Atleast one warehouse is mandatory,Co najmniej jeden magazyn jest wymagany
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +205,Atleast one warehouse is mandatory,Co najmniej jeden magazyn jest wymagany
 DocType: Serial No,Out of Warranty,Brak Gwarancji
 DocType: BOM Update Tool,Replace,Zamień
 apps/erpnext/erpnext/templates/includes/product_list.js +42,No products found.,Nie znaleziono produktów.
@@ -4969,10 +5005,10 @@ DocType: Pricing Rule,Disable,Wyłącz
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +180,Mode of payment is required to make a payment,"Sposób płatności jest wymagane, aby dokonać płatności"
 DocType: Project Task,Pending Review,Czekający na rewizję
 apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +14,"Edit in full page for more options like assets, serial nos, batches etc.","Edytuj na całej stronie, aby uzyskać więcej opcji, takich jak zasoby, numery seryjne, partie itp."
-apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py +10,Appointments and Consultations,Terminy i konsultacje
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +10,Appointments and Consultations,Terminy i konsultacje
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +41,{0} - {1} is not enrolled in the Batch {2},{0} - {1} nie jest powiązana z transakcją{2}
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +113,"Asset {0} cannot be scrapped, as it is already {1}","Składnik {0} nie może zostać wycofane, jak to jest już {1}"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +86,Cheques Required,Wymagane kontrole
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +84,Cheques Required,Wymagane kontrole
 DocType: Task,Total Expense Claim (via Expense Claim),Razem zwrot kosztów (przez zwrot kosztów)
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177,Mark Absent,Oznacz Nieobecna
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +40,Failed to setup company,Nie udało się skonfigurować firmy
@@ -5015,6 +5051,7 @@ DocType: Item Variant,Item Variant,Pozycja Wersja
 ,Work Order Stock Report,Raport o stanie zlecenia pracy
 DocType: Assessment Result Tool,Assessment Result Tool,Wynik oceny Narzędzie
 apps/erpnext/erpnext/education/doctype/instructor/instructor.js +24,As Supervisor,Jako Supervisor
+apps/erpnext/erpnext/public/js/hub/hub_form.js +376,Suggest Category,Zaproponuj kategorię
 DocType: BOM Scrap Item,BOM Scrap Item,BOM Złom Item
 apps/erpnext/erpnext/accounts/page/pos/pos.js +895,Submitted orders can not be deleted,Złożone zlecenia nie mogą zostać usunięte
 apps/erpnext/erpnext/accounts/doctype/account/account.py +114,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Konto jest na minusie, nie możesz ustawić wymagań jako kredyt."
@@ -5025,7 +5062,7 @@ DocType: Agriculture Task,Previous Business Day,Poprzedni dzień roboczy
 DocType: Employee Loan,Repay Fixed Amount per Period,Spłacić ustaloną kwotę za okres
 DocType: Employee,Health Insurance No,Numer ubezpieczenia zdrowotnego
 apps/erpnext/erpnext/buying/utils.py +47,Please enter quantity for Item {0},Wprowadź ilość dla przedmiotu {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229,Credit Note Amt,Uwaga kredytowa Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Credit Note Amt,Uwaga kredytowa Amt
 DocType: Employee External Work History,Employee External Work History,Historia zatrudnienia pracownika poza firmą
 DocType: Opening Invoice Creation Tool,Purchase,Zakup
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +37,Balance Qty,Ilość bilansu
@@ -5068,7 +5105,7 @@ apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +18,O
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +18,Opp Count,Opp Count
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +244,Please find attached {0} #{1},Załączeniu {0} # {1}
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py +52,Average Rate,Średnia stawka
-apps/erpnext/erpnext/controllers/accounts_controller.py +728,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Całkowita kwota płatności w harmonogramie płatności musi być równa sumie całkowitej / zaokrąglonej
+apps/erpnext/erpnext/controllers/accounts_controller.py +730,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Całkowita kwota płatności w harmonogramie płatności musi być równa sumie całkowitej / zaokrąglonej
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Bilans wyciągów bankowych wedle Księgi Głównej
 DocType: Job Applicant,Applicant Name,Imię Aplikanta
 DocType: Authorization Rule,Customer / Item Name,Klient / Nazwa Przedmiotu
@@ -5119,6 +5156,7 @@ DocType: Crop,Produce,Produkować
 DocType: Hotel Settings,Default Taxes and Charges,Domyślne podatków i opłat
 DocType: Account,Receivable,Należności
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +308,Row #{0}: Not allowed to change Supplier as Purchase Order already exists,"Wiersz # {0}: Nie wolno zmienić dostawcę, jak już istnieje Zamówienie"
+DocType: Stock Entry,Material Consumption for Manufacture,Zużycie materiału do produkcji
 DocType: Item Alternative,Alternative Item Code,Alternatywny kod towaru
 DocType: Accounts Settings,Role that is allowed to submit transactions that exceed credit limits set.,"Rola pozwala na zatwierdzenie transakcji, których kwoty przekraczają ustalone limity kredytowe."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +990,Select Items to Manufacture,Wybierz produkty do Manufacture
@@ -5135,9 +5173,11 @@ apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +92,Do you wan
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +36,Motion Picture & Video,Ruchomy Obraz i Video
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +5,Ordered,Zamówione
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js +51,Resume,Wznawianie
+DocType: Hub Settings,Hub Username,Nazwa użytkownika koncentratora
 DocType: Salary Detail,Component,Składnik
 DocType: Assessment Criteria,Assessment Criteria Group,Kryteria oceny grupowej
 DocType: Healthcare Settings,Patient Name By,Nazwisko pacjenta
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252,Accrual Journal Entry for salaries from {0} to {1},Zapis wstępny w dzienniku dla zarobków od {0} do {1}
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Opening Accumulated Depreciation must be less than equal to {0},Otwarcie Skumulowana amortyzacja powinna być mniejsza niż równa {0}
 DocType: Warehouse,Warehouse Name,Nazwa magazynu
 DocType: Naming Series,Select Transaction,Wybierz Transakcję
@@ -5157,9 +5197,9 @@ DocType: BOM Update Tool,Update latest price in all BOMs,Zaktualizuj ostatnią c
 apps/erpnext/erpnext/healthcare/doctype/consultation/consultation.js +23,Medical Record,Historia choroby
 DocType: Vehicle,Vehicle,Pojazd
 DocType: Purchase Invoice,In Words,Słownie
-apps/erpnext/erpnext/hr/doctype/training_result/training_result.py +15,{0} must be submitted,{0} musi zostać złożony
+apps/erpnext/erpnext/hr/doctype/training_result/training_result.py +15,{0} must be submitted,{0} musi zostać wysłany
 DocType: POS Profile,Item Groups,Pozycja Grupy
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +221,Today is {0}'s birthday!,Dziś jest {0} 'urodziny!
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +222,Today is {0}'s birthday!,Dziś jest {0} 'urodziny!
 DocType: Sales Order Item,For Production,Dla Produkcji
 DocType: Payment Request,payment_url,payment_url
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +186,Please add a Temporary Opening account in Chart of Accounts,Dodaj konto tymczasowego otwarcia w planie kont
@@ -5204,7 +5244,7 @@ DocType: Assessment Result Detail,Assessment Result Detail,Wynik oceny Szczegó�
 DocType: Employee Education,Employee Education,Wykształcenie pracownika
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +53,Duplicate item group found in the item group table,Duplikat grupę pozycji w tabeli grupy produktów
 DocType: Land Unit,Parent Land Unit,Jednostka macierzysta
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1113,It is needed to fetch Item Details.,"Jest to niezbędne, aby pobrać szczegółowe dotyczące pozycji."
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1114,It is needed to fetch Item Details.,"Jest to niezbędne, aby pobrać szczegółowe dotyczące pozycji."
 DocType: Fertilizer,Fertilizer Name,Nazwa nawozu
 DocType: Salary Slip,Net Pay,Stawka Netto
 DocType: Cash Flow Mapping Accounts,Account,Konto
@@ -5244,8 +5284,8 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +275," {0} Retain Sample is base
 DocType: Task,Is Milestone,Jest Milestone
 DocType: Delivery Stop,Email Sent To,Email wysłany do
 DocType: Budget,Warn,Ostrzeż
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +81,Are you sure you want to unregister?,Czy na pewno chcesz się wyrejestrować?
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +812,All items have already been transferred for this Work Order.,Wszystkie przedmioty zostały już przekazane dla tego zlecenia pracy.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +108,Are you sure you want to unregister?,Czy na pewno chcesz się wyrejestrować?
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +926,All items have already been transferred for this Work Order.,Wszystkie przedmioty zostały już przekazane dla tego zlecenia pracy.
 DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","Wszelkie inne uwagi, zauważyć, że powinien iść nakładu w ewidencji."
 DocType: Asset Maintenance,Manufacturing User,Produkcja użytkownika
 DocType: Purchase Invoice,Raw Materials Supplied,Dostarczone surowce
@@ -5268,9 +5308,10 @@ DocType: Item Attribute Value,Attribute Value,Wartość atrybutu
 DocType: Salary Detail,Salary Detail,Wynagrodzenie Szczegóły
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1070,Please select {0} first,Proszę najpierw wybrać {0}
 DocType: Appointment Type,Physician,Lekarz
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +891,Batch {0} of Item {1} has expired.,Batch {0} pozycji {1} wygasł.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1005,Batch {0} of Item {1} has expired.,Batch {0} pozycji {1} wygasł.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11,Consultations,Konsultacje
 DocType: Sales Invoice,Commission,Prowizja
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +187,{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3},{0} ({1}) nie może być większe niż planowana ilość ({2}) w zleceniu pracy {3}
 apps/erpnext/erpnext/config/manufacturing.py +27,Time Sheet for manufacturing.,Arkusz Czas produkcji.
 apps/erpnext/erpnext/templates/pages/cart.html +37,Subtotal,Razem
 apps/erpnext/erpnext/config/erpnext_integrations.py +18,GoCardless SEPA Mandate,Mandat SEPA bez karty
@@ -5331,7 +5372,6 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-Korekta na fakturze
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Zamówienie pracy zostało już utworzone dla wszystkich produktów z zestawieniem komponentów
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Szczegółowy raport dotyczący wariantu
 DocType: Setup Progress Action,Setup Progress Action,Konfiguracja działania
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Proszę ustawić serię numerów dla Obecności za pośrednictwem Setup&gt; Numbering Series
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Kupowanie cennika
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,"Usuń element, jeśli opłata nie ma zastosowania do tej pozycji"
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Wybierz Stan konserwacji jako Zakończony lub Usuń datę ukończenia
@@ -5361,11 +5401,10 @@ DocType: Cash Flow Mapper,Section Footer,Sekcja stopki
 apps/erpnext/erpnext/stock/doctype/item/item.js +304,Add / Edit Prices,Dodaj / Edytuj ceny
 DocType: Batch,Parent Batch,Nadrzędna partia
 DocType: Batch,Parent Batch,Nadrzędna partia
-DocType: Cheque Print Template,Cheque Print Template,Czek Szablon Drukuj
+DocType: Cheque Print Template,Cheque Print Template,Sprawdź Szablon druku
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +36,Chart of Cost Centers,Struktura kosztów (MPK)
 DocType: Lab Test Template,Sample Collection,Kolekcja Próbek
 ,Requested Items To Be Ordered,Proszę o Zamówienie Przedmiotów
-apps/erpnext/erpnext/public/js/hub/hub_page.js +137,My Orders,Moje Zamówienia
 DocType: Price List,Price List Name,Nazwa cennika
 DocType: BOM,Manufacturing,Produkcja
 ,Ordered Items To Be Delivered,Zamówione produkty do dostarczenia
@@ -5397,7 +5436,7 @@ DocType: Cost Center,Cost Center Name,Nazwa Centrum Kosztów
 DocType: Student,B+,B +
 DocType: HR Settings,Max working hours against Timesheet,Maksymalny czas pracy przed grafiku
 DocType: Maintenance Schedule Detail,Scheduled Date,Zaplanowana Data
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +228,Total Paid Amt,Łączna wypłacona Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +226,Total Paid Amt,Łączna wypłacona Amt
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,Wiadomości dłuższe niż 160 znaków zostaną podzielone na kilka wiadomości
 DocType: Purchase Receipt Item,Received and Accepted,Otrzymano i zaakceptowano
 DocType: Hub Settings,Company and Seller Profile,Firma i profil sprzedawcy
@@ -5415,6 +5454,7 @@ apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,Please c
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +80,Cannot set as Lost as Sales Order is made.,Nie można ustawić jako Utracone Zamówienia Sprzedaży
 DocType: Request for Quotation Item,Supplier Part No,Dostawca Część nr
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +382,Cannot deduct when category is for 'Valuation' or 'Vaulation and Total',"Nie można odliczyć, gdy kategoria jest dla &#39;Wycena&#39; lub &#39;Vaulation i Total&#39;"
+apps/erpnext/erpnext/public/js/hub/hub_form.js +197,Anonymous,Anonimowy
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +377,Received From,Otrzymane od
 DocType: Lead,Converted,Przekształcono
 DocType: Item,Has Serial No,Posiada numer seryjny
@@ -5462,7 +5502,7 @@ DocType: Vehicle,Vehicle Value,Wartość pojazdu
 DocType: Crop Cycle,Detected Diseases,Wykryto choroby
 DocType: Stock Entry,Default Source Warehouse,Domyślny magazyn źródłowy
 DocType: Item,Customer Code,Kod Klienta
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +220,Birthday Reminder for {0},Przypomnienie o Urodzinach dla {0}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +221,Birthday Reminder for {0},Przypomnienie o Urodzinach dla {0}
 DocType: Asset Maintenance Task,Last Completion Date,Ostatnia data ukończenia
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72,Days Since Last Order,Dni od ostatniego zamówienia
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +365,Debit To account must be a Balance Sheet account,Debetowane konto musi być kontem bilansowym
@@ -5499,7 +5539,7 @@ DocType: Shipping Rule,Restrict to Countries,Ogranicz do krajów
 DocType: Purchase Invoice,Write Off Amount (Company Currency),Kwota Odpisu (Waluta Firmy)
 DocType: Sales Invoice Timesheet,Billing Hours,Godziny billingowe
 DocType: Project,Total Sales Amount (via Sales Order),Całkowita kwota sprzedaży (poprzez zamówienie sprzedaży)
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +551,Default BOM for {0} not found,Domyślnie BOM dla {0} Nie znaleziono
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +572,Default BOM for {0} not found,Domyślnie BOM dla {0} Nie znaleziono
 apps/erpnext/erpnext/stock/doctype/item/item.py +514,Row #{0}: Please set reorder quantity,Wiersz # {0}: Proszę ustawić ilość zmienić kolejność
 apps/erpnext/erpnext/public/js/pos/pos.html +20,Tap items to add them here,"Dotknij elementów, aby je dodać tutaj"
 DocType: Fees,Program Enrollment,Rejestracja w programie
@@ -5524,6 +5564,7 @@ DocType: Customer,Additional information regarding the customer.,Dodatkowe infor
 DocType: Quality Inspection Reading,Reading 5,Odczyt 5
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +236,"{0} {1} is associated with {2}, but Party Account is {3}","{0} {1} jest powiązane z {2}, ale rachunek osobisty jest {3}"
 apps/erpnext/erpnext/healthcare/doctype/sample_collection/sample_collection.js +7,View Lab Tests,Wyświetl testy laboratoryjne
+DocType: Hub Users,Hub Users,Użytkownicy centrum
 DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,Data Konserwacji
 DocType: Purchase Invoice Item,Rejected Serial No,Odrzucony Nr Seryjny
@@ -5534,7 +5575,7 @@ DocType: Item,"Example: ABCD.#####
 If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Przykład:. ABCD ##### 
  Jeśli seria jest ustawiona i nr seryjny nie jest wymieniony w transakcjach, automatyczny numer seryjny zostanie utworzony na podstawie tej serii. Jeśli chcesz zawsze jednoznacznie ustawiać numery seryjne dla tej pozycji, pozostaw to pole puste."
 DocType: Upload Attendance,Upload Attendance,Wyślij obecność
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +604,BOM and Manufacturing Quantity are required,BOM i ilości są wymagane Manufacturing
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,BOM i ilości są wymagane Manufacturing
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +50,Ageing Range 2,Starzenie Zakres 2
 DocType: SG Creation Tool Course,Max Strength,Maksymalna siła
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +28,Installing presets,Instalowanie ustawień wstępnych
@@ -5603,6 +5644,7 @@ DocType: Quotation Item,Against Docname,
 DocType: SMS Center,All Employee (Active),Wszyscy pracownicy (aktywni)
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +9,View Now,Zobacz teraz
 DocType: BOM,Raw Material Cost,Koszt surowców
+DocType: Woocommerce Settings,Woocommerce Server URL,URL serwera Woocommerce
 DocType: Item Reorder,Re-Order Level,Próg ponowienia zamówienia
 apps/erpnext/erpnext/projects/doctype/project/project.js +54,Gantt Chart,Wykres Gantta
 DocType: Crop Cycle,Cycle Type,Typ cyklu
@@ -5630,7 +5672,7 @@ DocType: Shareholder,Hidden list maintaining the list of contacts linked to Shar
 apps/erpnext/erpnext/config/non_profit.py +63,Donor Type information.,Informacje o typie dawcy.
 DocType: Request for Quotation,Supplier Detail,Dostawca Szczegóły
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +100,Error in formula or condition: {0},Błąd wzoru lub stanu {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +108,Invoiced Amount,Kwota zafakturowana
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +106,Invoiced Amount,Kwota zafakturowana
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +47,Criteria weights must add up to 100%,Kryteria wag muszą dodać do 100%
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.js +7,Attendance,Obecność
 apps/erpnext/erpnext/public/js/pos/pos.html +115,Stock Items,produkty seryjne
@@ -5638,10 +5680,11 @@ DocType: BOM,Materials,Materiały
 DocType: Leave Block List,"If not checked, the list will have to be added to each Department where it has to be applied.","Jeśli nie jest zaznaczone, lista będzie musiała być dodana do każdego działu, w którym ma zostać zastosowany."
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +111,Creating {0},Tworzenie {0}
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py +28,Source and Target Warehouse cannot be same,Źródło i Cel Magazyn nie może być taki sam
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +588,Posting date and posting time is mandatory,Delegowanie datę i czas delegowania jest obowiązkowe
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +628,Posting date and posting time is mandatory,Delegowanie datę i czas delegowania jest obowiązkowe
 apps/erpnext/erpnext/config/buying.py +76,Tax template for buying transactions.,Szablon podatkowy dla transakcji zakupu.
 ,Item Prices,Ceny
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,Słownie będzie widoczna w Zamówieniu po zapisaniu
+DocType: Woocommerce Settings,Endpoint,Punkt końcowy
 DocType: Period Closing Voucher,Period Closing Voucher,Zamknięcie roku
 DocType: Consultation,Review Details,Szczegóły oceny
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +185,The shareholder does not belong to this company,Akcjonariusz nie należy do tej spółki
@@ -5687,7 +5730,7 @@ DocType: BOM,Quantity of item obtained after manufacturing / repacking from give
 DocType: Lab Test,Test Group,Grupa testowa
 DocType: Payment Reconciliation,Receivable / Payable Account,Konto Należności / Zobowiązań
 DocType: Delivery Note Item,Against Sales Order Item,Na podstawie pozycji zamówienia sprzedaży
-DocType: Company,Company Logo,Logo firmy
+DocType: Hub Settings,Company Logo,Logo firmy
 apps/erpnext/erpnext/stock/doctype/item/item.py +709,Please specify Attribute Value for attribute {0},Proszę podać wartość atrybutu dla atrybutu {0}
 DocType: Item,Default Warehouse,Domyślny magazyn
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +45,Budget cannot be assigned against Group Account {0},Budżet nie może być przypisany do rachunku grupy {0}
@@ -5712,6 +5755,7 @@ DocType: GST Settings,GST Summary,Podsumowanie GST
 apps/erpnext/erpnext/hr/doctype/daily_work_summary_group/daily_work_summary_group.py +16,Please enable default incoming account before creating Daily Work Summary Group,Włącz domyślne konto przychodzące przed utworzeniem Daily Summary Summary Group
 DocType: Assessment Result,Total Score,Całkowity wynik
 DocType: Journal Entry,Debit Note,Nota debetowa
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +102,Please enter API Consumer Secret,Wprowadź klucz tajny API
 DocType: Stock Entry,As per Stock UOM,
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Nie minął
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +49,ValidDate,Ważna data
@@ -5742,6 +5786,7 @@ DocType: Opening Invoice Creation Tool,Create Missing Party,Utwórz brakującą 
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Zostaw puste, jeśli uczysz grupy studentów rocznie"
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Zostaw puste, jeśli uczysz grupy studentów rocznie"
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Jeśli zaznaczone, Całkowita liczba Dni Roboczych obejmie święta, a to zmniejsza wartość Wynagrodzenie za dzień"
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +25,"Apps using current key won't be able to access, are you sure?","Aplikacje używające obecnego klucza nie będą mogły uzyskać dostępu, czy na pewno?"
 DocType: Purchase Invoice,Total Advance,Całość zaliczka
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +27,Change Template Code,Zmień kod szablonu
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +23,The Term End Date cannot be earlier than the Term Start Date. Please correct the dates and try again.,Termin Data zakończenia nie może być wcześniejsza niż data początkowa Term. Popraw daty i spróbuj ponownie.
@@ -5798,7 +5843,7 @@ apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_
 DocType: Asset,Out of Order,Nieczynny
 DocType: Purchase Receipt Item,Accepted Quantity,Przyjęta Ilość
 DocType: Projects Settings,Ignore Workstation Time Overlap,Zignoruj nakładanie się czasu w stacji roboczej
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +242,Please set a default Holiday List for Employee {0} or Company {1},Proszę ustawić domyślnej listy wypoczynkowe dla pracowników {0} lub {1} firmy
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +243,Please set a default Holiday List for Employee {0} or Company {1},Proszę ustawić domyślnej listy wypoczynkowe dla pracowników {0} lub {1} firmy
 apps/erpnext/erpnext/accounts/party.py +30,{0}: {1} does not exists,{0}: {1} nie istnieje
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +76,Select Batch Numbers,Wybierz numery partii
 apps/erpnext/erpnext/config/accounts.py +12,Bills raised to Customers.,Rachunki dla klientów.
@@ -5810,7 +5855,6 @@ DocType: Account,Parent Account,Nadrzędne konto
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +295,Available,Dostępny
 DocType: Quality Inspection Reading,Reading 3,Odczyt 3
 DocType: Stock Entry,Source Warehouse Address,Adres hurtowni
-,Hub,Piasta
 DocType: GL Entry,Voucher Type,Typ Podstawy
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1717,Price List not found or disabled,Cennik nie został znaleziony lub wyłączone
 DocType: Student Applicant,Approved,Zatwierdzono
@@ -5859,7 +5903,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +
 DocType: GL Entry,Transaction Date,Data transakcji
 DocType: Production Plan Item,Planned Qty,Planowana ilość
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +121,Total Tax,Razem podatkowa
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +204,For Quantity (Manufactured Qty) is mandatory,Do Ilość (Wyprodukowano kopie) są obowiązkowe
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +245,For Quantity (Manufactured Qty) is mandatory,Do Ilość (Wyprodukowano kopie) są obowiązkowe
 DocType: Stock Entry,Default Target Warehouse,Domyślny magazyn docelowy
 DocType: Purchase Invoice,Net Total (Company Currency),Łączna wartość netto (waluta firmy)
 apps/erpnext/erpnext/education/doctype/academic_year/academic_year.py +14,The Year End Date cannot be earlier than the Year Start Date. Please correct the dates and try again.,Rok Data zakończenia nie może być wcześniejsza niż data początkowa rok. Popraw daty i spróbuj ponownie.
@@ -5899,7 +5943,7 @@ DocType: Item,Item Tax,Podatek dla tej pozycji
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +883,Material to Supplier,Materiał do Dostawcy
 DocType: Soil Texture,Loamy Sand,Piasek gliniasty
 DocType: Production Plan,Material Request Planning,Planowanie zapotrzebowania materiałowego
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +663,Excise Invoice,Akcyza Faktura
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +676,Excise Invoice,Akcyza Faktura
 apps/erpnext/erpnext/education/doctype/grading_scale/grading_scale.py +16,Treshold {0}% appears more than once,Próg {0}% występuje więcej niż jeden raz
 DocType: Expense Claim,Employees Email Id,Email ID pracownika
 DocType: Employee Attendance Tool,Marked Attendance,Zaznaczona Obecność

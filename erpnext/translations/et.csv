@@ -79,7 +79,7 @@ apps/erpnext/erpnext/templates/includes/product_page.js +25,In Stock,Laos
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +16,Primary Contact Details,Peamised kontaktandmed
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,Avatud küsimused
 DocType: Production Plan Item,Production Plan Item,Tootmise kava toode
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +149,User {0} is already assigned to Employee {1},Kasutaja {0} on juba määratud töötaja {1}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +150,User {0} is already assigned to Employee {1},Kasutaja {0} on juba määratud töötaja {1}
 DocType: Lab Test Groups,Add new line,Lisage uus rida
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +31,Health Care,Tervishoid
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +65,Delay in payment (Days),Makseviivitus (päevad)
@@ -103,6 +103,7 @@ DocType: Timesheet,Total Costing Amount,Kokku kuluarvestus summa
 DocType: Delivery Note,Vehicle No,Sõiduk ei
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +163,Please select Price List,Palun valige hinnakiri
 DocType: Accounts Settings,Currency Exchange Settings,Valuuta vahetus seaded
+apps/erpnext/erpnext/public/js/hub/hub_factory.js +61,Please check your network connection.,Kontrollige oma võrguühendust.
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +94,Row #{0}: Payment document is required to complete the trasaction,Rida # {0}: Maksedokumendi on kohustatud täitma trasaction
 DocType: Work Order Operation,Work In Progress,Töö käib
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py +13,Please select date,Palun valige kuupäev
@@ -128,7 +129,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan_dashb
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +43,Attendance date can not be less than employee's joining date,Osavõtjate kuupäev ei saa olla väiksem kui töötaja ühinemistähtaja
 DocType: Grading Scale,Grading Scale Name,Hindamisskaala Nimi
 DocType: Subscription,Repeat on Day,Korrake päeval
-apps/erpnext/erpnext/accounts/doctype/account/account.js +41,This is a root account and cannot be edited.,See on root ja seda ei saa muuta.
+apps/erpnext/erpnext/accounts/doctype/account/account.js +37,This is a root account and cannot be edited.,See on root ja seda ei saa muuta.
 DocType: Sales Invoice,Company Address,ettevõtte aadress
 DocType: BOM,Operations,Operations
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,Cannot set authorization on basis of Discount for {0},Ei saa seada loa alusel Allahindlus {0}
@@ -218,9 +219,9 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +44,Real Estate,Ki
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +1,Statement of Account,Kontoteatis
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +41,Pharmaceuticals,Farmaatsia
 DocType: Purchase Invoice Item,Is Fixed Asset,Kas Põhivarade
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +273,"Available qty is {0}, you need {1}","Saadaval Kogus on {0}, peate {1}"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +313,"Available qty is {0}, you need {1}","Saadaval Kogus on {0}, peate {1}"
 DocType: Expense Claim Detail,Claim Amount,Nõude suurus
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +657,Work Order has been {0},Töökorraldus on {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +679,Work Order has been {0},Töökorraldus on {0}
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +56,Duplicate customer group found in the cutomer group table,Duplicate klientide rühm leidub cutomer grupi tabelis
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +31,Supplier Type / Supplier,Tarnija tüüp / tarnija
 DocType: Naming Series,Prefix,Eesliide
@@ -228,7 +229,7 @@ apps/erpnext/erpnext/hr/email_alert/training_scheduled/training_scheduled.html +
 DocType: Asset Settings,Asset Settings,Varade seaded
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +68,Consumable,Tarbitav
 DocType: Student,B-,B-
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +98,Successfully unregistered.,Edukalt registreerimata.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +140,Successfully unregistered.,Edukalt registreerimata.
 DocType: Assessment Result,Grade,hinne
 DocType: Restaurant Table,No of Seats,Istekohtade arv
 DocType: Subscription,"To add dynamic subject, use jinja tags like
@@ -259,13 +260,13 @@ DocType: Item,Supply Raw Materials for Purchase,Supply tooraine ostmiseks
 DocType: Agriculture Analysis Criteria,Fertilizer,Väetis
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +152,At least one mode of payment is required for POS invoice.,Vähemalt üks makseviis on vajalik POS arve.
 DocType: Products Settings,Show Products as a List,Näita tooteid listana
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +534,Item {0} is not active or end of life has been reached,Punkt {0} ei ole aktiivne või elu lõpuni jõutud
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +574,Item {0} is not active or end of life has been reached,Punkt {0} ei ole aktiivne või elu lõpuni jõutud
 DocType: Student Admission Program,Minimum Age,Minimaalne vanus
 apps/erpnext/erpnext/utilities/user_progress.py +190,Example: Basic Mathematics,Näide: Basic Mathematics
 DocType: Customer,Primary Address,Peamine aadress
 DocType: Production Plan,Material Request Detail,Materjali taotlus Detailid
 DocType: Selling Settings,Default Quotation Validity Days,Vaikimisi väärtpaberite kehtivuspäevad
-apps/erpnext/erpnext/controllers/accounts_controller.py +800,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Et sisaldada makse järjest {0} Punkti kiirus, maksud ridadesse {1} peab olema ka"
+apps/erpnext/erpnext/controllers/accounts_controller.py +802,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Et sisaldada makse järjest {0} Punkti kiirus, maksud ridadesse {1} peab olema ka"
 apps/erpnext/erpnext/config/hr.py +223,Settings for HR Module,Seaded HR Module
 DocType: SMS Center,SMS Center,SMS Center
 DocType: Sales Invoice,Change Amount,Muuda summa
@@ -311,6 +312,7 @@ apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +112,Item Template,Esem
 apps/erpnext/erpnext/healthcare/setup.py +215,Biochemistry,Biokeemia
 DocType: Job Offer,Select Terms and Conditions,Vali Tingimused
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +72,Out Value,välja väärtus
+DocType: Woocommerce Settings,Woocommerce Settings,Woocommerce seaded
 DocType: Production Plan,Sales Orders,Müügitellimuste
 DocType: Purchase Taxes and Charges,Valuation,Väärtustamine
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +394,Set as Default,Set as Default
@@ -321,7 +323,7 @@ DocType: Hotel Room Reservation,Late Checkin,Hiline registreerimine
 apps/erpnext/erpnext/templates/emails/request_for_quotation.html +7,The request for quotation can be accessed by clicking on the following link,Taotluse tsitaat pääseb klõpsates järgmist linki
 apps/erpnext/erpnext/config/hr.py +81,Allocate leaves for the year.,Eraldada lehed aastal.
 DocType: SG Creation Tool Course,SG Creation Tool Course,SG Loomistööriist kursus
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +275,Insufficient Stock,Ebapiisav Stock
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +315,Insufficient Stock,Ebapiisav Stock
 DocType: Manufacturing Settings,Disable Capacity Planning and Time Tracking,Keela Capacity Planning and Time Tracking
 DocType: Email Digest,New Sales Orders,Uus müügitellimuste
 DocType: Bank Guarantee,Bank Account,Pangakonto
@@ -359,7 +361,7 @@ DocType: Restaurant Order Entry,Add Item,Lisa toode
 DocType: Lab Test,Custom Result,Kohandatud tulemus
 DocType: Delivery Stop,Contact Name,kontaktisiku nimi
 DocType: Course Assessment Criteria,Course Assessment Criteria,Muidugi Hindamiskriteeriumid
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +27,Tax Id: ,Maksu ID:
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +25,Tax Id: ,Maksu ID:
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +216,Student ID: ,Õpilase ID:
 DocType: POS Customer Group,POS Customer Group,POS Kliendi Group
 DocType: Land Unit,Land Unit describing various land assets,"Maaüksus, mis kirjeldab erinevaid maa varasid"
@@ -373,7 +375,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +6,This is ba
 DocType: Payment Term,Credit Months,Krediitkaardid
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +409,Net Pay cannot be less than 0,Netopalk ei tohi olla väiksem kui 0
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +5,"To stop sending repetitive error notifications from the system, we have checked Disabled field in the subscription","Kui soovite lõpetada korduva veateate märguannete saatmise süsteemist, oleme tellimuse väljal Puudutatud"
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +121,Relieving Date must be greater than Date of Joining,Leevendab kuupäev peab olema suurem kui Liitumis
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +122,Relieving Date must be greater than Date of Joining,Leevendab kuupäev peab olema suurem kui Liitumis
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +240,Leaves per Year,Lehed aastas
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +130,Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Row {0}: Palun vaadake &quot;Kas Advance&quot; vastu Konto {1}, kui see on ette sisenemist."
 apps/erpnext/erpnext/stock/utils.py +219,Warehouse {0} does not belong to company {1},Ladu {0} ei kuulu firma {1}
@@ -406,7 +408,7 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1064,Mater
 DocType: Bank Reconciliation,Update Clearance Date,Värskenda Kliirens kuupäev
 ,GSTR-2,GSTR-2
 DocType: Item,Purchase Details,Ostu üksikasjad
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +408,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},Punkt {0} ei leitud &quot;tarnitud tooraine&quot; tabelis Ostutellimuse {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +448,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},Punkt {0} ei leitud &quot;tarnitud tooraine&quot; tabelis Ostutellimuse {1}
 DocType: Salary Slip,Total Principal Amount,Põhisumma kokku
 DocType: Student Guardian,Relation,Seos
 DocType: Student Guardian,Mother,ema
@@ -415,7 +417,7 @@ DocType: Crop,Biennial,Biennaal
 apps/erpnext/erpnext/config/selling.py +18,Confirmed orders from Customers.,Kinnitatud klientidelt tellimusi.
 DocType: Purchase Receipt Item,Rejected Quantity,Tagasilükatud Kogus
 apps/erpnext/erpnext/education/doctype/fees/fees.py +80,Payment request {0} created,Makse taotlus {0} loodud
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Open Orders,Avatud tellimused
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +79,Open Orders,Avatud tellimused
 apps/erpnext/erpnext/healthcare/setup.py +255,Low Sensitivity,Madal tundlikkus
 DocType: Notification Control,Notification Control,Märguannete juhtimiskeskuse
 apps/erpnext/erpnext/templates/emails/training_event.html +17,Please confirm once you have completed your training,"Kinnitage, kui olete oma koolituse lõpetanud"
@@ -451,7 +453,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Item,Synced With Hub,Sünkroniseerida Hub
 DocType: Driver,Fleet Manager,Fleet Manager
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +542,Row #{0}: {1} can not be negative for item {2},Row # {0}: {1} ei saa olla negatiivne artiklijärgse {2}
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +59,Wrong Password,Vale parool
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +86,Wrong Password,Vale parool
 DocType: Item,Variant Of,Variant Of
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +406,Completed Qty can not be greater than 'Qty to Manufacture',Valminud Kogus ei saa olla suurem kui &quot;Kogus et Tootmine&quot;
 DocType: Period Closing Voucher,Closing Account Head,Konto sulgemise Head
@@ -517,8 +519,7 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +426,Please see attac
 DocType: Purchase Order,% Received,% Vastatud
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +3,Create Student Groups,Loo Üliõpilasgrupid
 DocType: Volunteer,Weekends,Nädalavahetustel
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127,Credit Note Amount,Kreeditarve summa
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +187,{0} ({1}) cannot be greater than planned quanitity ({2}) in Work Order {3},{0} ({1}) ei tohi olla suurem kui kavandatud kvantiteeti ({2}) töökorralduses {3}
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +125,Credit Note Amount,Kreeditarve summa
 DocType: Setup Progress Action,Action Document,Tegevusdokument
 DocType: Chapter Member,Website URL,Koduleht
 ,Finished Goods,Valmistoodang
@@ -548,7 +549,7 @@ DocType: Employee,Widowed,Lesk
 DocType: Request for Quotation,Request for Quotation,Hinnapäring
 DocType: Healthcare Settings,Require Lab Test Approval,Nõuda laborikatse heakskiitmist
 DocType: Salary Slip Timesheet,Working Hours,Töötunnid
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +68,Total Outstanding,Kokku tasumata
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +66,Total Outstanding,Kokku tasumata
 DocType: Naming Series,Change the starting / current sequence number of an existing series.,Muuda algus / praegune järjenumber olemasoleva seeria.
 DocType: Dosage Strength,Strength,Tugevus
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1534,Create a new Customer,Loo uus klient
@@ -562,7 +563,7 @@ DocType: Workstation,Consumable Cost,Tarbekaubad Cost
 DocType: Purchase Receipt,Vehicle Date,Sõidukite kuupäev
 DocType: Student Log,Medical,Medical
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +175,Reason for losing,Põhjus kaotada
-apps/erpnext/erpnext/accounts/doctype/account/account.js +52,Update Account Number,Uuenda konto numbrit
+apps/erpnext/erpnext/accounts/doctype/account/account.js +46,Update Account Number,Uuenda konto numbrit
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +44,Lead Owner cannot be same as the Lead,Kaabli omanik ei saa olla sama Lead
 apps/erpnext/erpnext/accounts/utils.py +351,Allocated amount can not greater than unadjusted amount,Eraldatud summa ei ole suurem kui korrigeerimata summa
 DocType: Announcement,Receiver,vastuvõtja
@@ -601,7 +602,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollmen
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +220,{0} {1} is not associated with {2} {3},{0} {1} ei ole seotud {2} {3}
 DocType: Notification Control,Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,"Kohanda sissejuhatavat teksti, mis läheb osana, et e-posti. Iga tehing on eraldi sissejuhatavat teksti."
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +176,Please set default payable account for the company {0},Määrake vaikimisi makstakse kontole ettevõtte {0}
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +513,Transaction not allowed against stopped Work Order {0},Tehing ei ole lubatud peatatud töökorralduse kohta {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +553,Transaction not allowed against stopped Work Order {0},Tehing ei ole lubatud peatatud töökorralduse kohta {0}
 DocType: Setup Progress Action,Min Doc Count,Min Doc Count
 apps/erpnext/erpnext/config/manufacturing.py +84,Global settings for all manufacturing processes.,Global seaded kõik tootmisprotsessid.
 DocType: Accounts Settings,Accounts Frozen Upto,Kontod Külmutatud Upto
@@ -640,6 +641,7 @@ apps/erpnext/erpnext/config/hr.py +24,Attendance record.,Osavõtjate rekord.
 DocType: Salary Structure,Salary Component for timesheet based payroll.,Palk Component töögraafik põhineb palgal.
 DocType: Sales Order Item,Used for Production Plan,Kasutatakse tootmise kava
 DocType: Employee Loan,Total Payment,Kokku tasumine
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +99,Cannot cancel transaction for Completed Work Order.,Tühistama tehingut lõpetatud töökorralduse jaoks.
 DocType: Manufacturing Settings,Time Between Operations (in mins),Aeg toimingute vahel (in minutit)
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +132,{0} {1} is cancelled so the action cannot be completed,{0} {1} katkeb nii toimingut ei saa lõpule
 DocType: Customer,Buyer of Goods and Services.,Ostja kaupade ja teenuste.
@@ -691,7 +693,7 @@ DocType: Account,Profit and Loss,Kasum ja kahjum
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +104,"Not permitted, configure Lab Test Template as required","Pole lubatud, seadistage Lab Test Mall vastavalt vajadusele"
 DocType: Patient,Risk Factors,Riskifaktorid
 DocType: Patient,Occupational Hazards and Environmental Factors,Kutsealased ohud ja keskkonnategurid
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +239,Stock Entries already created for Work Order ,Tööpakkumiste jaoks juba loodud laoseisud
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +279,Stock Entries already created for Work Order ,Tööpakkumiste jaoks juba loodud laoseisud
 DocType: Vital Signs,Respiratory rate,Hingamissagedus
 apps/erpnext/erpnext/config/stock.py +338,Managing Subcontracting,Tegevjuht Alltöövõtt
 DocType: Vital Signs,Body Temperature,Keha temperatuur
@@ -727,6 +729,7 @@ DocType: Installation Note Item,Installation Note Item,Paigaldamine Märkus Punk
 DocType: Production Plan Item,Pending Qty,Kuni Kogus
 DocType: Budget,Ignore,Ignoreerima
 apps/erpnext/erpnext/accounts/party.py +396,{0} {1} is not active,{0} {1} ei ole aktiivne
+DocType: Woocommerce Settings,Freight and Forwarding Account,Kaubavedu ja edastuskonto
 apps/erpnext/erpnext/config/accounts.py +272,Setup cheque dimensions for printing,Setup check mõõtmed trükkimiseks
 DocType: Salary Slip,Salary Slip Timesheet,Palgatõend Töögraafik
 apps/erpnext/erpnext/controllers/buying_controller.py +161,Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Tarnija Warehouse kohustuslik allhanked ostutšekk
@@ -735,7 +738,7 @@ DocType: Sales Invoice,Total Commission,Kokku Komisjoni
 DocType: Pricing Rule,Sales Partner,Müük Partner
 apps/erpnext/erpnext/config/buying.py +150,All Supplier scorecards.,Kõik tarnija skoorikaardid.
 DocType: Buying Settings,Purchase Receipt Required,Ostutšekk Vajalikud
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +188,Target warehouse in row {0} must be same as Work Order,Lahtri sihtrida reas {0} peab olema sama kui töökorraldus
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +228,Target warehouse in row {0} must be same as Work Order,Lahtri sihtrida reas {0} peab olema sama kui töökorraldus
 apps/erpnext/erpnext/stock/doctype/item/item.py +155,Valuation Rate is mandatory if Opening Stock entered,"Hindamine Rate on kohustuslik, kui algvaru sisestatud"
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +143,No records found in the Invoice table,Salvestusi ei leitud Arvel tabelis
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js +34,Please select Company and Party Type first,Palun valige Company Pidu ja Type esimene
@@ -817,6 +820,7 @@ apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group
 apps/erpnext/erpnext/accounts/utils.py +720,"Payment Gateway Account not created, please create one manually.","Payment Gateway konto ei ole loodud, siis looge see käsitsi."
 DocType: Supplier Scorecard,Per Year,Aastas
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +51,Not eligible for the admission in this program as per DOB,Selles programmis osalemise lubamine vastavalt DOB-ile puudub
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Tootekood&gt; Elemendi grupp&gt; Bränd
 DocType: Sales Invoice,Sales Taxes and Charges,Müük maksud ja tasud
 DocType: Employee,Organization Profile,Organisatsiooni andmed
 DocType: Vital Signs,Height (In Meter),Kõrgus (mõõdikus)
@@ -866,6 +870,7 @@ DocType: Activity Cost,Activity Type,Tegevuse liik
 DocType: Request for Quotation,For individual supplier,Üksikute tarnija
 DocType: BOM Operation,Base Hour Rate(Company Currency),Base Hour Rate (firma Valuuta)
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +47,Delivered Amount,Tarnitakse summa
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +14,Lab Tests,Lab Testid
 DocType: Quotation Item,Item Balance,Punkt Balance
 DocType: Sales Invoice,Packing List,Pakkimisnimekiri
 apps/erpnext/erpnext/config/buying.py +28,Purchase Orders given to Suppliers.,Ostutellimuste antud Tarnijatele.
@@ -889,10 +894,10 @@ DocType: Employee Loan,Total Interest Payable,Kokku intressivõlg
 DocType: Landed Cost Taxes and Charges,Landed Cost Taxes and Charges,Maandus Cost maksud ja tasud
 DocType: Work Order Operation,Actual Start Time,Tegelik Start Time
 DocType: BOM Operation,Operation Time,Operation aeg
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +316,Finish,lõpp
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +412,Base,alus
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +337,Finish,lõpp
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +422,Base,alus
 DocType: Timesheet,Total Billed Hours,Kokku Maksustatakse Tundi
-apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1551,Write Off Amount,Kirjutage Off summa
+apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1553,Write Off Amount,Kirjutage Off summa
 DocType: Leave Block List Allow,Allow User,Laske Kasutaja
 DocType: Journal Entry,Bill No,Bill pole
 DocType: Company,Gain/Loss Account on Asset Disposal,Gain / kulude aruandes varade realiseerimine
@@ -925,7 +930,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +303,Pa
 DocType: Request for Quotation,Get Suppliers,Hankige tarnijaid
 DocType: Purchase Receipt Item Supplied,Current Stock,Laoseis
 apps/erpnext/erpnext/controllers/accounts_controller.py +610,Row #{0}: Asset {1} does not linked to Item {2},Rida # {0}: Asset {1} ei ole seotud Punkt {2}
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +394,Preview Salary Slip,Eelvaade palgatõend
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +404,Preview Salary Slip,Eelvaade palgatõend
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +54,Account {0} has been entered multiple times,Konto {0} on sisestatud mitu korda
 DocType: Account,Expenses Included In Valuation,Kulud sisalduvad Hindamine
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +37,You can only renew if your membership expires within 30 days,"Te saate uuendada ainult siis, kui teie liikmelisus lõpeb 30 päeva jooksul"
@@ -967,7 +972,7 @@ DocType: Driver,License Details,Litsentsi üksikasjad
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +85,The field From Shareholder cannot be blank,Väljal Aktsionäril ei tohi olla tühjaks
 DocType: Purchase Order,Supply Raw Materials,Supply tooraine
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +10,Current Assets,Käibevara
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +121,{0} is not a stock Item,{0} ei ole laos toode
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +133,{0} is not a stock Item,{0} ei ole laos toode
 apps/erpnext/erpnext/hr/email_alert/training_feedback/training_feedback.html +6,Please share your feedback to the training by clicking on 'Training Feedback' and then 'New',"Jagage oma koolituse kohta tagasisidet, klõpsates &quot;Treening Tagasiside&quot; ja seejärel &quot;Uus&quot;"
 DocType: Mode of Payment Account,Default Account,Vaikimisi konto
 apps/erpnext/erpnext/stock/doctype/item/item.py +273,Please select Sample Retention Warehouse in Stock Settings first,Esitage kõigepealt proovi võttehoidla varude seadistustes
@@ -1008,7 +1013,7 @@ DocType: Item Attribute Value,Item Attribute Value,Punkt omadus Value
 apps/erpnext/erpnext/projects/doctype/project/project.py +406,Please Update your Project Status,Palun uuendage oma projekti olekut
 DocType: Item,Maximum sample quantity that can be retained,"Maksimaalne proovikogus, mida on võimalik säilitada"
 DocType: Project Update,How is the Project Progressing Right Now?,Kuidas projekt käivitub kohe?
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +419,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},Rida {0} # Item {1} ei saa üle anda {2} ostutellimuse vastu {3}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +459,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},Rida {0} # Item {1} ei saa üle anda {2} ostutellimuse vastu {3}
 apps/erpnext/erpnext/config/selling.py +158,Sales campaigns.,Müügikampaaniad.
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +117,Make Timesheet,Tee Töögraafik
 DocType: Sales Taxes and Charges Template,"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
@@ -1054,13 +1059,14 @@ apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +220,Sanctioned A
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +11,Academic Term: ,Akadeemiline termin:
 DocType: Salary Detail,Do not include in total,Ärge lisage kokku
 DocType: Company,Default Cost of Goods Sold Account,Vaikimisi müüdud toodangu kulu konto
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1063,Sample quantity {0} cannot be more than received quantity {1},Proovi kogus {0} ei saa olla suurem kui saadud kogus {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1177,Sample quantity {0} cannot be more than received quantity {1},Proovi kogus {0} ei saa olla suurem kui saadud kogus {1}
 apps/erpnext/erpnext/stock/get_item_details.py +369,Price List not selected,Hinnakiri ole valitud
 DocType: Employee,Family Background,Perekondlik taust
 DocType: Request for Quotation Supplier,Send Email,Saada E-
 apps/erpnext/erpnext/stock/doctype/item/item.py +228,Warning: Invalid Attachment {0},Hoiatus: Vigane Attachment {0}
 DocType: Item,Max Sample Quantity,Max Proovi Kogus
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +766,No Permission,Ei Luba
+apps/erpnext/erpnext/public/js/hub/hub_form.js +351,Quote Requested,Tsiteerimine soovitud
 DocType: Vital Signs,Heart Rate / Pulse,Südame löögisageduse / impulsi
 DocType: Company,Default Bank Account,Vaikimisi Bank Account
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +59,"To filter based on Party, select Party Type first","Filtreerida põhineb Party, Party Tüüp esimene"
@@ -1138,7 +1144,7 @@ DocType: Drug Prescription,Interval UOM,Intervall UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Kui valite valitud aadressi pärast salvestamist, vali uuesti"
 apps/erpnext/erpnext/stock/doctype/item/item.js +544,Item Variant {0} already exists with same attributes,Punkt Variant {0} on juba olemas sama atribuute
 DocType: Item,Hub Publishing Details,Hubi avaldamise üksikasjad
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +117,'Opening',&quot;Avamine&quot;
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +123,'Opening',&quot;Avamine&quot;
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130,Open To Do,Avatud teha
 DocType: Notification Control,Delivery Note Message,Toimetaja märkus Message
 DocType: Lab Test Template,Result Format,Tulemusvorming
@@ -1182,13 +1188,13 @@ DocType: Salary Slip,Working Days,Tööpäeva jooksul
 DocType: Serial No,Incoming Rate,Saabuva Rate
 DocType: Packing Slip,Gross Weight,Brutokaal
 ,Final Assessment Grades,Lõplik hindamisastmed
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +47,Enable Hub,Hubi lubamine
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +60,Enable Hub,Hubi lubamine
 apps/erpnext/erpnext/public/js/setup_wizard.js +110,The name of your company for which you are setting up this system.,"Nimi oma firma jaoks, millele te Selle süsteemi rajamisel."
 DocType: HR Settings,Include holidays in Total no. of Working Days,Kaasa pühad Kokku ole. tööpäevade
 apps/erpnext/erpnext/setup/setup_wizard/operations/sample_data.py +108,Setup your Institute in ERPNext,Seadista oma instituut ERPNextis
 DocType: Agriculture Analysis Criteria,Plant Analysis,Taimeanalüüs
 DocType: Job Applicant,Hold,Hoia
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +127,Alternate Item,Alternatiivne üksus
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +128,Alternate Item,Alternatiivne üksus
 DocType: Project Update,Progress Details,Progress Detailid
 DocType: Employee,Date of Joining,Liitumis
 DocType: Naming Series,Update Series,Värskenda Series
@@ -1214,6 +1220,8 @@ DocType: Crop Cycle,ISO 8016 standard,ISO 8016 standard
 DocType: Pricing Rule,Rate or Discount,Hind või soodustus
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +213,Serial No {0} does not belong to Item {1},Serial No {0} ei kuulu Punkt {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Nõutav Kogus
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +58,Favourites,Lemmikud
+DocType: Hub Settings,Custom Data,Kohandatud andmed
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +126,Warehouses with existing transaction can not be converted to ledger.,Laod olemasolevate tehing ei ole ümber pearaamatu.
 DocType: Bank Reconciliation,Total Amount,Kogu summa
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +32,Internet Publishing,Internet kirjastamine
@@ -1235,6 +1243,7 @@ DocType: Supplier,Default Payable Accounts,Vaikimisi on tasulised kontod
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +49,Employee {0} is not active or does not exist,Töötaja {0} ei ole aktiivne või ei ole olemas
 DocType: Fee Structure,Components,komponendid
 DocType: Item Barcode,Item Barcode,Punkt Triipkood
+DocType: Woocommerce Settings,Endpoints,Lõppjooned
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +329,Please enter Asset Category in Item {0},Palun sisesta Põhivarakategoori punktis {0}
 apps/erpnext/erpnext/stock/doctype/item/item.py +661,Item Variants {0} updated,Punkt variandid {0} uuendatud
 DocType: Quality Inspection Reading,Reading 6,Lugemine 6
@@ -1250,9 +1259,11 @@ DocType: Employee,Permanent Address Is,Alaline aadress
 DocType: Work Order Operation,Operation completed for how many finished goods?,Operation lõpule mitu valmistoodang?
 DocType: Payment Terms Template,Payment Terms Template,Maksete tingimused mall
 apps/erpnext/erpnext/public/js/setup_wizard.js +51,The Brand,Brand
+DocType: Manufacturing Settings,Allow Multiple Material Consumption,Luba mitme materjali tarbimine
 DocType: Employee,Exit Interview Details,Exit Intervjuu Üksikasjad
 DocType: Item,Is Purchase Item,Kas Ostu toode
 DocType: Journal Entry Account,Purchase Invoice,Ostuarve
+DocType: Manufacturing Settings,Allow multiple Material Consumption against a Work Order,Võimaldage mitu materjalitarbimist töökorralduse vastu
 DocType: Stock Ledger Entry,Voucher Detail No,Voucher Detail Ei
 apps/erpnext/erpnext/accounts/page/pos/pos.js +789,New Sales Invoice,Uus müügiarve
 DocType: Stock Entry,Total Outgoing Value,Kokku Väljuv Value
@@ -1275,7 +1286,7 @@ DocType: Guardian,Guardian Name,Guardian Nimi
 DocType: Cheque Print Template,Has Print Format,Kas Print Format
 DocType: Employee Loan,Sanctioned,sanktsioneeritud
 apps/erpnext/erpnext/accounts/page/pos/pos.js +75, is mandatory. Maybe Currency Exchange record is not created for ,on kohustuslik. Ehk Valuutavahetus rekord ei ole loodud
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +139,Row #{0}: Please specify Serial No for Item {1},Row # {0}: Palun täpsustage Serial No Punkt {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +151,Row #{0}: Please specify Serial No for Item {1},Row # {0}: Palun täpsustage Serial No Punkt {1}
 DocType: Crop Cycle,Crop Cycle,Põllukultuuride tsükkel
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +633,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Sest &quot;Toote Bundle esemed, Warehouse, Serial No ja partii ei loetakse alates&quot; Pakkeleht &quot;tabelis. Kui Lao- ja partii ei on sama kõigi asjade pakkimist tahes &quot;Toote Bundle&quot; kirje, need väärtused võivad olla kantud põhi tabeli väärtused kopeeritakse &quot;Pakkeleht&quot; tabelis."
 DocType: Student Admission,Publish on website,Avaldab kodulehel
@@ -1311,7 +1322,7 @@ apps/erpnext/erpnext/agriculture/doctype/water_analysis/water_analysis.py +23,La
 DocType: HR Settings,Don't send Employee Birthday Reminders,Ärge saatke Töötaja Sünnipäev meeldetuletused
 DocType: Expense Claim,Total Advance Amount,Eelmakse kokku
 DocType: Delivery Stop,Estimated Arrival,Eeldatav saabumine
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +34,Save Settings,Salvesta sätted
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +47,Save Settings,Salvesta sätted
 DocType: Delivery Stop,Notified by Email,E-posti teel teavitatud
 DocType: Item,Inspection Criteria,Inspekteerimiskriteeriumitele
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Transfered,Siirdus
@@ -1321,7 +1332,7 @@ DocType: Timesheet Detail,Bill,arve
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +88,Next Depreciation Date is entered as past date,Järgmine kulum kuupäev on sisestatud viimase kuupäeva
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +208,White,Valge
 DocType: SMS Center,All Lead (Open),Kõik Plii (Open)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +270,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Rida {0}: Kogus ole saadaval {4} laos {1} postitama aeg kanne ({2} {3})
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +310,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Rida {0}: Kogus ole saadaval {4} laos {1} postitama aeg kanne ({2} {3})
 apps/erpnext/erpnext/accounts/doctype/cash_flow_mapping/cash_flow_mapping.py +18,You can only select a maximum of one option from the list of check boxes.,Märkeruutade loendist saate valida ainult ühe võimaluse.
 DocType: Purchase Invoice,Get Advances Paid,Saa makstud ettemaksed
 DocType: Item,Automatically Create New Batch,Automaatselt Loo uus partii
@@ -1346,7 +1357,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +236,Stoc
 DocType: Buying Settings,Disable Fetching Last Purchase Details in Purchase Order,Enne ostutellimuse viimaste ostude andmete hankimist keelake
 DocType: Journal Entry Account,Expense Claim,Kuluhüvitussüsteeme
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +267,Do you really want to restore this scrapped asset?,Kas te tõesti soovite taastada seda lammutatakse vara?
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +381,Qty for {0},Kogus eest {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +402,Qty for {0},Kogus eest {0}
 DocType: Leave Application,Leave Application,Jäta ostusoov
 DocType: Patient,Patient Relation,Patsiendi suhe
 apps/erpnext/erpnext/config/hr.py +80,Leave Allocation Tool,Jäta jaotamine Tool
@@ -1417,7 +1428,6 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1624,ZIP Code,Postiindeks
 apps/erpnext/erpnext/controllers/selling_controller.py +252,Sales Order {0} is {1},Sales Order {0} on {1}
 DocType: Opportunity,Contact Info,Kontaktinfo
 apps/erpnext/erpnext/config/stock.py +323,Making Stock Entries,Making Stock kanded
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Palun seadke töötaja nimesüsteem inimressurss&gt; HR-seaded
 DocType: Packing Slip,Net Weight UOM,Net Weight UOM
 DocType: Item,Default Supplier,Vaikimisi Tarnija
 DocType: Manufacturing Settings,Over Production Allowance Percentage,Üle Tootmise toetus protsent
@@ -1427,7 +1437,7 @@ DocType: Holiday List,Get Weekly Off Dates,Võta Weekly Off kuupäevad
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +33,End Date can not be less than Start Date,End Date saa olla väiksem kui alguskuupäev
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +337,Invoice can't be made for zero billing hour,Arve ei saa teha arveldusnädala nullini
 DocType: Sales Person,Select company name first.,Vali firma nimi esimesena.
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +189,Email sent to {0},E-kiri saadetakse aadressile {0}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +182,Email sent to {0},E-kiri saadetakse aadressile {0}
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Tsitaadid Hankijatelt.
 apps/erpnext/erpnext/config/manufacturing.py +74,Replace BOM and update latest price in all BOMs,Vahetage BOM ja värskendage viimast hinda kõikides BOM-i
 apps/erpnext/erpnext/controllers/selling_controller.py +27,To {0} | {1} {2},{0} | {1} {2}
@@ -1473,7 +1483,7 @@ DocType: Leave Allocation,LAL/,LAL /
 DocType: Setup Progress Action,Action Name,Tegevus nimega
 apps/erpnext/erpnext/public/js/financial_statements.js +75,Start Year,Start Aasta
 apps/erpnext/erpnext/regional/india/utils.py +25,First 2 digits of GSTIN should match with State number {0},Esimese 2 numbrit GSTIN peaks sobima riik number {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +77,PDC/LC,PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +75,PDC/LC,PDC / LC
 DocType: Purchase Invoice,Start date of current invoice's period,Arve makseperioodi alguskuupäev
 DocType: Salary Slip,Leave Without Pay,Palgata puhkust
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385,Capacity Planning Error,Capacity Planning viga
@@ -1481,7 +1491,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +385,Capacit
 DocType: Lead,Consultant,Konsultant
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +356,Parents Teacher Meeting Attendance,Vanemate õpetajate kohtumispaik
 DocType: Salary Slip,Earnings,Tulu
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +443,Finished Item {0} must be entered for Manufacture type entry,Lõppenud Punkt {0} tuleb sisestada Tootmine tüübist kirje
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +483,Finished Item {0} must be entered for Manufacture type entry,Lõppenud Punkt {0} tuleb sisestada Tootmine tüübist kirje
 apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Avamine Raamatupidamine Balance
 ,GST Sales Register,GST Sales Registreeri
 DocType: Sales Invoice Advance,Sales Invoice Advance,Müügiarve Advance
@@ -1592,7 +1602,7 @@ DocType: Opportunity Item,Opportunity Item,Opportunity toode
 ,Student and Guardian Contact Details,Student ja Guardian Kontakt
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +53,Row {0}: For supplier {0} Email Address is required to send email,Rida {0}: tarnija {0} e-posti aadress on vajalik saata e-posti
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +72,Temporary Opening,Ajutine avamine
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +10,View Hub,Kuva keskus
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +9,View Hub,Kuva keskus
 ,Employee Leave Balance,Töötaja Jäta Balance
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +147,Balance for Account {0} must always be {1},Balance Konto {0} peab alati olema {1}
 DocType: Patient Appointment,More Info,Rohkem infot
@@ -1630,9 +1640,9 @@ DocType: Employee,Place of Issue,Väljaandmise koht
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +101,Contract,Leping
 DocType: Plant Analysis,Laboratory Testing Datetime,Laboratoorse testimise kuupäev
 DocType: Email Digest,Add Quote,Lisa Quote
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1031,UOM coversion factor required for UOM: {0} in Item: {1},UOM coversion tegur vajalik UOM: {0} punktis: {1}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1145,UOM coversion factor required for UOM: {0} in Item: {1},UOM coversion tegur vajalik UOM: {0} punktis: {1}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +92,Indirect Expenses,Kaudsed kulud
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +98,Row {0}: Qty is mandatory,Row {0}: Kogus on kohustuslikuks
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +110,Row {0}: Qty is mandatory,Row {0}: Kogus on kohustuslikuks
 DocType: Agriculture Analysis Criteria,Agriculture,Põllumajandus
 apps/erpnext/erpnext/accounts/page/pos/pos.js +794,Sync Master Data,Sync Master andmed
 DocType: Asset Repair,Repair Cost,Remondikulud
@@ -1757,6 +1767,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +70,Appli
 DocType: Activity Cost,Projects,Projektid
 DocType: Payment Request,Transaction Currency,tehing Valuuta
 apps/erpnext/erpnext/controllers/buying_controller.py +31,From {0} | {1} {2},Siit {0} | {1} {2}
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +341,Removed from Favourites,Lemmikutest eemaldatud
 DocType: Work Order Operation,Operation Description,Tööpõhimõte
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +34,Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Ei saa muuta Fiscal Year Alguse kuupäev ja Fiscal Year End Date kui majandusaasta on salvestatud.
 DocType: Quotation,Shopping Cart,Ostukorv
@@ -1776,8 +1787,8 @@ DocType: Employee,Prefered Email,eelistatud Post
 DocType: Student Admission,Eligibility and Details,Abikõlblikkus ja üksikasjad
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +38,Net Change in Fixed Asset,Net Change põhivarade
 DocType: Leave Control Panel,Leave blank if considered for all designations,"Jäta tühjaks, kui arvestada kõiki nimetusi"
-apps/erpnext/erpnext/controllers/accounts_controller.py +806,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Laadige tüüp &quot;Tegelik&quot; in real {0} ei saa lisada Punkt Rate
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +382,Max: {0},Max: {0}
+apps/erpnext/erpnext/controllers/accounts_controller.py +808,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Laadige tüüp &quot;Tegelik&quot; in real {0} ei saa lisada Punkt Rate
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +403,Max: {0},Max: {0}
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,From Datetime,Siit Date
 DocType: Email Digest,For Company,Sest Company
 apps/erpnext/erpnext/config/support.py +17,Communication log.,Side log.
@@ -1813,7 +1824,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
 Used for Taxes and Charges",Maksu- detail tabelis tõmmatud kirje kapten string ja hoitakse selles valdkonnas. Kasutatakse maksud ja tasud
 DocType: Supplier Scorecard Period,SSC-,SSC-
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +159,Employee cannot report to himself.,Töötaja ei saa aru ise.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +160,Employee cannot report to himself.,Töötaja ei saa aru ise.
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.","Kui konto on külmutatud, kanded on lubatud piiratud kasutajatele."
 DocType: Email Digest,Bank Balance,Bank Balance
 apps/erpnext/erpnext/accounts/party.py +240,Accounting Entry for {0}: {1} can only be made in currency: {2},Raamatupidamine kirjet {0} {1} saab teha ainult valuuta: {2}
@@ -1825,6 +1836,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +53,{0} {1}: Customer
 DocType: Purchase Invoice,Total Taxes and Charges (Company Currency),Kokku maksud ja tasud (firma Valuuta)
 DocType: Weather,Weather Parameter,Ilmaparameeter
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Näita sulgemata eelarve aasta P &amp; L saldod
+apps/erpnext/erpnext/public/js/hub/hub_form.js +336,Request a Quote,Küsi hinnapakkumist
 DocType: Lab Test Template,Collection Details,Kollektsiooni üksikasjad
 DocType: POS Profile,Allow Print Before Pay,Luba Prindi enne maksmist
 DocType: Land Unit,Linked Soil Texture,Seotud mulla tekstuur
@@ -1840,7 +1852,7 @@ DocType: Asset,Asset Name,Asset Nimi
 DocType: Project,Task Weight,ülesanne Kaal
 DocType: Shipping Rule Condition,To Value,Hindama
 DocType: Asset Movement,Stock Manager,Stock Manager
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +171,Source warehouse is mandatory for row {0},Allikas lattu on kohustuslik rida {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +211,Source warehouse is mandatory for row {0},Allikas lattu on kohustuslik rida {0}
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py +38,The Payment Term at row {0} is possibly a duplicate.,Makse tähtaeg reas {0} on tõenäoliselt duplikaat.
 apps/erpnext/erpnext/public/js/setup_wizard.js +30,Agriculture (beta),Põllumajandus (beetaversioon)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +863,Packing Slip,Pakkesedel
@@ -1904,7 +1916,6 @@ DocType: Landed Cost Voucher,Additional Charges,lisatasudeta
 DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Täiendav Allahindluse summa (firma Valuuta)
 DocType: Supplier Scorecard,Supplier Scorecard,Tarnijate tulemuskaart
 DocType: Plant Analysis,Result Datetime,Tulemus Datetime
-apps/erpnext/erpnext/accounts/doctype/account/account.js +21,Please create new account from Chart of Accounts.,Palun uusi konto kontoplaani.
 ,Support Hour Distribution,Tugi jagamise aeg
 DocType: Maintenance Visit,Maintenance Visit,Hooldus Külasta
 DocType: Student,Leaving Certificate Number,Lõputunnistus arv
@@ -1920,7 +1931,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +220,Please input a
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +106,Accounts Receivable Summary,Arved kokkuvõte
 DocType: Employee Loan,Monthly Repayment Amount,Igakuine tagasimakse
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Arvelduste avamine
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +195,Please set User ID field in an Employee record to set Employee Role,Palun määra Kasutaja ID väli töötaja rekord seada töötaja roll
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +196,Please set User ID field in an Employee record to set Employee Role,Palun määra Kasutaja ID väli töötaja rekord seada töötaja roll
 DocType: UOM,UOM Name,UOM nimi
 DocType: GST HSN Code,HSN Code,HSN kood
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +39,Contribution Amount,Panus summa
@@ -1928,6 +1939,7 @@ DocType: Purchase Invoice,Shipping Address,Kohaletoimetamise aadress
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,See tööriist aitab teil värskendada või määrata koguse ja väärtuse hindamine varude süsteemi. See on tavaliselt kasutatakse sünkroonida süsteemi väärtused ja mida tegelikult olemas oma laod.
 DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,"Sõnades on nähtav, kui salvestate saateleht."
 DocType: Expense Claim,EXP,kuni
+apps/erpnext/erpnext/erpnext_integrations/connectors/woocommerce_connection.py +21,Unverified Webhook Data,Kontrollimata Webhooki andmed
 DocType: Water Analysis,Container,Konteiner
 apps/erpnext/erpnext/education/utils.py +50,Student {0} - {1} appears Multiple times in row {2} & {3},Student {0} - {1} esineb mitu korda järjest {2} ja {3}
 DocType: Item Alternative,Two-way,Kahesuunaline
@@ -1967,7 +1979,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +58,{0} must
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +59,Leaves Allocated Successfully for {0},Lehed Eraldatud edukalt {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +42,No Items to pack,"Ole tooteid, mida pakkida"
 DocType: Shipping Rule Condition,From Value,Väärtuse
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +608,Manufacturing Quantity is mandatory,Tootmine Kogus on kohustuslikuks
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +655,Manufacturing Quantity is mandatory,Tootmine Kogus on kohustuslikuks
 DocType: Employee Loan,Repayment Method,tagasimaksmine meetod
 DocType: Products Settings,"If checked, the Home page will be the default Item Group for the website",Märkimise korral Kodulehekülg on vaikimisi Punkt Group kodulehel
 DocType: Quality Inspection Reading,Reading 4,Lugemine 4
@@ -2007,13 +2019,13 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +100,Net Change in Cash,Net muutus Cash
 DocType: Assessment Plan,Grading Scale,hindamisskaala
 apps/erpnext/erpnext/stock/doctype/item/item.py +438,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Mõõtühik {0} on kantud rohkem kui üks kord Conversion Factor tabel
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +643,Already completed,juba lõpetatud
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +665,Already completed,juba lõpetatud
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +33,Stock In Hand,Stock In Hand
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +64,Import Successful!,Import edukas!
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +29,Payment Request already exists {0},Maksenõudekäsule juba olemas {0}
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Kulud Väljastatud Esemed
 DocType: Physician,Hospital,Haigla
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +385,Quantity must not be more than {0},Kogus ei tohi olla rohkem kui {0}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +406,Quantity must not be more than {0},Kogus ei tohi olla rohkem kui {0}
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +117,Previous Financial Year is not closed,Eelmisel majandusaastal ei ole suletud
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +68,Age (Days),Vanus (päevad)
 DocType: Quotation Item,Quotation Item,Tsitaat toode
@@ -2021,6 +2033,7 @@ DocType: Customer,Customer POS Id,Kliendi POS Id
 DocType: Account,Account Name,Kasutaja nimi
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +40,From Date cannot be greater than To Date,Siit kuupäev ei saa olla suurem kui kuupäev
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Serial No {0} quantity {1} cannot be a fraction,Serial nr {0} kogust {1} ei saa olla vaid murdosa
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +96,Please enter Woocommerce Server URL,Palun sisestage Woocommerce Serveri URL
 apps/erpnext/erpnext/config/buying.py +43,Supplier Type master.,Tarnija Type kapten.
 DocType: Purchase Order Item,Supplier Part Number,Tarnija osa number
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +108,Conversion rate cannot be 0 or 1,Ümberarvestuskursi ei saa olla 0 või 1
@@ -2059,6 +2072,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +51,You cannot 
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,A customer with the same name already exists,Sama nimega klient on juba olemas
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +185,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,See esitab Palkade loendused ja loob kogunenud ajakirja kande. Kas soovite jätkata?
 DocType: Purchase Invoice,Total Net Weight,Netokaal kokku
+DocType: Purchase Order,Order Confirmation No,Telli kinnitus nr
 DocType: Purchase Invoice,Eligibility For ITC,ITC-le sobivus
 DocType: Journal Entry,Entry Type,Entry Type
 ,Customer Credit Balance,Kliendi kreeditjääk
@@ -2096,7 +2110,7 @@ apps/erpnext/erpnext/healthcare/setup.py +257,Moderate Sensitivity,Mõõdukas tu
 DocType: Leave Type,Include holidays within leaves as leaves,Kaasa pühade jooksul lehed nagu lehed
 DocType: Sales Invoice,Packed Items,Pakitud Esemed
 apps/erpnext/erpnext/config/support.py +27,Warranty Claim against Serial No.,Garantiinõudest vastu Serial No.
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +211,'Total',&quot;Kokku&quot;
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +209,'Total',&quot;Kokku&quot;
 DocType: Shopping Cart Settings,Enable Shopping Cart,Luba Ostukorv
 DocType: Employee,Permanent Address,püsiaadress
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +260,"Advance paid against {0} {1} cannot be greater \
@@ -2112,7 +2126,7 @@ DocType: GST Settings,GST Accounts,GST kontod
 DocType: Payment Entry,Paid Amount (Company Currency),Paide summa (firma Valuuta)
 DocType: Purchase Invoice,Additional Discount,Täiendav Soodus
 DocType: Selling Settings,Selling Settings,Müük Seaded
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +83,Confirm Action,Kinnita toimingut
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +110,Confirm Action,Kinnita toimingut
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +39,Online Auctions,Online Oksjonid
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +100,Please specify either Quantity or Valuation Rate or both,Palun täpsustage kas Kogus või Hindamine Rate või nii
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order_dashboard.py +18,Fulfillment,täitmine
@@ -2210,7 +2224,7 @@ apps/erpnext/erpnext/hr/doctype/training_program/training_program_dashboard.py +
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +205,Duplicate Serial No entered for Item {0},Duplicate Serial No sisestatud Punkt {0}
 apps/erpnext/erpnext/config/selling.py +179,Track Leads by Lead Source.,Juhtivate allikate jälgimine.
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Tingimuseks laevandus reegel
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +167,Please enter ,Palun sisesta
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +168,Please enter ,Palun sisesta
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +43,Maintenance Log,Hoolduslogi
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +236,Please set filter based on Item or Warehouse,Palun määra filter põhineb toode või Warehouse
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),Netokaal selle paketi. (arvutatakse automaatselt summana netokaal punkte)
@@ -2244,7 +2258,7 @@ DocType: Hub Category,Hub Node,Hub Node
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78,You have entered duplicate items. Please rectify and try again.,Te olete sisenenud eksemplaris teemad. Palun paranda ja proovige uuesti.
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +129,Associate,Associate
 DocType: Asset Movement,Asset Movement,Asset liikumine
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +510,Work Order {0} must be submitted,Töökorraldus {0} tuleb esitada
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +550,Work Order {0} must be submitted,Töökorraldus {0} tuleb esitada
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2210,New Cart,uus ostukorvi
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +44,Item {0} is not a serialized Item,Punkt {0} ei ole seeriasertide toode
 DocType: SMS Center,Create Receiver List,Loo vastuvõtja loetelu
@@ -2260,7 +2274,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +52,Telecommunicat
 apps/erpnext/erpnext/accounts/party.py +263,Billing currency must be equal to either default company's currency or party account currency,Arveldusvaluuta peab olema võrdne kas ettevõtte vaikimisi valuuta või partei konto valuutaga
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),"Näitab, et pakend on osa sellest sünnitust (Ainult eelnõu)"
 DocType: Soil Texture,Loam,Loam
-apps/erpnext/erpnext/controllers/accounts_controller.py +705,Row {0}: Due Date cannot be before posting date,Rida {0}: tähtaeg ei saa olla enne postitamise kuupäeva
+apps/erpnext/erpnext/controllers/accounts_controller.py +707,Row {0}: Due Date cannot be before posting date,Rida {0}: tähtaeg ei saa olla enne postitamise kuupäeva
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +36,Make Payment Entry,Tee makse Entry
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +129,Quantity for Item {0} must be less than {1},Kogus Punkt {0} peab olema väiksem kui {1}
 ,Sales Invoice Trends,Müügiarve Trends
@@ -2277,6 +2291,7 @@ apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +33,Item {0} appears
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +41,"Selling must be checked, if Applicable For is selected as {0}","Müük tuleb kontrollida, kui need on kohaldatavad valitakse {0}"
 DocType: Production Plan Material Request,Material Request Date,Materjal taotlus kuupäev
 DocType: Purchase Order Item,Supplier Quotation Item,Tarnija Tsitaat toode
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +181,Material Consumption is not set in Manufacturing Settings.,Materjalitarbimine ei ole seadistatud seadistustes.
 DocType: Student,Student Mobile Number,Student Mobile arv
 DocType: Item,Has Variants,Omab variandid
 apps/erpnext/erpnext/controllers/accounts_controller.py +488,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings",Elemendile {0} ei saa realt {1} rohkem kui {2} üle märkida. Ülekarvete lubamiseks määrake varude seadistused
@@ -2296,7 +2311,6 @@ DocType: Budget,Fiscal Year,Eelarveaasta
 DocType: Asset Maintenance Log,Planned,Planeeritud
 DocType: Healthcare Settings,Default receivable accounts to be used if not set in Patient to book Consultation charges.,"Vaikimisi saadaolevad kontod, mida kasutatakse juhul, kui patsient ei soovi broneerida konsultatsioonitasusid."
 DocType: Vehicle Log,Fuel Price,kütuse hind
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Klient&gt; Kliendi Grupp&gt; Territoorium
 DocType: Budget,Budget,Eelarve
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +65,Set Open,Määrake Ava
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,Fixed Asset Item must be a non-stock item.,Põhivara objektile peab olema mitte-laoartikkel.
@@ -2337,6 +2351,7 @@ DocType: Employee,Salary Information,Palk Information
 DocType: Sales Person,Name and Employee ID,Nimi ja Töötaja ID
 apps/erpnext/erpnext/accounts/party.py +308,Due Date cannot be before Posting Date,Tähtaeg ei tohi olla enne postitamist kuupäev
 DocType: Website Item Group,Website Item Group,Koduleht Punkt Group
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +339,Added to Favourites,Lemmikutele lisatud
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +463,No salary slip found to submit for the above selected criteria OR salary slip already submitted,Palkade libisemist ei leitud enam esitatud kriteeriumidele vastavaks esitamiseks või juba esitatud palgalehelt
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +150,Duties and Taxes,Lõivud ja maksud
 DocType: Projects Settings,Projects Settings,Projektide seaded
@@ -2381,6 +2396,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +15,{0} hou
 DocType: Course,Default Grading Scale,Vaikimisi hindamisskaala
 DocType: Appraisal,For Employee Name,Töötajate Nimi
 DocType: Holiday List,Clear Table,Clear tabel
+DocType: Woocommerce Settings,Tax Account,Maksukonto
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +119,Available slots,Olemasolevad teenindusajad
 DocType: C-Form Invoice Detail,Invoice No,Arve nr
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +363,Make Payment,Tee makse
@@ -2418,6 +2434,7 @@ DocType: Delivery Note,Excise Page Number,Aktsiisi Page Number
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +227,"Company, From Date and To Date is mandatory",Firma From kuupäev ning praegu on kohustuslik
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +33,Get from Consultation,Hankige konsultatsioonist
 DocType: Asset,Purchase Date,Ostu kuupäev
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +33,Could not generate Secret,Saladust ei saanud luua
 DocType: Volunteer,Volunteer Type,Vabatahtlike tüüp
 DocType: Student,Personal Details,Isiklikud detailid
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +193,Please set 'Asset Depreciation Cost Center' in Company {0},Palun määra &quot;Vara amortisatsioonikulu Center&quot; Company {0}
@@ -2464,6 +2481,7 @@ DocType: Landed Cost Voucher,Distribute Charges Based On,Jaota põhinevatest tas
 DocType: Projects Settings,Timesheets,timesheets
 DocType: HR Settings,HR Settings,HR Seaded
 DocType: Salary Slip,net pay info,netopalk info
+DocType: Woocommerce Settings,Enable Sync,Sünkroonimise lubamine
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Seda väärtust uuendatakse Vaikimüügi hinnakirjas.
 DocType: Email Digest,New Expenses,uus kulud
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Amount,PDC / LC summa
@@ -2476,7 +2494,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +596,"Row #{0}: Qty must
 DocType: Leave Block List Allow,Leave Block List Allow,Jäta Block loetelu Laske
 apps/erpnext/erpnext/setup/doctype/company/company.py +317,Abbr can not be blank or space,Lühend ei saa olla tühi või ruumi
 DocType: Patient Medical Record,Patient Medical Record,Patsiendi meditsiiniline aruanne
-apps/erpnext/erpnext/accounts/doctype/account/account.js +68,Group to Non-Group,Grupi Non-Group
+apps/erpnext/erpnext/accounts/doctype/account/account.js +62,Group to Non-Group,Grupi Non-Group
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +50,Sports,Spordi-
 DocType: Loan Type,Loan Name,laenu Nimi
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +56,Total Actual,Kokku Tegelik
@@ -2496,6 +2514,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.js +45,Expense Claims,Kuluaruand
 DocType: Issue,Support,Support
 ,BOM Search,Bom Otsing
 DocType: Project,Total Consumed Material Cost  (via Stock Entry),Kokku tarbitud materjalikulud (varude sisestamise kaudu)
+DocType: Hub Settings,Company Registered,Registreeritud ettevõte
 DocType: Item,"Publish ""In Stock"" or ""Not in Stock"" on Hub based on stock available in this warehouse.","Kirjastage laos &quot;Laos&quot; või &quot;Laos&quot;, mis asub jaotuses, tuginedes laos saadaval olevale laos."
 DocType: Vehicle,Fuel Type,kütuse tüüp
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +27,Please specify currency in Company,Palun täpsustage valuuta Company
@@ -2504,6 +2523,7 @@ apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,Pärast Material taotlused on tõstatatud automaatselt vastavalt objekti ümber korraldada tasemel
 DocType: Email Digest,Pending Sales Orders,Kuni müügitellimuste
 apps/erpnext/erpnext/controllers/accounts_controller.py +312,Account {0} is invalid. Account Currency must be {1},Konto {0} on kehtetu. Konto Valuuta peab olema {1}
+DocType: Employee,Create User Permission,Loo kasutaja luba
 DocType: Healthcare Settings,Remind Before,Tuleta meelde enne
 apps/erpnext/erpnext/buying/utils.py +34,UOM Conversion factor is required in row {0},UOM Ümberarvutustegur on vaja järjest {0}
 DocType: Production Plan Item,material_request_item,material_request_item
@@ -2515,7 +2535,7 @@ DocType: Stock Reconciliation Item,Amount Difference,summa vahe
 apps/erpnext/erpnext/stock/get_item_details.py +356,Item Price added for {0} in Price List {1},Toode Hind lisatud {0} Hinnakirjas {1}
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person_tree.js +8,Please enter Employee Id of this sales person,Palun sisestage Töötaja Id selle müügi isik
 DocType: Territory,Classification of Customers by region,Klientide liigitamine piirkonniti
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +76,In Production,Tootmises
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +78,In Production,Tootmises
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +65,Difference Amount must be zero,Erinevus summa peab olema null
 DocType: Project,Gross Margin,Gross Margin
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +61,Please enter Production Item first,Palun sisestage Production Punkt esimene
@@ -2627,6 +2647,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +364,{0} ag
 DocType: Account,Fixed Asset,Põhivarade
 apps/erpnext/erpnext/config/stock.py +328,Serialized Inventory,SERIALIZED Inventory
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74,Email not found in default contact,E-post ei leitud vaikekontaktis
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +23,Generate Secret,Loo saladus
 DocType: Employee Loan,Account Info,Konto andmed
 DocType: Activity Type,Default Billing Rate,Vaikimisi Arved Rate
 DocType: Fees,Include Payment,Lisada makse
@@ -2682,7 +2703,7 @@ DocType: Hub Settings,Unregister from Hub,Registreerumine Hubist
 apps/erpnext/erpnext/public/js/utils.js +108,Total Unpaid: {0},Kokku Palgata: {0}
 DocType: BOM Website Operation,BOM Website Operation,Bom Koduleht operatsiooni
 DocType: Supplier Scorecard,Supplier Score,Tarnija skoor
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Total Invoiced Amt,Kokku arve Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +225,Total Invoiced Amt,Kokku arve Amt
 DocType: Supplier,Warn RFQs,Hoiata RFQs
 DocType: BOM,Conversion Rate,tulosmuuntokertoimella
 apps/erpnext/erpnext/templates/pages/product_search.html +3,Product Search,Tooteotsing
@@ -2691,7 +2712,7 @@ DocType: Authorization Rule,Approving Role (above authorized value),Kinnitamine 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +118,Credit To account must be a Payable account,Krediidi konto peab olema tasulised konto
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +43,Please select Student Admission which is mandatory for the paid student applicant,"Palun valige Student Admission, mis on tasuline üliõpilaspidaja kohustuslik"
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +355,BOM recursion: {0} cannot be parent or child of {2},Bom recursion: {0} ei saa olla vanem või laps {2}
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +21,Please select a Price List to publish pricing,Hinnakirja avaldamiseks valige hinnakiri
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +36,Please select a Price List to publish pricing,Hinnakirja avaldamiseks valige hinnakiri
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +38,Budget List,Eelarve nimekiri
 DocType: Work Order Operation,Completed Qty,Valminud Kogus
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +148,"For {0}, only debit accounts can be linked against another credit entry","Sest {0}, ainult deebetkontode võib olla seotud teise vastu kreeditlausend"
@@ -2700,7 +2721,7 @@ apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +127,Row {0}: Compl
 DocType: Manufacturing Settings,Allow Overtime,Laske Ületunnitöö
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +148,"Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry","Seeriatootmiseks Oksjoni {0} ei saa uuendada, kasutades Stock vastavuse kontrollimiseks kasutada Stock Entry"
 DocType: Training Event Employee,Training Event Employee,Koolitus Sündmus Employee
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1075,Maximum Samples - {0} can be retained for Batch {1} and Item {2}.,Suurimad proovid - {0} saab säilitada partii {1} ja üksuse {2} jaoks.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1189,Maximum Samples - {0} can be retained for Batch {1} and Item {2}.,Suurimad proovid - {0} saab säilitada partii {1} ja üksuse {2} jaoks.
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +7,Add Time Slots,Lisage ajapilusid
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +201,{0} Serial Numbers required for Item {1}. You have provided {2}.,{0} seerianumbrid vajalik Eseme {1}. Sa andsid {2}.
 DocType: Stock Reconciliation Item,Current Valuation Rate,Praegune Hindamine Rate
@@ -2745,10 +2766,12 @@ DocType: Sales Order,Not Delivered,Ei ole esitanud
 ,Bank Clearance Summary,Bank Kliirens kokkuvõte
 apps/erpnext/erpnext/config/setup.py +106,"Create and manage daily, weekly and monthly email digests.","Luua ja hallata päeva, nädala ja kuu email digests."
 DocType: Appraisal Goal,Appraisal Goal,Hinnang Goal
+apps/erpnext/erpnext/public/js/hub/hub_form.js +420,Suggest Category?,Soovita Kategooria?
 DocType: Stock Reconciliation Item,Current Amount,Praegune summa
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +58,Buildings,ehitised
 DocType: Fee Schedule,Fee Structure,Fee struktuur
 DocType: Timesheet Detail,Costing Amount,Mis maksavad summa
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Tarnija&gt; Tarnija tüüp
 DocType: Student Admission Program,Application Fee,Application Fee
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +52,Submit Salary Slip,Esita palgatõend
 apps/erpnext/erpnext/controllers/selling_controller.py +137,Maxiumm discount for Item {0} is {1}%,Maxiumm allahindlust Punkt {0} on {1}%
@@ -2777,6 +2800,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Journal Entry,Reference Number,Viitenumber
 DocType: Employee,Employment Details,Tööhõive Üksikasjad
 DocType: Employee,New Workplace,New Töökoht
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +330,Material Consumption,Materiaalne tarbimine
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +17,Set as Closed,Pane suletud
 apps/erpnext/erpnext/stock/get_item_details.py +127,No Item with Barcode {0},No Punkt Triipkood {0}
 DocType: Normal Test Items,Require Result Value,Nõuda tulemuse väärtust
@@ -2799,13 +2823,13 @@ DocType: Cost Center,Track separate Income and Expense for product verticals or 
 DocType: Rename Tool,Rename Tool,Nimeta Tool
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +72,Update Cost,Värskenda Cost
 DocType: Item Reorder,Item Reorder,Punkt Reorder
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +463,Show Salary Slip,Näita palgatõend
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +473,Show Salary Slip,Näita palgatõend
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +849,Transfer Material,Transfer Materjal
 DocType: Fees,Send Payment Request,Saada makse taotlus
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.",Määrake tegevuse töökulud ja annab ainulaadse operatsiooni ei oma tegevuse.
 DocType: Water Analysis,Origin,Päritolu
 apps/erpnext/erpnext/controllers/status_updater.py +204,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,See dokument on üle piiri {0} {1} artiklijärgse {4}. Kas tegemist teise {3} samade {2}?
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1154,Please set recurring after saving,Palun määra korduvate pärast salvestamist
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1155,Please set recurring after saving,Palun määra korduvate pärast salvestamist
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +769,Select change amount account,Vali muutus summa kontole
 DocType: Purchase Invoice,Price List Currency,Hinnakiri Valuuta
 DocType: Naming Series,User must always select,Kasutaja peab alati valida
@@ -2826,7 +2850,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +34,Traceability,Jälg
 DocType: Asset Maintenance Log,Actions performed,Sooritatud toimingud
 DocType: Cash Flow Mapper,Section Leader,Sektsiooni juht
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +137,Source of Funds (Liabilities),Vahendite allika (Kohustused)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +433,Quantity in row {0} ({1}) must be same as manufactured quantity {2},"Kogus järjest {0} ({1}) peab olema sama, mida toodetakse kogus {2}"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +473,Quantity in row {0} ({1}) must be same as manufactured quantity {2},"Kogus järjest {0} ({1}) peab olema sama, mida toodetakse kogus {2}"
 DocType: Supplier Scorecard Scoring Standing,Employee,Töötaja
 DocType: Asset Repair,Failure Date,Ebaõnnestumise kuupäev
 DocType: Sample Collection,Collected Time,Kogutud aeg
@@ -2921,7 +2945,7 @@ DocType: Authorization Rule,Authorized Value,Lubatud Value
 DocType: BOM,Show Operations,Näita Operations
 ,Minutes to First Response for Opportunity,Protokoll First Response Opportunity
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +68,Total Absent,Kokku Puudub
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +881,Item or Warehouse for row {0} does not match Material Request,Punkt või lattu järjest {0} ei sobi Material taotlus
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +995,Item or Warehouse for row {0} does not match Material Request,Punkt või lattu järjest {0} ei sobi Material taotlus
 apps/erpnext/erpnext/config/stock.py +195,Unit of Measure,Mõõtühik
 DocType: Fiscal Year,Year End Date,Aasta lõpp kuupäev
 DocType: Task Depends On,Task Depends On,Task sõltub
@@ -2972,7 +2996,7 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +86,Purchas
 apps/erpnext/erpnext/stock/doctype/item/item.py +498,Barcode {0} is not a valid {1} code,Vöötkood {0} ei ole kehtiv {1} kood
 apps/erpnext/erpnext/public/js/financial_statements.js +83,End Year,End Aasta
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Quot / Plii%
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +124,Contract End Date must be greater than Date of Joining,Leping End Date peab olema suurem kui Liitumis
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +125,Contract End Date must be greater than Date of Joining,Leping End Date peab olema suurem kui Liitumis
 DocType: Driver,Driver,Juht
 DocType: Vital Signs,Nutrition Values,Toitumisväärtused
 DocType: Lab Test Template,Is billable,On tasuline
@@ -3007,6 +3031,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 10. Add or Deduct: Whether you want to add or deduct the tax.","Standard maksu mall, mida saab rakendada kõigi ostutehingute. See mall võib sisaldada nimekirja maksu juhid ja ka teiste kulul juhid nagu &quot;Shipping&quot;, &quot;Kindlustus&quot;, &quot;Handling&quot; jt #### Märkus maksumäär Siin määratud olla hariliku maksumäära kõigile ** Kirjed * *. Kui on ** Kirjed **, mis on erineva kiirusega, tuleb need lisada ka ** Oksjoni Maksu- ** tabeli ** Oksjoni ** kapten. #### Kirjeldus veerud arvutamine 1. tüüpi: - See võib olla ** Net Kokku ** (mis on summa põhisummast). - ** On eelmise rea kokku / Summa ** (kumulatiivse maksud või maksed). Kui valite selle funktsiooni, maksu rakendatakse protsentides eelmise rea (maksu tabel) summa või kokku. - ** Tegelik ** (nagu mainitud). 2. Konto Head: Konto pearaamatu, mille alusel see maks broneeritud 3. Kulude Center: Kui maks / lõiv on sissetulek (nagu laevandus) või kulutustega tuleb kirjendada Cost Center. 4. Kirjeldus: Kirjeldus maksu (mis trükitakse arved / jutumärkideta). 5. Hinda: Maksumäär. 6. Summa: Maksu- summa. 7. Kokku: Kumulatiivne kokku selles küsimuses. 8. Sisestage Row: Kui põhineb &quot;Eelmine Row Kokku&quot; saate valida rea number, mida võtta aluseks selle arvutamine (default on eelmise rea). 9. Mõtle maksu, et: Selles sektsioonis saab määrata, kui maks / lõiv on ainult hindamise (ei kuulu kokku) või ainult kokku (ei lisa väärtust kirje) või nii. 10. Lisa või Lahutada: Kas soovite lisada või maksu maha arvata."
 DocType: Homepage,Homepage,Kodulehekülg
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +68,Select Physician...,Valige arst ...
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +606,Back to Products,Tagasi toodete juurde
 DocType: Grant Application,Grant Application Details ,Toetage rakenduse üksikasju
 DocType: Stock Entry Detail,Original Item,Originaalüksus
 DocType: Purchase Receipt Item,Recd Quantity,KONTOLE Kogus
@@ -3083,7 +3108,7 @@ DocType: Purchase Invoice,Total Taxes and Charges,Kokku maksud ja tasud
 DocType: Employee,Emergency Contact,Hädaabi kontaktinfo
 DocType: Bank Reconciliation Detail,Payment Entry,makse Entry
 ,sales-browser,müügi-brauser
-apps/erpnext/erpnext/accounts/doctype/account/account.js +79,Ledger,Kontoraamat
+apps/erpnext/erpnext/accounts/doctype/account/account.js +73,Ledger,Kontoraamat
 DocType: Patient Medical Record,PMR-,PMR-
 DocType: Drug Prescription,Drug Code,Ravimikood
 DocType: Target Detail,Target  Amount,Sihtsummaks
@@ -3135,17 +3160,16 @@ apps/erpnext/erpnext/utilities/activation.py +127,"Student Batches help you trac
 DocType: Payment Entry,Total Allocated Amount,Eraldati kokku
 apps/erpnext/erpnext/setup/doctype/company/company.py +151,Set default inventory account for perpetual inventory,Määra vaikimisi laoseisu konto jooksva inventuuri
 DocType: Item Reorder,Material Request Type,Materjal Hankelepingu liik
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252,Accural Journal Entry for salaries from {0} to {1},Accural päevikusissekanne palgad alates {0} kuni {1}
 apps/erpnext/erpnext/non_profit/doctype/grant_application/grant_application.js +17,Send Grant Review Email,Saatke graafikujuliste meilide saatmine
 apps/erpnext/erpnext/accounts/page/pos/pos.js +848,"LocalStorage is full, did not save","LocalStorage on täis, ei päästa"
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +100,Row {0}: UOM Conversion Factor is mandatory,Row {0}: UOM Conversion Factor on kohustuslik
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +112,Row {0}: UOM Conversion Factor is mandatory,Row {0}: UOM Conversion Factor on kohustuslik
 apps/erpnext/erpnext/utilities/user_progress.py +235,Room Capacity,Toa maht
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +28,Already record exists for the item {0},Kirje {0} jaoks on juba olemas kirje
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +28,Ref,Ref
 DocType: Lab Test,LP-,LP-
 DocType: Healthcare Settings,Registration Fee,Registreerimistasu
 DocType: Budget,Cost Center,Cost Center
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +45,Voucher #,Voucher #
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +46,Voucher #,Voucher #
 DocType: Notification Control,Purchase Order Message,Ostutellimuse Message
 DocType: Tax Rule,Shipping Country,Kohaletoimetamine Riik
 DocType: Selling Settings,Hide Customer's Tax Id from Sales Transactions,Peida Kliendi Maksu Id müügitehingute
@@ -3159,7 +3183,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +72,Incom
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,Rada viib Tööstuse tüüp.
 apps/erpnext/erpnext/utilities/user_progress.py +101,Go to Letterheads,Mine kleebiste juurde
 DocType: Item Supplier,Item Supplier,Punkt Tarnija
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1255,Please enter Item Code to get batch no,Palun sisestage Kood saada partii ei
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1256,Please enter Item Code to get batch no,Palun sisestage Kood saada partii ei
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +880,Please select a value for {0} quotation_to {1},Palun valige väärtust {0} quotation_to {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +419,No Items selected for transfer,Ülekandmiseks valitud üksused pole valitud
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,Kõik aadressid.
@@ -3231,7 +3255,7 @@ DocType: Project Update,Project Update,Projekti uuendamine
 DocType: Fees,Fees,Tasud
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Täpsustada Vahetuskurss vahetada üks valuuta teise
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +159,Quotation {0} is cancelled,Tsitaat {0} on tühistatud
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +128,Total Outstanding Amount,Tasumata kogusumma
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +126,Total Outstanding Amount,Tasumata kogusumma
 DocType: Sales Partner,Targets,Eesmärgid
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +54,Please register the SIREN number in the company information file,Palun registreerige ettevõtte infofailis SIREN number
 DocType: Price List,Price List Master,Hinnakiri Master
@@ -3280,7 +3304,7 @@ apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_
 ,Salary Register,palk Registreeri
 DocType: Warehouse,Parent Warehouse,Parent Warehouse
 DocType: C-Form Invoice Detail,Net Total,Net kokku
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +549,Default BOM not found for Item {0} and Project {1},Vaikimisi Bom ei leitud Oksjoni {0} ja Project {1}
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +570,Default BOM not found for Item {0} and Project {1},Vaikimisi Bom ei leitud Oksjoni {0} ja Project {1}
 apps/erpnext/erpnext/config/hr.py +168,Define various loan types,Määrake erinevate Laenuliigid
 DocType: Bin,FCFS Rate,FCFS Rate
 DocType: Opening Invoice Creation Tool Item,Outstanding Amount,Tasumata summa
@@ -3317,6 +3341,7 @@ DocType: Employee Loan,Repaid/Closed,Tagastatud / Suletud
 DocType: Item,Total Projected Qty,Kokku prognoositakse Kogus
 DocType: Monthly Distribution,Distribution Name,Distribution nimi
 apps/erpnext/erpnext/stock/stock_ledger.py +477,"Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry","Kirje {0} jaoks ei leitud hindamismäär, mis on vajalik {1} {2} arvestuskande tegemiseks. Kui üksus tegeleb väärtusega {1} nullväärtusega, siis märkige see {1} üksuse tabelisse. Muul juhul looge objektiga saabuv varude tehing või märkige väärtuse määr kirje kirjele ja proovige seejärel selle kirje esitamist / tühistamist"
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Palun määrake seerianumbrite nime seeria {0} abil häälestus&gt; Seaded&gt; nime seeria
 DocType: Course,Course Code,Kursuse kood
 apps/erpnext/erpnext/controllers/stock_controller.py +337,Quality Inspection required for Item {0},Kvaliteedi kontroll on vajalikud Punkt {0}
 DocType: POS Settings,Use POS in Offline Mode,Kasutage POS-i võrguühendusrežiimis
@@ -3361,10 +3386,10 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +136,Row # {0}: Ca
 DocType: Item Group,Show this slideshow at the top of the page,Näita seda slideshow ülaosas lehele
 DocType: BOM,Item UOM,Punkt UOM
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),Maksusumma Pärast Allahindluse summa (firma Valuuta)
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +177,Target warehouse is mandatory for row {0},Target lattu on kohustuslik rida {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +217,Target warehouse is mandatory for row {0},Target lattu on kohustuslik rida {0}
 DocType: Cheque Print Template,Primary Settings,esmane seaded
 DocType: Purchase Invoice,Select Supplier Address,Vali Tarnija Aadress
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +397,Add Employees,Lisa Töötajad
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +407,Add Employees,Lisa Töötajad
 DocType: Purchase Invoice Item,Quality Inspection,Kvaliteedi kontroll
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +196,Extra Small,Mikroskoopilises
 DocType: Company,Standard Template,standard Template
@@ -3389,6 +3414,7 @@ DocType: Crop,Crop Name,Taime nimetus
 DocType: SMS Log,No of Sent SMS,No saadetud SMS
 DocType: Antibiotic,Healthcare Administrator,Tervishoiu administraator
 apps/erpnext/erpnext/utilities/user_progress.py +47,Set a Target,Määra sihtmärk
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Palun seadistage külastuse numbrite seeria seaded&gt; nummering seeria abil
 DocType: Dosage Strength,Dosage Strength,Annuse tugevus
 DocType: Account,Expense Account,Ärikohtumisteks
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +49,Software,Tarkvara
@@ -3416,7 +3442,7 @@ DocType: Purchase Invoice,Availed ITC Cess,Availed ITC Cess
 ,Student Monthly Attendance Sheet,Student Kuu osavõtt Sheet
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +96,Shipping rule only applicable for Selling,Müügi reegel kehtib ainult Müügi kohta
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Projekti alguskuupäev
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +32,Until,Kuni
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +30,Until,Kuni
 DocType: Rename Tool,Rename Log,Nimeta Logi
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Student Group või Kursuse ajakava on kohustuslik
 DocType: HR Settings,Maintain Billing Hours and Working Hours Same on Timesheet,Säilitada Arved ja tööaja samad Töögraafik
@@ -3466,13 +3492,13 @@ DocType: Project,Total Costing Amount (via Timesheets),Kogukulude summa (ajaveeb
 DocType: Employee Advance,Expense Approver,Kulu Approver
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +136,Row {0}: Advance against Customer must be credit,Row {0}: Advance vastu Klient peab olema krediidi
 DocType: Project,Hourly,Tunnis
-apps/erpnext/erpnext/accounts/doctype/account/account.js +89,Non-Group to Group,Non-Group Group
+apps/erpnext/erpnext/accounts/doctype/account/account.js +83,Non-Group to Group,Non-Group Group
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +58,Batch is mandatory in row {0},Partii on kohustuslik rida {0}
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,Ostutšekk tooteühiku
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,To Datetime,Et Date
 apps/erpnext/erpnext/config/selling.py +302,Logs for maintaining sms delivery status,Logid säilitamiseks sms tarneseisust
 DocType: Accounts Settings,Make Payment via Journal Entry,Tee makse kaudu päevikusissekanne
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +237,Printed On,trükitud
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +235,Printed On,trükitud
 DocType: Item,Inspection Required before Delivery,Ülevaatus Vajalik enne sünnitust
 DocType: Item,Inspection Required before Purchase,Ülevaatus Vajalik enne ostu
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +93,Pending Activities,Kuni Tegevused
@@ -3482,7 +3508,7 @@ DocType: Chapter Member,Chapter Member,Peatükk Liige
 DocType: Material Request Plan Item,Minimum Order Quantity,Tellimuse miinimumkogus
 apps/erpnext/erpnext/public/js/setup_wizard.js +106,Your Organization,teie organisatsiooni
 DocType: Fee Component,Fees Category,Tasud Kategooria
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +134,Please enter relieving date.,Palun sisestage leevendab kuupäeva.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,Please enter relieving date.,Palun sisestage leevendab kuupäeva.
 apps/erpnext/erpnext/controllers/trends.py +149,Amt,Amt
 DocType: Supplier Scorecard,Notify Employee,Teata töötajatest
 DocType: Opportunity,Enter name of campaign if source of enquiry is campaign,Sisesta nimi kampaania kui allikas uurimine on kampaania
@@ -3510,6 +3536,7 @@ apps/erpnext/erpnext/assets/doctype/asset_repair/asset_repair.py +14,Please sele
 DocType: Student Batch Attendance Tool,Student Batch Attendance Tool,Student Partii osavõtt Tool
 apps/erpnext/erpnext/controllers/status_updater.py +213,Limit Crossed,Limit Crossed
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.js +22,Scheduled Upto,Planeeritud kuni
+DocType: Woocommerce Settings,Secret,Saladus
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +55,Venture Capital,Venture Capital
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +40,An academic term with this 'Academic Year' {0} and 'Term Name' {1} already exists. Please modify these entries and try again.,Akadeemilise perspektiivis selle &quot;Academic Year &#39;{0} ja&quot; Term nimi &quot;{1} on juba olemas. Palun muuda neid sissekandeid ja proovi uuesti.
 DocType: UOM,Must be Whole Number,Peab olema täisarv
@@ -3544,7 +3571,7 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 DocType: Employee Attendance Tool,Employee Attendance Tool,Töötaja osalemise Tool
 DocType: Guardian Student,Guardian Student,Guardian Student
 DocType: Supplier,Credit Limit,Krediidilimiit
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75,Avg. Selling Price List Rate,Keskm. Hinnakirja hinna müügihind
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Avg. Selling Price List Rate,Keskm. Hinnakirja hinna müügihind
 DocType: Salary Component,Salary Component,palk Component
 apps/erpnext/erpnext/accounts/utils.py +490,Payment Entries {0} are un-linked,Makse Sissekanded {0} on un-seotud
 DocType: GL Entry,Voucher No,Voucher ei
@@ -3562,6 +3589,7 @@ DocType: Support Settings,Auto close Issue after 7 days,Auto lähedale Issue 7 p
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +71,"Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Jäta ei saa eraldada enne {0}, sest puhkuse tasakaal on juba carry-edastas tulevikus puhkuse jaotamise rekord {1}"
 apps/erpnext/erpnext/accounts/party.py +317,Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s),Märkus: Tänu / Viitekuupäev ületab lubatud klientide krediidiriski päeva {0} päeva (s)
 apps/erpnext/erpnext/education/doctype/program/program.js +8,Student Applicant,Student esitaja
+DocType: Hub Tracked Item,Hub Tracked Item,Hub Tracked Item
 DocType: Purchase Invoice,ORIGINAL FOR RECIPIENT,ORIGINAL vastuvõtvate
 DocType: Asset Category Account,Accumulated Depreciation Account,Akumuleeritud kulum konto
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +11,This email is autogenerated,See meil on automaatselt genereeritud
@@ -3635,7 +3663,7 @@ apps/erpnext/erpnext/education/doctype/instructor/instructor.py +21,Please selec
 DocType: Sales Order,Fully Delivered,Täielikult Tarnitakse
 DocType: Lead,Lower Income,Madalama sissetulekuga
 DocType: Restaurant Order Entry,Current Order,Praegune tellimus
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +196,Source and target warehouse cannot be same for row {0},Allika ja eesmärgi lattu ei saa olla sama rida {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +236,Source and target warehouse cannot be same for row {0},Allika ja eesmärgi lattu ei saa olla sama rida {0}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +243,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Erinevus konto peab olema vara / kohustuse tüübist võtta, sest see Stock leppimine on mõra Entry"
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +107,Disbursed Amount cannot be greater than Loan Amount {0},Väljastatud summa ei saa olla suurem kui Laenusumma {0}
 apps/erpnext/erpnext/utilities/user_progress.py +176,Go to Programs,Avage programmid
@@ -3662,6 +3690,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +86,Va
 DocType: Payment Terms Template,Payment Terms,Maksetingimused
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +449,Productions Orders cannot be raised for:,Lavastused Tellimused ei saa tõsta jaoks:
 apps/erpnext/erpnext/utilities/user_progress.py +147,Minute,Minut
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Palun seadke töötaja nimesüsteem inimressurss&gt; HR-seaded
 DocType: Purchase Invoice,Purchase Taxes and Charges,Ostu maksud ja tasud
 DocType: Chapter,Meetup Embed HTML,Meetup Embed HTML
 apps/erpnext/erpnext/utilities/user_progress.py +121,Go to Suppliers,Mine pakkujatele
@@ -3694,7 +3723,7 @@ DocType: Purchase Invoice,Edit Posting Date and Time,Edit Postitamise kuupäev j
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +101,Please set Depreciation related Accounts in Asset Category {0} or Company {1},Palun määra kulum seotud arvepidamise Põhivarakategoori {0} või ettevõtte {1}
 DocType: Lab Test Groups,Normal Range,Normaalne vahemik
 DocType: Academic Term,Academic Year,Õppeaasta
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Available Selling,Saadaval müügil
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +79,Available Selling,Saadaval müügil
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +169,Opening Balance Equity,Algsaldo Equity
 DocType: Lead,CRM,CRM
 DocType: Purchase Invoice,N,N
@@ -3711,7 +3740,7 @@ apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_recei
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +64,Create Fees,Loo lõivu
 DocType: Project,Total Purchase Cost (via Purchase Invoice),Kokku ostukulud (via ostuarve)
 DocType: Training Event,Start Time,Algusaeg
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +400,Select Quantity,Vali Kogus
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +421,Select Quantity,Vali Kogus
 DocType: Customs Tariff Number,Customs Tariff Number,Tollitariifistiku number
 DocType: Patient Appointment,Patient Appointment,Patsiendi määramine
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +34,Approving Role cannot be same as role the rule is Applicable To,Kinnitamine roll ei saa olla sama rolli õigusriigi kohaldatakse
@@ -3755,6 +3784,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +137,Delivery wa
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),Brutokaal pakendis. Tavaliselt netokaal + pakkematerjali kaal. (trüki)
 DocType: Assessment Plan,Program,programm
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Kasutajad seda rolli on lubatud kehtestada külmutatud kontode ja luua / muuta raamatupidamiskirjeteks vastu külmutatud kontode
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Palun seadke õpetaja nime sisestamine haridusse&gt; Hariduseseaded
 DocType: Serial No,Is Cancelled,Kas Tühistatud
 DocType: Student Group,Group Based On,Grupp põhineb
 DocType: Journal Entry,Bill Date,Bill kuupäev
@@ -3780,6 +3810,7 @@ DocType: Payment Gateway Account,Default Payment Request Message,Vaikimisi makse
 DocType: Item Group,Check this if you want to show in website,"Märgi see, kui soovid näha kodulehel"
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +338,Balance ({0}),Saldo ({0})
 apps/erpnext/erpnext/config/accounts.py +134,Banking and Payments,Pank ja maksed
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +99,Please enter API Consumer Key,Palun sisestage API-tarbija võti
 ,Welcome to ERPNext,Tere tulemast ERPNext
 apps/erpnext/erpnext/config/learn.py +102,Lead to Quotation,Viia Tsitaat
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +34,Email Reminders will be sent to all parties with email contacts,E-posti meeldetuletused saadetakse kõigile e-posti kontaktide osapooltele
@@ -3820,13 +3851,13 @@ DocType: Purchase Invoice Item,Landed Cost Voucher Amount,Maandus Cost Voucher s
 ,Item Balance (Simple),Kirje Balanss (lihtne)
 apps/erpnext/erpnext/config/accounts.py +17,Bills raised by Suppliers.,Arveid tõstatatud Tarnijatele.
 DocType: POS Profile,Write Off Account,Kirjutage Off konto
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229,Debit Note Amt,Võlateate Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Debit Note Amt,Võlateate Amt
 apps/erpnext/erpnext/templates/print_formats/includes/taxes.html +5,Discount Amount,Soodus summa
 DocType: Purchase Invoice,Return Against Purchase Invoice,Tagasi Against ostuarve
 DocType: Item,Warranty Period (in days),Garantii Periood (päeva)
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +61,Failed to set defaults,Vaikeväärtuste määramine ebaõnnestus
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +56,Relation with Guardian1,Seos Guardian1
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +787,Please select BOM against item {0},Palun vali BOM seoses elemendiga {0}
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +791,Please select BOM against item {0},Palun vali BOM seoses elemendiga {0}
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js +18,Make Invoices,Tee arveid
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +23,Net Cash from Operations,Rahavood äritegevusest
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Punkt 4
@@ -3873,7 +3904,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js +95,Company name not same,
 DocType: Lead,Address Desc,Aadress otsimiseks
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +113,Party is mandatory,Partei on kohustuslik
 DocType: Journal Entry,JV-,JV-
-apps/erpnext/erpnext/controllers/accounts_controller.py +712,Rows with duplicate due dates in other rows were found: {list},Leiti järgmised rea duplikaadi tähtajad teistes ridades: {list}
+apps/erpnext/erpnext/controllers/accounts_controller.py +714,Rows with duplicate due dates in other rows were found: {list},Leiti järgmised rea duplikaadi tähtajad teistes ridades: {list}
 DocType: Topic,Topic Name,Teema nimi
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast one of the Selling or Buying must be selected,Atleast üks müümine või ostmine tuleb valida
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +290,Select an employee to get the employee advance.,"Valige töötaja, et saada töötaja ette."
@@ -3910,19 +3941,20 @@ DocType: Production Plan,Sales Orders Detail,Müügitellimuste üksikasjad
 DocType: Bin,Requested Quantity,taotletud Kogus
 DocType: Patient,Marital Status,Perekonnaseis
 DocType: Stock Settings,Auto Material Request,Auto Material taotlus
+DocType: Woocommerce Settings,API consumer secret,API tarbija saladus
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,Saadaval Partii Kogus kell laost
 DocType: Customer,CUST-,CUST-
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +50,Idevise,Idevise
 DocType: Salary Slip,Gross Pay - Total Deduction - Loan Repayment,Gross Pay - kokku mahaarvamine - laenu tagasimakse
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +29,Current BOM and New BOM can not be same,Praegune BOM ja Uus BOM saa olla samad
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py +47,Salary Slip ID,Palgatõend ID
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +118,Date Of Retirement must be greater than Date of Joining,Erru minemise peab olema suurem kui Liitumis
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +119,Date Of Retirement must be greater than Date of Joining,Erru minemise peab olema suurem kui Liitumis
 apps/erpnext/erpnext/stock/doctype/item/item.js +68,Multiple Variants,Mitmed variandid
 DocType: Sales Invoice,Against Income Account,Sissetuleku konto
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +117,{0}% Delivered,{0}% Tarnitakse
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +107,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,Punkt {0}: Tellitud tk {1} ei saa olla väiksem kui minimaalne tellimuse tk {2} (vastab punktis).
 DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,Kuu Distribution osakaal
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +49,Please login as another user.,Palun logige sisse teise kasutajana.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +62,Please login as another user.,Palun logige sisse teise kasutajana.
 DocType: Daily Work Summary Group User,Daily Work Summary Group User,Igapäevase töö kokkuvõtte grupi kasutaja
 DocType: Territory,Territory Targets,Territoorium Eesmärgid
 DocType: Soil Analysis,Ca/Mg,Ca / Mg
@@ -3975,7 +4007,7 @@ DocType: Asset Settings,Number of Days in Fiscal Year,Päevade arv eelarveaastal
 apps/erpnext/erpnext/templates/includes/cart/cart_items.html +29,Rate: {0},Hinda: {0}
 DocType: Company,Exchange Gain / Loss Account,Exchange kasum / kahjum konto
 apps/erpnext/erpnext/config/hr.py +7,Employee and Attendance,Töötaja ja osavõtt
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +93,Purpose must be one of {0},Eesmärk peab olema üks {0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +105,Purpose must be one of {0},Eesmärk peab olema üks {0}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +100,Fill the form and save it,Täitke vorm ja salvestage see
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Suhtlus Foorum
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +52,Actual qty in stock,Tegelik Kogus laos
@@ -4001,15 +4033,17 @@ apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +16,{0}: F
 DocType: Task,depends_on,oleneb
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +60,Queued for updating latest price in all Bill of Materials. It may take a few minutes.,Kõigi materjalide nimekirja värskendamise järjekorras. See võib võtta paar minutit.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +26,Name of new Account. Note: Please don't create accounts for Customers and Suppliers,Nimi uue konto. Märkus: Palun ärge kontosid luua klientide ja hankijate
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Klient&gt; Kliendi Grupp&gt; Territoorium
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,Riik tark default Aadress Templates
 DocType: Water Analysis,Appearance,Välimus
-apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +75,Avg. Buying Price List Rate,Keskm. Hinnakirja hinna ostmine
+apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +77,Avg. Buying Price List Rate,Keskm. Hinnakirja hinna ostmine
 DocType: Sales Order Item,Supplier delivers to Customer,Tarnija tarnib Tellija
 apps/erpnext/erpnext/config/non_profit.py +23,Member information.,Liikmeinfo
 apps/erpnext/erpnext/utilities/bot.py +34,[{0}](#Form/Item/{0}) is out of stock,[{0}] (# vorm / Punkt / {0}) on otsas
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +58,Asset Maintenance,Varade hooldus
 ,Sales Payment Summary,Müügimaksete kokkuvõte
 DocType: Restaurant,Restaurant,Restoran
+DocType: Woocommerce Settings,API consumer key,API-tarbija võti
 apps/erpnext/erpnext/accounts/party.py +320,Due / Reference Date cannot be after {0},Tänu / Viitekuupäev ei saa pärast {0}
 apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,Andmete impordi ja ekspordi
 DocType: Patient,Account Details,Konto üksikasjad
@@ -4028,6 +4062,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +584,Please
 DocType: Program Enrollment,School House,School House
 DocType: Serial No,Out of AMC,Out of AMC
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +82,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,Arv Amortisatsiooniaruanne Broneeritud ei saa olla suurem kui koguarv Amortisatsiooniaruanne
+DocType: Purchase Order,Order Confirmation Date,Tellimuse kinnitamise kuupäev
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,Tee hooldus Külasta
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +215,Please contact to the user who have Sales Master Manager {0} role,"Palun pöörduge kasutaja, kes on Sales Master Manager {0} rolli"
 DocType: Company,Default Cash Account,Vaikimisi arvelduskontole
@@ -4055,7 +4090,7 @@ DocType: Fee Schedule,Fee Schedule,Fee Ajakava
 DocType: Hub Settings,Publish Availability,Avalda saadavust
 DocType: Company,Create Chart Of Accounts Based On,Loo kontoplaani põhineb
 apps/erpnext/erpnext/projects/doctype/task/task.js +91,Cannot convert it to non-group. Child Tasks exist.,Ei saa teisendada selle mitterühma. Lasteülesanded on olemas.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +112,Date of Birth cannot be greater than today.,Sünniaeg ei saa olla suurem kui täna.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +113,Date of Birth cannot be greater than today.,Sünniaeg ei saa olla suurem kui täna.
 ,Stock Ageing,Stock Ageing
 apps/erpnext/erpnext/education/doctype/student/student.py +40,Student {0} exist against student applicant {1},Student {0} on olemas peale õpilase taotleja {1}
 DocType: Purchase Invoice,Rounding Adjustment (Company Currency),Ümardamise korrigeerimine (ettevõtte valuuta)
@@ -4087,6 +4122,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 
 apps/erpnext/erpnext/utilities/user_progress.py +247,Add Users,Lisa Kasutajad
 DocType: POS Item Group,Item Group,Punkt Group
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +16,Student Group: ,Tudengirühm:
+apps/erpnext/erpnext/public/js/hub/hub_listing.js +388,Select Country,Vali riik
 DocType: Item,Safety Stock,kindlustusvaru
 DocType: Healthcare Settings,Healthcare Settings,Tervishoiuteenuse sätted
 apps/erpnext/erpnext/projects/doctype/task/task.py +54,Progress % for a task cannot be more than 100.,Progress% ülesandega ei saa olla rohkem kui 100.
@@ -4099,11 +4135,11 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +43,Item {0} must be a Fixed 
 apps/erpnext/erpnext/stock/doctype/item/item.js +372,Make Variants,Tee variandid
 DocType: Item,Default BOM,Vaikimisi Bom
 DocType: Project,Total Billed Amount (via Sales Invoices),Kogu tasuline summa (arvete kaudu)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +127,Debit Note Amount,Võlateate Summa
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +125,Debit Note Amount,Võlateate Summa
 DocType: Project Update,Not Updated,Ei ole uuendatud
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +106,"There are inconsistencies between the rate, no of shares and the amount calculated","Maksumäära, aktsiate arvu ja arvutatud summa vahel on vastuolud"
 apps/erpnext/erpnext/setup/doctype/company/company.js +89,Please re-type company name to confirm,Palun ümber kirjutada firma nime kinnitamiseks
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +230,Total Outstanding Amt,Kokku Tasumata Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +228,Total Outstanding Amt,Kokku Tasumata Amt
 DocType: Journal Entry,Printing Settings,Printing Settings
 DocType: Employee Advance,Advance Account,Ettemaksekonto
 DocType: Job Offer,Job Offer Terms,Tööpakkumise tingimused
@@ -4112,7 +4148,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +292,Total 
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +11,Automotive,Autod
 DocType: Vehicle,Insurance Company,Kindlustusselts
 DocType: Asset Category Account,Fixed Asset Account,Põhivarade konto
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +414,Variable,muutuja
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +424,Variable,muutuja
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.js +47,From Delivery Note,Siit Saateleht
 DocType: Chapter,Members,Liikmed
 DocType: Student,Student Email Address,Student e-posti aadress
@@ -4143,7 +4179,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +122,Reference No is mandatory if you entered Reference Date,"Viitenumber on kohustuslik, kui sisestatud Viitekuupäev"
 DocType: Bank Reconciliation Detail,Payment Document,maksedokumendi
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py +37,Error evaluating the criteria formula,Viga kriteeriumide valemi hindamisel
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +115,Date of Joining must be greater than Date of Birth,Liitumis peab olema suurem kui Sünniaeg
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +116,Date of Joining must be greater than Date of Birth,Liitumis peab olema suurem kui Sünniaeg
 DocType: Salary Slip,Salary Structure,Palgastruktuur
 DocType: Account,Bank,Pank
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +9,Airline,Lennukompanii
@@ -4153,7 +4189,6 @@ DocType: Material Request Item,For Warehouse,Sest Warehouse
 DocType: Employee,Offer Date,Pakkuda kuupäev
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Quotations,Tsitaadid
 apps/erpnext/erpnext/accounts/page/pos/pos.js +735,You are in offline mode. You will not be able to reload until you have network.,"Olete võrguta režiimis. Sa ei saa uuesti enne, kui olete võrgus."
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Tarnija&gt; Tarnija tüüp
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py +47,No Student Groups created.,Ei Üliõpilasgrupid loodud.
 DocType: Purchase Invoice Item,Serial No,Seerianumber
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +119,Monthly Repayment Amount cannot be greater than Loan Amount,Igakuine tagasimakse ei saa olla suurem kui Laenusumma
@@ -4199,9 +4234,10 @@ DocType: Hotel Settings,Default Customer,Vaikimisi klient
 DocType: Assessment Plan,Supervisor Name,Juhendaja nimi
 DocType: Healthcare Settings,Do not confirm if appointment is created for the same day,"Ärge kinnitage, kas kohtumine on loodud samal päeval"
 DocType: Program Enrollment Course,Program Enrollment Course,Programm Registreerimine Course
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +164,Make Sample Retention Stock Entry,Proovide võtmisega varude sisestamine
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +165,Make Sample Retention Stock Entry,Proovide võtmisega varude sisestamine
 DocType: Purchase Taxes and Charges,Valuation and Total,Hindamine ja kokku
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py +11,Scorecards,Tulemuskaardid
+DocType: Employee,This will restrict user access to other employee records,See piirab kasutajate juurdepääsu muudele töötajate registrile
 DocType: Tax Rule,Shipping City,Kohaletoimetamine City
 DocType: Notification Control,Customize the Notification,Kohanda teatamine
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +24,Cash Flow from Operations,Rahavoog äritegevusest
@@ -4264,7 +4300,7 @@ apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet
 apps/erpnext/erpnext/config/accounts.py +105,Accounting Statements,raamatupidamise aastaaruanne
 DocType: Drug Prescription,Hour,Tund
 DocType: Restaurant Order Entry,Last Sales Invoice,Viimane müügiarve
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +789,Please select Qty against item {0},Palun vali kogus elemendi {0}
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +793,Please select Qty against item {0},Palun vali kogus elemendi {0}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,New Serial No ei ole Warehouse. Ladu peab ette Stock Entry või ostutšekk
 DocType: Lead,Lead Type,Plii Type
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +114,You are not authorized to approve leaves on Block Dates,Teil ei ole kiita lehed Block kuupäevad
@@ -4301,7 +4337,7 @@ DocType: Production Plan,Get Raw Materials For Production,Hankige toorainet toot
 DocType: Job Opening,Job Title,Töö nimetus
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py +84,"{0} indicates that {1} will not provide a quotation, but all items \
 					have been quoted. Updating the RFQ quote status.","{0} näitab, et {1} ei anna hinnapakkumist, kuid kõik esemed \ on tsiteeritud. RFQ tsiteeritud oleku värskendamine."
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1070,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Suurimad proovid - {0} on partii {1} ja pootise {2} jaoks juba paketi {3} jaoks juba salvestatud.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1184,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Suurimad proovid - {0} on partii {1} ja pootise {2} jaoks juba paketi {3} jaoks juba salvestatud.
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +125,Please Set Supplier Type in Buying Settings.,Palun seadke tarnija tüüp ostunäidetesse.
 DocType: Manufacturing Settings,Update BOM Cost Automatically,Värskenda BOM-i maksumust automaatselt
 DocType: Lab Test,Test Name,Testi nimi
@@ -4314,7 +4350,7 @@ apps/erpnext/erpnext/config/maintenance.py +17,Visit report for maintenance call
 DocType: Stock Entry,Update Rate and Availability,Värskenduskiirus ja saadavust
 DocType: Stock Settings,Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,"Osakaal teil on lubatud vastu võtta või pakkuda rohkem vastu tellitav kogus. Näiteks: Kui olete tellinud 100 ühikut. ja teie toetus on 10%, siis on lubatud saada 110 ühikut."
 DocType: POS Customer Group,Customer Group,Kliendi Group
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +217,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs,Rida # {0}: käitamine {1} ei ole lõpetatud {2} valmistoodetele töökorralduse # {3}. Palun ajakohastage operatsiooni olekut kellaajaregistrite abil
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +258,Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs,Rida # {0}: käitamine {1} ei ole lõpetatud {2} valmistoodetele töökorralduse # {3}. Palun ajakohastage operatsiooni olekut kellaajaregistrite abil
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +128,New Batch ID (Optional),Uus Partii nr (valikuline)
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +201,Expense account is mandatory for item {0},Kulu konto on kohustuslik element {0}
 DocType: BOM,Website Description,Koduleht kirjeldus
@@ -4341,7 +4377,6 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,"Palun valige kanda, kui soovite ka lisada eelnenud eelarveaasta saldo jätab see eelarveaastal"
 DocType: GL Entry,Against Voucher Type,Vastu Voucher Type
 DocType: Physician,Phone (R),Telefon (R)
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Tootekood&gt; Elemendi grupp&gt; Bränd
 apps/erpnext/erpnext/healthcare/doctype/physician_schedule/physician_schedule.js +56,Time slots added,Ajakohad on lisatud
 DocType: Item,Attributes,Näitajad
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +31,Enable Template,Malli lubamine
@@ -4393,6 +4428,7 @@ apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,and unch
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +41,Series is mandatory,Seeria on kohustuslik
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Services,Finantsteenused
 DocType: Student Sibling,Student ID,Õpilase ID
+apps/erpnext/erpnext/public/js/hub/hub_form.js +445,Supplier Email,Tarnija e-post
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,Tüübid tegevused aeg kajakad
 DocType: Opening Invoice Creation Tool,Sales,Läbimüük
 DocType: Stock Entry Detail,Basic Amount,Põhisummat
@@ -4461,12 +4497,13 @@ DocType: Lab Prescription,Test Code,Testi kood
 apps/erpnext/erpnext/config/website.py +11,Settings for website homepage,Seaded veebisaidi avalehel
 DocType: Job Offer,Awaiting Response,Vastuse ootamine
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +82,Above,Ülal
-apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1487,Total Amount {0},Kogusumma {0}
+apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1489,Total Amount {0},Kogusumma {0}
 apps/erpnext/erpnext/controllers/item_variant.py +306,Invalid attribute {0} {1},Vale atribuut {0} {1}
 DocType: Supplier,Mention if non-standard payable account,"Mainida, kui mittestandardsete makstakse konto"
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.py +25,Please select the assessment group other than 'All Assessment Groups',Palun valige hindamise rühm kui &quot;Kõik Hindamine Grupid&quot;
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +67,Row {0}: Cost center is required for an item {1},Rida {0}: üksuse {1} jaoks on vaja kulude keskmist
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +43,EcritureDate,EcritureDate
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +6,This is based on transactions against this Physician.,See põhineb tehingutele selle arstiga.
 DocType: Training Event Employee,Optional,Valikuline
 DocType: Salary Slip,Earning & Deduction,Teenimine ja mahaarvamine
 DocType: Agriculture Analysis Criteria,Water Analysis,Vee analüüs
@@ -4526,7 +4563,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +28,Cannot conv
 DocType: Production Plan,Total Planned Qty,Kokku planeeritud kogus
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +68,Opening Value,Seis
 DocType: Salary Detail,Formula,valem
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +47,Serial #,Serial #
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +48,Serial #,Serial #
 DocType: Lab Test Template,Lab Test Template,Lab Test Template
 apps/erpnext/erpnext/setup/doctype/company/company.py +181,Sales Account,Müügikonto
 DocType: Purchase Invoice Item,Total Weight,Kogukaal
@@ -4539,7 +4576,8 @@ DocType: Restaurant Order Entry,Restaurant Order Entry,Restorani korralduse siss
 apps/erpnext/erpnext/accounts/general_ledger.py +134,Debit and Credit not equal for {0} #{1}. Difference is {2}.,Deebeti ja kreediti ole võrdsed {0} # {1}. Erinevus on {2}.
 DocType: Asset Maintenance Task,Assign To Name,Määra nimi
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +98,Entertainment Expenses,Esinduskulud
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +98,Make Material Request,Tee Materjal taotlus
+DocType: Hub Settings,Enabled Users,Lubatud kasutajad
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +99,Make Material Request,Tee Materjal taotlus
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom_item_preview.html +20,Open Item {0},Avatud Punkt {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +222,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Müügiarve {0} tuleb tühistada enne tühistades selle Sales Order
 DocType: Consultation,Age,Ajastu
@@ -4562,12 +4600,11 @@ apps/erpnext/erpnext/stock/get_item_details.py +131,No Item with Serial No {0},N
 DocType: Email Digest,Open Notifications,Avatud teated
 DocType: Payment Entry,Difference Amount (Company Currency),Erinevus summa (firma Valuuta)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +79,Direct Expenses,Otsesed kulud
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +206,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Palun määrake seerianumbrite nime seeria {0} abil häälestus&gt; Seaded&gt; nime seeria
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,Uus klient tulud
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +119,Travel Expenses,Sõidukulud
 DocType: Maintenance Visit,Breakdown,Lagunema
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +50,Add custom field Subscription in the doctype {0},Lisage kohandatud väljal liitumine doctypes {0}
-apps/erpnext/erpnext/controllers/accounts_controller.py +820,Account: {0} with currency: {1} can not be selected,Konto: {0} valuuta: {1} ei saa valida
+apps/erpnext/erpnext/controllers/accounts_controller.py +822,Account: {0} with currency: {1} can not be selected,Konto: {0} valuuta: {1} ei saa valida
 DocType: Purchase Receipt Item,Sample Quantity,Proovi kogus
 DocType: Manufacturing Settings,"Update BOM cost automatically via Scheduler, based on latest valuation rate / price list rate / last purchase rate of raw materials.","Värskendage BOM-i automaatselt Scheduleri kaudu, tuginedes kõige värskemale hindamismäärale / hinnakirja hinnale / toorainete viimasele ostuhinnale."
 DocType: Bank Reconciliation Detail,Cheque Date,Tšekk kuupäev
@@ -4582,14 +4619,13 @@ apps/erpnext/erpnext/config/hr.py +115,Salary Components,palk komponendid
 DocType: Program Enrollment Tool,New Academic Year,Uus õppeaasta
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +811,Return / Credit Note,Tagasi / kreeditarve
 DocType: Stock Settings,Auto insert Price List rate if missing,"Auto sisestada Hinnakiri määra, kui puuduvad"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +126,Total Paid Amount,Kokku Paide summa
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +124,Total Paid Amount,Kokku Paide summa
 DocType: GST Settings,B2C Limit,B2C piirang
 DocType: Work Order Item,Transferred Qty,Kantud Kogus
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Liikumine
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +188,Planning,Planeerimine
 DocType: Share Balance,Issued,Emiteeritud
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +14,Student Activity,Üliõpilaste aktiivsus
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Palun seadke õpetaja nime sisestamine haridusse&gt; Hariduseseaded
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +80,Supplier Id,Tarnija Id
 DocType: Payment Request,Payment Gateway Details,Payment Gateway Detailid
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +276,Quantity should be greater than 0,Kogus peaks olema suurem kui 0
@@ -4635,7 +4671,7 @@ DocType: Stock Settings,Role Allowed to edit frozen stock,Role Lubatud muuta kü
 ,Territory Target Variance Item Group-Wise,Territoorium Target Dispersioon Punkt Group-Wise
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +143,All Customer Groups,Kõik kliendigruppide
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +114,Accumulated Monthly,kogunenud Kuu
-apps/erpnext/erpnext/controllers/accounts_controller.py +781,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} on kohustuslik. Ehk Valuutavahetus rekord ei ole loodud {1} on {2}.
+apps/erpnext/erpnext/controllers/accounts_controller.py +783,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} on kohustuslik. Ehk Valuutavahetus rekord ei ole loodud {1} on {2}.
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +44,Tax Template is mandatory.,Maksu- vorm on kohustuslik.
 apps/erpnext/erpnext/accounts/doctype/account/account.py +44,Account {0}: Parent account {1} does not exist,Konto {0}: Parent konto {1} ei ole olemas
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Hinnakiri Rate (firma Valuuta)
@@ -4644,7 +4680,7 @@ DocType: Products Settings,Products Settings,tooted seaded
 DocType: Lab Prescription,Test Created,Test loodud
 DocType: Healthcare Settings,Custom Signature in Print,Kohandatud allkiri printimisel
 DocType: Account,Temporary,Ajutine
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +116,Customer LPO No.,Kliendi LPO nr
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +114,Customer LPO No.,Kliendi LPO nr
 DocType: Program,Courses,Kursused
 DocType: Monthly Distribution Percentage,Percentage Allocation,Protsentuaalne jaotus
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +128,Secretary,Sekretär
@@ -4698,7 +4734,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +567,POS Pr
 DocType: Program Enrollment Tool,Enroll Students,õppima üliõpilasi
 DocType: Lab Test,Approved Date,Heakskiidetud kuupäev
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,Standard Selling
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +165,Atleast one warehouse is mandatory,Atleast üks ladu on kohustuslik
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +205,Atleast one warehouse is mandatory,Atleast üks ladu on kohustuslik
 DocType: Serial No,Out of Warranty,Out of Garantii
 DocType: BOM Update Tool,Replace,Vahetage
 apps/erpnext/erpnext/templates/includes/product_list.js +42,No products found.,Tooteid ei leidu.
@@ -4849,10 +4885,10 @@ DocType: Pricing Rule,Disable,Keela
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +180,Mode of payment is required to make a payment,Maksmise viis on kohustatud makse
 DocType: Project Task,Pending Review,Kuni Review
 apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +14,"Edit in full page for more options like assets, serial nos, batches etc.","Muutke täislehelt rohkem võimalusi, nagu vara, seerianumbrid, partiid jne"
-apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py +10,Appointments and Consultations,Ametikohad ja konsultatsioonid
+apps/erpnext/erpnext/healthcare/doctype/physician/physician_dashboard.py +10,Appointments and Consultations,Ametikohad ja konsultatsioonid
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +41,{0} - {1} is not enrolled in the Batch {2},{0} - {1} ei kaasati Partii {2}
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +113,"Asset {0} cannot be scrapped, as it is already {1}","Asset {0} ei saa lammutada, sest see on juba {1}"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +86,Cheques Required,Nõutavad kontrollid
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +84,Cheques Required,Nõutavad kontrollid
 DocType: Task,Total Expense Claim (via Expense Claim),Kogukulude nõue (via kuluhüvitussüsteeme)
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177,Mark Absent,Mark leidu
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +40,Failed to setup company,Ettevõtte seadistamine ebaõnnestus
@@ -4895,6 +4931,7 @@ DocType: Item Variant,Item Variant,Punkt Variant
 ,Work Order Stock Report,Töökorralduse aruanne
 DocType: Assessment Result Tool,Assessment Result Tool,Hinnang Tulemus Tool
 apps/erpnext/erpnext/education/doctype/instructor/instructor.js +24,As Supervisor,Juhendajana
+apps/erpnext/erpnext/public/js/hub/hub_form.js +376,Suggest Category,Soovita kategooria
 DocType: BOM Scrap Item,BOM Scrap Item,Bom Vanametalli toode
 apps/erpnext/erpnext/accounts/page/pos/pos.js +895,Submitted orders can not be deleted,Esitatud tellimusi ei saa kustutada
 apps/erpnext/erpnext/accounts/doctype/account/account.py +114,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Konto jääk juba Deebetkaart, sa ei tohi seada &quot;Balance tuleb&quot; nagu &quot;Credit&quot;"
@@ -4905,7 +4942,7 @@ DocType: Agriculture Task,Previous Business Day,Eelmine tööpäev
 DocType: Employee Loan,Repay Fixed Amount per Period,Maksta kindlaksmääratud summa Periood
 DocType: Employee,Health Insurance No,Ravikindlustuse nr
 apps/erpnext/erpnext/buying/utils.py +47,Please enter quantity for Item {0},Palun sisestage koguse Punkt {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +229,Credit Note Amt,Kreeditarve Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +227,Credit Note Amt,Kreeditarve Amt
 DocType: Employee External Work History,Employee External Work History,Töötaja Väline tööandjad
 DocType: Opening Invoice Creation Tool,Purchase,Ostu
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +37,Balance Qty,Balance Kogus
@@ -4946,7 +4983,7 @@ apps/erpnext/erpnext/config/accounts.py +471,List of all share transactions,Kõi
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +18,Opp Count,Opp Krahv
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +244,Please find attached {0} #{1},Saadame teile {0} # {1}
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py +52,Average Rate,Keskmine määr
-apps/erpnext/erpnext/controllers/accounts_controller.py +728,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Maksete kogusumma maksegraafikus peab olema võrdne Suur / Ümardatud Kokku
+apps/erpnext/erpnext/controllers/accounts_controller.py +730,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Maksete kogusumma maksegraafikus peab olema võrdne Suur / Ümardatud Kokku
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Bank avaldus tasakaalu kohta pearaamat
 DocType: Job Applicant,Applicant Name,Taotleja nimi
 DocType: Authorization Rule,Customer / Item Name,Klienditeenindus / Nimetus
@@ -4997,6 +5034,7 @@ DocType: Crop,Produce,Toota
 DocType: Hotel Settings,Default Taxes and Charges,Vaikimisi maksud ja tasud
 DocType: Account,Receivable,Nõuete
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +308,Row #{0}: Not allowed to change Supplier as Purchase Order already exists,Row # {0}: Ei ole lubatud muuta tarnija Ostutellimuse juba olemas
+DocType: Stock Entry,Material Consumption for Manufacture,Materjalitarbimine valmistamiseks
 DocType: Item Alternative,Alternative Item Code,Alternatiivne tootekood
 DocType: Accounts Settings,Role that is allowed to submit transactions that exceed credit limits set.,"Roll, mis on lubatud esitada tehinguid, mis ületavad laenu piirmäärade."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +990,Select Items to Manufacture,Vali Pane Tootmine
@@ -5013,9 +5051,11 @@ apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +92,Do you wan
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +36,Motion Picture & Video,Motion Picture &amp; Video
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +5,Ordered,Tellitud
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js +51,Resume,Jätka
+DocType: Hub Settings,Hub Username,Hubi kasutajanimi
 DocType: Salary Detail,Component,komponent
 DocType: Assessment Criteria,Assessment Criteria Group,Hindamiskriteeriumid Group
 DocType: Healthcare Settings,Patient Name By,Patsiendi nimi
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252,Accrual Journal Entry for salaries from {0} to {1},Accrual Journal sissekanne palkade eest alates {0} kuni {1}
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Opening Accumulated Depreciation must be less than equal to {0},Avamine akumuleeritud kulum peab olema väiksem kui võrdne {0}
 DocType: Warehouse,Warehouse Name,Ladu nimi
 DocType: Naming Series,Select Transaction,Vali Tehing
@@ -5037,7 +5077,7 @@ DocType: Vehicle,Vehicle,sõiduk
 DocType: Purchase Invoice,In Words,Sõnades
 apps/erpnext/erpnext/hr/doctype/training_result/training_result.py +15,{0} must be submitted,{0} tuleb esitada
 DocType: POS Profile,Item Groups,Punkt Groups
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +221,Today is {0}'s birthday!,Täna on {0} &#39;s sünnipäeva!
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +222,Today is {0}'s birthday!,Täna on {0} &#39;s sünnipäeva!
 DocType: Sales Order Item,For Production,Tootmiseks
 DocType: Payment Request,payment_url,payment_url
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +186,Please add a Temporary Opening account in Chart of Accounts,Palun lisage ajutine avamise konto arveldusarvele
@@ -5081,7 +5121,7 @@ DocType: Assessment Result Detail,Assessment Result Detail,Hindamise tulemused t
 DocType: Employee Education,Employee Education,Töötajate haridus
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +53,Duplicate item group found in the item group table,Duplicate kirje rühm leidis elemendi rühma tabelis
 DocType: Land Unit,Parent Land Unit,Vanemate maaüksus
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1113,It is needed to fetch Item Details.,"See on vajalik, et tõmbad Punkt Details."
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1114,It is needed to fetch Item Details.,"See on vajalik, et tõmbad Punkt Details."
 DocType: Fertilizer,Fertilizer Name,Väetise nimi
 DocType: Salary Slip,Net Pay,Netopalk
 DocType: Cash Flow Mapping Accounts,Account,Konto
@@ -5121,8 +5161,8 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +275," {0} Retain Sample is base
 DocType: Task,Is Milestone,Kas Milestone
 DocType: Delivery Stop,Email Sent To,Saadetud e-
 DocType: Budget,Warn,Hoiatama
-apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +81,Are you sure you want to unregister?,"Kas olete kindel, et soovite registrist kustutada?"
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +812,All items have already been transferred for this Work Order.,Kõik üksused on selle töökorralduse jaoks juba üle antud.
+apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.js +108,Are you sure you want to unregister?,"Kas olete kindel, et soovite registrist kustutada?"
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +926,All items have already been transferred for this Work Order.,Kõik üksused on selle töökorralduse jaoks juba üle antud.
 DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","Muid märkusi, tähelepanuväärne jõupingutusi, et peaks minema arvestust."
 DocType: Asset Maintenance,Manufacturing User,Tootmine Kasutaja
 DocType: Purchase Invoice,Raw Materials Supplied,Tarnitud tooraine
@@ -5145,9 +5185,10 @@ DocType: Item Attribute Value,Attribute Value,Omadus Value
 DocType: Salary Detail,Salary Detail,palk Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1070,Please select {0} first,Palun valige {0} Esimene
 DocType: Appointment Type,Physician,Arst
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +891,Batch {0} of Item {1} has expired.,Partii {0} Punkt {1} on aegunud.
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1005,Batch {0} of Item {1} has expired.,Partii {0} Punkt {1} on aegunud.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11,Consultations,Konsultatsioonid
 DocType: Sales Invoice,Commission,Vahendustasu
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +187,{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3},{0} ({1}) ei tohi olla suurem kui kavandatud kogus ({2}) töökorralduses {3}
 apps/erpnext/erpnext/config/manufacturing.py +27,Time Sheet for manufacturing.,Aeg Sheet valmistamiseks.
 apps/erpnext/erpnext/templates/pages/cart.html +37,Subtotal,osakokkuvõte
 apps/erpnext/erpnext/config/erpnext_integrations.py +18,GoCardless SEPA Mandate,GoCardless SEPA volitus
@@ -5208,7 +5249,6 @@ DocType: Purchase Invoice,04-Correction in Invoice,04-korrigeerimine arvel
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +963,Work Order already created for all items with BOM,Töökorraldus on juba loodud kõigi BOM-iga üksustega
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Variandi üksikasjade aruanne
 DocType: Setup Progress Action,Setup Progress Action,Seadista edu toiming
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Palun seadistage külastuse numbrite seeria seaded&gt; nummering seeria abil
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Ostute hinnakiri
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,"Eemalda kirje, kui makse ei kohaldata selle objekti"
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,Palun valige Hooldus olek lõpule viidud või eemaldage lõpuleviimise kuupäev
@@ -5241,7 +5281,6 @@ DocType: Cheque Print Template,Cheque Print Template,Tšekk Prindi Mall
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +36,Chart of Cost Centers,Graafik kulukeskuste
 DocType: Lab Test Template,Sample Collection,Proovide kogu
 ,Requested Items To Be Ordered,Taotlenud objekte tuleb tellida
-apps/erpnext/erpnext/public/js/hub/hub_page.js +137,My Orders,Minu Tellimused
 DocType: Price List,Price List Name,Hinnakiri nimi
 DocType: BOM,Manufacturing,Tootmine
 ,Ordered Items To Be Delivered,Tellitud Esemed tuleb tarnida
@@ -5273,7 +5312,7 @@ DocType: Cost Center,Cost Center Name,Kuluüksus nimi
 DocType: Student,B+,B +
 DocType: HR Settings,Max working hours against Timesheet,Max tööaeg vastu Töögraafik
 DocType: Maintenance Schedule Detail,Scheduled Date,Tähtajad
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +228,Total Paid Amt,Kokku Paide Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +226,Total Paid Amt,Kokku Paide Amt
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,Teated enam kui 160 tähemärki jagatakse mitu sõnumit
 DocType: Purchase Receipt Item,Received and Accepted,Saanud ja heaks kiitnud
 DocType: Hub Settings,Company and Seller Profile,Ettevõtte ja müüja profiil
@@ -5291,6 +5330,7 @@ apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +6,Please c
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +80,Cannot set as Lost as Sales Order is made.,"Ei saa määrata, kui on kaotatud Sales Order on tehtud."
 DocType: Request for Quotation Item,Supplier Part No,Tarnija osa pole
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +382,Cannot deduct when category is for 'Valuation' or 'Vaulation and Total',"Ei saa maha arvata, kui kategooria on &quot;Hindamine&quot; või &quot;Vaulation ja kokku&quot;"
+apps/erpnext/erpnext/public/js/hub/hub_form.js +197,Anonymous,Anonüümne
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +377,Received From,Saadud
 DocType: Lead,Converted,Converted
 DocType: Item,Has Serial No,Kas Serial No
@@ -5338,7 +5378,7 @@ DocType: Vehicle,Vehicle Value,sõiduki väärtusest
 DocType: Crop Cycle,Detected Diseases,Tuvastatud haigused
 DocType: Stock Entry,Default Source Warehouse,Vaikimisi Allikas Warehouse
 DocType: Item,Customer Code,Kliendi kood
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +220,Birthday Reminder for {0},Sünnipäev Meeldetuletus {0}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +221,Birthday Reminder for {0},Sünnipäev Meeldetuletus {0}
 DocType: Asset Maintenance Task,Last Completion Date,Viimase täitmise kuupäev
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72,Days Since Last Order,Päeva eelmisest Telli
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +365,Debit To account must be a Balance Sheet account,Kanne konto peab olema bilansis
@@ -5375,7 +5415,7 @@ DocType: Shipping Rule,Restrict to Countries,Riigid piirduvad
 DocType: Purchase Invoice,Write Off Amount (Company Currency),Kirjutage Off summa (firma Valuuta)
 DocType: Sales Invoice Timesheet,Billing Hours,Arved Tundi
 DocType: Project,Total Sales Amount (via Sales Order),Müügi kogusumma (müügitellimuse kaudu)
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +551,Default BOM for {0} not found,Vaikimisi Bom {0} ei leitud
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +572,Default BOM for {0} not found,Vaikimisi Bom {0} ei leitud
 apps/erpnext/erpnext/stock/doctype/item/item.py +514,Row #{0}: Please set reorder quantity,Row # {0}: määrake reorganiseerima kogusest
 apps/erpnext/erpnext/public/js/pos/pos.html +20,Tap items to add them here,Puuduta Toodete lisamiseks neid siin
 DocType: Fees,Program Enrollment,programm Registreerimine
@@ -5398,6 +5438,7 @@ DocType: Customer,Additional information regarding the customer.,Lisainfot klien
 DocType: Quality Inspection Reading,Reading 5,Lugemine 5
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +236,"{0} {1} is associated with {2}, but Party Account is {3}","{0} {1} on seotud {2} -ga, kuid osapoole konto on {3}"
 apps/erpnext/erpnext/healthcare/doctype/sample_collection/sample_collection.js +7,View Lab Tests,Vaadake laboritestid
+DocType: Hub Users,Hub Users,Hubi kasutajad
 DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,Hooldus kuupäev
 DocType: Purchase Invoice Item,Rejected Serial No,Tagasilükatud Järjekorranumber
@@ -5407,7 +5448,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 DocType: Item,"Example: ABCD.#####
 If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Näide: ABCD. ##### Kui seeria on seatud ja Serial No ei ole nimetatud tehingute, siis automaatne seerianumber luuakse põhineb selles sarjas. Kui tahad alati mainitaks Serial nr selle objekt. jäta tühjaks."
 DocType: Upload Attendance,Upload Attendance,Laadi Osavõtt
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +604,BOM and Manufacturing Quantity are required,Bom ja tootmine Kogus on vajalik
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,Bom ja tootmine Kogus on vajalik
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +50,Ageing Range 2,Vananemine Range 2
 DocType: SG Creation Tool Course,Max Strength,max Strength
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +28,Installing presets,Eelseadistuste installimine
@@ -5474,6 +5515,7 @@ DocType: Quotation Item,Against Docname,Vastu Docname
 DocType: SMS Center,All Employee (Active),Kõik Töötaja (Active)
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +9,View Now,Vaata nüüd
 DocType: BOM,Raw Material Cost,Tooraine hind
+DocType: Woocommerce Settings,Woocommerce Server URL,Woocommerce Serveri URL
 DocType: Item Reorder,Re-Order Level,Re-Order Level
 apps/erpnext/erpnext/projects/doctype/project/project.js +54,Gantt Chart,Gantti tabel
 DocType: Crop Cycle,Cycle Type,Tsüklitüüp
@@ -5500,7 +5542,7 @@ DocType: Shareholder,Hidden list maintaining the list of contacts linked to Shar
 apps/erpnext/erpnext/config/non_profit.py +63,Donor Type information.,Anduri tüübi andmed.
 DocType: Request for Quotation,Supplier Detail,tarnija Detail
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +100,Error in formula or condition: {0},Viga valemis või seisund: {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +108,Invoiced Amount,Arve kogusumma
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +106,Invoiced Amount,Arve kogusumma
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +47,Criteria weights must add up to 100%,Kriteeriumide kaalud peavad sisaldama kuni 100%
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.js +7,Attendance,Osavõtt
 apps/erpnext/erpnext/public/js/pos/pos.html +115,Stock Items,stock Kirjed
@@ -5508,10 +5550,11 @@ DocType: BOM,Materials,Materjalid
 DocType: Leave Block List,"If not checked, the list will have to be added to each Department where it has to be applied.","Kui ei kontrollita, nimekirja tuleb lisada iga osakond, kus tuleb rakendada."
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +111,Creating {0},{0} loomine
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py +28,Source and Target Warehouse cannot be same,Allikas ja Target Warehouse ei saa olla sama
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +588,Posting date and posting time is mandatory,Postitamise kuupäev ja postitad aega on kohustuslik
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +628,Posting date and posting time is mandatory,Postitamise kuupäev ja postitad aega on kohustuslik
 apps/erpnext/erpnext/config/buying.py +76,Tax template for buying transactions.,Maksu- malli osta tehinguid.
 ,Item Prices,Punkt Hinnad
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,"Sõnades on nähtav, kui salvestate tellimusele."
+DocType: Woocommerce Settings,Endpoint,Lõpp-punkt
 DocType: Period Closing Voucher,Period Closing Voucher,Periood sulgemine Voucher
 DocType: Consultation,Review Details,Läbivaatamise üksikasjad
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +185,The shareholder does not belong to this company,Aktsionär ei kuulu selle äriühingu hulka
@@ -5556,7 +5599,7 @@ DocType: BOM,Quantity of item obtained after manufacturing / repacking from give
 DocType: Lab Test,Test Group,Katserühm
 DocType: Payment Reconciliation,Receivable / Payable Account,Laekumata / maksmata konto
 DocType: Delivery Note Item,Against Sales Order Item,Vastu Sales Order toode
-DocType: Company,Company Logo,Ettevõtte logo
+DocType: Hub Settings,Company Logo,Ettevõtte logo
 apps/erpnext/erpnext/stock/doctype/item/item.py +709,Please specify Attribute Value for attribute {0},Palun täpsustage omadus Väärtus atribuut {0}
 DocType: Item,Default Warehouse,Vaikimisi Warehouse
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +45,Budget cannot be assigned against Group Account {0},Eelarve ei saa liigitada vastu Group Konto {0}
@@ -5581,6 +5624,7 @@ DocType: GST Settings,GST Summary,GST kokkuvõte
 apps/erpnext/erpnext/hr/doctype/daily_work_summary_group/daily_work_summary_group.py +16,Please enable default incoming account before creating Daily Work Summary Group,Palun lubage enne sissetuleva konto sisselogimist enne igapäevase töö kokkuvõtte grupi loomist
 DocType: Assessment Result,Total Score,punkte kokku
 DocType: Journal Entry,Debit Note,Võlateate
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py +102,Please enter API Consumer Secret,Palun sisestage API tarbija saladus
 DocType: Stock Entry,As per Stock UOM,Nagu iga Stock UOM
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Ole lõppenud
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +49,ValidDate,Kehtiv kuupäev
@@ -5609,6 +5653,7 @@ apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule_list.js +9,Fee 
 DocType: Opening Invoice Creation Tool,Create Missing Party,Loo kadunud poole
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Jäta tühjaks, kui teete õpilast rühmade aastas"
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Kui see on märgitud, kokku ei. tööpäevade hulka puhkusereisid ja see vähendab väärtust Palk päevas"
+apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +25,"Apps using current key won't be able to access, are you sure?","Praeguse võtmega rakendused ei pääse juurde, kas olete kindel?"
 DocType: Purchase Invoice,Total Advance,Kokku Advance
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +27,Change Template Code,Malli koodi muutmine
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +23,The Term End Date cannot be earlier than the Term Start Date. Please correct the dates and try again.,Term lõppkuupäev ei saa olla varasem tähtaeg Start Date. Palun paranda kuupäev ja proovi uuesti.
@@ -5664,7 +5709,7 @@ apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_
 DocType: Asset,Out of Order,Korrast ära
 DocType: Purchase Receipt Item,Accepted Quantity,Aktsepteeritud Kogus
 DocType: Projects Settings,Ignore Workstation Time Overlap,Ignoreeri tööjaama kattumist
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +242,Please set a default Holiday List for Employee {0} or Company {1},Palun Algsete Holiday nimekiri Töötajaportaali {0} või ettevõtte {1}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +243,Please set a default Holiday List for Employee {0} or Company {1},Palun Algsete Holiday nimekiri Töötajaportaali {0} või ettevõtte {1}
 apps/erpnext/erpnext/accounts/party.py +30,{0}: {1} does not exists,{0}: {1} pole olemas
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +76,Select Batch Numbers,Valige partiinumbritele
 apps/erpnext/erpnext/config/accounts.py +12,Bills raised to Customers.,Arveid tõstetakse klientidele.
@@ -5676,7 +5721,6 @@ DocType: Account,Parent Account,Parent konto
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +295,Available,saadaval
 DocType: Quality Inspection Reading,Reading 3,Lugemine 3
 DocType: Stock Entry,Source Warehouse Address,Allika Warehouse Aadress
-,Hub,Hub
 DocType: GL Entry,Voucher Type,Voucher Type
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1717,Price List not found or disabled,Hinnakiri ei leitud või puudega
 DocType: Student Applicant,Approved,Kinnitatud
@@ -5725,7 +5769,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.js +
 DocType: GL Entry,Transaction Date,Tehingu kuupäev
 DocType: Production Plan Item,Planned Qty,Planeeritud Kogus
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +121,Total Tax,Kokku maksu-
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +204,For Quantity (Manufactured Qty) is mandatory,Sest Kogus (Toodetud Kogus) on kohustuslik
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +245,For Quantity (Manufactured Qty) is mandatory,Sest Kogus (Toodetud Kogus) on kohustuslik
 DocType: Stock Entry,Default Target Warehouse,Vaikimisi Target Warehouse
 DocType: Purchase Invoice,Net Total (Company Currency),Net kokku (firma Valuuta)
 apps/erpnext/erpnext/education/doctype/academic_year/academic_year.py +14,The Year End Date cannot be earlier than the Year Start Date. Please correct the dates and try again.,Aasta lõpu kuupäev ei saa olla varasem kui alguskuupäev. Palun paranda kuupäev ja proovi uuesti.
@@ -5764,7 +5808,7 @@ DocType: Item,Item Tax,Punkt Maksu-
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +883,Material to Supplier,Materjal Tarnija
 DocType: Soil Texture,Loamy Sand,Loamy Liiv
 DocType: Production Plan,Material Request Planning,Materjalitaotluse planeerimine
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +663,Excise Invoice,Aktsiisi Arve
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +676,Excise Invoice,Aktsiisi Arve
 apps/erpnext/erpnext/education/doctype/grading_scale/grading_scale.py +16,Treshold {0}% appears more than once,Lävepakk {0}% esineb enam kui ühel
 DocType: Expense Claim,Employees Email Id,Töötajad Post Id
 DocType: Employee Attendance Tool,Marked Attendance,Märkimisväärne osavõtt
