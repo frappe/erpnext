@@ -105,8 +105,8 @@ def update_total_amount_paid(doc):
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
 
 def update_disbursement_status(doc):
-	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount 
-		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""", 
+	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
+		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""",
 		(doc.payment_account, doc.name), as_dict=1)[0]
 	if disbursement.disbursed_amount == doc.loan_amount:
 		frappe.db.set_value("Loan", doc.name , "status", "Disbursed")
