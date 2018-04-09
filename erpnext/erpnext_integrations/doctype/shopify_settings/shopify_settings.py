@@ -96,7 +96,7 @@ def get_header(settings):
 		return header
 
 def get_webhook_address():
-	endpoint = "/api/method/erpnext.erpnext_integrations.connectors.shopify_connection.order"
+	endpoint = "/api/method/erpnext.erpnext_integrations.connectors.shopify_connection.sync_order"
 
 	# try:
 # 		url = frappe.request.url
@@ -114,8 +114,8 @@ def get_webhook_address():
 
 @frappe.whitelist()
 def get_series():
-		return {
-			"sales_order_series" : frappe.get_meta("Sales Order").get_options("naming_series") or "SO-Shopify-",
-			"sales_invoice_series" : frappe.get_meta("Sales Invoice").get_options("naming_series")  or "SI-Shopify-",
-			"delivery_note_series" : frappe.get_meta("Delivery Note").get_options("naming_series")  or "DN-Shopify-"
-		}
+	return {
+		"sales_order_series" : frappe.get_meta("Sales Order").get_options("naming_series") or "SO-Shopify-",
+		"sales_invoice_series" : frappe.get_meta("Sales Invoice").get_options("naming_series")  or "SI-Shopify-",
+		"delivery_note_series" : frappe.get_meta("Delivery Note").get_options("naming_series")  or "DN-Shopify-"
+	}
