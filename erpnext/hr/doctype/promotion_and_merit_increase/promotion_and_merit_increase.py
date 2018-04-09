@@ -27,17 +27,17 @@ class PromotionandMeritIncrease(Document):
 
     def validate_emp(self):
         if self.employee:
-            user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "user_id")
-            if self.get('__islocal'):
-                if u'CEO' in frappe.get_roles(user):
+            employee_user = frappe.get_value("Employee", filters={"name": self.employee}, fieldname="user_id")
+            if self.get('__islocal') and employee_user:
+                if u'CEO' in frappe.get_roles(employee_user):
                     self.workflow_state = "Created By CEO"
-                elif u'Director' in frappe.get_roles(user):
+                elif u'Director' in frappe.get_roles(employee_user):
                     self.workflow_state = "Created By Director"
-                elif u'Manager' in frappe.get_roles(user):
+                elif u'Manager' in frappe.get_roles(employee_user):
                     self.workflow_state = "Created By Manager"
-                elif u'Line Manager' in frappe.get_roles(user):
+                elif u'Line Manager' in frappe.get_roles(employee_user):
                     self.workflow_state = "Created By Line Manager"
-                elif u'Employee' in frappe.get_roles(user):
+                elif u'Employee' in frappe.get_roles(employee_user):
                     self.workflow_state = "Pending"
                     
             if not user and self.get('__islocal'):

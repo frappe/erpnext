@@ -75,26 +75,28 @@ class BusinessTrip(Document):
 
 
     def validate_emp(self):
-        if self.get('__islocal'):
-            # if self.handled_by== "Director" and self.days < 4 and self.workflow_state != "Created By Requester" :
-            #   self.workflow_state = "Approve By Director"
-            
-            if self.request_employee==1 :
-                self.workflow_state = "Wait For Exceptional Approval"
-            elif u'CEO' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By CEO"
-            elif u'Director' in frappe.get_roles(frappe.session.user) and self.days>4:
-                self.workflow_state = "Created By Director"
-            elif u'Director' in frappe.get_roles(frappe.session.user) and self.days<4:
-                self.workflow_state = "Create By Director"
-            elif u'Manager' in frappe.get_roles(frappe.session.user) and self.days>4:
-                self.workflow_state = "Created By Manager"
-            elif u'Manager' in frappe.get_roles(frappe.session.user) and self.days<4:
-                self.workflow_state = "Create By Manager"
-            elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By Line Manager"
-            elif u'Employee' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Pending"
+        if self.employee:
+            employee_user = frappe.get_value("Employee", filters={"name": self.employee}, fieldname="user_id")
+            if self.get('__islocal') and employee_user:
+                # if self.handled_by== "Director" and self.days < 4 and self.workflow_state != "Created By Requester" :
+                #   self.workflow_state = "Approve By Director"
+
+                if self.request_employee==1 :
+                    self.workflow_state = "Wait For Exceptional Approval"
+                elif u'CEO' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Created By CEO"
+                elif u'Director' in frappe.get_roles(employee_user) and self.days>4:
+                    self.workflow_state = "Created By Director"
+                elif u'Director' in frappe.get_roles(employee_user) and self.days<4:
+                    self.workflow_state = "Create By Director"
+                elif u'Manager' in frappe.get_roles(employee_user) and self.days>4:
+                    self.workflow_state = "Created By Manager"
+                elif u'Manager' in frappe.get_roles(employee_user) and self.days<4:
+                    self.workflow_state = "Create By Manager"
+                elif u'Line Manager' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Created By Line Manager"
+                elif u'Employee' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Pending"
 
             # self.requested_department=self.department
 

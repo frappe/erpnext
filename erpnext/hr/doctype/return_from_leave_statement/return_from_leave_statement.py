@@ -38,17 +38,19 @@ class ReturnFromLeaveStatement(Document):
 			leave_application.save()
 
 	def validate_emp(self):
-		 if self.get('__islocal'):
-			if u'CEO' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By CEO"
-			elif u'Director' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Director"
-			elif u'Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Manager"
-			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Line Manager"
-			elif u'Employee' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Pending"
+		if self.employee:
+			employee_user = frappe.get_value("Employee", filters={"name": self.employee}, fieldname="user_id")
+			if self.get('__islocal') and employee_user:
+				if u'CEO' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By CEO"
+				elif u'Director' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Director"
+				elif u'Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Manager"
+				elif u'Line Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Line Manager"
+				elif u'Employee' in frappe.get_roles(employee_user):
+					self.workflow_state = "Pending"
 
 	def validate_dates(self):
 		if getdate(self.return_date) <= getdate(self.to_date):

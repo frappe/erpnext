@@ -108,18 +108,19 @@ class LeaveApplication(Document):
 	# 			self.set("approvals",app)
 
 	def validate_emp(self):
-		employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
-		if self.get('__islocal') and employee_user:
-			if u'CEO' in frappe.get_roles(employee_user):
-				self.workflow_state = "Created By CEO"
-			elif u'Director' in frappe.get_roles(employee_user):
-				self.workflow_state = "Created By Director"
-			elif u'Manager' in frappe.get_roles(employee_user):
-					self.workflow_state = "Created By Manager"
-			elif u'Line Manager' in frappe.get_roles(employee_user):
-					self.workflow_state = "Created By Line Manager"
-			else:
-				self.workflow_state = "Pending"
+		if self.employee:
+			employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
+			if self.get('__islocal') and employee_user:
+				if u'CEO' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By CEO"
+				elif u'Director' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Director"
+				elif u'Manager' in frappe.get_roles(employee_user):
+						self.workflow_state = "Created By Manager"
+				elif u'Line Manager' in frappe.get_roles(employee_user):
+						self.workflow_state = "Created By Line Manager"
+				else:
+					self.workflow_state = "Pending"
 
 
 	def after_insert(self):
@@ -1157,16 +1158,16 @@ def hooked_leave_allocation_builder():
 					if getdate(add_years(emp.date_of_joining,1)) > getdate(nowdate()):
 						allocation_from_date = emp.date_of_joining
 						allocation_to_date = add_days(add_years(emp.date_of_joining,1),-1)
-						if emp.name == "EMP/1007":
-							print("sssss"  "  " + allocation_from_date)
+						# if emp.name == "EMP/1007":
+						# 	print("sssss"  "  " + allocation_from_date)
 					else:
 						day = "0" + str(getdate(emp.date_of_joining).day) if len(str(getdate(emp.date_of_joining).day)) == 1 else str(getdate(emp.date_of_joining).day)
 						month = "0" + str(getdate(emp.date_of_joining).month) if len(str(getdate(emp.date_of_joining).month)) == 1 else str(getdate(emp.date_of_joining).month)
 						year = str(getdate(nowdate()).year)
 						allocation_from_date = year + "-" + month + "-" + day
 						allocation_to_date = add_days(add_years(allocation_from_date,1),-1)
-						if emp.name == "EMP/1007":
-							print("mmmmm"+ "  " + allocation_from_date)
+						# if emp.name == "EMP/1007":
+						# 	print("mmmmm"+ "  " + allocation_from_date)
 
 					if lt.name == "Annual Leave - اجازة اعتيادية":
 						if getdate(nowdate()) > getdate(add_months(emp.date_of_joining,3)):
