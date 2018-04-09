@@ -7,7 +7,7 @@ frappe.ui.form.on("Work Order", {
 			'Timesheet': 'Make Timesheet',
 			'Stock Entry': 'Make Stock Entry',
 		}
-		
+
 		// Set query for warehouses
 		frm.set_query("wip_warehouse", function(doc) {
 			return {
@@ -16,7 +16,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
-		
+
 		frm.set_query("source_warehouse", function() {
 			return {
 				filters: {
@@ -24,7 +24,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
-		
+
 		frm.set_query("source_warehouse", "required_items", function() {
 			return {
 				filters: {
@@ -32,7 +32,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
-		
+
 		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
@@ -41,7 +41,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
-		
+
 		frm.set_query("scrap_warehouse", function() {
 			return {
 				filters: {
@@ -50,7 +50,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
-		
+
 		// Set query for BOM
 		frm.set_query("bom_no", function() {
 			if (frm.doc.production_item) {
@@ -60,7 +60,7 @@ frappe.ui.form.on("Work Order", {
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
-		
+
 		// Set query for FG Item
 		frm.set_query("production_item", function() {
 			return {
@@ -84,7 +84,7 @@ frappe.ui.form.on("Work Order", {
 		frm.set_indicator_formatter('operation',
 			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
-	
+
 	onload: function(frm) {
 		if (!frm.doc.status)
 			frm.doc.status = 'Draft';
@@ -122,7 +122,7 @@ frappe.ui.form.on("Work Order", {
 			})
 		}
 	},
-	
+
 	show_progress: function(frm) {
 		var bars = [];
 		var message = '';
@@ -156,7 +156,7 @@ frappe.ui.form.on("Work Order", {
 		}
 		frm.dashboard.add_progress(__('Status'), bars, message);
 	},
-	
+
 	production_item: function(frm) {
 		if (frm.doc.production_item) {
 			frappe.call({
@@ -184,13 +184,13 @@ frappe.ui.form.on("Work Order", {
 			});
 		}
 	},
-	
+
 	project: function(frm) {
 		if(!erpnext.in_production_item_onchange) {
 			frm.trigger("production_item");
 		}
 	},
-	
+
 	bom_no: function(frm) {
 		return frm.call({
 			doc: frm.doc,
@@ -203,7 +203,7 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 	},
-	
+
 	use_multi_level_bom: function(frm) {
 		if(frm.doc.bom_no) {
 			frm.trigger("bom_no");
@@ -213,7 +213,7 @@ frappe.ui.form.on("Work Order", {
 	qty: function(frm) {
 		frm.trigger('bom_no');
 	},
-	
+
 	before_submit: function(frm) {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
@@ -251,7 +251,7 @@ frappe.ui.form.on("Work Order Item", {
 					item_code: row.item_code,
 					warehouse: row.source_warehouse
 				},
-				callback: function (r) {			
+				callback: function (r) {
 					frappe.model.set_value(row.doctype, row.name,
 						"available_qty_at_source_warehouse", r.message);
 				}
@@ -310,21 +310,42 @@ erpnext.work_order = {
 			}
 
 			if(!frm.doc.skip_transfer){
-				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
-						&& frm.doc.status != 'Stopped') {
-					frm.has_finish_btn = true;
-					var finish_btn = frm.add_custom_button(__('Finish'), function() {
-						erpnext.work_order.make_se(frm, 'Manufacture');
-					});
+				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
+				frappe.model.get_value('Manufacturing Settings', {'name': 'Manufacturing Settings'}, 'material_consumption', function(d) {
+					if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
+					&& frm.doc.status != 'Stopped') {
+						frm.has_finish_btn = true;
 
-					if(doc.material_transferred_for_manufacturing==doc.qty) {
-						// all materials transferred for manufacturing, make this primary
-						finish_btn.addClass('btn-primary');
+						if (d.material_consumption == 1) {
+							// Only show "Material Consumption" when required_qty > consumed_qty
+							var counter = 0;
+							var tbl = frm.doc.required_items || [];
+							var tbl_lenght = tbl.length;
+							for (var i = 0, len = tbl_lenght; i < len; i++) {
+								if (flt(frm.doc.required_items[i].required_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
+									counter += 1;
+								}
+							}
+							if (counter > 0) {
+								var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+									erpnext.work_order.make_consumption_se(frm, d.backflush_raw_materials_based_on);
+								});
+								consumption_btn.addClass('btn-primary');
+							}
+						}
+
+						var finish_btn = frm.add_custom_button(__('Finish'), function() {
+							erpnext.work_order.make_se(frm, 'Manufacture');
+						});
+
+						if(doc.material_transferred_for_manufacturing==doc.qty) {
+							// all materials transferred for manufacturing, make this primary
+							finish_btn.addClass('btn-primary');
+						}
 					}
-				}
+				})
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
-					frm.has_finish_btn = true;
 					var finish_btn = frm.add_custom_button(__('Finish'), function() {
 						erpnext.work_order.make_se(frm, 'Manufacture');
 					});
@@ -367,7 +388,7 @@ erpnext.work_order = {
 			});
 		}
 	},
-	
+
 	make_se: function(frm, purpose) {
 		if(!frm.doc.skip_transfer){
 			var max = (purpose === "Manufacture") ?
@@ -399,7 +420,31 @@ erpnext.work_order = {
 			});
 		}, __("Select Quantity"), __("Make"));
 	},
-	
+
+	make_consumption_se: function(frm, backflush_raw_materials_based_on) {
+		if(!frm.doc.skip_transfer){
+			var max = (backflush_raw_materials_based_on === "Material Transferred for Manufacture") ?
+				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
+				flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+				// flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+		} else {
+			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+		}
+
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+			args: {
+				"work_order_id": frm.doc.name,
+				"purpose": "Material Consumption for Manufacture",
+				"qty": max
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
 	stop_work_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
