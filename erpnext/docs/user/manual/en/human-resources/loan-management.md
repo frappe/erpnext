@@ -41,10 +41,19 @@ Once the Loan is approved, Manager can create Loan record for the Employee.
 
  * Enter Employee and Loan Application
  * Check "Repay from Salary" if the loan repayment will be deducted from the salary
- * Enter Disbursement Date and Account Info
- * As soon as you hit save, the repayment schedule is generated.
+ * Enter Disbursement Date, Repayment Start Date, and Account Info
+ * If the amount has been disbursed and status is set to "Disbursed", as soon as you hit save, the repayment schedule is generated.
+ * The first repayment payment date would be set as per the "Repayment Start Date".  
  
 <img class="screenshot" alt="repayment Schedule" src="{{docs_base_url}}/assets/img/human-resources/repayment-schedule.png">
+
+#### Loan Repayment for Members
+
+* After submitting the document, if the status is "Disbursed" and "Repay from Salary" is unchecked, you can click on "Make Repayment Entry" and select the payments which haven't been paid till date.
+* After selecting the rows, you will be routed to Journal Entry where the selected payments will be added and placed in their respective Debit/ Credit accounts.
+* On submitting the Journal Entry, "Paid" will be checked in the payment rows of the Repayment Schedule, for which the Journal entry has been created.
+
+<img class="screenshot" alt="Make Repayment" src="{{docs_base_url}}/assets/img/human-resources/loan-repayment.gif">
 
 #### Loan repayment deduction from Salary
 
@@ -57,4 +66,4 @@ To auto deduct the Loan repayment from Salary, check "Repay from Salary" in Loan
   </iframe>
 </div>
 
-{nex}
+{next}
