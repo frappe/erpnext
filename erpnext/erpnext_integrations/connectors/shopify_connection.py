@@ -3,7 +3,7 @@ import frappe
 from frappe import _
 import base64, hashlib, hmac, json
 from frappe.utils import cstr, cint, nowdate, flt
-from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import sync_item_from_shopify
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 
@@ -30,8 +30,10 @@ def validate_webhooks_request():
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
-def sync_order():
-	order = json.loads(frappe.request.data)
+def sync_order(order=None):
+	if not order:
+		order = json.loads(frappe.request.data)
+
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
@@ -43,12 +45,12 @@ def validate_customer(order, shopify_settings):
 	customer_id = order.get("customer", {}).get("id")
 	if customer_id:
 		if not frappe.db.get_value("Customer", {"shopify_customer_id": customer_id}, "name"):
-			create_customer(order.get("customer"), shopify_customer_list=[])
+			create_customer(order.get("customer"), shopify_settings)
 
 def validate_item(order, shopify_settings):
 	for item in order.get("line_items"):
 		if item.get("product_id") and not frappe.db.get_value("Item", {"shopify_product_id": item.get("product_id")}, "name"):
-			make_item(shopify_settings.warehouse, item, shopify_item_list=[])
+			sync_item_from_shopify(shopify_settings, item, shopify_item_list=[])
 
 def create_order(order, shopify_settings, company=None):
 	so = create_sales_order(order, shopify_settings, company)

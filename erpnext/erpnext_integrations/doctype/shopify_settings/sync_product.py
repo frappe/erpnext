@@ -1,7 +1,22 @@
 import frappe
 from frappe import _
-from frappe.utils import cstr, cint
+from frappe.utils import cstr, cint, get_request_session
+from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import get_shopify_url, get_header
+
 shopify_variants_attr_list = ["option1", "option2", "option3"]
+
+def sync_item_from_shopify(shopify_settings, item, shopify_item_list):
+	url = get_shopify_url("/admin/products/{0}.json".format(item.get("product_id")), shopify_settings)
+	session = get_request_session()
+
+	try:
+		res = session.get(url, headers=get_header(shopify_settings))
+		res.raise_for_status()
+
+		shopify_item = res.json()["product"]
+		make_item(shopify_settings.warehouse, shopify_item, shopify_item_list)
+	except:
+		raise
 
 def make_item(warehouse, shopify_item, shopify_item_list):
 	add_item_weight(shopify_item)
