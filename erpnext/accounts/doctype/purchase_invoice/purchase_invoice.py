@@ -81,11 +81,11 @@ class PurchaseInvoice(BuyingController):
 						row.warehouse = warehouse
 					elif row.warehouse !=warehouse : 
 						frappe.throw(_("Bad Warehouse in row  %s default warehouse is %s"%(row.idx,warehouse)))
-				
+	
 	def get_title(self):
 		from frappe.utils import getdate
 		
-		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype,"naming_series":self.naming_series},ignore_permissions=True)
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
 		if namming :
 			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
 			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
@@ -104,9 +104,9 @@ class PurchaseInvoice(BuyingController):
 			nammeing_doc.index_value = 1
 			nammeing_doc.year = str(getdate(self.posting_date).year)
 			nammeing_doc.name_of_doc = self.doctype
-			nammeing_doc.naming_series = self.naming_series
 			nammeing_doc.save()
 			return title
+			
 	def after_insert(self):
 		self.get_project()
 		
