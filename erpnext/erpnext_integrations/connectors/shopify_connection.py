@@ -86,10 +86,10 @@ def validate_item(order, shopify_settings):
 def create_order(order, shopify_settings, company=None):
 	so = create_sales_order(order, shopify_settings, company)
 	if so:
-		if order.get("financial_status") == "paid" and cint(shopify_settings.sync_sales_invoice):
+		if order.get("financial_status") == "paid":
 			create_sales_invoice(order, shopify_settings, so)
 
-		if order.get("fulfillments") and cint(shopify_settings.sync_delivery_note):
+		if order.get("fulfillments"):
 			create_delivery_note(order, shopify_settings, so)
 
 def create_sales_order(shopify_order, shopify_settings, company=None):
@@ -141,7 +141,8 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 
 def create_sales_invoice(shopify_order, shopify_settings, so):
 	if not frappe.db.get_value("Sales Invoice", {"shopify_order_id": shopify_order.get("id")}, "name")\
-		and so.docstatus==1 and not so.per_billed:
+		and so.docstatus==1 and not so.per_billed and cint(shopify_settings.sync_sales_invoice):
+
 		si = make_sales_invoice(so.name)
 		si.shopify_order_id = shopify_order.get("id")
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
@@ -164,9 +165,13 @@ def make_payament_entry_against_sales_invoice(doc, shopify_settings):
 	payemnt_entry.submit()
 
 def create_delivery_note(shopify_order, shopify_settings, so):
+	if not cint(shopify_settings.sync_delivery_note):
+		return
+
 	for fulfillment in shopify_order.get("fulfillments"):
 		if not frappe.db.get_value("Delivery Note", {"shopify_fulfillment_id": fulfillment.get("id")}, "name")\
 			and so.docstatus==1:
+
 			dn = make_delivery_note(so.name)
 			dn.shopify_order_id = fulfillment.get("order_id")
 			dn.shopify_fulfillment_id = fulfillment.get("id")
