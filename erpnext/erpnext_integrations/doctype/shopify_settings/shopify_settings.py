@@ -14,18 +14,14 @@ import json
 
 class ShopifySettings(Document):
 	def validate(self):
-		self.setup_custom_fields()
-
 		if self.enable_shopify == 1:
+			self.setup_custom_fields()
 			self.validate_access_credentials()
-		
-		self.setup_webhooks()
+			self.register_webhooks()
+		else:
+			self.unregister_webhooks()
 
 	def setup_custom_fields(self):
-		dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
-			fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-			depends_on="eval:doc.invoice_type=='Export' ")
-
 		custom_fields = {
 			"Customer": [dict(fieldname='shopify_customer_id', label='Shopify Customer Id',
 				fieldtype='Data', insert_after='series', read_only=1, print_hide=1)],
@@ -62,23 +58,54 @@ class ShopifySettings(Document):
 			if not (self.access_token and self.shopify_url):
 				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=ShopifySetupError)
 	
-	def setup_webhooks(self):
-		webhooks = ["orders/create", "orders/paid", "orders/fulfilled"]
-		url = get_shopify_url('admin/webhooks.json', self)
+	def register_webhooks(self):
+		webhooks = {
+			"orders/create": "sync_salse_order",
+			"orders/paid": "prepare_sales_invoice",
+			"orders/fulfilled": "prepare_delivery_note"
+		}
 
-		for webhook in webhooks:
+		url = get_shopify_url('admin/webhooks.json', self)
+		created_webhooks = [d.method for d in self.webhooks]
+
+		for method in webhooks:
+			if method in created_webhooks:
+				continue
+
 			session = get_request_session()
 			try:
 				d = session.post(url, data=json.dumps({
 					"webhook": {
-						"topic": webhook,
-						"address": get_webhook_address(),
+						"topic": method,
+						"address": get_webhook_address(webhooks[method]),
 						"format": "json"
 						}
 					}), headers=get_header(self))
 				d.raise_for_status()
+				self.update_webhook_table(method, d.json())
 			except Exception:
 				pass
+
+	def unregister_webhooks(self):
+		session = get_request_session()
+		deleted_webhooks = []
+
+		for d in self.webhooks:
+			url = get_shopify_url('admin/webhooks/{0}.json'.format(d.webhook_id), self)
+			try:
+				res = session.delete(url, headers=get_header(self))
+				res.raise_for_status()
+				deleted_webhooks.append(d)
+			except Exception:
+				pass
+
+		[self.remove(d) for d in deleted_webhooks]
+
+	def update_webhook_table(self, method, res):
+		self.append("webhooks", {
+			"webhook_id": res['webhook']['id'],
+			"method": method
+		})
 
 def get_shopify_url(path, settings):
 	if settings.app_type == "Private":
@@ -95,8 +122,8 @@ def get_header(settings):
 		header["X-Shopify-Access-Token"] = settings.access_token
 		return header
 
-def get_webhook_address():
-	endpoint = "/api/method/erpnext.erpnext_integrations.connectors.shopify_connection.sync_order"
+def get_webhook_address(method_name):
+	endpoint = "/api/method/erpnext.erpnext_integrations.connectors.shopify_connection.{0}".format(method_name)
 
 	# try:
 # 		url = frappe.request.url

@@ -23,23 +23,54 @@ def validate_webhooks_request():
 			frappe.get_request_header("X-Shopify-Hmac-Sha256") and \
 			not sig == bytes(frappe.get_request_header("X-Shopify-Hmac-Sha256").encode()):
 				frappe.throw(_("Unverified Webhook Data"))
-		
+		frappe.set_user(shopify_settings.modified_by)
+
 		return fn
 
 	return innerfn
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
-def sync_order(order=None):
+def sync_salse_order(order=None):
 	if not order:
 		order = json.loads(frappe.request.data)
 
 	shopify_settings = frappe.get_doc("Shopify Settings")
-	
+
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
 		validate_customer(order, shopify_settings)
 		validate_item(order, shopify_settings)
 		create_order(order, shopify_settings)
+
+@frappe.whitelist(allow_guest=True)
+@validate_webhooks_request()
+def prepare_sales_invoice(order=None):
+	if not order:
+		order = json.loads(frappe.request.data)
+
+	shopify_settings = frappe.get_doc("Shopify Settings")
+	sales_order = get_sales_order(cstr(order['id']))
+
+	if sales_order:
+		create_sales_invoice(order, shopify_settings, sales_order)
+
+@frappe.whitelist(allow_guest=True)
+@validate_webhooks_request()
+def prepare_delivery_note(order=None):
+	if not order:
+		order = json.loads(frappe.request.data)
+
+	shopify_settings = frappe.get_doc("Shopify Settings")
+	sales_order = get_sales_order(cstr(order['id']))
+
+	if sales_order:
+		create_delivery_note(order, shopify_settings, sales_order)
+
+def get_sales_order(shopify_order_id):
+	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
+	if sales_order:
+		so = frappe.get_doc("Sales Order", sales_order)
+		return so
 
 def validate_customer(order, shopify_settings):
 	customer_id = order.get("customer", {}).get("id")

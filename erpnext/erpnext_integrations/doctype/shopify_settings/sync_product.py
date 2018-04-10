@@ -15,8 +15,9 @@ def sync_item_from_shopify(shopify_settings, item, shopify_item_list):
 
 		shopify_item = res.json()["product"]
 		make_item(shopify_settings.warehouse, shopify_item, shopify_item_list)
-	except:
-		raise
+	except Exception as e:
+		message = frappe.get_traceback() + "\n" + json.dumps(shopify_item)
+		frappe.log_error(message, title=e.message[:140])
 
 def make_item(warehouse, shopify_item, shopify_item_list):
 	add_item_weight(shopify_item)
@@ -111,11 +112,15 @@ def create_item(shopify_item, warehouse, has_variant=0, attributes=None,variant_
 
 	if not is_item_exists(item_dict, attributes, variant_of=variant_of, shopify_item_list=shopify_item_list):
 		item_details = get_item_details(shopify_item)
+		name = ''
 
 		if not item_details:
 			new_item = frappe.get_doc(item_dict)
 			new_item.insert()
 			name = new_item.name
+
+		if not name:
+			name = item_details.name
 
 		if not has_variant:
 			add_to_price_list(shopify_item, name)
