@@ -81,30 +81,31 @@ def get_caller_info(caller_no):
 		if(contact_doc.get_link_for('Customer')):
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
-			popup_data = {
+			dashboard_data = {
 				"title": "Customer",
 				"number": caller_no,
 				"name": customer_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
 
-			return popup_data
-
 		elif(contact_doc.get_link_for('Lead')):
 			lead_full_name = frappe.get_doc("Lead",contact_doc.get_link_for('Lead')).lead_name
-			popup_data = {
+			dashboard_data = {
 				"title": "Lead",
 				"number": caller_no,
 				"name": lead_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
-			return popup_data
+
+		open_issues = frappe.get_all("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"])
+		dashboard_data["issue_list"] = open_issues
+		return dashboard_data
 
 	else:
-		popup_data = {
+		dashboard_data = {
 			"title": "Unknown Caller",
 			"number": caller_no,
 			"name": "Unknown",
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
-		return popup_data
+		return dashboard_data

@@ -49,35 +49,26 @@
 			{% } %}
 		</ul>
 	</div>
-	<div class="col-xs-8" style="padding:0px;">
-		<li class="list-group-item">
-			<ul class="list-group">
-				<li class="list-group-item">
-					<div class="row">
-						<!-- Open issues come here -->
-						<div class="col-xs-12">
-							Issue name 1
-						</div>
+	<div class="col-xs-8" style="padding-right:0px;">
+		<b> <h4>Issue List:</h4></b>
+		<ul class="list-group">
+			{% if(info.issue_list.length == 0){ %}
+				<div class="row">
+					<div class="col-xs-12">
+						No Issues linked to this number
 					</div>
-				</li>
-				<li class="list-group-item">
-					<div class="row">
-						<!-- Open issues come here -->
-						<div class="col-xs-12">
-							Issue name 2
-						</div>
+				</div>
+			{% } %}
+			{% for(var i=0;i<=info.issue_list.length - 1;i++){ %}
+			<li class="list-group-item">
+				<div class="row">
+					<div class="col-xs-12">
+						<a href="/desk#Form/Issue/{{ info.issue_list[i].name }}">{{ info.issue_list[i].subject }}</a>
 					</div>
-				</li>
-				<li class="list-group-item">
-					<div class="row">
-						<!-- Open issues come here -->
-						<div class="col-xs-12">
-							Issue name 3
-						</div>
-					</div>
-				</li>
-			</ul>
-		</li>
+				</div>	
+			</li>
+			{% } %}
+		</ul>
 	</div>	
 </div>
 
