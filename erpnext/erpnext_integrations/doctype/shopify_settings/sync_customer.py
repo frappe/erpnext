@@ -8,7 +8,7 @@ def create_customer(shopify_customer, shopify_settings):
 	cust_name = (shopify_customer.get("first_name") + " " + (shopify_customer.get("last_name") \
 		and  shopify_customer.get("last_name") or "")) if shopify_customer.get("first_name")\
 		else shopify_customer.get("email")
-	
+
 	try:
 		customer = frappe.get_doc({
 			"doctype": "Customer",

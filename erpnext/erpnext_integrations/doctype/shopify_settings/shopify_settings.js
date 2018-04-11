@@ -1,21 +1,21 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext_shopify.shopify_settings");
+frappe.provide("erpnext_integrations.shopify_settings");
 
-frappe.ui.form.on("Shopify Settings", "onload", function(frm, dt, dn){
+frappe.ui.form.on("Shopify Settings", "onload", function(frm){
 	frappe.call({
 		method:"erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings.get_series",
 		callback:function(r){
 			$.each(r.message, function(key, value){
-				set_field_options(key, value)
-			})
+				set_field_options(key, value);
+			});
 		}
 	})
 	erpnext_shopify.shopify_settings.setup_queries(frm);
 })
 
-frappe.ui.form.on("Shopify Settings", "app_type", function(frm, dt, dn) {
+frappe.ui.form.on("Shopify Settings", "app_type", function(frm {
 	frm.toggle_reqd("api_key", (frm.doc.app_type == "Private"));
 	frm.toggle_reqd("password", (frm.doc.app_type == "Private"));
 })
@@ -40,7 +40,7 @@ frappe.ui.form.on("Shopify Settings", "refresh", function(frm){
 })
 
 
-$.extend(erpnext_shopify.shopify_settings, {
+$.extend(erpnext_integrations.shopify_settings, {
 	setup_queries: function(frm) {
 		frm.fields_dict["warehouse"].get_query = function(doc) {
 			return {
@@ -51,7 +51,7 @@ $.extend(erpnext_shopify.shopify_settings, {
 			}
 		}
 
-		frm.fields_dict["taxes"].grid.get_field("tax_account").get_query = function(doc, dt, dn){
+		frm.fields_dict["taxes"].grid.get_field("tax_account").get_query = function(doc){
 			return {
 				"query": "erpnext.controllers.queries.tax_account_query",
 				"filters": {
@@ -81,7 +81,7 @@ $.extend(erpnext_shopify.shopify_settings, {
 			}
 		}
 
-		frm.fields_dict["price_list"].get_query = function(doc) {
+		frm.fields_dict["price_list"].get_query = function() {
 			return {
 				filters:{
 					"selling": 1

@@ -57,7 +57,7 @@ class ShopifySettings(Document):
 		else:
 			if not (self.access_token and self.shopify_url):
 				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=ShopifySetupError)
-	
+
 	def register_webhooks(self):
 		webhooks = {
 			"orders/create": "sync_salse_order",
@@ -96,8 +96,8 @@ class ShopifySettings(Document):
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()
 				deleted_webhooks.append(d)
-			except Exception:
-				pass
+			except Exception as e:
+				frappe.log_error(message=frappe.get_traceback(), title=e.message[:140])
 
 		[self.remove(d) for d in deleted_webhooks]
 
