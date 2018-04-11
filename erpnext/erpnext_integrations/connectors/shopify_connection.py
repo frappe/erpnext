@@ -12,19 +12,20 @@ def validate_webhooks_request():
 	def innerfn(fn):
 		shopify_settings = frappe.get_doc("Shopify Settings")
 
-		sig = base64.b64encode(
-			hmac.new(
-				shopify_settings.shared_secret.encode('utf8'),
-				frappe.request.data,
-				hashlib.sha256
-			).digest()
-		)
+		if shopify_settings and shopify_settings.shared_secret:
+			sig = base64.b64encode(
+				hmac.new(
+					shopify_settings.shared_secret.encode('utf8'),
+					frappe.request.data,
+					hashlib.sha256
+				).digest()
+			)
 
-		if frappe.request.data and \
-			frappe.get_request_header("X-Shopify-Hmac-Sha256") and \
-			not sig == bytes(frappe.get_request_header("X-Shopify-Hmac-Sha256").encode()):
-				frappe.throw(_("Unverified Webhook Data"))
-		frappe.set_user(shopify_settings.modified_by)
+			if frappe.request.data and \
+				frappe.get_request_header("X-Shopify-Hmac-Sha256") and \
+				not sig == bytes(frappe.get_request_header("X-Shopify-Hmac-Sha256").encode()):
+					frappe.throw(_("Unverified Webhook Data"))
+			frappe.set_user(shopify_settings.modified_by)
 
 		return fn
 
