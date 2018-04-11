@@ -22,7 +22,7 @@ frappe.ui.form.on('Student', {
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.set_route('query-report', 'General Ledger',
-				{party_type:'Student', party:frm.doc.name});
+					{party_type:'Student', party:frm.doc.name});
 			});
 		}
 	}
