@@ -1,5 +1,4 @@
 import frappe
-import json
 from frappe import _
 from frappe.utils import cstr, cint, get_request_session
 from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import get_shopify_url, get_header
@@ -16,9 +15,9 @@ def sync_item_from_shopify(shopify_settings, item, shopify_item_list):
 
 		shopify_item = res.json()["product"]
 		make_item(shopify_settings.warehouse, shopify_item, shopify_item_list)
-	except Exception as e:
-		message = frappe.get_traceback() + "\n" + json.dumps(shopify_item)
-		frappe.log_error(message, title=e.message[:140])
+	except Exception:
+		make_shopify_log(status="Error", method="sync_item_from_shopify", message=frappe.get_traceback(),
+			request_data=shopify_item, exception=True)
 
 def make_item(warehouse, shopify_item, shopify_item_list):
 	add_item_weight(shopify_item)

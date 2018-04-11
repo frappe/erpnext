@@ -3,9 +3,10 @@ import frappe
 from frappe import _
 import base64, hashlib, hmac, json
 from frappe.utils import cstr, cint, nowdate, flt
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import sync_item_from_shopify
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
 
 def validate_webhooks_request():
 	def innerfn(fn):
@@ -38,12 +39,9 @@ def sync_salse_order(order=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
 
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
-		try:
-			validate_customer(order, shopify_settings)
-			validate_item(order, shopify_settings)
-			create_order(order, shopify_settings)
-		except Exception as e:
-			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
+		validate_customer(order, shopify_settings)
+		validate_item(order, shopify_settings)
+		create_order(order, shopify_settings)
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
@@ -57,8 +55,9 @@ def prepare_sales_invoice(order=None):
 	if sales_order:
 		try:
 			create_sales_invoice(order, shopify_settings, sales_order)
-		except Exception as e:
-			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
+		except Exception:
+			make_shopify_log(status="Error", method="prepare_sales_invoice", message=frappe.get_traceback(),
+				request_data=sales_order, exception=True)
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
@@ -72,8 +71,9 @@ def prepare_delivery_note(order=None):
 	if sales_order:
 		try:
 			create_delivery_note(order, shopify_settings, sales_order)
-		except Exception as e:
-			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
+		except Exception:
+			make_shopify_log(status="Error", method="prepare_delivery_note", message=frappe.get_traceback(),
+				request_data=sales_order, exception=True)
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
@@ -114,7 +114,8 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 			message = 'Following items are exists in order but relevant record not found in Product master'
 			message += "\n" + ", ".join(product_not_exists)
 
-			frappe.log_error(message=message, title=title)
+			make_shopify_log(status="Error", method="create_sales_order", message=message,
+				request_data=shopify_order, exception=True, title=title)
 
 			return ''
 
@@ -152,7 +153,7 @@ def create_sales_invoice(shopify_order, shopify_settings, so):
 	if not frappe.db.get_value("Sales Invoice", {"shopify_order_id": shopify_order.get("id")}, "name")\
 		and so.docstatus==1 and not so.per_billed and cint(shopify_settings.sync_sales_invoice):
 
-		si = make_sales_invoice(so.name)
+		si = make_sales_invoice(so.name, ignore_permissions=True)
 		si.shopify_order_id = shopify_order.get("id")
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
 		si.flags.ignore_mandatory = True
@@ -181,7 +182,7 @@ def create_delivery_note(shopify_order, shopify_settings, so):
 		if not frappe.db.get_value("Delivery Note", {"shopify_fulfillment_id": fulfillment.get("id")}, "name")\
 			and so.docstatus==1:
 
-			dn = make_delivery_note(so.name)
+			dn = make_delivery_note(so.name, ignore_permissions=True)
 			dn.shopify_order_id = fulfillment.get("order_id")
 			dn.shopify_fulfillment_id = fulfillment.get("id")
 			dn.naming_series = shopify_settings.delivery_note_series or "DN-Shopify-"
