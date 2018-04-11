@@ -2,16 +2,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-
-import os
-import json
 import frappe
-import unittest
-from frappe.utils import cint, cstr, flt
+
+import unittest, os, json
+from frappe.utils import cstr
 from frappe.utils.fixtures import sync_fixtures
-from erpnext_shopify.sync_orders import create_order, valid_customer_and_product
-from erpnext_shopify.sync_products import make_item
-from erpnext_shopify.sync_customers import create_customer
+from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
 
 class ShopifySettings(unittest.TestCase):
 	def setUp(self):
@@ -46,7 +44,9 @@ class ShopifySettings(unittest.TestCase):
 			],
 			"enable_shopify": 0,
 			"sales_order_series": "SO-",
+			"sync_sales_invoice": 1,
 			"sales_invoice_series": "SINV-",
+			"sync_delivery_note": 1,
 			"delivery_note_series": "DN-"
 		}).save(ignore_permissions=True)
 
@@ -71,55 +71,25 @@ class ShopifySettings(unittest.TestCase):
 						if doc.docstatus == 1:
 							doc.cancel()
 					frappe.delete_doc(doctype, record.name)
-
-	def test_product(self):
-		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_item.json")) as shopify_item:
-			shopify_item = json.load(shopify_item)
-
-		make_item("_Test Warehouse - _TC", shopify_item.get("product"), [])
-
-		item = frappe.get_doc("Item", cstr(shopify_item.get("product").get("id")))
-
-		self.assertEqual(cstr(shopify_item.get("product").get("id")), item.shopify_product_id)
-		self.assertEqual(item.sync_with_shopify, 1)
-
-		#test variant price
-		for variant in shopify_item.get("product").get("variants"):
-			price = frappe.get_value("Item Price",
-				{"price_list": "_Test Price List", "item_code": cstr(variant.get("id"))}, "price_list_rate")
-			self.assertEqual(flt(variant.get("price")), flt(price))
-
-	def test_customer(self):
-		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_customer.json")) as shopify_customer:
-			shopify_customer = json.load(shopify_customer)
-
-		create_customer(shopify_customer.get("customer"), [])
-
-		customer = frappe.get_doc("Customer", {"shopify_customer_id": cstr(shopify_customer.get("customer").get("id"))})
-
-		self.assertEqual(customer.sync_with_shopify, 1)
-
-		shopify_address = shopify_customer.get("customer").get("addresses")[0]
-		address = frappe.get_doc("Address", {"customer": customer.name})
-
-		self.assertEqual(cstr(shopify_address.get("id")), address.shopify_address_id)
 	
 	def test_order(self):
+		shopify_settings = frappe.get_doc("Shopify Settings", "Shopify Settings")
+
+		### Create Customer ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_customer.json")) as shopify_customer:
 			shopify_customer = json.load(shopify_customer)
-			
-		create_customer(shopify_customer.get("customer"), [])
-		
+		create_customer(shopify_customer.get("customer"), shopify_settings)
+
+		### Create Item ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_item.json")) as shopify_item:
 			shopify_item = json.load(shopify_item)
+		make_item("_Test Warehouse - _TC", shopify_item.get("product"))
 
-		make_item("_Test Warehouse - _TC", shopify_item.get("product"), [])
-				
+
+		### Create Order ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_order.json")) as shopify_order:
 			shopify_order = json.load(shopify_order)
 
-		shopify_settings = frappe.get_doc("Shopify Settings", "Shopify Settings")
-		
 		create_order(shopify_order.get("order"), shopify_settings, "_Test Company")
 
 		sales_order = frappe.get_doc("Sales Order", {"shopify_order_id": cstr(shopify_order.get("order").get("id"))})
