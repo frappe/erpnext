@@ -36,6 +36,7 @@ class ShopifySettings(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC",
 			"cash_bank_account": "Cash - _TC",
 			"customer_group": "_Test Customer Group",
+			"cost_center": "Main - _TC",
 			"taxes": [
 				{
 					"shopify_tax": "International Shipping",
@@ -51,28 +52,6 @@ class ShopifySettings(unittest.TestCase):
 		}).save(ignore_permissions=True)
 
 		self.shopify_settings = shopify_settings
-
-	def tearDown(self):
-		frappe.set_user("Administrator")
-
-		records = {
-			"Sales Invoice": [{"shopify_order_id": "2414345735"}],
-			"Delivery Note": [{"shopify_order_id": "2414345735"}],
-			"Sales Order": [{"shopify_order_id": "2414345735"}],
-			"Item": [{"shopify_product_id" :"4059739520"},{"shopify_product_id": "13917612359"}, 
-				{"shopify_product_id": "13917612423"}, {"shopify_product_id":"13917612487"}],
-			"Address": [{"shopify_address_id": "2476804295"}],
-			"Customer": [{"shopify_customer_id": "2324518599"}]
-		}
-
-		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Item", "Address", "Customer"]:
-			for filters in records[doctype]:
-				for record in frappe.get_all(doctype, filters=filters):
-					if doctype not in ["Customer", "Item", "Address"]:
-						doc = frappe.get_doc(doctype, record.name)
-						if doc.docstatus == 1:
-							doc.cancel()
-					frappe.delete_doc(doctype, record.name)
 	
 	def test_order(self):
 		### Create Customer ###

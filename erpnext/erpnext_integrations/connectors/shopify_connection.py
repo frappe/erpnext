@@ -12,7 +12,7 @@ def validate_webhooks_request():
 	def innerfn(fn):
 		shopify_settings = frappe.get_doc("Shopify Settings")
 
-		if shopify_settings and shopify_settings.shared_secret:
+		if shopify_settings and shopify_settings.shared_secret and not frappe.flags.in_test:
 			sig = base64.b64encode(
 				hmac.new(
 					shopify_settings.shared_secret.encode('utf8'),
