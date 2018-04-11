@@ -4,12 +4,13 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 from frappe.model.document import Document
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from six.moves.urllib.parse import urlparse
 from frappe.utils import get_request_session
-import json
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
 
 class ShopifySettings(Document):
 	def validate(self):
@@ -82,8 +83,9 @@ class ShopifySettings(Document):
 					}), headers=get_header(self))
 				d.raise_for_status()
 				self.update_webhook_table(method, d.json())
-			except Exception:
-				pass
+			except Exception as e:
+				make_shopify_log(status="Warning", method="register_webhooks",
+					message=e.message, exception=False)
 
 	def unregister_webhooks(self):
 		session = get_request_session()
@@ -98,7 +100,8 @@ class ShopifySettings(Document):
 			except Exception as e:
 				frappe.log_error(message=frappe.get_traceback(), title=e.message[:140])
 
-		[self.remove(d) for d in deleted_webhooks]
+		for d in deleted_webhooks:
+			self.remove(d) 
 
 	def update_webhook_table(self, method, res):
 		self.append("webhooks", {

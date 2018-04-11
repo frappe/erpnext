@@ -33,6 +33,7 @@ class ShopifySettings(unittest.TestCase):
 			"shopify_url": "test.myshopify.com",
 			"api_key": "17702c7c4452b9c5d235240b6e7a39da",
 			"password": "17702c7c4452b9c5d235240b6e7a39da",
+			"shared_secret": "17702c7c4452b9c5d235240b6e7a39da",
 			"price_list": "_Test Price List",
 			"warehouse": "_Test Warehouse - _TC",
 			"cash_bank_account": "Cash - _TC",

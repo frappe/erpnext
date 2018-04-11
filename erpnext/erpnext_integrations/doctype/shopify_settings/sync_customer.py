@@ -22,12 +22,12 @@ def create_customer(shopify_customer, shopify_settings):
 		})
 		customer.flags.ignore_mandatory = True
 		customer.insert()
-	
+
 		if customer:
 			create_customer_address(customer, shopify_customer)
 
 		frappe.db.commit()
-		
+
 	except Exception as e:
 		if e.args[0] and e.args[0].startswith("402"):
 			make_shopify_log(status="Error", method="create_customer", message=e.message,
@@ -61,7 +61,7 @@ def create_customer_address(customer, shopify_customer):
 					"link_name": customer.name
 				}]
 			}).insert(ignore_mandatory=True)
-		
+
 		except Exception:
 			make_shopify_log(status="Error", method="create_customer_address", message=frappe.get_traceback(),
 				request_data=shopify_customer, exception=True)
@@ -71,5 +71,5 @@ def get_address_title_and_type(customer_name, index):
 	address_title = customer_name
 	if frappe.db.get_value("Address", "{0}-{1}".format(customer_name.strip(), address_type)):
 		address_title = "{0}-{1}".format(customer_name.strip(), index)
-	
+
 	return address_title, address_type

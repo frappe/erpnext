@@ -39,9 +39,13 @@ def sync_salse_order(order=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
 
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
-		validate_customer(order, shopify_settings)
-		validate_item(order, shopify_settings)
-		create_order(order, shopify_settings)
+		try:
+			validate_customer(order, shopify_settings)
+			validate_item(order, shopify_settings)
+			create_order(order, shopify_settings)
+		except Exception:
+			make_shopify_log(status="Error", method="sync_salse_order", message=frappe.get_traceback(),
+				request_data=order, exception=False)
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
@@ -90,7 +94,7 @@ def validate_customer(order, shopify_settings):
 def validate_item(order, shopify_settings):
 	for item in order.get("line_items"):
 		if item.get("product_id") and not frappe.db.get_value("Item", {"shopify_product_id": item.get("product_id")}, "name"):
-			sync_item_from_shopify(shopify_settings, item, shopify_item_list=[])
+			sync_item_from_shopify(shopify_settings, item)
 
 def create_order(order, shopify_settings, company=None):
 	so = create_sales_order(order, shopify_settings, company)
@@ -133,7 +137,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 			"apply_discount_on": "Grand Total",
 			"discount_amount": get_discounted_amount(shopify_order),
 		})
-	
+
 		if company:
 			so.update({
 				"company": company,
@@ -182,7 +186,7 @@ def create_delivery_note(shopify_order, shopify_settings, so):
 		if not frappe.db.get_value("Delivery Note", {"shopify_fulfillment_id": fulfillment.get("id")}, "name")\
 			and so.docstatus==1:
 
-			dn = make_delivery_note(so.name, ignore_permissions=True)
+			dn = make_delivery_note(so.name)
 			dn.shopify_order_id = fulfillment.get("order_id")
 			dn.shopify_fulfillment_id = fulfillment.get("id")
 			dn.naming_series = shopify_settings.delivery_note_series or "DN-Shopify-"
