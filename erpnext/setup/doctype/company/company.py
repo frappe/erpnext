@@ -398,7 +398,7 @@ def cache_companies_monthly_sales_history():
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	if parent == None or parent == "All Company":
+	if parent == None or parent == "All Companies":
 		parent = ""
 
 	return frappe.db.sql("""
