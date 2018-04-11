@@ -22,7 +22,7 @@ def make_shopify_log(title="Sync Log", status="Queued", method="sync_shopify", m
 		else:
 			# if queued job is not found create a new one
 			log = frappe.get_doc({"doctype":"Shopify Log"}).insert(ignore_permissions=True)
-		
+
 		if exception:
 			frappe.db.rollback()
 			log = frappe.get_doc({"doctype":"Shopify Log"}).insert(ignore_permissions=True)

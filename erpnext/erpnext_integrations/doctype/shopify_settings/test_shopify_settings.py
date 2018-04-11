@@ -19,13 +19,13 @@ class ShopifySettings(unittest.TestCase):
 		frappe.reload_doctype("Sales Order")
 		frappe.reload_doctype("Delivery Note")
 		frappe.reload_doctype("Sales Invoice")
-		
+
 		self.setup_shopify()
-	
+
 	def setup_shopify(self):
 		shopify_settings = frappe.get_doc("Shopify Settings")
 		shopify_settings.taxes = []
-		
+
 		shopify_settings.update({
 			"app_type": "Private",
 			"shopify_url": "test.myshopify.com",
@@ -50,9 +50,11 @@ class ShopifySettings(unittest.TestCase):
 			"delivery_note_series": "DN-"
 		}).save(ignore_permissions=True)
 
+		self.shopify_settings = shopify_settings
+
 	def tearDown(self):
 		frappe.set_user("Administrator")
-		
+
 		records = {
 			"Sales Invoice": [{"shopify_order_id": "2414345735"}],
 			"Delivery Note": [{"shopify_order_id": "2414345735"}],
@@ -62,7 +64,7 @@ class ShopifySettings(unittest.TestCase):
 			"Address": [{"shopify_address_id": "2476804295"}],
 			"Customer": [{"shopify_customer_id": "2324518599"}]
 		}
-		
+
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Item", "Address", "Customer"]:
 			for filters in records[doctype]:
 				for record in frappe.get_all(doctype, filters=filters):
@@ -73,12 +75,10 @@ class ShopifySettings(unittest.TestCase):
 					frappe.delete_doc(doctype, record.name)
 	
 	def test_order(self):
-		shopify_settings = frappe.get_doc("Shopify Settings", "Shopify Settings")
-
 		### Create Customer ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_customer.json")) as shopify_customer:
 			shopify_customer = json.load(shopify_customer)
-		create_customer(shopify_customer.get("customer"), shopify_settings)
+		create_customer(shopify_customer.get("customer"), self.shopify_settings)
 
 		### Create Item ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_item.json")) as shopify_item:
@@ -90,7 +90,7 @@ class ShopifySettings(unittest.TestCase):
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_order.json")) as shopify_order:
 			shopify_order = json.load(shopify_order)
 
-		create_order(shopify_order.get("order"), shopify_settings, "_Test Company")
+		create_order(shopify_order.get("order"), self.shopify_settings, "_Test Company")
 
 		sales_order = frappe.get_doc("Sales Order", {"shopify_order_id": cstr(shopify_order.get("order").get("id"))})
 

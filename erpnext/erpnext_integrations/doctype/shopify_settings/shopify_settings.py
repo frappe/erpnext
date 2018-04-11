@@ -15,39 +15,11 @@ from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_sh
 class ShopifySettings(Document):
 	def validate(self):
 		if self.enable_shopify == 1:
-			self.setup_custom_fields()
+			setup_custom_fields()
 			self.validate_access_credentials()
 			self.register_webhooks()
 		else:
 			self.unregister_webhooks()
-
-	def setup_custom_fields(self):
-		custom_fields = {
-			"Customer": [dict(fieldname='shopify_customer_id', label='Shopify Customer Id',
-				fieldtype='Data', insert_after='series', read_only=1, print_hide=1)],
-			"Address": [dict(fieldname='shopify_address_id', label='Shopify Address Id',
-				fieldtype='Data', insert_after='fax', read_only=1, print_hide=1)],
-			"Item": [
-				dict(fieldname='shopify_variant_id', label='Shopify Variant Id',
-					fieldtype='Data', insert_after='item_code', read_only=1, print_hide=1),
-				dict(fieldname='shopify_product_id', label='Shopify Product Id',
-					fieldtype='Data', insert_after='item_code', read_only=1, print_hide=1),
-				dict(fieldname='shopify_description', label='Shopify Description',
-					fieldtype='Text Editor', insert_after='description', read_only=1, print_hide=1)
-			],
-			"Sales Order": [dict(fieldname='shopify_order_id', label='Shopify Order Id',
-				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)],
-			"Delivery Note":[
-				dict(fieldname='shopify_order_id', label='Shopify Order Id',
-					fieldtype='Data', insert_after='title', read_only=1, print_hide=1),
-				dict(fieldname='shopify_fulfillment_id', label='Shopify Fulfillment Id',
-					fieldtype='Data', insert_after='title', read_only=1, print_hide=1)
-			],
-			"Sales Invoice": [dict(fieldname='shopify_order_id', label='Shopify Order Id',
-				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)]
-		}
-
-		create_custom_fields(custom_fields)
 
 	def validate_access_credentials(self):
 		if self.app_type == "Private":
@@ -101,7 +73,7 @@ class ShopifySettings(Document):
 				frappe.log_error(message=frappe.get_traceback(), title=e.message[:140])
 
 		for d in deleted_webhooks:
-			self.remove(d) 
+			self.remove(d)
 
 	def update_webhook_table(self, method, res):
 		self.append("webhooks", {
@@ -130,16 +102,14 @@ def get_webhook_address(method_name):
 	# try:
 # 		url = frappe.request.url
 # 	except RuntimeError:
-		# for CI Test to work
 	url = "https://testshop1.localtunnel.me"
 
 	server_url = '{uri.scheme}://{uri.netloc}'.format(
 		uri=urlparse(url)
 	)
 
-	delivery_url = server_url + endpoint
-
-	return delivery_url
+	server_url += endpoint
+	return server_url
 
 @frappe.whitelist()
 def get_series():
@@ -148,3 +118,32 @@ def get_series():
 		"sales_invoice_series" : frappe.get_meta("Sales Invoice").get_options("naming_series")  or "SI-Shopify-",
 		"delivery_note_series" : frappe.get_meta("Delivery Note").get_options("naming_series")  or "DN-Shopify-"
 	}
+
+def setup_custom_fields():
+	custom_fields = {
+		"Customer": [dict(fieldname='shopify_customer_id', label='Shopify Customer Id',
+			fieldtype='Data', insert_after='series', read_only=1, print_hide=1)],
+		"Address": [dict(fieldname='shopify_address_id', label='Shopify Address Id',
+			fieldtype='Data', insert_after='fax', read_only=1, print_hide=1)],
+		"Item": [
+			dict(fieldname='shopify_variant_id', label='Shopify Variant Id',
+				fieldtype='Data', insert_after='item_code', read_only=1, print_hide=1),
+			dict(fieldname='shopify_product_id', label='Shopify Product Id',
+				fieldtype='Data', insert_after='item_code', read_only=1, print_hide=1),
+			dict(fieldname='shopify_description', label='Shopify Description',
+				fieldtype='Text Editor', insert_after='description', read_only=1, print_hide=1)
+		],
+		"Sales Order": [dict(fieldname='shopify_order_id', label='Shopify Order Id',
+			fieldtype='Data', insert_after='title', read_only=1, print_hide=1)],
+		"Delivery Note":[
+			dict(fieldname='shopify_order_id', label='Shopify Order Id',
+				fieldtype='Data', insert_after='title', read_only=1, print_hide=1),
+			dict(fieldname='shopify_fulfillment_id', label='Shopify Fulfillment Id',
+				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)
+		],
+		"Sales Invoice": [dict(fieldname='shopify_order_id', label='Shopify Order Id',
+			fieldtype='Data', insert_after='title', read_only=1, print_hide=1)]
+	}
+
+	create_custom_fields(custom_fields)
+

@@ -11,7 +11,7 @@ frappe.ui.form.on("Shopify Settings", "onload", function(frm){
 				set_field_options(key, value);
 			});
 		}
-	})
+	});
 	erpnext_integrations.shopify_settings.setup_queries(frm);
 })
 
@@ -36,9 +36,7 @@ frappe.ui.form.on("Shopify Settings", "refresh", function(frm){
 		frm.toggle_reqd("delivery_note_series", frm.doc.sync_delivery_note);
 
 	}
-
 })
-
 
 $.extend(erpnext_integrations.shopify_settings, {
 	setup_queries: function(frm) {
