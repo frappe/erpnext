@@ -1,6 +1,6 @@
 # Shopify Integration
 
-The Shopify Connector, pulls the orders from Shopify and create Sales Order agaist them in ERPNext. 
+The Shopify Connector pulls the orders from Shopify and creates Sales Order against them in ERPNext.
 
 While creating the sales order if Customer or Item is missing in ERPNext the system will create new Customer/Item by pulling respective details from Shopify.
 
@@ -28,17 +28,15 @@ Once you have created a Private App on Shopify, setup App Credentials and other 
 <img class="screenshot" alt="ERP Configurations" src="{{docs_base_url}}/assets/img/erpnext_integrations/erp_configurations.png">
 
 3. Setup Sync Configurations.
-	The system pulls Orders from Shopify and create Sales Order against them in ERPNext. You can configure ERPNext system to capture payment and fulfilment's against orders.
+    The system pulls Orders from Shopify and creates Sales Order in ERPNext. You can configure ERPNext system to capture payment and fulfilments against orders.
 <img class="screenshot" alt="Sync Configure" src="{{docs_base_url}}/assets/img/erpnext_integrations/sync_config.png">
 
 4. Setup Tax Mapper.
-	Prepare tax and shipping charges mapper for each tax and shipping charge you apply in Shopify
+    Prepare tax and shipping charges mapper for each tax and shipping charge you apply in Shopify
 <img class="screenshot" alt="Taxes and Shipping Charges" src="{{docs_base_url}}/assets/img/erpnext_integrations/tax_config.png">
 
 
-After setting up all the configurations, enable the shopify sync and save the settings. This will register the API's to Shopify and the system will start Order sync between Shopify and ERPNext.
+After setting up all the configurations, enable the Shopify sync and save the settings. This will register the API's to Shopify and the system will start Order sync between Shopify and ERPNext.
 
 ### Note:
-The system won't handle Order cancellation. If you cancel any order in Shopify then manually you have to cancel respective Sales Order and other documents in ERPNext.
-
-
+The connector won't handle Order cancellation. If you cancelled any order in Shopify then manually you have to cancel respective Sales Order and other documents in ERPNext.
