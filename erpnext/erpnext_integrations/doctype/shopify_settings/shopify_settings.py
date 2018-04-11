@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext_shopify.exceptions import ShopifySetupError
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from six.moves.urllib.parse import urlparse
 from frappe.utils import get_request_session
@@ -52,11 +51,11 @@ class ShopifySettings(Document):
 	def validate_access_credentials(self):
 		if self.app_type == "Private":
 			if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
-				frappe.msgprint(_("Missing value for Password, API Key or Shopify URL"), raise_exception=ShopifySetupError)
+				frappe.msgprint(_("Missing value for Password, API Key or Shopify URL"), raise_exception=frappe.ValidationError)
 
 		else:
 			if not (self.access_token and self.shopify_url):
-				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=ShopifySetupError)
+				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=frappe.ValidationError)
 
 	def register_webhooks(self):
 		webhooks = {
@@ -129,7 +128,7 @@ def get_webhook_address(method_name):
 # 		url = frappe.request.url
 # 	except RuntimeError:
 		# for CI Test to work
-	url = "https://testshop.localtunnel.me"
+	url = "https://testshop1.localtunnel.me"
 
 	server_url = '{uri.scheme}://{uri.netloc}'.format(
 		uri=urlparse(url)

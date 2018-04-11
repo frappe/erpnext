@@ -11,5 +11,9 @@ def execute():
 
 	frappe.delete_doc("DocType", 'Shopify Log')
 	frappe.db.sql('delete from `tabDesktop Icon` where app="erpnext_shopify" ')
-	frappe.db.sql("drop table `tabShopify Log`")
 	frappe.delete_doc("Module Def", 'erpnext_shopify')
+
+	frappe.db.commit()
+
+	frappe.db.sql("drop table `tabShopify Log`")
+

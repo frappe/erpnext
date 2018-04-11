@@ -12,10 +12,10 @@ frappe.ui.form.on("Shopify Settings", "onload", function(frm){
 			});
 		}
 	})
-	erpnext_shopify.shopify_settings.setup_queries(frm);
+	erpnext_integrations.shopify_settings.setup_queries(frm);
 })
 
-frappe.ui.form.on("Shopify Settings", "app_type", function(frm {
+frappe.ui.form.on("Shopify Settings", "app_type", function(frm) {
 	frm.toggle_reqd("api_key", (frm.doc.app_type == "Private"));
 	frm.toggle_reqd("password", (frm.doc.app_type == "Private"));
 })

@@ -38,9 +38,12 @@ def sync_salse_order(order=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
 
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
-		validate_customer(order, shopify_settings)
-		validate_item(order, shopify_settings)
-		create_order(order, shopify_settings)
+		try:
+			validate_customer(order, shopify_settings)
+			validate_item(order, shopify_settings)
+			create_order(order, shopify_settings)
+		except Exception as e:
+			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
@@ -52,7 +55,10 @@ def prepare_sales_invoice(order=None):
 	sales_order = get_sales_order(cstr(order['id']))
 
 	if sales_order:
-		create_sales_invoice(order, shopify_settings, sales_order)
+		try:
+			create_sales_invoice(order, shopify_settings, sales_order)
+		except Exception as e:
+			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request()
@@ -64,7 +70,10 @@ def prepare_delivery_note(order=None):
 	sales_order = get_sales_order(cstr(order['id']))
 
 	if sales_order:
-		create_delivery_note(order, shopify_settings, sales_order)
+		try:
+			create_delivery_note(order, shopify_settings, sales_order)
+		except Exception as e:
+			frappe.log_error(message=frappe.get_traceback(), title=e.message[140:])
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
@@ -94,7 +103,7 @@ def create_order(order, shopify_settings, company=None):
 
 def create_sales_order(shopify_order, shopify_settings, company=None):
 	product_not_exists = []
-	customer = frappe.db.get_value("Customer", {"shopify_customer_id": shopify_order.get("customer").get("id")}, "name")
+	customer = frappe.db.get_value("Customer", {"shopify_customer_id": shopify_order.get("customer", {}).get("id")}, "name")
 	so = frappe.db.get_value("Sales Order", {"shopify_order_id": shopify_order.get("id")}, "name")
 
 	if not so:
