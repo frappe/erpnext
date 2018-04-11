@@ -21,6 +21,8 @@ class ShopifySettings(Document):
 		else:
 			self.unregister_webhooks()
 
+		self.validate_app_type()
+
 	def validate_access_credentials(self):
 		if self.app_type == "Private":
 			if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
@@ -29,6 +31,10 @@ class ShopifySettings(Document):
 		else:
 			if not (self.access_token and self.shopify_url):
 				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=frappe.ValidationError)
+
+	def validate_app_type(self):
+		if self.app_type == "Public":
+			frappe.throw(_("Support for public app is deprecated. Please setup private app, for more details refer user manual"))
 
 	def register_webhooks(self):
 		webhooks = {

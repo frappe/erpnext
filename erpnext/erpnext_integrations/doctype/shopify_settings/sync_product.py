@@ -183,8 +183,8 @@ def get_sku(item):
 	return ""
 
 def add_to_price_list(item, name):
-	shopify_settings = frappe.db.get_value("Shopify Settings", None, ["price_list", "push_prices_to_shopify"], as_dict=1)
-	if shopify_settings.push_prices_to_shopify:
+	shopify_settings = frappe.db.get_value("Shopify Settings", None, ["price_list", "update_price_in_erpnext_price_list"], as_dict=1)
+	if not shopify_settings.update_price_in_erpnext_price_list:
 		return
 
 	item_price_name = frappe.db.get_value("Item Price",
