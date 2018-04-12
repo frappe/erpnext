@@ -568,5 +568,6 @@ $.extend(erpnext.journal_entry, {
 			me.accounts[i].debit_in_account_currency = me.accounts[i].debit;
 		}
 		frm.copy_doc();
+		cur_frm.reload_doc();
 	}
 });
