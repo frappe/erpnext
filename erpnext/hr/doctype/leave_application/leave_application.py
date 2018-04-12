@@ -384,7 +384,7 @@ def get_leave_allocation_records(date, employee=None):
 
 	return allocated_leaves
 
-
+@frappe.whitelist()
 def get_holidays(employee, from_date, to_date):
 	'''get holidays between two dates for the given employee'''
 	holiday_list = get_holiday_list_for_employee(employee)
