@@ -21,6 +21,9 @@ frappe.ui.form.on("Journal Entry", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
+			frm.add_custom_button(__('Reverse Journal Entry'), function() {
+				return erpnext.journal_entry.reverse_journal_entry(frm);
+			});
 		}
 
 		if (frm.doc.__islocal) {
@@ -553,5 +556,17 @@ $.extend(erpnext.journal_entry, {
 			});
 		}
 		return { filters: filters };
+	},
+
+	reverse_journal_entry: function(frm) {
+		var me = frm.doc;
+		for(var i=0; i<me.accounts.length; i++) {
+			me.accounts[i].credit += me.accounts[i].debit
+			me.accounts[i].debit = me.accounts[i].credit - me.accounts[i].debit
+			me.accounts[i].credit -= me.accounts[i].debit
+			me.accounts[i].credit_in_account_currency = me.accounts[i].credit
+			me.accounts[i].debit_in_account_currency = me.accounts[i].debit
+		}
+		frm.copy_doc();
 	}
 });
