@@ -561,11 +561,11 @@ $.extend(erpnext.journal_entry, {
 	reverse_journal_entry: function(frm) {
 		var me = frm.doc;
 		for(var i=0; i<me.accounts.length; i++) {
-			me.accounts[i].credit += me.accounts[i].debit
-			me.accounts[i].debit = me.accounts[i].credit - me.accounts[i].debit
-			me.accounts[i].credit -= me.accounts[i].debit
-			me.accounts[i].credit_in_account_currency = me.accounts[i].credit
-			me.accounts[i].debit_in_account_currency = me.accounts[i].debit
+			me.accounts[i].credit += me.accounts[i].debit;
+			me.accounts[i].debit = me.accounts[i].credit - me.accounts[i].debit;
+			me.accounts[i].credit -= me.accounts[i].debit;
+			me.accounts[i].credit_in_account_currency = me.accounts[i].credit;
+			me.accounts[i].debit_in_account_currency = me.accounts[i].debit;
 		}
 		frm.copy_doc();
 	}
