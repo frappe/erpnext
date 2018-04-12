@@ -7,13 +7,12 @@ from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	item_conditions = get_item_conditions(filters)
-	item_details = get_item_details(filters, item_conditions)
-	sl_entries = get_stock_ledger_entries(filters, item_conditions, item_details)
+	items = get_items(filters)
+	sl_entries = get_stock_ledger_entries(filters, items)
+	item_details = get_item_details(items, sl_entries)
 	opening_row = get_opening_balance(filters, columns)
 
 	data = []
-
 	if opening_row:
 		data.append(opening_row)
 
@@ -53,12 +52,12 @@ def get_columns():
 
 	return columns
 
-def get_stock_ledger_entries(filters, item_conditions, item_details):
+def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
-	if item_conditions:
-		items = ['"' + frappe.db.escape(i) + '"' for i in item_details.keys()]
-		if items:
-			item_conditions_sql = 'and sle.item_code in ({})'.format(', '.join(items))
+	if items:
+		item_conditions_sql = 'and sle.item_code in ({})'\
+			.format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items]))
+
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project
@@ -73,25 +72,35 @@ def get_stock_ledger_entries(filters, item_conditions, item_details):
 			item_conditions_sql = item_conditions_sql
 		), filters, as_dict=1)
 
-def get_item_details(filters, item_conditions):
-	item_details = {}
-	for item in frappe.db.sql("""select name, item_name, description, item_group,
-			brand, stock_uom from `tabItem` item {item_conditions}"""\
-			.format(item_conditions=item_conditions), filters, as_dict=1):
-		item_details.setdefault(item.name, item)
-
-	return item_details
-
-def get_item_conditions(filters):
+def get_items(filters):
 	conditions = []
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
-	if filters.get("brand"):
-		conditions.append("item.brand=%(brand)s")
-	if filters.get("item_group"):
-		conditions.append(get_item_group_condition(filters.get("item_group")))
+	else:
+		if filters.get("brand"):
+			conditions.append("item.brand=%(brand)s")
+		if filters.get("item_group"):
+			conditions.append(get_item_group_condition(filters.get("item_group")))
 
-	return "where {}".format(" and ".join(conditions)) if conditions else ""
+	items = []
+	if conditions:
+		items = frappe.db.sql_list("""select name from `tabItem` item where {}"""
+			.format(" and ".join(conditions)), filters)
+	return items
+
+def get_item_details(items, sl_entries):
+	item_details = {}
+	if not items:
+		items = list(set([d.item_code for d in sl_entries]))
+
+	for item in frappe.db.sql("""
+		select name, item_name, description, item_group, brand, stock_uom
+		from `tabItem`
+		where name in ({0})
+		""".format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items])), as_dict=1):
+			item_details.setdefault(item.name, item)
+
+	return item_details
 
 def get_sle_conditions(filters):
 	conditions = []
