@@ -17,7 +17,7 @@ frappe.ui.form.on('Student', {
 		})
 	},
 	refresh: function(frm) {
-		if(!frm.doc.__islocal) {
+		if(!frm.is_new()) {
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
