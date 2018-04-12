@@ -89,11 +89,12 @@ def get_caller_info(caller_no):
 			}
 
 		elif(contact_doc.get_link_for('Lead')):
-			lead_full_name = frappe.get_doc("Lead",contact_doc.get_link_for('Lead')).lead_name
+			lead_doc = frappe.get_doc("Lead",contact_doc.get_link_for('Lead'))
 			dashboard_data = {
 				"title": "Lead",
 				"number": caller_no,
-				"name": lead_full_name,
+				"route_link":lead_doc.name,
+				"name": lead_doc.lead_name or lead_doc.company_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
 
@@ -103,9 +104,10 @@ def get_caller_info(caller_no):
 
 	else:
 		dashboard_data = {
-			"title": "Unknown Caller",
+			"title": "New Caller",
 			"number": caller_no,
 			"name": "Unknown",
-			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
+			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S'),
+			"issue_list":[]
 		}
 		return dashboard_data

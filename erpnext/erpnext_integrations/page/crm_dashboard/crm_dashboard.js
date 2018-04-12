@@ -130,36 +130,28 @@ frappe.CallCenterConsole = Class.extend({
 						content = frappe.render_template("telephony_console", {"info": r.message || null});
 						me.page.main.append(content);
 						
-						// if (r.message.title == "Lead") {
-
-						// 	me.page.main.find("#lead_to_service").on("click", function() {
-						// 		console.log("New Lead", r.message);
-						// 		me.create_service(r.message);
-						// 	});
-						// 	me.page.main.find("#lead_issue").on("click", function() {
-						// 		me.create_issue(r.message);
-						// 	});
-						// } else if(r.message.title == "Customer") {
-						// 	me.page.main.find("#service_for_customer").on("click", function() {
-						// 		// r.message["selected_address_name"] = $('input[name="selected_address"]:checked').attr("id");
-						// 		// r.message["selected_address_hub"] = $('input[name="selected_address"]:checked').attr("data-service-hub");
-						// 		me.create_service(r.message);
-						// 	});
-						// 	me.page.main.find("#customer_issue").on("click", function() {
-						// 		me.create_issue(r.message);
-						// 	});
-						// } else {
-						// 	me.page.main.find("#new_lead").on("click", function() {
-						// 		me.create_lead(r.message);
-						// 	});
-
-						// 	me.page.main.find("#service_for_new_caller").on("click", function() {
-						// 		me.create_service(r.message);
-						// 	});
-						// 	me.page.main.find("#new_caller_issue").on("click", function() {
-						// 		me.create_issue(r.message);
-						// 	});						
-						// }							
+						if (r.message.title == "Lead") {
+							me.page.main.find("#lead_to_customer").on("click", function() {
+								me.create_customer(r.message);
+							});
+							me.page.main.find("#lead_issue").on("click", function() {
+								me.create_issue(r.message);
+							});
+						} else if(r.message.title == "Customer") {
+							me.page.main.find("#customer_issue").on("click", function() {
+								me.create_issue(r.message);
+							});
+						} else {
+							me.page.main.find("#new_lead").on("click", function() {
+								me.create_lead(r.message);
+							});
+							me.page.main.find("#new_customer").on("click", function() {
+								me.create_lead(r.message);
+							});
+							me.page.main.find("#new_caller_issue").on("click", function() {
+								me.create_issue(r.message);
+							});						
+						}							
 					}
 				}
 			});
@@ -177,53 +169,6 @@ frappe.CallCenterConsole = Class.extend({
 		new_lead.status = "Lead";	
 		
 		frappe.set_route("Form", "Lead", new_lead.name);
-	},
-	create_service: function(resp) {
-		//console.log("create_service", resp);
-
-		if(resp.title == "Customer") {
-			frappe.route_options = {
-				"contact_name": resp.contact, 
-				"selected_address_name": resp.selected_address_name,
-				"selected_address_hub": resp.selected_address_hub
-			};
-			frappe.set_route("rn-service-scheduling");
-		}
-		else{
-			var dialog = new frappe.ui.Dialog({
-				title: __("Enter Details"),
-				fields: [
-					{fieldtype: "Data", fieldname: "full_name", label: __("Full Name"), reqd:1},					
-					{fieldtype: "Data", fieldname: "phone", label: __("Phone"), reqd:1}
-				]
-			});
-			if(resp.title == "Lead"){
-				dialog.fields_dict.full_name.set_input(resp.lead_name);				
-			}
-			dialog.fields_dict.phone.set_input(resp.number);
-	
-			dialog.set_primary_action(__("Save"), function() {
-				var values = dialog.get_values();
-				
-				frappe.call({
-					method: "refreshednow_erpnext.ccc_api.autocreate",
-					args: {
-						"caller_title": resp.title,
-						"caller_name": resp.name,						
-						"values": values
-					},
-					callback: function(r) {
-						if(r.message){
-							frappe.show_alert("<p><i>Customer</i> and <i>Contact</i> created for <b>" + values.full_name + "</b>.</p>Redirecting to Service scheduling Tool");
-							frappe.route_options = {"contact_name": r.message};
-							frappe.set_route("rn-service-scheduling");	
-						}
-						dialog.clear(); dialog.hide();
-					}
-				});
-			});
-			dialog.show();				
-		}
 	},
 	create_issue: function(resp) {
 		console.log("Issue", resp);
