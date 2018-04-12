@@ -1,4 +1,4 @@
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +86,Cheques Required,Checks Required
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +84,Cheques Required,Checks Required
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +97,Row #{0}: Clearance date {1} cannot be before Cheque Date {2},Row #{0}: Clearance date {1} cannot be before Check Date {2}
 apps/erpnext/erpnext/utilities/user_progress.py +210,People who teach at your organisation,People who teach at your organization
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +37,Outstanding Cheques and Deposits to clear,Outstanding Checks and Deposits to clear
