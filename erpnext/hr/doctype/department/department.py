@@ -18,7 +18,7 @@ class Department(NestedSet):
 
 	def on_trash(self):
 		super(Department, self).on_trash()
- 		delete_events(self.doctype, self.name)
+		delete_events(self.doctype, self.name)
 
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
