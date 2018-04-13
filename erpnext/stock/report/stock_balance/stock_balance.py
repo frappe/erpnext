@@ -4,7 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate
+from frappe.utils import flt, cint, getdate, now
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -12,10 +13,11 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns()
-	item_map = get_item_details(filters)
-	item_reorder_detail_map = get_item_reorder_details(filters)
-	iwb_map = get_item_warehouse_map(filters)
-	
+	items = get_items(filters)
+	sle = get_stock_ledger_entries(filters, items)
+	iwb_map = get_item_warehouse_map(filters, sle)
+	item_map = get_item_details(items, sle, filters)
+	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
@@ -88,21 +90,9 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
-	if filters.get("item_group"):		
-		ig_details = frappe.db.get_value("Item Group", filters.get("item_group"), 
-			["lft", "rgt"], as_dict=1)
-			
-		if ig_details:
-			conditions += """ 
-				and exists (select name from `tabItem Group` ig 
-				where ig.lft >= %s and ig.rgt <= %s and item.item_group = ig.name)
-			""" % (ig_details.lft, ig_details.rgt)
-		
-	if filters.get("item_code"):
-		conditions += " and sle.item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
-
 	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
+		warehouse_details = frappe.db.get_value("Warehouse",
+			filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
 			conditions += " and exists (select name from `tabWarehouse` wh \
 				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
@@ -110,29 +100,28 @@ def get_conditions(filters):
 
 	return conditions
 
-def get_stock_ledger_entries(filters):
+def get_stock_ledger_entries(filters, items):
+	item_conditions_sql = ''
+	if items:
+		item_conditions_sql = ' and sle.item_code in ({})'\
+			.format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items]))
+
 	conditions = get_conditions(filters)
-	
-	join_table_query = ""
-	if filters.get("item_group"):
-		join_table_query = "inner join `tabItem` item on item.name = sle.item_code"
-	
+
 	return frappe.db.sql("""
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference
 		from
-			`tabStock Ledger Entry` sle force index (posting_sort_index) %s
-		where sle.docstatus < 2 %s 
+			`tabStock Ledger Entry` sle force index (posting_sort_index)
+		where sle.docstatus < 2 %s %s
 		order by sle.posting_date, sle.posting_time, sle.name""" %
-		(join_table_query, conditions), as_dict=1)
+		(item_conditions_sql, conditions), as_dict=1)
 
-def get_item_warehouse_map(filters):
+def get_item_warehouse_map(filters, sle):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
-
-	sle = get_stock_ledger_entries(filters)
 
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
@@ -191,20 +180,33 @@ def filter_items_with_no_transactions(iwb_map):
 
 	return iwb_map
 
-def get_item_details(filters):
-	condition = ''
-	value = ()
+def get_items(filters):
+	conditions = []
 	if filters.get("item_code"):
-		condition = "where item_code=%s"
-		value = (filters.get("item_code"),)
+		conditions.append("item.name=%(item_code)s")
+	else:
+		if filters.get("brand"):
+			conditions.append("item.brand=%(brand)s")
+		if filters.get("item_group"):
+			conditions.append(get_item_group_condition(filters.get("item_group")))
 
-	items = frappe.db.sql("""
-		select name, item_name, stock_uom, item_group, brand, description
-		from tabItem
-		{condition}
-	""".format(condition=condition), value, as_dict=1)
+	items = []
+	if conditions:
+		items = frappe.db.sql_list("""select name from `tabItem` item where {}"""
+			.format(" and ".join(conditions)), filters)
+	return items
 
-	item_details = dict((d.name , d) for d in items)
+def get_item_details(items, sle, filters):
+	item_details = {}
+	if not items:
+		items = list(set([d.item_code for d in sle]))
+
+	for item in frappe.db.sql("""
+		select name, item_name, description, item_group, brand, stock_uom
+		from `tabItem`
+		where name in ({0})
+		""".format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items])), as_dict=1):
+			item_details.setdefault(item.name, item)
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(item_details.keys())
@@ -212,18 +214,12 @@ def get_item_details(filters):
 
 	return item_details
 
-def get_item_reorder_details(filters):
-	condition = ''
-	value = ()
-	if filters.get("item_code"):
-		condition = "where parent=%s"
-		value = (filters.get("item_code"),)
-
+def get_item_reorder_details(items):
 	item_reorder_details = frappe.db.sql("""
 		select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 		from `tabItem Reorder`
-		{condition}
-	""".format(condition=condition), value, as_dict=1)
+		where parent in ({0})
+	""".format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 
@@ -233,11 +229,9 @@ def validate_filters(filters):
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
 
-
 def get_variants_attributes():
 	'''Return all item variant attributes.'''
 	return [i.name for i in frappe.get_all('Item Attribute')]
-
 
 def get_variant_values_for(items):
 	'''Returns variant values for items.'''

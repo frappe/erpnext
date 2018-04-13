@@ -410,7 +410,7 @@ def get_party_item_code(args, item_doc, out):
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
-def get_pos_profile_item_details(company, args, pos_profile=None):
+def get_pos_profile_item_details(company, args, pos_profile=None, update_data=False):
 	res = frappe._dict()
 
 	if not pos_profile:
@@ -418,7 +418,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
-			if not args.get(fieldname) and pos_profile.get(fieldname):
+			if (not args.get(fieldname) or update_data) and pos_profile.get(fieldname):
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
