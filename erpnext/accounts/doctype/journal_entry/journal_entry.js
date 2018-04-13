@@ -29,6 +29,14 @@ frappe.ui.form.on("Journal Entry", {
 			});
 		}
 
+		frm.set_query("finance_book", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company
+				}
+			};
+		});
+
 		// hide /unhide fields based on currency
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 	},
