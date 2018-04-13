@@ -22,9 +22,9 @@
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h3 class="text-center">{%= filters.company %}</h3>
 <h3 class="text-center">{%= filters.fiscal_year %}</h3>
-<h5 class="text-center">{%=  __("Currency") %} : {%= erpnext.get_currency(filters.company) %} </h4>
+<h5 class="text-center">{%=  __("Currency") %} : {%= filters.presentation_currency || erpnext.get_currency(filters.company) %} </h4>
 {% if (filters.from_date) { %}
-	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h3>
+	<h4 class="text-center">{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}</h3>
 {% } %}
 <hr>
 <table class="table table-bordered">
@@ -51,7 +51,7 @@
 					<td class="text-right">
 						{% var fieldname = report.columns[i].field || report.columns[i].fieldname; %}
 						{% if (!is_null(row[fieldname])) { %}
-							{%= format_number(row[fieldname], null)%}
+							{%= format_currency(row[fieldname], filters.presentation_currency) %}
 						{% } %}
 					</td>
 				{% } %}
@@ -59,4 +59,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
