@@ -38,6 +38,12 @@ class LeaveApplication(Document):
 			# notify leave applier about rejection
 			self.notify_employee()
 
+	def on_update(self):
+		if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
+				self.docstatus < 2 and self.previous_doc.leave_approver != self.leave_approver):
+			# notify leave approver about creation
+			self.notify_leave_approver()
+
 	def on_submit(self):
 		self.validate_back_dated_application()
 
@@ -240,6 +246,30 @@ class LeaveApplication(Document):
 			# for email
 			"subject": (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (self.name, cstr(employee.employee_name))
 		})
+	def notify_leave_approver(self):
+		employee = frappe.get_doc("Employee", self.employee)
+
+		def _get_message(url=False):
+			name = self.name
+			employee_name = cstr(employee.employee_name)
+			if url:
+				name = get_link_to_form(self.doctype, self.name)
+				employee_name = get_link_to_form("Employee", self.employee, label=employee_name)
+			message = (_("Leave Application") + ": %s") % (name)+"<br>"
+			message += (_("Employee") + ": %s") % (employee_name)+"<br>"
+			message += (_("Leave Type") + ": %s") % (self.leave_type)+"<br>"
+			message += (_("From Date") + ": %s") % (self.from_date)+"<br>"
+			message += (_("To Date") + ": %s") % (self.to_date)
+			return message
+
+		self.notify({
+			# for post in messages
+			"message": _get_message(url=True),
+			"message_to": self.leave_approver,
+
+			# for email
+			"subject": (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (self.name, cstr(employee.employee_name))
+		})
 
 	def notify(self, args):
 		args = frappe._dict(args)
@@ -279,6 +309,28 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				# Arrey!
 				pass
+
+@frappe.whitelist()
+def get_approvers(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("employee"):
+		frappe.throw(_("Please select Employee Record first."))
+
+	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
+
+	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
+		tabUser user, `tabEmployee Leave Approver` approver where
+		approver.parent = %s
+		and user.name like %s
+		and approver.leave_approver=user.name""", (employee_department, "%" + txt + "%"), as_list=True)
+
+	# fetch approvers from parents of department as well
+	parent_dept = frappe.db.get_value("Department", employee_department, "parent_department")
+
+	if parent_dept:
+		filters["department"] = parent_dept
+		approvers_list.extend(get_approvers(doctype, txt, searchfield, start, page_len, filters))
+
+	return approvers_list
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
