@@ -6,11 +6,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class CompensatoryLeaveRequest(Document):
-<<<<<<< HEAD
-	def validate_present(self):
-		pass
-
-=======
+class EmployeeTaxExcemptionCategory(Document):
 	pass
->>>>>>> New doctypes for HR and Accounting (#13652)
