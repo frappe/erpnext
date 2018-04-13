@@ -457,7 +457,4 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "employee_name", 
  "track_changes": 1, 
- "track_seen": 0
-}
