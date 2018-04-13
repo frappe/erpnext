@@ -156,6 +156,17 @@ frappe.ui.form.on("Expense Claim", {
 		});
 	},
 
+	onload: function(frm) {
+		frm.set_query("expense_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.expense_claim.expense_claim.get_approvers",
+				filters: {
+					employee: frm.doc.employee
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
