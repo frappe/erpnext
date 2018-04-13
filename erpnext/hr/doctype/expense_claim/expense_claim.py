@@ -236,6 +236,28 @@ def update_reimbursed_amount(doc):
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 @frappe.whitelist()
+def get_approvers(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("employee"):
+		frappe.throw(_("Please select Employee Record first."))
+
+	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
+
+	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
+		tabUser user, `tabEmployee Expense Approver` approver where
+		approver.parent = %s
+		and user.name like %s
+		and approver.expense_approver=user.name""", (employee_department, "%" + txt + "%"), as_list=True)
+
+	# fetch approvers from parents of department as well
+	parent_dept = frappe.get_value("Department", employee_department, "parent_department")
+
+	if parent_dept:
+		filters["department"] = parent_dept
+		approvers_list.extend(get_approvers(doctype, txt, searchfield, start, page_len, filters))
+
+	return approvers_list
+
+@frappe.whitelist()
 def make_bank_entry(dt, dn):
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 

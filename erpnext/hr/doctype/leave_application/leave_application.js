@@ -10,8 +10,16 @@ frappe.ui.form.on("Leave Application", {
 			frm.set_value("posting_date", frappe.datetime.get_today());
 		}
 
-		frm.set_query("employee", erpnext.queries.employee);
+		frm.set_query("leave_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+				filters: {
+					employee: frm.doc.employee
+				}
+			};
+		});
 
+		frm.set_query("employee", erpnext.queries.employee);
 	},
 
 	validate: function(frm) {
@@ -26,10 +34,21 @@ frappe.ui.form.on("Leave Application", {
 		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
 			frm.set_intro(__("Fill the form and save it"));
 		}
+		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'leave_approver_mandatory_in_leave_application', (r) => {
+			if (frm.doc.docstatus < 1 && (r.leave_approver_mandatory_in_leave_application == 0)) {
+				frm.toggle_reqd("leave_approver", false);
+			}
+		});
 	},
 
 	employee: function(frm) {
 		frm.trigger("get_leave_balance");
+	},
+
+	leave_approver: function(frm) {
+		if(frm.doc.leave_approver){
+			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+		}
 	},
 
 	leave_type: function(frm) {
