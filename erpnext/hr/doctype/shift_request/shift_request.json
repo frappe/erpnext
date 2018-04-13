@@ -213,7 +213,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-13 17:51:49.443066", 
+ "modified": "2018-04-13 18:55:41.428419", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Shift Request", 
@@ -278,7 +278,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 0, 
