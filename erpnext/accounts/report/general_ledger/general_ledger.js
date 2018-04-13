@@ -104,6 +104,12 @@ frappe.query_reports["General Ledger"] = {
 			"hidden": 1
 		},
 		{
+			"fieldname":"group_by_party",
+			"label": __("Group by Party"),
+			"fieldtype": "Check",
+			"default": 0
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
