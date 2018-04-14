@@ -25,10 +25,14 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Attendance Request",
+				},
+				{
+					"type": "doctype",
 					"name": "Upload Attendance",
 					"description":_("Upload attendance from a .csv file"),
 					"hide_count": True
-				},
+				}
 			]
 		},
 		{
@@ -61,6 +65,22 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Compensatory Leave Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Period",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Policy",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Encashment",
+				},
+				{
+					"type": "doctype",
 					"name":"Leave Type",
 					"description": _("Type of leaves like casual, sick etc."),
 				},
@@ -90,32 +110,93 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Employee Lifecycle"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Transfer",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Promotion",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Lifecycle Activity",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Lifecycle Activity Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Lifecycle Process Template",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Lifecycle Process",
+				}
+			]
+		},
+		{
 			"label": _("Payroll"),
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Salary Structure Assignment",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Slip",
-					"description": _("Monthly salary statement."),
 				},
 				{
 					"type": "doctype",
 					"name": "Payroll Entry",
 					"label": _("Payroll Entry"),
-					"description":_("Generate Salary Slips"),
 					"hide_count": True
 				},
 				{
 					"type": "doctype",
-					"name": "Salary Structure",
-					"description": _("Salary template master.")
+					"name": "Employee Benefit Claim",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Incentive",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Benefit Application",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Proof Submission",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Declaration",
+				}
+			]
+		},
+		{
+			"label": _("Payroll Setup"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Payroll Period",
 				},
 				{
 					"type": "doctype",
 					"name": "Salary Component",
-					"label": _("Salary Components"),
-					"description": _("Earnings, Deductions and other Salary components")
 				},
-
+				{
+					"type": "doctype",
+					"name": "Salary Structure",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Category",
+				},
+				
 			]
 		},
 		{
@@ -199,7 +280,27 @@ def get_data():
 				},
 			]
 		},
-
+		{
+			"label": _("Shift Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Shift Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Assignment",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Assignment Tool",
+				}
+			]
+		},
 		{
 			"label": _("Fleet Management"),
 			"items": [
@@ -248,7 +349,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Health Insurance"
+					"name": "Employee Health Insurance"
+				},
+				{
+					"type": "doctype",
+					"name": "Staffing Plan",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Grade",
 				}
 			]
 		},
