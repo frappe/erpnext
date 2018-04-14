@@ -7,7 +7,6 @@ import frappe
 import unittest
 
 class TestCompensatoryLeaveRequest(unittest.TestCase):
-<<<<<<< HEAD
 	def get_compensatory_leave_request(self):
 		return frappe.get_doc('Compensatory Leave Request', dict(
 			employee = employee,
@@ -39,7 +38,4 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		self.assertRaises(MaxLeavesLimitCrossed, compensatory_leave_request.submit)
 
 		frappe.db.set_value('Leave Type', compensatory_leave_request.leave_type, 'max_leaves_allowed', 10)
-		
-=======
-	pass
->>>>>>> New doctypes for HR and Accounting (#13652)
+
