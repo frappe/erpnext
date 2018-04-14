@@ -13,7 +13,7 @@ frappe.ui.form.on('Department', {
 		});
 		frm.set_query("expense_approver", "expense_approvers", function(doc) {
 			return {
-				query:"erpnext.hr.doctype.employee_expense_approver.employee_expense_approver.get_approvers",
+				query:"erpnext.hr.doctype.employee_leave_approver.employee_leave_approver.get_approvers",
 				filters:{
 					user: doc.user_id
 				}

@@ -14,7 +14,8 @@ frappe.ui.form.on("Leave Application", {
 			return {
 				query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
 				filters: {
-					employee: frm.doc.employee
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
 				}
 			};
 		});
