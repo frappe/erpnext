@@ -4,7 +4,49 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
+from frappe.utils import getdate
 from frappe.model.document import Document
 
 class SalaryStructureAssignment(Document):
-	pass
+	def validate(self):
+		self.validate_dates()
+
+	def validate_date(self):
+		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
+
+		if self.from_date:
+			if joining_date and getdate(self.from_date) < joining_date:
+				frappe.throw(_("From Date {0} cannot be before employee's joining Date {2}")
+					.format(self.from_date, joining_date))
+			if relieving_date and getdate(self.from_date) > relieving_date:
+				frappe.throw(_("From Date {0} cannot be after employee's relieving Date {2}")
+					.format(self.from_date, relieving_date))
+
+		if self.to_date:
+			if self.from_date and getdate(self.from_date) < getdate(self.to_date):
+				frappe.throw(_("From Date {0} cannot be before To Date {2}")
+					.format(self.from_date, self.to_date))
+			if relieving_date and getdate(self.to_date) > relieving_date:
+				frappe.throw(_("To Date {0} cannot be after employee's relieving Date {2}")
+					.format(self.to_date, relieving_date))
+
+	def validate_duplicate_assignments(self):
+		assignment = frappe.db.sql("""
+			select name from `tabSalary Structure Assignment`
+			where employee=%(employee)s
+			and name != %(salary_struct)s
+			and (
+				(%(from_date)s between from_date and ifnull(to_date, '2199-12-31'))
+				or (%(to_date)s between from_date and ifnull(to_date, '2199-12-31'))
+				or (from_date between %(from_date)s and %(to_date)s)
+			)""", {
+				'employee': self.employee,
+				'from_date': self.from_date,
+				'to_date': (self.to_date or '2199-12-31'),
+				'salary_struct': self.salary_struct
+			})
+
+		if assignment:
+			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").format(assignment[0][0], self.employee))
