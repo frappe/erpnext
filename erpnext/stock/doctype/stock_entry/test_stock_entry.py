@@ -575,7 +575,8 @@ class TestStockEntry(unittest.TestCase):
 			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "_Test UOM",
-			"wip_warehouse": "_Test Warehouse - _TC"
+			"wip_warehouse": "_Test Warehouse - _TC",
+			"skip_transfer": 1
 		})
 		work_order.insert()
 		work_order.submit()
@@ -679,6 +680,34 @@ class TestStockEntry(unittest.TestCase):
 
 		repack.insert()
 		self.assertRaises(frappe.ValidationError, repack.submit)
+
+	def test_material_consumption(self):
+		from erpnext.manufacturing.doctype.work_order.work_order \
+			import make_stock_entry as _make_stock_entry
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
+			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.update({
+			"company": "_Test Company",
+			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"production_item": "_Test FG Item 2",
+			"bom_no": bom_no,
+			"qty": 4.0,
+			"stock_uom": "_Test UOM",
+			"wip_warehouse": "_Test Warehouse - _TC",
+			"additional_operating_cost": 1000
+		})
+		work_order.insert()
+		work_order.submit()
+
+		make_stock_entry(item_code="_Test Serialized Item With Series", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
+
+		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
+		self.assertEqual(stock_entry.get("items")[0].qty, 10)
+		self.assertEqual(stock_entry.get("items")[1].qty, 6)
+
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
