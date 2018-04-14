@@ -84,17 +84,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payroll Entry",
-					"label": _("Payroll Entry"),
-					"hide_count": True
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Benefit Claim",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Incentive",
+					"name": "Payroll Entry"
 				},
 				{
 					"type": "doctype",
@@ -102,12 +92,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Tax Exemption Proof Submission",
+					"name": "Employee Benefit Claim",
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Tax Exemption Declaration",
-				}
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Proof Submission",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Incentive",
+				},
 			]
 		},
 		{
