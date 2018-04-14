@@ -314,21 +314,18 @@ class LeaveApplication(Document):
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("employee"):
 		frappe.throw(_("Please select Employee Record first."))
-
+	approvers_list = []
 	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
-
-	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
-		tabUser user, `tabEmployee Leave Approver` approver where
-		approver.parent = %s
-		and user.name like %s
-		and approver.leave_approver=user.name""", (employee_department, "%" + txt + "%"), as_list=True)
-
-	# fetch approvers from parents of department as well
-	parent_dept = frappe.db.get_value("Department", employee_department, "parent_department")
-
-	if parent_dept:
-		filters["department"] = parent_dept
-		approvers_list.extend(get_approvers(doctype, txt, searchfield, start, page_len, filters))
+	department = frappe.db.get_value("Department", {"name": employee_department}, ["lft", "rgt"], as_dict=True)
+	department_list = frappe.db.sql("""select name from `tabDepartment` where lft <= %s
+		and rgt >= %s
+		order by lft desc""", (department.lft, department.rgt), as_list = True)
+	for d in department_list:
+		approvers_list += frappe.db.sql("""select user.name, user.first_name, user.last_name from
+			tabUser user, `tabEmployee Leave Approver` approver where
+			approver.parent = %s
+			and user.name like %s
+			and approver.leave_approver=user.name""", (d, "%" + txt + "%"), as_list=True)
 
 	return approvers_list
 
