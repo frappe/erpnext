@@ -25,6 +25,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Attendance Request",
+				},
+				{
+					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True
 				}
