@@ -225,6 +225,83 @@ class TestLeaveApplication(unittest.TestCase):
 
 		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
 			"applies_to_all_departments", 0)
+	
+	def test_optional_leave(self):
+		''''''
+		leave_period = get_leave_period()
+		today = get_today()
+		
+		holiday_list = frappe.get_doc(dict(
+			doctype = 'Holiday List',
+			name = 'test holiday list for optional holiday'
+			from_date = year_start_date(),
+			from_date = year_end_date()
+			holidays = [
+				dict(holiday_date = today, description = 'test')
+			]
+		))
+		employee = get_employee()
+		
+		frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
+		
+		leave_type = frappe.get_doc(dict(
+			leave_type_name = 'Test Optional Type',
+			doctype = 'Leave Type',
+			is_optional_leave = 1,
+			holiday_list = holiday_list
+		)).insert()
+		
+		allocate_leaves(employee, leave_period, leave_type.name, 10)
+		
+		date = get_today() - 1
+				
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee,
+			leave_type = leave_type.name,
+			from_date = date,
+			to_date = date,
+		))
+		
+		# can only apply on optional holidays
+		self.assertTrue(NotAnOptionalHoliday, leave_application.insert)
+		
+		leave_application.from_date = today
+		leave_application.to_date = today
+		leave_application.insert()
+		leave_application.submit()
+		
+		# check leave balance is reduced
+		self.assertEqual(get_leave_balance(employee, leave_period, leave_type.name), 9)
+		
+	def test_leaves_allowed(self):
+		# TODO: test cannot allocate more than max leaves
+
+	def test_applicable_after(self):
+		# TODO: test not applicable until applicable working days
+
+	def test_max_continuous_leaves(self):
+		# TODO: test cannot take continuous leaves more than
+		
+	def test_earned_leave(self):
+		leave_period = get_leave_period()
+		employee = get_employee()
+
+		leave_type = frappe.get_doc(dict(
+			leave_type_name = 'Test Earned Leave Type',
+			doctype = 'Leave Type',
+			is_earned_leave = 1,
+			earned_leave_frequency = 'Monthly',
+			rounding = 0.5
+		)).insert()
+		
+		allocate_leaves(employee, leave_period, leave_type.name, 0, eligible_leaves = 12)
+		
+		# this method will be called by scheduler
+		allocate_earned_leaves(leave_type.name, leave_period, as_on = half_of_leave_period)
+		
+		self.assertEqual(get_leave_balance(employee, leave_period, leave_type.name), 6)
+		
 
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")

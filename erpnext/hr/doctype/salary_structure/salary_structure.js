@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 {% include "erpnext/public/js/controllers/accounts.js" %}
 
-cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
 
@@ -31,14 +30,6 @@ frappe.ui.form.on('Salary Structure', {
 				}
 			}
 		});
-		frm.set_query("employee", "employees", function(doc) {
-			return {
-				query: "erpnext.controllers.queries.employee_query",
-				filters: {
-					company: doc.company
-				}
-			}
-		});
 		frm.set_query("payment_account", function () {
 			var account_types = ["Bank", "Cash"];
 			return {
@@ -58,61 +49,6 @@ frappe.ui.form.on('Salary Structure', {
 
 		frm.add_custom_button(__("Preview Salary Slip"),
 			function() { frm.trigger('preview_salary_slip'); }, "fa fa-sitemap", "btn-default");
-
-		frm.add_custom_button(__("Add Employees"),function () {
-			frm.trigger('add_employees')
-		})
-
-	},
-
-	add_employees:function (frm) {
-		frm.$emp_dialog = new frappe.ui.Dialog({
-			title: __("Add Employees"),
-			fields: [
-				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
-				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
-				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
-				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
-				{fieldname:'base_variable', fieldtype:'Section Break'},
-				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
-				{fieldname:'base_col_br', fieldtype:'Column Break'},
-				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}
-			]
-		});
-		frm.$emp_dialog.set_primary_action(__("Add"), function() {
-			frm.trigger('get_employees');
-		});
-		frm.$emp_dialog.show();
-	},
-
-	get_employees:function (frm) {
-		var filters = frm.$emp_dialog.get_values();
-		if ('variable' in filters) {
-			delete filters.variable
-		}
-		if ('base' in filters) {
-			delete filters.base
-		}
-		frappe.call({
-			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
-			args:{
-				filters: filters
-			},
-			callback:function (r) {
-				var employees = $.map(frm.doc.employees, function(d) { return d.employee });
-				for (var i=0; i< r.message.length; i++) {
-					if (employees.indexOf(r.message[i].name) === -1) {
-						var row = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
-						row.employee = r.message[i].name;
-						row.employee_name = r.message[i].employee_name;
-						row.base = frm.$emp_dialog.get_value('base');
-						row.variable = frm.$emp_dialog.get_value('variable');
-					}
-				}
-				frm.refresh_field('employees');
-				frm.$emp_dialog.hide()
-			}
-		})
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
@@ -120,38 +56,54 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	preview_salary_slip: function(frm) {
-		var d = new frappe.ui.Dialog({
-			title: __("Preview Salary Slip"),
-			fields: [
-				{	"fieldname":"employee", "fieldtype":"Select", "label":__("Employee"),
-					options: $.map(frm.doc.employees, function(d) { return d.employee }), reqd: 1 },
-				{	fieldname:"fetch", "label":__("Show Salary Slip"), "fieldtype":"Button"}
-			]
-		});
-		d.get_input("fetch").on("click", function() {
-			var values = d.get_values();
-			if(!values) return;
-			var print_format;
-			frm.doc.salary_slip_based_on_timesheet ?
-				print_format="Salary Slip based on Timesheet" :
-				print_format="Salary Slip Standard";
+		frappe.call({
+			method: "erpnext.hr.doctype.salary_structure.salary_structure.get_employees",
+			args: {
+				salary_structure: frm.doc.name
+			},
+			callback: function(r) {
+				var employees = r.message;
+				var d = new frappe.ui.Dialog({
+					title: __("Preview Salary Slip"),
+					fields: [
+						{
+							"label":__("Employee"),
+							"fieldname":"employee",
+							"fieldtype":"Select",
+							options: employees
+						}, {
+							fieldname:"fetch",
+							"label":__("Show Salary Slip"),
+							"fieldtype":"Button"
+						}
+					]
+				});
+				d.get_input("fetch").on("click", function() {
+					var values = d.get_values();
+					if(!values) return;
+					var print_format;
+					frm.doc.salary_slip_based_on_timesheet ?
+						print_format="Salary Slip based on Timesheet" :
+						print_format="Salary Slip Standard";
 
-			frappe.call({
-				method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
-				args: {
-					source_name: frm.doc.name,
-					employee: values.employee,
-					as_print: 1,
-					print_format: print_format
-				},
-				callback: function(r) {
-					var new_window = window.open();
-					new_window.document.write(r.message);
-					// frappe.msgprint(r.message);
-				}
-			});
+					frappe.call({
+						method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
+						args: {
+							source_name: frm.doc.name,
+							employee: values.employee,
+							as_print: 1,
+							print_format: print_format
+						},
+						callback: function(r) {
+							var new_window = window.open();
+							new_window.document.write(r.message);
+							// frappe.msgprint(r.message);
+						}
+					});
+				});
+				d.show();
+			}
 		});
-		d.show();
 	},
 
 	toggle_fields: function(frm) {
@@ -189,7 +141,6 @@ var calculate_totals = function(doc) {
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	calculate_totals(doc);
-	if(doc.employee && doc.is_active == "Yes") frappe.model.clear_doc("Employee", doc.employee);
 }
 
 
