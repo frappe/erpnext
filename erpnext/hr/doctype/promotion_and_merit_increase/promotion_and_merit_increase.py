@@ -40,7 +40,7 @@ class PromotionandMeritIncrease(Document):
                 elif u'Employee' in frappe.get_roles(employee_user):
                     self.workflow_state = "Pending"
                     
-            if not user and self.get('__islocal'):
+            if not employee_user and self.get('__islocal'):
                 self.workflow_state = "Pending" 
 
     def get_basic_salary(self):

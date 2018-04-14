@@ -7,28 +7,10 @@ frappe.ui.form.on('General', {
 
     },
     onload: function(frm) {
-        var user_id = String(frappe.session.user_email);
+        var user_id = String(frappe.session.user);
+        // erpnext.hr.doctype.leave_allocation.leave_allocation.get_annual_and_emergency_balanch
 
-        frappe.call({
-            method: 'erpnext.hr.doctype.leave_allocation.leave_allocation.get_annual_and_emergency_balanch',
-            args: {
-                'employee': user_id,
-            },
-            callback: function(r) {
-                if (r.message) {
-                    console.log('-----------------------------------------------');
-                    console.log(r.message);
-                    frm.set_value("annual_leave_balance", r.message[0]);
-                    frm.set_value("emergency_leave_balance", r.message[1]);
-                    console.log('-----------------------------------------------');
-
-                
-                    }
-                }
-        });
-
-
-        // dummy user for testing 
+          // dummy user for testing 
         // user_id = "aa.alsulaiteen@tawari.sa"
 
         frappe.call({
@@ -48,6 +30,8 @@ frappe.ui.form.on('General', {
                 ]
             },
             freeze: true,
+            freeze_message: "Loading Data",
+            async: false,
             callback: function(r) {
                 if (!r.exc) {
                     // alert(r);
@@ -71,7 +55,29 @@ frappe.ui.form.on('General', {
             }
         });
 
+        frappe.call({
+            method: 'get_leaves_balances',
+            doc: frm.doc,
+            args: {
+                annual: "Annual Leave - اجازة اعتيادية",
+                emergency: "emergency -اضطرارية"
+            },
+            async: false,
+            callback: function(r) {
+                frm.refresh();
+                if (r.message) {
+                    // frm.refresh_field("annual_leave_balance");
+                    // frm.refresh_field("emergency_leave_balance");
+                    // console.log('-----------------------------------------------');
+                    // console.log(r.message);
+                    // frm.set_value("annual_leave_balance", r.message[0]);
+                    // frm.set_value("emergency_leave_balance", r.message[1]);
+                    // console.log('-----------------------------------------------');
 
+                
+                    }
+                }
+        });
 
 
     },

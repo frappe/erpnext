@@ -42,7 +42,9 @@ class Appraisal(Document):
                     self.workflow_state = "Created By Line Manager"
                 elif u'Employee' in frappe.get_roles(employee_user):
                     self.workflow_state = "Pending"
-                
+
+            if not employee_user and self.get('__islocal'):
+                self.workflow_state = "Pending"
 
     def get_employee_name(self):
         self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")

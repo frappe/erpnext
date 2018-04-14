@@ -58,6 +58,9 @@ class CancelLeaveApplication(Document):
 				elif u'Employee' in frappe.get_roles(employee_user):
 					self.workflow_state = "Pending"
 
+			if not employee_user and self.get('__islocal'):
+				self.workflow_state = "Pending"
+				
 	def validate_dates(self):
 		if getdate(self.cancel_date) >= getdate(self.to_date):
 			frappe.throw(_("Cancel date can not be greater or equal than end date"))

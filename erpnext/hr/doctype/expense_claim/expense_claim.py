@@ -47,6 +47,9 @@ class ExpenseClaim(Document):
 					self.workflow_state = "Created By Line Manager"
 				elif u'Employee' in frappe.get_roles(employee_user):
 					self.workflow_state = "Pending"
+					
+			if not employee_user and self.get('__islocal'):
+				self.workflow_state = "Pending"
 
 
 

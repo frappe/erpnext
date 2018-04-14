@@ -123,23 +123,67 @@ def validate_carry_forward(leave_type):
     if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
         frappe.throw(_("Leave Type {0} cannot be carry-forwarded").format(leave_type))
     
+def get_users_exceed_max_leave_allocation():
+    notify_emps = []
+    allocation = frappe.db.sql("""  select employee,max(from_date),max(to_date),total_leaves_allocated from `tabLeave Allocation` where leave_type='Annual Leave - اجازة اعتيادية' group by employee  """)
+    for i in range(len(allocation)):
+        # print allocation[i][0],allocation[i][1],allocation[i][2]
+
+        leave = frappe.db.sql(""" select employee,creation,total_leave_days from `tabLeave Application` where leave_type='Annual Leave - اجازة اعتيادية' and docstatus=1 and employee='{0}' and creation between '{1}' and '{2}' """.format(allocation[i][0],allocation[i][1],allocation[i][2]))
+        # print leave
+        
+        if allocation[i][3] >= 30:
+            notify_emps.append(allocation[i][0].encode('ascii'))
+            print notify_emps
+            for l in range(len(leave)):
+                if leave[l][0] == allocation[i][0]:
+                    print allocation[i][3] - leave[l][2]
+                    if allocation[i][3] - leave[l][2] < 30:
+                        del notify_emps[-1]
+
+    usr = ()
+    if notify_emps:
+        if len(notify_emps) == 1:
+            usr = frappe.db.sql(""" select user_id from `tabEmployee` where employee = '{0}' """.format(notify_emps[0]))
+        else:
+            usr = frappe.db.sql(""" select user_id from `tabEmployee` where employee in {0} """.format((tuple(notify_emps))))
+
+    return usr
 
 def check_max_allocation_balance():
     from frappe.core.doctype.communication.email import make
     frappe.flags.sent_mail = None
     content_msg="Your Annual Leave balance exceeded 30 days, Please use them !"
 
-    allocated_balance = frappe.db.sql("select user_id from `tabEmployee` where name in (select employee from `tabLeave Allocation` where leave_type ='Annual Leave - اجازة اعتيادية' and total_leaves_allocated >=30 )")
-    for i in allocated_balance:
-        prefered_email = frappe.get_value("Employee", filters = {"user_id": i[0]}, fieldname = "prefered_email")
+    allocated_balance = get_users_exceed_max_leave_allocation()
+    if allocated_balance:
+        for i in allocated_balance:
+            prefered_email = frappe.get_value("Employee", filters = {"user_id": i[0]}, fieldname = "prefered_email")
 
-        if prefered_email:
+            if prefered_email:
 
-            try:
-                make(subject = "Max Annual Leave exceeded", content=content_msg, recipients=prefered_email,
-                    send_email=True, sender="erp@tawari.sa")
-            except:
-                frappe.msgprint("could not send")
+                try:
+                    make(subject = "Max Annual Leave exceeded", content=content_msg, recipients=prefered_email,
+                        send_email=True, sender="erp@tawari.sa")
+                except:
+                    frappe.msgprint("could not send")
+
+# def check_max_allocation_balance():
+#     from frappe.core.doctype.communication.email import make
+#     frappe.flags.sent_mail = None
+#     content_msg="Your Annual Leave balance exceeded 30 days, Please use them !"
+
+#     allocated_balance = frappe.db.sql("select user_id from `tabEmployee` where name in (select employee from `tabLeave Allocation` where leave_type ='Annual Leave - اجازة اعتيادية' and total_leaves_allocated >=30 )")
+#     for i in allocated_balance:
+#         prefered_email = frappe.get_value("Employee", filters = {"user_id": i[0]}, fieldname = "prefered_email")
+
+#         if prefered_email:
+
+#             try:
+#                 make(subject = "Max Annual Leave exceeded", content=content_msg, recipients=prefered_email,
+#                     send_email=True, sender="erp@tawari.sa")
+#             except:
+#                 frappe.msgprint("could not send")
 
 
 @frappe.whitelist(allow_guest=True)

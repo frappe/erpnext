@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from frappe.utils import formatdate, getdate, flt, add_days
 from datetime import datetime
+# from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
+# 	comma_or, get_fullname, add_years, add_months, add_days, nowdate
+from erpnext.hr.doctype.leave_application.leave_application import get_monthly_accumulated_leave
 import datetime
 # import operator
 import re
@@ -21,6 +24,7 @@ def get_columns(filters):
 	return [
 		_("Employee") + ":Link/Employee:150",
 		_("Employee Name") + "::150",
+		# _("Annual Leave AB") + "::150",
 		_("Annual Leave - اجازة اعتيادية") + "::150",
 		_("Compensatory off - تعويضية") + "::150",
 		_("Death - وفاة") + "::150",
@@ -51,13 +55,15 @@ def get_columns(filters):
 def get_data(filters):
 	data =[]
 	# conditions = get_conditions(filters)
-	li_list=frappe.db.sql(""" select DISTINCT employee,employee_name from `tabLeave Allocation` order by creation desc """,as_dict=1)
+	li_list=frappe.db.sql(""" select DISTINCT employee, employee_name, from_date, leave_type from `tabLeave Allocation` order by creation desc """,as_dict=1)
 
 	for leave in li_list:
 		remain_annual = frappe.db.sql(""" select (select total_leaves_allocated from `tabLeave Allocation` where employee='{0}' and leave_type = 'Annual Leave - اجازة اعتيادية' and docstatus =1 order by creation desc limit 1 ) - ( select SUM(total_leave_days) from `tabLeave Application` where employee='{0}' and leave_type='Annual Leave - اجازة اعتيادية' and docstatus=1  )""".format(leave.employee))
 		max_annual = frappe.db.sql(""" select total_leaves_allocated from `tabLeave Allocation` where employee='{0}' and leave_type = 'Annual Leave - اجازة اعتيادية' and docstatus =1 order by creation desc limit 1 """.format(leave.employee))
 		used_annual = frappe.db.sql(""" select SUM(total_leave_days) from `tabLeave Application` where employee='{0}' and leave_type='Annual Leave - اجازة اعتيادية' and docstatus=1 """.format(leave.employee))
 		
+		annual_ab = get_monthly_accumulated_leave(leave.from_date, nowdate(), leave.leave_type, leave.employee, for_report=True)
+
 		remain_compensatory = frappe.db.sql(""" select (select total_leaves_allocated from `tabLeave Allocation` where employee='{0}' and leave_type = 'Compensatory off - تعويضية' and docstatus =1 order by creation desc limit 1 ) - ( select SUM(total_leave_days) from `tabLeave Application` where employee='{0}' and leave_type='Compensatory off - تعويضية' and docstatus=1  )""".format(leave.employee))
 		max_compensatory = frappe.db.sql(""" select total_leaves_allocated from `tabLeave Allocation` where employee='{0}' and leave_type = 'Compensatory off - تعويضية' and docstatus =1 order by creation desc limit 1 """.format(leave.employee))
 		used_compensatory = frappe.db.sql(""" select SUM(total_leave_days) from `tabLeave Application` where employee='{0}' and leave_type='Compensatory off - تعويضية' and docstatus=1 """.format(leave.employee))
@@ -95,6 +101,7 @@ def get_data(filters):
 		row = [
 		leave.employee,
 		leave.employee_name,
+		annual_ab if annual_ab else 0,
 		remain_annual if used_annual[0][0] else max_annual,
 		remain_compensatory if used_compensatory[0][0] else max_compensatory,
 		remain_death if used_death[0][0] else max_death,

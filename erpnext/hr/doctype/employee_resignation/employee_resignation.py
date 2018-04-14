@@ -94,6 +94,9 @@ class EmployeeResignation(Document):
                 elif u'Employee' in frappe.get_roles(employee_user):
                     self.workflow_state = "Pending"
 
+            if not employee_user and self.get('__islocal'):
+                self.workflow_state = "Pending"
+
         #if frappe.get_value('Financial Custody', filters={'employee' : self.employee}):
             #name=frappe.get_value('Financial Custody', filters={'employee' : self.employee}) 
             #custody =frappe.get_doc("Financial Custody",name)

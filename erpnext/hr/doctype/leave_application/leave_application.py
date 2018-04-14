@@ -121,6 +121,9 @@ class LeaveApplication(Document):
 						self.workflow_state = "Created By Line Manager"
 				else:
 					self.workflow_state = "Pending"
+									
+			if not employee_user and self.get('__islocal'):
+				self.workflow_state = "Pending"
 
 
 	def after_insert(self):
@@ -905,11 +908,17 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	return approvers_list
 
 @frappe.whitelist()
-def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
+def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee, for_report=False):
 	allocation_records = get_leave_allocation_records(from_date, employee, leave_type)
 	if allocation_records:
 		applied_days = get_approved_leaves_for_period(employee, leave_type, allocation_records[employee][leave_type].from_date, to_date)
-		total_leave_days = get_number_of_leave_days(employee, leave_type, from_date, to_date)
+
+
+		if for_report:
+			total_leave_days=0
+		else:
+			total_leave_days = get_number_of_leave_days(employee, leave_type, from_date, to_date)			
+
 		date_dif = date_diff(to_date, allocation_records[employee][leave_type].from_date)
 		balance = ""
 		if leave_type == "Annual Leave - اجازة اعتيادية":
