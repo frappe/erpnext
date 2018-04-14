@@ -307,7 +307,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2018-04-17 14:50:09.125737", 
+=======
+ "modified": "2018-04-14 15:42:12.617715", 
+>>>>>>> Removed employee table from Salary Structure and added employee name in all forms
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Shift Assignment", 
