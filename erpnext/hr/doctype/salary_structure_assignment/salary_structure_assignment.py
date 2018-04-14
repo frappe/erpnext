@@ -12,24 +12,24 @@ class SalaryStructureAssignment(Document):
 	def validate(self):
 		self.validate_dates()
 
-	def validate_date(self):
+	def validate_dates(self):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
 		if self.from_date:
 			if joining_date and getdate(self.from_date) < joining_date:
-				frappe.throw(_("From Date {0} cannot be before employee's joining Date {2}")
+				frappe.throw(_("From Date {0} cannot be before employee's joining Date {1}")
 					.format(self.from_date, joining_date))
 			if relieving_date and getdate(self.from_date) > relieving_date:
-				frappe.throw(_("From Date {0} cannot be after employee's relieving Date {2}")
+				frappe.throw(_("From Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.from_date, relieving_date))
 
 		if self.to_date:
-			if self.from_date and getdate(self.from_date) < getdate(self.to_date):
-				frappe.throw(_("From Date {0} cannot be before To Date {2}")
+			if self.from_date and getdate(self.from_date) > getdate(self.to_date):
+				frappe.throw(_("From Date {0} cannot be after To Date {1}")
 					.format(self.from_date, self.to_date))
 			if relieving_date and getdate(self.to_date) > relieving_date:
-				frappe.throw(_("To Date {0} cannot be after employee's relieving Date {2}")
+				frappe.throw(_("To Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.to_date, relieving_date))
 
 	def validate_duplicate_assignments(self):

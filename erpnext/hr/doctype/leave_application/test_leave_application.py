@@ -233,9 +233,9 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		holiday_list = frappe.get_doc(dict(
 			doctype = 'Holiday List',
-			name = 'test holiday list for optional holiday'
+			name = 'test holiday list for optional holiday',
 			from_date = year_start_date(),
-			from_date = year_end_date()
+			to_date = year_end_date(),
 			holidays = [
 				dict(holiday_date = today, description = 'test')
 			]
@@ -276,12 +276,15 @@ class TestLeaveApplication(unittest.TestCase):
 		
 	def test_leaves_allowed(self):
 		# TODO: test cannot allocate more than max leaves
+		pass
 
 	def test_applicable_after(self):
 		# TODO: test not applicable until applicable working days
+		pass
 
 	def test_max_continuous_leaves(self):
 		# TODO: test cannot take continuous leaves more than
+		pass
 		
 	def test_earned_leave(self):
 		leave_period = get_leave_period()
