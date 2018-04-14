@@ -7,9 +7,9 @@ import frappe
 def execute():
 	frappe.reload_doc("hr", "doctype", "salary_structure_assignment")
 	for d in frappe.db.sql("""
-		select * from `tabSalary Structure Employee` sse, `tabSalary Structure` ss
+		select sse.*, ss.company from `tabSalary Structure Employee` sse, `tabSalary Structure` ss
 		where ss.name = sse.parent""", as_dict=1):
-
+		print(d)
 		s = frappe.new_doc("Salary Structure Assignment")
 		s.employee = d.employee
 		s.employee_name = d.employee_name
