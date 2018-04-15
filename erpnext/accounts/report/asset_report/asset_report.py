@@ -57,12 +57,22 @@ def get_data(filters):
 	asset_parent_categories=set()
 
 	for asset in li_list:
-		depreciation_schedule=frappe.db.sql("select sum(depreciation_amount) from `tabDepreciation Schedule` where parent ='{0}' and journal_entry is not null ".format(asset.name))
+		# depreciation_schedule=frappe.db.sql("select sum(depreciation_amount) from `tabDepreciation Schedule` where parent ='{0}' and journal_entry is not null ".format(asset.name))
+
+		jes = frappe.db.sql("select journal_entry from `tabDepreciation Schedule` where parent ='{0}' and journal_entry is not null ".format(asset.name))
+
+		ds_total = 0
+		if jes:
+			for je in jes:
+				ds_total += frappe.db.sql("select credit from `tabGL Entry` where voucher_no='{0}' and against_voucher='{1}'".format(je[0], asset.name))[0][0]
+
+		# frappe.throw(str(depreciation_schedule[0][0]) + "  " + str(ds_test))
+
 		item_name=frappe.db.sql("select item_name from `tabItem` where item_code ='{0}' ".format(asset.item_code))
 		asset_parent_category=frappe.db.sql("select parent_asset_category from `tabAsset Category` where name ='{0}' ".format(asset.asset_category))
-		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0]))
+		book_value = (flt(asset.gross_purchase_amount)-flt(ds_total))
 		 # - flt(asset.expected_value_after_useful_life)
-		accumulated_depreciation = flt(depreciation_schedule[0][0])
+		accumulated_depreciation = flt(ds_total)
 		asset_parent_categories.add(asset_parent_category[0][0])
 
 		row = [
@@ -75,7 +85,8 @@ def get_data(filters):
 		asset.purchase_date,
 		asset.next_depreciation_date,
 		"{:.2f}".format(flt(asset.gross_purchase_amount, precision=2)),
-		"{:.2f}".format(flt(accumulated_depreciation, precision=2)),
+		accumulated_depreciation,
+		# "{:.2f}".format(flt(accumulated_depreciation, precision=2)),
 		"{:.2f}".format(flt(book_value, precision=2)),
 		"{:.2f}".format(flt(asset.total_number_of_depreciations, precision=2))
 		]
@@ -103,7 +114,7 @@ def get_data(filters):
 			for items in data:
 				if asset_cat == items[5]:
 					asset_category_gpa_total+=flt(re.findall("\d+\.\d+", items[8])[0])
-					asset_category_ad_total+=flt(re.findall("\d+\.\d+", items[9])[0])
+					asset_category_ad_total+=items[9]
 					asset_category_bv_total+=flt(re.findall("\d+\.\d+", items[10])[0])
 					idx=data.index(items)+1
 			totals_list.insert(0,asset_cat)

@@ -44,6 +44,16 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		error_msg = _("""{0} {1} not in any active Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://frappe.github.io/erpnext/user/manual/en/accounts/articles/fiscal-year-error")
 		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
+	else :
+		fycv  = frappe.db.sql("""select name from `tabPeriod Closing Voucher` where docstatus = 1 and fiscal_year in (select fy.name from `tabFiscal Year` fy
+		where %s order by fy.year_start_date desc)""" % cond, {
+			"fiscal_year": fiscal_year,
+			"transaction_date": transaction_date,
+			"company": company
+		}, as_dict=as_dict)
+		if fycv :
+			throw(_("Transaction is made in Closed Fiscal Year")) 
+				
 	return fy
 
 def validate_fiscal_year(date, fiscal_year, label=_("Date"), doc=None):
