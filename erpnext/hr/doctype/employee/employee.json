@@ -2766,11 +2766,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
-<<<<<<< HEAD
  "modified": "2018-04-25 09:08:06.852604", 
-=======
- "modified": "2018-04-14 13:30:43.761434", 
->>>>>>> Removed employee table from Salary Structure and added employee name in all forms
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
