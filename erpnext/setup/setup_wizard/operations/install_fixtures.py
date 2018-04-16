@@ -234,7 +234,7 @@ def install(country=None):
 			- To Date: {{to_date}} <br>\
 			- Status: {{status}}"),
 			"owner": frappe.session.user},
-	
+
 		{'doctype': "Party Type", "party_type": "Customer"},
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},

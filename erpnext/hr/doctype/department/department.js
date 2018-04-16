@@ -9,7 +9,7 @@ frappe.ui.form.on('Department', {
 				filters:{
 					user: doc.user_id
 				}
-			}
+			};
 		});
 		frm.set_query("expense_approver", "expense_approvers", function(doc) {
 			return {
@@ -17,7 +17,7 @@ frappe.ui.form.on('Department', {
 				filters:{
 					user: doc.user_id
 				}
-			}
+			};
 		});
 	}
 });

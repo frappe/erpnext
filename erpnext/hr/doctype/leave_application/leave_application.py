@@ -2,12 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
 	comma_or, get_fullname
 from erpnext.hr.utils import set_employee_name
-from frappe.utils.user import get_user_fullname
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
@@ -215,8 +214,6 @@ class LeaveApplication(Document):
 		if not employee.user_id:
 			return
 
-		sender_name = get_user_fullname(self.leave_approver)
-
 		parent_doc = frappe.get_doc('Leave Application', self.name)
 		args = parent_doc.as_dict()
 
@@ -234,8 +231,6 @@ class LeaveApplication(Document):
 		})
 
 	def notify_leave_approver(self):
-
-		sender_name = get_user_fullname(self.leave_approver)
 
 		parent_doc = frappe.get_doc('Leave Application', self.name)
 		args = parent_doc.as_dict()
