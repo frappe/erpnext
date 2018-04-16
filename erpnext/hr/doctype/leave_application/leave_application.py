@@ -256,7 +256,6 @@ class LeaveApplication(Document):
 	def notify(self, args):
 		args = frappe._dict(args)
 		# args -> message, message_to, subject
-		frappe.errprint(self.status)
 		if cint(self.follow_via_email):
 			contact = args.message_to
 			if not isinstance(contact, list):
@@ -277,37 +276,6 @@ class LeaveApplication(Document):
 				frappe.msgprint(_("Email sent to {0}").format(contact))
 			except frappe.OutgoingEmailError:
 				pass
-
-@frappe.whitelist()
-def get_approvers(doctype, txt, searchfield, start, page_len, filters):
-
-	if not filters.get("employee"):
-		frappe.throw(_("Please select Employee Record first."))
-
-	approvers = []
-	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
-	if employee_department:
-		department_details = frappe.db.get_value("Department", {"name": employee_department}, ["lft", "rgt"], as_dict=True)
-	if department_details:
-		department_list = frappe.db.sql("""select name from `tabDepartment` where lft <= %s
-			and rgt >= %s
-			order by lft desc""", (department_details.lft, department_details.rgt), as_list = True)
-
-	if filters.get("doctype") == "Leave Application":
-		table = "Employee Leave Approver"
-		approver = "leave_approver"
-	else:
-		table = "Employee Expense Approver"
-		approver = "expense_approver"
-	if department_list:
-		for d in department_list:
-			approvers += frappe.db.sql("""select user.name, user.first_name, user.last_name from
-				tabUser user, `tab%s` approver where
-				approver.parent = %s
-				and user.name like %s
-				and approver.%s=user.name"""% (table, '%s', '%s', approver),(d, "%" + txt + "%"), as_list=True)
-
-	return approvers
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):

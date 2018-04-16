@@ -12,7 +12,7 @@ frappe.ui.form.on("Leave Application", {
 
 		frm.set_query("leave_approver", function() {
 			return {
-				query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
 				filters: {
 					employee: frm.doc.employee,
 					doctype: frm.doc.doctype
