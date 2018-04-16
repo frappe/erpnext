@@ -213,27 +213,12 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 
-		{'doctype': "Email Template", "name": _("Leave Approval Notification"), "subject": _("Leave Approval Notification"),
-			"response": _(
-			"Leave Approval Notification <br><br>\
-			- Leave Application: {{name}} <br>\
-			- Employee: {{employee_name}} <br>\
-			- Leave Type: {{leave_type}} <br>\
-			- From Date: {{from_date}} <br>\
-			- To Date: {{to_date}} <br>\
-			- Status: {{status}}"),
-			"owner": frappe.session.user},
-
-		{'doctype': "Email Template", "name": _("Leave Status Notification"), "subject": _("Leave Status Notification"),
-			"response": _(
-			"Leave Status Notification <br><br>\
-			- Leave Application: {{name}} <br>\
-			- Employee: {{employee_name}} <br>\
-			- Leave Type: {{leave_type}} <br>\
-			- From Date: {{from_date}} <br>\
-			- To Date: {{to_date}} <br>\
-			- Status: {{status}}"),
-			"owner": frappe.session.user},
+		{"doctype": "Email Template", "name": _("Leave Approval Notification"),\
+			"response": frappe.render_template("erpnext/hr/doctype/leave_application/leave_application_email_template.html",\
+				{'data': "Leave Approval Notification"}), 'subject': _("Leave Approval Notification"), "owner": frappe.session.user},
+		{"doctype": "Email Template", "name": _("Leave Status Notification"),\
+			"response": frappe.render_template("erpnext/hr/doctype/leave_application/leave_application_email_template.html",\
+				{'data': "Leave Status Notification"}), 'subject': _("Leave Status Notification"), "owner": frappe.session.user},
 
 		{'doctype': "Party Type", "party_type": "Customer"},
 		{'doctype': "Party Type", "party_type": "Supplier"},

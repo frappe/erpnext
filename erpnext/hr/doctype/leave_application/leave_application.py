@@ -218,6 +218,9 @@ class LeaveApplication(Document):
 		args = parent_doc.as_dict()
 
 		template = frappe.db.get_single_value('HR Settings', 'leave_status_notification_template')
+		if not template:
+			frappe.msgprint(_("Please set default template for Leave Status Notification in HR Settings."))
+			return
 		email_template = frappe.get_doc("Email Template", template)
 		message = frappe.render_template(email_template.response, args)
 
@@ -236,6 +239,9 @@ class LeaveApplication(Document):
 		args = parent_doc.as_dict()
 
 		template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
+		if not template:
+			frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
+			return
 		email_template = frappe.get_doc("Email Template", template)
 		message = frappe.render_template(email_template.response, args)
 
