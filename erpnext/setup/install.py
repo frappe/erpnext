@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 
 import frappe
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
+from .default_success_action import DEFAULT_SUCCESS_ACTION
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
@@ -20,6 +21,7 @@ def after_install():
 	create_print_zero_amount_taxes_custom_field()
 	add_all_roles_to("Administrator")
 	create_default_cash_flow_mapper_templates()
+	create_default_success_action()
 	frappe.db.commit()
 
 
@@ -78,3 +80,10 @@ def create_default_cash_flow_mapper_templates():
 		if not frappe.db.exists('Cash Flow Mapper', mapper['section_name']):
 			doc = frappe.get_doc(mapper)
 			doc.insert(ignore_permissions=True)
+
+def create_default_success_action():
+	default_success_actions = DEFAULT_SUCCESS_ACTION
+	for success_action in default_success_actions:
+			if not frappe.db.exists('Success Action', success_action.get("for_doctype")):
+				doc = frappe.get_doc(success_action)
+				doc.insert(ignore_permissions=True)
