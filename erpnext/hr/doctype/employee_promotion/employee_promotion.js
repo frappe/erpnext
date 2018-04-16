@@ -4,7 +4,7 @@
 frappe.ui.form.on('Employee Promotion', {
 	onload: function(frm) {
 		frappe.call({
-			method: 'erpnext.hr.doctype.employee_promotion.employee_promotion.get_employee_fields_label',
+			method: 'erpnext.hr.utils.get_employee_fields_label',
 			callback: function(r) {
 				var df = frappe.meta.get_docfield("Employee Property History","property", frm.doc.name);
 				df.options = r.message;
