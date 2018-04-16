@@ -97,17 +97,6 @@ data_map = {
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date, posting_time, name",
 	},
-	"Work Order": {
-		"columns": ["name", "production_item as item_code",
-			"(qty - produced_qty) as qty",
-			"fg_warehouse as warehouse"],
-		"conditions": ["docstatus=1", "status != 'Stopped'", "ifnull(fg_warehouse, '')!=''",
-			"qty > produced_qty"],
-		"links": {
-			"item_code": ["Item", "name"],
-			"warehouse": ["Warehouse", "name"]
-		},
-	},
 	"Material Request Item": {
 		"columns": ["item.name as name", "item_code", "warehouse",
 			"(qty - ordered_qty) as qty"],

@@ -25,8 +25,6 @@ def execute(filters=None):
 			"buying_rate", "base_amount", "buying_amount", "gross_profit", "gross_profit_percent"],
 		"warehouse": ["warehouse", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
 			"gross_profit", "gross_profit_percent"],
-		"territory": ["territory", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
-			"gross_profit", "gross_profit_percent"],
 		"brand": ["brand", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
 			"gross_profit", "gross_profit_percent"],
 		"item_group": ["item_group", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",

@@ -249,7 +249,6 @@ class PurchaseOrder(BuyingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': '',
 			'join_field': 'sales_order_item',
-			'source_dt': 'Purchase Order Item',
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty'
 		})
