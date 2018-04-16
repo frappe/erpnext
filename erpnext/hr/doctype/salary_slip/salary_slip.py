@@ -411,7 +411,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
-			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
+			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
