@@ -21,6 +21,9 @@ frappe.ui.form.on("Journal Entry", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
+		}
+
+		if(frm.doc.docstatus==1 && frm.doc.naming_series=="JV-") {
 			frm.add_custom_button(__('Reverse Journal Entry'), function() {
 				return erpnext.journal_entry.reverse_journal_entry(frm);
 			});
