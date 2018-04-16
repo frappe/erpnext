@@ -36,8 +36,8 @@ frappe.ui.form.on("Leave Application", {
 			frm.set_intro(__("Fill the form and save it"));
 		}
 		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'leave_approver_mandatory_in_leave_application', (r) => {
-			if (frm.doc.docstatus < 1 && (r.leave_approver_mandatory_in_leave_application == 0)) {
-				frm.toggle_reqd("leave_approver", false);
+			if (frm.doc.docstatus < 1 && (r.leave_approver_mandatory_in_leave_application == 1)) {
+				frm.toggle_reqd("leave_approver", true);
 			}
 		});
 	},

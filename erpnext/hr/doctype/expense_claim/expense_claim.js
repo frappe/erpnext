@@ -188,6 +188,11 @@ frappe.ui.form.on("Expense Claim", {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __("Make"));
 		}
+		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'expense_approver_mandatory_in_expense_claim', (r) => {
+			if (frm.doc.docstatus < 1 && (r.expense_approver_mandatory_in_expense_claim == 1)) {
+				frm.toggle_reqd("expense_approver", true);
+			}
+		});
 	},
 
 	make_payment_entry: function(frm) {
