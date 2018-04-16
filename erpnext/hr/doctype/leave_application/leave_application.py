@@ -81,8 +81,10 @@ class LeaveApplication(Document):
 			"to_date": self.to_date,
 			"company": self.company
 		}, as_dict=1)
-
 		if leave_period:
+			holidays = 0
+			if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
+				holidays = get_holidays(self.employee, self.from_date, self.to_date)
 			leave_days = get_approved_leaves_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
 			this_leave_days = date_diff(getdate(self.to_date), getdate(self.from_date))
 			if self.half_day:
@@ -92,7 +94,7 @@ class LeaveApplication(Document):
 					this_leave_days = this_leave_days + .5
 			else:
 				this_leave_days = this_leave_days + 1
-			total_leave_days = this_leave_days + leave_days
+			total_leave_days = this_leave_days + leave_days - holidays
 			if total_leave_days > leave_type.max_leaves_allowed:
 				msg = _("Maximum Parental Leave allowed is exceed by {0} between {1} and {2} of Leave Period: ")\
 				.format(total_leave_days - leave_type.max_leaves_allowed, leave_period[0].from_date, leave_period[0].to_date)\
