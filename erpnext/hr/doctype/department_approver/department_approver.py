@@ -8,16 +8,17 @@ from frappe import _
 from frappe.model.document import Document
 
 class DepartmentApprover(Document):
-	
-	def get_department_approvers(doctype, txt, searchfield, start, page_len, filters):
-		return get_approver_list(filters.get("user"))
+	pass
 
-	def get_approver_list(name):
-		return frappe.db.sql("""select user.name, user.first_name, user.last_name from
-			tabUser user where
-			user.enabled and
-			user.name != %s 
-			""", name or "")
+def get_department_approvers(doctype, txt, searchfield, start, page_len, filters):
+	return get_approver_list(filters.get("user"))
+
+def get_approver_list(name):
+	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
+		tabUser user where
+		user.enabled and
+		user.name != %s 
+		""", name or "")
 
 @frappe.whitelist()
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
