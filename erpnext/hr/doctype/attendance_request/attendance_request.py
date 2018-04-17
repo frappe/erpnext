@@ -24,8 +24,7 @@ class AttendanceRequest(Document):
 				attendance_obj.cancel()
 
 	def validate_date(self):
-		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
-		relieving_date = frappe.db.get_value("Employee", self.employee, "relieving_date")
+		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee, ["date_of_joining", "relieving_date"])
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To date can not be less than from date"))
 		elif getdate(self.from_date) > getdate(nowdate()):
