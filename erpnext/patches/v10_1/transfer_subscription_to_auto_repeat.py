@@ -14,7 +14,7 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'journal_entry')
 	frappe.reload_doc('buying', 'doctype', 'purchase_order')
 	frappe.reload_doc('buying', 'doctype', 'supplier_quotation')
-	frappe.reload_doc('desk', 'doctype', 'Auto Repeat')
+	frappe.reload_doc('desk', 'doctype', 'auto_repeat')
 	frappe.reload_doc('selling', 'doctype', 'quotation')
 	frappe.reload_doc('selling', 'doctype', 'sales_order')
 	frappe.reload_doc('stock', 'doctype', 'purchase_receipt')
@@ -28,4 +28,4 @@ def execute():
 	for doc in subscriptions:
 		doc['doctype'] = 'Auto Repeat'
 		auto_repeat = frappe.get_doc(doc)
-		auto_repeat.insert()
+		auto_repeat.db_insert()
