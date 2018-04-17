@@ -2,6 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Staffing Plan', {
+	setup: function(frm) {
+		frm.set_query("designation", "staffing_details", function() {
+			let designations = [];
+			$.each(frm.doc.staffing_details, function(index, staff_detail) {
+				if(staff_detail.designation){
+					designations.push(staff_detail.designation)
+				}
+			})
+			// Filter out designations already selected in Staffing Plan Detail
+			return {
+				filters: [
+					['Designation', 'name', 'not in', designations],
+				]
+			}
+		});
+	},
+
 	refresh: function(frm) {
 	}
 });
@@ -42,7 +59,6 @@ frappe.ui.form.on('Staffing Plan Detail', {
 
 });
 
-// ToDo: Handle if designation is selected multiple times
 var set_vacancies = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn]
 	if(child.number_of_positions) {
