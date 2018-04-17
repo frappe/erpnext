@@ -18,7 +18,7 @@ class ShiftAssignment(Document):
 			if not self.name:
 				self.name = "New Shift Assignment"
 
-			for d in frappe.db.sql("""
+			d = frappe.db.sql("""
 				select
 					name, shift_type, date
 				from `tabShift Assignment`
@@ -26,17 +26,18 @@ class ShiftAssignment(Document):
 				and date = %(date)s
 				and name != %(name)s""", {
 					"employee": self.employee,
+					"shift_type": self.shift_type,
 					"date": self.date,
 					"name": self.name
-				}, as_dict = 1):
+				}, as_dict = 1)
 
-				if (getdate(self.date) == getdate(d.date)
-					and self.shift_type == d.shift_type ):
-						self.throw_overlap_error(d)
+			for date_overlap in d:
+				if date_overlap['name']:
+					self.throw_overlap_error(date_overlap)
 
 	def throw_overlap_error(self, d):
-		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
-			d['shift_type'], formatdate(d['date']), formatdate(d['date'])) \
+		msg = _("Employee {0} has already applied for {1} on {2} : ").format(self.employee,
+			d['shift_type'], formatdate(d['date'])) \
 			+ """ <b><a href="#Form/Shift Request/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 

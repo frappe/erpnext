@@ -35,25 +35,26 @@ class ShiftRequest(Document):
 			if not self.name:
 				self.name = "New Shift Request"
 
-			for d in frappe.db.sql("""
+			d = frappe.db.sql("""
 				select
 					name, shift_type, from_date, to_date
 				from `tabShift Request`
 				where employee = %(employee)s and docstatus < 2
-				and to_date >= %(from_date)s and from_date <= %(to_date)s
+				and ((%(from_date)s >= from_date
+					and %(from_date)s <= to_date) or
+					( %(to_date)s >= from_date
+					and %(to_date)s <= to_date ))
 				and name != %(name)s""", {
 					"employee": self.employee,
+					"shift_type": self.shift_type,
 					"from_date": self.from_date,
 					"to_date": self.to_date,
 					"name": self.name
-				}, as_dict = 1):
+				}, as_dict=1)
 
-				if (((getdate(self.from_date) >= getdate(d.to_date) 
-					or getdate(self.from_date) <= getdate(d.from_date))
-					or (getdate(self.to_date) >= getdate(d.from_date) 
-					or getdate(self.to_date) <= getdate(d.to_date))) and
-					self.shift_type == d.shift_type ):
-						self.throw_overlap_error(d)
+			for date_overlap in d:
+				if date_overlap ['name']:
+					self.throw_overlap_error(date_overlap)
 
 	def throw_overlap_error(self, d):
 		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
