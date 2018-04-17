@@ -22,13 +22,35 @@ class ReceivablePayableReport(object):
 		return columns, data, None, chart
 
 	def get_columns(self, party_naming_by, args):
-		columns = [_("Posting Date") + ":Date:80", _(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
+		columns = []
+		columns.append({
+			"label": _("Posting Date"),
+			"fieldtype": "Date",
+			"fieldname": "posting_date",
+			"width": 90
+		})
+
+		columns += [_(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
 
 		if party_naming_by == "Naming Series":
 			columns += [args.get("party_type") + " Name::110"]
 
-		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":120",
-			_("Due Date") + ":Date:80"]
+		columns.append({
+			"label": _("Voucher Type"),
+			"fieldtype": "Data",
+			"fieldname": "voucher_type",
+			"width": 110
+		})
+
+		columns.append({
+			"label": _("Voucher No"),
+			"fieldtype": "Dynamic Link",
+			"fieldname": "voucher_no",
+			"width": 110,
+			"options": "voucher_type",
+		})
+
+		columns += [_("Due Date") + ":Date:80"]
 
 		if args.get("party_type") == "Supplier":
 			columns += [_("Bill No") + "::80", _("Bill Date") + ":Date:80"]
@@ -114,7 +136,7 @@ class ReceivablePayableReport(object):
 		return_entries = self.get_return_entries(args.get("party_type"))
 
 		data = []
-		pdc_details = get_pdc_details(args.get("party_type"))
+		pdc_details = get_pdc_details(args.get("party_type"), self.filters.report_date)
 
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
@@ -160,6 +182,7 @@ class ReceivablePayableReport(object):
 						row.append(company_currency)
 
 					pdc = pdc_details.get((gle.voucher_no, gle.party), {})
+
 					remaining_balance = outstanding_amount - flt(pdc.get("pdc_amount"))
 					row += [pdc.get("pdc_date"), pdc.get("pdc_ref"),
 						flt(pdc.get("pdc_amount")), remaining_balance]
@@ -392,7 +415,7 @@ def get_ageing_data(first_range, second_range, third_range, age_as_on, entry_dat
 
 	return [age] + outstanding_range
 
-def get_pdc_details(party_type):
+def get_pdc_details(party_type, report_date):
 	pdc_details = frappe._dict()
 
 	for pdc in frappe.db.sql("""
@@ -405,13 +428,14 @@ def get_pdc_details(party_type):
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus < 2 and pent.reference_date >= pent.posting_date
+			pent.docstatus < 2 and pent.reference_date >= %s
 			and pent.party_type = %s
-			group by pent.party, pref.reference_name""", party_type, as_dict=1):
+			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
 
 	if scrub(party_type):
-		amount_field = "jea.debit_in_account_currency + jea.credit_in_account_currency"
+		amount_field = ("jea.debit_in_account_currency"
+			if party_type == 'Supplier' else "jea.credit_in_account_currency")
 	else:
 		amount_field = "jea.debit + jea.credit"
 
@@ -425,9 +449,9 @@ def get_pdc_details(party_type):
 		on
 			(jea.parent = je.name)
 		where
-			je.docstatus < 2 and je.cheque_date >= je.posting_date
+			je.docstatus < 2 and je.cheque_date >= %s
 			and jea.party_type = %s
-			group by jea.party, jea.reference_name""".format(amount_field), party_type, as_dict=1):
+			group by jea.party, jea.reference_name""".format(amount_field), (report_date, party_type), as_dict=1):
 			if (pdc.invoice_no, pdc.party) in pdc_details:
 				pdc_details[(pdc.invoice_no, pdc.party)]["pdc_amount"] += pdc.pdc_amount
 			else:

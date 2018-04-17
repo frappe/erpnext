@@ -1,5 +1,4 @@
 import frappe
-from frappe import _
 from erpnext.stock.utils import get_bin
 
 def execute():
@@ -24,7 +23,7 @@ def execute():
 	# Update reserved warehouse
 	for item in po_item:
 		reserve_warehouse = get_warehouse(item.rm_item_code, item.company, company_warehouse, item_wh)
-		update_res_warehouse = frappe.db.sql("""update `tabPurchase Order Item Supplied`
+		frappe.db.sql("""update `tabPurchase Order Item Supplied`
 			set reserve_warehouse = %s
 			where parent = %s and rm_item_code = %s
 		""", (reserve_warehouse, item["poname"], item["rm_item_code"]))
@@ -38,8 +37,11 @@ def execute():
 			and po.is_subcontracted = "Yes"
 			and po.docstatus = 1"""), as_dict=1)
 	for d in item_wh_bin:
-		stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
-		stock_bin.update_reserved_qty_for_sub_contracting()
+		try:
+			stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
+			stock_bin.update_reserved_qty_for_sub_contracting()
+		except:
+			pass
 
 def get_warehouse(item_code, company, company_warehouse, item_wh):
 	reserve_warehouse = item_wh.get(item_code)

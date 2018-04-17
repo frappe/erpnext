@@ -75,15 +75,17 @@ class Bin(Document):
 
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
-			in open production orders'''
-		self.reserved_qty_for_production = frappe.db.sql('''select sum(required_qty - transferred_qty)
-			from `tabProduction Order` pro, `tabProduction Order Item` item
+			in open work orders'''
+		self.reserved_qty_for_production = frappe.db.sql('''
+			select sum(item.required_qty - item.transferred_qty)
+			from `tabWork Order` pro, `tabWork Order Item` item
 			where
 				item.item_code = %s
 				and item.parent = pro.name
 				and pro.docstatus = 1
 				and item.source_warehouse = %s
-				and pro.status not in ("Stopped", "Completed")''', (self.item_code, self.warehouse))[0][0]
+				and pro.status not in ("Stopped", "Completed")
+				and item.required_qty > item.transferred_qty''', (self.item_code, self.warehouse))[0][0]
 
 		self.set_projected_qty()
 
@@ -114,16 +116,21 @@ class Bin(Document):
 				se.docstatus=1
 				and se.purpose='Subcontract'
 				and ifnull(se.purchase_order, '') !=''
-				and sed.item_code = %s
+				and (sed.item_code = %(item)s or sed.original_item = %(item)s)
 				and se.name = sed.parent
 				and se.purchase_order = po.name
 				and po.docstatus = 1
 				and po.is_subcontracted = 'Yes'
 				and po.status != 'Closed'
 				and po.per_received < 100
-		""", (self.item_code))[0][0]
+		""", {'item': self.item_code})[0][0]
 
-		self.db_set('reserved_qty_for_sub_contract', (reserved_qty_for_sub_contract - materials_transferred))
+		if reserved_qty_for_sub_contract > materials_transferred:
+			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred
+		else:
+			reserved_qty_for_sub_contract = 0
+
+		self.db_set('reserved_qty_for_sub_contract', reserved_qty_for_sub_contract)
 		self.set_projected_qty()
 		self.db_set('projected_qty', self.projected_qty)
 

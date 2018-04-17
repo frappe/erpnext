@@ -24,6 +24,15 @@ frappe.ui.form.on("Purchase Order", {
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+
+		frm.set_query("reserve_warehouse", "supplied_items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
 	},
 
 	onload: function(frm) {
@@ -210,14 +219,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		]
 
 		me.dialog = new frappe.ui.Dialog({
-			title: title,fields: fields
-			});
+			title: title, fields: fields
+		});
 
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {
 			if (item.rm_item_code && item.main_item_code) {
 					me.raw_material_data.push ({
-						'name':index,
+						'name':item.name,
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
 						'item_name': item.rm_item_code,

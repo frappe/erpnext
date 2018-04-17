@@ -444,27 +444,49 @@ $.extend(erpnext.item, {
 			return selected_attributes;
 		}
 
-		let attribute_names = frm.doc.attributes.map(d => d.attribute);
-
-		attribute_names.forEach(function(attribute) {
+		frm.doc.attributes.forEach(function(d) {
 			let p = new Promise(resolve => {
-				frappe.call({
-					method:"frappe.client.get_list",
-					args:{
-						doctype:"Item Attribute Value",
-						filters: [
-							["parent","=", attribute]
-						],
-						fields: ["attribute_value"],
-						limit_start: 0,
-						limit_page_length: 500
-					}
-				}).then((r) => {
-					if(r.message) {
-						attr_val_fields[attribute] = r.message.map(function(d) { return d.attribute_value; });
-						resolve();
-					}
-				});
+				if(!d.numeric_values) {
+					frappe.call({
+						method:"frappe.client.get_list",
+						args:{
+							doctype:"Item Attribute Value",
+							filters: [
+								["parent","=", d.attribute]
+							],
+							fields: ["attribute_value"],
+							limit_start: 0,
+							limit_page_length: 500,
+							parent: "Item"
+						}
+					}).then((r) => {
+						if(r.message) {
+							attr_val_fields[d.attribute] = r.message.map(function(d) { return d.attribute_value; });
+							resolve();
+						}
+					});
+				} else {
+					frappe.call({
+						method:"frappe.client.get",
+						args:{
+							doctype:"Item Attribute",
+							name: d.attribute
+						}
+					}).then((r) => {
+						if(r.message) {
+							const from = r.message.from_range;
+							const to = r.message.to_range;
+							const increment = r.message.increment;
+
+							let values = [];
+							for(var i = from; i <= to; i += increment) {
+								values.push(i);
+							}
+							attr_val_fields[d.attribute] = values;
+							resolve();
+						}
+					});
+				}
 			});
 
 			promises.push(p);
@@ -577,7 +599,8 @@ $.extend(erpnext.item, {
 								["parent","=", i],
 								["attribute_value", "like", term + "%"]
 							],
-							fields: ["attribute_value"]
+							fields: ["attribute_value"],
+							parent: "Item"
 						},
 						callback: function(r) {
 							if (r.message) {
@@ -630,4 +653,12 @@ $.extend(erpnext.item, {
 		}
 		frm.layout.refresh_sections();
 	}
+});
+
+frappe.ui.form.on("Item", {
+	setup: function(frm) {
+		// #13478 : Default Accounts in Item from Item Group
+		cur_frm.add_fetch('item_group', 'default_expense_account', 'expense_account');
+		cur_frm.add_fetch('item_group', 'default_income_account', 'income_account');
+	},
 });

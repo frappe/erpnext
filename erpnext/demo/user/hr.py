@@ -34,14 +34,14 @@ def work():
 		payroll_entry.salary_slip_based_on_timesheet = 0
 		payroll_entry.create_salary_slips()
 		payroll_entry.submit_salary_slips()
-		payroll_entry.make_accural_jv_entry()
+		payroll_entry.make_accrual_jv_entry()
 		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
 		payroll_entry.salary_slip_based_on_timesheet = 1
 		payroll_entry.create_salary_slips()
 		payroll_entry.submit_salary_slips()
-		payroll_entry.make_accural_jv_entry()
+		payroll_entry.make_accrual_jv_entry()
 		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 

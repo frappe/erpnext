@@ -309,7 +309,8 @@ class DeliveryNote(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
-			dn_doc.update_billing_percentage(update_modified=update_modified)
+			if dn_doc.net_total > 0:
+				dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
 
@@ -387,6 +388,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been invoiced"))

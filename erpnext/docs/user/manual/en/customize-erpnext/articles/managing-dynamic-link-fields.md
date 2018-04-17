@@ -22,7 +22,7 @@ By **Doctype** mentioned in the Option field, we mean parent Doctype. So, just l
 ---- Quotation<br>
 ---- Sales Invoice<br>
 ---- Employee<br>
----- Production Order<br>
+---- Work Order<br>
 .. and so on.
 
 So linking this field with parent Doctype will list all the Doctype records.

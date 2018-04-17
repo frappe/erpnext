@@ -11,6 +11,21 @@ from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
 hub_url = "https://hubmarket.org"
+# hub_url = "http://159.89.175.122"
+# hub_url = "http://erpnext.hub:8000"
+
+class OAuth2Session():
+	def __init__(self, headers):
+		self.headers = headers
+	def get(self, url, params, headers, verify):
+		res = requests.get(url, params=params, headers=self.headers, verify=verify)
+		return res
+	def post(self, url, data, verify):
+		res = requests.post(url, data=data, headers=self.headers, verify=verify)
+		return res
+	def put(self, url, data, verify):
+		res = requests.put(url, data=data, headers=self.headers, verify=verify)
+		return res
 
 class HubSetupError(frappe.ValidationError): pass
 
@@ -34,6 +49,33 @@ class HubSettings(Document):
 		}).insert()
 
 		doc.run()
+
+	def pre_reg(self):
+		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
+		protocol = 'http://'
+		route = '/token'
+		data = {
+			'site_name': site_name,
+			'protocol': protocol,
+			'route': route
+		}
+
+		redirect_url = protocol + site_name + route
+		post_url = hub_url + '/api/method/hub.hub.api.pre_reg'
+
+		response = requests.post(post_url, data=data)
+		response.raise_for_status()
+		message = response.json().get('message')
+
+		if message and message.get('client_id'):
+			print("======CLIENT_ID======")
+			print(message.get('client_id'))
+
+			return {
+				'client_id': message.get('client_id'),
+				'redirect_uri': redirect_url
+			}
+
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
