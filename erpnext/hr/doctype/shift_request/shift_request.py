@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate
+from frappe.utils import formatdate, getdate
 
 class OverlapError(frappe.ValidationError): pass
 
