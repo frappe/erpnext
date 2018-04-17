@@ -16,7 +16,7 @@ class ShiftRequest(Document):
 		self.validate_shift_request_overlap_dates();
 
 	def on_submit(self):
-		date_list = self.get_date_list(self.from_date, self.to_date)
+		date_list = self.get_working_days(self.from_date, self.to_date)
 		for date in date_list:
 			assignment_doc = frappe.new_doc("Shift Assignment")
 			assignment_doc.company = self.company
@@ -62,7 +62,7 @@ class ShiftRequest(Document):
 			+ """ <b><a href="#Form/Shift Request/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 
-	def get_date_list(self, start_date, end_date):
+	def get_working_days(self, start_date, end_date):
 		start_date, end_date = getdate(start_date), getdate(end_date)
 
 		from datetime import timedelta
