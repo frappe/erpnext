@@ -40,11 +40,11 @@ def validate_filters(filters, account_details):
 	if filters.get("account") and not account_details.get(filters.account):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
 
-	if filters.get("account") and filters.get("group_by_account") \
-		and account_details[filters.account].is_group == 0:
+	if (filters.get("account") and filters.get("group_by") == 'Group by Account'
+		and account_details[filters.account].is_group == 0):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
-	if filters.get("voucher_no") and filters.get("group_by_voucher"):
+	if (filters.get("voucher_no") and filters.get("group_by") == 'Group by Voucher'):
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
 	if filters.from_date > filters.to_date:
@@ -106,9 +106,9 @@ def get_gl_entries(filters):
 	select_fields = """, sum(debit_in_account_currency) as debit_in_account_currency,
 		sum(credit_in_account_currency) as credit_in_account_currency""" \
 
-
-	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
-		if filters.get("group_by_voucher") else "group by name"
+	group_by_condition = "group by name"
+	if filters.get("group_by") == "Group by Voucher":
+		group_by_condition = "group by voucher_type, voucher_no, account, cost_center"
 
 	gl_entries = frappe.db.sql(
 		"""
@@ -144,13 +144,17 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
+		conditions.append("party_type in ('Customer', 'Supplier')")
+
 	if filters.get("party_type"):
 		conditions.append("party_type=%(party_type)s")
 
 	if filters.get("party"):
 		conditions.append("party=%(party)s")
 
-	if not (filters.get("account") or filters.get("party") or filters.get("group_by_account")):
+	if not (filters.get("account") or filters.get("party") or
+		filters.get("group_by") in ["Group by Account", "Group by Party"]):
 		conditions.append("posting_date >=%(from_date)s")
 		conditions.append("posting_date <=%(to_date)s")
 
@@ -168,15 +172,17 @@ def get_conditions(filters):
 
 def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data = []
-	gle_map = initialize_gle_map(gl_entries)
+
+	gle_map = initialize_gle_map(gl_entries, filters)
 
 	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map)
 
 	# Opening for filtered account
 	data.append(totals.opening)
 
-	if filters.get("group_by_account"):
+	if filters.get("group_by") in ["Group by Account", "Group by Party"]:
 		for acc, acc_dict in gle_map.items():
+			# acc
 			if acc_dict.entries:
 				# opening
 				data.append({})
@@ -219,16 +225,19 @@ def get_totals_dict():
 	)
 
 
-def initialize_gle_map(gl_entries):
+def initialize_gle_map(gl_entries, filters):
 	gle_map = frappe._dict()
+	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
+
 	for gle in gl_entries:
-		gle_map.setdefault(gle.account, _dict(totals=get_totals_dict(), entries=[]))
+		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
 	return gle_map
 
 
 def get_accountwise_gle(filters, gl_entries, gle_map):
 	totals = get_totals_dict()
 	entries = []
+	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
 
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += flt(gle.debit)
@@ -240,21 +249,21 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
-			update_value_in_dict(gle_map[gle.account].totals, 'opening', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
 			update_value_in_dict(totals, 'opening', gle)
 
-			update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
 			update_value_in_dict(totals, 'closing', gle)
 
 		elif gle.posting_date <= to_date:
-			update_value_in_dict(gle_map[gle.account].totals, 'total', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
 			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by_account"):
-				gle_map[gle.account].entries.append(gle)
+			if filters.get("group_by") in ["Group by Account", "Group by Party"]:
+				gle_map[gle.get(group_by)].entries.append(gle)
 			else:
 				entries.append(gle)
 
-			update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
 			update_value_in_dict(totals, 'closing', gle)
 
 	return totals, entries
