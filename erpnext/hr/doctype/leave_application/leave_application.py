@@ -33,7 +33,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
-		self.validate_parental_leave()
+		self.validate_applicable_after_max_allowed()
 
 		if hasattr(self, "workflow_state") and self.workflow_state == "Rejected":
 			# notify leave applier about rejection
@@ -42,22 +42,21 @@ class LeaveApplication(Document):
 	def on_submit(self):
 		self.validate_back_dated_application()
 
-	def validate_parental_leave(self):
+	def validate_applicable_after_max_allowed(self):
 		if self.leave_type:
 			leave_type = frappe.get_doc("Leave Type", self.leave_type)
-			if leave_type.is_parental_leave == 1:
-				# Check on Applicable After
-				if leave_type.applicable_after > 0:
-					self.validate_applicable_after(leave_type.applicable_after)
+			# Check on Applicable After
+			if leave_type.applicable_after > 0:
+				self.validate_applicable_after(leave_type.applicable_after)
 
-				# Check if leave cross Max Leaves Allowed
-				if leave_type.max_leaves_allowed > 0:
-					self.validate_max_leave_allowed(leave_type)
+			# Check if leave cross Max Leaves Allowed
+			if leave_type.max_leaves_allowed > 0:
+				self.validate_max_leave_allowed(leave_type)
 
 
 	def validate_applicable_after(self, applicable_after):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
-		leave_days = get_total_approved_leaves_for_period(self.employee, date_of_joining, self.from_date)
+		leave_days = get_approved_leaves_for_period(self.employee, False, date_of_joining, self.from_date)
 		leave_start = getdate(self.from_date)
 		number_of_days = date_diff(leave_start, date_of_joining)
 		if number_of_days > 0:
@@ -66,7 +65,7 @@ class LeaveApplication(Document):
 				holidays = get_holidays(self.employee, date_of_joining, self.from_date)
 			number_of_days = number_of_days - leave_days - holidays
 			if number_of_days < applicable_after:
-				frappe.throw(_("Parental leave applicable after {0} working days").format(applicable_after))
+				frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, applicable_after))
 
 	def validate_max_leave_allowed(self, leave_type):
 		leave_period = frappe.db.sql("""
@@ -96,8 +95,8 @@ class LeaveApplication(Document):
 				this_leave_days = this_leave_days + 1
 			total_leave_days = this_leave_days + leave_days - holidays
 			if total_leave_days > leave_type.max_leaves_allowed:
-				msg = _("Maximum Parental Leave allowed is exceed by {0} between {1} and {2} of Leave Period: ")\
-				.format(total_leave_days - leave_type.max_leaves_allowed, leave_period[0].from_date, leave_period[0].to_date)\
+				msg = _("Maximum {0} allowed is exceed by {1} between {2} and {3} of Leave Period: ")\
+				.format(self.leave_type, total_leave_days - leave_type.max_leaves_allowed, leave_period[0].from_date, leave_period[0].to_date)\
 					+ """ <b><a href="#Form/Leave period/{0}">{0}</a></b>""".format(leave_period[0].name)
 				frappe.throw(msg)
 		else:
@@ -372,38 +371,7 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 	return flt(allocation.total_leaves_allocated) - flt(leaves_taken)
 
 def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
-	leave_applications = frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, total_leave_days
-		from `tabLeave Application`
-		where employee=%(employee)s and leave_type=%(leave_type)s
-			and docstatus=1
-			and (from_date between %(from_date)s and %(to_date)s
-				or to_date between %(from_date)s and %(to_date)s
-				or (from_date < %(from_date)s and to_date > %(to_date)s))
-	""", {
-		"from_date": from_date,
-		"to_date": to_date,
-		"employee": employee,
-		"leave_type": leave_type
-	}, as_dict=1)
-
-	leave_days = 0
-	for leave_app in leave_applications:
-		if leave_app.from_date >= getdate(from_date) and leave_app.to_date <= getdate(to_date):
-			leave_days += leave_app.total_leave_days
-		else:
-			if leave_app.from_date < getdate(from_date):
-				leave_app.from_date = from_date
-			if leave_app.to_date > getdate(to_date):
-				leave_app.to_date = to_date
-
-			leave_days += get_number_of_leave_days(employee, leave_type,
-				leave_app.from_date, leave_app.to_date)
-
-	return leave_days
-
-def get_total_approved_leaves_for_period(employee, from_date, to_date):
-	leave_applications = frappe.db.sql("""
+	query = """
 		select employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s
@@ -411,10 +379,15 @@ def get_total_approved_leaves_for_period(employee, from_date, to_date):
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
-	""", {
+	"""
+	if leave_type:
+		query += "and leave_type=%(leave_type)s"
+
+	leave_applications = frappe.db.sql(query,{
 		"from_date": from_date,
 		"to_date": to_date,
-		"employee": employee
+		"employee": employee,
+		"leave_type": leave_type
 	}, as_dict=1)
 
 	leave_days = 0
