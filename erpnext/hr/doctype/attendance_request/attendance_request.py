@@ -10,8 +10,10 @@ from frappe.utils import getdate, date_diff, add_days, nowdate
 from erpnext.hr.doctype.employee.employee import is_holiday
 
 class AttendanceRequest(Document):
-	def on_submit(self):
+	def validate(self):
 		self.validate_date()
+
+	def on_submit(self):
 		self.create_attendance()
 
 	def on_cancel(self):
@@ -23,18 +25,21 @@ class AttendanceRequest(Document):
 
 	def validate_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+		relieving_date = frappe.db.get_value("Employee", self.employee, "relieving_date")
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To date can not be less than from date"))
 		elif getdate(self.from_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance request can not submit for future dates"))
 		elif date_of_joining and getdate(self.from_date) < getdate(date_of_joining):
 			frappe.throw(_("From date can not be less than employee's joining date"))
+		elif relieving_date and getdate(self.to_date) > getdate(relieving_date):
+			frappe.throw(_("To date can not greater than employee's relieving date"))
 
 	def create_attendance(self):
 		request_days = date_diff(self.to_date, self.from_date)
 		for number in range(request_days):
 			attendance_date = add_days(self.from_date, number)
-			skip_attendance = self.validate_attendance_day(attendance_date)
+			skip_attendance = self.validate_if_attendance_not_applicable(attendance_date)
 			if not skip_attendance:
 				attendance = frappe.new_doc("Attendance")
 				attendance.employee = self.employee
@@ -46,7 +51,7 @@ class AttendanceRequest(Document):
 				attendance.save(ignore_permissions=True)
 				attendance.submit()
 
-	def validate_attendance_day(self, attendance_date):
+	def validate_if_attendance_not_applicable(self, attendance_date):
 		# Check if attendance_date is a Holiday
 		if is_holiday(self.employee, attendance_date):
 			return True
