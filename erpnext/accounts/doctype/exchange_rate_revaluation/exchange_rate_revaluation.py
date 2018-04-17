@@ -18,7 +18,7 @@ class ExchangeRateRevaluation(Document):
 					"balance_in_alternate_currency":get_balance_on(i),
 					"current_exchange_rate":get_average_exchange_rate(i),
 					"difference":-(get_average_exchange_rate(i) * get_balance_on(i))
-					})					
+					})
 		else :
 			frappe.msgprint("Company is not selected")
 
@@ -26,7 +26,7 @@ class ExchangeRateRevaluation(Document):
 	def get_accounts(self):
 		company_currency = erpnext.get_company_currency(self.company)
 		accounts = frappe.db.sql_list("""
-			select name from tabAccount 
+			select name from tabAccount
 			where is_group=0 and report_type='Balance Sheet' and company=%s
 			and not account_currency=%s order by name""",(self.company,company_currency))
 		return accounts
