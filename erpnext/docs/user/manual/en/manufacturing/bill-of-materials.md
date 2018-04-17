@@ -24,7 +24,7 @@ To make a new BOM:
 
   * Select the Item for which you want to make the BOM.
   * Add the operations that you have to go through to make that particular Item in the “Operations” table. For each operation, you will be asked to enter a Workstation. You must create new Workstations as and when necessary.
-  * Workstations are defined only for product costing and Production Order Operations scheduling purposes not inventory. 
+  * Workstations are defined only for product costing and Work Order Operations scheduling purposes not inventory. 
   * Inventory is tracked in Warehouses not Workstations.
 
 ###Costing of a BOM

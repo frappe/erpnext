@@ -54,7 +54,7 @@ frappe.ui.form.on("Sales Order Item", {
 			row.delivery_date = frm.doc.delivery_date;
 			refresh_field("delivery_date", cdn, "items");
 		} else {
-			this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
+			frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
 		}
 	},
 	delivery_date: function(frm, cdt, cdn) {
@@ -65,6 +65,10 @@ frappe.ui.form.on("Sales Order Item", {
 });
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
+	onload: function(doc, dt, dn) {
+		this._super();
+	},
+
 	refresh: function(doc, dt, dn) {
 		var me = this;
 		this._super();
@@ -96,37 +100,37 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if (this.frm.has_perm("submit")) {
 					// close
-					if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed) < 100) {
+					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
 						this.frm.add_custom_button(__('Close'),
 							function() { me.close_sales_order() }, __("Status"))
 					}
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
-					this.frm.add_custom_button(__('Production Order'),
-						function() { me.make_production_order() }, __("Make"));
+					this.frm.add_custom_button(__('Work Order'),
+						function() { me.make_work_order() }, __("Make"));
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
 
 				// sales invoice
-				if(flt(doc.per_billed, 2) < 100) {
+				if(flt(doc.per_billed, 6) < 100) {
 					this.frm.add_custom_button(__('Invoice'),
 						function() { me.make_sales_invoice() }, __("Make"));
 				}
 
 				// material request
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
-					&& flt(doc.per_delivered, 2) < 100) {
+					&& flt(doc.per_delivered, 6) < 100) {
 					this.frm.add_custom_button(__('Material Request'),
 						function() { me.make_material_request() }, __("Make"));
 				}
 
 				// make purchase order
-				if(flt(doc.per_delivered, 2) < 100 && allow_purchase) {
+				if(flt(doc.per_delivered, 6) < 100 && allow_purchase) {
 					this.frm.add_custom_button(__('Purchase Order'),
 						function() { me.make_purchase_order() }, __("Make"));
 				}
@@ -192,15 +196,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.order_type(doc);
 	},
 
-	make_production_order() {
+	make_work_order() {
 		var me = this;
 		this.frm.call({
 			doc: this.frm.doc,
-			method: 'get_production_order_items',
+			method: 'get_work_order_items',
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
+						title: __('Work Order not created'),
 						message: __('No Items with Bill of Materials to Manufacture'),
 						indicator: 'orange'
 					});
@@ -208,8 +212,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 				else if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
-						message: __('Production Order already created for all items with BOM'),
+						title: __('Work Order not created'),
+						message: __('Work Order already created for all items with BOM'),
 						indicator: 'orange'
 					});
 					return;
@@ -229,6 +233,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
 									label: __('Sales Order Item'), hidden:1}
 							],
+							data: r.message,
 							get_data: function() {
 								return r.message
 							}
@@ -240,7 +245,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						primary_action: function() {
 							var data = d.get_values();
 							me.frm.call({
-								method: 'make_production_orders',
+								method: 'make_work_orders',
 								args: {
 									items: data,
 									company: me.frm.doc.company,
@@ -251,9 +256,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								callback: function(r) {
 									if(r.message) {
 										frappe.msgprint({
-											message: __('Production Orders Created: {0}',
+											message: __('Work Orders Created: {0}',
 												[r.message.map(function(d) {
-													return repl('<a href="#Form/Production Order/%(name)s">%(name)s</a>', {name:d})
+													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})

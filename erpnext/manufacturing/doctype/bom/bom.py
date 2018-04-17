@@ -543,6 +543,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.description,
 				item.image,
 				item.stock_uom,
+				item.allow_alternative_item,
 				item.default_warehouse,
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
@@ -604,6 +605,9 @@ def validate_bom_no(item, bom_no):
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
+			if (d.item_code.lower() == item.lower()):
+				rm_item_exists = True
+		for d in bom.scrap_items:
 			if (d.item_code.lower() == item.lower()):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \

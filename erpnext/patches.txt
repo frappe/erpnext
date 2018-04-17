@@ -1,6 +1,7 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
 erpnext.patches.v10_0.rename_schools_to_education
+erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee
@@ -198,7 +199,7 @@ execute:frappe.db.sql("update `tabStock Ledger Entry` set stock_queue = '[]' whe
 erpnext.patches.v5_4.fix_missing_item_images
 erpnext.patches.v5_4.stock_entry_additional_costs
 erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
-execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
+erpnext.patches.v5_7.update_item_description_based_on_item_master
 erpnext.patches.v5_7.item_template_attributes
 execute:frappe.delete_doc_if_exists("DocType", "Manage Variants")
 execute:frappe.delete_doc_if_exists("DocType", "Manage Variants Item")
@@ -509,5 +510,13 @@ erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
 erpnext.patches.v10_0.update_warehouse_address_details
+erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
+erpnext.patches.v10_0.update_hub_connector_domain
+erpnext.patches.v10_0.set_student_party_type
+erpnext.patches.v10_0.update_project_in_sle
+erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v11_0.add_index_on_nestedset_doctypes
+erpnext.patches.v11_0.remove_modules_setup_page
+erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
 erpnext.patches.v10_1.drop_old_subscription_records

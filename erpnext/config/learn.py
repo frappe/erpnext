@@ -219,7 +219,7 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Production Order"),
+					"label": _("Work Order"),
 					"youtube_id": "ZotgLyp2YFY"
 				},
 

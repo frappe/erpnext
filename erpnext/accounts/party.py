@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (add_days, getdate, formatdate, get_first_day, date_diff,
-                          add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
+from frappe.utils import (add_days, getdate, formatdate, date_diff,
+	add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact

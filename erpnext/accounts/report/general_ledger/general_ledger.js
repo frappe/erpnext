@@ -61,7 +61,10 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Party Type"),
 			"fieldtype": "Link",
 			"options": "Party Type",
-			"default": ""
+			"default": "",
+			on_change: function() {
+				frappe.query_report_filters_by_name.party.set_value("");
+			}
 		},
 		{
 			"fieldname":"party",
@@ -82,16 +85,27 @@ frappe.query_reports["General Ledger"] = {
 					frappe.query_report_filters_by_name.party_name.set_value("");
 					return;
 				}
-
-				var fieldname = frappe.scrub(party_type) + "_name";
+				var fieldname = erpnext.utils.get_party_name(party_type) || "name";
 				frappe.db.get_value(party_type, party, fieldname, function(value) {
 					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
 				});
+
+				if (party_type === "Customer" || party_type === "Supplier") {
+					frappe.db.get_value(party_type, party, "tax_id", function(value) {
+						frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+					});
+				}
 			}
 		},
 		{
 			"fieldname":"party_name",
 			"label": __("Party Name"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"tax_id",
+			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
 		},

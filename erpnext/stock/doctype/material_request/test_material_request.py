@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe, unittest, erpnext
 from frappe.utils import flt, today
-from erpnext.stock.doctype.material_request.material_request import raise_production_orders
+from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
@@ -536,8 +536,8 @@ class TestMaterialRequest(unittest.TestCase):
 		requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 
-		prod_order = raise_production_orders(mr.name)
-		po = frappe.get_doc("Production Order", prod_order[0])
+		prod_order = raise_work_orders(mr.name)
+		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
 		

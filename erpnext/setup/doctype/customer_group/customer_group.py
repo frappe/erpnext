@@ -25,3 +25,6 @@ def get_parent_customer_groups(customer_group):
 	return frappe.db.sql("""select name from `tabCustomer Group`
 		where lft <= %s and rgt >= %s
 		order by lft asc""", (lft, rgt), as_dict=True)
+
+def on_doctype_update():
+	frappe.db.add_index("Customer Group", ["lft", "rgt"])

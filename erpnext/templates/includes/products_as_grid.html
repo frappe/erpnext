@@ -5,6 +5,13 @@
 		<div class="product-image-img">
 			{{ product_image_square(thumbnail or website_image) }}
 			<div class="product-text" itemprop="name">{{ item_name }}</div>
+			{% if price_sales_uom %}
+				<div>{{ price_sales_uom }}</div>
+				<div style='font-size: small; margin-bottom: 10px;'>({{ price_stock_uom }} / {{ stock_uom }})</div>
+			{% else %}
+				<div>&nbsp</div>
+				<div style='font-size: small; margin-bottom: 10px;'>&nbsp</div>
+			{% endif %}
 			{% if in_stock or not is_stock_item %}
 				<div style='color: green'> <i class='fa fa-check'></i> {{ _("In stock") }}</div>
 			{% else %}
