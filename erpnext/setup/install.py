@@ -84,6 +84,6 @@ def create_default_cash_flow_mapper_templates():
 def create_default_success_action():
 	default_success_actions = DEFAULT_SUCCESS_ACTION
 	for success_action in default_success_actions:
-			if not frappe.db.exists('Success Action', success_action.get("for_doctype")):
+			if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
 				doc = frappe.get_doc(success_action)
 				doc.insert(ignore_permissions=True)
