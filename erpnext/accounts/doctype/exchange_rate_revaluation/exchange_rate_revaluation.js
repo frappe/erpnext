@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('Exchange Rate Revaluation', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal) {
+			frm.events.get_total_gain_loss(frm);
+		}
 	},
 	get_entries: function(frm) {
 		frappe.call({
@@ -10,9 +13,17 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 			doc: cur_frm.doc,
 			callback: function(r){
 				refresh_field("exchange_rate_revaluation_account");
+				frm.events.get_total_gain_loss(frm);
 			}
 		});
 	},
+	get_total_gain_loss: function(frm) {
+		frm.doc.total_gain_loss = 0;
+		$.each(frm.doc.exchange_rate_revaluation_account, function(i, d) {
+			frm.doc.total_gain_loss += frm.doc.exchange_rate_revaluation_account[i].difference;
+		});
+		refresh_field("total_gain_loss");
+	}
 });
 
 frappe.ui.form.on("Exchange Rate Revaluation Account", {
