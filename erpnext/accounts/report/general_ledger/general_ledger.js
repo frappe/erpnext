@@ -104,21 +104,17 @@ frappe.query_reports["General Ledger"] = {
 			"hidden": 1
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group by"),
+			"fieldtype": "Select",
+			"options": ["Group by Voucher", "Group by Account", "Group by Party"],
+			"default": "Group by Voucher"
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
-		},
-		{
-			"fieldname":"group_by_voucher",
-			"label": __("Group by Voucher"),
-			"fieldtype": "Check",
-			"default": 1
-		},
-		{
-			"fieldname":"group_by_account",
-			"label": __("Group by Account"),
-			"fieldtype": "Check",
 		},
 		{
 			"fieldname": "presentation_currency",
