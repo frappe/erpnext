@@ -54,10 +54,6 @@ var show_dialog = function(frm, field_labels) {
 			args: {employee: frm.doc.employee, fieldname: property},
 			callback: function(r) {
 				if(r.message){
-					if(r.message.datatype == "Date" || r.message.datatype =="Datetime"){
-						d.message.value = frappe.datetime.get_user_fmt(d.message.value)
-						console.log(frappe.datetime.get_user_fmt(d.message.value));
-					}
 					d.data.current = r.message.value;
 					d.fields_dict.field_html.$wrapper.html("")
 					d.set_value('current', r.message.value);
