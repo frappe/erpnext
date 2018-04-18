@@ -30,11 +30,11 @@ def get_current_employee_count(designation):
 	if not designation:
 		return False
 	employee_count = frappe.db.sql("""select count(*) from `tabEmployee` where \
-							designation = %s and status='Active'""", designation)[0][0]
+							designation = '{0}' and status='Active'""".format(designation))[0][0]
 	return employee_count
 
 @frappe.whitelist()
-def get_active_staffing_plan(company, designation, department=None, date=getdate(nowdate())):
+def get_active_staffing_plan_and_vacancies(company, designation, department=None, date=getdate(nowdate())):
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
 
@@ -47,9 +47,9 @@ def get_active_staffing_plan(company, designation, department=None, date=getdate
 	if(date): #ToDo: Date should be mandatory?
 		conditions += " and '{0}' between sp.from_date and sp.to_date".format(date)
 
-	staffing_plan = frappe.db.sql("""select spd.parent \
+	staffing_plan = frappe.db.sql("""select spd.parent, spd.vacancies \
 		from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name
 		where {0}""".format(conditions))
 
 	# Only a signle staffing plan can be active for a designation on given date
-	return staffing_plan[0][0] if staffing_plan else False
+	return staffing_plan[0] if staffing_plan else False
