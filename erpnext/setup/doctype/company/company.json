@@ -42,6 +42,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -73,6 +74,7 @@
    "reqd": 1,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -105,6 +107,7 @@
    "reqd": 1,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -135,6 +138,38 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_on_submit": 0,
+   "bold": 1,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "hidden": 0,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 1,
+   "in_standard_filter": 0,
+   "label": "Is Group",
+   "length": 0,
+   "no_copy": 0,
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 0,
+   "print_hide_if_no_value": 0,
+   "read_only": 0,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 0,
+   "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -163,6 +198,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -193,6 +229,39 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "parent_company",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "Parent Comapny",
+   "length": 0,
+   "no_copy": 0,
+   "options": "Company",
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 0,
+   "print_hide_if_no_value": 0,
+   "read_only": 0,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 0,
+   "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -223,6 +292,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -253,6 +323,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -284,6 +355,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -313,6 +385,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -344,6 +417,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -373,6 +447,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -404,6 +479,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -435,6 +511,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -465,6 +542,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -495,6 +573,7 @@
    "reqd": 1,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -524,6 +603,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -554,6 +634,7 @@
    "reqd": 1,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -585,6 +666,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -617,6 +699,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -649,6 +732,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -679,6 +763,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -709,6 +794,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -742,6 +828,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -773,6 +860,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -806,6 +894,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -837,6 +926,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -868,6 +958,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -899,6 +990,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -928,6 +1020,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0,
    "width": "50%"
   },
@@ -962,6 +1055,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -993,6 +1087,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1024,6 +1119,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1055,6 +1151,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1087,6 +1184,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1118,6 +1216,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1147,6 +1246,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1178,6 +1278,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1207,6 +1308,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1240,6 +1342,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1272,6 +1375,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1302,6 +1406,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1333,6 +1438,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1364,6 +1470,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1394,6 +1501,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1423,6 +1531,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1453,6 +1562,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1483,6 +1593,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1513,6 +1624,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1544,6 +1656,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1575,6 +1688,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1605,6 +1719,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1634,6 +1749,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1665,6 +1781,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1696,6 +1813,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1726,6 +1844,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1755,6 +1874,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1784,6 +1904,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0,
    "width": "50%"
   },
@@ -1817,6 +1938,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1849,6 +1971,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1881,6 +2004,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1912,6 +2036,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -1943,6 +2068,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0,
    "width": "50%"
   },
@@ -1976,6 +2102,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -2006,6 +2133,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
@@ -2036,6 +2164,100 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "Lft",
+   "length": 0,
+   "no_copy": 0,
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 1,
+   "print_hide_if_no_value": 0,
+   "read_only": 1,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 1,
+   "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "Rgt",
+   "length": 0,
+   "no_copy": 0,
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 1,
+   "print_hide_if_no_value": 0,
+   "read_only": 1,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 1,
+   "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "old_parent",
+   "length": 0,
+   "no_copy": 0,
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 1,
+   "print_hide_if_no_value": 0,
+   "read_only": 1,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 0,
+   "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   }
  ],
@@ -2052,15 +2274,14 @@
  "istable": 0,
  "max_attachments": 0,
  "menu_index": 0,
- "modified": "2018-02-14 15:54:26.776363",
- "modified_by": "achilles@erpnext.com",
+ "modified": "2018-04-09 01:54:56.828976",
+ "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
  "owner": "Administrator",
  "permissions": [
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 1,
    "delete": 1,
@@ -2080,7 +2301,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -2100,7 +2320,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -2120,7 +2339,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -2140,7 +2358,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -2160,7 +2377,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -2180,7 +2396,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
