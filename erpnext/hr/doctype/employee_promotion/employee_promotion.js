@@ -23,6 +23,9 @@ frappe.ui.form.on('Employee Promotion', {
 				}
 			});
 		});
+	},
+	employee: function(frm) {
+		frm.add_fetch("employee", "company", "company");
 	}
 });
 
