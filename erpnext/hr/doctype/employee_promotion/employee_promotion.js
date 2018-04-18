@@ -38,9 +38,7 @@ var show_dialog = function(frm, field_labels) {
 		primary_action: () => {
 			d.get_primary_btn().attr('disabled', true);
 			if(d.data){
-				get_property_name(field_labels, d, function(){
-					add_to_details(frm, d);
-				});
+				add_to_details(frm, d);
 			}
 		}
 	});
@@ -54,6 +52,7 @@ var show_dialog = function(frm, field_labels) {
 			callback: function(r) {
 				if(r.message){
 					d.data.current = r.message.value;
+					d.data.property = r.message.label;
 					d.fields_dict.field_html.$wrapper.html("");
 					d.set_value('current', r.message.value);
 					render_dynamic_field(d, r.message.datatype, r.message.options, property);
@@ -125,14 +124,4 @@ var validate_duplicate =  function(frm, fieldname){
 		}
 	});
 	return duplicate;
-}
-
-var get_property_name = function(labels, d, callback) {
-	$.each(labels, function(i, item) {
-		if(item.value == d.data.fieldname){
-			d.data.property = item.label;
-			return;
-		}
-	});
-	callback();
 }

@@ -34,6 +34,7 @@ def get_employee_field_property(employee, fieldname):
 		return {
 			"value" : value,
 			"datatype" : field.fieldtype,
+			"label" : field.label,
 			"options" : options
 		}
 	else:
