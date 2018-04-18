@@ -7,22 +7,26 @@ import frappe, erpnext
 from frappe.model.document import Document
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_average_exchange_rate,get_balance_on
 class ExchangeRateRevaluation(Document):
-	def get_accounts_data(self):
+	def get_accounts_data(self, account=None):
+		child_table = []
 		if self.company:
-			accounts = self.get_accounts()
-			self.exchange_rate_revaluation_account = []
+			if account:
+				accounts = [account]
+			else:	
+				accounts = self.get_accounts()
 			for i in accounts:
 				balance = get_average_exchange_rate(i) * get_balance_on(i)
 				if balance:
-					self.append("exchange_rate_revaluation_account",{
-						"account":i,
-						"balance_in_base_currency":balance,
-						"balance_in_alternate_currency":get_balance_on(i),
-						"current_exchange_rate":get_average_exchange_rate(i),
-						"difference":-(balance)
-					})
+					child_table.append({
+							"account":i,
+							"balance_in_base_currency":balance,
+							"balance_in_alternate_currency":get_balance_on(i),
+							"current_exchange_rate":get_average_exchange_rate(i),
+							"difference":-(balance)
+						})
+			return child_table		
 		else :
-			frappe.msgprint("Company is not selected")
+			return frappe.msgprint("Company is not selected")
 
 
 	def get_accounts(self):
