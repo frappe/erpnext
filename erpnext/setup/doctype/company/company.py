@@ -11,8 +11,11 @@ from frappe.cache_manager import clear_defaults_cache
 
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils.nestedset import NestedSet
 
-class Company(Document):
+class Company(NestedSet):
+	nsm_parent_field = 'parent_company'
+
 	def onload(self):
 		load_address_and_contact(self, "company")
 		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
@@ -78,6 +81,7 @@ class Company(Document):
 				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
 
 	def on_update(self):
+		self.update_nsm_model()
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
@@ -245,10 +249,14 @@ class Company(Document):
 	def abbreviate(self):
 		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
 
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
+
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		self.update_nsm_model()
 		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
 		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
 		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
@@ -387,3 +395,32 @@ def cache_companies_monthly_sales_history():
 	for company in companies:
 		update_company_monthly_sales(company)
 	frappe.db.commit()
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False):
+	if parent == None or parent == "All Companies":
+		parent = ""
+
+	return frappe.db.sql("""
+		select
+			name as value,
+			is_group as expandable
+		from
+			`tab{doctype}` comp
+		where
+			ifnull(parent_company, "")="{parent}"
+		""".format(
+			doctype = frappe.db.escape(doctype),
+			parent=frappe.db.escape(parent)
+		), as_dict=1)
+
+@frappe.whitelist()
+def add_node():
+	from frappe.desk.treeview import make_tree_args
+	args = frappe.form_dict
+	args = make_tree_args(**args)
+
+	if args.parent_company == 'All Companies':
+		args.parent_company = None
+
+	frappe.get_doc(args).insert()
