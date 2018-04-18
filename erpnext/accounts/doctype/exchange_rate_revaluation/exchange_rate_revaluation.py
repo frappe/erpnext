@@ -29,6 +29,6 @@ class ExchangeRateRevaluation(Document):
 		company_currency = erpnext.get_company_currency(self.company)
 		accounts = frappe.db.sql_list("""
 			select name from tabAccount
-			where is_group=0 and report_type='Balance Sheet' and company=%s
+			where is_group=0 and report_type='Balance Sheet' and root_type in ('Asset','Liability') and company=%s
 			and not account_currency=%s order by name""",(self.company,company_currency))
 		return accounts
