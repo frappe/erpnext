@@ -11,8 +11,8 @@ frappe.ui.form.on('Employee Promotion', {
 		cur_frm.fields_dict["promotion_details"].grid.wrapper.find('.grid-add-row').hide();
 		cur_frm.fields_dict["promotion_details"].grid.add_custom_button(__('Add Row'), () => {
 			if(!frm.doc.employee){
-				frappe.msgprint(__("Please select Employee"))
-				return
+				frappe.msgprint(__("Please select Employee"));
+				return;
 			}
 			frappe.call({
 				method: 'erpnext.hr.utils.get_employee_fields_label',
@@ -36,7 +36,6 @@ var show_dialog = function(frm, field_labels) {
 		],
 		primary_action_label: __('Add to Details'),
 		primary_action: () => {
-			var values = d.get_values();
 			d.get_primary_btn().attr('disabled', true);
 			if(d.data){
 				get_property_name(field_labels, d, function(){
@@ -55,17 +54,17 @@ var show_dialog = function(frm, field_labels) {
 			callback: function(r) {
 				if(r.message){
 					d.data.current = r.message.value;
-					d.fields_dict.field_html.$wrapper.html("")
+					d.fields_dict.field_html.$wrapper.html("");
 					d.set_value('current', r.message.value);
 					render_dynamic_field(d, r.message.datatype, r.message.options, property);
 					d.get_primary_btn().attr('disabled', false);
 				}
 			}
 		});
-	}
+	};
 	d.get_primary_btn().attr('disabled', true);
 	d.data = {};
-	d.show()
+	d.show();
 }
 
 var render_dynamic_field = function(d, fieldtype, options, fieldname) {
@@ -89,7 +88,7 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 }
 
 var add_to_details = function(frm, d) {
-	let data = d.data
+	let data = d.data;
 	if(data.fieldname){
 		if(validate_duplicate(frm, data.fieldname)){
 			frappe.show_alert({message:__("Property already added"), indicator:'orange'});
@@ -108,10 +107,10 @@ var add_to_details = function(frm, d) {
 		});
 		frm.refresh_field('promotion_details');
 		d.fields_dict.field_html.$wrapper.html("");
-		d.set_value("property", "")
+		d.set_value("property", "");
 		d.set_value('current', "");
 		frappe.show_alert({message:__("Added to details"),indicator:'green'});
-		d.data = {}
+		d.data = {};
 	}else {
 		frappe.show_alert({message:__("Value missing"),indicator:'red'});
 	}
