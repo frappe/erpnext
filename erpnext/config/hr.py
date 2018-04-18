@@ -263,10 +263,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Shift Assignment",
-				},
-				{
-					"type": "doctype",
-					"name": "Shift Assignment Tool",
 				}
 			]
 		},
