@@ -12,12 +12,14 @@ class ExchangeRateRevaluation(Document):
 			accounts = self.get_accounts()
 			self.exchange_rate_revaluation_account = []
 			for i in accounts:
-				self.append("exchange_rate_revaluation_account",{
-					"account":i,
-					"balance_in_base_currency":get_average_exchange_rate(i) * get_balance_on(i),
-					"balance_in_alternate_currency":get_balance_on(i),
-					"current_exchange_rate":get_average_exchange_rate(i),
-					"difference":-(get_average_exchange_rate(i) * get_balance_on(i))
+				balance = get_average_exchange_rate(i) * get_balance_on(i)
+				if balance:
+					self.append("exchange_rate_revaluation_account",{
+						"account":i,
+						"balance_in_base_currency":balance,
+						"balance_in_alternate_currency":get_balance_on(i),
+						"current_exchange_rate":get_average_exchange_rate(i),
+						"difference":-(balance)
 					})
 		else :
 			frappe.msgprint("Company is not selected")
