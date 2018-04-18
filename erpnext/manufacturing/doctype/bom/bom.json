@@ -2,7 +2,8 @@
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
+ "autoname": "Prompt", 
  "beta": 0, 
  "creation": "2013-01-22 15:11:38", 
  "custom": 0, 
@@ -1820,7 +1821,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-02-26 22:51:40.232456", 
+ "modified": "2018-04-18 14:46:07.453313", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
@@ -1828,7 +1829,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -1848,7 +1848,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
