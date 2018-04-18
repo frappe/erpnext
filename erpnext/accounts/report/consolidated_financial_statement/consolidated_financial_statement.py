@@ -87,11 +87,12 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	return data, None, chart
 
 def get_income_expense_data(companies, fiscal_year, filters):
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	income = get_data(companies, "Income", "Credit", fiscal_year, filters, True)
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
 
-	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, True)
+	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
 
 	return income, expense, net_profit_loss
 	
