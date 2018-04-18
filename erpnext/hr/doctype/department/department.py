@@ -22,3 +22,22 @@ class Department(NestedSet):
 
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False):
+	condition = ''
+	if company == parent:
+		condition = 'name="All Departments"'
+	elif company:
+		condition = "parent_department='{0}' and company='{1}'".format(parent, company)
+	else:
+		condition = "parent_department = '{0}'".format(parent)
+
+	return frappe.db.sql("""
+		select
+			name as value,
+			is_group as expandable
+		from `tab{doctype}`
+		where
+			{condition}
+		order by name""".format(doctype=doctype, condition=condition), as_dict=1)
