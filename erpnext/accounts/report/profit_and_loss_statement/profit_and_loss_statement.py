@@ -33,11 +33,7 @@ def execute(filters=None):
 
 	return columns, data, None, chart
 
-<<<<<<< HEAD
-def get_net_profit_loss(income, expense, period_list, company, currency=None):
-=======
-def get_net_profit_loss(income, expense, period_list, company, consolidated=False):
->>>>>>> Consolidated financial statement (#13678)
+def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
 	total = 0
 	net_profit_loss = {
 		"account_name": "'" + _("Profit for the year") + "'",
