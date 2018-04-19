@@ -147,14 +147,14 @@ def install(country=None):
 		{'doctype': 'Customer Group', 'customer_group_name': _('Non Profit'), 'is_group': 0, 'parent_customer_group': _('All Customer Groups')},
 		{'doctype': 'Customer Group', 'customer_group_name': _('Government'), 'is_group': 0, 'parent_customer_group': _('All Customer Groups')},
 
-		# supplier type
-		{'doctype': 'Supplier Type', 'supplier_type': _('Services')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Local')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Raw Material')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Electrical')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Hardware')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Pharmaceutical')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Distributor')},
+		# supplier group
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Services')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Local')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Raw Material')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Electrical')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Hardware')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Pharmaceutical')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Distributor')},
 
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': 1, "parent_sales_person": ""},
