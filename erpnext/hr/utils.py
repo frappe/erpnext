@@ -71,3 +71,17 @@ def get_employee_leave_policy(employee):
 			frappe.throw(_("Employee {0} has no grade to get default leave policy").format(employee))
 	if leave_policy:
 		return frappe.get_doc("Leave Policy", leave_policy)
+
+def get_leave_period(from_date, to_date, company):
+	return frappe.db.sql("""
+		select name, from_date, to_date
+		from `tabLeave Period`
+		where company=%(company)s and is_active=1
+			and (from_date between %(from_date)s and %(to_date)s
+				or to_date between %(from_date)s and %(to_date)s
+				or (from_date < %(from_date)s and to_date > %(to_date)s))
+	""", {
+		"from_date": from_date,
+		"to_date": to_date,
+		"company": company
+	}, as_dict=1)
