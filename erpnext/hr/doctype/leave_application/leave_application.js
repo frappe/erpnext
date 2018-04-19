@@ -90,6 +90,15 @@ frappe.ui.form.on("Leave Application", {
 
 	calculate_total_days: function(frm) {
 		if(frm.doc.from_date && frm.doc.to_date && frm.doc.employee && frm.doc.leave_type) {
+
+			from_date = Date.parse(frm.doc.from_date)
+			to_date = Date.parse(frm.doc.to_date)
+
+			if(to_date < from_date){
+				frappe.msgprint(__("To date caonnot be less than from date"));
+				frm.set_value('to_date', '');
+				return
+			}
 				// server call is done to include holidays in leave days calculations
 			return frappe.call({
 				method: 'erpnext.hr.doctype.leave_application.leave_application.get_number_of_leave_days',
