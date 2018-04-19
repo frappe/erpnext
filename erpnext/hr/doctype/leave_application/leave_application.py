@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
-	comma_or, get_fullname
+	comma_or, get_fullname, add_days
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -33,6 +33,8 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
+		if is_optional_leave(self.leave_type):
+			self.validate_optional_leave()
 
 		if hasattr(self, "workflow_state") and self.workflow_state == "Rejected":
 			# notify leave applier about rejection
@@ -118,7 +120,7 @@ class LeaveApplication(Document):
 			self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
 				self.from_date, self.to_date, self.half_day, self.half_day_date)
 
-			if self.total_leave_days == 0:
+			if self.total_leave_days == 0 and not is_optional_leave(self.leave_type):
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
@@ -194,6 +196,14 @@ class LeaveApplication(Document):
 		if attendance:
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
 				AttendanceAlreadyMarkedError)
+
+	def validate_optional_leave(self):
+		day = getdate(self.from_date)
+		holiday_list = frappe.get_value("Leave Type", self.leave_type, "holiday_list")
+		while day <= getdate(self.to_date):
+			if not frappe.db.exists({"doctype": "Holiday", "parent": holiday_list, "holiday_date": day}):
+				frappe.throw(_("Optional leave can only be availed on holidays"))
+			day = add_days(day, 1)
 
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)
@@ -372,6 +382,10 @@ def get_holidays(employee, from_date, to_date):
 def is_lwp(leave_type):
 	lwp = frappe.db.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
 	return lwp and cint(lwp[0][0]) or 0
+
+def is_optional_leave(leave_type):
+	optional_leave = frappe.db.sql("select is_optional_leave from `tabLeave Type` where name = %s", leave_type)
+	return optional_leave and cint(optional_leave[0][0]) or 0
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
