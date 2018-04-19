@@ -74,16 +74,13 @@ def create_print_zero_amount_taxes_custom_field():
 
 
 def create_default_cash_flow_mapper_templates():
-	mappers = DEFAULT_MAPPERS
-
-	for mapper in mappers:
+	for mapper in DEFAULT_MAPPERS:
 		if not frappe.db.exists('Cash Flow Mapper', mapper['section_name']):
 			doc = frappe.get_doc(mapper)
 			doc.insert(ignore_permissions=True)
 
 def create_default_success_action():
-	default_success_actions = DEFAULT_SUCCESS_ACTION
-	for success_action in default_success_actions:
-			if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
-				doc = frappe.get_doc(success_action)
-				doc.insert(ignore_permissions=True)
+	for success_action in DEFAULT_SUCCESS_ACTION:
+		if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
+			doc = frappe.get_doc(success_action)
+			doc.insert(ignore_permissions=True)
