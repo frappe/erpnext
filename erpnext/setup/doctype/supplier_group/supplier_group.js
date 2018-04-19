@@ -1,5 +1,5 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.set_intro(doc.__islocal ? "" : __("There is nothing to edit."))
