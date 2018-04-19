@@ -19,7 +19,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			title: __("Purchase Analytics"),
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company", "Fiscal Year",
+			doctypes: ["Item", "Item Group", "Supplier", "Supplier Group", "Company", "Fiscal Year",
 				"Purchase Invoice", "Purchase Invoice Item",
 				"Purchase Order", "Purchase Order Item[Purchase Analytics]",
 				"Purchase Receipt", "Purchase Receipt Item[Purchase Analytics]"],
@@ -27,11 +27,11 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		});
 
 		this.tree_grids = {
-			"Supplier Type": {
-				label: __("Supplier Type / Supplier"),
+			"Supplier Group": {
+				label: __("Supplier Group / Supplier"),
 				show: true,
 				item_key: "supplier",
-				parent_field: "parent_supplier_type",
+				parent_field: "parent_supplier_group",
 				formatter: function(item) {
 					return item.supplier_name ? item.supplier_name + " (" + item.name + ")" : item.name;
 				}
@@ -77,7 +77,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: __("Tree Type"), fieldname: "tree_type",
-			options:["Supplier Type", "Supplier", "Item Group", "Item"],
+			options:["Supplier Group", "Supplier", "Item Group", "Item"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -110,22 +110,22 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		var me = this;
 		if (!this.tl) {
 			// add 'Not Set' Supplier & Item
-			// Add 'All Supplier Types' Supplier Type
+			// Add 'All Supplier Groups' Supplier Group
 			// (Supplier / Item are not mandatory!!)
-			// Set parent supplier type for tree view
+			// Set parent supplier group for tree view
 
-			$.each(frappe.report_dump.data["Supplier Type"], function(i, v) {
-				v['parent_supplier_type'] = __("All Supplier Types")
+			$.each(frappe.report_dump.data["Supplier Group"], function(i, v) {
+				v['parent_supplier_group'] = __("All Supplier Groups")
 			})
 
-			frappe.report_dump.data["Supplier Type"] = [{
-				name: __("All Supplier Types"),
-				id: "All Supplier Types",
-			}].concat(frappe.report_dump.data["Supplier Type"]);
+			frappe.report_dump.data["Supplier Group"] = [{
+				name: __("All Supplier Groups"),
+				id: "All Supplier Groups",
+			}].concat(frappe.report_dump.data["Supplier Group"]);
 
 			frappe.report_dump.data["Supplier"].push({
 				name: __("Not Set"),
-				parent_supplier_type: __("All Supplier Types"),
+				parent_supplier_group: __("All Supplier Groups"),
 				id: "Not Set",
 			});
 
@@ -144,8 +144,8 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Supplier') {
 				var items = frappe.report_dump.data["Supplier"];
-			} if(me.tree_type=='Supplier Type') {
-				var items = this.prepare_tree("Supplier", "Supplier Type");
+			} if(me.tree_type=='Supplier Group') {
+				var items = this.prepare_tree("Supplier", "Supplier Group");
 			} else if(me.tree_type=="Item Group") {
 				var items = this.prepare_tree("Item", "Item Group");
 			} else if(me.tree_type=="Item") {
