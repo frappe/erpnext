@@ -24,7 +24,7 @@ class ExchangeRateRevaluation(Document):
 							"current_exchange_rate":get_average_exchange_rate(i),
 							"difference":-(balance)
 						})
-			return child_table		
+			return child_table
 		else :
 			return frappe.msgprint("Company is not selected")
 

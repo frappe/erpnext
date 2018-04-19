@@ -27,6 +27,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		});
 		refresh_field("total_gain_loss");
 	},
+
 });
 
 frappe.ui.form.on("Exchange Rate Revaluation Account", {
@@ -41,21 +42,22 @@ frappe.ui.form.on("Exchange Rate Revaluation Account", {
 
 	account: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt,cdn);
-		console.log("local cdt and cdn",cdn,row.account);
 		frappe.call({
 			method: "get_accounts_data",
 			doc: cur_frm.doc,
 			args:{ account:row.account},
 			callback: function(r){
-				r.message.forEach((d) => {
-					row.balance_in_base_currency = d.balance_in_base_currency;
-					row.balance_in_alternate_currency = d.balance_in_alternate_currency;
-					row.current_exchange_rate = d.current_exchange_rate;
-					row.difference = d.difference;
-				});
+				row.balance_in_base_currency = r.message[0].balance_in_base_currency;
+				row.balance_in_alternate_currency = r.message[0].balance_in_alternate_currency;
+				row.current_exchange_rate = r.message[0].current_exchange_rate;
+				row.difference = r.message[0].difference;
 				refresh_field("exchange_rate_revaluation_account");
 				frm.events.get_total_gain_loss(frm);
 			}
 		});
+	}, 
+
+	exchange_rate_revaluation_account_remove: function(frm) {
+		frm.events.get_total_gain_loss(frm);
 	}
 });
