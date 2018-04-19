@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import formatdate, getdate, cstr, comma_and
+from frappe.utils import formatdate, getdate, cstr
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_overlap, get_employee_leave_policy
 
