@@ -1030,7 +1030,7 @@ def get_inter_company_details(doc, doctype):
 		company = frappe.db.get_value("Customer", {"name": doc.get("customer")}, "represents_company")
 	else:
 		party = frappe.db.get_value("Customer", {"is_internal_customer":1, "represents_company": doc.get("company")}, "name")
-		company = frappe.db.get_value("Customer", {"name": doc.get("supplier")}, "represents_company")
+		company = frappe.db.get_value("Supplier", {"name": doc.get("supplier")}, "represents_company")
 
 	return {
 		"party": party, 
@@ -1067,6 +1067,7 @@ def validate_inter_company_invoice(doc):
 
 		company = details.get("company")
 		default_currency = frappe.db.get_value("Company", company, "default_currency")
+
 		if default_currency != doc.get("currency"):
 			frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
 
@@ -1106,8 +1107,6 @@ def make_inter_company_invoice(doctype, source_name, target_doc=None):
 		target_doc.expense_account = ""
 		target_doc.cost_center = ""
 
-	base_doc = "Sales Invoice"
-	target_doctype = "Purchase Invoice"
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,

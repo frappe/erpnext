@@ -663,4 +663,3 @@ var calculate_total_billing_amount =  function(frm) {
 
 	refresh_field('total_billing_amount')
 }
-
