@@ -95,9 +95,9 @@ frappe.ui.form.on("Leave Application", {
 			var to_date = Date.parse(frm.doc.to_date);
 
 			if(to_date < from_date){
-				frappe.msgprint(__("To date caonnot be less than from date"));
+				frappe.msgprint(__("To Date cannot be less than From Date"));
 				frm.set_value('to_date', '');
-				return
+				return;
 			}
 				// server call is done to include holidays in leave days calculations
 			return frappe.call({
