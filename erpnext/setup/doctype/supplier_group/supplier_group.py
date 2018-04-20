@@ -4,7 +4,17 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
+from frappe.utils.nestedset import NestedSet
 
-class SupplierGroup(Document):
-	pass
+class SupplierGroup(NestedSet):
+	nsm_parent_field = 'parent_supplier_group';
+
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
+
+	def on_update(self):
+		self.update_nsm_model()
+		self.validate_one_root()
+
+	def on_trash(self):
+		self.update_nsm_model()
