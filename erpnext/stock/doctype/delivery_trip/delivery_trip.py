@@ -165,7 +165,7 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 			sender_designation = frappe.db.get_value("Employee", sender_email, ["designation"])
 
 			estimated_arrival = cstr(delivery_stop.estimated_arrival)[:-3]
-			email_template = frappe.get_doc("Standard Reply", delivery_notification)
+			email_template = frappe.get_doc("Email Template", delivery_notification)
 			message = frappe.render_template(email_template.response, args)
 
 			frappe.sendmail(

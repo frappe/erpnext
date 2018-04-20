@@ -131,7 +131,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	email_prompt: function() {
 		var me = this;
 		var fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
-			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
+			{fieldtype: "Section Break", collapsible: 1, label: "CC & Email Template"},
 			{fieldtype: "Section Break"},
 			{label:__("Subject"), fieldtype:"Data", reqd: 1,
 				fieldname:"subject",length:524288},
