@@ -67,14 +67,15 @@ class ExchangeRateRevaluation(Document):
 					"reference_type": "Exchange Rate Revaluation",
 					"reference_name": self.name,
 					})
-			account_amt_list.append({
-				"account": exchange_gain_loss,
-				"balance":get_balance_on(exchange_gain_loss),
-				"debit_in_account_currency": total_gain_loss if total_gain_loss < 0 else 0,
-				"credit_in_account_currency": total_gain_loss if total_gain_loss > 0 else 0,
-				"reference_type": "Exchange Rate Revaluation",
-				"reference_name": self.name,
-				})
+			if total_gain_loss != 0:
+				account_amt_list.append({
+					"account": exchange_gain_loss,
+					"balance":get_balance_on(exchange_gain_loss),
+					"debit_in_account_currency": total_gain_loss if total_gain_loss < 0 else 0,
+					"credit_in_account_currency": total_gain_loss if total_gain_loss > 0 else 0,
+					"reference_type": "Exchange Rate Revaluation",
+					"reference_name": self.name,
+					})
 			journal_entry.set("accounts", account_amt_list)
 			return journal_entry.as_dict()
 		else:
