@@ -27,36 +27,34 @@ def sync_sales_order(order, request_id=None):
 			validate_customer(order, shopify_settings)
 			validate_item(order, shopify_settings)
 			create_order(order, shopify_settings)
-		except Exception:
-			make_shopify_log(status="Error", exception=False)
-
-	make_shopify_log(status="Success")
+		except Exception as e:
+			make_shopify_log(status="Error", message=e.message, exception=False)
+		else:
+			make_shopify_log(status="Success")
 
 def prepare_sales_invoice(order, request_id=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
-	sales_order = get_sales_order(cstr(order['id']))
 	frappe.flags.request_id = request_id
 
-	if sales_order:
-		try:
+	try:
+		sales_order = get_sales_order(cstr(order['id']))
+		if sales_order:
 			create_sales_invoice(order, shopify_settings, sales_order)
-		except Exception:
-			make_shopify_log(status="Error", exception=True)
-
-	make_shopify_log(status="Success")
+		make_shopify_log(status="Success")
+	except Exception:
+		make_shopify_log(status="Error", exception=True)
 
 def prepare_delivery_note(order, request_id=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
-	sales_order = get_sales_order(cstr(order['id']))
 	frappe.flags.request_id = request_id
 
-	if sales_order:
-		try:
+	try:
+		sales_order = get_sales_order(cstr(order['id']))
+		if sales_order:
 			create_delivery_note(order, shopify_settings, sales_order)
-		except Exception:
-			make_shopify_log(status="Error", exception=True)
-
-	make_shopify_log(status="Success")
+		make_shopify_log(status="Success")
+	except Exception:
+		make_shopify_log(status="Error", exception=True)
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
