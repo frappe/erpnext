@@ -92,12 +92,56 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get items from"));
 		}
-
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+
+		var me = this;
+		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function() {
+				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
+				var internal = supplier.is_internal_supplier;
+				if (internal == 1) {
+					me.frm.add_custom_button("Inter Company Invoice", function() {
+						me.validate_inter_company_invoice(me.frm);
+					}, __("Make"));
+				}
+			});
+		}
 	},
 
 	supplier: function() {
 		var me = this;
+		let internal;
+		frappe.db.get_value('Supplier', {name: this.frm.doc.supplier}, 'is_internal_supplier', (r) => {
+			if (r) {
+				internal = r.is_internal_supplier;
+			}
+			if (internal == 1) {
+				frappe.call({
+					method:"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_allowed_companies",
+					args: {supplier: this.frm.doc.supplier},
+					callback: function(r){
+						if (r.message){
+							if (me.frm.doc.company) {
+								me.frm.set_value("company", r.message[0]);
+							}
+							me.frm.set_query('company', function() {
+								return {
+									"filters": {"name": ["in", r.message]}
+									}
+								}
+							);
+						}
+					}
+				});
+			}
+			else {
+				me.frm.set_query('company', function(){
+					return {
+						"filters": {"name": ["like", "%" + "" + "%"]}
+					}
+				});
+			}
+		});
 		if(this.frm.updating_party_details)
 			return;
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
@@ -131,6 +175,25 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+	},
+	validate_inter_company_invoice: function(frm) {
+		var me = this;
+		frappe.call({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.validate_inter_company_invoice",
+			args: {"doc": frm.doc},
+			callback: function(r) {
+				if (r && r.message) {
+					me.make_inter_company_invoice(frm);
+				}
+			}
+		});
+	},
+
+	make_inter_company_invoice: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
+			frm: frm
+		});
 	},
 
 	is_paid: function() {
