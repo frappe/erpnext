@@ -7,9 +7,9 @@ import frappe
 import json
 from frappe import _
 from frappe.model.document import Document
-from six.moves.urllib.parse import urlparse
 from frappe.utils import get_request_session
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from erpnext.erpnext_integrations.utils import get_webhook_address
 from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
 
 class ShopifySettings(Document):
@@ -37,11 +37,7 @@ class ShopifySettings(Document):
 			frappe.throw(_("Support for public app is deprecated. Please setup private app, for more details refer user manual"))
 
 	def register_webhooks(self):
-		webhooks = {
-			"orders/create": "sync_salse_order",
-			"orders/paid": "prepare_sales_invoice",
-			"orders/fulfilled": "prepare_delivery_note"
-		}
+		webhooks = ["orders/create", "orders/paid", "orders/fulfilled"]
 
 		url = get_shopify_url('admin/webhooks.json', self)
 		created_webhooks = [d.method for d in self.webhooks]
@@ -55,7 +51,7 @@ class ShopifySettings(Document):
 				d = session.post(url, data=json.dumps({
 					"webhook": {
 						"topic": method,
-						"address": get_webhook_address(webhooks[method]),
+						"address": get_webhook_address(connector_name='shopify_connection', method='store_request_data'),
 						"format": "json"
 						}
 					}), headers=get_header(self))
@@ -101,21 +97,6 @@ def get_header(settings):
 	else:
 		header["X-Shopify-Access-Token"] = settings.access_token
 		return header
-
-def get_webhook_address(method_name):
-	endpoint = "/api/method/erpnext.erpnext_integrations.connectors.shopify_connection.{0}".format(method_name)
-
-	# try:
-# 		url = frappe.request.url
-# 	except RuntimeError:
-	url = "https://testshop1.localtunnel.me"
-
-	server_url = '{uri.scheme}://{uri.netloc}'.format(
-		uri=urlparse(url)
-	)
-
-	server_url += endpoint
-	return server_url
 
 @frappe.whitelist()
 def get_series():

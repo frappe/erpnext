@@ -1,6 +1,5 @@
 import frappe
 from frappe import _
-from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
 
 def create_customer(shopify_customer, shopify_settings):
 	import frappe.utils.nestedset
@@ -29,12 +28,7 @@ def create_customer(shopify_customer, shopify_settings):
 		frappe.db.commit()
 
 	except Exception as e:
-		if e.args[0] and e.args[0].startswith("402"):
-			make_shopify_log(status="Error", method="create_customer", message=e.message,
-				request_data=shopify_customer, exception=True)
-		else:
-			make_shopify_log(status="Error", method="create_customer", message=frappe.get_traceback(),
-				request_data=shopify_customer, exception=True)
+		raise e
 
 def create_customer_address(customer, shopify_customer):
 	if not shopify_customer.get("addresses"):
@@ -62,9 +56,8 @@ def create_customer_address(customer, shopify_customer):
 				}]
 			}).insert(ignore_mandatory=True)
 
-		except Exception:
-			make_shopify_log(status="Error", method="create_customer_address", message=frappe.get_traceback(),
-				request_data=shopify_customer, exception=True)
+		except Exception as e:
+			raise e
 
 def get_address_title_and_type(customer_name, index):
 	address_type = _("Billing")

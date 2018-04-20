@@ -1,43 +1,26 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import base64, hashlib, hmac, json
+import json
 from frappe.utils import cstr, cint, nowdate, flt
+from erpnext.erpnext_integrations.utils import validate_webhooks_request
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import sync_item_from_shopify
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
-from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log
-
-def validate_webhooks_request():
-	def innerfn(fn):
-		shopify_settings = frappe.get_doc("Shopify Settings")
-
-		if shopify_settings and shopify_settings.shared_secret and not frappe.flags.in_test:
-			sig = base64.b64encode(
-				hmac.new(
-					shopify_settings.shared_secret.encode('utf8'),
-					frappe.request.data,
-					hashlib.sha256
-				).digest()
-			)
-
-			if frappe.request.data and \
-				frappe.get_request_header("X-Shopify-Hmac-Sha256") and \
-				not sig == bytes(frappe.get_request_header("X-Shopify-Hmac-Sha256").encode()):
-					frappe.throw(_("Unverified Webhook Data"))
-			frappe.set_user(shopify_settings.modified_by)
-
-		return fn
-
-	return innerfn
+from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log, dump_request_data
 
 @frappe.whitelist(allow_guest=True)
-@validate_webhooks_request()
-def sync_salse_order(order=None):
-	if not order:
+@validate_webhooks_request("Shopify Settings", 'X-Shopify-Hmac-Sha256', secret_key='shared_secret')
+def store_request_data(order=None, event=None):
+	if frappe.request:
 		order = json.loads(frappe.request.data)
+		event = frappe.request.headers.get('X-Shopify-Topic')
 
+	dump_request_data(order, event)
+
+def sync_sales_order(order, request_id=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
+	frappe.flags.request_id = request_id
 
 	if not frappe.db.get_value("Sales Order", filters={"shopify_order_id": cstr(order['id'])}):
 		try:
@@ -45,40 +28,35 @@ def sync_salse_order(order=None):
 			validate_item(order, shopify_settings)
 			create_order(order, shopify_settings)
 		except Exception:
-			make_shopify_log(status="Error", method="sync_salse_order", message=frappe.get_traceback(),
-				request_data=order, exception=False)
+			make_shopify_log(status="Error", exception=False)
 
-@frappe.whitelist(allow_guest=True)
-@validate_webhooks_request()
-def prepare_sales_invoice(order=None):
-	if not order:
-		order = json.loads(frappe.request.data)
+	make_shopify_log(status="Success")
 
+def prepare_sales_invoice(order, request_id=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	sales_order = get_sales_order(cstr(order['id']))
+	frappe.flags.request_id = request_id
 
 	if sales_order:
 		try:
 			create_sales_invoice(order, shopify_settings, sales_order)
 		except Exception:
-			make_shopify_log(status="Error", method="prepare_sales_invoice", message=frappe.get_traceback(),
-				request_data=sales_order, exception=True)
+			make_shopify_log(status="Error", exception=True)
 
-@frappe.whitelist(allow_guest=True)
-@validate_webhooks_request()
-def prepare_delivery_note(order=None):
-	if not order:
-		order = json.loads(frappe.request.data)
+	make_shopify_log(status="Success")
 
+def prepare_delivery_note(order, request_id=None):
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	sales_order = get_sales_order(cstr(order['id']))
+	frappe.flags.request_id = request_id
 
 	if sales_order:
 		try:
 			create_delivery_note(order, shopify_settings, sales_order)
 		except Exception:
-			make_shopify_log(status="Error", method="prepare_delivery_note", message=frappe.get_traceback(),
-				request_data=sales_order, exception=True)
+			make_shopify_log(status="Error", exception=True)
+
+	make_shopify_log(status="Success")
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
@@ -115,12 +93,10 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 		items = get_order_items(shopify_order.get("line_items"), shopify_settings)
 
 		if not items:
-			title = 'Some items not found for Order {}'.format(shopify_order.get('id'))
 			message = 'Following items are exists in order but relevant record not found in Product master'
 			message += "\n" + ", ".join(product_not_exists)
 
-			make_shopify_log(status="Error", method="create_sales_order", message=message,
-				request_data=shopify_order, exception=True, title=title)
+			make_shopify_log(status="Error", message=message, exception=True)
 
 			return ''
 
