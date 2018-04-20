@@ -2,17 +2,29 @@
 	<style>
 	@media screen {
 	  .print-format {
-	    padding: 8mm;
-		margin:4mm;
-		font-size:10px;
+	    padding: 4mm;
+		font-size: 8.0pt !important;
 		font-family: Tahoma, sans-serif;
 	  }
 	}
 	</style>
 {% } %}
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+		font-family: Tahoma, sans-serif;
+	}
+</style>
+
 
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
+<h6 class="text-center">
+		{% if (filters.tax_id) { %}
+		{%= __("Tax Id: ")%}	{%= filters.tax_id %}
+		{% } %}
+</h6>
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}
@@ -27,7 +39,7 @@
 		   var range4 = report.columns[14].label;
 	%}
 	{% if(balance_row) { %}
-	<table class="table table-bordered table-condensed table-sm small">
+	<table class="table table-bordered table-condensed">
 		<caption class="text-right">(Amount in {%= data[0][__("currency")] || "" %})</caption>
 	        <colgroup>
 	            <col style="width: 30mm;">
@@ -86,8 +98,8 @@
 	<thead>
 		<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
-				<th style="width: 10%">{%= __("Date") %}</th>
-				<th style="width: 15%">{%= __("Ref") %}</th>
+				<th style="width: 18%">{%= __("Date") %}</th>
+				<th style="width: 17%">{%= __("Reference") %}</th>
 				{% if(!filters.show_pdc_in_print) { %}
 				<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
 				{% } %}
@@ -120,10 +132,15 @@
 			<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
-					<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-					<td>{%= data[i][__("Voucher Type")] %}
-						<br>{%= data[i][__("Voucher No")] %}</td>
-					{% if(!filters.show_pdc_in_print) { %}	
+					<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+					<td>
+						{% if(!filters.show_pdc_in_print) { %}
+							{%= data[i]["voucher_type"] %}
+							<br>
+						{% } %}
+						{%= data[i]["voucher_no"] %}
+					</td>
+					{% if(!filters.show_pdc_in_print) { %}
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
 							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
@@ -215,4 +232,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">{{ __("Printed On") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">{{ __("Printed On ") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

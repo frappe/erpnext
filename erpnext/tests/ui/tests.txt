@@ -40,7 +40,7 @@ erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
 erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
 erpnext/hr/doctype/leave_application/test_leave_application.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
-erpnext/manufacturing/doctype/production_order/test_production_order.js #long
+erpnext/manufacturing/doctype/work_order/test_work_order.js #long
 erpnext/accounts/page/pos/test_pos.js
 erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js

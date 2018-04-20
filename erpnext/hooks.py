@@ -49,7 +49,7 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
-calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
+calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
 
 
@@ -199,18 +199,17 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		'validate': 'erpnext.regional.india.utils.set_place_of_supply',
 		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
-		"on_trash": "erpnext.regional.france.utils.check_deletion_permission"
+		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
-		"on_trash": "erpnext.regional.france.utils.check_deletion_permission"
+		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	'Purchase Invoice': {
+	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }

@@ -53,8 +53,9 @@ class Item(WebsiteGenerator):
 					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
 					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
-				from frappe.model.naming import make_autoname
-				self.item_code = make_autoname(self.naming_series + '.#####')
+				from frappe.model.naming import set_name_by_naming_series
+				set_name_by_naming_series(self)
+				self.item_code = self.name
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
@@ -531,7 +532,7 @@ class Item(WebsiteGenerator):
 
 	def on_trash(self):
 		super(Item, self).on_trash()
-		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
+		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
 		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)

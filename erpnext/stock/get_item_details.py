@@ -320,7 +320,7 @@ def get_price_list_rate(args, item_doc, out):
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 		if not args.price_list_uom_dependant:
-			out.price_list_rate = flt(out.price_list_rate * (args.conversion_factor or 1.0))
+			out.price_list_rate = flt(out.price_list_rate * (flt(args.conversion_factor) or 1.0))
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -396,14 +396,22 @@ def validate_conversion_rate(args, meta):
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
+		out.customer_item_code = None
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
-		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
+
+		if customer_item_code:
+			out.customer_item_code = customer_item_code[0].ref_code
+		else:
+			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group")
+			customer_group_item_code = item_doc.get("customer_items", {"customer_group": customer_group})
+			if customer_group_item_code and not customer_group_item_code[0].customer_name:
+				out.customer_item_code = customer_group_item_code[0].ref_code
 
 	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
-def get_pos_profile_item_details(company, args, pos_profile=None):
+def get_pos_profile_item_details(company, args, pos_profile=None, update_data=False):
 	res = frappe._dict()
 
 	if not pos_profile:
@@ -411,7 +419,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
-			if not args.get(fieldname) and pos_profile.get(fieldname):
+			if (not args.get(fieldname) or update_data) and pos_profile.get(fieldname):
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):

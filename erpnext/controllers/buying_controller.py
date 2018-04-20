@@ -10,6 +10,7 @@ from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -195,7 +196,16 @@ class BuyingController(StockController):
 			self.set('supplied_items', [])
 
 	def update_raw_materials_supplied(self, item, raw_material_table):
-		bom_items = self.get_items_from_bom(item.item_code, item.bom)
+		exploded_item = 1
+		if hasattr(item, 'include_exploded_items'):
+			exploded_item = item.get('include_exploded_items')
+
+		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
+
+		used_alternative_items = []
+		if self.doctype == 'Purchase Receipt' and item.purchase_order:
+			used_alternative_items = get_used_alternative_items(purchase_order = item.purchase_order)
+
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
@@ -206,6 +216,16 @@ class BuyingController(StockController):
 				reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
 				if frappe.db.get_value("Warehouse", reserve_warehouse, "company") != self.company:
 					reserve_warehouse = None
+
+			conversion_factor = item.conversion_factor
+			if (self.doctype == 'Purchase Receipt' and item.purchase_order and
+				bom_item.item_code in used_alternative_items):
+				alternative_item_data = used_alternative_items.get(bom_item.item_code)
+				bom_item.item_code = alternative_item_data.item_code
+				bom_item.item_name = alternative_item_data.item_name
+				bom_item.stock_uom = alternative_item_data.stock_uom
+				conversion_factor = alternative_item_data.conversion_factor
+				bom_item.description = alternative_item_data.description
 
 			# check if exists
 			exists = 0
@@ -219,7 +239,7 @@ class BuyingController(StockController):
 				rm = self.append(raw_material_table, {})
 
 			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * (flt(item.qty) + getattr(item, 'rejected_qty', 0)) *
-				flt(item.conversion_factor), rm.precision("required_qty"))
+				flt(conversion_factor), rm.precision("required_qty"))
 			rm.reference_name = item.name
 			rm.bom_detail_no = bom_item.name
 			rm.main_item_code = item.item_code
@@ -229,7 +249,7 @@ class BuyingController(StockController):
 			if self.doctype == "Purchase Order" and not rm.reserve_warehouse:
 				rm.reserve_warehouse = reserve_warehouse
 
-			rm.conversion_factor = item.conversion_factor
+			rm.conversion_factor = conversion_factor
 
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty
@@ -275,20 +295,6 @@ class BuyingController(StockController):
 			for d in rm_supplied_details:
 				if d not in delete_list:
 					self.append(raw_material_table, d)
-
-	def get_items_from_bom(self, item_code, bom):
-		bom_items = frappe.db.sql("""select t2.item_code,
-			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
-			t2.rate, t2.stock_uom, t2.name, t2.description, t2.source_warehouse
-			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
-			where t2.parent = t1.name and t1.item = %s
-			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""", (item_code, bom), as_dict=1)
-
-		if not bom_items:
-			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
-
-		return bom_items
 
 	@property
 	def sub_contracted_items(self):
@@ -456,3 +462,21 @@ class BuyingController(StockController):
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
 
+def get_items_from_bom(item_code, bom, exploded_item=1):
+	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
+
+	bom_items = frappe.db.sql("""select t2.item_code, t2.name,
+			t2.rate, t2.stock_uom, t2.source_warehouse, t2.description,
+			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit
+		from
+			`tabBOM` t1, `tab{0}` t2, tabItem t3
+		where
+			t2.parent = t1.name and t1.item = %s
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
+			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			(item_code, bom), as_dict=1)
+
+	if not bom_items:
+		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
+
+	return bom_items

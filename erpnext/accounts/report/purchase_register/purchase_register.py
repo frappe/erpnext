@@ -43,7 +43,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row += [
 			supplier_details.get(inv.supplier), # supplier_type
-			inv.credit_to, inv.mode_of_payment, ", ".join(project),
+			inv.tax_id, inv.credit_to, inv.mode_of_payment, ", ".join(project),
 			inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency
 		]
@@ -83,7 +83,7 @@ def get_columns(invoice_list, additional_table_columns):
 		columns += additional_table_columns
 
 	columns += [
-		_("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120",
+		_("Supplier Type") + ":Link/Supplier Type:120", _("Tax Id") + "::80", _("Payable Account") + ":Link/Account:120",
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
 		_("Purchase Order") + ":Link/Purchase Order:100",
@@ -143,7 +143,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select
-			name, posting_date, credit_to, supplier, supplier_name, bill_no, bill_date,
+			name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
 			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`
@@ -179,7 +179,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in expense_accounts:
-			if invoice_expense_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_expense_map[d.parent]:
 				invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)

@@ -14,8 +14,8 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 
 class TestTimesheet(unittest.TestCase):
 	def test_timesheet_billing_amount(self):
-		make_salary_structure("_T-Employee-0001")
-		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
+		make_salary_structure("_T-Employee-00001")
+		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
 		self.assertEqual(timesheet.total_billable_hours, 2)
@@ -24,8 +24,8 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 100)
 
 	def test_timesheet_billing_amount_not_billable(self):
-		make_salary_structure("_T-Employee-0001")
-		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=0)
+		make_salary_structure("_T-Employee-00001")
+		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
 		self.assertEqual(timesheet.total_billable_hours, 0)
@@ -34,8 +34,8 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
-		salary_structure = make_salary_structure("_T-Employee-0001")
-		timesheet = make_timesheet("_T-Employee-0001", simulate = True, billable=1)
+		salary_structure = make_salary_structure("_T-Employee-00001")
+		timesheet = make_timesheet("_T-Employee-00001", simulate = True, billable=1)
 		salary_slip = make_salary_slip(timesheet.name)
 		salary_slip.submit()
 
@@ -44,7 +44,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(salary_slip.net_pay, 150)
 		self.assertEqual(salary_slip.timesheets[0].time_sheet, timesheet.name)
 		self.assertEqual(salary_slip.timesheets[0].working_hours, 2)
-		
+
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
 		self.assertEqual(timesheet.status, 'Payslip')
 		salary_slip.cancel()
@@ -53,7 +53,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.status, 'Submitted')
 
 	def test_sales_invoice_from_timesheet(self):
-		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
+		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1)
 		sales_invoice = make_sales_invoice(timesheet.name, '_Test Item', '_Test Customer')
 		sales_invoice.due_date = nowdate()
 		sales_invoice.submit()
@@ -68,7 +68,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(item.rate, 50.00)
 
 	def test_timesheet_billing_based_on_project(self):
-		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1, project = '_Test Project', company='_Test Company')
+		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1, project = '_Test Project', company='_Test Company')
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		sales_invoice.project = '_Test Project'
 		sales_invoice.submit()
@@ -85,7 +85,7 @@ class TestTimesheet(unittest.TestCase):
 
 		update_activity_type("_Test Activity Type")
 		timesheet = frappe.new_doc("Timesheet")
-		timesheet.employee = "_T-Employee-0001"
+		timesheet.employee = "_T-Employee-00001"
 		timesheet.append(
 			'time_logs',
 			{
@@ -140,11 +140,11 @@ def make_salary_structure(employee):
 			"base": 1200,
 			"from_date": add_months(nowdate(),-1)
 		})
-		
-		
+
+
 		es = salary_structure.append('earnings', {
 			"salary_component": "_Test Allowance",
-			"amount": 100 
+			"amount": 100
 		})
 
 		ds = salary_structure.append('deductions', {

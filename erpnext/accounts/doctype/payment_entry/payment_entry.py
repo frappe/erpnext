@@ -21,6 +21,11 @@ class InvalidPaymentEntry(ValidationError):
 
 
 class PaymentEntry(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super(PaymentEntry, self).__init__(*args, **kwargs)
+		if not self.is_new():
+			self.setup_party_account_field()
+
 	def setup_party_account_field(self):
 		self.party_account_field = None
 		self.party_account = None
@@ -290,27 +295,16 @@ class PaymentEntry(AccountsController):
 		self.unallocated_amount = 0
 		if self.party:
 			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
-
-			if self.party_account_currency == self.company_currency:
-				if self.payment_type == "Receive" \
-					and self.total_allocated_amount <= self.paid_amount + total_deductions:
-						self.unallocated_amount = self.paid_amount - \
-							(self.total_allocated_amount - total_deductions)
-				elif self.payment_type == "Pay" \
-					and self.total_allocated_amount <= self.received_amount - total_deductions:
-						self.unallocated_amount = self.received_amount - \
-							(self.total_allocated_amount + total_deductions)
-			else:
-				if self.payment_type == "Receive" \
-					and self.base_total_allocated_amount <= self.base_received_amount + total_deductions \
-					and self.total_allocated_amount < self.paid_amount:
-						self.unallocated_amount = (self.base_received_amount + total_deductions - 
-							self.base_total_allocated_amount) / self.source_exchange_rate
-				elif self.payment_type == "Pay" \
-					and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
-					and self.total_allocated_amount < self.received_amount:
-						self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
-							self.base_total_allocated_amount)) / self.target_exchange_rate
+			if self.payment_type == "Receive" \
+				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
+				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
+					self.unallocated_amount = (self.base_received_amount + total_deductions - 
+						self.base_total_allocated_amount) / self.source_exchange_rate
+			elif self.payment_type == "Pay" \
+				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
+				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
@@ -679,6 +673,24 @@ def get_company_defaults(company):
 	return ret
 
 
+def get_outstanding_on_journal_entry(name):
+	res = frappe.db.sql(
+			'SELECT '
+			'CASE WHEN party_type IN ("Customer", "Student") '
+			'THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) '
+			'ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) '
+			'END as outstanding_amount '
+			'FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) '
+			'AND party_type IS NOT NULL '
+			'AND party_type != ""',
+			(name, name), as_dict=1
+		)
+
+	outstanding_amount = res[0].get('outstanding_amount', 0) if res else 0
+
+	return outstanding_amount
+
+
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
 	total_amount = outstanding_amount = exchange_rate = None
@@ -689,6 +701,13 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
+	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+		total_amount = ref_doc.get("total_amount")
+		if ref_doc.multi_currency:
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+		else:
+			exchange_rate = 1
+			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
 		if party_account_currency == company_currency:
 			if ref_doc.doctype == "Expense Claim":
@@ -750,6 +769,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_account = doc.receivable_account
 	elif dt == "Employee Advance":
 		party_account = doc.advance_account
+	elif dt == "Expense Claim":
+		party_account = doc.payable_account
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 

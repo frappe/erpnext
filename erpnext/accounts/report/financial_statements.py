@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import re
-
+from past.builtins import cmp
 import functools
 
 import frappe
@@ -297,8 +297,7 @@ def filter_accounts(accounts, depth=10):
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
-			if parent == None:
-				sort_root_accounts(children)
+			sort_accounts(children, is_root=True if parent==None else False)
 
 			for child in children:
 				child.indent = level
@@ -310,25 +309,26 @@ def filter_accounts(accounts, depth=10):
 	return filtered_accounts, accounts_by_name, parent_children_map
 
 
-def sort_root_accounts(roots):
+def sort_accounts(accounts, is_root=False, key="name"):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
-	def compare_roots(a, b):
-		if a.value and re.split('\W+', a.value)[0].isdigit():
-			# if chart of accounts is numbered, then sort by number
-			return cmp(a.value, b.value)
-		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
-			return -1
-		if a.root_type != b.root_type and a.root_type == "Asset":
-			return -1
-		if a.root_type == "Liability" and b.root_type == "Equity":
-			return -1
-		if a.root_type == "Income" and b.root_type == "Expense":
-			return -1
+	def compare_accounts(a, b):
+		if is_root:
+			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+				return -1
+			if a.root_type != b.root_type and a.root_type == "Asset":
+				return -1
+			if a.root_type == "Liability" and b.root_type == "Equity":
+				return -1
+			if a.root_type == "Income" and b.root_type == "Expense":
+				return -1
+		else:
+			if re.split('\W+', a[key])[0].isdigit():
+				# if chart of accounts is numbered, then sort by number
+				return cmp(a[key], b[key])
 		return 1
 
-	roots.sort(key = functools.cmp_to_key(compare_roots))
-
+	accounts.sort(key = functools.cmp_to_key(compare_accounts))
 
 def set_gl_entries_by_account(
 		company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account, ignore_closing_entries=False):

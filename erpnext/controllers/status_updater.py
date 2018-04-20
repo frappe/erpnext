@@ -156,6 +156,9 @@ class StatusUpdater(Document):
 
 			# get unique transactions to update
 			for d in self.get_all_children():
+				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
+
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
@@ -282,7 +285,7 @@ class StatusUpdater(Document):
 					ifnull((select
 						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
@@ -290,7 +293,7 @@ class StatusUpdater(Document):
 			if args.get('status_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
 					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+						'Not %(keyword)s', if(%(target_parent_field)s>=99.999999,
 						'Fully %(keyword)s', 'Partly %(keyword)s'))
 					where name='%(name)s'""" % args)
 

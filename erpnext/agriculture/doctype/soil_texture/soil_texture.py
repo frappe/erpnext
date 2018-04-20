@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, cint
+from frappe import _
 
 class SoilTexture(Document):
 	soil_edit_order = [2, 1, 0]
