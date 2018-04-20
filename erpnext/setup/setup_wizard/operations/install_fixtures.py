@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, os
 
 from frappe import _
 
@@ -261,6 +261,15 @@ def install(country=None):
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
+
+	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
+	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
+
+	records += {'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,\
+		'subject': _("Leave Approval Notification"), 'owner': frappe.session.user}
+
+	records += {'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,\
+		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
