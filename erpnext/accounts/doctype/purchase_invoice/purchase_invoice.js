@@ -110,38 +110,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	supplier: function() {
 		var me = this;
-		let internal;
-		frappe.db.get_value('Supplier', {name: this.frm.doc.supplier}, 'is_internal_supplier', (r) => {
-			if (r) {
-				internal = r.is_internal_supplier;
-			}
-			if (internal == 1) {
-				frappe.call({
-					method:"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_allowed_companies",
-					args: {supplier: this.frm.doc.supplier},
-					callback: function(r){
-						if (r.message){
-							if (me.frm.doc.company) {
-								me.frm.set_value("company", r.message[0]);
-							}
-							me.frm.set_query('company', function() {
-								return {
-									"filters": {"name": ["in", r.message]}
-									}
-								}
-							);
-						}
-					}
-				});
-			}
-			else {
-				me.frm.set_query('company', function(){
-					return {
-						"filters": {"name": ["like", "%" + "" + "%"]}
-					}
-				});
-			}
-		});
 		if(this.frm.updating_party_details)
 			return;
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
