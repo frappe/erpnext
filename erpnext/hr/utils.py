@@ -34,6 +34,7 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		doc.name = "New "+doc.doctype
 
 	overlap_doc = frappe.db.sql(query.format(doc.doctype),{
+			"employee": doc.employee,
 			"from_date": from_date,
 			"to_date": to_date,
 			"name": doc.name,
@@ -47,7 +48,12 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		throw_overlap_error(doc, exists_for, overlap_doc[0].name, from_date, to_date)
 
 def get_doc_condition(doctype):
-	if doctype == "Leave Period":
+	if doctype == "Compensatory Leave Request":
+		return "and employee = %(employee)s and docstatus < 2 \
+		and (work_from_date between %(from_date)s and %(to_date)s \
+		or work_end_date between %(from_date)s and %(to_date)s \
+		or (work_from_date < %(from_date)s and work_end_date > %(to_date)s))"
+	elif doctype == "Leave Period":
 		return "and company = %(company)s and (from_date between %(from_date)s and %(to_date)s \
 			or to_date between %(from_date)s and %(to_date)s \
 			or (from_date < %(from_date)s and to_date > %(to_date)s))"
