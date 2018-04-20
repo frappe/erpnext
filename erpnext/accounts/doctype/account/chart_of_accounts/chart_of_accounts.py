@@ -165,7 +165,7 @@ def build_account_tree(tree, parent, all_accounts):
 		tree[child.account_name] = {}
 		
 		# assign account_type and root_type
-		if child.account_type:
+		if child.account_number:
 			tree[child.account_name]["account_number"] = child.account_number
 		if child.account_type:
 			tree[child.account_name]["account_type"] = child.account_type
