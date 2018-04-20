@@ -216,7 +216,7 @@ data_map = {
 		}
 	},
 	"Supplier Group": {
-		"columns": ["name"],
+		"columns": ["name", "parent_supplier_group"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},

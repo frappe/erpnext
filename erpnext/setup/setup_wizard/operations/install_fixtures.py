@@ -148,13 +148,14 @@ def install(country=None):
 		{'doctype': 'Customer Group', 'customer_group_name': _('Government'), 'is_group': 0, 'parent_customer_group': _('All Customer Groups')},
 
 		# supplier group
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Services')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Local')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Raw Material')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Electrical')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Hardware')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Pharmaceutical')},
-		{'doctype': 'Supplier Group', 'supplier_group_name': _('Distributor')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('All Supplier Groups'), 'is_group': 1, 'name': _('All Supplier Groups'), 'parent_supplier_group': ''},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Services'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Local'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Raw Material'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Electrical'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Hardware'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Pharmaceutical'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Distributor'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
 
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': 1, "parent_sales_person": ""},

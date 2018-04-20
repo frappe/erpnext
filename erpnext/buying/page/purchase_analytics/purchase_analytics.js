@@ -110,19 +110,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		var me = this;
 		if (!this.tl) {
 			// add 'Not Set' Supplier & Item
-			// Add 'All Supplier Groups' Supplier Group
 			// (Supplier / Item are not mandatory!!)
-			// Set parent supplier group for tree view
-
-			$.each(frappe.report_dump.data["Supplier Group"], function(i, v) {
-				v['parent_supplier_group'] = __("All Supplier Groups")
-			})
-
-			frappe.report_dump.data["Supplier Group"] = [{
-				name: __("All Supplier Groups"),
-				id: "All Supplier Groups",
-			}].concat(frappe.report_dump.data["Supplier Group"]);
-
 			frappe.report_dump.data["Supplier"].push({
 				name: __("Not Set"),
 				parent_supplier_group: __("All Supplier Groups"),
