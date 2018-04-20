@@ -101,6 +101,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
+		var me = this;
+		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
+				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
+				var internal = customer.is_internal_customer;
+				if (internal == 1) {
+					me.frm.add_custom_button("Inter Company Invoice", function() {
+						me.validate_inter_company_invoice(me.frm);
+					}, __("Make"));
+				}
+			});
+		}
 	},
 
 	on_submit: function(doc, dt, dn) {
@@ -213,11 +225,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	tc_name: function() {
 		this.get_terms();
 	},
-
 	customer: function() {
 		var me = this;
 		if(this.frm.updating_party_details) return;
-
 		erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
@@ -228,6 +238,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}, function() {
 				me.apply_pricing_rule();
 			})
+	},
+	
+	validate_inter_company_invoice: function(frm) {
+		var me = this;
+		frappe.call({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.validate_inter_company_invoice",
+			args: {"doc": frm.doc},
+			callback: function(r) {
+				if (r && r.message) {
+					me.make_inter_company_invoice(frm);
+				}
+			}
+		});
+	},
+
+	make_inter_company_invoice: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
+			frm: frm
+		});
 	},
 
 	debit_to: function() {
