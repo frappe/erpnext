@@ -61,6 +61,8 @@ def set_default_settings(args):
 
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
+	hr_settings.leave_approval_notification_template = "Leave Approval Notification"
+	hr_settings.leave_status_notification_template = "Leave Status Notification"
 	hr_settings.save()
 
 def set_no_copy_fields_in_variant_settings():

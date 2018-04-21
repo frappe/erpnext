@@ -19,7 +19,7 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 
-	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
+	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company, filters.presentation_currency)
 
 	data = []
 	data.extend(income or [])
@@ -33,13 +33,13 @@ def execute(filters=None):
 
 	return columns, data, None, chart
 
-def get_net_profit_loss(income, expense, period_list, company):
+def get_net_profit_loss(income, expense, period_list, company, currency=None):
 	total = 0
 	net_profit_loss = {
 		"account_name": "'" + _("Profit for the year") + "'",
 		"account": "'" + _("Profit for the year") + "'",
 		"warn_if_negative": True,
-		"currency": frappe.db.get_value("Company", company, "default_currency")
+		"currency": currency or frappe.db.get_value("Company", company, "default_currency")
 	}
 
 	has_value = False

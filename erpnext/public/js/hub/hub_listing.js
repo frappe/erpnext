@@ -152,9 +152,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		var html = this.data.map(this.item_html.bind(this)).join("");
 
 		if (this.start === 0) {
-			// this.renderHeader();
+			// ${this.getHeaderHtml()}
 			this.$result.html(`
-				${this.getHeaderHtml()}
 				<div class="image-view-container small">
 					${html}
 				</div>
@@ -173,17 +172,21 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		});
 	}
 
-	getHeaderHtml() {
+	getHeaderHtml(title, image, content) {
 		// let company_html =
 		return `
 			<header class="list-row-head text-muted small">
 				<div style="display: flex;">
 					<div class="list-header-icon">
-						<img title="Riadco%20Group" alt="Riadco Group" src="https://cdn.pbrd.co/images/HdaPxcg.png">
+						<img title="${title}" alt="${title}" src="${image}">
 					</div>
 					<div class="list-header-info">
-						<h5>Riadco Group</h5>
-						<span class="margin-vertical-10 level-item">Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam</span>
+						<h5>
+							${title}
+						</h5>
+						<span class="margin-vertical-10 level-item">
+							${content}
+						</span>
 					</div>
 				</div>
 			</header>
@@ -246,69 +249,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		)
 	}
 
-	item_html(item) {
-		item._name = encodeURI(item.name);
-		const encoded_name = item._name;
-		const title = strip_html(item[this.meta.title_field || 'name']);
-		const _class = !item[this.imageFieldName] ? 'no-image' : '';
-		const route = `#Hub/Item/${item.hub_item_code}`;
-		const company_name = item['company_name'];
-
-		const reviewLength = (item.reviews || []).length;
-		const ratingAverage = reviewLength
-			? item.reviews
-				.map(r => r.rating)
-				.reduce((a, b) => (a + b, 0))/reviewLength
-			: -1;
-
-		let ratingHtml = ``;
-
-		for(var i = 0; i < 5; i++) {
-			let starClass = 'fa-star';
-			if(i >= ratingAverage) starClass = 'fa-star-o';
-			ratingHtml += `<i class='fa fa-fw ${starClass} star-icon' data-index=${i}></i>`;
-		}
-
-		let item_html = `
-			<div class="image-view-item">
-				<div class="image-view-header">
-					<div class="list-row-col list-subject ellipsis level">
-						<span class="level-item bold ellipsis" title="McGuffin">
-							<a href="${route}">${title}</a>
-						</span>
-					</div>
-					<div class="text-muted small" style="margin: 5px 0px;">
-						${ratingHtml}
-						(${reviewLength})
-					</div>
-					<div class="list-row-col">
-						<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
-					</div>
-				</div>
-				<div class="image-view-body">
-					<a  data-name="${encoded_name}"
-						title="${encoded_name}"
-						href="${route}"
-					>
-						<div class="image-field ${_class}"
-							data-name="${encoded_name}"
-						>
-							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
-								<i class="octicon octicon-eye" data-name="${encoded_name}"></i>
-							</button>
-							<button class="btn btn-default like-button" data-name="${encoded_name}">
-								<i class="octicon octicon-heart" data-name="${encoded_name}"></i>
-							</button>
-						</div>
-					</a>
-				</div>
-
-			</div>
-		`;
-
-		return item_html;
-	}
-
 	setup_quick_view() {
 		if(this.quick_view) return;
 
@@ -316,6 +256,31 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			title: 'Quick View',
 			fields: this.formFields
 		});
+		this.quick_view.set_primary_action(__('Request a Quote'), () => {
+			this.show_rfq_modal()
+				.then(values => {
+					item.item_code = values.item_code;
+					delete values.item_code;
+
+					const supplier = values;
+					return [item, supplier];
+				})
+				.then(([item, supplier]) => {
+					return this.make_rfq(item, supplier, this.page.btn_primary);
+				})
+				.then(r => {
+					console.log(r);
+					if (r.message && r.message.rfq) {
+						this.page.btn_primary.addClass('disabled').html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
+					} else {
+						throw r;
+					}
+				})
+				.catch((e) => {
+					console.log(e); //eslint-disable-line
+				});
+		}, 'octicon octicon-plus');
+
 		this.$result.on('click', '.btn.zoom-view', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
@@ -398,6 +363,14 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.page_title = __('Products');
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
 		this.filters = [];
+	}
+
+	render() {
+		this.data_dict = {};
+		this.render_image_view();
+
+		this.setup_quick_view();
+		this.setup_like();
 	}
 
 	bootstrap_data(response) {
@@ -486,6 +459,11 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 			label: __("Favourites"),
 			on_click: () => frappe.set_route('Hub', 'Favourites')
 		}, __("Account"));
+
+		this.sidebar.add_item({
+			label: __("Settings"),
+			on_click: () => frappe.set_route('Form', 'Hub Settings')
+		}, __("Account"));
 	}
 
 	update_category(label) {
@@ -514,6 +492,70 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 			this.data_dict[d.hub_item_code] = d;
 		});
 	}
+
+	item_html(item) {
+		item._name = encodeURI(item.name);
+		const encoded_name = item._name;
+		const title = strip_html(item[this.meta.title_field || 'name']);
+		const _class = !item[this.imageFieldName] ? 'no-image' : '';
+		const route = `#Hub/Item/${item.hub_item_code}`;
+		const company_name = item['company_name'];
+
+		const reviewLength = (item.reviews || []).length;
+		const ratingAverage = reviewLength
+			? item.reviews
+				.map(r => r.rating)
+				.reduce((a, b) => a + b, 0)/reviewLength
+			: -1;
+
+		let ratingHtml = ``;
+
+		for(var i = 0; i < 5; i++) {
+			let starClass = 'fa-star';
+			if(i >= ratingAverage) starClass = 'fa-star-o';
+			ratingHtml += `<i class='fa fa-fw ${starClass} star-icon' data-index=${i}></i>`;
+		}
+
+		let item_html = `
+			<div class="image-view-item">
+				<div class="image-view-header">
+					<div class="list-row-col list-subject ellipsis level">
+						<span class="level-item bold ellipsis" title="McGuffin">
+							<a href="${route}">${title}</a>
+						</span>
+					</div>
+					<div class="text-muted small" style="margin: 5px 0px;">
+						${ratingHtml}
+						(${reviewLength})
+					</div>
+					<div class="list-row-col">
+						<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
+					</div>
+				</div>
+				<div class="image-view-body">
+					<a  data-name="${encoded_name}"
+						title="${encoded_name}"
+						href="${route}"
+					>
+						<div class="image-field ${_class}"
+							data-name="${encoded_name}"
+						>
+							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
+								<i class="octicon octicon-eye" data-name="${encoded_name}"></i>
+							</button>
+							<button class="btn btn-default like-button" data-name="${encoded_name}">
+								<i class="octicon octicon-heart" data-name="${encoded_name}"></i>
+							</button>
+						</div>
+					</a>
+				</div>
+
+			</div>
+		`;
+
+		return item_html;
+	}
+
 };
 
 erpnext.hub.Favourites = class Favourites extends erpnext.hub.ItemListing {
@@ -564,16 +606,6 @@ erpnext.hub.Favourites = class Favourites extends erpnext.hub.ItemListing {
 			label: __('Back to Products'),
 			on_click: () => frappe.set_route('Hub', 'Item')
 		});
-
-		// this.sidebar.add_item({
-		// 	label: this.hub_settings.company,
-		// 	on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
-		// }, __("Account"));
-
-		// this.sidebar.add_item({
-		// 	label: __("My Orders"),
-		// 	on_click: () => frappe.set_route('List', 'Request for Quotation')
-		// }, __("Account"));
 	}
 
 	update_category(label) {
@@ -610,6 +642,11 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 		this.show();
 	}
 
+	render() {
+		this.data_dict = {};
+		this.render_image_view();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Company';
@@ -628,6 +665,18 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 		this.imageFieldName = 'company_logo';
 	}
 
+	setup_side_bar() {
+		this.sidebar = new frappe.ui.Sidebar({
+			wrapper: this.page.wrapper.find('.layout-side-section'),
+			css_class: 'hub-sidebar'
+		});
+
+		this.sidebar.add_item({
+			label: __('Back to Products'),
+			on_click: () => frappe.set_route('Hub', 'Item')
+		});
+	}
+
 	get_filters_for_args() {
 		let filters = {};
 		this.filter_area.get().forEach(f => {
@@ -637,29 +686,41 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 		return filters;
 	}
 
-	card_html(company) {
-		company._name = encodeURI(company.name);
-		const route = `#Hub/Company/${company.company_name}`;
+	item_html(company) {
+		company._name = encodeURI(company.company_name);
+		const encoded_name = company._name;
+		const title = strip_html(company.company_name);
+		const _class = !company[this.imageFieldName] ? 'no-image' : '';
+		const company_name = company['company_name'];
+		const route = `#Hub/Company/${company_name}`;
 
 		let image_html = company.company_logo ?
 			`<img src="${company.company_logo}"><span class="helper"></span>` :
 			`<div class="standard-image">${frappe.get_abbr(company.company_name)}</div>`;
 
-		return `
-			<div class="hub-item-wrapper margin-bottom" style="width: 200px;">
-				<a href="${route}">
-					<div class="hub-item-image">
-						<div class="img-wrapper" style="height: 200px; width: 200px">
-							${ image_html }
+		let item_html = `
+			<div class="image-view-item">
+				<div class="image-view-header">
+					<div class="list-row-col list-subject ellipsis level">
+						<span class="level-item bold ellipsis" title="McGuffin">
+							<a href="${route}">${title}</a>
+						</span>
+					</div>
+				</div>
+				<div class="image-view-body">
+					<a  data-name="${encoded_name}"
+						title="${encoded_name}"
+						href="${route}">
+						<div class="image-field ${_class}"
+							data-name="${encoded_name}">
 						</div>
-					</div>
-					<div class="hub-item-title">
-						<h5 class="bold">
-							${ company.company_name }
-						</h5>
-					</div>
-				</a>
+					</a>
+				</div>
+
 			</div>
 		`;
+
+		return item_html;
 	}
+
 };
