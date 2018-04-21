@@ -46,6 +46,9 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"voucher_no",
 			"label": __("Voucher No"),
 			"fieldtype": "Data",
+			on_change: function() {
+				frappe.query_report_filters_by_name.group_by.set_value("");
+			}
 		},
 		{
 			"fieldname":"project",
@@ -107,7 +110,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
-			"options": ["Group by Voucher", "Group by Account", "Group by Party"],
+			"options": ["", "Group by Voucher", "Group by Account", "Group by Party"],
 			"default": "Group by Voucher"
 		},
 		{

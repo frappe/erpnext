@@ -146,6 +146,7 @@ class PayrollEntry(Document):
 		ss_list = self.get_sal_slip_list(ss_status=0)
 		submitted_ss = []
 		not_submitted_ss = []
+		frappe.flags.via_payroll_entry = True
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			ss_dict = {}
@@ -159,7 +160,7 @@ class PayrollEntry(Document):
 			else:
 				try:
 					ss_obj.submit()
-					submitted_ss.append(ss_dict)
+					submitted_ss.append(ss_obj)
 
 				except frappe.ValidationError:
 					not_submitted_ss.append(ss_dict)
@@ -168,7 +169,14 @@ class PayrollEntry(Document):
 			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
 				.format(ss_obj.start_date, ss_obj.end_date))
 
+			self.email_salary_slip(submitted_ss)
+
 		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
+
+	def email_salary_slip(self, submitted_ss):
+		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
+			for ss in submitted_ss:
+				ss.email_salary_slip()
 
 	def get_loan_details(self):
 		"""
