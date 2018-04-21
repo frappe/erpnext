@@ -51,7 +51,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
->>>>>>> b44ed732754c3ba203148cfc1751b390328149bc
    "fieldname": "employee", 
    "fieldtype": "Link", 
    "hidden": 0, 
