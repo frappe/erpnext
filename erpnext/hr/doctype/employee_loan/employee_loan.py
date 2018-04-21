@@ -135,26 +135,26 @@ def get_employee_loan_application(employee_loan_application):
 		return employee_loan.as_dict()
 
 @frappe.whitelist()
-def make_jv_entry(employee_loan, company, employee_loan_account, employee, loan_amount, payment_account=None):
+def make_jv_entry( company, account, amount, employee=None, reference_name=None, reference_type=None, payment_account=None):
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.voucher_type = 'Bank Entry'
-	journal_entry.user_remark = _('Against Employee Loan: {0}').format(employee_loan)
+	journal_entry.user_remark = _('Against Employee Loan: {0}').format(reference_name)
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
 
 	account_amt_list = []
 
 	account_amt_list.append({
-		"account": employee_loan_account,
-		"debit_in_account_currency": loan_amount,
-		"reference_type": "Employee Loan",
-		"reference_name": employee_loan,
+		"account": account,
+		"debit_in_account_currency": amount,
+		"reference_type": reference_type,
+		"reference_name": reference_name,
 		})
 	account_amt_list.append({
 		"account": payment_account,
-		"credit_in_account_currency": loan_amount,
-		"reference_type": "Employee Loan",
-		"reference_name": employee_loan,
+		"credit_in_account_currency": amount,
+		"reference_type": reference_type,
+		"reference_name": reference_name,
 		})
 	journal_entry.set("accounts", account_amt_list)
 	return journal_entry.as_dict()
