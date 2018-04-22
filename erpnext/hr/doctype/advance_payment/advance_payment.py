@@ -13,7 +13,7 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 	
 class AdvancePayment(Document):
 	def validate(self):
-		self.validate_date()
+		#~ self.validate_date()
 		self.valdate_duplicate()
 		self.vaidate_amount()
 		
