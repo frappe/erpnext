@@ -22,7 +22,7 @@ frappe.ui.form.on("Request for Quotation",{
 	},
 
 	onload: function(frm) {
-		frm.add_fetch('standard_reply', 'response', 'message_for_supplier');
+		frm.add_fetch('email_template', 'response', 'message_for_supplier');
 
 		if(!frm.doc.message_for_supplier) {
 			frm.set_value("message_for_supplier", __("Please supply the specified items at the best possible rates"))
