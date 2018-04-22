@@ -31,6 +31,7 @@ class EmployeeChangeIBAN(Document):
 		employee = frappe.get_doc("Employee", self.employee)
 		employee.db_set("iban", self.new_iban)
 		employee.db_set("bank_name", self.new_bank)
+		employee.save()
 		self.validate_commitment_with_bank()
 
 
