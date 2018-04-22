@@ -12,6 +12,20 @@ frappe.query_reports["General Ledger"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book",
+			"get_query": function() {
+				var company = frappe.query_report_filters_by_name.company.get_value();
+				return {
+					"filters": {
+						"company": company,
+					}
+				};
+			}
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
