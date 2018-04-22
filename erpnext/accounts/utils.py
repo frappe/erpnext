@@ -51,8 +51,8 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 			"transaction_date": transaction_date,
 			"company": company
 		}, as_dict=as_dict)
-		if fycv :
-			throw(_("Transaction is made in Closed Fiscal Year")) 
+		# if fycv :
+		# 	throw(_("Transaction is made in Closed Fiscal Year")) 
 				
 	return fy
 

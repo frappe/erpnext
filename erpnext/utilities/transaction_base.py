@@ -74,7 +74,7 @@ class TransactionBase(StatusUpdater):
 						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
-						elif not val.get("allow_duplicate_prev_row_id"):
+						elif not val.get("allow_duplicate_prev_row_id") and self.doctype != "Purchase Receipt":
 							frappe.throw(_("Duplicate row {0} with same {1}").format(d.idx, key))
 					elif ref_dn:
 						ref_doc.setdefault(key, [])

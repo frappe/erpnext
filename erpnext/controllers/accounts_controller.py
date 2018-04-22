@@ -193,7 +193,8 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 							elif fieldname == "cost_center" and not item.get("cost_center"):
-								item.set(fieldname, value)
+								#~ item.set(fieldname, value)
+								pass
 
 							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
 								item.set(fieldname, value)
