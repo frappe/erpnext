@@ -129,7 +129,7 @@ class Subscription(Document):
 		"""
 		subscription_settings = frappe.get_single('Subscription Settings')
 		if self.status == 'Past Due Date' and self.is_past_grace_period():
-			self.status = 'Canceled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
+			self.status = 'Cancelled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
 
 	def set_subscription_status(self):
 		"""
@@ -139,7 +139,7 @@ class Subscription(Document):
 			self.status = 'Trialling'
 		elif self.status == 'Past Due Date' and self.is_past_grace_period():
 			subscription_settings = frappe.get_single('Subscription Settings')
-			self.status = 'Canceled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
+			self.status = 'Cancelled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
 		elif self.status == 'Past Due Date' and not self.has_outstanding_invoice():
 			self.status = 'Active'
 		elif self.current_invoice_is_past_due():
@@ -335,7 +335,7 @@ class Subscription(Document):
 		The possible outcomes of this method are:
 		1. Generate a new invoice
 		2. Change the `Subscription` status to 'Past Due Date'
-		3. Change the `Subscription` status to 'Canceled'
+		3. Change the `Subscription` status to 'Cancelled'
 		"""
 		if getdate(nowdate()) > getdate(self.current_invoice_end) and not self.has_outstanding_invoice():
 			self.generate_invoice()
@@ -352,7 +352,7 @@ class Subscription(Document):
 		"""
 		Called when `Subscription.cancel_at_period_end` is truthy
 		"""
-		self.status = 'Canceled'
+		self.status = 'Cancelled'
 		if not self.cancelation_date:
 			self.cancelation_date = nowdate()
 
@@ -362,7 +362,7 @@ class Subscription(Document):
 
 		The possible outcomes of this method are:
 		1. Change the `Subscription` status to 'Active'
-		2. Change the `Subscription` status to 'Canceled'
+		2. Change the `Subscription` status to 'Cancelled'
 		3. Change the `Subscription` status to 'Unpaid'
 		"""
 		current_invoice = self.get_current_invoice()
@@ -397,10 +397,10 @@ class Subscription(Document):
 		This sets the subscription as cancelled. It will stop invoices from being generated
 		but it will not affect already created invoices.
 		"""
-		if self.status != 'Canceled':
+		if self.status != 'Cancelled':
 			to_generate_invoice = True if self.status == 'Active' else False
 			to_prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
-			self.status = 'Canceled'
+			self.status = 'Cancelled'
 			self.cancelation_date = nowdate()
 			if to_generate_invoice:
 				self.generate_invoice(prorate=to_prorate)
@@ -412,7 +412,7 @@ class Subscription(Document):
 		subscription and the `Subscription` will lose all the history of generated invoices
 		it has.
 		"""
-		if self.status == 'Canceled':
+		if self.status == 'Cancelled':
 			self.status = 'Active'
 			self.db_set('start', nowdate())
 			self.update_subscription_period(nowdate())
@@ -449,7 +449,7 @@ def get_all_subscriptions():
 	Returns all `Subscription` documents
 	"""
 	return frappe.db.sql(
-		'select name from `tabSubscription` where status != "Canceled"',
+		'select name from `tabSubscription` where status != "Cancelled"',
 		as_dict=1
 	)
 

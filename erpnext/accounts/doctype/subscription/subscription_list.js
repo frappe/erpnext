@@ -8,8 +8,8 @@ frappe.listview_settings['Subscription'] = {
 			return [__("Past Due Date"), "orange"];
 		} else if(doc.status === 'Unpaid') {
 			return [__("Unpaid"), "red"];
-		} else if(doc.status === 'Canceled') {
-			return [__("Canceled"), "darkgrey"];
+		} else if(doc.status === 'Cancelled') {
+			return [__("Cancelled"), "darkgrey"];
 		}
 	}
 };

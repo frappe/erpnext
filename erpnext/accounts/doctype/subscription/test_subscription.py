@@ -165,8 +165,8 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Past Due Date')
 
 		subscription.process()
-		# This should change status to Canceled since grace period is 0
-		self.assertEqual(subscription.status, 'Canceled')
+		# This should change status to Cancelled since grace period is 0
+		self.assertEqual(subscription.status, 'Cancelled')
 
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
@@ -188,7 +188,7 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Past Due Date')
 
 		subscription.process()
-		# This should change status to Canceled since grace period is 0
+		# This should change status to Cancelled since grace period is 0
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		settings.cancel_after_grace = default_grace_period_action
@@ -270,7 +270,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.save()
 		subscription.cancel_subscription()
 
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 
 		subscription.delete()
 
@@ -303,7 +303,7 @@ class TestSubscription(unittest.TestCase):
 			flt(prorate_factor, 2)
 		)
 		self.assertEqual(flt(invoice.grand_total, 2), flt(prorate_factor * 900, 2))
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 
 		subscription.delete()
 		settings.prorate = to_prorate
@@ -371,15 +371,15 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(len(subscription.invoices), invoices)
 
 		subscription.cancel_subscription()
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 		self.assertEqual(len(subscription.invoices), invoices)
 
 		subscription.process()
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 		self.assertEqual(len(subscription.invoices), invoices)
 
 		subscription.process()
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 		self.assertEqual(len(subscription.invoices), invoices)
 
 		settings.cancel_after_grace = default_grace_period_action
@@ -406,7 +406,7 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		subscription.cancel_subscription()
-		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(subscription.status, 'Cancelled')
 
 		subscription.restart_subscription()
 		self.assertEqual(subscription.status, 'Active')
@@ -440,7 +440,7 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Past Due Date')
 
 		subscription.process()
-		# This should change status to Canceled since grace period is 0
+		# This should change status to Cancelled since grace period is 0
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		invoice = subscription.get_current_invoice()

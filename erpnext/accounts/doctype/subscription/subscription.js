@@ -4,7 +4,7 @@
 frappe.ui.form.on('Subscription', {
 	refresh: function(frm) {
 		if(!frm.is_new()){
-			if(frm.doc.status !== 'Canceled'){
+			if(frm.doc.status !== 'Cancelled'){
 				frm.add_custom_button(
 					__('Cancel Subscription'),
 					() => frm.events.cancel_this_subscription(frm)
@@ -14,7 +14,7 @@ frappe.ui.form.on('Subscription', {
 					() => frm.events.get_subscription_updates(frm)
 				);
 			}
-			else if(frm.doc.status === 'Canceled'){
+			else if(frm.doc.status === 'Cancelled'){
 				frm.add_custom_button(
 					__('Restart Subscription'),
 					() => frm.events.renew_this_subscription(frm)

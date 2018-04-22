@@ -315,7 +315,7 @@
    "label": "Status", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "\nTrialling\nActive\nPast Due Date\nCanceled\nUnpaid", 
+   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid",
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
