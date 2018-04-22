@@ -175,7 +175,13 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			return out;
 		});
 
-
+		me.frm.set_query("finance_book", function(frm) {
+			return {
+				filters: {
+					company: me.frm.doc.company
+				}
+			};
+		});
 	},
 
 	setup_balance_formatter: function() {
