@@ -112,8 +112,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		me.frm.set_query("finance_book", function() {
 			return {
 				filters: {
-					company: me.frm.doc.company,
-					is_group: 0
+					company: me.frm.doc.company
 				}
 			};
 		});
