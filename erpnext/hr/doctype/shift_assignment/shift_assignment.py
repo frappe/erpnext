@@ -78,3 +78,4 @@ def add_assignments(events, start, end, conditions=None):
 		}
 		if e not in events:
 			events.append(e)
+
