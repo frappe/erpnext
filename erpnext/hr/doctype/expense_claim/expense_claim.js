@@ -16,7 +16,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		if(!d.expense_type) {
 			return;
 		}
-
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
@@ -156,6 +155,18 @@ frappe.ui.form.on("Expense Claim", {
 		});
 	},
 
+	onload: function(frm) {
+		frm.set_query("expense_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
@@ -176,6 +187,11 @@ frappe.ui.form.on("Expense Claim", {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __("Make"));
 		}
+		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'expense_approver_mandatory_in_expense_claim', (r) => {
+			if (frm.doc.docstatus < 1 && (r.expense_approver_mandatory_in_expense_claim == 1)) {
+				frm.toggle_reqd("expense_approver", true);
+			}
+		});
 	},
 
 	make_payment_entry: function(frm) {
