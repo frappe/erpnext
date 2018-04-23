@@ -9,8 +9,6 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
-
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
