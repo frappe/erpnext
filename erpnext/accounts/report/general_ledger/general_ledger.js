@@ -72,7 +72,7 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"party",
 			"label": __("Party"),
-			"fieldtype": "Dynamic Link",
+			"fieldtype": "MultiSelect",
 			"get_options": function() {
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
 				var party = frappe.query_report_filters_by_name.party.get_value();
@@ -83,20 +83,26 @@ frappe.query_reports["General Ledger"] = {
 			},
 			on_change: function() {
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
-				var party = frappe.query_report_filters_by_name.party.get_value();
-				if(!party_type || !party) {
-					frappe.query_report_filters_by_name.party_name.set_value("");
-					return;
-				}
-				var fieldname = erpnext.utils.get_party_name(party_type) || "name";
-				frappe.db.get_value(party_type, party, fieldname, function(value) {
-					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
-				});
+				var parties = frappe.query_report_filters_by_name.party.get_value();
+				const values = parties.split(/\s*,\s*/).filter(d => d);
 
-				if (party_type === "Customer" || party_type === "Supplier") {
-					frappe.db.get_value(party_type, party, "tax_id", function(value) {
-						frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+				if(!party_type || !parties || values.length>1) {
+					frappe.query_report_filters_by_name.party_name.set_value("");
+					frappe.query_report_filters_by_name.tax_id.set_value("");
+					return;
+				} else {
+					var party = values[0];
+					frappe.query_report_filters_by_name.show_name = true;
+					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
+					frappe.db.get_value(party_type, party, fieldname, function(value) {
+						frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
 					});
+
+					if (party_type === "Customer" || party_type === "Supplier") {
+						frappe.db.get_value(party_type, party, "tax_id", function(value) {
+							frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+						});
+					}
 				}
 			}
 		},
