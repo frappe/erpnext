@@ -2,9 +2,9 @@ import frappe
 from frappe import _
 
 def execute():
+	frappe.reload_doc("hr", "doctype", "department_approver")
 	frappe.reload_doc("hr", "doctype", "employee")
 	frappe.reload_doc("hr", "doctype", "department")
-	frappe.reload_doc("hr", "doctype", "employee_leave_approver")
 
 	approvers = frappe.db.sql("""select distinct app.leave_approver, emp.department from
 	`tabEmployee Leave Approver` app, `tabEmployee` emp
