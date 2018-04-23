@@ -13,6 +13,6 @@ def execute():
 		""", as_dict=True)
 	for record in approvers:
 		if record.department:
-			frappe.db.sql("""update `tabDepartment Approver` app set app.parenttype = '{0}',
-				app.parent = '{1}' and parentfield = 'leave_approver' where app.leave_approver = '{2}'"""
+			frappe.db.sql("""update `tabDepartment Approver` set parenttype = '{0}',
+				parent = '{1}' and parentfield = 'leave_approver' where approver = '{2}'"""
 				.format(_('Department'), record.department, record.leave_approver))
