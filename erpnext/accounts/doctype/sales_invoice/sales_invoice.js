@@ -106,9 +106,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
 				var internal = customer.is_internal_customer;
-				if (internal == 1) {
+				var disabled = customer.disabled;
+				if (internal == 1 && disabled == 0) {
 					me.frm.add_custom_button("Inter Company Invoice", function() {
-						me.validate_inter_company_invoice(me.frm);
+						me.make_inter_company_invoice();
 					}, __("Make"));
 				}
 			});
@@ -239,24 +240,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				me.apply_pricing_rule();
 			})
 	},
-	
-	validate_inter_company_invoice: function(frm) {
-		var me = this;
-		frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.validate_inter_company_invoice",
-			args: {"doc": frm.doc},
-			callback: function(r) {
-				if (r && r.message) {
-					me.make_inter_company_invoice(frm);
-				}
-			}
-		});
-	},
 
-	make_inter_company_invoice: function(frm) {
+	make_inter_company_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
-			frm: frm
+			frm: me.frm
 		});
 	},
 

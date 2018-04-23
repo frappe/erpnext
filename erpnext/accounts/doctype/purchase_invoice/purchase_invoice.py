@@ -17,6 +17,8 @@ from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from frappe.model.mapper import get_mapped_doc
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
+	unlink_inter_company_invoice
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -73,7 +75,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
-		self.validate_inter_company_supplier()
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -119,21 +121,6 @@ class PurchaseInvoice(BuyingController):
 			frappe.throw(_("Credit To account must be a Payable account"))
 
 		self.party_account_currency = account.account_currency
-
-	def validate_inter_company_supplier(self):
-		if frappe.db.get_value("Supplier", self.supplier, "is_internal_supplier") == 1:
-			if self.inter_company_invoice_reference:
-				doc = frappe.get_doc("Sales Invoice", self.inter_company_invoice_reference)
-				if not frappe.db.get_value("Supplier", {"represents_company": doc.company}, "name") == self.supplier:
-					frappe.throw(_("Invalid Supplier for Inter Company Invoice"))
-				if not frappe.db.get_value("Customer", {"name": doc.customer}, "represents_company") == self.company:
-					frappe.throw(_("Invalid Company for Inter Company Invoice"))
-			else:
-				companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
-					where parenttype = "Supplier" and parent = '{0}'""".format(self.supplier), as_list = 1)
-				companies = [company[0] for company in companies]
-				if not self.company in companies:
-					frappe.throw(_("Supplier not allowed to transact with {0}. Please change the Company.").format(self.company))
 
 	def check_for_closed_status(self):
 		check_list = []
@@ -319,12 +306,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 		self.update_fixed_asset()
-		self.update_linked_invoice()
-
-	def update_linked_invoice(self):
-		if self.inter_company_invoice_reference:
-			frappe.db.set_value("Sales Invoice", self.inter_company_invoice_reference,\
-				"inter_company_invoice_reference", self.name)
+		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_fixed_asset(self):
 		for d in self.get("items"):
@@ -657,7 +639,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_fixed_asset()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		self.unlink_inter_company_invoice()
+		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_project(self):
 		project_list = []
@@ -695,13 +677,6 @@ class PurchaseInvoice(BuyingController):
 				if pi:
 					pi = pi[0][0]
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}".format(pi)))
-
-	def unlink_inter_company_invoice(self):
-		if self.inter_company_invoice_reference:
-			frappe.db.set_value("Purchase Invoice", self.name,\
-				"inter_company_invoice_reference", "")
-			frappe.db.set_value("Sales Invoice", self.inter_company_invoice_reference,\
-				"inter_company_invoice_reference", "")
 
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_pr = []
