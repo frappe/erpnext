@@ -196,7 +196,8 @@ erpnext.utils.select_alternate_items = function(opts) {
 			{fieldtype:'Section Break', label: __('Items')},
 			{
 				fieldname: "alternative_items", fieldtype: "Table", cannot_add_rows: true,
-				in_place_edit: true, data: this.data,
+				in_place_edit: true,
+				data: this.data,
 				get_data: () => {
 					return this.data;
 				},

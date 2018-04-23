@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
+import json
 from frappe.utils import cint, cstr, flt
 from frappe import _
 from erpnext.setup.utils import get_exchange_rate
@@ -533,11 +534,11 @@ def get_list_context(context):
 
 def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0):
 	item_dict = {}
-
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
 				bom_item.idx,
+				bom_item.set_alternative_items,
 				item.item_name,
 				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
@@ -585,7 +586,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
 				if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 					item_dict[item][d[1]] = frappe.db.get_value("Company", company, d[2]) if d[2] else None
-
+	# BOM Alternative Items
+	for item, item_details in item_dict.items():
+		item_details['original_item'] = item_details['item_code']
+		if item_details['set_alternative_items']:
+			item_details['alt_items'] = get_bomline_alternative_items(bom, item)
 	return item_dict
 
 @frappe.whitelist()
@@ -658,3 +663,88 @@ def get_boms_in_bottom_up_order(bom_no=None):
 		count += 1
 
 	return bom_list
+
+
+@frappe.whitelist()
+def setup_bomline_alternative_items(items, bom, parent_item_code):
+	"""
+		Update related BOM Item , BOM Line Alternative Item
+	"""
+
+	bomline_alt_items = frappe.db.sql(
+		"""
+			select name, alt_item
+			from `tabBOM Line Alternative Item`
+		    where bom=%s and item=%s
+		""", (bom, parent_item_code), as_dict=1)
+	items = json.loads(items)
+	current_alt_items = [item['alt_item'] for item in items]
+	delete_items = bomline_alt_items
+	if items:
+		delete_items = [item for item in bomline_alt_items
+				        if item['alt_item'] not in current_alt_items]
+	for item in delete_items:
+		frappe.db.sql(
+		"""
+			delete from `tabBOM Line Alternative Item`
+			where name=%s
+		""",(item['name']))
+		frappe.db.commit()
+
+    # Create or update
+	for item in items:
+		item = frappe._dict(item)
+		docs = frappe.get_all('BOM Line Alternative Item',
+					          filters={'bom': bom, 'item': parent_item_code,
+									   'alt_item': item.alt_item})
+		if not docs:
+			d = frappe.new_doc('BOM Line Alternative Item')
+			d.bom = bom
+			d.item = parent_item_code
+			d.alt_item = item.alt_item
+			d.save()
+			frappe.db.commit()
+
+	return frappe.db.sql(
+		"""
+			select alt_item, name
+			from `tabBOM Line Alternative Item`
+		    where bom=%s and item=%s
+		""", (bom, parent_item_code), as_dict=1)
+
+
+@frappe.whitelist()
+def remove_bomline_alt_items(bom, parent_item_code):
+	"""
+		Remove related BOM Item Alternative items
+
+		:params:bom
+		:params:parent_item_code
+	"""
+	bomline_alt_items = frappe.db.sql(
+		"""
+			select name, alt_item
+			from `tabBOM Line Alternative Item`
+		    where bom=%s and item=%s
+		""", (bom, parent_item_code), as_dict=1)
+	for item in bomline_alt_items:
+		frappe.db.sql(
+		"""
+			delete from `tabBOM Line Alternative Item`
+			where name=%s
+		""",(item['name']))
+		frappe.db.commit()
+	return "Deleted related Bomline Alt items"
+
+
+@frappe.whitelist()
+def get_bomline_alternative_items(bom, parent_item_code):
+	"""
+		Get related BOM Item, BOM Line Alternative Item
+	"""
+	return frappe.db.sql(
+		"""
+			select alt_item, name
+			from `tabBOM Line Alternative Item`
+		    where bom=%s and item=%s order by idx
+		""", (bom, parent_item_code), as_dict=1)

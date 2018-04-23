@@ -518,6 +518,3 @@ erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
 erpnext.patches.v11_0.update_department_lft_rgt
-erpnext.patches.v11_0.move_leave_approvers_from_employee
-erpnext.patches.v11_0.add_default_email_template_for_leave
-erpnext.patches.v11_0.set_default_email_template_in_hr
