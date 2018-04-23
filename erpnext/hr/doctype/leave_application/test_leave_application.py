@@ -59,29 +59,6 @@ class TestLeaveApplication(unittest.TestCase):
 	def _clear_applications(self):
 		frappe.db.sql("""delete from `tabLeave Application`""")
 
-	def _add_employee_leave_approver(self, employee, leave_approver):
-		temp_session_user = frappe.session.user
-		frappe.set_user("Administrator")
-		employee = frappe.get_doc("Employee", employee)
-		employee.append("leave_approvers", {
-			"doctype": "Employee Leave Approver",
-			"leave_approver": leave_approver
-		})
-		employee.save()
-		frappe.set_user(temp_session_user)
-
-	def _remove_employee_leave_approver(self, employee, leave_approver):
-		temp_session_user = frappe.session.user
-		frappe.set_user("Administrator")
-		employee = frappe.get_doc("Employee", employee)
-		d = employee.get("leave_approvers", {
-			"leave_approver": leave_approver
-		})
-		if d:
-			employee.get("leave_approvers").remove(d[0])
-			employee.save()
-		frappe.set_user(temp_session_user)
-
 	def get_application(self, doc):
 		application = frappe.copy_doc(doc)
 		application.from_date = "2013-01-01"
@@ -230,7 +207,6 @@ class TestLeaveApplication(unittest.TestCase):
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "Employee")
 		add_role("test@example.com", "Leave Approver")
-		self._add_employee_leave_approver("_T-Employee-00002", "test@example.com")
 
 		make_allocation_record(employee="_T-Employee-00002")
 
