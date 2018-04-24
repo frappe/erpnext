@@ -100,7 +100,7 @@ def get_item_details(items, sl_entries):
 		select name, item_name, description, item_group, brand, stock_uom
 		from `tabItem`
 		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1, debug=1):
+		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
 			item_details.setdefault(item.name, item)
 
 	return item_details
