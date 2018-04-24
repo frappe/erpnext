@@ -109,6 +109,14 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			}
 		});
 
+		me.frm.set_query("finance_book", function() {
+			return {
+				filters: {
+					company: me.frm.doc.company
+				}
+			};
+		});
+
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 
