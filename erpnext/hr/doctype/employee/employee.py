@@ -40,7 +40,6 @@ class Employee(NestedSet):
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
-		self.validate_employee_leave_approver()
 		self.validate_reports_to()
 		self.validate_preferred_email()
 
@@ -149,11 +148,6 @@ class Employee(NestedSet):
 		if employee:
 			throw(_("User {0} is already assigned to Employee {1}").format(
 				self.user_id, employee[0]), frappe.DuplicateEntryError)
-
-	def validate_employee_leave_approver(self):
-		for l in self.get("leave_approvers")[:]:
-			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
 
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
