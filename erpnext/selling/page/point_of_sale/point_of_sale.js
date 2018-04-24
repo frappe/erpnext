@@ -816,7 +816,7 @@ class POSCart {
 						});
 						this.numpad.reset_value();
 					} else {
-						const item_code = this.selected_item.attr('data-item-code');
+						const item_code = unescape(this.selected_item.attr('data-item-code'));
 						const batch_no = this.selected_item.attr('data-batch-no');
 						const field = this.selected_item.active_field;
 						const value = this.numpad.get_value();
@@ -863,7 +863,7 @@ class POSCart {
 
 	update_item(item) {
 		const item_selector = item.batch_no ?
-			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${item.item_code}"]`;
+			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
 
 		const $item = this.$cart_items.find(item_selector);
 
@@ -889,7 +889,7 @@ class POSCart {
 		const batch_no = item.batch_no || '';
 
 		return `
-			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}"
+			<div class="list-item indicator ${indicator_class}" data-item-code="${escape(item.item_code)}"
 				data-batch-no="${batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
@@ -933,20 +933,21 @@ class POSCart {
 
 	exists(item_code, batch_no) {
 		const is_exists = batch_no ?
-			`[data-batch-no="${batch_no}"]` : `[data-item-code="${item_code}"]`;
+			`[data-batch-no="${batch_no}"]` : `[data-item-code="${escape(item_code)}"]`;
 
 		let $item = this.$cart_items.find(is_exists);
+
 		return $item.length > 0;
 	}
 
 	highlight_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		const $item = this.$cart_items.find(`[data-item-code="${escape(item_code)}"]`);
 		$item.addClass('highlight');
 		setTimeout(() => $item.removeClass('highlight'), 1000);
 	}
 
 	scroll_to_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		const $item = this.$cart_items.find(`[data-item-code="${escape(item_code)}"]`);
 		if ($item.length === 0) return;
 		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
 		this.$cart_items.animate({ scrollTop });
@@ -961,7 +962,7 @@ class POSCart {
 			'[data-action="increment"], [data-action="decrement"]', function() {
 				const $btn = $(this);
 				const $item = $btn.closest('.list-item[data-item-code]');
-				const item_code = $item.attr('data-item-code');
+				const item_code = unescape($item.attr('data-item-code'));
 				const action = $btn.attr('data-action');
 
 				if(action === 'increment') {
@@ -984,7 +985,7 @@ class POSCart {
 		this.$cart_items.on('change', '.quantity input', function() {
 			const $input = $(this);
 			const $item = $input.closest('.list-item[data-item-code]');
-			const item_code = $item.attr('data-item-code');
+			const item_code = unescape($item.attr('data-item-code'));
 			events.on_field_change(item_code, 'qty', flt($input.val()));
 		});
 
@@ -1252,7 +1253,7 @@ class POSItems {
 		var me = this;
 		this.wrapper.on('click', '.pos-item-wrapper', function() {
 			const $item = $(this);
-			const item_code = $item.attr('data-item-code');
+			const item_code = unescape($item.attr('data-item-code'));
 			me.events.update_cart(item_code, 'qty', '+1');
 		});
 	}
@@ -1278,7 +1279,7 @@ class POSItems {
 		const item_title = item_name || item_code;
 
 		const template = `
-			<div class="pos-item-wrapper image-view-item" data-item-code="${item_code}">
+			<div class="pos-item-wrapper image-view-item" data-item-code="${escape(item_code)}">
 				<div class="image-view-header">
 					<div>
 						<a class="grey list-id" data-name="${item_code}" title="${item_title}">
