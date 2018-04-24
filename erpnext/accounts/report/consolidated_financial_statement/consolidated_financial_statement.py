@@ -265,7 +265,7 @@ def get_subsidiary_companies(company):
 		company, ["lft", "rgt"])
 
 	return frappe.db.sql_list("""select name from `tabCompany`
-		where lft >= {0} and rgt <= {1}""".format(lft, rgt))
+		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(lft, rgt))
 
 def get_accounts(root_type, filters):
 	return frappe.db.sql(""" select name, is_group, company,
