@@ -155,7 +155,7 @@ class Gstr1Report(object):
 				and parent in (%s)
 			order by account_head
 		""" % (self.tax_doctype, '%s', ', '.join(['%s']*len(self.invoices.keys()))),
-			tuple([self.doctype] + self.invoices.keys()))
+			tuple([self.doctype] + list(self.invoices.keys())))
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()

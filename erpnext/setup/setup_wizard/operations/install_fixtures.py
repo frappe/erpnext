@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, os
 
 from frappe import _
 
@@ -105,19 +105,20 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
 
 		# Department
-		{'doctype': 'Department', 'department_name': _('Accounts')},
-		{'doctype': 'Department', 'department_name': _('Marketing')},
-		{'doctype': 'Department', 'department_name': _('Sales')},
-		{'doctype': 'Department', 'department_name': _('Purchase')},
-		{'doctype': 'Department', 'department_name': _('Operations')},
-		{'doctype': 'Department', 'department_name': _('Production')},
-		{'doctype': 'Department', 'department_name': _('Dispatch')},
-		{'doctype': 'Department', 'department_name': _('Customer Service')},
-		{'doctype': 'Department', 'department_name': _('Human Resources')},
-		{'doctype': 'Department', 'department_name': _('Management')},
-		{'doctype': 'Department', 'department_name': _('Quality Management')},
-		{'doctype': 'Department', 'department_name': _('Research & Development')},
-		{'doctype': 'Department', 'department_name': _('Legal')},
+		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
+		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments')},
+		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments')},
 
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
@@ -260,6 +261,15 @@ def install(country=None):
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
+
+	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
+	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
+
+	records += {'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,\
+		'subject': _("Leave Approval Notification"), 'owner': frappe.session.user}
+
+	records += {'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,\
+		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records

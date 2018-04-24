@@ -336,7 +336,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					for fname, val in get_pos_profile_item_details(pos,
-						frappe._dict(item.as_dict()), pos).items():
+						frappe._dict(item.as_dict()), pos, True).items():
 
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -346,8 +346,8 @@ class SalesInvoice(SellingController):
 				self.terms = frappe.db.get_value("Terms and Conditions", self.tc_name, "terms")
 
 			# fetch charges
-			if self.taxes_and_charges and not len(self.get("taxes")):
-				self.set_taxes()
+			if self.taxes_and_charges:
+				self.set_other_charges()
 
 		return pos
 
