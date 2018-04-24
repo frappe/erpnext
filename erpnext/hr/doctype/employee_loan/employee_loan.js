@@ -56,11 +56,12 @@ frappe.ui.form.on('Employee Loan', {
 	make_jv: function (frm) {
 		frappe.call({
 			args: {
-				"employee_loan": frm.doc.name,
+				"reference_name": frm.doc.name,
+				"reference_type": "Employee Loan",
 				"company": frm.doc.company,
-				"employee_loan_account": frm.doc.employee_loan_account,
+				"account": frm.doc.employee_loan_account,
 				"employee": frm.doc.employee,
-				"loan_amount": frm.doc.loan_amount,
+				"amount": frm.doc.loan_amount,
 				"payment_account": frm.doc.payment_account
 			},
 			method: "erpnext.hr.doctype.employee_loan.employee_loan.make_jv_entry",
