@@ -380,13 +380,13 @@ class SalarySlip(TransactionBase):
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		for loan in self.get_employee_loan_details():
+		for loan in self.get_loan_details():
 			self.append('loans', {
-				'employee_loan': loan.name,
+				'loan': loan.name,
 				'total_payment': loan.total_payment,
 				'interest_amount': loan.interest_amount,
 				'principal_amount': loan.principal_amount,
-				'employee_loan_account': loan.employee_loan_account,
+				'loan_account': loan.loan_account,
 				'interest_income_account': loan.interest_income_account
 			})
 
@@ -394,14 +394,14 @@ class SalarySlip(TransactionBase):
 			self.total_interest_amount += loan.interest_amount
 			self.total_principal_amount += loan.principal_amount
 
-	def get_employee_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, el.name,
-				rps.total_payment, el.employee_loan_account, el.interest_income_account
+	def get_loan_details(self):
+		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, l.name,
+				rps.total_payment, l.loan_account, l.interest_income_account
 			from
-				`tabRepayment Schedule` as rps, `tabEmployee Loan` as el
+				`tabRepayment Schedule` as rps, `tabLoan` as l
 			where
-				el.name = rps.parent and rps.payment_date between %s and %s and
-				el.repay_from_salary = 1 and el.docstatus = 1 and el.employee = %s""",
+				l.name = rps.parent and rps.payment_date between %s and %s and
+				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
 			(self.start_date, self.end_date, self.employee), as_dict=True) or []
 
 	def on_submit(self):
