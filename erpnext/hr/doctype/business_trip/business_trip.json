@@ -1069,7 +1069,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-09 12:02:55.446570", 
+ "modified": "2018-04-24 10:53:18.500375", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Business Trip", 
@@ -1178,7 +1178,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -1218,7 +1218,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
