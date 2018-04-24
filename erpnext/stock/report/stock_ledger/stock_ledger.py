@@ -93,11 +93,14 @@ def get_item_details(items, sl_entries):
 	if not items:
 		items = list(set([d.item_code for d in sl_entries]))
 
+	if not items:
+		return item_details
+
 	for item in frappe.db.sql("""
 		select name, item_name, description, item_group, brand, stock_uom
 		from `tabItem`
 		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
+		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1, debug=1):
 			item_details.setdefault(item.name, item)
 
 	return item_details
