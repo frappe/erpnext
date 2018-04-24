@@ -481,6 +481,57 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	due_date: function() {
+		// due_date is to be changed, payment terms template and/or payment schedule must
+		// be removed as due_date is automatically changed based on payment terms
+		if (this.frm.doc.due_date && !this.frm.updating_party_details && !this.frm.doc.is_pos) {
+			if (this.frm.doc.payment_terms_template ||
+				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
+				var message1 = "";
+				var message2 = "";
+				var final_message = "Please clear the ";
+
+				if (this.frm.doc.payment_terms_template) {
+					message1 = "selected Payment Terms Template";
+					final_message = final_message + message1;
+				}
+
+				if ((this.frm.doc.payment_schedule || []).length) {
+					message2 = "Payment Schedule Table";
+					if (message1.length !== 0) message2 = " and " + message2;
+					final_message = final_message + message2;
+				}
+				frappe.msgprint(final_message);
+			}
+		}
+	},
+
+	bill_date: function() {
+		this.posting_date();
+	},
+
+	recalculate_terms: function() {
+		const doc = this.frm.doc;
+		if (doc.payment_terms_template) {
+			this.payment_terms_template();
+		} else if (doc.payment_schedule) {
+			const me = this;
+			doc.payment_schedule.forEach(
+				function(term) {
+					if (term.payment_term) {
+						me.payment_term(doc, term.doctype, term.name);
+					} else {
+						frappe.model.set_value(
+							term.doctype, term.name, 'due_date',
+							doc.posting_date || doc.transaction_date
+						);
+					}
+				}
+			);
+		}
+	},
+
+
 	get_company_currency: function() {
 		return erpnext.get_currency(this.frm.doc.company);
 	},
@@ -670,7 +721,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
 		}
-
+		if(
+			this.frm.docstatus < 2 
+			&& this.frm.fields_dict["payment_terms_template"]
+			&& this.frm.fields_dict["payment_schedule"]
+			&& this.frm.doc.payment_terms_template
+			&& !this.frm.doc.payment_schedule.length
+		){
+			this.frm.trigger("payment_terms_template");
+		}
+		
 		if(this.frm.fields_dict["taxes"]) {
 			this.frm.set_currency_labels(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
 
@@ -1083,5 +1143,51 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		return method
 	},
+		payment_terms_template: function() {
+		var me = this;
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
+			var posting_date = doc.posting_date || doc.transaction_date;
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_payment_terms",
+				args: {
+					terms_template: doc.payment_terms_template,
+					posting_date: posting_date,
+					grand_total: doc.rounded_total || doc.grand_total,
+					bill_date: doc.bill_date
+				},
+				callback: function(r) {
+					if(r.message && !r.exc) {
+						me.frm.set_value("payment_schedule", r.message);
+					}
+				}
+			})
+		}
+	},
+
+	payment_term: function(doc, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.payment_term) {
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
+				args: {
+					term: row.payment_term,
+					bill_date: this.frm.doc.bill_date,
+					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+				},
+				callback: function(r) {
+					if(r.message && !r.exc) {
+						console.log("111111111111111")
+						console.log(r.message)
+						console.log("222222222222222")
+						for (var d in r.message) {
+							frappe.model.set_value(cdt, cdn, d, r.message[d]);
+						}
+					}
+				}
+			})
+		}
+	}
 	
 });

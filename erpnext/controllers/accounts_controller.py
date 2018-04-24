@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -12,6 +12,7 @@ from erpnext.controllers.recurring_document import convert_to_recurring, validat
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
+from six import text_type
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
@@ -27,8 +28,15 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.get("__onload").make_payment_via_journal_entry \
+			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
 
+		if self.is_new():
+			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
+				"Purchase Invoice", "Sales Invoice")
+			if self.doctype in relevant_docs:
+				self.set_payment_schedule()
+				
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
@@ -42,7 +50,10 @@ class AccountsController(TransactionBase):
 
 			validate_return(self)
 			self.set_total_in_words()
-
+		
+		if self.meta.get_field("payment_schedule"):
+			self.validate_all_documents_schedule()
+		
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
 			self.validate_advance_entries()
@@ -62,6 +73,25 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
+
+	def validate_invoice_documents_schedule(self):
+		self.validate_payment_schedule_dates()
+		self.set_due_date()
+		self.set_payment_schedule()
+		self.validate_payment_schedule_amount()
+		self.validate_due_date()
+		self.validate_advance_entries()
+
+	def validate_non_invoice_documents_schedule(self):
+		self.set_payment_schedule()
+		self.validate_payment_schedule_dates()
+		self.validate_payment_schedule_amount()
+
+	def validate_all_documents_schedule(self):
+		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
+			self.validate_invoice_documents_schedule()
+		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
+			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
 		if self.doctype in ['Purchase Order', 'Sales Order']:
@@ -620,6 +650,77 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
+	def set_payment_schedule(self):
+		if self.doctype == 'Sales Invoice' and self.is_pos:
+			self.payment_terms_template = ''
+			return
+
+		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
+		date = self.get("due_date")
+		due_date = date or posting_date
+		grand_total = self.get("rounded_total") or self.grand_total
+		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			grand_total = grand_total - flt(self.write_off_amount)
+
+		if not self.get("payment_schedule"):
+			if self.get("payment_terms_template"):
+				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total)
+				for item in data:
+					self.append("payment_schedule", item)
+			else:
+				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total)
+				self.append("payment_schedule", data)
+		else:
+			for d in self.get("payment_schedule"):
+				if d.invoice_portion:
+					d.payment_amount = grand_total * flt(d.invoice_portion) / 100
+
+	def set_due_date(self):
+		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
+		if due_dates:
+			self.due_date = max(due_dates)
+
+	def validate_payment_schedule_dates(self):
+		dates = []
+		li = []
+
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
+		for d in self.get("payment_schedule"):
+			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
+				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
+			elif d.due_date in dates:
+				li.append('{0} in row {1}'.format(d.due_date, d.idx))
+			dates.append(d.due_date)
+
+		if li:
+			duplicates = '<br>' + '<br>'.join(li)
+			frappe.throw(_("Rows with duplicate due dates in other rows were found: {list}")
+				.format(list=duplicates))
+
+	def validate_payment_schedule_amount(self):
+		if self.doctype == 'Sales Invoice' : return
+
+		if self.get("payment_schedule"):
+			total = 0
+			for d in self.get("payment_schedule"):
+				total += flt(d.payment_amount)
+			total = flt(total, self.precision("grand_total"))
+
+			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+				grand_total = grand_total - flt(self.write_off_amount)
+			if total != grand_total:
+				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
+
+	def is_rounded_total_disabled(self):
+		if self.meta.get_field("disable_rounded_total"):
+			return self.disable_rounded_total
+		else:
+			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
+
+
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -789,3 +890,50 @@ def update_invoice_status():
 
 	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue' 
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
+
+@frappe.whitelist()
+def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None):
+	if not terms_template:
+		return
+
+	terms_doc = frappe.get_doc("Payment Terms Template", terms_template)
+
+	schedule = []
+	for d in terms_doc.get("terms"):
+		term_details = get_payment_term_details(d, posting_date, grand_total, bill_date)
+		schedule.append(term_details)
+
+	return schedule
+
+@frappe.whitelist()
+def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None):
+	#~ term_details = frappe._dict()
+	term_details = frappe.new_doc("Payment Schedule")
+	if isinstance(term, text_type):
+		term = frappe.get_doc("Payment Term", term)
+	else:
+		term_details.payment_term = term.payment_term
+	term_details.description = term.description
+	term_details.invoice_portion = term.invoice_portion
+	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+	if bill_date:
+		term_details.due_date = get_due_date(term, bill_date)
+	elif posting_date:
+		term_details.due_date = get_due_date(term, posting_date)
+
+	if getdate(term_details.due_date) < getdate(posting_date):
+		term_details.due_date = posting_date
+	term_details.mode_of_payment = term.mode_of_payment
+
+	return term_details
+
+def get_due_date(term, posting_date=None, bill_date=None):
+	due_date = None
+	date = bill_date or posting_date
+	if term.due_date_based_on == "Day(s) after invoice date":
+		due_date = add_days(date, term.credit_days)
+	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
+		due_date = add_days(get_last_day(date), term.credit_days)
+	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
+		due_date = add_months(get_last_day(date), term.credit_months)
+	return due_date

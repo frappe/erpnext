@@ -159,12 +159,13 @@ def check_max_allocation_balance():
     if allocated_balance:
         for i in allocated_balance:
             prefered_email = frappe.get_value("Employee", filters = {"user_id": i[0]}, fieldname = "prefered_email")
-
+            print prefered_email
             if prefered_email:
 
                 try:
-                    make(subject = "Max Annual Leave exceeded", content=content_msg, recipients=prefered_email,
-                        send_email=True, sender="erp@tawari.sa")
+                    print prefered_email
+                    # make(subject = "Max Annual Leave exceeded", content=content_msg, recipients=prefered_email,
+                    #     send_email=True, sender="erp@tawari.sa")
                 except:
                     frappe.msgprint("could not send")
 

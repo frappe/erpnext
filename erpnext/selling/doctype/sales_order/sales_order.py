@@ -468,15 +468,18 @@ def make_delivery_note(source_name, target_doc=None):
 	return target_doc
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, payment_term = False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
+		#~ update_payment_schedule(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
 		target.set_advances()
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
+		target.payment_terms_template = source.payment_terms_template
+		update_payment_schedule(source, target)
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -490,6 +493,23 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+	
+	def update_payment_schedule(source, target):
+		target.payment_schedule = []
+		payment_schedule = source.get("payment_schedule")
+		if payment_schedule:
+			for payment in payment_schedule:
+				if payment.payment_term == payment_term : 
+					child = target.append('payment_schedule', {})
+					child.payment_term = payment.payment_term
+					child.description = payment.description
+					child.due_date = payment.due_date
+					child.invoice_portion = payment.invoice_portion
+					child.payment_amount = payment.payment_amount
+					child.account = payment.account
+					
+					
+
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -509,6 +529,20 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
+		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"field_map": {
+				"payment_term": "payment_term",
+				"description": "description",
+				"due_date": "due_date",
+				"invoice_portion": "invoice_portion",
+				"payment_amount": "payment_amount",
+				"account": "account",
+				"parent": "sales_order",
+			},
+			#~ "postprocess": update_item,
+			#~ "condition": lambda doc: doc.payment_term == payment_term
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

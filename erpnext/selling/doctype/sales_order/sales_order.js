@@ -145,10 +145,45 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_sales_invoice: function() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
-			frm: cur_frm
-		})
+		var d = new frappe.ui.Dialog({
+			title: __('Update Account Number'),
+			fields: [
+				{
+					"label": "Payment Term",
+					"fieldname": "payment_term",
+					"fieldtype": "Link",
+					"options": "Payment Term",
+					"reqd": 1
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				d.hide();
+				console.log(data);
+				return frappe.call({
+					type: "GET",
+					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
+					args: {
+						"source_name": cur_frm.doc.name,
+						"payment_term": data.payment_term,
+					},
+					freeze: true,
+					callback: function(r) {
+						if(!r.exc) {
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+					}
+				});
+				
+			},
+			primary_action_label: __('Create')
+		});
+		d.show();
+		
+		
+		
+		
 	},
 
 	make_maintenance_schedule: function() {
