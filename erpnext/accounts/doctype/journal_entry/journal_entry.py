@@ -9,7 +9,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
+from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
 
 from six import string_types, iteritems
 
@@ -46,9 +46,9 @@ class JournalEntry(AccountsController):
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
+		self.update_loan()
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_employee_loan()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -72,7 +72,7 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_employee_loan()
+		self.update_loan()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 
@@ -518,11 +518,17 @@ class JournalEntry(AccountsController):
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc)
 
-	def update_employee_loan(self):
+	def update_loan(self):
+		if self.paid_loan:
+			paid_loan = json.loads(self.paid_loan)
+			value = 1 if self.docstatus < 2 else 0
+			for name in paid_loan:
+				frappe.db.set_value("Repayment Schedule", name, "paid", value)
 		for d in self.accounts:
-			if d.reference_type=="Employee Loan" and flt(d.debit) > 0:
-				doc = frappe.get_doc("Employee Loan", d.reference_name)
+			if d.reference_type=="Loan" and flt(d.debit) > 0:
+				doc = frappe.get_doc("Loan", d.reference_name)
 				update_disbursement_status(doc)
+				update_total_amount_paid(doc)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
