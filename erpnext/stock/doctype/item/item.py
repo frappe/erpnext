@@ -96,7 +96,7 @@ class Item(WebsiteGenerator):
 		self.check_for_active_boms()
 		self.fill_customer_code()
 		self.check_item_tax()
-		self.validate_barcode()
+		# self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 		self.synced_with_hub = 0
