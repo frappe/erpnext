@@ -2,7 +2,7 @@ import frappe, os
 from frappe import _
 
 def execute():
-	frappe.reload_doc("setup", "doctype", "email_template")
+	frappe.reload_doc("email", "doctype", "email_template")
 
 	if not frappe.db.exists("Email Template", _('Leave Approval Notification')):
 		base_path = frappe.get_app_path("erpnext", "hr", "doctype")
