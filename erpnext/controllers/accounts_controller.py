@@ -233,13 +233,18 @@ class AccountsController(TransactionBase):
 
 		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-		if self.is_new() and not self.get("taxes"):
+		if (self.is_new() or self.is_pos_profile_changed()) and not self.get("taxes"):
 			if self.company and not self.get("taxes_and_charges"):
 				# get the default tax master
 				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype,
 					{"is_default": 1, 'company': self.company})
 
 			self.append_taxes_from_master(tax_master_doctype)
+
+	def is_pos_profile_changed(self):
+		if (self.doctype == 'Sales Invoice' and self.is_pos and
+			self.pos_profile != frappe.db.get_value('Sales Invoice', self.name, 'pos_profile')):
+			return True
 
 	def append_taxes_from_master(self, tax_master_doctype=None):
 		if self.get("taxes_and_charges"):
