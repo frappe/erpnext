@@ -164,7 +164,8 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				'item_code': d.item_code,
 				'bom_no': d.bom_no != null ? d.bom_no: '',
 				"scrap_items": scrap_items,
-				'qty': d.qty
+				'qty': d.qty,
+				"allow_zero_valuation": d.allow_zero_valuation_rate
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
