@@ -393,7 +393,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-01-14 11:41:38.487597", 
+ "modified": "2018-04-24 14:59:20.627788", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Business Trip Exceptional Approval", 
@@ -502,7 +502,7 @@
   }
  ], 
  "quick_entry": 0, 
- "read_only": 0, 
+ "read_only": 1, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
