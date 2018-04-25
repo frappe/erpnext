@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import nowdate
 from frappe.model.document import Document
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_average_exchange_rate,get_balance_on
 class ExchangeRateRevaluation(Document):
 	def get_accounts_data(self, account=None):
@@ -16,14 +18,20 @@ class ExchangeRateRevaluation(Document):
 			else:	
 				accounts = self.get_accounts()
 			for i in accounts:
-				balance = get_average_exchange_rate(i) * get_balance_on(i)
+				balance = get_balance_on(i, in_account_currency=False)
+				company_currency = erpnext.get_company_currency(self.company)
+				account_currency = get_account_currency(i)
+				new_exchange_rate = get_exchange_rate(account_currency, company_currency, self.posting_date)
+				new_balance_in_base_currency = get_balance_on(i) * new_exchange_rate
 				if balance:
 					child_table.append({
 							"account":i,
-							"balance_in_base_currency":balance,
-							"balance_in_alternate_currency":get_balance_on(i),
-							"current_exchange_rate":get_average_exchange_rate(i),
-							"difference":-(balance)
+							"balance_in_base_currency": balance,
+							"balance_in_alternate_currency": get_balance_on(i),
+							"current_exchange_rate": get_average_exchange_rate(i),
+							"new_exchange_rate": new_exchange_rate,
+							"new_balance_in_base_currency": new_balance_in_base_currency,
+							"difference": (new_balance_in_base_currency - balance)
 						})
 			return child_table
 		else :
@@ -79,4 +87,4 @@ class ExchangeRateRevaluation(Document):
 			journal_entry.set("accounts", account_amt_list)
 			return journal_entry.as_dict()
 		else:
-			frappe.msgprint("Set the Unrealized Exchange / Gain Loss Account field in Company field")	
+			frappe.msgprint("Set the Unrealized Exchange / Gain Loss Account field in Company DocType")
