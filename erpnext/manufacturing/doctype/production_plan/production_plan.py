@@ -47,7 +47,7 @@ class ProductionPlan(Document):
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
 				and so.company = %(company)s
-				and so_item.qty > so_item.delivered_qty {0} {1}
+				and so_item.qty > so_item.work_order_qty {0} {1}
 				and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
 						and bom.is_active = 1)
 					or exists (select name from `tabPacked Item` pi
@@ -63,7 +63,10 @@ class ProductionPlan(Document):
 				"company": self.company
 			}, as_dict=1)
 
-		self.add_so_in_table(open_so)
+		if open_so:
+			self.add_so_in_table(open_so)
+		else:
+			frappe.msgprint(_("Sales orders are not available for production"))
 
 	def add_so_in_table(self, open_so):
 		""" Add sales orders in the table"""
@@ -136,23 +139,23 @@ class ProductionPlan(Document):
 			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - delivered_qty)*conversion_factor as pending_qty
+			(qty - work_order_qty) * conversion_factor as pending_qty, name
 			from `tabSales Order Item` so_item
-			where parent in (%s) and docstatus = 1 and qty > delivered_qty
+			where parent in (%s) and docstatus = 1 and qty > work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
 					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and pi.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
-			(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
-				as pending_qty
+			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
+				as pending_qty, pi.parent_item, so_item.name
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
-			and so_item.parent in (%s) and so_item.qty > so_item.delivered_qty
+			and so_item.parent in (%s) and so_item.qty > so_item.work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=pi.item_code
 					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
@@ -194,7 +197,8 @@ class ProductionPlan(Document):
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
 				'pending_qty': data.pending_qty,
-				'planned_start_date': now_datetime()
+				'planned_start_date': now_datetime(),
+				'product_bundle_item': data.parent_item
 			})
 
 			if self.get_items_from == "Sales Order":
@@ -261,6 +265,9 @@ class ProductionPlan(Document):
 			self.status = 'In Process'
 
 	def update_requested_status(self):
+		if not self.mr_items:
+			return
+
 		update_status = True
 		for d in self.mr_items:
 			if d.quantity != d.requested_qty:
@@ -276,6 +283,7 @@ class ProductionPlan(Document):
 				"production_item"		: d.item_code,
 				"use_multi_level_bom"   : d.include_exploded_items,
 				"sales_order"			: d.sales_order,
+				"sales_order_item"		: d.sales_order_item,
 				"material_request"		: d.material_request,
 				"material_request_item"	: d.material_request_item,
 				"bom_no"				: d.bom_no,
@@ -284,7 +292,8 @@ class ProductionPlan(Document):
 				"company"				: self.company,
 				"fg_warehouse"			: d.warehouse,
 				"production_plan"       : self.name,
-				"production_plan_item"  : d.name
+				"production_plan_item"  : d.name,
+				"product_bundle_item"	: d.product_bundle_item
 			}
 
 			item_details.update({
@@ -375,10 +384,10 @@ class ProductionPlan(Document):
 		requested_qty = 0
 		if self.ignore_existing_ordered_qty:
 			requested_qty = total_qty
-		elif total_qty > projected_qty:
+		else:
 			requested_qty = total_qty - projected_qty
 
-		if requested_qty and requested_qty < row.min_order_qty:
+		if requested_qty > 0 and requested_qty < row.min_order_qty:
 			requested_qty = row.min_order_qty
 
 		if requested_qty > 0:
