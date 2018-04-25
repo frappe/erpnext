@@ -4,7 +4,6 @@
 
 cur_frm.add_fetch("employee", "employee_name", "employee_name");
 cur_frm.add_fetch('employee','department','department');
-cur_frm.add_fetch('requested_employee','department','requested_department');
 
 cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
     // console.log(cd);
@@ -31,9 +30,9 @@ frappe.ui.form.on('Business Trip', {
             frm.enable_save();
         }
         
-    	if (cur_frm.doc.workflow_state=="Pending"){
-        get_current_user();
-        }
+    	// if (cur_frm.doc.workflow_state=="Pending"){
+     //    get_current_user();
+     //    }
     },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
@@ -43,97 +42,61 @@ frappe.ui.form.on('Business Trip', {
         }
         
     },
-    request_employee: function(frm){
-
-		frm.toggle_reqd(['requested_employee'], frm.doc.request_employee);
-
-		if (cur_frm.doc.request_employee){
-			cur_frm.set_value("department", );
-		}else{
-			cur_frm.set_value("requested_department", );
-			get_current_user();
-		}
-    },
-
     employee: function(frm){
-    	if (cur_frm.doc.request_employee){
-			cur_frm.set_value("department", );
-		}else{
-			cur_frm.set_value("requested_department", );
-		}
-
-
         frappe.call({
-                method: "get_default_cost_center",
-                args: {company: frappe.sys_defaults.company},
-                doc: frm.doc,
-                callback: function(r) {
-                    cur_frm.set_value("cost_center", r.message);
-                }
-            });
-
+            method: "get_default_cost_center",
+            args: {company: frappe.sys_defaults.company},
+            doc: frm.doc,
+            callback: function(r) {
+                cur_frm.set_value("cost_center", r.message);
+            }
+        });
     },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
 
-        cur_frm.set_df_property("request_employee", "read_only", 1);
-        cur_frm.set_df_property("requested_employee", "read_only", 1);
-        cur_frm.set_df_property("trip_reason", "read_only", 1);
-        cur_frm.set_df_property("from_date", "read_only", 1);
-        cur_frm.set_df_property("to_date", "read_only", 1);
-        cur_frm.set_df_property("payment_encashment", "read_only", 1);
-        cur_frm.set_df_property("cost_center", "read_only", 1);
-        cur_frm.set_df_property("assignment_type", "read_only", 1);
-        cur_frm.set_df_property("world_countries", "read_only", 1);
-        cur_frm.set_df_property("city", "read_only", 1);
-        cur_frm.set_df_property("ticket", "read_only", 1);
-        cur_frm.set_df_property("ticket_cost", "read_only", 1);
+        // cur_frm.set_df_property("trip_reason", "read_only", 1);
+        // cur_frm.set_df_property("from_date", "read_only", 1);
+        // cur_frm.set_df_property("to_date", "read_only", 1);
+        // cur_frm.set_df_property("payment_encashment", "read_only", 1);
+        // cur_frm.set_df_property("cost_center", "read_only", 1);
+        // cur_frm.set_df_property("assignment_type", "read_only", 1);
+        // cur_frm.set_df_property("world_countries", "read_only", 1);
+        // cur_frm.set_df_property("city", "read_only", 1);
+        // cur_frm.set_df_property("ticket", "read_only", 1);
+        // cur_frm.set_df_property("ticket_cost", "read_only", 1);
 
     },
     onload: function(frm) {
-    	if (cur_frm.doc.workflow_state=="Pending"){
-            cur_frm.set_value("cost_center", 'TOP MANAGEMENT - T');
+    	// if (cur_frm.doc.workflow_state=="Pending"){
+     //        cur_frm.set_value("cost_center", 'TOP MANAGEMENT - T');
             
-            get_current_user();
+     //        // get_current_user();
 
-            cur_frm.set_query("requested_employee", function() {
-                return {
-                    query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
-                    filters: [
-                        ["Employee", "name", "!=", cur_frm.doc.employee],
-                    ]
-                };
-            });
+     //        frappe.call({
+     //            method: "get_default_cost_center",
+     //            args: {company: frappe.sys_defaults.company},
+     //            doc: frm.doc,
+     //            callback: function(r) {
+     //                cur_frm.set_value("cost_center", r.message);
+     //            }
+     //        });
+
+     //    }
 
 
-
-            frappe.call({
-                method: "get_default_cost_center",
-                args: {company: frappe.sys_defaults.company},
-                doc: frm.doc,
-                callback: function(r) {
-                    cur_frm.set_value("cost_center", r.message);
-                }
-            });
-
-        }
-
-        
-
-    	if (cur_frm.doc.workflow_state!= "Pending"){
-    	cur_frm.set_df_property("request_employee", "read_only", 1);
-    	cur_frm.set_df_property("requested_employee", "read_only", 1);
-    	cur_frm.set_df_property("trip_reason", "read_only", 1);
-    	cur_frm.set_df_property("from_date", "read_only", 1);
-    	cur_frm.set_df_property("to_date", "read_only", 1);
-    	cur_frm.set_df_property("payment_encashment", "read_only", 1);
-    	cur_frm.set_df_property("cost_center", "read_only", 1);
-    	cur_frm.set_df_property("assignment_type", "read_only", 1);
-    	cur_frm.set_df_property("world_countries", "read_only", 1);
-    	cur_frm.set_df_property("city", "read_only", 1);
-    	cur_frm.set_df_property("ticket", "read_only", 1);
-    	cur_frm.set_df_property("ticket_cost", "read_only", 1);
-}
+    	// if (cur_frm.doc.workflow_state!= "Pending"){
+     //    	cur_frm.set_df_property("trip_reason", "read_only", 1);
+     //    	cur_frm.set_df_property("from_date", "read_only", 1);
+     //    	cur_frm.set_df_property("to_date", "read_only", 1);
+     //    	cur_frm.set_df_property("payment_encashment", "read_only", 1);
+     //    	cur_frm.set_df_property("cost_center", "read_only", 1);
+     //    	cur_frm.set_df_property("assignment_type", "read_only", 1);
+     //    	cur_frm.set_df_property("world_countries", "read_only", 1);
+     //    	cur_frm.set_df_property("city", "read_only", 1);
+     //    	cur_frm.set_df_property("ticket", "read_only", 1);
+     //    	cur_frm.set_df_property("ticket_cost", "read_only", 1);
+     //    }
 
         
        
@@ -147,15 +110,6 @@ frappe.ui.form.on('Business Trip', {
             });
         }
 
-        // cur_frm.set_query("requested_department", function () {
-        //     return {
-        //         "filters": {
-        //             "is_group": 0
-        //         }
-        //     };
-        // });
-
-        
 
     },
     city: function(frm) {

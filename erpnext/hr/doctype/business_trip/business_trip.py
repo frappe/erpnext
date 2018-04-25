@@ -31,59 +31,17 @@ class BusinessTrip(Document):
         self.validate_emp()
 
         if hasattr(self,"workflow_state"):
-            if not self.get('__islocal') and self.workflow_state == "Wait For Exceptional Approval":
-                frappe.throw("Waiting For Business Trip Exceptional Approval")
-
             if self.workflow_state:
                 if "Rejected" in self.workflow_state:
                     self.docstatus = 1
                     self.docstatus = 2
 
 
-
-    def after_insert(self):
-        if self.request_employee==1:
-            self.create_exceptional_approval()
-
-    def create_exceptional_approval(self):
-
-        cur_user=frappe.db.sql("select user_id from `tabEmployee` where name='{0}'".format(self.requested_employee))
-
-        if u'CEO' in frappe.get_roles(cur_user[0][0]) or u'Director' in frappe.get_roles(cur_user[0][0]):
-            state = 'Create By Requester'
-        else:
-            state = 'Created By Requester'
-        
-        if self.request_employee==1:
-            btea_doc = frappe.get_doc({
-                "doctype":"Business Trip Exceptional Approval",
-                "business_trip": self.name,
-                "from_date": self.from_date,
-                "to_date": self.to_date,
-                "days": self.days,
-                "assignment_type": self.assignment_type,
-                "city": self.city,
-                "status": 'Pending',
-                "workflow_state": state,
-                "employee": self.requested_employee,
-                "employee_name": self.requested_employee_name,
-                "department": self.requested_department
-            }).insert(ignore_permissions=True)
-            msg = """Exceptional Approval has been created: <b><a href="#Form/Business Trip Exceptional Approval/{0}">{0}</a></b>""".format(btea_doc.name)
-            self.business_trip_exceptional_approval = btea_doc.name
-            frappe.msgprint(msg)
-
-
     def validate_emp(self):
         if self.employee:
             employee_user = frappe.get_value("Employee", filters={"name": self.employee}, fieldname="user_id")
             if self.get('__islocal') and employee_user:
-                # if self.handled_by== "Director" and self.days < 4 and self.workflow_state != "Created By Requester" :
-                #   self.workflow_state = "Approve By Director"
-
-                if self.request_employee==1 :
-                    self.workflow_state = "Wait For Exceptional Approval"
-                elif u'CEO' in frappe.get_roles(employee_user):
+                if u'CEO' in frappe.get_roles(employee_user):
                     self.workflow_state = "Created By CEO"
                 elif u'Director' in frappe.get_roles(employee_user) and self.days>4:
                     self.workflow_state = "Created By Director"
@@ -100,8 +58,6 @@ class BusinessTrip(Document):
 
             if not employee_user and self.get('__islocal'):
                 self.workflow_state = "Pending"
-
-            # self.requested_department=self.department
 
 
     def validate_dates(self):
@@ -300,42 +256,4 @@ class BusinessTrip(Document):
         if employees:
             employee = frappe.get_doc('Employee', {'name': employees[0].name})
             return employee
-
-
-def get_approvers(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql(""" select name,employee_name from `tabEmployee` """)
-
-
-# def get_permission_query_conditions(user):
-#   if not user: user = frappe.session.user
-#   employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-#   if employees:
-#     query = ""
-#     employee = frappe.get_doc('Employee', {'name': employees[0].name})
-    
-#     if u'Employee' in frappe.get_roles(user) and employee=self.requested_employee and self.workflow_state=='Approved By Requester Director' and self.handled_by=='Employee':
-#         if query != "":
-#             query+=" or "
-#             query+="""(`taBusiness Trip`.owner = '{user}' or `tabBusiness Trip`.requested_employee = '{employee}')""" \
-#                 .format(user=frappe.db.escape(user), employee=frappe.db.escape(self.requested_employee))
-#         return query
-
-
-
-
-
-# def get_permission_query_conditions(user):
-    # if not user: user = frappe.session.user
-    # employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-    # if employees:
-    #     employee = frappe.get_doc('Employee', {'name': employees[0].name})
-    #     department = frappe.get_doc('Department', {'name': employee.department})
-    #     # business_trip = frappe.get_doc('Business Trip', {'employee': employees[0].name})
-
-    #     if u'Employee' in frappe.get_roles(user):
-    #         return """(`tabBusiness Trip`.owner = '{user}' or `tabBusiness Trip`.employee = '{employee}' or `tabBusiness Trip`.requested_employee = '{requested_employee}')""" \
-    #             .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name), requested_employee=frappe.db.escape(employee.name))
-    #     else :
-    #         return None
-
 
