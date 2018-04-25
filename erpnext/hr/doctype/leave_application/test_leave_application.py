@@ -77,6 +77,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		application = self.get_application(_test_records[0])
 		application.insert()
+		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
 		frappe.set_user("test1@example.com")
@@ -216,7 +217,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		frappe.set_user("test1@example.com")
 		application.insert()
-
+		application.status = "Approved"
 		frappe.set_user("test@example.com")
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
