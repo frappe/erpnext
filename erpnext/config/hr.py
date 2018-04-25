@@ -277,11 +277,11 @@ def get_data():
 					"name": "Business Trip",
 					"description":_("Business Trip"),
 				},
-				{
-					"type": "doctype",
-					"name": "Business Trip Exceptional Approval",
-					"description":_("Business Trip Exceptional Approval"),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Business Trip Exceptional Approval",
+				# 	"description":_("Business Trip Exceptional Approval"),
+				# },
 				{
 					"type": "doctype",
 					"name": "Trip Return and Reimbursement",
