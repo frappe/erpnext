@@ -232,24 +232,24 @@ class LeaveApplication(Document):
 		})
 
 	def notify_leave_approver(self):
+		if self.leave_approver:
+			parent_doc = frappe.get_doc('Leave Application', self.name)
+			args = parent_doc.as_dict()
 
-		parent_doc = frappe.get_doc('Leave Application', self.name)
-		args = parent_doc.as_dict()
+			template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
+			if not template:
+				frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
+				return
+			email_template = frappe.get_doc("Email Template", template)
+			message = frappe.render_template(email_template.response, args)
 
-		template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
-		if not template:
-			frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
-			return
-		email_template = frappe.get_doc("Email Template", template)
-		message = frappe.render_template(email_template.response, args)
-
-		self.notify({
-			# for post in messages
-			"message": message,
-			"message_to": self.leave_approver,
-			# for email
-			"subject": email_template.subject
-		})
+			self.notify({
+				# for post in messages
+				"message": message,
+				"message_to": self.leave_approver,
+				# for email
+				"subject": email_template.subject
+			})
 
 	def notify(self, args):
 		args = frappe._dict(args)
