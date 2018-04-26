@@ -94,5 +94,4 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
-	else:
-		frappe.throw(_("There is no leave period in between {0} and {1}").format(from_date, to_date))
+	
