@@ -287,6 +287,10 @@ def get_default_income_account(args, item):
 		or frappe.db.get_value("Item Group", item.item_group, "default_income_account"))
 
 def get_default_expense_account(args, item):
+	if item and item.is_fixed_asset:
+		return frappe.db.get_value("Company", args.company, "fixed_asset_account")
+		if account: return account
+
 	return (item.expense_account
 		or args.expense_account
 		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account"))

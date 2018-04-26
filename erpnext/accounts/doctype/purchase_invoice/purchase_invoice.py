@@ -305,23 +305,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries()
 
 		self.update_project()
-		self.update_fixed_asset()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
-
-	def update_fixed_asset(self):
-		for d in self.get("items"):
-			if d.is_fixed_asset:
-				asset = frappe.get_doc("Asset", d.asset)
-				if self.docstatus==1:
-					asset.purchase_invoice = self.name
-					asset.purchase_date = self.posting_date
-					asset.supplier = self.supplier
-				else:
-					asset.purchase_invoice = None
-					asset.supplier = None
-
-				asset.flags.ignore_validate_update_after_submit = True
-				asset.save()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -636,7 +620,6 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
-		self.update_fixed_asset()
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)

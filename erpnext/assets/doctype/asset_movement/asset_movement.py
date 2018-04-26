@@ -11,19 +11,22 @@ class AssetMovement(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_warehouses()
-		
+
 	def validate_asset(self):
-		status, company = frappe.db.get_value("Asset", self.asset, ["status", "company"])
-		if status in ("Draft", "Scrapped", "Sold"):
+		status, company, serial_no = frappe.db.get_value("Asset", self.asset, ["status", "company", "serial_no"])
+		if self.purpose == 'Transfer' and status in ("Draft", "Scrapped", "Sold"):
 			frappe.throw(_("{0} asset cannot be transferred").format(status))
-			
+
 		if company != self.company:
 			frappe.throw(_("Asset {0} does not belong to company {1}").format(self.asset, self.company))
-			
+
+		if serial_no and not self.serial_no:
+			self.serial_no = serial_no
+
 	def validate_warehouses(self):
-		if not self.source_warehouse:
+		if self.purpose == 'Transfer' and not self.source_warehouse:
 			self.source_warehouse = frappe.db.get_value("Asset", self.asset, "warehouse")
-		
+
 		if self.source_warehouse == self.target_warehouse:
 			frappe.throw(_("Source and Target Warehouse cannot be same"))
 

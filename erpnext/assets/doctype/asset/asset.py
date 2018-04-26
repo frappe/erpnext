@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class Asset(Document):
 	def validate(self):
@@ -26,11 +27,15 @@ class Asset(Document):
 
 	def on_submit(self):
 		self.set_status()
+		self.update_stock_movement()
 
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
+
+	def on_update(self):
+		self.update_serial_nos()
 
 	def validate_item(self):
 		item = frappe.db.get_value("Item", self.item_code,
@@ -219,6 +224,9 @@ class Asset(Document):
 		if self.purchase_invoice:
 			frappe.throw(_("Please cancel Purchase Invoice {0} first").format(self.purchase_invoice))
 
+		if self.purchase_receipt:
+			frappe.throw(_("Please cancel Purchase Receipt {0} first").format(self.purchase_receipt))
+
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):
 			if d.journal_entry:
@@ -250,6 +258,20 @@ class Asset(Document):
 			status = "Cancelled"
 		return status
 
+	def update_serial_nos(self):
+		if self.serial_no:
+			serial_nos = get_serial_nos(self.serial_no)
+			frappe.db.sql(""" update `tabSerial No` set asset = '%s' where
+				name in(%s)"""%(self.name, ','.join(['%s'] * len(serial_nos))), tuple(serial_nos))
+
+	def update_stock_movement(self):
+		asset_movement = frappe.db.get_value('Asset Movement',
+			{'asset': self.name, 'reference_name': self.purchase_receipt, 'docstatus': 0}, 'name')
+
+		if asset_movement:
+			doc = frappe.get_doc('Asset Movement', asset_movement)
+			doc.submit()
+
 def update_maintenance_status():
 	assets = frappe.get_all('Asset', filters = {'docstatus': 1, 'maintenance_required': 1})
 
@@ -280,7 +302,7 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 	return pi
 
 @frappe.whitelist()
-def make_sales_invoice(asset, item_code, company):
+def make_sales_invoice(asset, item_code, company, serial_no):
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
 	si.currency = frappe.db.get_value("Company", company, "default_currency")
@@ -290,6 +312,7 @@ def make_sales_invoice(asset, item_code, company):
 		"is_fixed_asset": 1,
 		"asset": asset,
 		"income_account": disposal_account,
+		"serial_no": serial_no,
 		"cost_center": depreciation_cost_center,
 		"qty": 1
 	})

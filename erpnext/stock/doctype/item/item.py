@@ -444,7 +444,7 @@ class Item(WebsiteGenerator):
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
-		if self.has_serial_no == 1 and self.is_stock_item == 0:
+		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
 		if self.has_serial_no == 0 and self.serial_no_series:
