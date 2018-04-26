@@ -5,7 +5,7 @@ worth is invested in the stock in hand.
 
 ### Material Flow
 
-There are three main types of entries:
+There are three main types of entries
 
   * Purchase Receipt: Items received from Suppliers against Purchase Orders.
   * Stock Entry: Items transferred from one Warehouse to another.
