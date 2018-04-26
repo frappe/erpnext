@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["HSN wise Summary"] = {
+frappe.query_reports["HSN-wise-summary of outward supplies"] = {
 	"filters": [
 		{
 			"fieldname":"company",
