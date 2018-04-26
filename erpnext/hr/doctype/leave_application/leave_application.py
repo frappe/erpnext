@@ -10,8 +10,6 @@ from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
-from erpnext.hr.utils import get_leave_period
-
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -34,7 +32,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
-		self.validate_applicable_after_max_allowed()
+		self.validate_applicable_after()
 
 		if hasattr(self, "workflow_state") and self.workflow_state == "Rejected":
 			# notify leave applier about rejection
@@ -43,54 +41,20 @@ class LeaveApplication(Document):
 	def on_submit(self):
 		self.validate_back_dated_application()
 
-	def validate_applicable_after_max_allowed(self):
+	def validate_applicable_after(self):
 		if self.leave_type:
 			leave_type = frappe.get_doc("Leave Type", self.leave_type)
-			# Check on Applicable After
 			if leave_type.applicable_after > 0:
-				self.validate_applicable_after(leave_type.applicable_after)
-
-			# Check if leave cross Max Leaves Allowed
-			if leave_type.max_leaves_allowed > 0:
-				self.validate_max_leave_allowed(leave_type)
-
-
-	def validate_applicable_after(self, applicable_after):
-		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
-		leave_days = get_approved_leaves_for_period(self.employee, False, date_of_joining, self.from_date)
-		leave_start = getdate(self.from_date)
-		number_of_days = date_diff(leave_start, date_of_joining)
-		if number_of_days > 0:
-			holidays = 0
-			if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
-				holidays = get_holidays(self.employee, date_of_joining, self.from_date)
-			number_of_days = number_of_days - leave_days - holidays
-			if number_of_days < applicable_after:
-				frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, applicable_after))
-
-	def validate_max_leave_allowed(self, leave_type):
-		leave_period = get_leave_period(self.from_date, self.to_date, self.company)
-		if leave_period:
-			holidays = 0
-			if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
-				holidays = get_holidays(self.employee, self.from_date, self.to_date)
-			leave_days = get_approved_leaves_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
-			this_leave_days = date_diff(getdate(self.to_date), getdate(self.from_date))
-			if self.half_day:
-				if getdate(self.from_date) == getdate(self.to_date):
-					this_leave_days = 0.5
-				else:
-					this_leave_days = this_leave_days + .5
-			else:
-				this_leave_days = this_leave_days + 1
-			total_leave_days = this_leave_days + leave_days - holidays
-			if total_leave_days > leave_type.max_leaves_allowed:
-				msg = _("Maximum {0} allowed is exceed by {1} between {2} and {3} of Leave Period: ")\
-				.format(self.leave_type, total_leave_days - leave_type.max_leaves_allowed, leave_period[0].from_date, leave_period[0].to_date)\
-					+ """ <b><a href="#Form/Leave period/{0}">{0}</a></b>""".format(leave_period[0].name)
-				frappe.throw(msg)
-		else:
-			frappe.throw(_("There is no leave period in between {0} and {1}").format(self.from_date, self.to_date))
+				date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+				leave_days = get_approved_leaves_for_period(self.employee, False, date_of_joining, self.from_date)
+				number_of_days = date_diff(getdate(self.from_date), date_of_joining)
+				if number_of_days >= 0:
+					holidays = 0
+					if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
+						holidays = get_holidays(self.employee, date_of_joining, self.from_date)
+					number_of_days = number_of_days - leave_days - holidays
+					if number_of_days < leave_type.applicable_after:
+						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
