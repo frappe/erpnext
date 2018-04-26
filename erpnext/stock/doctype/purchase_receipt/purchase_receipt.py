@@ -393,6 +393,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"parent": "purchase_receipt",
 				"purchase_order_item": "po_detail",
 				"purchase_order": "purchase_order",
+				"is_fixed_asset": "is_fixed_asset",
+				"asset": "asset",
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0

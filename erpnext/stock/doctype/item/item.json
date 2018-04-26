@@ -1285,7 +1285,7 @@
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no",
    "columns": 0,
-   "depends_on": "is_stock_item",
+   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
    "hidden": 0,
@@ -1513,7 +1513,7 @@
    "collapsible": 0,
    "columns": 0,
    "default": "",
-   "depends_on": "eval:doc.is_stock_item",
+   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "description": "",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
@@ -3725,7 +3725,6 @@
  "permissions": [
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 1,
    "delete": 1,
@@ -3745,7 +3744,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3765,7 +3763,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3785,7 +3782,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3805,7 +3801,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3825,7 +3820,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3845,7 +3839,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,
@@ -3865,7 +3858,6 @@
   },
   {
    "amend": 0,
-   "apply_user_permissions": 0,
    "cancel": 0,
    "create": 0,
    "delete": 0,

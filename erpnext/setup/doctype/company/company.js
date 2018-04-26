@@ -5,6 +5,14 @@ frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
 	setup: function(frm) {
+		frm.fields_dict.fixed_asset_account.get_query = function() {
+			return {
+				filters: {
+					account_type: "Fixed Asset",
+					company: frm.doc.name
+				}
+			}
+		}
 		erpnext.company.setup_queries(frm);
 	},
 
