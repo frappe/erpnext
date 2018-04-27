@@ -76,7 +76,6 @@ def get_item_details(args):
 			args[key] = value
 
 	out.update(get_pricing_rule_for_item(args))
-
 	if (args.get("doctype") == "Delivery Note" or
 		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
 		and out.warehouse and out.stock_qty > 0:
@@ -86,8 +85,12 @@ def get_item_details(args):
 			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
 			if actual_batch_qty:
 				out.update(actual_batch_qty)
-		
-		if out.has_serial_no:
+
+		if out.has_serial_no and args.get('batch_no'):
+			out.batch_no = args.get('batch_no')
+			out.serial_no = get_serial_no(out, args.serial_no)
+
+		elif out.has_serial_no:
 			out.serial_no = get_serial_no(out, args.serial_no)
 
 	if args.transaction_date and item.lead_time_days:
@@ -468,7 +471,7 @@ def get_serial_nos_by_fifo(args):
 def get_serial_no_batchwise(args):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
 		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s and batch_no=%(batch_no)s
+			where item_code=%(item_code)s and warehouse=%(warehouse)s and (batch_no=%(batch_no)s or batch_no is NULL)
 			order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
@@ -688,14 +691,13 @@ def get_serial_no(args, serial_nos=None):
 
 	if args.get('warehouse') and args.get('stock_qty') and args.get('item_code'):
 		has_serial_no = frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no")
-
 		if args.get('batch_no') and has_serial_no == 1:
 			return get_serial_no_batchwise(args)
-		# elif (args.get('has_batch_no') == 1) and has_serial_no == 1 and not args.get(batch_no):
+		# elif (args.get('has_batch_no') == 1) and has_serial_no == 1 and not args.get('batch_no'):
 		# 	args.batch_no = get_batch_no(args.item_code, args.warehouse, args.qty)
-		# 	actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
+		# 	actual_batch_qty = get_batch_qty(args.batch_no, args.warehouse, args.item_code)
 		# 	if actual_batch_qty:
-		# 		out.update(actual_batch_qty)
+		# 		args.update(actual_batch_qty)
 		# 	return get_serial_no_batchwise(args)
 		elif has_serial_no == 1:
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
