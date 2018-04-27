@@ -199,7 +199,6 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		'validate': 'erpnext.regional.india.utils.set_place_of_supply',
 		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
@@ -210,7 +209,7 @@ doc_events = {
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	'Purchase Invoice': {
+	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }

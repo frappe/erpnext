@@ -40,10 +40,6 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			wrapper: this.$page.find('.layout-side-section'),
 			css_class: 'hub-form-sidebar'
 		});
-
-		this.attachFooter();
-		this.attachTimeline();
-		this.attachReviewArea();
 	}
 
 	setup_filter_area() { }
@@ -132,8 +128,8 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		this.form.set_values(this.data);
 		this.$result.show();
 
-		this.$timelineList.empty();
-		if(this.data.reviews.length) {
+		this.$timelineList && this.$timelineList.empty();
+		if(this.data.reviews && this.data.reviews.length) {
 			this.data.reviews.map(review => {
 				this.addReviewToTimeline(review);
 			})
@@ -323,6 +319,58 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 		this.image_field_name = 'image';
 	}
 
+	setup_page_head() {
+		super.setup_page_head();
+		this.set_primary_action();
+	}
+
+	setup_side_bar() {
+		this.setup_side_bar();
+		this.attachFooter();
+		this.attachTimeline();
+		this.attachReviewArea();
+	}
+
+	set_primary_action() {
+		let item = this.data;
+		this.page.set_primary_action(__('Request a Quote'), () => {
+			this.show_rfq_modal()
+				.then(values => {
+					item.item_code = values.item_code;
+					delete values.item_code;
+
+					const supplier = values;
+					return [item, supplier];
+				})
+				.then(([item, supplier]) => {
+					return this.make_rfq(item, supplier, this.page.btn_primary);
+				})
+				.then(r => {
+					console.log(r);
+					if (r.message && r.message.rfq) {
+						this.page.btn_primary.addClass('disabled').html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
+					} else {
+						throw r;
+					}
+				})
+				.catch((e) => {
+					console.log(e); //eslint-disable-line
+				});
+		}, 'octicon octicon-plus');
+	}
+
+	make_rfq(item, supplier, btn) {
+		console.log(supplier);
+		return new Promise((resolve, reject) => {
+			frappe.call({
+				method: 'erpnext.hub_node.make_rfq_and_send_opportunity',
+				args: { item, supplier },
+				callback: resolve,
+				btn,
+			}).fail(reject);
+		});
+	}
+
 	postRender() {
 		this.categoryDialog = new frappe.ui.Dialog({
 			title: __('Suggest Category'),
@@ -345,6 +393,7 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 						category: values.category
 					},
 					callback: () => {
+						this.categoryDialog.hide();
 						this.refresh();
 					},
 					freeze: true
@@ -382,6 +431,36 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 			}
 		];
 		this.formFields = colOneFields.concat(miscFields, colTwoFields);
+	}
+
+	show_rfq_modal() {
+		let item = this.data;
+		return new Promise(res => {
+			let fields = [
+				{ label: __('Item Code'), fieldtype: 'Data', fieldname: 'item_code', default: item.item_code },
+				{ fieldtype: 'Column Break' },
+				{ label: __('Item Group'), fieldtype: 'Link', fieldname: 'item_group', default: item.item_group },
+				{ label: __('Supplier Details'), fieldtype: 'Section Break' },
+				{ label: __('Supplier Name'), fieldtype: 'Data', fieldname: 'supplier_name', default: item.company_name },
+				{ label: __('Supplier Email'), fieldtype: 'Data', fieldname: 'supplier_email', default: item.seller },
+				{ fieldtype: 'Column Break' },
+				{ label: __('Supplier Type'), fieldname: 'supplier_type',
+					fieldtype: 'Link', options: 'Supplier Type' }
+			];
+			fields = fields.map(f => { f.reqd = 1; return f; });
+
+			const d = new frappe.ui.Dialog({
+				title: __('Request for Quotation'),
+				fields: fields,
+				primary_action_label: __('Send'),
+				primary_action: (values) => {
+					res(values);
+					d.hide();
+				}
+			});
+
+			d.show();
+		});
 	}
 }
 

@@ -10,7 +10,7 @@ from frappe import _
 from frappe.utils import flt, cint, getdate
 from erpnext.stock.report.stock_balance.stock_balance import get_item_details, get_item_reorder_details, get_item_warehouse_map
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
-from dlt.utils import get_user_permissions_for
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -85,8 +85,9 @@ def validate_filters(filters):
 		filters["company"] = frappe.defaults.get_user_default("Company")
 
 def get_warehouse_list(filters):
+	from frappe.defaults import get_user_permissions
 	condition = ''
-	user_permitted_warehouse = get_user_permissions_for("Warehouse")
+	user_permitted_warehouse = filter(None, get_user_permissions().get("Warehouse", []))
 	value = ()
 	if user_permitted_warehouse:
 		condition = "and name in %s"
