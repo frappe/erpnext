@@ -56,7 +56,6 @@ def get_data():
 		{
 			"module_name": "Lead",
 			"icon": "octicon octicon-broadcast",
-			"type": "module",
 			"_doctype": "Lead",
 			"type": "link",
 			"link": "List/Lead"
@@ -81,7 +80,6 @@ def get_data():
 		{
 			"module_name": "Stock",
 			"color": "#f39c12",
-			"icon": "fa fa-truck",
 			"icon": "octicon octicon-package",
 			"type": "module",
 			"hidden": 1
@@ -96,7 +94,6 @@ def get_data():
 		{
 			"module_name": "Selling",
 			"color": "#1abc9c",
-			"icon": "fa fa-tag",
 			"icon": "octicon octicon-tag",
 			"type": "module",
 			"hidden": 1
@@ -104,7 +101,6 @@ def get_data():
 		{
 			"module_name": "Buying",
 			"color": "#c0392b",
-			"icon": "fa fa-shopping-cart",
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
 			"hidden": 1
@@ -112,7 +108,6 @@ def get_data():
 		{
 			"module_name": "HR",
 			"color": "#2ecc71",
-			"icon": "fa fa-group",
 			"icon": "octicon octicon-organization",
 			"label": _("Human Resources"),
 			"type": "module",
@@ -121,7 +116,6 @@ def get_data():
 		{
 			"module_name": "Manufacturing",
 			"color": "#7f8c8d",
-			"icon": "fa fa-cogs",
 			"icon": "octicon octicon-tools",
 			"type": "module",
 			"hidden": 1
@@ -145,7 +139,6 @@ def get_data():
 		{
 			"module_name": "Projects",
 			"color": "#8e44ad",
-			"icon": "fa fa-puzzle-piece",
 			"icon": "octicon octicon-rocket",
 			"type": "module",
 			"hidden": 1
@@ -153,7 +146,6 @@ def get_data():
 		{
 			"module_name": "Support",
 			"color": "#2c3e50",
-			"icon": "fa fa-phone",
 			"icon": "octicon octicon-issue-opened",
 			"type": "module",
 			"hidden": 1

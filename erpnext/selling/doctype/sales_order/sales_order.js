@@ -65,6 +65,10 @@ frappe.ui.form.on("Sales Order Item", {
 });
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
+	onload: function(doc, dt, dn) {
+		this._super();
+	},
+
 	refresh: function(doc, dt, dn) {
 		var me = this;
 		this._super();

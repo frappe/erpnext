@@ -60,6 +60,7 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_over_production(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
+
 		wo_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
@@ -300,6 +301,7 @@ def make_wo_order_test_record(**args):
 	wo_order.company = args.company or "_Test Company"
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
 	wo_order.use_multi_level_bom=0
+	wo_order.skip_transfer=1
 	wo_order.get_items_and_operations_from_bom()
 
 	if args.source_warehouse:

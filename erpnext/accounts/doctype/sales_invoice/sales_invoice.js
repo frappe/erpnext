@@ -319,6 +319,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	pos_profile: function() {
+		this.frm.doc.taxes = []
 		this.set_pos_data();
 	},
 

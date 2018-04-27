@@ -532,7 +532,7 @@ class Item(WebsiteGenerator):
 
 	def on_trash(self):
 		super(Item, self).on_trash()
-		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
+		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
 		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
@@ -568,7 +568,7 @@ class Item(WebsiteGenerator):
 					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
 
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
-				if old_name in item_wise_tax_detail:
+				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:
 					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
 					item_wise_tax_detail.pop(old_name)
 
