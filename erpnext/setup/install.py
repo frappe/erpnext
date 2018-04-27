@@ -5,7 +5,7 @@ from __future__ import print_function, unicode_literals
 
 import frappe
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
-from .default_success_action import DEFAULT_SUCCESS_ACTION
+from .default_success_action import get_default_success_action
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
@@ -80,7 +80,7 @@ def create_default_cash_flow_mapper_templates():
 			doc.insert(ignore_permissions=True)
 
 def create_default_success_action():
-	for success_action in DEFAULT_SUCCESS_ACTION:
+	for success_action in get_default_success_action():
 		if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
 			doc = frappe.get_doc(success_action)
 			doc.insert(ignore_permissions=True)
