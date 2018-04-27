@@ -30,6 +30,7 @@ def _execute(filters=None):
 			row += [item_tax.get("tax_amount", 0)]
 			total_tax += flt(item_tax.get("tax_amount"))
 
+		row += [d.base_net_amount + total_tax]
 		data.append(row)
 	if data:
 		data = get_merged_data(columns, data) # merge same hsn code data
@@ -167,6 +168,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 	for desc in tax_columns:
 		columns.append(desc + " Amount:Currency/currency:160")
 
+	columns += ["Total Amount:Currency/currency:110"]
 	return itemised_tax, tax_columns
 
 def get_merged_data(columns, data):
