@@ -7,7 +7,7 @@ It helps you effectively manage administrative side and allows you to focus on w
 
 <img class="screenshot" alt="School Hero" src="{{docs_base_url}}/assets/img/education/school-hero.png">
 
-## Contents of ERPNext Education Domain
+### Contents of ERPNext Education Domain
 
 Using Education module of ERPNext, you can effectively manage operations like:
 
@@ -23,7 +23,7 @@ For an online demonstration on each functionality of ERPNext Education module, [
 
 <img class="screenshot" alt="Fees Section" src="{{docs_base_url}}/assets/img/education/assessment.png">
 
-## Who Uses ERPNext
+### Who Uses ERPNext
 
 The very first implementation of ERPNext was driven by a school teacher herself. She explains what it takes to get implementation right at your education institute.
 
@@ -34,7 +34,7 @@ The very first implementation of ERPNext was driven by a school teacher herself.
     </div>
 <div>
 
-## User Manual
+### User Manual
 
 Education Institute needs lots more than Education module, and ERPNext has all of it available built-in.
 
