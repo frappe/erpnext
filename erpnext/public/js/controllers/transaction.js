@@ -304,7 +304,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
