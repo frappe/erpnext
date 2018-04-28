@@ -21,8 +21,8 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		party = [d for d in str(filters.get("party")).split(', ') if d]
-		filters.party = party
+		parties = str(filters.get("party")).strip()
+		filters.party = [d.strip() for d in parties.split(',') if d]
 
 	validate_filters(filters, account_details)
 

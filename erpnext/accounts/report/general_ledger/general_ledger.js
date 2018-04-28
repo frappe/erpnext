@@ -73,13 +73,36 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"party",
 			"label": __("Party"),
 			"fieldtype": "MultiSelect",
-			"get_options": function() {
+			get_data: function() {
+				if(!frappe.query_report_filters_by_name) return;
+
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
-				var party = frappe.query_report_filters_by_name.party.get_value();
-				if(party && !party_type) {
+				var parties = frappe.query_report_filters_by_name.party.get_value();
+				if(!party_type) {
 					frappe.throw(__("Please select Party Type first"));
 				}
-				return party_type;
+
+				const values = parties.split(/\s*,\s*/).filter(d => d);
+				const txt = parties.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: frappe.query_report_filters_by_name.party_type.get_value(),
+						txt: txt,
+						filters: {
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
 			},
 			on_change: function() {
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
