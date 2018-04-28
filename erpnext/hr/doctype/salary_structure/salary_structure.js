@@ -62,7 +62,36 @@ frappe.ui.form.on('Salary Structure', {
 		frm.add_custom_button(__("Add Employees"),function () {
 			frm.trigger('add_employees')
 		})
+		
+		frm.add_custom_button(__("Get details from Grade"),function () {
+			frm.trigger('get_details_from_grade')
+		})
 
+	},
+
+	get_details_from_grade:function (frm) {
+		frm.$grade_info_dialog = new frappe.ui.Dialog({
+			title: __("Get details from Grade"),
+			fields: [
+				{fieldname:'employee_grade', fieldtype:'Link', options: 'Employee Grade', label: __('Employee Grade')},
+			]
+		});
+		frm.$grade_info_dialog.set_primary_action(__("Get"), function() {
+			frm.clear_table("earnings");
+			frm.clear_table("deductions");
+			frappe.call({
+				doc:frm.doc,
+				method:'get_grade_info',
+				args:{
+					employee_grade : frm.$grade_info_dialog.get_values().employee_grade,
+				},
+				callback:function (r) {
+					frm.refresh_fields(["earnings","deductions"]);
+					frm.$grade_info_dialog.hide()
+				}
+			})
+		});
+		frm.$grade_info_dialog.show();
 	},
 
 	add_employees:function (frm) {
@@ -70,6 +99,7 @@ frappe.ui.form.on('Salary Structure', {
 			title: __("Add Employees"),
 			fields: [
 				{fieldname:'company', fieldtype:'Link', options: 'Company', label: __('Company')},
+				{fieldname:'employee_grade', fieldtype:'Link', options: 'Employee Grade', label: __('Employee Grade')},
 				{fieldname:'branch', fieldtype:'Link', options: 'Branch', label: __('Branch')},
 				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
 				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
@@ -87,16 +117,23 @@ frappe.ui.form.on('Salary Structure', {
 
 	get_employees:function (frm) {
 		var filters = frm.$emp_dialog.get_values();
+		var base = 0 ;
+		var variable = 0 ;
 		if ('variable' in filters) {
+			variable = filters.variable
 			delete filters.variable
 		}
 		if ('base' in filters) {
+			base = filters.base
 			delete filters.base
 		}
 		frappe.call({
 			method:'erpnext.hr.doctype.salary_structure.salary_structure.get_employees',
 			args:{
-				filters: filters
+				filters: filters ,
+				base : base,
+				variable:variable
+				
 			},
 			callback:function (r) {
 				var employees = $.map(frm.doc.employees, function(d) { return d.employee });
@@ -105,8 +142,8 @@ frappe.ui.form.on('Salary Structure', {
 						var row = frappe.model.add_child(frm.doc, frm.fields_dict.employees.df.options, frm.fields_dict.employees.df.fieldname);
 						row.employee = r.message[i].name;
 						row.employee_name = r.message[i].employee_name;
-						row.base = frm.$emp_dialog.get_value('base');
-						row.variable = frm.$emp_dialog.get_value('variable');
+						row.base = r.message[i].base;
+						row.variable = r.message[i].variable;
 					}
 				}
 				frm.refresh_field('employees');

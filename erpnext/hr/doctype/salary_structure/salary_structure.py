@@ -72,7 +72,35 @@ class SalaryStructure(Document):
 		for row in self.deductions:
 			row.condition = row.condition.strip() if row.condition else ""
 			row.formula = row.formula.strip() if row.formula else ""
+	
+	def get_grade_info(self,employee_grade):
+		self.deductions = []
+		self.earnings = []
+		grade_doc = frappe.get_doc("Employee Grade",employee_grade)
 
+		for e in  grade_doc.earnings:
+			child = self.append('earnings', {})
+			child.salary_component= e.salary_component
+			child.abbr= e.abbr
+			child.condition= e.condition
+			child.amount_based_on_formula= e.amount_based_on_formula
+			child.formula= e.formula
+			child.amount= e.amount
+			child.depends_on_lwp= e.depends_on_lwp
+			child.default_amount= e.default_amount
+
+		for e in  grade_doc.deductions:
+			child = self.append('deductions', {})
+			child.salary_component= e.salary_component
+			child.abbr= e.abbr
+			child.condition= e.condition
+			child.amount_based_on_formula= e.amount_based_on_formula
+			child.formula= e.formula
+			child.amount= e.amount
+			child.depends_on_lwp= e.depends_on_lwp
+			child.default_amount= e.default_amount
+			
+			
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
 	def postprocess(source, target):
@@ -104,5 +132,24 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 
 
 @frappe.whitelist()
-def get_employees(**args):
-	return frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name'])
+def get_employees(base = None, variable = None , **args):
+	employees =  frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name','employee_grade','employee_level'])
+	for employee in employees : 
+		employee["variable"] = 0 if variable is None else variable
+		if employee.get('employee_grade') :
+			level_percent = frappe.db.get_value("Employee Grade", employee.employee_grade, "level_percent")
+			salary_base = frappe.db.get_value("Employee Grade", employee.employee_grade, "base")
+			level_added_value = float(level_percent)/100.00
+			
+			for l in range(1,employee.employee_level):
+				salary_base += salary_base *level_added_value
+			employee["base"] = salary_base
+		else:
+			employee["base"] = 0 if base is None else base
+	return employees
+
+	
+
+		
+
+

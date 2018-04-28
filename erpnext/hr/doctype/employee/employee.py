@@ -42,7 +42,8 @@ class Employee(NestedSet):
 		self.validate_status()
 		self.validate_reports_to()
 		self.validate_preferred_email()
-
+		self.validate_employee_grade()
+		
 		if self.user_id:
 			self.validate_for_enabled_user_id()
 			self.validate_duplicate_user_id()
@@ -160,7 +161,19 @@ class Employee(NestedSet):
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
-
+	
+	def validate_employee_grade(self):
+		if self.employee_grade:
+			max_level = frappe.db.get_value("Employee Grade", self.employee_grade, "max_level")
+			if not self.employee_level :
+				throw(_("Employee Level must be set"))
+			else:
+				if self.employee_level <= 0:
+					throw(_("Employee level Must have value bigger than 0"))
+				if self.employee_level > max_level:
+					throw(_("Employee level Must be smaller or equal to Grade Max level %d"%max_level))
+				
+			
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
