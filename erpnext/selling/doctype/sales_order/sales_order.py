@@ -662,7 +662,7 @@ def get_events(start, end, filters=None):
 	data = frappe.db.sql("""
 		select
 			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
-			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
+			`tabSales Order`.delivery_status, `tabSales Order`.billing_status, `tabSales Order`._color,
 			`tabSales Order Item`.delivery_date
 		from
 			`tabSales Order`, `tabSales Order Item`
