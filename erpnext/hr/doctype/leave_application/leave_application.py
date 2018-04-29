@@ -382,7 +382,6 @@ def get_events(start, end, filters=None):
 
 	from frappe.desk.reportview import get_filters_cond
 	conditions = get_filters_cond("Leave Application", filters, [])
-
 	# show department leaves for employee
 	if "Employee" in frappe.get_roles():
 		add_department_leaves(events, start, end, employee, company)
@@ -408,7 +407,7 @@ def add_department_leaves(events, start, end, employee, company):
 	add_leaves(events, start, end, match_conditions=match_conditions)
 
 def add_leaves(events, start, end, match_conditions=None):
-	query = """select name, from_date, to_date, employee_name, half_day,
+	query = """select name, from_date, to_date, employee_name, _color, half_day,
 		employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
@@ -422,9 +421,10 @@ def add_leaves(events, start, end, match_conditions=None):
 			"doctype": "Leave Application",
 			"from_date": d.from_date,
 			"to_date": d.to_date,
+			"docstatus": d.docstatus,
+			"color": d._color,
 			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
-			"docstatus": d.docstatus
 		}
 		if e not in events:
 			events.append(e)

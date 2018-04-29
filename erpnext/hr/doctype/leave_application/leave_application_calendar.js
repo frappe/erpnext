@@ -7,7 +7,8 @@ frappe.views.calendar["Leave Application"] = {
 		"end": "to_date",
 		"id": "name",
 		"title": "title",
-		"docstatus": 1
+		"docstatus": 1,
+		"color": "_color"
 	},
 	options: {
 		header: {
