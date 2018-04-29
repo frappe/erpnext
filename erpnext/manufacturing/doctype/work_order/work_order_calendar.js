@@ -7,6 +7,7 @@ frappe.views.calendar["Work Order"] = {
 		"end": "planned_end_date",
 		"id": "name",
 		"title": "name",
+		"color": "_color",
 		"allDay": "allDay",
 		"progress": function(data) {
 			return flt(data.produced_qty) / data.qty * 100;
