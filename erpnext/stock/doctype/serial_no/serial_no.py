@@ -235,7 +235,7 @@ def validate_serial_no(sle, item_det):
 							if sr.batch_no and sr.batch_no != sle.batch_no:
 								frappe.throw(_("Serial No {0} does not belong to Batch {1}").format(serial_no,
 									sle.batch_no), SerialNoBatchError)
-	
+
 							if sle.is_cancelled=="No" and not sr.warehouse:
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
