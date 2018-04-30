@@ -49,9 +49,6 @@ class TestLeaveApplication(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-		# so that this test doesn't affect other tests
-		frappe.db.sql("""delete from `tabEmployee Leave Approver`""")
-
 	def _clear_roles(self):
 		frappe.db.sql("""delete from `tabHas Role` where parent in
 			("test@example.com", "test1@example.com", "test2@example.com")""")
@@ -80,6 +77,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		application = self.get_application(_test_records[0])
 		application.insert()
+		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
 		frappe.set_user("test1@example.com")
@@ -219,7 +217,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		frappe.set_user("test1@example.com")
 		application.insert()
-
+		application.status = "Approved"
 		frappe.set_user("test@example.com")
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
