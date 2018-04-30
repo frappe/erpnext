@@ -14,7 +14,14 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
-			"options": "Customer"
+			"options": "Customer",
+			on_change: () => {
+				var customer = frappe.query_report_filters_by_name.customer.get_value();
+				frappe.db.get_value('Customer', customer, "customer_name", function(value) {
+					frappe.query_report.context_data = value;
+					frappe.query_report.refresh()
+				});
+			}
 		},
 		{
 			"fieldname":"customer_group",
