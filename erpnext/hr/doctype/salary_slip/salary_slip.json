@@ -1044,7 +1044,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fieldname": "include_unclaimed_employee_benefits", 
+   "fieldname": "deduct_tax_for_unclaimed_employee_benefits", 
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -1053,7 +1053,7 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Include Unclaimed Employee Benefits", 
+   "label": "Deduct Tax For Unclaimed Employee Benefits", 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -1435,7 +1435,7 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Loan", 
+   "label": "Employee Loan", 
    "length": 0, 
    "no_copy": 0, 
    "options": "Salary Slip Loan", 
@@ -1812,7 +1812,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-13 20:14:23.105069", 
+ "modified": "2018-04-27 12:42:21.278360", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -1835,7 +1835,6 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
    "write": 1
   }, 
   {
@@ -1874,7 +1873,6 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
-   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 0
   }
  ], 
