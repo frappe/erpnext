@@ -421,7 +421,7 @@ def add_leaves(events, start, end, match_conditions=None):
 			"doctype": "Leave Application",
 			"from_date": d.from_date,
 			"to_date": d.to_date,
-			"docstatus": d.docstatus, 
+			"docstatus": d.docstatus,
 			"color": d.color,
 			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
