@@ -71,7 +71,7 @@ frappe.ui.form.on('Employee',{
 			},
 			callback: function(r)
 			{
-				frm.set_value("employee_age", r.message)
+				frm.set_value("employee_age", r.message);
 			}
 		});
 	},

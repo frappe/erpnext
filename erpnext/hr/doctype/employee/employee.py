@@ -214,7 +214,11 @@ def age_calculate(employees):
 		return no_of_emp, total_age, average_age
 	return no_of_emp, total_age, average_age
 
-def get_employees_by_filter(filters={}, fields=[]):
+def get_employees_by_filter(filters, fields):
+	if not filters:
+		filters = {}
+	if not fields:
+		fields = []
 	employees = frappe.get_all('Employee', filters=filters, fields=fields)
 	return employees
 
