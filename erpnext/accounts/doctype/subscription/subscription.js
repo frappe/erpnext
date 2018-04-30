@@ -54,6 +54,8 @@ frappe.ui.form.on('Subscription', {
 					}
 				);
 			}
+
+			render_subscription(frm);
 		}
 	},
 
@@ -72,4 +74,16 @@ frappe.ui.form.on('Subscription', {
 			}
 		});
 	}
+
 });
+
+function render_subscription(frm){
+	frappe.call({
+		method: "get_subscription_schedule",
+		doc: cur_frm.doc
+	}).done((r) => {
+		var wrapper = $(cur_frm.fields_dict["subscription_schedule"].wrapper);
+
+		wrapper.html(frappe.render_template ("subscription_schedule", {"s" : r.message}  ))
+	})
+};

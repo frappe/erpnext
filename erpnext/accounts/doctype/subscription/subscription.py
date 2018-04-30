@@ -32,6 +32,7 @@ class Subscription(Document):
 
 	def on_submit(self):
 		self.update_subscription_id()
+		self.get_subscription_schedule()
 
 	def on_update_after_submit(self):
 		self.validate_dates()
@@ -95,6 +96,16 @@ class Subscription(Document):
 
 		if status and status != 'Resumed':
 			self.status = status
+
+	def get_subscription_schedule(self):
+		s = {
+		"reference_document" : self.reference_document,
+		"frequency" : self.frequency,
+		"next_scheduled_date" : self.next_schedule_date,
+		"end_date" : self.end_date
+
+		}
+		return s
 
 def get_next_schedule_date(start_date, frequency, repeat_on_day):
 	mcount = month_map.get(frequency)
