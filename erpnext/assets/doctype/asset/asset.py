@@ -52,14 +52,14 @@ class Asset(Document):
 					self.set(field, value)
 
 	def validate_asset_values(self):
-		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
-			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
-
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if not self.calculate_depreciation:
 			return
+
+		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
+			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0

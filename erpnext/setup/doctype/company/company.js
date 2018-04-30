@@ -18,6 +18,16 @@ frappe.ui.form.on("Company", {
 		}
 	},
 
+	date_of_commencement: function(frm) {
+		if(frm.doc.date_of_commencement<frm.doc.date_of_incorporation)
+		{
+			frappe.throw(__("Date of Commencement should be greater than Date of Incorporation"));
+		}
+		if(!frm.doc.date_of_commencement){
+			frm.doc.date_of_incorporation = ""
+		}
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.abbr && !frm.doc.__islocal) {
 			frm.set_df_property("abbr", "read_only", 1);
