@@ -13,7 +13,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.accounts.doctype.subscription.subscription import get_next_schedule_date
+from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 form_grid_templates = {
@@ -369,16 +369,16 @@ class SalesOrder(SellingController):
 						))
 		return items
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
-			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+														 auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
 			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
-				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+														  auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
