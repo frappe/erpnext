@@ -5,8 +5,7 @@ frappe.views.calendar["Course Schedule"] = {
 		"end": "to_datetime",
 		"id": "name",
 		"title": "course",
-		"allDay": "allDay",
-		"color": "_color"
+		"allDay": "allDay"
 	},
 	gantt: false,
 	order_by: "schedule_date",

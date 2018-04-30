@@ -7,8 +7,7 @@ frappe.views.calendar["Leave Application"] = {
 		"end": "to_date",
 		"id": "name",
 		"title": "title",
-		"docstatus": 1,
-		"color": "_color"
+		"docstatus": 1
 	},
 	options: {
 		header: {
@@ -16,6 +15,6 @@ frappe.views.calendar["Leave Application"] = {
 			center: 'title',
 			right: 'month'
 		}
-	},
+	}, 
 	get_events_method: "erpnext.hr.doctype.leave_application.leave_application.get_events"
 }
