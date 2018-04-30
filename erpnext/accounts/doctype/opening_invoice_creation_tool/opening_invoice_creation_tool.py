@@ -138,7 +138,8 @@ class OpeningInvoiceCreationTool(Document):
 			income_expense_account_field = "expense_account"
 
 		item = get_item_dict()
-		return frappe._dict({
+
+		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
 			"set_posting_time": 1,
@@ -149,6 +150,11 @@ class OpeningInvoiceCreationTool(Document):
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
+
+		if self.invoice_type == "Sales":
+			args["is_pos"] = 0
+
+		return args
 
 @frappe.whitelist()
 def get_temporary_opening_account(company=None):
