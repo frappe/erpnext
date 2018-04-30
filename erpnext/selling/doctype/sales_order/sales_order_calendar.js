@@ -7,8 +7,7 @@ frappe.views.calendar["Sales Order"] = {
 		"end": "delivery_date",
 		"id": "name",
 		"title": "customer_name",
-		"allDay": "allDay",
-		"color": "_color"
+		"allDay": "allDay"
 	},
 	gantt: true,
 	filters: [
