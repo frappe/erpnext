@@ -157,6 +157,26 @@ def install(country=None):
 		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
 		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
 
+		#UOM Category
+		{'category_name': _('Length'), 'doctype': 'UOM Category', 'name': _('Length')},
+		{'category_name': _('Area'), 'doctype': 'UOM Category', 'name': _('Area')},
+		{'category_name': _('Angle'), 'doctype': 'UOM Category', 'name': _('Angle')},
+		{'category_name': _('Agriculture'), 'doctype': 'UOM Category', 'name': _('Agriculture')},
+		{'category_name': _('Speed'), 'doctype': 'UOM Category', 'name': _('Speed')},
+		{'category_name': _('Mass'), 'doctype': 'UOM Category', 'name': _('Mass')},
+		{'category_name': _('Density'), 'doctype': 'UOM Category', 'name': _('Density')},
+		{'category_name': _('Volume'), 'doctype': 'UOM Category', 'name': _('Volume')},
+		{'category_name': _('Time'), 'doctype': 'UOM Category', 'name': _('Time')},
+		{'category_name': _('Pressure'), 'doctype': 'UOM Category', 'name': _('Pressure')},
+		{'category_name': _('Force'), 'doctype': 'UOM Category', 'name': _('Force')},
+		{'category_name': _('Energy'), 'doctype': 'UOM Category', 'name': _('Energy')},
+		{'category_name': _('Power'), 'doctype': 'UOM Category', 'name': _('Power')},
+		{'category_name': _('Temperature'), 'doctype': 'UOM Category', 'name': _('Temperature')},
+		{'category_name': _('Frequency And Wavelength'), 'doctype': 'UOM Category', 'name': _('Frequency And Wavelength')},
+		{'category_name': _('Electrical Charge'), 'doctype': 'UOM Category', 'name': _('Electrical Charge')},
+		{'category_name': _('Electric Current'), 'doctype': 'UOM Category', 'name': _('Electric Current')},
+		{'category_name': _('Magnetic Induction'), 'doctype': 'UOM Category', 'name': _('Magnetic Induction')}
+
 		# Mode of Payment
 		{'doctype': 'Mode of Payment',
 			'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),
@@ -244,7 +264,12 @@ def install(country=None):
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
+	def get_country_wise_tax(country):
+		data = {}
+		with open (os.path.join(os.path.dirname(__file__), "..", "data", "country_wise_tax.json")) as countrywise_tax:
+			data = json.load(countrywise_tax).get(country)
 
+		return data
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
 
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
@@ -266,6 +291,14 @@ def install(country=None):
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.save()
+
+	# bootstrap uom conversion factors
+	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
+	for d in uom_conversions:
+		uom_conversion = frappe.new_doc('UOM Conversion Factor')
+		uom_conversion.flags.ignore_mandatory = True
+		uom_conversion.update(d)
+		uom_conversion.save(ignore_permissions=True)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub

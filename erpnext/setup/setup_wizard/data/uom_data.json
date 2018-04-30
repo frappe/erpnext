@@ -1,0 +1,1663 @@
+[
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Meter",
+		"abbr": "m",
+		"value": "1"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Barleycorn",
+		"value": "0.008467"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Calibre",
+		"abbr": "cal",
+		"value": "0.0254"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Cable Length (UK)",
+		"abbr": "cables",
+		"value": "182.88"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Cable Length (US)",
+		"abbr": "cables",
+		"value": "219.456"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Cable Length",
+		"abbr": "cables",
+		"value": "185.2"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Centimeter",
+		"abbr": "cm",
+		"value": "0.01"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Chain",
+		"abbr": "ch",
+		"value": "20.1168"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Decimeter",
+		"abbr": "dm",
+		"value": "0.1"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Ells (UK)",
+		"abbr": "ells",
+		"value": "0.875"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Ems(Pica)",
+		"abbr": "ems",
+		"value": "0.004233"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Fathom",
+		"abbr": "fm",
+		"value": "1.8288"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Foot",
+		"abbr": "ft",
+		"value": "0.3048"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Furlong",
+		"abbr": "fur",
+		"value": "201.168"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Hand",
+		"abbr": "hand",
+		"value": "0.1016"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Hectometer",
+		"abbr": "hm",
+		"value": "100"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Inch",
+		"abbr": "in",
+		"value": "0.0254"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Kilometer",
+		"abbr": "km",
+		"value": "1000"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Link",
+		"abbr": "li",
+		"value": "0.201168"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Micrometer",
+		"abbr": "µm",
+		"value": "0.000001"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Mile",
+		"abbr": "mi",
+		"value": "1609.344"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Mile (Nautical)",
+		"abbr": "nmi(NM)",
+		"value": "1852"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Millimeter",
+		"abbr": "mm",
+		"value": "0.001"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Nanometer",
+		"abbr": "nm",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Rod",
+		"abbr": "rd",
+		"value": "5.02921"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Vara",
+		"abbr": "V",
+		"value": "0.835906"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Versta",
+		"value": "1066.8"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Yard",
+		"abbr": "yd",
+		"value": "0.9144"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Arshin",
+		"value": "0.7112"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Sazhen",
+		"value": "2.1336"
+	},
+	{
+		"category": "Length",
+		"from": "Meter",
+		"to": "Medio Metro",
+		"abbr": "mediom",
+		"value": "0.5"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Meter",
+		"value": "1"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Centiarea",
+		"abbr": "CentArea",
+		"value": "1"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Area",
+		"abbr": "Area",
+		"value": "100"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Manzana",
+		"abbr": "Mz",
+		"value": "6987.388"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Caballeria",
+		"abbr": "Cbll",
+		"value": "447192.86"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Kilometer",
+		"value": "1000000"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Are",
+		"abbr": "a",
+		"value": "100"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Acre",
+		"abbr": "ac",
+		"value": "4046.856422"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Acre (US)",
+		"abbr": "ac",
+		"value": "4046.87261"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Hectare",
+		"abbr": "ha",
+		"value": "10000"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Yard",
+		"value": "0.83612736"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Foot",
+		"value": "0.09290304"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Inch",
+		"value": "0.00064516"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Centimeter",
+		"value": "0.0001"
+	},
+	{
+		"category": "Area",
+		"from": "Square Meter",
+		"to": "Square Mile",
+		"value": "2589988.11"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Circle",
+		"value": "360"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Degree",
+		"value": "1"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Grad Or Gon",
+		"abbr": "grd",
+		"value": "0.9"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Quadrant",
+		"value": "90"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Radian",
+		"abbr": "rad",
+		"value": "57.29577951"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Revolution",
+		"abbr": "r",
+		"value": "360"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Right Angle",
+		"value": "90"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Mil",
+		"value": "0.05625"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Minutes",
+		"value": "0.016666667"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Seconds",
+		"value": "0.000277778"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Sextant",
+		"value": "60"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Sign",
+		"value": "30"
+	},
+	{
+		"category": "Angle",
+		"from": "Degree",
+		"to": "Turn",
+		"value": "360"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Meter/Second",
+		"abbr": "m/s",
+		"value": "1"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Inch/Minute",
+		"abbr": "ipm",
+		"value": "0.000423333"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Foot/Minute",
+		"abbr": "fpm",
+		"value": "0.00508"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Inch/Second",
+		"abbr": "ips",
+		"value": "0.0254"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Kilometer/Hour",
+		"abbr": "km/h",
+		"value": "0.277777778"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Foot/Second",
+		"abbr": "fps",
+		"value": "0.3048"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Mile/Hour",
+		"abbr": "mph",
+		"value": "0.44704"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Knot",
+		"abbr": "kn",
+		"value": "0.514444"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Mile/Minute",
+		"abbr": "mpm",
+		"value": "26.8224"
+	},
+	{
+		"category": "Speed",
+		"from": "Meter/Second",
+		"to": "Mile/Second",
+		"abbr": "mps",
+		"value": "1609.344"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Carat",
+		"abbr": "carat",
+		"value": "0.0002"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Cental",
+		"abbr": "cental",
+		"value": "45.359237"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Dram",
+		"abbr": "dr",
+		"value": "0.001771845"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Grain",
+		"abbr": "gr",
+		"value": "0.000065"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Gram",
+		"abbr": "g",
+		"value": "0.001"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Hundredweight",
+		"abbr": "cwt",
+		"value": "45.359237"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Quintal",
+		"abbr": "qq",
+		"value": "45.359237"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Kilogram",
+		"abbr": "kg",
+		"value": "1"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Microgram",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Milligram",
+		"abbr": "mg",
+		"value": "0.000001"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Ounce",
+		"abbr": "oz",
+		"value": "0.02835"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Pood",
+		"abbr": "pood",
+		"value": "16.3805"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Pound",
+		"abbr": "lbm",
+		"value": "0.45359237"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Slug",
+		"abbr": "slug",
+		"value": "14.5939029"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Stone",
+		"abbr": "stone",
+		"value": "6.350293"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Tonne",
+		"abbr": "t",
+		"value": "1000"
+	},
+	{
+		"category": "Mass",
+		"from": "Kilogram",
+		"to": "Kip",
+		"abbr": "kip",
+		"value": "453.59237"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Barrel(Beer)",
+		"abbr": "bbl",
+		"value": "117.3478"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Barrel (Oil)",
+		"abbr": "bbl",
+		"value": "158.987295"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Bushel (UK)",
+		"abbr": "bu",
+		"value": "36.36872"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Bushel (US Dry Level)",
+		"abbr": "bu",
+		"value": "35.23907017"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Centiliter",
+		"abbr": "cl",
+		"value": "0.01"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Centimeter",
+		"value": "0.001"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Decimeter",
+		"value": "1"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Foot",
+		"value": "28.31684659"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Inch",
+		"value": "0.016387064"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Meter",
+		"value": "1000"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Millimeter",
+		"value": "0.000001"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cubic Yard",
+		"value": "764.554858"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Cup",
+		"abbr": "cp",
+		"value": "0.236588"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Deciliter",
+		"abbr": "dl",
+		"value": "0.1"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Fluid Ounce (UK)",
+		"abbr": "fl oz",
+		"value": "0.028413"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Fluid Ounce (US)",
+		"abbr": "fl oz",
+		"value": "0.029574"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Gallon (UK)",
+		"abbr": "gal",
+		"value": "4.54609"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Gallon Dry (US)",
+		"abbr": "gal",
+		"value": "4.404884"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Gallon Liquid (US)",
+		"abbr": "gal",
+		"value": "3.785411784"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Liter",
+		"abbr": "L",
+		"value": "1"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Deciliter",
+		"abbr": "dl",
+		"value": "0.1"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Milliliter",
+		"abbr": "ml",
+		"value": "0.001"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Peck",
+		"abbr": "pk",
+		"value": "8.809768"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Pint (UK)",
+		"abbr": "pt",
+		"value": "0.568261"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Pint, Dry (US)",
+		"abbr": "pt",
+		"value": "0.55061"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Pint, Liquid (US)",
+		"abbr": "pt",
+		"value": "0.473176475"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Quart (UK)",
+		"abbr": "qt",
+		"value": "1.136523"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Quart Dry (US)",
+		"abbr": "qt",
+		"value": "1.136523"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Quart Liquid (US)",
+		"abbr": "qt",
+		"value": "1.136523"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Tablespoon (US)",
+		"abbr": "tbsp",
+		"value": "0.014787"
+	},
+	{
+		"category": "Volume",
+		"from": "Liter",
+		"to": "Teaspoon",
+		"abbr": "tsp",
+		"value": "0.004929"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Day",
+		"value": "86400"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Hour",
+		"abbr": "h",
+		"value": "3600"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Minute",
+		"abbr": "min",
+		"value": "60"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Second",
+		"abbr": "s",
+		"value": "1"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Millisecond",
+		"abbr": "ms",
+		"value": "0.001"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Microsecond",
+		"value": "0.000001"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Nanosecond",
+		"abbr": "ns",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Time",
+		"from": "Second",
+		"to": "Week",
+		"value": "604800"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Atmosphere",
+		"abbr": "atm",
+		"value": "101325"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Pascal",
+		"abbr": "Pa",
+		"value": "1"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Bar",
+		"abbr": "bar",
+		"value": "100000"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Foot Of Water",
+		"abbr": "ftH2O",
+		"value": "2989.06692"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Hectopascal",
+		"abbr": "hPa",
+		"value": "100"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Iches Of Water",
+		"abbr": "inH2O",
+		"value": "249.08891"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Inches Of Mercury",
+		"abbr": "inHg",
+		"value": "3386.388"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Kilopascal",
+		"abbr": "kPa",
+		"value": "1000"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Meter Of Water",
+		"abbr": "mH2O",
+		"value": "9806.65"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Microbar",
+		"value": "0.1"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Milibar",
+		"abbr": "mbar",
+		"value": "100"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Millimeter Of Mercury",
+		"abbr": "mmHg",
+		"value": "133.322"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Millimeter Of Water",
+		"abbr": "mmH2O",
+		"value": "9.80665"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Technical Atmosphere",
+		"abbr": "at",
+		"value": "98066.5"
+	},
+	{
+		"category": "Pressure",
+		"from": "Pascal",
+		"to": "Torr",
+		"abbr": "torr",
+		"value": "133.322"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Dyne",
+		"abbr": "dyn",
+		"value": "0.00001"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Gram-Force",
+		"abbr": "gf",
+		"value": "0.00980665"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Joule/Meter",
+		"abbr": "J/m",
+		"value": "1"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Kilogram-Force",
+		"abbr": "kgf",
+		"value": "9.80665"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Kilopond",
+		"abbr": "kp",
+		"value": "9.80665"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Kilopound-Force",
+		"abbr": "kipf",
+		"value": "4448.221615"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Newton",
+		"abbr": "N",
+		"value": "1"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Ounce-Force",
+		"abbr": "ozf",
+		"value": "0.278013851"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Pond",
+		"abbr": "p",
+		"value": "0.00980665"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Pound-Force",
+		"abbr": "lbf",
+		"value": "4.448222"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Poundal",
+		"abbr": "pdl",
+		"value": "0.138254954"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Tonne-Force(Metric)",
+		"abbr": "tf",
+		"value": "9806.65"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Ton-Force (UK)",
+		"abbr": "tf(UK)",
+		"value": "9964.016418"
+	},
+	{
+		"category": "Force",
+		"from": "Newton",
+		"to": "Ton-Force (US)",
+		"abbr": "tf(US)",
+		"value": "8896.443231"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Btu (It)",
+		"abbr": "dyn",
+		"value": "1055.056"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Btu (Th)",
+		"value": "1054.35"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Btu (Mean)",
+		"value": "1055.87"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Calorie (It)",
+		"abbr": "cal",
+		"value": "4.1868"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Calorie (Th)",
+		"value": "4.184"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Calorie (Mean)",
+		"value": "4.19002"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Calorie (Food)",
+		"value": "4186"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Erg",
+		"abbr": "erg",
+		"value": "0.0000001"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Horsepower-Hours",
+		"abbr": "hph",
+		"value": "2684520"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Inch Pound-Force",
+		"abbr": "in lbf",
+		"value": "0.112985"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Joule",
+		"abbr": "J",
+		"value": "1"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Kilojoule",
+		"abbr": "kJ",
+		"value": "1000"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Kilocalorie",
+		"abbr": "kcal",
+		"value": "4184"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Kilowatt-Hour",
+		"abbr": "kWh",
+		"value": "3600000"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Litre-Atmosphere",
+		"abbr": "litre-atm",
+		"value": "101.3253354"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Megajoule",
+		"abbr": "MJ",
+		"value": "1000000"
+	},
+	{
+		"category": "Energy",
+		"from": "Joule",
+		"to": "Watt-Hour",
+		"abbr": "Wh",
+		"value": "3600"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Btu/Hour",
+		"abbr": "B/h",
+		"value": "0.29301067"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Btu/Minutes",
+		"abbr": "B/min",
+		"value": "17.56863"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Btu/Seconds",
+		"abbr": "B/s",
+		"value": "1055.056"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Calorie/Seconds",
+		"abbr": "cal/s",
+		"value": "4.183076"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Horsepower",
+		"abbr": "hp",
+		"value": "745.6998716"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Kilowatt",
+		"abbr": "kW",
+		"value": "1000"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Megawatt",
+		"abbr": "MW",
+		"value": "1000000"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Volt-Ampere",
+		"abbr": "VA",
+		"value": "1"
+	},
+	{
+		"category": "Power",
+		"from": "Watt",
+		"to": "Watt",
+		"abbr": "W",
+		"value": "1"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Centigram/Liter",
+		"abbr": "cg/l",
+		"value": "0.01"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Decigram/Liter",
+		"abbr": "dg/l",
+		"value": "0.1"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Dekagram/Liter",
+		"abbr": "dag/l",
+		"value": "10"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Hectogram/Liter",
+		"abbr": "hg/l",
+		"value": "100"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Gram/Cubic Meter",
+		"value": "0.001"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Gram/Cubic Centimeter",
+		"value": "1000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Gram/Cubic Millimeter",
+		"value": "1000000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Gram/Liter",
+		"abbr": "g/l",
+		"value": "1"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Grain/Gallon (US)",
+		"value": "0.017118061"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Grain/Gallon (UK)",
+		"value": "0.014253768"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Grain/Cubic Foot",
+		"value": "0.002288352"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Kilogram/Cubic Meter",
+		"value": "1"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Kilogram/Cubic Centimeter",
+		"value": "1000000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Kilogram/Liter",
+		"abbr": "kg/l",
+		"value": "1000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Milligram/Cubic Meter",
+		"value": "0.000001"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Milligram/Cubic Centimeter",
+		"value": "1"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Milligram/Cubic Millimeter",
+		"value": "1000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Megagram/Liter",
+		"abbr": "Mg/l",
+		"value": "1000000"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Milligram/Liter",
+		"abbr": "mg/l",
+		"value": "0.001"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Microgram/Liter",
+		"abbr": "µm/l",
+		"value": "0.000001"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Nanogram/Liter",
+		"abbr": "ng/l",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ounce/Cubic Inch",
+		"value": "1729.994044"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ounce/Cubic Foot",
+		"value": "1.001153961"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ounce/Gallon (US)",
+		"abbr": "oz/gal(US)",
+		"value": "7.489151707"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ounce/Gallon (UK)",
+		"abbr": "oz/gal(UK)",
+		"value": "6.236023291"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Pound/Cubic Inch",
+		"value": "27679.90471"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Pound/Cubic Foot",
+		"value": "16.01846337"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Pound Cubic Yard",
+		"value": "0.593276421"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Pound/Gallon (US)",
+		"abbr": "lb/gal(US)",
+		"value": "119.8264273"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Pound/Gallon (UK)",
+		"abbr": "lb/gal(UK)",
+		"value": "99.77637266"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Psi/1000 Feet",
+		"abbr": "psi/1000 ft",
+		"value": "2.306658726"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Slug/Cubic Foot",
+		"value": "515.3788184"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ton (Short)/Cubic Yard",
+		"abbr": "ton(short)/yd³",
+		"value": "1186.552843"
+	},
+	{
+		"category": "Density",
+		"from": "Gram/Liter",
+		"to": "Ton (Long)/Cubic Yard",
+		"abbr": "ton(long)/yd³",
+		"value": "1328.939184"
+	},
+	{
+		"category": "Temperature",
+		"from": "Celsius",
+		"to": "Celsius",
+		"value": "1"
+	},
+	{
+		"category": "Temperature",
+		"from": "Celsius",
+		"to": "Fahrenheit",
+		"value": "0.555555556"
+	},
+	{
+		"category": "Temperature",
+		"from": "Celsius",
+		"to": "Kelvin",
+		"value": "1"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Cycle/Second",
+		"value": "1"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Nanohertz",
+		"abbr": "nHz",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Millihertz",
+		"abbr": "mHz",
+		"value": "0.001"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Hertz",
+		"abbr": "Hz",
+		"value": "1"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Kilohertz",
+		"abbr": "kHz",
+		"value": "1000"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Megahertz",
+		"abbr": "MHz",
+		"value": "1000000"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Wavelength In Gigametres",
+		"value": "0.299792458"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Wavelength In Megametres",
+		"value": "299.792458"
+	},
+	{
+		"category": "Frequency and Wavelength",
+		"from": "Hertz",
+		"to": "Wavelength In Kilometres",
+		"value": "299792.458"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Ampere-Hour",
+		"value": "3600"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Ampere-Minute",
+		"value": "60"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Ampere-Second",
+		"value": "1"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Coulomb",
+		"abbr": "C",
+		"value": "1"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "EMU Of Charge",
+		"value": "10"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Faraday",
+		"value": "96485.309"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Kilocoulomb",
+		"abbr": "kC",
+		"value": "1000"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Megacoulomb",
+		"abbr": "MC",
+		"value": "1000000"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Millicoulomb",
+		"abbr": "mC",
+		"value": "0.001"
+	},
+	{
+		"category": "Electrical Charge",
+		"from": "Coulomb",
+		"to": "Nanocoulomb",
+		"abbr": "nC",
+		"value": "0.000000001"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "ampere",
+		"abbr": "A",
+		"value": "1"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "Abampere",
+		"abbr": "abA",
+		"value": "10"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "Biot",
+		"abbr": "Bi",
+		"value": "10"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "EMU of current",
+		"abbr": "EMU",
+		"value": "10"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "Kiloampere",
+		"abbr": "kA",
+		"value": "1000"
+	},
+	{
+		"category": "Electric Current",
+		"from": "ampere",
+		"to": "Milliampere",
+		"abbr": "mA",
+		"value": "0.001"
+	},
+	{
+		"category": "Magnetic Induction",
+		"from": "Gauss",
+		"to": "Gamma",
+		"value": "0.00001"
+	},
+	{
+		"category": "Magnetic Induction",
+		"from": "Gauss",
+		"to": "Gauss",
+		"abbr": "G",
+		"value": "1"
+	},
+	{
+		"category": "Magnetic Induction",
+		"from": "Gauss",
+		"to": "Tesla",
+		"abbr": "T",
+		"value": "10000"
+	},
+	{
+		"category": "Agriculture",
+		"from": "Percent",
+		"to": "Percent",
+		"abbr": "%",
+		"value": "1"
+	},
+	{
+		"category": "Agriculture",
+		"from": "Percent",
+		"to": "Parts Per Million",
+		"abbr": "ppm",
+		"value": "0.0001"
+	}
+]
