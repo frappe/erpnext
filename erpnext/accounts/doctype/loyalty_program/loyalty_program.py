@@ -86,7 +86,9 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 	else:
 		posting_date = today()
 
-	if not hasattr(ref_doc, "loyalty_program") or not ref_doc.loyalty_program:
+	if hasattr(ref_doc, "loyalty_program") and ref_doc.loyalty_program:
+		loyalty_program = ref_doc.loyalty_program
+	else:
 		loyalty_program = frappe.db.get_value("Customer", ref_doc.customer, ["loyalty_program"])
 
 	if loyalty_program and frappe.db.get_value("Loyalty Program", loyalty_program, ["company"]) !=\
@@ -105,20 +107,16 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		if loyalty_amount > ref_doc.grand_total:
 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Grand Total."))
 
+		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
+			ref_doc.loyalty_amount = loyalty_amount
+
 		if ref_doc.doctype == "Sales Invoice":
-			ref_doc.loyalty_program = loyalty_amount
+			ref_doc.loyalty_program = loyalty_program
 			if not ref_doc.loyalty_redemption_account:
 				ref_doc.loyalty_redemption_account = loyalty_program_details.expense_account
 
 			if not ref_doc.loyalty_redemption_cost_center:
 				ref_doc.loyalty_redemption_cost_center = loyalty_program_details.cost_center
-
-			if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
-				ref_doc.loyalty_amount = loyalty_amount
-
-			if not ref_doc.is_pos and ref_doc.paid_amount != ref_doc.loyalty_amount:
-				ref_doc.paid_amount = ref_doc.loyalty_amount
-				ref_doc.outstanding_amount = flt(ref_doc.grand_total - ref_doc.paid_amount)
 
 		elif ref_doc.doctype == "Sales Order":
 			return loyalty_amount

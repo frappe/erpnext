@@ -17,6 +17,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	onload: function() {
 		var me = this;
 		this._super();
+		console.log("class erpnext.accounts.SalesInvoiceController, onload this->", this);
+		
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -363,6 +365,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.frm.refresh_fields();
 	},
+
+	loyalty_amount: function(){
+		console.log("triggered the loyalty amount");
+		this.calculate_outstanding_amount();
+		this.frm.refresh_field("outstanding_amount");
+		this.frm.refresh_field("paid_amount");
+		this.frm.refresh_field("base_paid_amount");
+	}
 });
 
 // for backward compatibility: combine new and previous states
@@ -512,6 +522,9 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 });
 
 frappe.ui.form.on('Sales Invoice', {
+	refresh: function(frm) {
+		console.log("inside ui.form refresh, this -> ", this);
+	},
 	setup: function(frm){
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
@@ -604,7 +617,7 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	loyalty_points: function(frm) {
-		if (frm.doc.loyalty_points && !frm.apply_loyalty_points) {
+		if (!frm.apply_loyalty_points) {
 			frm.applying_loyalty_points = true
 			frappe.call({
 				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_redeemption_factor",
@@ -613,13 +626,16 @@ frappe.ui.form.on('Sales Invoice', {
 				},
 				callback: function(r) {
 					if (r) {
-						let loyalty_amount = flt(r.message*frm.doc.loyalty_points, precision("loyalty_amount"));
-						frm.set_value("loyalty_amount", loyalty_amount);
-						if (frm.doc.grand_total && frm.doc.grand_total < loyalty_amount) {
-							let redeemable_amount = parseInt(frm.doc.grand_total/r.message);
-							frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_amount]));
-						} else {
-							frm.events.apply_loyalty_points(frm);
+						if (frm.doc.loyalty_points) {
+							let loyalty_amount = flt(r.message*frm.doc.loyalty_points, precision("loyalty_amount"));
+							frm.set_value("loyalty_amount", loyalty_amount);
+							var remaining_amount = flt(frm.doc.grand_total - frm.doc.total_advance)
+							if (frm.doc.grand_total && (remaining_amount < loyalty_amount)) {
+								let redeemable_amount = parseInt(remaining_amount/r.message);
+								frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_amount]));
+							} else {
+								frm.events.apply_loyalty_points(frm, remaining_amount);
+							}
 						}
 					}
 					frm.applying_loyalty_points = false
@@ -642,23 +658,20 @@ frappe.ui.form.on('Sales Invoice', {
 						frm.set_value("loyalty_program", r.message.loyalty_program);
 						frm.set_value("loyalty_redemption_account", r.message.expense_account);
 						frm.set_value("loyalty_redemption_cost_center", r.message.cost_center);
-						frm.set_value("loyalty_points", r.message.loyalty_points);
-						frm.events.apply_loyalty_points(frm);
+						let max_loyalty_points = parseInt((frm.doc.grand_total-frm.doc.total_advance)/r.message.conversion_factor);
+						let redeemable_points = max_loyalty_points > r.message.loyalty_points ? r.message.loyalty_points : max_loyalty_points;
+						frm.set_value("loyalty_points", redeemable_points);
 					}
 				}
 			});
 		}
 	},
 
-	apply_loyalty_points: function(frm) {
+	apply_loyalty_points: function(frm, remaining_amount) {
 		if (frm.doc.grand_total && frm.doc.loyalty_amount) {
-			frm.set_value("paid_amount", frm.doc.loyalty_amount);
-			frm.set_value("outstanding_amount", flt(frm.doc.grand_total - frm.doc.loyalty_amount));
+			// frm.set_value("paid_amount", frm.doc.loyalty_amount);
+			// frm.set_value("outstanding_amount", flt(remaining_amount - frm.doc.loyalty_amount));
 		}
-	},
-
-	check_loyalty_points: function(frm) {
-		console.log("wait");
 	}
 
 })

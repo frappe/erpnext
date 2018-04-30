@@ -448,7 +448,7 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			grand_total = self.doc.rounded_total or self.doc.grand_total
 			if self.doc.party_account_currency == self.doc.currency:
-				total_amount_to_pay = flt(grand_total  - self.doc.total_advance
+				total_amount_to_pay = flt(grand_total - self.doc.total_advance
 					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
 			else:
 				total_amount_to_pay = flt(flt(grand_total *
@@ -467,12 +467,11 @@ class calculate_taxes_and_totals(object):
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
 
-
+			print ("paid amount in the outstanding ->", paid_amount, total_amount_to_pay, change_amount)
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"))
 
 	def calculate_paid_amount(self):
-		if self.doc.redeem_loyalty_points: return
 
 		paid_amount = base_paid_amount = 0.0
 
@@ -484,6 +483,12 @@ class calculate_taxes_and_totals(object):
 				base_paid_amount += payment.base_amount
 		elif not self.doc.is_return:
 			self.doc.set('payments', [])
+
+		if self.doc.redeem_loyalty_points and self.doc.loyalty_amount:
+			base_paid_amount += self.doc.loyalty_amount
+			paid_amount += (self.doc.loyalty_amount / flt(self.doc.conversion_rate))
+
+		print ("=====calculate paid amount -> bpa, pa =========", base_paid_amount, paid_amount)
 
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))

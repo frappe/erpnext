@@ -957,7 +957,7 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
 	# collection of the loyalty points, create the ledger entry for that.
-	def make_loyalty_point_entry(self):		
+	def make_loyalty_point_entry(self):
 		loyalty_program_details = get_loyalty_program_details(self.customer, company=self.company)
 		if loyalty_program_details:
 			points_earned = int(self.grand_total/loyalty_program_details.collection_factor)
@@ -989,41 +989,6 @@ class SalesInvoice(SellingController):
 				First cancel the Sales Invoice No {0}''').format(invoice_list))
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where sales_invoice=%s''', (self.name))
-
-
-	# validate the loyalty points, equivalent amount, account, cost center and company
-	# def validate_loyalty_points(self):
-	# 	if not self.loyalty_program:
-	# 		self.loyalty_program = frappe.db.get_value("Customer", self.customer, ["loyalty_program"])
-
-	# 	if self.loyalty_program and frappe.db.get_value("Loyalty Program", self.loyalty_program, ["company"]) != \
-	# 		self.company:
-	# 		frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
-
-	# 	if self.loyalty_program and self.loyalty_points:
-	# 		loyalty_program_details = get_loyalty_program_details(self.customer, self.loyalty_program,
-	# 			self.posting_date, self.company)
-
-	# 		if not self.loyalty_redemption_account:
-	# 			self.loyalty_redemption_account = loyalty_program_details.expense_account
-
-	# 		if not self.loyalty_redemption_cost_center:
-	# 			self.loyalty_redemption_cost_center = loyalty_program_details.cost_center
-
-	# 		if self.loyalty_points > loyalty_program_details.loyalty_points:
-	# 			frappe.throw(_("You don't have enought Loyalty Points to redeem"))
-
-
-	# 		loyalty_amount = flt(self.loyalty_points * loyalty_program_details.conversion_factor)
-	# 		if not self.loyalty_amount and self.loyalty_amount != loyalty_amount:
-	# 			self.loyalty_amount = loyalty_amount
-
-	# 		if self.loyalty_amount > self.grand_total:
-	# 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Grand Total."))
-
-	# 		if not self.is_pos and self.paid_amount != self.loyalty_amount:
-	# 			self.paid_amount = self.loyalty_amount
-	# 			self.outstanding_amount = flt(self.grand_total - self.paid_amount)
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
