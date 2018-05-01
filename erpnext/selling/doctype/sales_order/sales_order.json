@@ -2825,9 +2825,9 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
@@ -3642,7 +3642,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-03-10 07:35:33.258624", 
+ "modified": "2018-04-30 12:49:10.225292", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -3650,7 +3650,6 @@
  "permissions": [
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -3670,7 +3669,6 @@
   }, 
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -3690,7 +3688,6 @@
   }, 
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -3710,7 +3707,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -3730,7 +3726,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -3750,7 +3745,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
