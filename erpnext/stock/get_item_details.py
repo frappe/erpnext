@@ -693,12 +693,6 @@ def get_serial_no(args, serial_nos=None):
 		has_serial_no = frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no")
 		if args.get('batch_no') and has_serial_no == 1:
 			return get_serial_no_batchwise(args)
-		# elif (args.get('has_batch_no') == 1) and has_serial_no == 1 and not args.get('batch_no'):
-		# 	args.batch_no = get_batch_no(args.item_code, args.warehouse, args.qty)
-		# 	actual_batch_qty = get_batch_qty(args.batch_no, args.warehouse, args.item_code)
-		# 	if actual_batch_qty:
-		# 		args.update(actual_batch_qty)
-		# 	return get_serial_no_batchwise(args)
 		elif has_serial_no == 1:
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
 			args = process_args(args)
