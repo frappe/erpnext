@@ -705,8 +705,10 @@ frappe.ui.form.on("UOM Conversion Detail", {
 					"uom": row.uom,
 					"stock_uom": frm.doc.stock_uom
 				},
-				callback: function() {
-					console.log(r);
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frappe.model.set_value(cdt, cdn, "conversion_factor", r.message);
+					}
 				}
 			});
 		}

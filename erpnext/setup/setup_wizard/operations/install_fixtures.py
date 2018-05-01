@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe, os
+import frappe, os, json
 
 from frappe import _
 
@@ -175,7 +175,7 @@ def install(country=None):
 		{'category_name': _('Frequency And Wavelength'), 'doctype': 'UOM Category', 'name': _('Frequency And Wavelength')},
 		{'category_name': _('Electrical Charge'), 'doctype': 'UOM Category', 'name': _('Electrical Charge')},
 		{'category_name': _('Electric Current'), 'doctype': 'UOM Category', 'name': _('Electric Current')},
-		{'category_name': _('Magnetic Induction'), 'doctype': 'UOM Category', 'name': _('Magnetic Induction')}
+		{'category_name': _('Magnetic Induction'), 'doctype': 'UOM Category', 'name': _('Magnetic Induction')},
 
 		# Mode of Payment
 		{'doctype': 'Mode of Payment',
@@ -264,12 +264,6 @@ def install(country=None):
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
-	def get_country_wise_tax(country):
-		data = {}
-		with open (os.path.join(os.path.dirname(__file__), "..", "data", "country_wise_tax.json")) as countrywise_tax:
-			data = json.load(countrywise_tax).get(country)
-
-		return data
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
 
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
