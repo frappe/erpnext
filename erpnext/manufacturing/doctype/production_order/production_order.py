@@ -64,7 +64,7 @@ class ProductionOrder(Document):
 						so.name, so_item.delivery_date, so.project
 					from
 						`tabSales Order` so, `tabSales Order Item` so_item, `tabPacked Item` packed_item
-					where so.name=%s 
+					where so.name=%s
 						and so.name=so_item.parent
 						and so.name=packed_item.parent
 						and so_item.item_code = packed_item.parent_item
@@ -88,7 +88,7 @@ class ProductionOrder(Document):
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
-	
+
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
 		for d in self.get("required_items"):
@@ -524,7 +524,7 @@ def get_item_details(item, project = None):
 	if not res["bom_no"]:
 		if project:
 			res = get_item_details(item)
-			frappe.msgprint(_("Default BOM not found for Item {0} and Project {1}").format(item, project))
+			frappe.msgprint(_("Default BOM not found for Item {0} and Project {1}").format(item, project), alert=1)
 		else:
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
@@ -642,5 +642,5 @@ def query_sales_order(production_item):
 		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
 		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
 	""", (production_item, production_item))
-	
+
 	return out
