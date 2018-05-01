@@ -307,8 +307,8 @@ def install(country=None):
 		doc.update({
 			"uom_name": d.to_uom
 		})
+		doc.flags.ignore_mandatory = True
 		doc.save(ignore_permissions=True)
-
 def make_fixture_records(records):
 	from frappe.modules import scrub
 	for r in records:
