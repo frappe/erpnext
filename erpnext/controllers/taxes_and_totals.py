@@ -29,6 +29,7 @@ class calculate_taxes_and_totals(object):
 			self.set_item_wise_tax_breakup()
 
 	def _calculate(self):
+		self.validate_conversion_rate()
 		self.calculate_item_values()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
