@@ -300,6 +300,15 @@ def install(country=None):
 		uom_conversion.update(d)
 		uom_conversion.save(ignore_permissions=True)
 
+	uom = frappe.db.sql("""select to_uom from `tabUOM Conversion Factor`\
+		where to_uom not in ("Kg", "Gram", "Meter", "Hour", "Minute", "Litre")""", as_dict=True)
+	for d in uom:
+		doc = frappe.new_doc('UOM')
+		doc.update({
+			"uom_name": d.to_uom
+		})
+		doc.save(ignore_permissions=True)
+
 def make_fixture_records(records):
 	from frappe.modules import scrub
 	for r in records:

@@ -901,3 +901,15 @@ def get_item_defaults(item, company):
 	else:
 		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
 			"is_stock_item", "item_code", "item_group"], as_dict=1)
+
+@frappe.whitelist()
+def get_uom_conv_factor(uom, stock_uom):
+	uoms = [uom, stock_uom]
+	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
+		where from_uom in (%s)"""%
+			', '.join(['%s']*len(uoms)), tuple(uoms), as_dict=True)
+	for d in uom_details:
+		if d.from_uom == stock_uom:
+			if d.to_uom == uom:
+				frappe.errprint(value)
+	return uom_details
