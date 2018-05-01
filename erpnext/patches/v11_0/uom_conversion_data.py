@@ -1,5 +1,4 @@
 import frappe, json
-from frappe import _
 
 def execute():
 
@@ -8,14 +7,14 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "UOM Category")
 	categories = [
 		"Length", "Area", "Angle", "Agriculture", "Speed", "Mass", "Density",\
-			"Volume", "Time", "Pressure", "Force", "Energy", "Power", "Temperature", "Frequency And Wavelength",\
-				"Electrical Charge", "Electric Current", "Magnetic Induction"
+		"Volume", "Time", "Pressure", "Force", "Energy", "Power", "Temperature", "Frequency And Wavelength",\
+		"Electrical Charge", "Electric Current", "Magnetic Induction"
 	]
 	for category in categories:
 		if not frappe.db.exists("UOM Category", category):
 			frappe.get_doc({
 				"doctype": "UOM Category",
-				"category_name": category 
+				"category_name": category
 			}).insert(ignore_permissions=True)
 
 	if not frappe.db.a_row_exists("UOM Conversion Factor"):
