@@ -618,7 +618,7 @@
    "label": "Reference Type", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nEmployee Loan\nPayroll Entry\nEmployee Advance", 
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

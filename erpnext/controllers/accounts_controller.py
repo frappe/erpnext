@@ -11,8 +11,9 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
+from six import text_type
 
-force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
+force_item_fields = ("item_group", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -137,7 +138,7 @@ class AccountsController(TransactionBase):
 
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company, self.bill_date)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("posting_date"):
@@ -197,7 +198,6 @@ class AccountsController(TransactionBase):
 
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
-
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
@@ -923,7 +923,7 @@ def update_invoice_status():
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
 
 @frappe.whitelist()
-def get_payment_terms(terms_template, posting_date=None, grand_total=None):
+def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None):
 	if not terms_template:
 		return
 
@@ -931,32 +931,39 @@ def get_payment_terms(terms_template, posting_date=None, grand_total=None):
 
 	schedule = []
 	for d in terms_doc.get("terms"):
-		term_details = get_payment_term_details(d, posting_date, grand_total)
+		term_details = get_payment_term_details(d, posting_date, grand_total, bill_date)
 		schedule.append(term_details)
 
 	return schedule
 
 @frappe.whitelist()
-def get_payment_term_details(term, posting_date=None, grand_total=None):
+def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None):
 	term_details = frappe._dict()
-	if isinstance(term, unicode):
+	if isinstance(term, text_type):
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
-	if posting_date:
-		term_details.due_date = get_due_date(posting_date, term)
+	if bill_date:
+		term_details.due_date = get_due_date(term, bill_date)
+	elif posting_date:
+		term_details.due_date = get_due_date(term, posting_date)
+
+	if getdate(term_details.due_date) < getdate(posting_date):
+		term_details.due_date = posting_date
+	term_details.mode_of_payment = term.mode_of_payment
+
 	return term_details
 
-def get_due_date(posting_date, term):
+def get_due_date(term, posting_date=None, bill_date=None):
 	due_date = None
+	date = bill_date or posting_date
 	if term.due_date_based_on == "Day(s) after invoice date":
-		due_date = add_days(posting_date, term.credit_days)
+		due_date = add_days(date, term.credit_days)
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
-		due_date = add_days(get_last_day(posting_date), term.credit_days)
+		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
-		due_date = add_months(get_last_day(posting_date), term.credit_months)
-
+		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date

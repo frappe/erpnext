@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
+from .operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):

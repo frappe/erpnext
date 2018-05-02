@@ -96,7 +96,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(child.reference_doctype == "Expense Claim") {
-				filters["status"] = "Approved";
+				filters["docstatus"] = 1;
 				filters["is_paid"] = 0;
 			}
 

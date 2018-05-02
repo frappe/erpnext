@@ -27,22 +27,22 @@ def insert_vital_signs_to_medical_record(doc):
 
 def delete_vital_signs_from_medical_record(doc):
 	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s",(doc.name))
-	if(medical_record_id[0][0]):
+	if medical_record_id and medical_record_id[0][0]:
 		frappe.delete_doc("Patient Medical Record", medical_record_id[0][0])
 
 def set_subject_field(doc):
-	subject = " "
+	subject = ""
 	if(doc.temperature):
-		subject += "Temperature: \n"+ str(doc.temperature)+". "
+		subject += "Temperature: "+ str(doc.temperature)+".\n"
 	if(doc.pulse):
-		subject += "Pulse: \n"+ str(doc.pulse)+". "
+		subject += "Pulse: "+ str(doc.pulse)+".\n"
 	if(doc.respiratory_rate):
-		subject += "Respiratory Rate: \n"+ str(doc.respiratory_rate)+". "
+		subject += "Respiratory Rate: "+ str(doc.respiratory_rate)+".\n"
 	if(doc.bp):
-		subject += "BP: \n"+ str(doc.bp)+". "
+		subject += "BP: "+ str(doc.bp)+".\n"
 	if(doc.bmi):
-		subject += "BMI: \n"+ str(doc.bmi)+". "
+		subject += "BMI: "+ str(doc.bmi)+".\n"
 	if(doc.nutrition_note):
-		subject += "Note: \n"+ str(doc.nutrition_note)+". "
+		subject += "Note: "+ str(doc.nutrition_note)+"."
 
 	return subject

@@ -170,8 +170,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
-				or tabItem.barcode LIKE %(txt)s
-				{description_cond})
+				or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s
+				{description_cond}))
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -276,13 +276,14 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 
 	if args.get('warehouse'):
-		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date
+		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
 				from `tabStock Ledger Entry` sle
 				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 				where
 					sle.item_code = %(item_code)s
 					and sle.warehouse = %(warehouse)s
-					and sle.batch_no like %(txt)s
+					and (sle.batch_no like %(txt)s
+					or batch.manufacturing_date like %(txt)s)
 					and batch.docstatus < 2
 					{0}
 					{match_conditions}
@@ -293,9 +294,10 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if batch_nos:
 		return batch_nos
 	else:
-		return frappe.db.sql("""select name, expiry_date from `tabBatch` batch
+		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
 			where item = %(item_code)s
-			and name like %(txt)s
+			and (name like %(txt)s
+			or manufacturing_date like %(txt)s)
 			and docstatus < 2
 			{0}
 			{match_conditions}
@@ -427,4 +429,4 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get('item'):
 		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
 
-	return frappe.db.sql(query)
+	return frappe.db.sql(query, filters)

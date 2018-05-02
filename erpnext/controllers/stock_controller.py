@@ -320,14 +320,20 @@ class StockController(AccountsController):
 		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
 			inspection_required_fieldname = "inspection_required_before_delivery"
 
-		if not inspection_required_fieldname or \
-			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock):
+		if ((not inspection_required_fieldname and self.doctype != "Stock Entry") or
+			(self.doctype == "Stock Entry" and not self.inspection_required) or
+			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock)):
 				return
 
 		for d in self.get('items'):
-			if (frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)
-				and not d.quality_inspection):
+			raise_exception = False
+			if (inspection_required_fieldname and not d.quality_inspection and
+				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
+				raise_exception = True
+			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
+				raise_exception = True
 
+			if raise_exception:
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
 					raise frappe.ValidationError

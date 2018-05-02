@@ -164,7 +164,7 @@ Customer's request to price an item or service.
 #### Sales Order
 
 A note confirming the terms of delivery and price of an Item (product or
-service) by the Customer. Deliveries, Production Orders and Invoices are made
+service) by the Customer. Deliveries, Work Orders and Invoices are made
 on basis of Sales Orders.
 
 > Selling > Sales Order
@@ -302,11 +302,11 @@ A type of leave (e.g., Sick Leave, Maternity Leave, etc.).
 
 > Human Resource > Leave and Attendance > Leave Type
 
-#### Process Payroll
+#### Payroll Entry
 
 A tool that helps in creation of multiple Salary Slips for Employees.
 
-> Human Resource > Salary and Payroll > Process Payroll
+> Human Resource > Payroll Entry
 
 #### Salary Slip
 
@@ -360,16 +360,16 @@ direct cost of the product.
 
 > Manufacturing > Workstation
 
-#### Production Order
+#### Work Order
 
 A document signaling production (manufacture) of a particular Item with
 specified quantities.
 
-> Manufacturing > Production Order
+> Manufacturing > Work Order
 
 #### Production Planning Tool
 
-A tool for automatic creation of Production Orders and Purchase Requests based
+A tool for automatic creation of Work Orders and Purchase Requests based
 on Open Sales Orders in a given period.
 
 > Manufacturing > Production Planning Tool

@@ -4,7 +4,7 @@
 
 **Answer:** There are 3 available options in the <i>Valuation Based On</i> field:
 
-<img alt="Nested BOM" class="screenshot" src="/docs/assets/img/articles/valuation-based-on-1.png">
+<img alt="Nested BOM" class="screenshot" src="{{docs_base_url}}/assets/img/articles/valuation-based-on-1.png">
 
 **Valuation Rate:** Item valuation rate is defined based on it's purchase or manufacture value. 
 

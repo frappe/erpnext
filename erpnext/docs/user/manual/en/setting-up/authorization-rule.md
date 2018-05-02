@@ -10,7 +10,7 @@ To create new Authorization Rule, go to:
 
 Let's consider an example of Authorization Rule to learn better.
 
-Assume that Sales Manager needs to authorize Sales Orders, only if its Grand Total value exceeds 10000. If Sales Orer values is less than 10000, then even Sales User will be able to submit it. It means Submit permision of Sales User will be restricted only upto Sales Order of Grand Total less than 10000.
+Assume that Sales Manager needs to authorize Sales Orders, only if its Grand Total value exceeds 10000. If Sales Order values is less than 10000, then even Sales User will be able to submit it. It means Submit permision of Sales User will be restricted only upto Sales Order of Grand Total less than 10000.
 
 **Step 1:**
 
@@ -36,7 +36,7 @@ Select approvers Role. It will be Sales Manager role which if assigned to user, 
 
 Set Above Value. Given the exmaple, Above Value will be set as 10000.
 
-<img class="screenshot" alt="Authorization Rule" src="/docs/assets/img/setup/auth-rule.png">
+<img class="screenshot" alt="Authorization Rule" src="{{docs_base_url}}/assets/img/setup/auth-rule.png">
 
 If Sales User tries submitting Sales Order of value higher than 10000, then he will get error message.
 

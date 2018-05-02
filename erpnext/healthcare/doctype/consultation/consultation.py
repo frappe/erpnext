@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 import json
@@ -18,10 +17,6 @@ class Consultation(Document):
 
 	def after_insert(self):
 		insert_consultation_to_medical_record(self)
-
-	def on_submit(self):
-		if not self.diagnosis or not self.symptoms:
-			frappe.throw("Diagnosis and Complaints cannot be left blank")
 
 	def on_cancel(self):
 		if(self.appointment):
@@ -113,9 +108,11 @@ def insert_consultation_to_medical_record(doc):
 
 def update_consultation_to_medical_record(consultation):
 	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s", (consultation.name))
-	if(medical_record_id[0][0]):
+	if medical_record_id and medical_record_id[0][0]:
 		subject = set_subject_field(consultation)
 		frappe.db.set_value("Patient Medical Record", medical_record_id[0][0], "subject", subject)
+	else:
+		insert_consultation_to_medical_record(consultation)
 
 def delete_medical_record(consultation):
 	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (consultation.name))
@@ -123,10 +120,10 @@ def delete_medical_record(consultation):
 def set_subject_field(consultation):
 	subject = "No Diagnosis "
 	if(consultation.diagnosis):
-		subject = "Diagnosis: \n"+ str(consultation.diagnosis)+". "
+		subject = "Diagnosis: "+ str(consultation.diagnosis)+". "
 	if(consultation.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
 	if(consultation.test_prescription):
-		subject += " Test(s) Prescribed."
+		subject += "\nTest(s) Prescribed."
 
 	return subject

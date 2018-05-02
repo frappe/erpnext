@@ -69,12 +69,12 @@ def get_chart_data(data,period_list):
 	datasets = []
 	if fuel_exp_data:
 		datasets.append({
-			'title': 'Fuel Expenses',
+			'name': 'Fuel Expenses',
 			'values': fuel_exp_data
 		})
 	if service_exp_data:
 		datasets.append({
-			'title': 'Service Expenses',
+			'name': 'Service Expenses',
 			'values': service_exp_data
 		})
 	chart = {

@@ -10,10 +10,21 @@ To schedule an assessment/examination for a Student Group, for specific Course, 
 
 4. Examiner and Supervisor
 
-<img class="screenshot" alt="Assessment Plan Details" src="/docs/assets/img/education/assessment/assessment-plan-details.png">
+<img class="screenshot" alt="Assessment Plan Details" src="{{docs_base_url}}/assets/img/education/assessment/assessment-plan-details.png">
 
 5. Assessment Criteria is list of criteria based which each student in will be evaluated and grades will be assigned.
 
-<img class="screenshot" alt="Assessment Plan Criteria" src="/docs/assets/img/education/assessment/assessment-plan-criteria.png">
+<img class="screenshot" alt="Assessment Plan Criteria" src="{{docs_base_url}}/assets/img/education/assessment/assessment-plan-criteria.png">
+
+#### Video Tutorial on Assessment Plan
+
+
+
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed/Q9CzzoYb_Js' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>    
 
 {next}

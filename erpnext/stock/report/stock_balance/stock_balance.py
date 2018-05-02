@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import flt, cint, getdate, now
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
+from six import iteritems
+
 def execute(filters=None):
 	if not filters: filters = {}
 
@@ -211,7 +213,7 @@ def get_item_details(items, sle, filters):
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(item_details.keys())
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.iteritems()}
+		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details
 

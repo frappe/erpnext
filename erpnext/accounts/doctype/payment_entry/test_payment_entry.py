@@ -183,7 +183,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.set_exchange_rate()
 		pe.set_amounts()
 
-		self.assertEquals(pe.difference_amount, 500)
+		self.assertEqual(pe.difference_amount, 500)
 
 		pe.append("deductions", {
 			"account": "_Test Exchange Gain/Loss - _TC",
@@ -260,10 +260,10 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gle[gle.account][0], gle.account)
-			self.assertEquals(expected_gle[gle.account][1], gle.debit)
-			self.assertEquals(expected_gle[gle.account][2], gle.credit)
-			self.assertEquals(expected_gle[gle.account][3], gle.against_voucher)
+			self.assertEqual(expected_gle[gle.account][0], gle.account)
+			self.assertEqual(expected_gle[gle.account][1], gle.debit)
+			self.assertEqual(expected_gle[gle.account][2], gle.credit)
+			self.assertEqual(expected_gle[gle.account][3], gle.against_voucher)
 
 	def get_gle(self, voucher_no):
 		return frappe.db.sql("""select account, debit, credit, against_voucher

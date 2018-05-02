@@ -7,7 +7,7 @@ from frappe import _
 
 from frappe.utils import cint, today, formatdate
 import frappe.defaults
-
+from frappe.cache_manager import clear_defaults_cache
 
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
@@ -235,17 +235,13 @@ class Company(Document):
 		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
 		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
 
-	def before_rename(self, olddn, newdn, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, companies cannot be merged"))
-
 	def after_rename(self, olddn, newdn, merge=False):
 		frappe.db.set(self, "company_name", newdn)
 
 		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
-		frappe.defaults.clear_cache()
+		clear_defaults_cache()
 
 	def abbreviate(self):
 		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])

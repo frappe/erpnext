@@ -5,7 +5,7 @@ chart of Sales Persons where each Sales Person’s target can be set
 individually. Again as in Territory, the target has to be set against Item
 Group.
 
-<img class="screenshot" alt="Sales Person Tree" src="/docs/assets/img/crm/sales-person-tree.png">
+<img class="screenshot" alt="Sales Person Tree" src="{{docs_base_url}}/assets/img/crm/sales-person-tree.png">
 
 ####Sales Person in Transactions
 

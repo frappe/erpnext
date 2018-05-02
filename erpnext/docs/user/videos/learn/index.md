@@ -219,8 +219,8 @@
             Production Planning Tool</a>
               <span class="text-muted pull-right">1:41</span>
         </li>
-        <li><a href="/docs/user/videos/learn/production-order.html">
-            Production Order</a>
+        <li><a href="/docs/user/videos/learn/work-order.html">
+            Work Order</a>
             <span class="text-muted pull-right">2:24</span>
         </li>
         <li>
@@ -240,10 +240,6 @@
         <li><a href="/docs/user/videos/learn/employee.html">
             Employees</a>
             <span class="text-muted pull-right">1:59</span>
-        </li>
-        <li><a href="/docs/user/videos/learn/processing-payroll.html">
-            Processing Payroll</a>
-              <span class="text-muted pull-right">4:00</span>
         </li>
         <li><a href="/docs/user/videos/learn/leave-management.html">
             Leave Management</a>

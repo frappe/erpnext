@@ -205,6 +205,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				filters: {
 					docstatus: 1,
 					inspection_type: inspection_type,
+					reference_name: doc.name,
 					item_code: d.item_code
 				}
 			}
@@ -295,7 +296,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
-
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -304,7 +304,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
@@ -519,6 +518,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					args: {
 						"posting_date": me.frm.doc.posting_date,
 						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
+						"bill_date": me.frm.doc.bill_date,
 						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
 						"company": me.frm.doc.company
 					},
@@ -562,9 +562,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	bill_date: function() {
+		this.posting_date();
+	},
+
 	recalculate_terms: function() {
 		const doc = this.frm.doc;
-
 		if (doc.payment_terms_template) {
 			this.payment_terms_template();
 		} else if (doc.payment_schedule) {
@@ -750,7 +753,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-				(item.uom != item.stock_uom)? true: false);
+				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
 
 	},
@@ -1271,16 +1274,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template) {
-			var posting_date = this.frm.doc.bill_date ||
-				this.frm.doc.posting_date || this.frm.doc.transaction_date;
-
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
+			var posting_date = doc.posting_date || doc.transaction_date;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
-					terms_template: this.frm.doc.payment_terms_template,
+					terms_template: doc.payment_terms_template,
 					posting_date: posting_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					grand_total: doc.rounded_total || doc.grand_total,
+					bill_date: doc.bill_date
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {
@@ -1298,6 +1301,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
 					term: row.payment_term,
+					bill_date: this.frm.doc.bill_date,
 					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
