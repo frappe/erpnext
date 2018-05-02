@@ -61,7 +61,6 @@ frappe.ui.form.on("Journal Entry", {
 				}
 			],
 		});
-
 		d.set_primary_action(__("Make"), function() {
 			d.hide();
 			var args = d.get_values();
