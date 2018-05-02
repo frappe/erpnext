@@ -5,6 +5,7 @@ point-of-sale-pos-invoice
 purchase-invoice
 payments
 journal-entry
+inter-company-journal-entry
 payment-entry
 subscription
 multi-currency-accounting
