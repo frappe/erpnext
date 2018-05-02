@@ -82,7 +82,7 @@ class JournalEntry(AccountsController):
 				d.reference_type = ''
 				d.reference_name = ''
 				d.db_update()
-				
+
 	def unlink_asset_reference(self):
 		for d in self.get("accounts"):
 			if d.reference_type=="Asset" and d.reference_name:
@@ -125,7 +125,7 @@ class JournalEntry(AccountsController):
 				if (d.party_type == 'Customer' and flt(d.credit) > 0) or \
 						(d.party_type == 'Supplier' and flt(d.debit) > 0):
 					if d.is_advance=="No":
-						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account))
+						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account), alert=1)
 					elif d.reference_type in ("Sales Order", "Purchase Order") and d.is_advance != "Yes":
 						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
