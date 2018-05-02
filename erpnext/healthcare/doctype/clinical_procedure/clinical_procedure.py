@@ -18,10 +18,12 @@ class ClinicalProcedure(Document):
 				frappe.throw(("Set warehouse for Procedure {0} ").format(self.name))
 			self.set_actual_qty()
 
-	def after_insert(self):
+	def before_insert(self):
 		if self.consume_stock:
 			doc = set_stock_items(self, self.procedure_template, "Clinical Procedure Template")
-			doc.save()
+			self.set_actual_qty();
+
+	def after_insert(self):
 		if self.appointment:
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
 		template = frappe.get_doc("Clinical Procedure Template", self.procedure_template)
@@ -128,7 +130,6 @@ def set_stock_items(doc, stock_detail_parent, parenttype):
 		se_child.conversion_factor = flt(d["conversion_factor"])
 		if d["batch_no"]:
 			se_child.batch_no = d["batch_no"]
-
 	return doc
 
 def get_item_dict(table, parent, parenttype):
