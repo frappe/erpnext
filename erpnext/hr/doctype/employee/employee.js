@@ -18,7 +18,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		var me = this;
 		erpnext.toggle_naming_series();
 		frappe.ui.form.on("Employee External Work History", {
-			total_experience_months: function (frm, cdt, cdn) {
+			total_experience_months: function (frm) {
 				total_previous_experience(cur_frm.doc);
 			}
 		});
