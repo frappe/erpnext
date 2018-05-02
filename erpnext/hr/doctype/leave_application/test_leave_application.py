@@ -7,6 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 from frappe.permissions import clear_user_permissions_for_doctype
+from frappe.utils import add_days, nowdate
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -42,274 +43,372 @@ _test_records = [
 
 
 class TestLeaveApplication(unittest.TestCase):
-	def setUp(self):
-		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
-			frappe.db.sql("delete from `tab%s`" % dt)
+    def setUp(self):
+        for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
+            frappe.db.sql("delete from `tab%s`" % dt)
 
-	def tearDown(self):
-		frappe.set_user("Administrator")
+    def tearDown(self):
+        frappe.set_user("Administrator")
 
-		# so that this test doesn't affect other tests
-		frappe.db.sql("""delete from `tabEmployee Leave Approver`""")
+        # so that this test doesn't affect other tests
+        frappe.db.sql("""delete from `tabEmployee Leave Approver`""")
 
-	def _clear_roles(self):
-		frappe.db.sql("""delete from `tabHas Role` where parent in
-			("test@example.com", "test1@example.com", "test2@example.com")""")
+    def _clear_roles(self):
+        frappe.db.sql("""delete from `tabHas Role` where parent in
+            ("test@example.com", "test1@example.com", "test2@example.com")""")
 
-	def _clear_applications(self):
-		frappe.db.sql("""delete from `tabLeave Application`""")
+    def _clear_applications(self):
+        frappe.db.sql("""delete from `tabLeave Application`""")
 
-	def _add_employee_leave_approver(self, employee, leave_approver):
-		temp_session_user = frappe.session.user
-		frappe.set_user("Administrator")
-		employee = frappe.get_doc("Employee", employee)
-		employee.append("leave_approvers", {
-			"doctype": "Employee Leave Approver",
-			"leave_approver": leave_approver
-		})
-		employee.save()
-		frappe.set_user(temp_session_user)
+    def _add_employee_leave_approver(self, employee, leave_approver):
+        temp_session_user = frappe.session.user
+        frappe.set_user("Administrator")
+        employee = frappe.get_doc("Employee", employee)
+        employee.append("leave_approvers", {
+            "doctype": "Employee Leave Approver",
+            "leave_approver": leave_approver
+        })
+        employee.save()
+        frappe.set_user(temp_session_user)
 
-	def _remove_employee_leave_approver(self, employee, leave_approver):
-		temp_session_user = frappe.session.user
-		frappe.set_user("Administrator")
-		employee = frappe.get_doc("Employee", employee)
-		d = employee.get("leave_approvers", {
-			"leave_approver": leave_approver
-		})
-		if d:
-			employee.get("leave_approvers").remove(d[0])
-			employee.save()
-		frappe.set_user(temp_session_user)
+    def _remove_employee_leave_approver(self, employee, leave_approver):
+        temp_session_user = frappe.session.user
+        frappe.set_user("Administrator")
+        employee = frappe.get_doc("Employee", employee)
+        d = employee.get("leave_approvers", {
+            "leave_approver": leave_approver
+        })
+        if d:
+            employee.get("leave_approvers").remove(d[0])
+            employee.save()
+        frappe.set_user(temp_session_user)
 
-	def get_application(self, doc):
-		application = frappe.copy_doc(doc)
-		application.from_date = "2013-01-01"
-		application.to_date = "2013-01-05"
-		return application
+    def get_application(self, doc):
+        application = frappe.copy_doc(doc)
+        application.from_date = "2013-01-01"
+        application.to_date = "2013-01-05"
+        return application
 
-	def test_block_list(self):
-		self._clear_roles()
+    def test_block_list(self):
+        self._clear_roles()
 
-		from frappe.utils.user import add_role
-		add_role("test1@example.com", "HR User")
-		add_role("test1@example.com", "Leave Approver")
-		clear_user_permissions_for_doctype("Employee")
+        from frappe.utils.user import add_role
+        add_role("test1@example.com", "HR User")
+        add_role("test1@example.com", "Leave Approver")
+        clear_user_permissions_for_doctype("Employee")
 
-		frappe.db.set_value("Department", "_Test Department",
-			"leave_block_list", "_Test Leave Block List")
+        frappe.db.set_value("Department", "_Test Department",
+            "leave_block_list", "_Test Leave Block List")
 
-		make_allocation_record()
+        make_allocation_record()
 
-		application = self.get_application(_test_records[0])
-		application.insert()
-		self.assertRaises(LeaveDayBlockedError, application.submit)
+        application = self.get_application(_test_records[0])
+        application.insert()
+        self.assertRaises(LeaveDayBlockedError, application.submit)
 
-		frappe.set_user("test1@example.com")
+        frappe.set_user("test1@example.com")
 
-		# clear other applications
-		frappe.db.sql("delete from `tabLeave Application`")
+        # clear other applications
+        frappe.db.sql("delete from `tabLeave Application`")
 
-		application = self.get_application(_test_records[0])
-		self.assertTrue(application.insert())
+        application = self.get_application(_test_records[0])
+        self.assertTrue(application.insert())
 
-	def test_overlap(self):
-		self._clear_roles()
-		self._clear_applications()
+    def test_overlap(self):
+        self._clear_roles()
+        self._clear_applications()
 
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
+        from frappe.utils.user import add_role
+        add_role("test@example.com", "Employee")
+        add_role("test2@example.com", "Leave Approver")
 
-		frappe.set_user("test@example.com")
+        frappe.set_user("test@example.com")
 
-		make_allocation_record()
+        make_allocation_record()
 
-		application = self.get_application(_test_records[0])
-		application.insert()
+        application = self.get_application(_test_records[0])
+        application.insert()
 
-		application = self.get_application(_test_records[0])
-		self.assertRaises(OverlapError, application.insert)
+        application = self.get_application(_test_records[0])
+        self.assertRaises(OverlapError, application.insert)
 
-	def test_overlap_with_half_day_1(self):
-		self._clear_roles()
-		self._clear_applications()
+    def test_overlap_with_half_day_1(self):
+        self._clear_roles()
+        self._clear_applications()
 
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
+        from frappe.utils.user import add_role
+        add_role("test@example.com", "Employee")
+        add_role("test2@example.com", "Leave Approver")
 
-		frappe.set_user("test@example.com")
+        frappe.set_user("test@example.com")
 
-		make_allocation_record()
+        make_allocation_record()
 
-		# leave from 1-5, half day on 3rd
-		application = self.get_application(_test_records[0])
-		application.half_day = 1
-		application.half_day_date = "2013-01-03"
-		application.insert()
+        # leave from 1-5, half day on 3rd
+        application = self.get_application(_test_records[0])
+        application.half_day = 1
+        application.half_day_date = "2013-01-03"
+        application.insert()
 
-		# Apply again for a half day leave on 3rd
-		application = self.get_application(_test_records[0])
-		application.from_date = "2013-01-03"
-		application.to_date = "2013-01-03"
-		application.half_day = 1
-		application.half_day_date = "2013-01-03"
-		application.insert()
+        # Apply again for a half day leave on 3rd
+        application = self.get_application(_test_records[0])
+        application.from_date = "2013-01-03"
+        application.to_date = "2013-01-03"
+        application.half_day = 1
+        application.half_day_date = "2013-01-03"
+        application.insert()
 
-		# Apply again for a half day leave on 3rd
-		application = self.get_application(_test_records[0])
-		application.from_date = "2013-01-03"
-		application.to_date = "2013-01-03"
-		application.half_day = 1
-		application.half_day_date = "2013-01-03"
+        # Apply again for a half day leave on 3rd
+        application = self.get_application(_test_records[0])
+        application.from_date = "2013-01-03"
+        application.to_date = "2013-01-03"
+        application.half_day = 1
+        application.half_day_date = "2013-01-03"
 
-		self.assertRaises(OverlapError, application.insert)
+        self.assertRaises(OverlapError, application.insert)
 
-	def test_overlap_with_half_day_2(self):
-		self._clear_roles()
-		self._clear_applications()
+    def test_overlap_with_half_day_2(self):
+        self._clear_roles()
+        self._clear_applications()
 
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
+        from frappe.utils.user import add_role
+        add_role("test@example.com", "Employee")
+        add_role("test2@example.com", "Leave Approver")
 
-		frappe.set_user("test@example.com")
+        frappe.set_user("test@example.com")
 
-		make_allocation_record()
+        make_allocation_record()
 
-		# leave from 1-5, no half day
-		application = self.get_application(_test_records[0])
-		application.insert()
+        # leave from 1-5, no half day
+        application = self.get_application(_test_records[0])
+        application.insert()
 
-		# Apply again for a half day leave on 1st
-		application = self.get_application(_test_records[0])
-		application.half_day = 1
-		application.half_day_date = application.from_date
+        # Apply again for a half day leave on 1st
+        application = self.get_application(_test_records[0])
+        application.half_day = 1
+        application.half_day_date = application.from_date
 
-		self.assertRaises(OverlapError, application.insert)
+        self.assertRaises(OverlapError, application.insert)
 
-	def test_overlap_with_half_day_3(self):
-		self._clear_roles()
-		self._clear_applications()
+    def test_overlap_with_half_day_3(self):
+        self._clear_roles()
+        self._clear_applications()
 
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
+        from frappe.utils.user import add_role
+        add_role("test@example.com", "Employee")
+        add_role("test2@example.com", "Leave Approver")
 
-		frappe.set_user("test@example.com")
+        frappe.set_user("test@example.com")
 
-		make_allocation_record()
+        make_allocation_record()
 
-		# leave from 1-5, half day on 5th
-		application = self.get_application(_test_records[0])
-		application.half_day = 1
-		application.half_day_date = "2013-01-05"
-		application.insert()
+        # leave from 1-5, half day on 5th
+        application = self.get_application(_test_records[0])
+        application.half_day = 1
+        application.half_day_date = "2013-01-05"
+        application.insert()
 
-		# Apply leave from 4-7, half day on 5th
-		application = self.get_application(_test_records[0])
-		application.from_date = "2013-01-04"
-		application.to_date = "2013-01-07"
-		application.half_day = 1
-		application.half_day_date = "2013-01-05"
+        # Apply leave from 4-7, half day on 5th
+        application = self.get_application(_test_records[0])
+        application.from_date = "2013-01-04"
+        application.to_date = "2013-01-07"
+        application.half_day = 1
+        application.half_day_date = "2013-01-05"
 
-		self.assertRaises(OverlapError, application.insert)
+        self.assertRaises(OverlapError, application.insert)
 
-		# Apply leave from 5-7, half day on 5th
-		application = self.get_application(_test_records[0])
-		application.from_date = "2013-01-05"
-		application.to_date = "2013-01-07"
-		application.half_day = 1
-		application.half_day_date = "2013-01-05"
-		application.insert()
+        # Apply leave from 5-7, half day on 5th
+        application = self.get_application(_test_records[0])
+        application.from_date = "2013-01-05"
+        application.to_date = "2013-01-07"
+        application.half_day = 1
+        application.half_day_date = "2013-01-05"
+        application.insert()
 
-	def test_global_block_list(self):
-		self._clear_roles()
+    def test_global_block_list(self):
+        self._clear_roles()
 
-		from frappe.utils.user import add_role
-		add_role("test1@example.com", "Employee")
-		add_role("test@example.com", "Leave Approver")
-		self._add_employee_leave_approver("_T-Employee-00002", "test@example.com")
+        from frappe.utils.user import add_role
+        add_role("test1@example.com", "Employee")
+        add_role("test@example.com", "Leave Approver")
+        self._add_employee_leave_approver("_T-Employee-00002", "test@example.com")
 
-		make_allocation_record(employee="_T-Employee-00002")
+        make_allocation_record(employee="_T-Employee-00002")
 
-		application = self.get_application(_test_records[1])
+        application = self.get_application(_test_records[1])
 
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 1)
-		frappe.db.set_value("Employee", "_T-Employee-00002", "department",
-			"_Test Department")
+        frappe.db.set_value("Leave Block List", "_Test Leave Block List",
+            "applies_to_all_departments", 1)
+        frappe.db.set_value("Employee", "_T-Employee-00002", "department",
+            "_Test Department")
 
-		frappe.set_user("test1@example.com")
-		application.insert()
+        frappe.set_user("test1@example.com")
+        application.insert()
 
-		frappe.set_user("test@example.com")
-		self.assertRaises(LeaveDayBlockedError, application.submit)
+        frappe.set_user("test@example.com")
+        self.assertRaises(LeaveDayBlockedError, application.submit)
 
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 0)
-	
-	def test_optional_leave(self):
-		''''''
-		leave_period = get_leave_period()
-		today = get_today()
-		
-		holiday_list = frappe.get_doc(dict(
-			doctype = 'Holiday List',
-			name = 'test holiday list for optional holiday',
-			from_date = year_start_date(),
-			to_date = year_end_date(),
-			holidays = [
-				dict(holiday_date = today, description = 'test')
-			]
-		))
-		employee = get_employee()
-		
-		frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
-		
-		leave_type = frappe.get_doc(dict(
-			leave_type_name = 'Test Optional Type',
-			doctype = 'Leave Type',
-			is_optional_leave = 1,
-			holiday_list = holiday_list
-		)).insert()
-		
-		allocate_leaves(employee, leave_period, leave_type.name, 10)
-		
-		date = get_today() - 1
-				
-		leave_application = frappe.get_doc(dict(
-			doctype = 'Leave Application',
-			employee = employee,
-			leave_type = leave_type.name,
-			from_date = date,
-			to_date = date,
-		))
-		
-		# can only apply on optional holidays
-		self.assertTrue(NotAnOptionalHoliday, leave_application.insert)
-		
-		leave_application.from_date = today
-		leave_application.to_date = today
-		leave_application.insert()
-		leave_application.submit()
-		
-		# check leave balance is reduced
-		self.assertEqual(get_leave_balance(employee, leave_period, leave_type.name), 9)
-		
-	def test_leaves_allowed(self):
-		# TODO: test cannot allocate more than max leaves
-		pass
+        frappe.db.set_value("Leave Block List", "_Test Leave Block List",
+            "applies_to_all_departments", 0)
 
-	def test_applicable_after(self):
-		# TODO: test not applicable until applicable working days
-		pass
+    def test_optional_leave(self):
+        ''''''
+        leave_period = get_leave_period()
+        today = get_today()
 
-	def test_max_continuous_leaves(self):
-		# TODO: test cannot take continuous leaves more than
-		pass
-		
+        holiday_list = frappe.get_doc(dict(
+            doctype = 'Holiday List',
+            name = 'test holiday list for optional holiday',
+            from_date = year_start_date(),
+            to_date = year_end_date(),
+            holidays = [
+                dict(holiday_date = today, description = 'test')
+            ]
+        ))
+        employee = get_employee()
+
+        frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
+
+        leave_type = frappe.get_doc(dict(
+            leave_type_name = 'Test Optional Type',
+            doctype = 'Leave Type',
+            is_optional_leave = 1,
+            holiday_list = holiday_list
+        )).insert()
+
+        allocate_leaves(employee, leave_period, leave_type.name, 10)
+
+        date = get_today() - 1
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee,
+            leave_type = leave_type.name,
+            from_date = date,
+            to_date = date,
+        ))
+
+        # can only apply on optional holidays
+        self.assertTrue(NotAnOptionalHoliday, leave_application.insert)
+
+        leave_application.from_date = today
+        leave_application.to_date = today
+        leave_application.insert()
+        leave_application.submit()
+
+        # check leave balance is reduced
+        self.assertEqual(get_leave_balance(employee, leave_period, leave_type.name), 9)
+
+    def test_leaves_allowed(self):
+        employee = get_employee()
+        leave_period = get_leave_period()
+        frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+        leave_type = frappe.get_doc(dict(
+            leave_type_name = 'Test Leave Type',
+            doctype = 'Leave Type',
+            max_leaves_allowed = 5
+        )).insert()
+
+        date = add_days(nowdate(), -7)
+
+        allocate_leaves(employee, leave_period, leave_type.name, 5)
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee.name,
+            leave_type = leave_type.name,
+            from_date = date,
+            to_date = add_days(date, 2),
+            company = "_Test Company",
+            docstatus = 1
+        ))
+
+        self.assertTrue(leave_application.insert())
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee.name,
+            leave_type = leave_type.name,
+            from_date = add_days(date, 4),
+            to_date = add_days(date, 7),
+            company = "_Test Company",
+            docstatus = 1
+        ))
+        self.assertRaises(frappe.ValidationError, leave_application.insert)
+
+    def test_applicable_after(self):
+        employee = get_employee()
+        leave_period = get_leave_period()
+        frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+        leave_type = frappe.get_doc(dict(
+            leave_type_name = 'Test Leave Type',
+            doctype = 'Leave Type',
+            applicable_after = 15
+        )).insert()
+
+        date = add_days(nowdate(), -7)
+
+        allocate_leaves(employee, leave_period, leave_type.name, 10)
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee.name,
+            leave_type = leave_type.name,
+            from_date = date,
+            to_date = add_days(date, 4),
+            company = "_Test Company",
+            docstatus = 1
+        ))
+
+        self.assertRaises(frappe.ValidationError, leave_application.insert)
+
+        frappe.delete_doc_if_exists("Leave Type", "Test Leave Type 1", force=1)
+        leave_type_1 = frappe.get_doc(dict(
+            leave_type_name = 'Test Leave Type 1',
+            doctype = 'Leave Type'
+        )).insert()
+
+        allocate_leaves(employee, leave_period, leave_type_1.name, 10)
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee.name,
+            leave_type = leave_type_1.name,
+            from_date = date,
+            to_date = add_days(date, 4),
+            company = "_Test Company",
+            docstatus = 1
+        ))
+
+        self.assertTrue(leave_application.insert())
+
+    def test_max_continuous_leaves(self):
+        employee = get_employee()
+        leave_period = get_leave_period()
+        frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+        leave_type = frappe.get_doc(dict(
+            leave_type_name = 'Test Leave Type',
+            doctype = 'Leave Type',
+            max_leaves_allowed = 15,
+            max_days_allowed = 3
+        )).insert()
+
+        date = add_days(nowdate(), -7)
+
+        allocate_leaves(employee, leave_period, leave_type.name, 10)
+
+        leave_application = frappe.get_doc(dict(
+            doctype = 'Leave Application',
+            employee = employee.name,
+            leave_type = leave_type.name,
+            from_date = date,
+            to_date = add_days(date, 4),
+            company = "_Test Company",
+            docstatus = 1
+        ))
+
+        self.assertRaises(frappe.ValidationError, leave_application.insert)
+
 	def test_earned_leave(self):
 		leave_period = get_leave_period()
 		employee = get_employee()
@@ -321,14 +420,14 @@ class TestLeaveApplication(unittest.TestCase):
 			earned_leave_frequency = 'Monthly',
 			rounding = 0.5
 		)).insert()
-		
+
 		allocate_leaves(employee, leave_period, leave_type.name, 0, eligible_leaves = 12)
-		
+
 		# this method will be called by scheduler
 		allocate_earned_leaves(leave_type.name, leave_period, as_on = half_of_leave_period)
-		
+
 		self.assertEqual(get_leave_balance(employee, leave_period, leave_type.name), 6)
-		
+
 
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -344,3 +443,36 @@ def make_allocation_record(employee=None, leave_type=None):
 
 	allocation.insert(ignore_permissions=True)
 	allocation.submit()
+
+def get_employee():
+    return frappe.get_doc("Employee", "_T-Employee-00001")
+
+def get_leave_period():
+    leave_period_name = frappe.db.exists({
+        "doctype": "Leave Period",
+        "name": "Test Leave Period"
+    })
+    if leave_period_name:
+        return frappe.get_doc("Leave Period", leave_period_name[0][0])
+    else:
+        return frappe.get_doc(dict(
+            name = 'Test Leave Period',
+            doctype = 'Leave Period',
+            from_date = add_days(nowdate(), -14),
+            to_date = add_days(nowdate(), 14),
+            company = "_Test Company",
+            is_active = 1
+        )).insert()
+
+def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, eligible_leaves=0):
+    leave_allocation = frappe.get_doc({
+        "doctype": "Leave Allocation",
+        "__islocal": 1,
+        "employee": employee.name,
+        "employee_name": employee.employee_name,
+        "leave_type": leave_type,
+        "from_date": leave_period.from_date,
+        "to_date": leave_period.to_date,
+        "new_leaves_allocated": new_leaves_allocated,
+        "docstatus": 1
+    }).insert()
