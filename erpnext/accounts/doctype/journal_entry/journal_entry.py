@@ -3,13 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
+from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 from six import string_types, iteritems
 
@@ -40,15 +40,17 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
+		self.validate_inter_company_accounts()
 		if not self.title:
 			self.title = self.get_title()
 
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
-		self.update_loan()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.update_employee_loan()
+		self.update_inter_company_jv()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -64,6 +66,20 @@ class JournalEntry(AccountsController):
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
+	def validate_inter_company_accounts(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			doc = frappe.get_doc("Journal Entry", self.inter_company_journal_entry_reference)
+			account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			previous_account_currency = frappe.db.get_value("Company", doc.company, "default_currency")
+			if account_currency == previous_account_currency:
+				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
+					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
+
+	def update_inter_company_jv(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
+				"inter_company_journal_entry_reference", self.name)
+
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
@@ -72,9 +88,10 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_loan()
+		self.update_employee_loan()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
+		self.unlink_inter_company_jv()
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -96,6 +113,13 @@ class JournalEntry(AccountsController):
 
 						asset.db_set("value_after_depreciation", asset.value_after_depreciation)
 						asset.set_status()
+
+	def unlink_inter_company_jv(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
+				"inter_company_journal_entry_reference", "")
+			frappe.db.set_value("Journal Entry", self.name,\
+				"inter_company_journal_entry_reference", "")
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -518,17 +542,11 @@ class JournalEntry(AccountsController):
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc)
 
-	def update_loan(self):
-		if self.paid_loan:
-			paid_loan = json.loads(self.paid_loan)
-			value = 1 if self.docstatus < 2 else 0
-			for name in paid_loan:
-				frappe.db.set_value("Repayment Schedule", name, "paid", value)
+	def update_employee_loan(self):
 		for d in self.accounts:
-			if d.reference_type=="Loan" and flt(d.debit) > 0:
-				doc = frappe.get_doc("Loan", d.reference_name)
+			if d.reference_type=="Employee Loan" and flt(d.debit) > 0:
+				doc = frappe.get_doc("Employee Loan", d.reference_name)
 				update_disbursement_status(doc)
-				update_total_amount_paid(doc)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
@@ -908,3 +926,12 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
+
+@frappe.whitelist()
+def make_inter_company_journal_entry(name, voucher_type , company):
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = voucher_type
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	journal_entry.inter_company_journal_entry_reference = name
+	return journal_entry.as_dict()
