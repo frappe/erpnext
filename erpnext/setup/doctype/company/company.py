@@ -131,6 +131,7 @@ class Company(Document):
 						if not wh_detail["is_group"] else ""
 				})
 				warehouse.flags.ignore_permissions = True
+				warehouse.flags.ignore_mandatory = True
 				warehouse.insert()
 
 	def create_default_accounts(self):
