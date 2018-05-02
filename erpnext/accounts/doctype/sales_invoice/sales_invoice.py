@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext, json
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt
 from frappe import _, msgprint, throw
@@ -1043,7 +1043,7 @@ def get_inter_company_details(doc, doctype):
 		company = frappe.db.get_value("Supplier", {"name": doc.supplier}, "represents_company")
 
 	return {
-		"party": party, 
+		"party": party,
 		"company": company
 	}
 
@@ -1073,8 +1073,6 @@ def make_inter_company_purchase_invoice(source_name, target_doc=None):
 	return make_inter_company_invoice("Sales Invoice", source_name, target_doc)
 
 def make_inter_company_invoice(doctype, source_name, target_doc=None):
-
-	from frappe.model.mapper import get_mapped_doc
 	if doctype == "Sales Invoice":
 		source_doc = frappe.get_doc("Sales Invoice", source_name)
 		target_doctype = "Purchase Invoice"
