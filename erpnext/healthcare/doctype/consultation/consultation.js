@@ -253,6 +253,25 @@ frappe.ui.form.on("Drug Prescription", {
 	}
 });
 
+frappe.ui.form.on("Procedure Prescription", {
+	procedure:  function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.procedure){
+			frappe.call({
+				"method": "frappe.client.get_value",
+				args: {
+					doctype: "Clinical Procedure Template",
+					fieldname: "medical_department",
+					filters: {name: child.procedure}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, 'department',data.message.medical_department);
+				}
+			});
+		}
+	}
+});
+
 
 var calculate_age = function(birth) {
 	var ageMS = Date.parse(Date()) - Date.parse(birth);

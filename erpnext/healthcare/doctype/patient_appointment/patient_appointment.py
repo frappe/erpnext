@@ -24,6 +24,8 @@ class PatientAppointment(Document):
 			self.reload()
 
 	def after_insert(self):
+		if self.procedure_prescription:
+			frappe.db.set_value("Procedure Prescription", self.procedure_prescription, "appointment_booked", True)
 		# Check fee validity exists
 		appointment = self
 		validity_exist = validity_exists(appointment.physician, appointment.patient)
@@ -164,8 +166,14 @@ def get_availability_data(date, physician):
 @frappe.whitelist()
 def update_status(appointment_id, status):
 	frappe.db.set_value("Patient Appointment", appointment_id, "status", status)
+	appointment_booked = True
 	if status == "Cancelled":
+		appointment_booked = False
 		appointment_cancel(appointment_id)
+
+	procedure_prescription = frappe.db.get_value("Patient Appointment", appointment_id, "procedure_prescription")
+	if procedure_prescription:
+		frappe.db.set_value("Procedure Prescription", procedure_prescription, "appointment_booked", appointment_booked)
 
 
 @frappe.whitelist()
@@ -348,3 +356,11 @@ def get_events(start, end, filters=None):
 	for item in data:
 		item.end = item.start + datetime.timedelta(minutes = item.duration)
 	return data
+
+@frappe.whitelist()
+def get_procedure_prescribed(patient):
+	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.physician,
+	ct.consultation_date, pp.physician, pp.date, pp.department
+	from tabConsultation ct, `tabProcedure Prescription` pp
+	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
+	order by ct.creation desc""".format(patient))

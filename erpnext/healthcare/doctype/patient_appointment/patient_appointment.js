@@ -215,7 +215,70 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.disable_save();
 		}
 	},
+	get_procedure_from_consultation: function(frm) {
+		get_procedure_prescribed(frm);
+	}
 });
+
+var get_procedure_prescribed = function(frm){
+	if(frm.doc.patient){
+		frappe.call({
+			method:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_procedure_prescribed",
+			args: {patient: frm.doc.patient},
+			callback: function(r){
+				show_procedure_templates(frm, r.message);
+			}
+		});
+	}
+	else{
+			msgprint("Please select Patient to get prescribed procedure");
+	}
+};
+
+var show_procedure_templates = function(frm, result){
+	var d = new frappe.ui.Dialog({
+		title: __("Prescribed Procedures"),
+		fields: [
+			{
+				fieldtype: "HTML", fieldname: "procedure_template"
+			}
+		]
+	});
+	var html_field = d.fields_dict.procedure_template.$wrapper;
+	html_field.empty();
+	$.each(result, function(x, y){
+		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
+		<div class="col-xs-5"> %(consultation)s <br> %(consulting_physician)s <br> %(consultation_date)s </div>\
+		<div class="col-xs-5"> %(procedure_template)s <br>%(physician)s  <br> %(date)s</div>\
+		<div class="col-xs-2">\
+		<a data-name="%(name)s" data-procedure-template="%(procedure_template)s"\
+		data-consultation="%(consultation)s" data-physician="%(physician)s"\
+		data-date="%(date)s"  data-department="%(department)s">\
+		<button class="btn btn-default btn-xs">Add\
+		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {name:y[0], procedure_template: y[1],
+			consultation:y[2], consulting_physician:y[3], consultation_date:y[4],
+			physician:y[5]? y[5]:'', date: y[6]? y[6]:'', department: y[7]? y[7]:''})).appendTo(html_field);
+		row.find("a").click(function() {
+			frm.doc.procedure_template = $(this).attr("data-procedure-template");
+			frm.doc.procedure_prescription = $(this).attr("data-name");
+			frm.doc.physician = $(this).attr("data-physician");
+			frm.doc.appointment_date = $(this).attr("data-date");
+			frm.doc.department = $(this).attr("data-department");
+			refresh_field("procedure_template");
+			refresh_field("procedure_prescription");
+			refresh_field("appointment_date");
+			refresh_field("physician");
+			refresh_field("department");
+			d.hide();
+			return false;
+		});
+	})
+	if(!result){
+		var msg = "There are no procedure prescribed for "+frm.doc.patient;
+		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+	}
+	d.show();
+}
 
 var btn_create_procedure = function(frm){
 	var doc = frm.doc;
