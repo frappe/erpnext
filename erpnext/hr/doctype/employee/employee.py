@@ -112,7 +112,7 @@ class Employee(NestedSet):
 
 	def validate_gap(self):
 		if self.gap and self.gap < 0.00:
-			frappe.throw(_("Gap (Months) should be >= 0.00"))
+			frappe.throw(_("Gap (Months) should be greater than Or equals to 0.00"))
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):

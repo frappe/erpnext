@@ -40,10 +40,10 @@ class Company(Document):
 	def validate_countable_experience(self):
 		if self.countable_exp_percent and \
 			self.countable_exp_percent > 100:
-			frappe.throw(_("Countable Experience (%) should be <= 100"))
+			frappe.throw(_("Countable Experience (%) should be less than Or equals to 100"))
 		elif self.countable_exp_percent and \
 			self.countable_exp_percent < 0.00:
-			frappe.throw(_("Countable Experience (%) should be >= 0.00"))
+			frappe.throw(_("Countable Experience (%) should be greater than Or equals to 0.00"))
 
 	def validate_abbr(self):
 		if not self.abbr:
