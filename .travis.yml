@@ -33,6 +33,7 @@ before_script:
   - bench reinstall --yes
   - bench build
   - bench scheduler disable
+  - sed -i 's/9000/9001/g' sites/common_site_config.json
   - bench start &
   - sleep 10
 
