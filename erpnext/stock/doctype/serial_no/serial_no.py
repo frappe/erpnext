@@ -16,6 +16,7 @@ class SerialNoRequiredError(ValidationError): pass
 class SerialNoQtyError(ValidationError): pass
 class SerialNoItemError(ValidationError): pass
 class SerialNoWarehouseError(ValidationError): pass
+class SerialNoBatchError(ValidationError): pass
 class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
@@ -187,6 +188,7 @@ def process_serial_no(sle):
 	update_serial_nos(sle, item_det)
 
 def validate_serial_no(sle, item_det):
+
 	if item_det.has_serial_no==0:
 		if sle.serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
@@ -228,8 +230,13 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
-							and sle.is_cancelled=="No" and not sr.warehouse:
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+
+							if sr.batch_no and sr.batch_no != sle.batch_no:
+								frappe.throw(_("Serial No {0} does not belong to Batch {1}").format(serial_no,
+									sle.batch_no), SerialNoBatchError)
+
+							if sle.is_cancelled=="No" and not sr.warehouse:
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
 
@@ -291,6 +298,7 @@ def update_serial_nos(sle, item_det):
 				sr.via_stock_ledger = True
 				sr.item_code = sle.item_code
 				sr.warehouse = sle.warehouse if sle.actual_qty > 0 else None
+				sr.batch_no = sle.batch_no
 				sr.save(ignore_permissions=True)
 			elif sle.actual_qty > 0:
 				make_serial_no(serial_no, sle)
@@ -313,6 +321,7 @@ def make_serial_no(serial_no, sle):
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
 	sr.company = sle.company
+	sr.batch_no = sle.batch_no
 	sr.via_stock_ledger = True
 	sr.insert()
 
