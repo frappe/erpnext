@@ -40,6 +40,7 @@ frappe.ui.form.on("Journal Entry", {
 			);
 		}
 	},
+
 	make_inter_company_journal_entry: function(frm) {
 		var d = new frappe.ui.Dialog({
 			title: __("Select Company"),
