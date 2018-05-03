@@ -3,8 +3,7 @@ from frappe import _
 def get_data():
 	return {
 		'heatmap': True,
-		'heatmap_message': _('This is based on stock movement. See {0} for details')\
-			.format('<a href="#query-report/Stock Ledger">' + _('Stock Ledger') + '</a>'),
+		'heatmap_message': _('See dashboard below for details'),
 		'fieldname': 'item_code',
 		'non_standard_fieldnames': {
 			'Production Order': 'production_item',

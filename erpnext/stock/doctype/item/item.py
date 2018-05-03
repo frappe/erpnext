@@ -688,8 +688,13 @@ class Item(WebsiteGenerator):
 			validate_item_variant_attributes(self, args)
 
 def get_timeline_data(doctype, name):
-	'''returns timeline data based on stock ledger entry'''
+	'''returns timeline data based on linked records in dashboard'''
+	from six import iteritems
+	from frappe.utils import get_timestamp
+
 	out = {}
+
+	'''stock ledger'''
 	items = dict(frappe.db.sql('''select posting_date, count(*)
 		from `tabStock Ledger Entry` where item_code=%s
 			and posting_date > date_sub(curdate(), interval 1 year)
@@ -698,6 +703,227 @@ def get_timeline_data(doctype, name):
 	for date, count in items.iteritems():
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })
+
+	'''bom'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabBOM` where item=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''product bundle'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabProduct Bundle` where name=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''quotation'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabQuotation Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''sales order'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabSales Order Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''delivery note'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabDelivery Note Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''sales invoice'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabSales Invoice Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''item price'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabItem Price` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''pricing rule'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabPricing Rule` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''material request'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabMaterial Request Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''supplier quotation'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabSupplier Quotation Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''request for quotation'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabRequest for Quotation Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''purchase order'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabPurchase Order Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''purchase receipt'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabPurchase Receipt Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''purchase invoice'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabPurchase Invoice Item` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''serial no'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabSerial No` where item_code=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''batch'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabBatch` where item=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
+
+	'''production order'''
+	items = dict(frappe.db.sql('''select creation, count(*)
+		from `tabProduction Order` where production_item=%s
+			and creation > date_sub(curdate(), interval 1 year)
+			group by creation''', name))
+
+	for date, count in iteritems(items):
+		timestamp = get_timestamp(date)
+		if not timestamp in out:
+			out.update({timestamp: count})
+		else :
+			out.update({timestamp: out[timestamp] + count})
 
 	return out
 

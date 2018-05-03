@@ -3,7 +3,7 @@ from frappe import _
 def get_data():
 	return {
 		'heatmap': True,
-		'heatmap_message': _('This is based on the attendance of this Employee'),
+		'heatmap_message': _('See dashboard below for more details'),
 		'fieldname': 'employee',
 		'transactions': [
 			{

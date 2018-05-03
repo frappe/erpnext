@@ -18,6 +18,8 @@ keydict = {
 	'account_url':'account_url',
 	'disable_rounded_total': 'disable_rounded_total',
 	'disable_in_words': 'disable_in_words',
+	'heatmap_style': 'heatmap_style',
+	'dashboard_collapse_def': 'dashboard_collapse_def',
 }
 
 from frappe.model.document import Document
