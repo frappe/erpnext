@@ -49,15 +49,15 @@ frappe.ui.form.on('Clinical Procedure', {
 
 			if(frm.doc.consume_stock){
 				var btn_label = 'Complete and Consume';
-				var msg = 'Are you sure to Complete and Consume Stock?';
+				var msg = 'Complete '+frm.doc.name+' and Consume Stock?';
 			}else{
 				btn_label = 'Complete';
-				msg = 'Are you sure to Complete?';
+				msg = 'Complete '+frm.doc.name+'?';
 			}
 
 			frm.add_custom_button(__(btn_label), function () {
 				frappe.confirm(
-					msg,
+					__(msg),
 					function(){
 						frappe.call({
 							doc: frm.doc,
@@ -80,7 +80,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						if(!r.exc){
 							if(frm.doc.status == 'Draft'){
 								frappe.confirm(
-									"Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer",
+									__("Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer"),
 									function(){
 										frappe.call({
 											doc: frm.doc,
