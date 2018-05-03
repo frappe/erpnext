@@ -401,7 +401,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				item.serial_no = valid_serial_nos.join('\n');
 
 				refresh_field("serial_no", item.name, item.parentfield);
-				if(!doc.is_return) {
+				if(!doc.is_return && cint(user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
 					frappe.model.set_value(item.doctype, item.name,
 						"qty", valid_serial_nos.length / item.conversion_factor);
 					frappe.model.set_value(item.doctype, item.name, "stock_qty", valid_serial_nos.length);
