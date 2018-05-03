@@ -12,3 +12,10 @@ class HealthcareServiceUnit(NestedSet):
 	def on_update(self):
 		super(HealthcareServiceUnit, self).on_update()
 		self.validate_one_root()
+
+	def validate(self):
+		if self.is_group:
+			self.allow_appointments = False
+			self.overlap_appointments = False
+		elif not self.allow_appointments:
+			self.overlap_appointments = False

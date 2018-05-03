@@ -26,6 +26,7 @@ frappe.ui.form.on('Patient Appointment', {
 			return {
 				filters: {
 					"is_group": false,
+					"allow_appointments": true
 				}
 			};
 		});

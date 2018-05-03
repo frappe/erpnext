@@ -28,5 +28,15 @@ frappe.ui.form.on('Healthcare Service Unit', {
 			frm.set_read_only();
 			frm.set_intro(__("This is a root healthcare service unit and cannot be edited."), true);
 		}
+	},
+	allow_appointments: function(frm) {
+		if(!frm.doc.allow_appointments){
+			frm.set_value("overlap_appointments", false);
+		}
+	},
+	is_group: function(frm) {
+		if(frm.doc.is_group){
+			frm.set_value("allow_appointments", false);
+		}
 	}
 });
