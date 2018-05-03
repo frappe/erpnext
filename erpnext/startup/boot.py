@@ -25,9 +25,6 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('Selling Settings',
 			'default_valid_till'))
 
-		bootinfo.notification_settings = frappe.get_doc("Notification Control",
-			"Notification Control")
-
 		# if no company, show a dialog box to create a new company
 		bootinfo.customer_count = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
 
