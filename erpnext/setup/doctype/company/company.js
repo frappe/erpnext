@@ -51,6 +51,10 @@ frappe.ui.form.on("Company", {
 			frm.add_custom_button(__('Purchase Tax Template'), function() {
 				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
 			}, __("View"));
+
+			frm.add_custom_button(__('Default Tax Template'), function() {
+				frm.trigger("make_default_tax_template");
+			}, __("Make"));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
@@ -88,7 +92,7 @@ frappe.ui.form.on("Company", {
 			},
 			function(data) {
 				if(data.company_name !== frm.doc.name) {
-					frappe.msgprint("Company name not same");
+					frappe.msgprint(__("Company name not same"));
 					return;
 				}
 				frappe.call({

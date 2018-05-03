@@ -3,17 +3,22 @@
 Production Planning Tool helps you plan production and purchase of Items for a
 period (usually a week or a month).
 
+<div class-"embed-container">
+  <iframe src="https://www.youtube.com/embed/i0E_RcngliQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 This list of Items can be generated from the open Sales Orders or pending Material Requests that can be Manufactured in the system
 and will generate:
 
-  * Production Orders for each Item.
+  * Work Orders for each Item.
   * Purchase Requests for Items whose Projected Quantity is likely to fall below zero.
 
 To use the Production Planning Tool, go to:
 
 > Manufacturing > Tools > Production Planning Tool
 
-<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt.png">
 
 #### Step 1: Specify source to get Production Items
 
@@ -27,7 +32,7 @@ To use the Production Planning Tool, go to:
 * Use filters to get the Sales Order / Material Request
 * Click on Get Sales Order / Get Material Requests to generate a list.
 
-<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-get-sales-orders.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-sales-orders.png">
 
 
 
@@ -36,11 +41,11 @@ To use the Production Planning Tool, go to:
 * Get the items for the Sales Order / Material request list
 * You can add/remove or change quantity of these Items.
 
-<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-get-item.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-item.png">
 
-#### Step 4: Create Production Orders
+#### Step 4: Create Work Orders
 
-<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-create-production-order.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-production-order.png">
 
 
 
@@ -48,7 +53,7 @@ To use the Production Planning Tool, go to:
 
 Create Material Request for Items with projected shortfall.
 
-<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-create-material-request.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-material-request.png">
 
 
 
@@ -64,7 +69,7 @@ You can always edit the Item list and increase / reduce quantities to plan
 your production.
 
 > Note: How do you change a Production Plan? The output of the Production
-Planning Tool is the Production Order. Once your orders are created, you can
-change them by amending the Production Orders.
+Planning Tool is the Work Order. Once your orders are created, you can
+change them by amending the Work Orders.
 
 {next}

@@ -230,7 +230,7 @@ def get_employee_by_user_id(user_id):
 def insert_lab_test_to_medical_record(doc):
 	subject = str(doc.test_name)
 	if(doc.test_comment):
-		subject += ", \n"+str(doc.test_comment)
+		subject += ", "+str(doc.test_comment)
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject

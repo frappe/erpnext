@@ -4,10 +4,11 @@ employee-advance
 expense-claim
 attendance
 salary-and-payroll
+payroll-entry
 appraisal
 job-applicant
 job-opening
-offer-letter
+job-offer
 training
 tools
 human-resources-reports
@@ -16,5 +17,5 @@ holiday-list
 human-resource-setup
 daily-work-summary
 fleet-management
-employee-loan-management
+loan-management
 articles

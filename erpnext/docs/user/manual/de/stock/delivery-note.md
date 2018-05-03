@@ -11,7 +11,7 @@ Die Buchung zum Lieferschein ist derjenigen zum Kaufbeleg sehr ähnlich. Sie kö
 
 oder aber über eine "übertragene" Kundenbestellung (die noch nicht versandt wurde) indem Sie auf "Lieferschein erstellen" klicken.
 
-<img class="screenshot" alt="Lieferschein" src="/docs/assets/img/stock/delivery-note.png">
+<img class="screenshot" alt="Lieferschein" src="{{docs_base_url}}/assets/img/stock/delivery-note.png">
 
 Sie können die Details auch aus einer noch nicht gelieferten Kundenbestellung "herausziehen".
 

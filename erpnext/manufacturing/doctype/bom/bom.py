@@ -9,6 +9,10 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
+import functools
+
+from six import string_types
+
 from operator import itemgetter
 
 form_grid_templates = {
@@ -108,7 +112,7 @@ class BOM(WebsiteGenerator):
 		if not args:
 			args = frappe.form_dict.get('args')
 
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			import json
 			args = json.loads(args)
 
@@ -539,6 +543,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.description,
 				item.image,
 				item.stock_uom,
+				item.allow_alternative_item,
 				item.default_warehouse,
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
@@ -569,7 +574,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
 	for item in items:
-		if item_dict.has_key(item.item_code):
+		if item.item_code in item_dict:
 			item_dict[item.item_code]["qty"] += flt(item.qty)
 		else:
 			item_dict[item.item_code] = item
@@ -586,7 +591,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
-	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
+	items.sort(key = functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
 
 def validate_bom_no(item, bom_no):

@@ -46,7 +46,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Offer Letter",
+					"name": "Job Offer",
 					"description": _("Offer candidate a Job."),
 				},
 			]
@@ -159,7 +159,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Loan Management"),
+			"label": _("Loan Management"),
 			"icon": "icon-list",
 			"items": [
 				{
@@ -169,12 +169,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan Application",
-					"description": _("Employee Loan Application")
+					"name": "Loan Application",
+					"description": _("Loan Application")
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan"
+					"name": "Loan"
 				},
 			]
 		},
@@ -246,6 +246,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Daily Work Summary Settings"
 				},
+				{
+					"type": "doctype",
+					"name": "Health Insurance"
+				}
 			]
 		},
 		{
@@ -314,12 +318,7 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
-				},
-				{
-					"type": "help",
-					"label": _("Processing Payroll"),
-					"youtube_id": "apgE-f25Rm0"
-				},
+				}
 			]
 		}
 	]

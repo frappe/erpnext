@@ -3,7 +3,7 @@
 Un registro de Aplicación de Estudiante necesita ser creado cuando un estudiante aplica para un programa en su institución.
 Puedes Aprobar o Rechazar una aplicación de estudiante. Aceptando una aplicación de un estudiante puedes agregarlos al master de estudiantes.
 
-<img class="screenshot" alt="Student Applicant" src="/docs/assets/img/education/admission/student-applicant.png">
+<img class="screenshot" alt="Student Applicant" src="{{docs_base_url}}/assets/img/education/admission/student-applicant.png">
 
 ### Estados de la Aplicación
 
@@ -23,6 +23,6 @@ Puedes Aprobar o Rechazar una aplicación de estudiante. Aceptando una aplicaci�
 Una vez aprobada una Aplicación de Estudiante, puedes inscribirlo a un programa. Cuando le das click al butón 'Inscribir',
 el sistema creará un estudiante usando esa aplicación y le va a redireccionar a el [Formulario de Inscripción al Programa](/docs/user/manual/es/education/student/program-enrollment.html).
 
-<img class="screenshot" alt="Student Applicant Enrollment" src="/docs/assets/img/education/admission/student-applicant-enroll.png">
+<img class="screenshot" alt="Student Applicant Enrollment" src="{{docs_base_url}}/assets/img/education/admission/student-applicant-enroll.png">
 
 {next}

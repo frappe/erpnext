@@ -101,14 +101,14 @@ frappe.ui.form.on("Lab Test", "patient", function(frm) {
 
 frappe.ui.form.on('Normal Test Items', {
 	normal_test_items_remove: function() {
-		frappe.msgprint("Not permitted, configure Lab Test Template as required");
+		frappe.msgprint(__("Not permitted, configure Lab Test Template as required"));
 		cur_frm.reload_doc();
 	}
 });
 
 frappe.ui.form.on('Special Test Items', {
 	special_test_items_remove: function() {
-		frappe.msgprint("Not permitted, configure Lab Test Template as required");
+		frappe.msgprint(__("Not permitted, configure Lab Test Template as required"));
 		cur_frm.reload_doc();
 	}
 });
@@ -142,7 +142,7 @@ var get_lab_test_prescribed = function(frm){
 		});
 	}
 	else{
-		frappe.msgprint("Please select Patient to get Lab Tests");
+		frappe.msgprint(__("Please select Patient to get Lab Tests"));
 	}
 };
 
@@ -217,7 +217,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.normal_test_items){
 		for(let result in doc.normal_test_items){
 			if(!doc.normal_test_items[result].result_value	&&	doc.normal_test_items[result].require_result_value == 1){
-				frappe.msgprint("Please input all required Result Value(s)");
+				frappe.msgprint(__("Please input all required Result Value(s)"));
 				throw("Error");
 			}
 		}
@@ -225,7 +225,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.special_test_items){
 		for(let result in doc.special_test_items){
 			if(!doc.special_test_items[result].result_value	&&	doc.special_test_items[result].require_result_value == 1){
-				frappe.msgprint("Please input all required Result Value(s)");
+				frappe.msgprint(__("Please input all required Result Value(s)"));
 				throw("Error");
 			}
 		}

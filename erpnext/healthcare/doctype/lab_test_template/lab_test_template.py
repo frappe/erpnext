@@ -36,7 +36,7 @@ class LabTestTemplate(Document):
 			try:
 				frappe.delete_doc("Item",self.item)
 			except Exception:
-				frappe.throw("""Not permitted. Please disable the Test Template""")
+				frappe.throw(_("""Not permitted. Please disable the Test Template"""))
 
 def item_price_exist(doc):
 	item_price = frappe.db.exists({

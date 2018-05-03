@@ -121,6 +121,7 @@ class PurchaseReceipt(BuyingController):
 		if self.per_billed < 100:
 			self.update_billing_status()
 
+		
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -378,6 +379,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
+			"field_map": {
+				"supplier_warehouse":"supplier_warehouse"
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			},

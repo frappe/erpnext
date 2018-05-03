@@ -13,7 +13,7 @@ In the Attachment file, fill in the appropriate columns;
 - **Qty (Quantity)** Leave this column blank.
 - **Valuation Rate** will be item's value after depreciation.
 
-<img alt="reorder level" class="screenshot" src="/docs/assets/img/articles/fixed-asset-dep-1.gif">
+<img alt="reorder level" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fixed-asset-dep-1.gif">
 
 After updating Valuation Rate for an item, come back to Stock Reconciliation and upload save .csv file.
 
@@ -21,7 +21,7 @@ After updating Valuation Rate for an item, come back to Stock Reconciliation and
 
 Select Expense account for depreciation in **Difference Account**. Value booked in the depreciation account will be the difference of old and next valuation rate of the fixed asset item, which will be actually the depreciation amount.
 
-<img alt="reorder level" class="screenshot" src="/docs/assets/img/articles/fixed-asset-dep-2.png">
+<img alt="reorder level" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fixed-asset-dep-2.png">
 
 ####Stock Reconciliation Help Video
 

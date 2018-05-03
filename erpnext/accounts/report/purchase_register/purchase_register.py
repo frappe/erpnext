@@ -179,7 +179,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in expense_accounts:
-			if invoice_expense_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_expense_map[d.parent]:
 				invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)

@@ -2,7 +2,7 @@
 
 This tool can be used to create 'Course Schedules'. 
 
-<img class="screenshot" alt="Scheduling Tool" src="/docs/assets/img/education/schedule/scheduling-tool.png">
+<img class="screenshot" alt="Scheduling Tool" src="{{docs_base_url}}/assets/img/education/schedule/scheduling-tool.png">
 
 ### Creating Course Schedules
 
@@ -19,5 +19,14 @@ This tool can be used to create 'Course Schedules'.
 - If you wish to reschedule Course Schedules created against a Course, follow the instructions for creating course schedules
 - Check the 'Reschedule' checkbox and then click 'Schedule Course' button.
 - System will delete existing Course Schedules for specified Course within the mentioned Course Start Date and Course End Date and crate new Course Schedules.
+
+#### Video Tutorial on Scheduling Tool
+
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed/iy-DBV9jI-A?start=114' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>    
 
 {next}

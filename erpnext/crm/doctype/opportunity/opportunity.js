@@ -53,8 +53,6 @@ frappe.ui.form.on("Opportunity", {
 			frm.add_custom_button(__('Quotation'),
 				cur_frm.cscript.create_quotation, __("Make"));
 
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
-
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);

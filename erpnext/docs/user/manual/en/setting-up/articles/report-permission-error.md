@@ -1,6 +1,6 @@
 **Question:** User has roles like Account User and Account Manager assigned. Still, when accessing  Account Receivable report, User is getting an error message of no permission the territory master.
 
-<img alt="Report Permission Error" class="screenshot" src="/docs/assets/img/articles/report-permission-1.png">
+<img alt="Report Permission Error" class="screenshot" src="{{docs_base_url}}/assets/img/articles/report-permission-1.png">
 
 **Answer:**
 
@@ -12,6 +12,6 @@ As per the permission system in ERPNext, for the User to be able to access a for
 
 3.  To resolve this issue, I have assigned Account User permission to Read Territory master.  
 
-    <img alt="Permission Manager" class="screenshot" src="/docs/assets/img/articles/report-permission-2.png">
+    <img alt="Permission Manager" class="screenshot" src="{{docs_base_url}}/assets/img/articles/report-permission-2.png">
 
 As per this permission update, User should be able to access Account Receivable report fine.

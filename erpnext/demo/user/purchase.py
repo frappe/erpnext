@@ -116,7 +116,7 @@ def make_material_request(item_code, qty):
 	return mr
 
 def add_suppliers(rfq):
-	for i in xrange(2):
+	for i in range(2):
 		supplier = get_random("Supplier")
 		if supplier not in [d.supplier for d in rfq.get('suppliers')]:
 			rfq.append("suppliers", { "supplier": supplier })

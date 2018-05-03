@@ -33,3 +33,6 @@ class SalesPerson(NestedSet):
 		
 		if sales_person and sales_person != self.name:
 			frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))
+
+def on_doctype_update():
+	frappe.db.add_index("Sales Person", ["lft", "rgt"])

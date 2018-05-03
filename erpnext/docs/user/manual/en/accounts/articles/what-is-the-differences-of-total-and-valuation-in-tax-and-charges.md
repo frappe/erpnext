@@ -6,7 +6,7 @@ Consider Tax or Charge field in Purchase Taxes and Charges master has three valu
 - Valuation
 - Total and Valuation
 
-<img alt="Purchase Tax and Charges Categories" class="screenshot" src="/docs/assets/img/articles/purchase-other-charges-1.png">
+<img alt="Purchase Tax and Charges Categories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/purchase-other-charges-1.png">
 
 Let's consider an example to understand an effect of each charge type. We purchase ten units of item, at the rate of 800. total purchase amount is 800. Purchased item has 4% VAT applied on it, and INR 100 was incurred in transportation.
 

@@ -10,7 +10,7 @@ To create new donor Type go to:
 
 > Non Profit > Donor Type > New
 
-<img class="screenshot" alt="donor type" src="/docs/assets/img/non_profit/donor/donor_type.png">
+<img class="screenshot" alt="donor type" src="{{docs_base_url}}/assets/img/non_profit/donor/donor_type.png">
 
 **Donor Type:** The Donor Type is displayed throughout the system, on both public and backend pages so spend some time thinking about a donor type name that is appropriate to both audiences. It can be changed at a later date
 

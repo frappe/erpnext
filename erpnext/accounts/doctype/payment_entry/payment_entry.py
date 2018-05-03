@@ -14,6 +14,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController
 
+from six import string_types
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -506,13 +507,13 @@ class PaymentEntry(AccountsController):
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
 					update_reimbursed_amount(doc)
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name
 		self.reference_date = nowdate()
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	party_account_currency = get_account_currency(args.get("party_account"))

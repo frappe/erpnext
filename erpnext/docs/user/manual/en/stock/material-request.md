@@ -3,7 +3,7 @@
 A Material Request is a simple document identifying a requirement of a set of
 Items (products or services) for a particular reason.
 
-<img class="screenshot" alt="Material Request" src="/docs/assets/img/buying/material-request-flowchart.png">
+<img class="screenshot" alt="Material Request" src="{{docs_base_url}}/assets/img/buying/material-request-flowchart.png">
 
 To generate a Material Request manually go to:
 
@@ -11,7 +11,7 @@ To generate a Material Request manually go to:
 
 #### Creating Material Request 
 
-<img class="screenshot" alt="Material Request" src="/docs/assets/img/buying/material-request.png">
+<img class="screenshot" alt="Material Request" src="{{docs_base_url}}/assets/img/buying/material-request.png">
 
 A Material Request can be generated:
 
@@ -31,5 +31,11 @@ The User can also raise a [Request For Quotation](/docs/user/manual/en/buying/re
 
 > Info: Material Request is not mandatory. It is ideal if you have centralized
 buying so that you can collect this information from various departments.
+
+
+<div>
+  <iframe src="https://www.youtube.com/embed/55Gk2j7Q8Zw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
 
 {next}

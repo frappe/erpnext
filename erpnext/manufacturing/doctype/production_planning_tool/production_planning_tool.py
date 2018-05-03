@@ -9,7 +9,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 
 class ProductionPlanningTool(Document):
 	def clear_table(self, table_name):
@@ -204,8 +204,8 @@ class ProductionPlanningTool(Document):
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
 
-	def raise_production_orders(self):
-		"""It will raise production order (Draft) for all distinct FG items"""
+	def raise_work_orders(self):
+		"""It will raise work order (Draft) for all distinct FG items"""
 		self.validate_data()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -213,22 +213,22 @@ class ProductionPlanningTool(Document):
 
 		items = self.get_production_items()
 
-		pro_list = []
+		wo_list = []
 		frappe.flags.mute_messages = True
 
 		for key in items:
-			production_order = self.create_production_order(items[key])
-			if production_order:
-				pro_list.append(production_order)
+			work_order = self.create_work_order(items[key])
+			if work_order:
+				wo_list.append(work_order)
 
 		frappe.flags.mute_messages = False
 
-		if pro_list:
-			pro_list = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in pro_list]
-			msgprint(_("{0} created").format(comma_and(pro_list)))
+		if wo_list:
+			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+				(p, p) for p in wo_list]
+			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
-			msgprint(_("No Production Orders created"))
+			msgprint(_("No Work Orders created"))
 
 	def get_production_items(self):
 		item_dict = {}
@@ -264,21 +264,21 @@ class ProductionPlanningTool(Document):
 
 		return item_dict
 
-	def create_production_order(self, item_dict):
-		"""Create production order. Called from Production Planning Tool"""
-		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError, get_default_warehouse
+	def create_work_order(self, item_dict):
+		"""Create work order. Called from Production Planning Tool"""
+		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
 		warehouse = get_default_warehouse()
-		pro = frappe.new_doc("Production Order")
-		pro.update(item_dict)
-		pro.set_production_order_operations()
+		wo = frappe.new_doc("Work Order")
+		wo.update(item_dict)
+		wo.set_work_order_operations()
 		if warehouse:
-			pro.wip_warehouse = warehouse.get('wip_warehouse')
-		if not pro.fg_warehouse:
-			pro.fg_warehouse = warehouse.get('fg_warehouse')
+			wo.wip_warehouse = warehouse.get('wip_warehouse')
+		if not wo.fg_warehouse:
+			wo.fg_warehouse = warehouse.get('fg_warehouse')
 
 		try:
-			pro.insert()
-			return pro.name
+			wo.insert()
+			return wo.name
 		except OverProductionError:
 			pass
 
