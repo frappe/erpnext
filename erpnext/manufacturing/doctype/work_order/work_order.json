@@ -1526,7 +1526,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-03-05 12:43:10.442928", 
+ "modified": "2018-04-30 12:49:21.211740", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Work Order", 
@@ -1534,7 +1534,6 @@
  "permissions": [
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -1554,7 +1553,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

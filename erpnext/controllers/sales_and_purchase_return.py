@@ -83,15 +83,15 @@ def validate_returned_items(doc):
 			else:
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
-				
+
 				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
 					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
-							
+
 				elif ref.batch_no and d.batch_no not in ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
-						
+
 				elif ref.serial_no:
 					if not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
@@ -120,25 +120,30 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 
 	for column in fields:
 		returned_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
-		reference_qty = (ref.get(column) if column == 'stock_qty'
-			else ref.get(column) * ref.get("conversion_factor", 1.0))
+
+		if column == 'stock_qty':
+			reference_qty = ref.get(column)
+			current_stock_qty = args.get(column)
+		else:
+			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
+			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
 
 		max_returnable_qty = flt(reference_qty) - returned_qty
 		label = column.replace('_', ' ').title()
 
-		if reference_qty:	
+		if reference_qty:
 			if flt(args.get(column)) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
 			elif returned_qty >= reference_qty and args.get(column):
 				frappe.throw(_("Item {0} has already been returned")
 					.format(args.item_code), StockOverReturnError)
-			elif (abs(args.get(column)) * args.get("conversion_factor", 1.0)) > max_returnable_qty:
+			elif abs(current_stock_qty) > max_returnable_qty:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
 
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-	
+
 	valid_items.setdefault(ref_item_row.item_code, frappe._dict({
 		"qty": 0,
 		"rate": 0,
@@ -160,10 +165,10 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 	if ref_item_row.get("serial_no"):
 		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
-		
+
 	if ref_item_row.get("batch_no"):
 		item_dict["batch_no"].append(ref_item_row.batch_no)
-		
+
 	return valid_items
 
 def get_already_returned_items(doc):

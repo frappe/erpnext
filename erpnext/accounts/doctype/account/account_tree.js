@@ -71,7 +71,7 @@ frappe.treeview_settings["Account"] = {
 
 		// financial statements
 		for (let report of ['Trial Balance', 'General Ledger', 'Balance Sheet',
-			'Profit and Loss', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
+			'Profit and Loss Statement', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
 			treeview.page.add_inner_button(__(report), function() {
 				frappe.set_route('query-report', report, {company: get_company()});
 			}, __('Financial Statements'));

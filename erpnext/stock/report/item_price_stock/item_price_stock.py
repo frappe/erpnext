@@ -20,6 +20,12 @@ def get_columns():
 			"width": 120
 		},
 		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
 			"label": _("Warehouse"),
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
@@ -71,7 +77,7 @@ def get_item_price_qty_data(filters):
 		conditions += "where a.item_code=%(item_code)s"
 
 	item_results = frappe.db.sql("""select a.item_code as item_name, a.name as price_list_name,
-		b.warehouse as warehouse, b.actual_qty as actual_qty
+		a.brand as brand, b.warehouse as warehouse, b.actual_qty as actual_qty
 		from `tabItem Price` a left join `tabBin` b
 		ON a.item_code = b.item_code
 		{conditions}"""
@@ -87,6 +93,7 @@ def get_item_price_qty_data(filters):
 		for item_dict in item_results:
 			data = {
 				'item_name': item_dict.item_name,
+				'brand': item_dict.brand,
 				'warehouse': item_dict.warehouse,
 				'stock_available': item_dict.actual_qty or 0,
 				'buying_price_list': "",
