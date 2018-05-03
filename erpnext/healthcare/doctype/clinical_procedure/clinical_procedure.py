@@ -20,7 +20,7 @@ class ClinicalProcedure(Document):
 
 	def before_insert(self):
 		if self.consume_stock:
-			doc = set_stock_items(self, self.procedure_template, "Clinical Procedure Template")
+			set_stock_items(self, self.procedure_template, "Clinical Procedure Template")
 			self.set_actual_qty();
 
 	def after_insert(self):
