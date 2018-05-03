@@ -94,8 +94,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Patient Service Unit",
-					"label": _("Patient Service Unit")
+					"name": "Healthcare Service Unit",
+					"label": _("Healthcare Service Unit")
 				}
 			]
 		},

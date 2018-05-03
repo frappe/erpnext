@@ -127,7 +127,7 @@ def get_availability_data(date, physician):
 
 					if schedule.service_unit:
 						slot_name  = schedule.schedule+" - "+schedule.service_unit
-						allow_overlap = frappe.get_value('Patient Service Unit', schedule.service_unit, 'overlap_appointments')
+						allow_overlap = frappe.get_value('Healthcare Service Unit', schedule.service_unit, 'overlap_appointments')
 						if allow_overlap:
 							# fetch all appointments to physician by service unit
 							appointments = frappe.get_all(
