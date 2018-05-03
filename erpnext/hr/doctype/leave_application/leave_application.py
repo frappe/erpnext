@@ -444,11 +444,12 @@ def add_leaves(events, start, end, filter_conditions=None):
 	if filter_conditions:
 		conditions.append(filter_conditions)
 
-	from frappe.desk.reportview import build_match_conditions
-	match_conditions = build_match_conditions("Leave Application")
+	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
+		from frappe.desk.reportview import build_match_conditions
+		match_conditions = build_match_conditions("Leave Application")
 
-	if match_conditions:
-		conditions.append(match_conditions)
+		if match_conditions:
+			conditions.append(match_conditions)
 
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
