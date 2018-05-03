@@ -551,6 +551,8 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
+		this.make_loyalty_program();
+		this.make_redeem_loyalty_checkbox();
 		this.make_numpad();
 	}
 
@@ -586,16 +588,28 @@ class POSCart {
 						</div>
 					</div>
 				</div>
-				<div class="number-pad-container">
+				<div class="row">
+					<div class="number-pad-container col-sm-6"></div>
+					<div class="col-sm-6 loyalty-program-section">
+						<div class="loyalty-program-field"> </div>
+						<div class="redeem-loyalty-points-field"> </div>
+					</div>
 				</div>
 			</div>
 		`);
+
+
 		this.$cart_items = this.wrapper.find('.cart-items');
 		this.$empty_state = this.wrapper.find('.cart-items .empty-state');
 		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
 		this.$discount_amount = this.wrapper.find('.discount-amount');
 		this.$grand_total = this.wrapper.find('.grand-total');
 		this.$qty_total = this.wrapper.find('.quantity-total');
+		// this.$loyalty_button = this.wrapper.find('.loyalty-button');
+
+		// this.$loyalty_button.on('click', () => {
+		// 	this.loyalty_button.show();
+		// })
 
 		this.toggle_taxes_and_totals(false);
 		this.$grand_total.on('click', () => {
@@ -727,7 +741,7 @@ class POSCart {
 		);
 	}
 
-	update_qty_total() {		
+	update_qty_total() {
 		var total_item_qty = 0;
 		$.each(this.frm.doc["items"] || [], function (i, d) {
 				if (d.qty > 0) {
@@ -752,7 +766,11 @@ class POSCart {
 					}
 				},
 				onchange: () => {
+					console.log("customer on change, this->", this);
 					this.events.on_customer_change(this.customer_field.get_value());
+					// if (this.frm.doc.loyalty_program) {
+					// 	this.wrapper.find('.loyalty-program-section').removeClass('hide')
+					// }
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -761,6 +779,42 @@ class POSCart {
 
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
+
+
+	make_loyalty_program() {
+		this.loyalty_program_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Link',
+				label: 'Loyalty Program',
+				fieldname: 'loyalty_program',
+				options: 'Loyalty Program',
+				read_only: 1
+			},
+			parent: this.wrapper.find('.loyalty-program-field')
+		});
+
+		this.loyalty_program_field.set_value(this.frm.doc.loyalty_program);
+	}
+
+
+	make_redeem_loyalty_checkbox() {
+		this.redeem_loyalty_points = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Check',
+				label: 'Redeem Loyalty Points',
+				fieldname: 'redeem_loyalty_points',
+				onchange: () => {
+					console.log("redeem points checkbox, this-> ", this);
+					this.frm.set_value("redeem_loyalty_points", this.redeem_loyalty_points.get_value());
+				}
+			},
+			parent: this.wrapper.find('.redeem-loyalty-points-field'),
+			render_input: true
+		});
+		console.log("this is the redeem checkbox", this);
+		this.redeem_loyalty_points.set_value(this.frm.doc.redeem_loyalty_points);
+	}
+
 
 	disable_numpad_control() {
 		let disabled_btns = [];
@@ -1497,7 +1551,7 @@ class Payment {
 			me.numpad.reset_value();
 			me.fieldname = $(this).prop('dataset').fieldname;
 			if (me.frm.doc.outstanding_amount > 0 &&
-				!in_list(['write_off_amount', 'change_amount'], me.fieldname)) {
+				!in_list(['write_off_amount', 'change_amount', 'loyalty_points', 'loyalty_amount'], me.fieldname)) {
 				me.frm.doc.payments.forEach((data) => {
 					if (data.mode_of_payment == me.fieldname && !data.amount) {
 						me.dialog.set_value(me.fieldname,
@@ -1542,6 +1596,33 @@ class Payment {
 			{
 				fieldtype: 'HTML',
 				fieldname: 'numpad'
+			},
+			{
+				fieldtype: 'Section Break',
+			},
+			{
+				fieldtype: 'Int',
+				fieldname: "loyalty_points",
+				label: __("Loyalty Points"),
+				default: me.frm.doc.loyalty_points,
+				onchange: () => {
+					debugger;
+					me.update_cur_frm_value('loyalty_points', () => {
+						frappe.flags.loyalty_points = false;
+						me.update_loyalty_points();
+					});
+				}
+			},
+			{
+				fieldtype: 'Column Break',
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Loyalty Amount"),
+				fieldname: "loyalty_amount",
+				options: me.frm.doc.currency,
+				default: me.frm.doc.loyalty_amount,
+				read_only: 1
 			},
 			{
 				fieldtype: 'Section Break',
@@ -1605,6 +1686,7 @@ class Payment {
 	set_flag() {
 		frappe.flags.write_off_amount = true;
 		frappe.flags.change_amount = true;
+		frappe.flags.loyalty_points = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -1645,4 +1727,12 @@ class Payment {
 		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount);
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
+
+	update_loyalty_points() {
+		this.update_payment_value();
+		this.dialog.set_value("loyalty_points", this.frm.doc.loyalty_points);
+		this.dialog.set_value("loyalty_amount", this.frm.doc.loyalty_amount);
+		// this.show_paid_amount();
+	}
+
 }

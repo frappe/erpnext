@@ -38,6 +38,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	refresh: function(doc, dt, dn) {
+		console.log("triggered the SalesInvoiceController");
 		this._super();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
@@ -523,9 +524,11 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 
 frappe.ui.form.on('Sales Invoice', {
 	refresh: function(frm) {
-		console.log("inside ui.form refresh, this -> ", this);
+		console.log("inside ui.form refresh");
+		frm.add_fetch('customer', 'loyalty_program', 'loyalty_program');
 	},
 	setup: function(frm){
+		
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
