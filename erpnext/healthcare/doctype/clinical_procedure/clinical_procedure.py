@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, nowdate
+from frappe.utils import cint, flt, nowdate, nowtime
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
@@ -55,8 +55,8 @@ class ClinicalProcedure(Document):
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": self.warehouse,
-				"posting_date": self.start_date,
-				"posting_time": self.start_time
+				"posting_date": nowdate(),
+				"posting_time": nowtime()
 			})
 
 			# get actual stock at source warehouse
