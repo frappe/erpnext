@@ -198,7 +198,7 @@ def validate_serial_no(sle, item_det):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
 
 			if len(serial_nos) and len(serial_nos) != abs(cint(sle.actual_qty)):
-				frappe.throw(_("{0} Serial Numbers required for Item {1}. You have provided {2}.").format(sle.actual_qty, sle.item_code, len(serial_nos)),
+				frappe.throw(_("{0} Serial Numbers required for Item {1}. You have provided {2}.").format(abs(sle.actual_qty), sle.item_code, len(serial_nos)),
 					SerialNoQtyError)
 
 			if len(serial_nos) != len(set(serial_nos)):
