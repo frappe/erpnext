@@ -2,14 +2,31 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Healthcare Service Unit', {
-});
+	onload: function(frm) {
+		frm.list_route = "Tree/Healthcare Service Unit";
 
-// get query select healthcare service unit
-cur_frm.fields_dict['parent_healthcare_service_unit'].get_query = function(doc) {
-	return{
-		filters:[
-			['Healthcare Service Unit', 'is_group', '=', 1],
-			['Healthcare Service Unit', 'name', '!=', doc.patient_healthcare_unit_name]
-		]
-	};
-};
+		//get query select healthcare service unit
+		frm.fields_dict['parent_healthcare_service_unit'].get_query = function(doc,cdt,cdn) {
+			return{
+				filters:[
+					['Healthcare Service Unit', 'is_group', '=', 1],
+					['Healthcare Service Unit', 'name', '!=', doc.healthcare_service_unit_name]
+				]
+			}
+		}
+	},
+	refresh: function(frm) {
+		frm.trigger("set_root_readonly");
+		frm.add_custom_button(__("Healthcare Service Unit Tree"), function() {
+			frappe.set_route("Tree", "Healthcare Service Unit");
+		});
+	},
+	set_root_readonly: function(frm) {
+		// read-only for root healthcare service unit
+		frm.set_intro("");
+		if(!frm.doc.parent_healthcare_service_unit) {
+			frm.set_read_only();
+			frm.set_intro(__("This is a root healthcare service unit and cannot be edited."), true);
+		}
+	}
+});
