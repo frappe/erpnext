@@ -20,6 +20,10 @@ def execute(filters=None):
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 		account_details.setdefault(acc.name, acc)
 
+	if filters.get('party'):
+		parties = str(filters.get("party")).strip()
+		filters.party = [d.strip() for d in parties.split(',') if d]
+
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
@@ -57,14 +61,13 @@ def validate_party(filters):
 	if party:
 		if not party_type:
 			frappe.throw(_("To filter based on Party, select Party Type first"))
-		elif not frappe.db.exists(party_type, party):
-			frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
-
+		else:
+			for d in party:
+				if not frappe.db.exists(party_type, d):
+					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
-	if not (filters.get("account") or filters.get("party")):
-		return filters
-	else:
+	if filters.get("account") or (filters.get('party') and len(filters.party) == 1):
 		filters["company_currency"] = frappe.db.get_value("Company", filters.company, "default_currency")
 		account_currency = None
 
@@ -73,7 +76,7 @@ def set_account_currency(filters):
 		elif filters.get("party"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry", {
-					"party_type": filters.party_type, "party": filters.party, "company": filters.company
+					"party_type": filters.party_type, "party": filters.party[0], "company": filters.company
 				},
 				"account_currency"
 			)
@@ -82,14 +85,14 @@ def set_account_currency(filters):
 				account_currency = gle_currency
 			else:
 				account_currency = None if filters.party_type in ["Employee", "Student", "Shareholder"] else \
-					frappe.db.get_value(filters.party_type, filters.party, "default_currency")
+					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency")
 
 		filters["account_currency"] = account_currency or filters.company_currency
 
 		if filters.account_currency != filters.company_currency:
 			filters["show_in_account_currency"] = 1
 
-		return filters
+	return filters
 
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
@@ -151,7 +154,7 @@ def get_conditions(filters):
 		conditions.append("party_type=%(party_type)s")
 
 	if filters.get("party"):
-		conditions.append("party=%(party)s")
+		conditions.append("party in %(party)s")
 
 	if not (filters.get("account") or filters.get("party") or
 		filters.get("group_by") in ["Group by Account", "Group by Party"]):
