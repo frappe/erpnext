@@ -27,6 +27,8 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 		frappe.throw(_("Please select Employee Record first."))
 
 	approvers = []
+	department_details = {}
+	department_list = []
 	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
 	if employee_department:
 		department_details = frappe.db.get_value("Department", {"name": employee_department}, ["lft", "rgt"], as_dict=True)
