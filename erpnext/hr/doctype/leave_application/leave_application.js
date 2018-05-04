@@ -9,7 +9,19 @@ frappe.ui.form.on("Leave Application", {
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
 		}
-
+		if (frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frm.toggle_reqd("leave_approver", true);
+					}
+				}
+			});
+		}
 		frm.set_query("leave_approver", function() {
 			return {
 				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
@@ -35,11 +47,6 @@ frappe.ui.form.on("Leave Application", {
 		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
 			frm.set_intro(__("Fill the form and save it"));
 		}
-		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'leave_approver_mandatory_in_leave_application', (r) => {
-			if (frm.doc.docstatus < 1 && (r.leave_approver_mandatory_in_leave_application == 1)) {
-				frm.toggle_reqd("leave_approver", true);
-			}
-		});
 	},
 
 	employee: function(frm) {
