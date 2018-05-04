@@ -604,19 +604,20 @@ class Item(WebsiteGenerator):
 
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
-		if self.variant_of and self.show_in_website:
-			self.show_variant_in_website = 1
-			self.show_in_website = 0
+		if self.variant_of:
+			if self.show_in_website:
+				self.show_variant_in_website = 1
+				self.show_in_website = 0
 
-		if self.show_variant_in_website:
-			# show template
-			template_item = frappe.get_doc("Item", self.variant_of)
+			if self.show_variant_in_website:
+				# show template
+				template_item = frappe.get_doc("Item", self.variant_of)
 
-			if not template_item.show_in_website:
-				template_item.show_in_website = 1
-				template_item.flags.dont_update_variants = True
-				template_item.flags.ignore_permissions = True
-				template_item.save()
+				if not template_item.show_in_website:
+					template_item.show_in_website = 1
+					template_item.flags.dont_update_variants = True
+					template_item.flags.ignore_permissions = True
+					template_item.save()
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
