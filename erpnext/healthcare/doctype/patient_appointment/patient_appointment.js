@@ -232,7 +232,7 @@ var get_procedure_prescribed = function(frm){
 		});
 	}
 	else{
-			msgprint("Please select Patient to get prescribed procedure");
+		frappe.msgprint("Please select Patient to get prescribed procedure");
 	}
 };
 
@@ -257,8 +257,8 @@ var show_procedure_templates = function(frm, result){
 		data-date="%(date)s"  data-department="%(department)s">\
 		<button class="btn btn-default btn-xs">Add\
 		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {name:y[0], procedure_template: y[1],
-			consultation:y[2], consulting_physician:y[3], consultation_date:y[4],
-			physician:y[5]? y[5]:'', date: y[6]? y[6]:'', department: y[7]? y[7]:''})).appendTo(html_field);
+				consultation:y[2], consulting_physician:y[3], consultation_date:y[4],
+				physician:y[5]? y[5]:'', date: y[6]? y[6]:'', department: y[7]? y[7]:''})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.procedure_template = $(this).attr("data-procedure-template");
 			frm.doc.procedure_prescription = $(this).attr("data-name");
@@ -273,13 +273,13 @@ var show_procedure_templates = function(frm, result){
 			d.hide();
 			return false;
 		});
-	})
+	});
 	if(!result){
 		var msg = "There are no procedure prescribed for "+frm.doc.patient;
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
-}
+};
 
 var btn_create_procedure = function(frm){
 	var doc = frm.doc;

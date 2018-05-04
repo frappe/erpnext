@@ -5,14 +5,14 @@ frappe.ui.form.on('Healthcare Service Unit', {
 	onload: function(frm) {
 		frm.list_route = "Tree/Healthcare Service Unit";
 
-		//get query select healthcare service unit
-		frm.fields_dict['parent_healthcare_service_unit'].get_query = function(doc,cdt,cdn) {
+		// get query select healthcare service unit
+		frm.fields_dict['parent_healthcare_service_unit'].get_query = function(doc) {
 			return{
 				filters:[
 					['Healthcare Service Unit', 'is_group', '=', 1],
 					['Healthcare Service Unit', 'name', '!=', doc.healthcare_service_unit_name]
 				]
-			}
+			};
 		}
 	},
 	refresh: function(frm) {
