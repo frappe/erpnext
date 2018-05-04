@@ -28,40 +28,7 @@ class ProductionPlan(Document):
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
-		so_filter = item_filter = ""
-		if self.from_date:
-			so_filter += " and so.transaction_date >= %(from_date)s"
-		if self.to_date:
-			so_filter += " and so.transaction_date <= %(to_date)s"
-		if self.customer:
-			so_filter += " and so.customer = %(customer)s"
-		if self.project:
-			so_filter += " and so.project = %(project)s"
-
-		if self.item_code:
-			item_filter += " and so_item.item_code = %(item)s"
-
-		open_so = frappe.db.sql("""
-			select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
-			from `tabSales Order` so, `tabSales Order Item` so_item
-			where so_item.parent = so.name
-				and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
-				and so.company = %(company)s
-				and so_item.qty > so_item.work_order_qty {0} {1}
-				and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
-						and bom.is_active = 1)
-					or exists (select name from `tabPacked Item` pi
-						where pi.parent = so.name and pi.parent_item = so_item.item_code
-							and exists (select name from `tabBOM` bom where bom.item=pi.item_code
-								and bom.is_active = 1)))
-			""".format(so_filter, item_filter), {
-				"from_date": self.from_date,
-				"to_date": self.to_date,
-				"customer": self.customer,
-				"project": self.project,
-				"item": self.item_code,
-				"company": self.company
-			}, as_dict=1)
+		open_so = get_sales_orders(self)
 
 		if open_so:
 			self.add_so_in_table(open_so)
@@ -490,6 +457,44 @@ class ProductionPlan(Document):
 				item_details.setdefault(data.item_code, [data.idx])
 
 		return item_details
+
+def get_sales_orders(self):
+	so_filter = item_filter = ""
+	if self.from_date:
+		so_filter += " and so.transaction_date >= %(from_date)s"
+	if self.to_date:
+		so_filter += " and so.transaction_date <= %(to_date)s"
+	if self.customer:
+		so_filter += " and so.customer = %(customer)s"
+	if self.project:
+		so_filter += " and so.project = %(project)s"
+
+	if self.item_code:
+		item_filter += " and so_item.item_code = %(item)s"
+
+	open_so = frappe.db.sql("""
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		from `tabSales Order` so, `tabSales Order Item` so_item
+		where so_item.parent = so.name
+			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
+			and so.company = %(company)s
+			and so_item.qty > so_item.work_order_qty {0} {1}
+			and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+					and bom.is_active = 1)
+				or exists (select name from `tabPacked Item` pi
+					where pi.parent = so.name and pi.parent_item = so_item.item_code
+						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
+							and bom.is_active = 1)))
+		""".format(so_filter, item_filter), {
+			"from_date": self.from_date,
+			"to_date": self.to_date,
+			"customer": self.customer,
+			"project": self.project,
+			"item": self.item_code,
+			"company": self.company
+		}, as_dict=1)
+
+	return open_so
 
 @frappe.whitelist()
 def get_bin_details(row):
