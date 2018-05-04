@@ -313,8 +313,8 @@ class Company(NestedSet):
 		# clear default accounts, warehouses from item
 		if warehouses:
 			for f in ["default_warehouse", "website_warehouse"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
+				frappe.db.sql("""update `tabItem Default` set %s=NULL where company=%s and %s in (%s)"""
+					% (f, self.name, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
 
 			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))

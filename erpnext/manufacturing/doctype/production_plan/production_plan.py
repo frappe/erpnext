@@ -293,14 +293,15 @@ class ProductionPlan(Document):
 				for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
 						ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
 						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
-						item.default_material_request_type, item.min_order_qty, item.default_warehouse
+						item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
 					from
-						`tabBOM Explosion Item` bei, `tabBOM` bom, `tabItem` item
+						`tabBOM Explosion Item` bei, `tabBOM` bom, `tabItem` item, `tabItem Default` item_default
 					where
-						bom.name = bei.parent and item.name = bei.item_code 
-						and bei.docstatus < 2 and bom.name=%s and item.is_stock_item in (1, {0})
+						bom.name = bei.parent and item.name = bei.item_code and bei.docstatus < 2 
+						and item_default.parent = item.name and item_default.company=%s
+						and bom.name=%s and item.is_stock_item in (1, {0})
 					group by bei.item_code, bei.stock_uom""".format(self.include_non_stock_items),
-					data.bom_no, as_dict=1):
+					(self.company, data.bom_no), as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				bom_wise_item_details = self.get_subitems(data, bom_wise_item_details, data.bom_no, 1)
@@ -317,16 +318,18 @@ class ProductionPlan(Document):
 				item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
 				item.default_bom as default_bom, bom_item.description as description,
 				bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty,
-				item.default_warehouse
+				item_default.default_warehouse
 			FROM
-				`tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+				`tabBOM Item` bom_item, `tabBOM` bom, tabItem item, `tabItem Default` item_default
 			where
 				bom.name = bom_item.parent and bom.name = %(bom)s
 				and bom_item.docstatus < 2 and bom_item.item_code = item.name
+				and item.name = item_default.parent and item_default.company = %(company)s
 				and item.is_stock_item in (1, {0})
 			group by bom_item.item_code""".format(self.include_non_stock_items),{
 				'bom': bom_no,
-				'parent_qty': parent_qty
+				'parent_qty': parent_qty,
+				'company': self.company
 			}, as_dict=1)
 
 		for d in items:
