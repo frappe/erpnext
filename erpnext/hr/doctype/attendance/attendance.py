@@ -76,12 +76,12 @@ def add_attendance(events, start, end, conditions=None):
 	query = """select name, attendance_date, employee_name,
 		employee, docstatus
 		from `tabAttendance` where
-		attendance_date <= %(date)s
+		attendance_date between %(from_date)s and %(end_date)s
 		and docstatus < 2"""
 	if conditions:
 		query += conditions
 
-	for d in frappe.db.sql(query, {"date":start, "date":end}, as_dict=True):
+	for d in frappe.db.sql(query, {"from_date":start, "end_date":end}, as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Attendance",
