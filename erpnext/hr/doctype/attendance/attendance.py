@@ -8,6 +8,7 @@ from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from frappe.utils import cstr
 
 class Attendance(Document):
 	def validate_duplicate_record(self):
@@ -54,3 +55,41 @@ class Attendance(Document):
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	events = []
+
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
+		as_dict=True)
+	if employee:
+		employee, company = employee.name, employee.company
+	else:
+		employee=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
+
+	from frappe.desk.reportview import get_filters_cond
+	conditions = get_filters_cond("Attendance", filters, [])
+	add_attendance(events, start, end, conditions=conditions)
+	return events
+
+def add_attendance(events, start, end, conditions=None):
+	query = """select name, attendance_date, employee_name, 
+		employee, docstatus
+		from `tabAttendance` where
+		attendance_date <= %(date)s
+		and docstatus < 2"""
+	if conditions:
+		query += conditions
+
+	for d in frappe.db.sql(query, {"date":start, "date":end}, as_dict=True):
+		e = {
+			"name": d.name,
+			"doctype": "Attendance",
+			"date": d.attendance_date,
+			"title": cstr(d.employee_name) + \
+				cstr(d.shift_type),
+			"docstatus": d.docstatus
+		}
+		if e not in events:
+			events.append(e)
