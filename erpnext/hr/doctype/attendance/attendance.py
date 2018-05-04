@@ -66,7 +66,6 @@ def get_events(start, end, filters=None):
 		employee = employee.name
 	else:
 		employee=''
-		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	from frappe.desk.reportview import get_filters_cond
 	conditions = get_filters_cond("Attendance", filters, [])
