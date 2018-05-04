@@ -71,8 +71,7 @@ def get_events(start, end, filters=None):
 	return events
 
 def add_attendance(events, start, end, conditions=None):
-	query = """select name, attendance_date, employee_name,
-		employee, status
+	query = """select name, attendance_date, status
 		from `tabAttendance` where
 		attendance_date between %(from_date)s and %(to_date)s
 		and docstatus < 2"""
