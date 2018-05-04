@@ -60,10 +60,10 @@ class Attendance(Document):
 def get_events(start, end, filters=None):
 	events = []
 
-	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name"],
 		as_dict=True)
 	if employee:
-		employee, company = employee.name, employee.company
+		employee = employee.name
 	else:
 		employee=''
 		company=frappe.db.get_value("Global Defaults", None, "default_company")
@@ -74,7 +74,7 @@ def get_events(start, end, filters=None):
 	return events
 
 def add_attendance(events, start, end, conditions=None):
-	query = """select name, attendance_date, employee_name, 
+	query = """select name, attendance_date, employee_name,
 		employee, docstatus
 		from `tabAttendance` where
 		attendance_date <= %(date)s

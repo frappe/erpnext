@@ -15,4 +15,4 @@ frappe.views.calendar["Attendance"] = {
 		}
 	},
 	get_events_method: "erpnext.hr.doctype.attendance.attendance.get_events"
-}
+};
