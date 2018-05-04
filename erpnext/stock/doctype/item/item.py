@@ -642,7 +642,7 @@ class Item(WebsiteGenerator):
 		if self.stock_ledger_created() and self._doc_before_save:
 			if (cint(self._doc_before_save.has_variants) != cint(self.has_variants)
 				or self._doc_before_save.variant_of != self.variant_of):
-				frappe.throw(_("Cannot change Variant properties after stock transction. You will have to make a new Item to do this.").format(self.name),
+				frappe.throw(_("Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.").format(self.name),
 					StockExistsForTemplate)
 
 			if self.has_variants or self.variant_of:
