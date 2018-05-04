@@ -40,6 +40,14 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			};
 		});
+		frm.set_query("service_unit", function(){
+			return {
+				filters: {
+					"is_group": false,
+					"allow_appointments": true
+				}
+			};
+		});
 		if(frm.doc.consume_stock){
 			frm.set_indicator_formatter('item_code',
 				function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" ; });
@@ -159,6 +167,7 @@ frappe.ui.form.on('Clinical Procedure', {
 					frm.set_value("start_date", data.message.appointment_date);
 					frm.set_value("start_time", data.message.appointment_time);
 					frm.set_value("notes", data.message.notes);
+					frm.set_value("service_unit", data.message.service_unit);
 				}
 			});
 		}
@@ -190,6 +199,23 @@ frappe.ui.form.on('Clinical Procedure', {
 			});
 		}else{
 			frm.set_value("consume_stock", 0);
+		}
+	},
+	service_unit: function(frm) {
+		if(frm.doc.service_unit){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args:{
+					fieldname: "warehouse",
+					doctype: "Healthcare Service Unit",
+					filters:{name: frm.doc.service_unit},
+				},
+				callback: function(data) {
+					if(data.message){
+						frm.set_value("warehouse", data.message.warehouse);
+					}
+				}
+			});
 		}
 	}
 });

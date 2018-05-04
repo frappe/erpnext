@@ -169,8 +169,15 @@ def create_procedure(appointment):
 	procedure.start_date = appointment.appointment_date
 	procedure.start_time = appointment.appointment_time
 	procedure.notes = appointment.notes
+	procedure.service_unit = appointment.service_unit
 	consume_stock = frappe.db.get_value("Clinical Procedure Template", appointment.procedure_template, "consume_stock")
 	if consume_stock == 1:
 		procedure.consume_stock = True
-		procedure.warehouse = frappe.db.get_value("Stock Settings", None, "default_warehouse")
+		warehouse = False
+		if appointment.service_unit:
+			warehouse = frappe.db.get_value("Healthcare Service Unit", appointment.service_unit, "warehouse")
+		if not warehouse:
+			warehouse = frappe.db.get_value("Stock Settings", None, "default_warehouse")
+		if warehouse:
+			procedure.warehouse = warehouse
 	return procedure.as_dict()
