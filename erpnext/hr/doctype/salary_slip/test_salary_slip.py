@@ -134,12 +134,12 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertTrue(email_queue)
 
 	def test_loan_repayment_salary_slip(self):
-		from erpnext.hr.doctype.employee_loan.test_employee_loan import create_loan_type, create_employee_loan
-		employee = self.make_employee("test_employee@salary.com")
+		from erpnext.hr.doctype.loan.test_loan import create_loan_type, create_loan
+		applicant = self.make_employee("test_employee@salary.com")
 		create_loan_type("Car Loan", 500000, 6.4)
-		employee_loan = create_employee_loan(employee, "Car Loan", 11000, "Repay Over Number of Periods", 20)
-		employee_loan.repay_from_salary = 1
-		employee_loan.submit()
+		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20)
+		loan.repay_from_salary = 1
+		loan.submit()
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 		ss.submit()

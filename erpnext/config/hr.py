@@ -159,7 +159,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Loan Management"),
+			"label": _("Loan Management"),
 			"icon": "icon-list",
 			"items": [
 				{
@@ -169,12 +169,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan Application",
-					"description": _("Employee Loan Application")
+					"name": "Loan Application",
+					"description": _("Loan Application")
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan"
+					"name": "Loan"
 				},
 			]
 		},
@@ -244,7 +244,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Group"
+					"name": "Daily Work Summary Settings"
+				},
+				{
+					"type": "doctype",
+					"name": "Health Insurance"
 				}
 			]
 		},

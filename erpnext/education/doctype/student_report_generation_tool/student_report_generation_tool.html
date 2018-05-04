@@ -1,0 +1,371 @@
+<style>
+		@media screen {
+		.print-format-gutter {
+			background-color: #ddd;
+			padding: 15px 0px;
+		}
+		.print-format {
+			background-color: white;
+			box-shadow: 0px 0px 9px rgba(0,0,0,0.5);
+			max-width: 8.3in;
+			min-height: 11.69in;
+			padding: 0.75in;
+			margin: auto;
+		}
+	
+		.print-format.landscape {
+			max-width: 11.69in;
+			padding: 0.2in;
+		}
+	
+		.page-break {
+			padding: 30px 0px;
+			border-bottom: 1px dashed #888;
+		}
+	
+		.page-break:first-child {
+			padding-top: 0px;
+		}
+	
+		.page-break:last-child {
+			border-bottom: 0px;
+		}
+	
+		/* mozilla hack for images in table */
+		body:last-child .print-format td img {
+			width: 100% !important;
+		}
+	
+		@media(max-width: 767px) {
+			.print-format {
+				padding: 0.2in;
+			}
+		}
+	}
+	
+	@media print {
+		.print-format p {
+			margin-left: 1px;
+			margin-right: 1px;
+		}
+	}
+	
+	.data-field {
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+	
+	.data-field .value {
+		word-wrap: break-word;
+	}
+	
+	.important .value {
+		font-size: 120%;
+		font-weight: bold;
+	}
+	
+	.important label {
+		line-height: 1.8;
+		margin: 0px;
+	}
+	
+	.table {
+		margin: 20px 0px;
+	}
+	
+	.square-image {
+		width: 100%;
+		height: 0;
+		padding: 50% 0;
+		background-size: contain;
+		/*background-size: cover;*/
+		background-repeat: no-repeat !important;
+		background-position: center center;
+		border-radius: 4px;
+	}
+	
+	.print-item-image {
+		object-fit: contain;
+	}
+	
+	.pdf-variables,
+	.pdf-variable,
+	.visible-pdf {
+		display: none !important;
+	}
+	
+	.print-format {
+		font-size: 9pt;
+		font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
+		-webkit-print-color-adjust:exact;
+	}
+	
+	.page-break {
+		page-break-after: always;
+	}
+	
+	.print-heading {
+		border-bottom: 1px solid #aaa;
+		margin-bottom: 10px;
+	}
+	
+	.print-heading h2 {
+		margin: 0px;
+	}
+	.print-heading h4 {
+		margin-top: 5px;
+	}
+	
+	table.no-border, table.no-border td {
+		border: 0px;
+	}
+	
+	.print-format label {
+		/* wkhtmltopdf breaks label into multiple lines when it is inline-block */
+		display: block;
+	}
+	
+	.print-format img {
+		max-width: 100%;
+	}
+	
+	.print-format table td > .primary:first-child {
+		font-weight: bold;
+	}
+	
+	.print-format td, .print-format th {
+		vertical-align: top !important;
+		padding: 6px !important;
+	}
+	
+	.print-format p {
+		margin: 3px 0px 3px;
+	}
+	
+	table td div {
+		
+		/* needed to avoid partial cutting of text between page break in wkhtmltopdf */
+		page-break-inside: avoid !important;
+		
+	}
+	
+	/* hack for webkit specific browser */
+	@media (-webkit-min-device-pixel-ratio:0) {
+		thead, tfoot { display: table-row-group; }
+	}
+	
+	[document-status] {
+		margin-bottom: 5mm;
+	}
+	
+	.signature-img {
+		background: #fff;
+		border-radius: 3px;
+		margin-top: 5px;
+		max-height: 150px;
+	}
+	
+	.print-heading {
+		text-align: right;
+		text-transform: uppercase;
+		color: #666;
+		padding-bottom: 20px;
+		margin-bottom: 20px;
+		border-bottom: 1px solid #d1d8dd;
+	}
+	
+	.print-heading h2 {
+		font-size: 24px;
+	}
+	
+	.print-format th {
+		background-color: #eee !important;
+		border-bottom: 0px !important;
+	}
+	
+	/* modern format: for-test */
+
+	.pbi_avoid {
+		page-break-inside: avoid !important;
+	}
+	.pb_before {
+		page-break-before: always !important;
+	}
+</style>
+
+
+
+<div class="page-break">
+
+	<div id="header-html" class="hidden-pdf">
+
+		{% if letterhead and add_letterhead %}
+			<div class="">{{ letterhead }}</div>
+		{% endif %}
+		<div class="print-heading">
+			<h2>{{ _("Student Report Card") }}<br>
+				<small>{{ doc.student_name }}</small>
+			</h2>
+		</div>
+	</div>
+
+	<div class="row section-break">
+		<div class="col-xs-6 column-break">
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Student ID: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.students[0] }}
+				</div>
+			</div>
+
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Student Name: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.student_name }}
+				</div>
+			</div>
+
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Program: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.program }}
+				</div>
+			</div>
+
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Batch: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.student_batch }}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-6 column-break">
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Academic Year: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.academic_year }}
+				</div>
+			</div>
+
+			{% if doc.academic_term %}
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Academic Term: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.academic_term }}
+				</div>
+			</div>
+			{% endif %}
+
+			<div class="row data-field">
+				<div class="col-xs-5">
+					<label>{{ _("Assessment Group: ") }}</label>
+				</div>
+				<div class="col-xs-7">
+					{{ doc.assessment_group }}
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+{% if doc.show_marks | int %}
+	{% set result_data = 'score' %}
+{% else %}
+	{% set result_data = 'grade' %}
+{% endif %}
+
+
+{% for course in courses %}
+
+<div class="row section-break pbi_avoid">
+	<div class="col-xs-12 column-break">
+
+		<div>
+		<table class="table table-bordered table-condensed">
+			<caption>
+				<div class="row">
+					<div class="col-xs-1">
+						<label>{{ _("Course: ") }}</label>
+					</div>
+					<div class="col-xs-11">
+						{{ course }} ({{ frappe.db.get_value("Course", course, "course_name") }})
+					</div>
+				</div>
+			</caption>
+			<thead>
+				<tr>
+					<th style="width: {{ 650//(assessment_groups|length + 1) }}px">{{ _("Assessment Criteria") }}</th>
+					{% for assessment_group in assessment_groups %}
+					<th> {{ assessment_group }}</th>
+					{% endfor %}
+				</tr>
+			</thead>
+
+			<tbody>
+				{% for criteria in course_criteria[course] %}
+				<tr>
+					<td>{{ criteria }}</td>
+					{% for assessment_group in assessment_groups %}
+						{% if (assessment_result.get(course) and assessment_result.get(course).get(assessment_group) and assessment_result.get(course).get(assessment_group).get(criteria)) %}
+							<td>
+								{{ assessment_result.get(course).get(assessment_group).get(criteria).get(result_data) }}
+								{% if result_data == 'score' %}
+								({{ assessment_result.get(course).get(assessment_group).get(criteria).get('maximum_score') }})
+								{% endif %}
+							</td>
+						{% else %}
+							<td></td>
+						{% endif %}
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</tbody>
+
+		</table>
+		</div>
+	</div>
+</div>
+
+{% endfor %}
+
+<br>
+
+<div class="row section-break pbi_avoid">
+	<div class="col-xs-6 column-break">	
+		<h4>{{ _("Student Attendance")}}</h4> <br>
+		<div>
+			Present {{ doc.attendance.get("Present") if doc.attendance.get("Present") != None else '0' }} days
+			out of {{ doc.attendance.get("Present") + doc.attendance.get("Absent") }}
+		</div>
+	</div>
+
+	<div class="col-xs-6 column-break">	
+		<h4>{{ _("Parents Teacher Meeting Attendance")}}</h4> <br>
+		<div>
+			Present {{ doc.parents_attendance if doc.parents_attendance != None else '0' }}
+			out of {{ doc.parents_meeting if doc.parents_meeting != None else '0' }}
+		</div>
+	</div>
+</div>
+
+{% if doc.assessment_terms %}
+<div class="row section-break pb_before">
+	<div class="col-xs-12">
+		<p> {{ doc.assessment_terms }} </p>
+	</div>
+</div>
+{% endif %}
+</div>

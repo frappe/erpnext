@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (add_days, getdate, formatdate, get_first_day, date_diff,
-                          add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
+from frappe.utils import (add_days, getdate, formatdate, date_diff,
+	add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -131,15 +130,15 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions().get("Price List", []))
-	if isinstance(price_list, list):
-		price_list = price_list[0] if len(price_list)==1 else None
+	price_list = filter(None, get_user_permissions()
+		.get("Price List", {})
+		.get("docs", []))
+	price_list = list(price_list)
 
-	if not price_list:
-		price_list = get_default_price_list(party)
-
-	if not price_list:
-		price_list = given_price_list
+	if price_list:
+		price_list = price_list[0]
+	else:
+		price_list = get_default_price_list(party) or given_price_list
 
 	if price_list:
 		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency")

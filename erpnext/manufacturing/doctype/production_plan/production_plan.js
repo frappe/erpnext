@@ -37,8 +37,8 @@ frappe.ui.form.on('Production Plan', {
 
 		if (frm.doc.docstatus === 1 && frm.doc.po_items
 			&& frm.doc.status != 'Completed') {
-			frm.add_custom_button(__("Production Order"), ()=> {
-				frm.trigger("make_production_order");
+			frm.add_custom_button(__("Work Order"), ()=> {
+				frm.trigger("make_work_order");
 			}, __("Make"));
 		}
 
@@ -52,9 +52,9 @@ frappe.ui.form.on('Production Plan', {
 		frm.trigger("material_requirement");
 	},
 
-	make_production_order: function(frm) {
+	make_work_order: function(frm) {
 		frappe.call({
-			method: "make_production_order",
+			method: "make_work_order",
 			freeze: true,
 			doc: frm.doc,
 			callback: function() {

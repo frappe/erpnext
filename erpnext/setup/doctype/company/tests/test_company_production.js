@@ -4,7 +4,7 @@ QUnit.test("Test: Company", function (assert) {
 	let done = assert.async();
 
 	frappe.run_serially([
-		// Added company for Production Order testing
+		// Added company for Work Order testing
 		() => frappe.set_route("List", "Company"),
 		() => frappe.new_doc("Company"),
 		() => frappe.timeout(1),

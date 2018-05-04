@@ -492,8 +492,8 @@ frappe.help.help_links['Form/BOM'] = [
 	{ label: 'Nested BOM Structure', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/articles/nested-bom-structure' },
 ]
 
-frappe.help.help_links['Form/Production Order'] = [
-	{ label: 'Production Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/production-order' },
+frappe.help.help_links['Form/Work Order'] = [
+	{ label: 'Work Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/work-order' },
 ]
 
 frappe.help.help_links['Form/Workstation'] = [

@@ -13,12 +13,6 @@ from six import string_types
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
-	def load_notification_message(self):
-		dt = self.doctype.lower().replace(" ", "_")
-		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.set("__notification_message",
-				frappe.db.get_value("Notification Control", None, dt + "_message"))
-
 	def validate_posting_time(self):
 		# set Edit Posting Date and Time to 1 while data import
 		if frappe.flags.in_import and self.posting_date:
@@ -36,7 +30,8 @@ class TransactionBase(StatusUpdater):
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
-				cstr(self.contact_date) != cstr(self._prev.contact_date) or force:
+				cstr(self.contact_date) != cstr(self._prev.contact_date) or force or \
+				(hasattr(self, "ends_on") and cstr(self.ends_on) != cstr(self._prev.ends_on)):
 
 			self.delete_events()
 			self._add_calendar_event(opts)
@@ -58,6 +53,7 @@ class TransactionBase(StatusUpdater):
 				"subject": opts.subject,
 				"description": opts.description,
 				"starts_on":  self.contact_date,
+				"ends_on": opts.ends_on,
 				"event_type": "Private",
 				"ref_type": self.doctype,
 				"ref_name": self.name

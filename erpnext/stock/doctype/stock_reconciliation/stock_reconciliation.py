@@ -8,6 +8,7 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
+from erpnext.accounts.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
@@ -304,3 +305,13 @@ def get_stock_balance_for(item_code, warehouse, posting_date, posting_time):
 		'qty': qty,
 		'rate': rate
 	}
+
+@frappe.whitelist()
+def get_difference_account(purpose, company):
+	if purpose == 'Stock Reconciliation':
+		account = get_company_default(company, "stock_adjustment_account")
+	else:
+		account = frappe.db.get_value('Account', {'is_group': 0,
+			'company': company, 'account_type': 'Temporary'}, 'name')
+
+	return account

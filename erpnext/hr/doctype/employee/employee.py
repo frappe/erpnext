@@ -40,9 +40,8 @@ class Employee(NestedSet):
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
-		self.validate_employee_leave_approver()
 		self.validate_reports_to()
-		self.validate_prefered_email()
+		self.validate_preferred_email()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -63,6 +62,7 @@ class Employee(NestedSet):
 			self.update_user_permissions()
 
 	def update_user_permissions(self):
+		if not self.create_user_permission: return
 		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
 		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
 
@@ -72,7 +72,7 @@ class Employee(NestedSet):
 		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
-			user.add_roles("Employee")
+			user.append_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name and not (user.first_name and user.last_name):
@@ -149,11 +149,6 @@ class Employee(NestedSet):
 			throw(_("User {0} is already assigned to Employee {1}").format(
 				self.user_id, employee[0]), frappe.DuplicateEntryError)
 
-	def validate_employee_leave_approver(self):
-		for l in self.get("leave_approvers")[:]:
-			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
-
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
@@ -162,7 +157,7 @@ class Employee(NestedSet):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
 
-	def validate_prefered_email(self):
+	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
 
@@ -330,3 +325,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 	# return employee
 	return employee
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])

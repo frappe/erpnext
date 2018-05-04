@@ -131,7 +131,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	email_prompt: function() {
 		var me = this;
 		var fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
-			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
+			{fieldtype: "Section Break", collapsible: 1, label: "CC & Email Template"},
 			{fieldtype: "Section Break"},
 			{label:__("Subject"), fieldtype:"Data", reqd: 1,
 				fieldname:"subject",length:524288},
@@ -1302,10 +1302,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			}
 		});
 
-		if (field == 'qty') {
-			this.remove_zero_qty_item();
-		}
-
 		this.update_paid_amount_status(false)
 	},
 
@@ -1445,6 +1441,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.set_taxes();
 		this.calculate_outstanding_amount(update_paid_amount);
 		this.set_totals();
+		this.update_total_qty();
 	},
 
 	get_company_currency: function () {
@@ -1513,6 +1510,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.wrapper.find(".grand-total").text(format_currency(me.frm.doc.grand_total, me.frm.doc.currency));
 		this.wrapper.find('input.discount-percentage').val(this.frm.doc.additional_discount_percentage);
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
+	},
+
+	update_total_qty: function() {
+		var me = this;
+		var qty_total = 0;
+			$.each(this.frm.doc["items"] || [], function (i, d) {
+				if (d.item_code) {
+					qty_total += d.qty;
+				}
+			});
+		this.frm.doc.qty_total = qty_total;
+		this.wrapper.find('.qty-total').text(this.frm.doc.qty_total);
 	},
 
 	set_primary_action: function () {
@@ -1637,7 +1646,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var invoice_data = {};
 		this.si_docs = this.get_doc_from_localstorage();
-    
+
 		if (this.frm.doc.offline_pos_name) {
 			this.update_invoice()
 			//to retrieve and set the default payment
@@ -1651,6 +1660,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.offline_pos_name = $.now();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
+			this.frm.doc.pos_total_qty = this.frm.doc.qty_total;
 			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
 			this.si_docs.push(invoice_data);

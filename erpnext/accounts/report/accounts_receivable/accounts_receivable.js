@@ -14,7 +14,14 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
-			"options": "Customer"
+			"options": "Customer",
+			on_change: () => {
+				var customer = frappe.query_report_filters_by_name.customer.get_value();
+				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name"], function(value) {
+					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+					frappe.query_report_filters_by_name.customer_name.set_value(value["customer_name"]);
+				});
+			}
 		},
 		{
 			"fieldname":"customer_group",
@@ -87,6 +94,18 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"show_pdc_in_print",
 			"label": __("Show PDC in Print"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname":"tax_id",
+			"label": __("Tax Id"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"customer_name",
+			"label": __("Customer Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		}
 	],
 

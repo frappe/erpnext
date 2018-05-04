@@ -8,7 +8,8 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from six import string_types
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -228,12 +229,12 @@ class ProductionPlan(Document):
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
-		self.delete_draft_production_order()
+		self.delete_draft_work_order()
 
-	def delete_draft_production_order(self):
-		for d in frappe.get_all('Production Order', fields = ["name"],
+	def delete_draft_work_order(self):
+		for d in frappe.get_all('Work Order', fields = ["name"],
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
-			frappe.delete_doc('Production Order', d.name)
+			frappe.delete_doc('Work Order', d.name)
 
 	def set_status(self):
 		self.status = {
@@ -391,37 +392,37 @@ class ProductionPlan(Document):
 				'sales_order': data.sales_order
 			})
 
-	def make_production_order(self):
-		pro_list = []
+	def make_work_order(self):
+		wo_list = []
 		self.validate_data()
 		items_data = self.get_production_items()
 
 		for key, item in items_data.items():
-			production_order = self.create_production_order(item)
-			if production_order:
-				pro_list.append(production_order)
+			work_order = self.create_work_order(item)
+			if work_order:
+				wo_list.append(work_order)
 
 		frappe.flags.mute_messages = False
 
-		if pro_list:
-			pro_list = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in pro_list]
-			msgprint(_("{0} created").format(comma_and(pro_list)))
+		if wo_list:
+			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+				(p, p) for p in wo_list]
+			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
-			msgprint(_("No Production Orders created"))
+			msgprint(_("No Work Orders created"))
 
-	def create_production_order(self, item):
-		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError, get_default_warehouse
+	def create_work_order(self, item):
+		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
 		warehouse = get_default_warehouse()
-		pro = frappe.new_doc("Production Order")
-		pro.update(item)
-		pro.set_production_order_operations()
+		wo = frappe.new_doc("Work Order")
+		wo.update(item)
+		wo.set_work_order_operations()
 
-		if not pro.fg_warehouse:
-			pro.fg_warehouse = warehouse.get('fg_warehouse')
+		if not wo.fg_warehouse:
+			wo.fg_warehouse = warehouse.get('fg_warehouse')
 		try:
-			pro.insert()
-			return pro.name
+			wo.insert()
+			return wo.name
 		except OverProductionError:
 			pass
 
@@ -483,7 +484,7 @@ class ProductionPlan(Document):
 
 @frappe.whitelist()
 def get_bin_details(row):
-	if isinstance(row, basestring):
+	if isinstance(row, string_types):
 		row = frappe._dict(json.loads(row))
 
 	conditions = ""

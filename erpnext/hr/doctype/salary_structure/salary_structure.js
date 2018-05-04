@@ -39,6 +39,16 @@ frappe.ui.form.on('Salary Structure', {
 				}
 			}
 		});
+		frm.set_query("payment_account", function () {
+			var account_types = ["Bank", "Cash"];
+			return {
+				filters: {
+					"account_type": ["in", account_types],
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -150,6 +160,28 @@ frappe.ui.form.on('Salary Structure', {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	}
 });
+
+frappe.ui.form.on('Salary Structure Employee', {
+	from_date: function(frm, cdt, cdn) {
+		validate_date(frm, cdt, cdn);
+	},
+	to_date: function(frm, cdt, cdn) {
+		validate_date(frm, cdt, cdn);
+	}
+});
+
+var validate_date = function(frm, cdt, cdn) {
+	var doc = locals[cdt][cdn];
+	if(doc.to_date && doc.from_date) {
+		var from_date = frappe.datetime.str_to_obj(doc.from_date);
+		var to_date = frappe.datetime.str_to_obj(doc.to_date);
+
+		if(to_date < from_date) {
+			frappe.model.set_value(cdt, cdn, "to_date", "");
+			frappe.throw(__("From Date cannot be greater than To Date"));
+		}
+	}
+}
 
 
 cur_frm.cscript.amount = function(doc, cdt, cdn){

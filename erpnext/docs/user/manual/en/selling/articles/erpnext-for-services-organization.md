@@ -40,6 +40,9 @@ ERPNext is the permission controlled system. Users access system based on permis
 
 You can also refer to help video on User and Permissions setting in ERPNext.
 
-<iframe width="660" height="371" src="https://www.youtube.com/embed/fnBoRhBrwR4" frameborder="0" allowfullscreen></iframe>
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/8Slw1hsTmUI" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
 
 <!-- markdown -->

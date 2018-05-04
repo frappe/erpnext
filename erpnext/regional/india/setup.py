@@ -180,10 +180,14 @@ def make_custom_fields():
 		'Sales Invoice Item': [hsn_sac_field],
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field]
+		'Purchase Invoice Item': [hsn_sac_field],
+		'Employee': [
+			dict(fieldname='ifsc_code', label='IFSC Code',
+				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
+				depends_on='eval:doc.salary_mode == "Bank"') ]
 	}
 
-	create_custom_fields(custom_fields)
+	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch)
 
 def make_fixtures():
 	docs = [

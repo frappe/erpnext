@@ -3,8 +3,8 @@ import frappe
 from erpnext.stock.stock_balance import repost_stock
 
 def execute():
-	frappe.reload_doc('manufacturing', 'doctype', 'production_order_item')
-	frappe.reload_doc('manufacturing', 'doctype', 'production_order')
+	frappe.reload_doc('manufacturing', 'doctype', 'work_order_item')
+	frappe.reload_doc('manufacturing', 'doctype', 'work_order')
 	
 	modified_items = frappe.db.sql_list("""
 		select name from `tabItem` 
@@ -26,12 +26,12 @@ def execute():
 			
 	item_warehouses_with_transactions += list(frappe.db.sql("""
 		select distinct production_item, fg_warehouse 
-		from `tabProduction Order` where docstatus=1 and production_item in ({0})"""
+		from `tabWork Order` where docstatus=1 and production_item in ({0})"""
 		.format(', '.join(['%s']*len(modified_items))), tuple(modified_items)))
 	
 	item_warehouses_with_transactions += list(frappe.db.sql("""
 		select distinct pr_item.item_code, pr_item.source_warehouse 
-		from `tabProduction Order` pr, `tabProduction Order Item` pr_item 
+		from `tabWork Order` pr, `tabWork Order Item` pr_item 
 		where pr_item.parent and pr.name and pr.docstatus=1 and pr_item.item_code in ({0})"""
 		.format(', '.join(['%s']*len(modified_items))), tuple(modified_items)))
 	

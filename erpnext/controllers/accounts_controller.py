@@ -198,7 +198,6 @@ class AccountsController(TransactionBase):
 
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
-
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
@@ -233,13 +232,18 @@ class AccountsController(TransactionBase):
 
 		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-		if self.is_new() and not self.get("taxes"):
+		if (self.is_new() or self.is_pos_profile_changed()) and not self.get("taxes"):
 			if self.company and not self.get("taxes_and_charges"):
 				# get the default tax master
 				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype,
 					{"is_default": 1, 'company': self.company})
 
 			self.append_taxes_from_master(tax_master_doctype)
+
+	def is_pos_profile_changed(self):
+		if (self.doctype == 'Sales Invoice' and self.is_pos and
+			self.pos_profile != frappe.db.get_value('Sales Invoice', self.name, 'pos_profile')):
+			return True
 
 	def append_taxes_from_master(self, tax_master_doctype=None):
 		if self.get("taxes_and_charges"):
@@ -667,7 +671,9 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		if self.doctype == 'Sales Invoice' and self.is_pos: return
+		if self.doctype == 'Sales Invoice' and self.is_pos:
+			self.payment_terms_template = ''
+			return
 
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")

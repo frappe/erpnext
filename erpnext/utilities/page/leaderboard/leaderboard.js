@@ -24,7 +24,7 @@ frappe.Leaderboard = Class.extend({
 			"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
 				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
 			"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
-			"Sales Partner": ["total_sales_amount", "total_commision"],
+			"Sales Partner": ["total_sales_amount", "total_commission"],
 			"Sales Person": ["total_sales_amount"],
 		};
 
@@ -146,7 +146,6 @@ frappe.Leaderboard = Class.extend({
 
 				me.$graph_area.show().empty();
 				let args = {
-					parent: '.leaderboard-graph',
 					data: {
 						datasets: [
 							{
@@ -160,7 +159,7 @@ frappe.Leaderboard = Class.extend({
 					type: 'bar',
 					height: 140
 				};
-				new Chart(args);
+				new Chart('.leaderboard-graph', args);
 
 				notify(me, r, $container);
 			}
@@ -280,7 +279,7 @@ frappe.Leaderboard = Class.extend({
 			fields.map(col => {
 					let val = item[col];
 					if(col=="name") {
-						var formatted_value = `<a class="grey list-id ellipsis" 
+						var formatted_value = `<a class="grey list-id ellipsis"
 							href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
 					} else {
 						var formatted_value = `<span class="text-muted ellipsis">

@@ -9,9 +9,30 @@ frappe.ui.form.on("Leave Application", {
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
 		}
+		if (frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frm.toggle_reqd("leave_approver", true);
+					}
+				}
+			});
+		}
+		frm.set_query("leave_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
+				}
+			};
+		});
 
 		frm.set_query("employee", erpnext.queries.employee);
-
 	},
 
 	validate: function(frm) {
@@ -30,6 +51,12 @@ frappe.ui.form.on("Leave Application", {
 
 	employee: function(frm) {
 		frm.trigger("get_leave_balance");
+	},
+
+	leave_approver: function(frm) {
+		if(frm.doc.leave_approver){
+			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+		}
 	},
 
 	leave_type: function(frm) {
@@ -90,6 +117,15 @@ frappe.ui.form.on("Leave Application", {
 
 	calculate_total_days: function(frm) {
 		if(frm.doc.from_date && frm.doc.to_date && frm.doc.employee && frm.doc.leave_type) {
+
+			var from_date = Date.parse(frm.doc.from_date);
+			var to_date = Date.parse(frm.doc.to_date);
+
+			if(to_date < from_date){
+				frappe.msgprint(__("To Date cannot be less than From Date"));
+				frm.set_value('to_date', '');
+				return;
+			}
 				// server call is done to include holidays in leave days calculations
 			return frappe.call({
 				method: 'erpnext.hr.doctype.leave_application.leave_application.get_number_of_leave_days',

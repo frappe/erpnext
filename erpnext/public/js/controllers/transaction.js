@@ -106,7 +106,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(
-			this.frm.fields_dict["payment_terms_template"]
+			this.frm.docstatus < 2 
+			&& this.frm.fields_dict["payment_terms_template"]
 			&& this.frm.fields_dict["payment_schedule"]
 			&& this.frm.doc.payment_terms_template
 			&& !this.frm.doc.payment_schedule.length
@@ -295,7 +296,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
-
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -304,7 +304,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
