@@ -13,7 +13,7 @@ frappe.ui.form.on('Healthcare Service Unit', {
 					['Healthcare Service Unit', 'name', '!=', doc.healthcare_service_unit_name]
 				]
 			};
-		}
+		};
 	},
 	refresh: function(frm) {
 		frm.trigger("set_root_readonly");
