@@ -22,15 +22,19 @@ def _execute(filters=None):
 
 	data = []
 	for d in item_list:
-		row = [d.gst_hsn_code, d.description, d.stock_qty, d.stock_uom, d.base_net_amount]
-
+		row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty]
 		total_tax = 0
 		for tax in tax_columns:
 			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
-			row += [item_tax.get("tax_amount", 0)]
 			total_tax += flt(item_tax.get("tax_amount"))
 
 		row += [d.base_net_amount + total_tax]
+		row += [d.base_net_amount]
+
+		for tax in tax_columns:
+			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+			row += [item_tax.get("tax_amount", 0)]
+
 		data.append(row)
 	if data:
 		data = get_merged_data(columns, data) # merge same hsn code data
@@ -52,16 +56,22 @@ def get_columns():
 			"width": 300
 		},
 		{
+			"fieldname": "stock_uom",
+			"label": _("Stock UOM"),
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
 			"fieldname": "stock_qty",
 			"label": _("Stock Qty"),
 			"fieldtype": "Float",
 			"width": 90
 		},
 		{
-			"fieldname": "stock_uom",
-			"label": _("Stock UOM"),
-			"fieldtype": "Data",
-			"width": 100
+			"fieldname": "total_amount",
+			"label": _("Total Amount"),
+			"fieldtype": "Currency",
+			"width": 120
 		},
 		{
 			"fieldname": "taxable_amount",
@@ -168,14 +178,14 @@ def get_tax_accounts(item_list, columns, company_currency,
 	for desc in tax_columns:
 		columns.append(desc + " Amount:Currency/currency:160")
 
-	columns += ["Total Amount:Currency/currency:110"]
+	# columns += ["Total Amount:Currency/currency:110"]
 	return itemised_tax, tax_columns
 
 def get_merged_data(columns, data):
 	merged_hsn_dict = {} # to group same hsn under one key and perform row addition
 	add_column_index = [] # store index of columns that needs to be added
 	tax_col = len(get_columns())
-	fields_to_merge = ["stock_qty", "taxable_amount"] # columns for which index needs to be found
+	fields_to_merge = ["stock_qty", "total_amount", "taxable_amount"] # columns for which index needs to be found
 
 	for i,d in enumerate(columns):
 		# check if fieldname in to_merge list and ignore tax-columns
