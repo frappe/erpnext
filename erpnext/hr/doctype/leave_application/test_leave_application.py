@@ -7,7 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, nowdate, now_datetime
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -44,7 +44,7 @@ _test_records = [
 
 class TestLeaveApplication(unittest.TestCase):
     def setUp(self):
-        for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
+        for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Period"]:
             frappe.db.sql("delete from `tab%s`" % dt)
 
     def tearDown(self):
@@ -458,8 +458,8 @@ def get_leave_period():
         return frappe.get_doc(dict(
             name = 'Test Leave Period',
             doctype = 'Leave Period',
-            from_date = add_days(nowdate(), -14),
-            to_date = add_days(nowdate(), 14),
+            from_date = "{0}-01-01".format(now_datetime().year),
+            to_date = "{0}-12-31".format(now_datetime().year),
             company = "_Test Company",
             is_active = 1
         )).insert()
