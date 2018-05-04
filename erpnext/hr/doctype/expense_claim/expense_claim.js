@@ -150,6 +150,19 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	onload: function(frm) {
+		if (frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frm.toggle_reqd("expense_approver", true);
+					}
+				}
+			});
+		}
 		frm.set_query("expense_approver", function() {
 			return {
 				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
@@ -181,11 +194,6 @@ frappe.ui.form.on("Expense Claim", {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __("Make"));
 		}
-		frappe.db.get_value('HR Settings', {name: 'HR Settings'}, 'expense_approver_mandatory_in_expense_claim', (r) => {
-			if (frm.doc.docstatus < 1 && (r.expense_approver_mandatory_in_expense_claim == 1)) {
-				frm.toggle_reqd("expense_approver", true);
-			}
-		});
 	},
 
 	make_payment_entry: function(frm) {

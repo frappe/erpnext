@@ -461,3 +461,16 @@ def add_holidays(events, start, end, employee, company):
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})
+
+@frappe.whitelist()
+def get_mandatory_approval(doctype):
+	mandatory = ""
+	if doctype == "Leave Application":
+		mandatory = frappe.db.get_single_value('HR Settings', 
+				'leave_approver_mandatory_in_leave_application')
+	else:
+		mandatory = frappe.db.get_single_value('HR Settings', 
+				'expense_approver_mandatory_in_expense_claim')
+
+	return mandatory
+	
