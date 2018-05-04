@@ -11,7 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext import get_company_currency
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import get_item_defaults
 
 
 from six import string_types, iteritems
@@ -206,9 +206,8 @@ def get_basic_details(args, item):
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list) == 1 else ""
 	
-	item_default_warehouse = [default.default_warehouse for default in item.item_defaults if default.company == args.company]
-	item_default_warehouse = item_default_warehouse[0] if item_default_warehouse else None
-	warehouse = user_default_warehouse or item_default_warehouse or args.warehouse
+	item_defaults = get_item_defaults(item.name, args.company)
+	warehouse = user_default_warehouse or item_defaults.default_warehouse or args.warehouse
 
 	material_request_type = ''
 	if args.get('doctype') == "Material Request":
@@ -231,9 +230,9 @@ def get_basic_details(args, item):
 		"description": cstr(item.description).strip(),
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
-		"income_account": get_default_income_account(args, item),
-		"expense_account": get_default_expense_account(args, item),
-		"cost_center": get_default_cost_center(args, item),
+		"income_account": get_default_income_account(args, item_defaults),
+		"expense_account": get_default_expense_account(args, item_defaults),
+		"cost_center": get_default_cost_center(args, item_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
@@ -682,7 +681,7 @@ def get_default_bom(item_code=None):
 			return bom
 
 def get_valuation_rate(item_code, company, warehouse=None):
-	item = get_item_details(item_code, company)
+	item = get_item_defaults(item_code, company)
 	# item = frappe.get_doc("Item", item_code)
 	if item.is_stock_item:
 		if not warehouse:

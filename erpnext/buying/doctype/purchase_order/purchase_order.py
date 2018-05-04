@@ -14,6 +14,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
 from six import string_types
+from erpnext.stock.doctype.item.item import get_item_defaults
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -374,7 +375,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, target.company)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
 			or item.buying_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")

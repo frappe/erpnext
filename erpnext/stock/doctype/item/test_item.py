@@ -36,7 +36,7 @@ def make_item(item_code, properties=None):
 
 
 	if item.is_stock_item:
-		for item_default in [doc for doc in item.item_defaults if not doc.default_warehouse]
+		for item_default in [doc for doc in item.item_defaults if not doc.default_warehouse]:
 			item_default.default_warehouse = "_Test Warehouse - _TC"
 
 	item.insert()
@@ -205,7 +205,7 @@ class TestItem(unittest.TestCase):
 					"default_warehouse": "_Test Warehouse - _TC",
 					"company": "_Test Company"
 				}
-			]
+			],
 			"has_variants": 1
 		})
 
