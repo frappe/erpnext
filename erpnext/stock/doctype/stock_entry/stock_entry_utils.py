@@ -12,6 +12,7 @@ def make_stock_entry(**args):
 
 	:item_code: Item to be moved
 	:qty: Qty to be moved
+	:company: Company Name (optional)
 	:from_warehouse: Optional
 	:to_warehouse: Optional
 	:rate: Optional

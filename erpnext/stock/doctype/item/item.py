@@ -81,7 +81,8 @@ class Item(WebsiteGenerator):
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
-			self.add_price()
+			for default in self.item_defaults:
+				self.add_price(default.default_price_list)
 
 		if self.opening_stock:
 			self.set_opening_stock()
@@ -166,15 +167,16 @@ class Item(WebsiteGenerator):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
-		default_warehouse = (self.default_warehouse
-        		or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
-                or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
+		for default in self.item_defaults:
+			default_warehouse = (default.default_warehouse
+					or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+					or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
 
-		if default_warehouse:
-			stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse,
-                                  qty=self.opening_stock, rate=self.valuation_rate)
+			if default_warehouse:
+				stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse, qty=self.opening_stock,
+												rate=self.valuation_rate, company=default.company)
 
-			stock_entry.add_comment("Comment", _("Opening Stock"))
+				stock_entry.add_comment("Comment", _("Opening Stock"))
 
 	def make_route(self):
 		if not self.route:
