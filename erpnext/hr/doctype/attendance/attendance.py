@@ -87,7 +87,7 @@ def add_attendance(events, start, end, conditions=None):
 			"doctype": "Attendance",
 			"date": d.attendance_date,
 			"title": cstr(d.employee_name) + \
-				cstr(d.shift_type),
+				cstr(d.status),
 			"docstatus": d.docstatus
 		}
 		if e not in events:
