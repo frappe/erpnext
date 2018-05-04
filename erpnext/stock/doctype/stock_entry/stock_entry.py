@@ -10,6 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
+from erpnext.stock.doctype.item.item import get_item_details
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.stock.utils import get_bin
 import json
@@ -716,8 +717,7 @@ class StockEntry(StockController):
 			item_code = frappe.db.get_value("BOM", self.bom_no, "item")
 			to_warehouse = self.to_warehouse
 
-		item = frappe.db.get_value("Item", item_code, ["item_name",
-			"description", "stock_uom", "expense_account", "buying_cost_center", "name", "default_warehouse"], as_dict=1)
+		item = get_item_details(item_code, self.company)
 
 		if not self.work_order and not to_warehouse:
 			# in case of BOM
@@ -782,8 +782,8 @@ class StockEntry(StockController):
 
 		for item in wo_items:
 			qty = item.required_qty
-			item_account_details = frappe.db.get_value("Item", item.item_code, ["item_name",
-				"description", "stock_uom", "expense_account", "buying_cost_center", "name", "default_warehouse"], as_dict=1)
+
+			item_account_details = get_item_details(item.item_code, self.company)
 			# Take into account consumption if there are any.
 			if self.purpose == 'Manufacture':
 				req_qty_each = flt(item.required_qty / wo.qty)

@@ -544,14 +544,16 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				item.stock_uom,
 				item.allow_alternative_item,
-				item.default_warehouse,
-				item.expense_account as expense_account,
-				item.buying_cost_center as cost_center
+				item_default.default_warehouse,
+				item_default.expense_account as expense_account,
+				item_default.buying_cost_center as cost_center
 				{select_columns}
 			from
-				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
+				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item, `tabItem Default` item_default
 			where
 				bom_item.docstatus < 2
+				and item_default.parent = item.name
+				and item_default.company = %(company)s
 				and bom.name = %(bom)s
 				and bom_item.parent = bom.name
 				and item.name = bom_item.item_code
@@ -564,14 +566,14 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			select_columns = ", bom_item.source_warehouse, (Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx")
-		items = frappe.db.sql(query, { "parent": bom, "qty": qty,	"bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
 		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="",
 			select_columns = ", bom_item.source_warehouse, bom_item.idx")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
 		if item.item_code in item_dict:
