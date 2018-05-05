@@ -25,9 +25,9 @@ frappe.ui.form.on(cur_frm.doctype, {
 		if(frm.doctype == "Employee Promotion"){
 			table = "promotion_details";
 		}else if (frm.doctype == "Employee Transfer") {
-			table = "transfer_details"
+			table = "transfer_details";
 		}
-		if(!table){return};
+		if(!table){return;}
 		cur_frm.fields_dict[table].grid.wrapper.find('.grid-add-row').hide();
 		cur_frm.fields_dict[table].grid.add_custom_button(__('Add Row'), () => {
 			if(!frm.doc.employee){
