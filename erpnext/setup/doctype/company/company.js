@@ -197,6 +197,7 @@ erpnext.company.setup_queries = function(frm) {
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
+		["unrealized_exchange_gain_loss_account", {"root_type": "Expense"}],
 		["accumulated_depreciation_account",
 			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
 		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
