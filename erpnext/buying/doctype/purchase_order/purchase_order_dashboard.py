@@ -6,7 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
-			'Subscription': 'reference_document'
+			'Auto Repeat': 'reference_document'
 		},
 		'internal_links': {
 			'Material Request': ['items', 'material_request'],
