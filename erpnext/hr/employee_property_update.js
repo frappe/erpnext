@@ -1,33 +1,33 @@
 frappe.ui.form.on(cur_frm.doctype, {
-  setup: function(frm) {
-    frm.set_query("employee", function() {
-      return {
+	setup: function(frm) {
+		frm.set_query("employee", function() {
+			return {
 				filters: {
 					"status": "Active"
 				}
 			};
-    })
-  },
-  onload: function(frm){
+		});
+	},
+	onload: function(frm){
 		if(frm.doc.__islocal){
-      if(frm.doctype == "Employee Promotion"){
-        frm.doc.promotion_details = [];
-      }else if (frm.doctype == "Employee Transfer") {
-        frm.doc.transfer_details = [];
-      }
+			if(frm.doctype == "Employee Promotion"){
+				frm.doc.promotion_details = [];
+			}else if (frm.doctype == "Employee Transfer") {
+				frm.doc.transfer_details = [];
+			}
 		}
 	},
-  employee: function(frm) {
+	employee: function(frm) {
 		frm.add_fetch("employee", "company", "company");
-	},  
+	},
 	refresh: function(frm) {
-    var table;
-    if(frm.doctype == "Employee Promotion"){
-      table = "promotion_details";
-    }else if (frm.doctype == "Employee Transfer") {
-      table = "transfer_details"
-    }
-    if(!table){return}
+		var table;
+		if(frm.doctype == "Employee Promotion"){
+			table = "promotion_details";
+		}else if (frm.doctype == "Employee Transfer") {
+			table = "transfer_details"
+		}
+		if(!table){return};
 		cur_frm.fields_dict[table].grid.wrapper.find('.grid-add-row').hide();
 		cur_frm.fields_dict[table].grid.add_custom_button(__('Add Row'), () => {
 			if(!frm.doc.employee){
@@ -84,7 +84,7 @@ var show_dialog = function(frm, table, field_labels) {
 	d.get_primary_btn().attr('disabled', true);
 	d.data = {};
 	d.show();
-}
+};
 
 var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 	d.data.new = null;
@@ -104,7 +104,7 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 	}).on("awesomplete-close", function(e) {
 		d.data.new = e.target.value;
 	});
-}
+};
 
 var add_to_details = function(frm, d, table) {
 	let data = d.data;
@@ -133,7 +133,7 @@ var add_to_details = function(frm, d, table) {
 	}else {
 		frappe.show_alert({message:__("Value missing"),indicator:'red'});
 	}
-}
+};
 
 var validate_duplicate =  function(frm, table, fieldname){
 	let duplicate = false;
@@ -144,4 +144,4 @@ var validate_duplicate =  function(frm, table, fieldname){
 		}
 	});
 	return duplicate;
-}
+};
