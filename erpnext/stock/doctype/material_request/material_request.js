@@ -28,7 +28,31 @@ frappe.ui.form.on('Material Request', {
 				filters: {'company': doc.company}
 			}
 		}
-	}
+	},
+	refresh: function(frm) {
+		if (cur_frm.doc.material_request_type) {
+			frm.events.material_request_type(frm);
+		}
+	},
+	material_request_type: function(frm) {
+		if (frm.doc.material_request_type == "Purchase") {
+			frm.fields_dict["items"].grid.set_column_disp("accounting_and_rate", true);
+			frm.fields_dict["items"].grid.set_column_disp("rate", true);
+			frm.fields_dict["items"].grid.set_column_disp("amount", true);
+		}	
+		else {
+			frm.fields_dict["items"].grid.set_column_disp("accounting_and_rate", false);
+			frm.fields_dict["items"].grid.set_column_disp("rate", false);
+			frm.fields_dict["items"].grid.set_column_disp("amount", false);
+		}
+		frm.refresh_fields("items");
+	},
+	get_amount: function(frm) {
+		frm.doc.items.forEach((d) => {
+			d.amount = d.qty * d.rate;
+		});
+		refresh_field("items");
+	},
 });
 
 frappe.ui.form.on("Material Request Item", {
@@ -37,12 +61,11 @@ frappe.ui.form.on("Material Request Item", {
 		if (flt(d.qty) < flt(d.min_order_qty)) {
 			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
+		frm.events.get_amount(frm);
 	},
-
 	item_code: function(frm, doctype, name) {
 		set_schedule_date(frm);
 	},
-
 	schedule_date: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
@@ -52,6 +75,9 @@ frappe.ui.form.on("Material Request Item", {
 				set_schedule_date(frm);
 			}
 		}
+	},
+	rate: function(frm) {
+		frm.events.get_amount(frm);
 	}
 });
 
