@@ -185,7 +185,7 @@ class Company(Document):
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
 
-					if not self.default_payroll_payable_account:
+		if not self.default_payroll_payable_account:
 			payroll_payable_account = frappe.db.get_value("Account",
 				{"account_name": _("Payroll Payable"), "company": self.name, "is_group": 0})
 
