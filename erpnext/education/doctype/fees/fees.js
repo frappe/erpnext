@@ -66,7 +66,7 @@ frappe.ui.form.on("Fees", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
-			frm.add_custom_button(__("Show Payments"), function() {
+			frm.add_custom_button(__("Payments"), function() {
 				frappe.set_route("List", "Payment Entry", {"Payment Entry Reference.reference_name": frm.doc.name});
 			}, __("View"));
 		}
