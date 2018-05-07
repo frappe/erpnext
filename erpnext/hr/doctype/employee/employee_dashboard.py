@@ -25,6 +25,10 @@ def get_data():
 			{
 				'label': _('Evaluation'),
 				'items': ['Appraisal']
+			},
+			{
+				'label': _('Employee Lifecycle'),
+				'items': ['Employee Transfer', 'Employee Promotion']
 			}
 		]
 	}

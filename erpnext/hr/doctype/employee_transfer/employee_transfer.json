@@ -42,7 +42,6 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -74,7 +73,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -102,10 +100,38 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
+   "reqd": 1, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "length": 0, 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -137,7 +163,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -169,7 +194,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -200,7 +224,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -221,7 +244,7 @@
    "label": "Employee Transfer Detail", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Employee Transfer Detail", 
+   "options": "Employee Property History", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -232,7 +255,6 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -243,7 +265,7 @@
    "columns": 0, 
    "fieldname": "reallocate_leaves", 
    "fieldtype": "Check", 
-   "hidden": 0, 
+   "hidden": 1, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
@@ -263,7 +285,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -294,7 +315,37 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "new_employee_id", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "label": "New Employee ID", 
+   "length": 0, 
+   "no_copy": 0, 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 1, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
    "unique": 0
   }, 
   {
@@ -325,7 +376,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -339,7 +389,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-14 15:42:31.098910", 
+ "modified": "2018-05-05 13:10:32.660537", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Transfer", 
@@ -348,6 +398,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -367,6 +418,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -386,6 +438,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
