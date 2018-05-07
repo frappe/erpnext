@@ -7,6 +7,6 @@ import frappe
 from frappe.model.document import Document
 
 class CompensatoryLeaveRequest(Document):
+
 	def validate_present(self):
 		pass
-

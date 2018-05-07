@@ -38,4 +38,4 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		self.assertRaises(MaxLeavesLimitCrossed, compensatory_leave_request.submit)
 
 		frappe.db.set_value('Leave Type', compensatory_leave_request.leave_type, 'max_leaves_allowed', 10)
-		
+
