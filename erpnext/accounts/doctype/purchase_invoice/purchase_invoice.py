@@ -422,6 +422,49 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+
+				elif item.is_fixed_asset and not self.update_stock:
+					asset_accounts = self.get_company_default(["asset_received_but_not_billed",
+						"expenses_included_in_asset_valuation", "capital_work_in_progress_account"])
+
+					asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
+					base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+
+					if not self.update_stock:
+						asset_rbnb_currency = get_account_currency(asset_accounts[0])
+
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[0],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"debit": base_asset_amount,
+							"debit_in_account_currency": (base_asset_amount
+								if asset_rbnb_currency == self.company_currency else asset_amount)
+						}))
+					else:
+						cwip_account_currency = get_account_currency(asset_accounts[2])
+
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[2],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"debit": base_asset_amount,
+							"debit_in_account_currency": (base_asset_amount
+								if cwip_account_currency == self.company_currency else asset_amount)
+						}))
+
+					asset_eiiav_currency = get_account_currency(asset_accounts[0])
+					gl_entries.append(self.get_gl_dict({
+						"account": asset_accounts[1],
+						"against": self.supplier,
+						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+						"cost_center": item.cost_center,
+						"credit": item.item_tax_amount,
+						"credit_in_account_currency": (item.item_tax_amount
+							if asset_eiiav_currency == self.company_currency else
+								item.item_tax_amount / self.conversion_rate)
+					}))
+
 				else:
 					gl_entries.append(
 						self.get_gl_dict({

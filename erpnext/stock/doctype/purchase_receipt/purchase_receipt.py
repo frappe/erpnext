@@ -253,6 +253,37 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
+			elif d.is_fixed_asset:
+				asset_accounts = self.get_company_default(["capital_work_in_progress_account",
+					"asset_received_but_not_billed"])
+
+				# CWIP entry
+				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
+				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
+
+				cwip_account_currency = get_account_currency(asset_accounts[0])
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_accounts[0],
+					"against": asset_accounts[1],
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"debit": base_asset_amount,
+					"debit_in_account_currency": (base_asset_amount
+						if cwip_account_currency == self.company_currency else asset_amount)
+				}))
+
+				# Asset received but not billed
+				asset_rbnb_currency = get_account_currency(asset_accounts[1])
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_accounts[1],
+					"against": asset_accounts[0],
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"credit": base_asset_amount,
+					"credit_in_account_currency": (base_asset_amount
+						if asset_rbnb_currency == self.company_currency else asset_amount)
+				}))
+
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
