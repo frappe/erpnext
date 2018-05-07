@@ -3,10 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 from frappe.model.document import Document
 
-class CompensatoryLeaveRequest(Document):
-
-	def validate_present(self):
-		pass
+class AllowedToTransactWith(Document):
+	pass

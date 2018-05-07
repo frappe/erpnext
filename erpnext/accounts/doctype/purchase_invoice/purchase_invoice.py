@@ -17,6 +17,8 @@ from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from frappe.model.mapper import get_mapped_doc
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
+	unlink_inter_company_invoice
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -73,6 +75,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -303,6 +306,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 		self.update_fixed_asset()
+		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_fixed_asset(self):
 		for d in self.get("items"):
@@ -635,6 +639,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_fixed_asset()
 		frappe.db.set(self, 'status', 'Cancelled')
 
+		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+
 	def update_project(self):
 		project_list = []
 		for d in self.items:
@@ -734,3 +740,8 @@ def make_stock_entry(source_name, target_doc=None):
 	}, target_doc)
 
 	return doc
+
+@frappe.whitelist()
+def make_inter_company_sales_invoice(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
+	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
