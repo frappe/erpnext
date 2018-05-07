@@ -205,7 +205,7 @@ def get_basic_details(args, item):
 	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list) == 1 else ""
-	
+
 	item_defaults = get_item_defaults(item.name, args.company)
 	warehouse = user_default_warehouse or item_defaults.default_warehouse or args.warehouse
 

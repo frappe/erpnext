@@ -352,10 +352,10 @@ def check_active_sales_items(obj):
 					if default.company == obj.company:
 						default.income_account = d.income_account
 						income_account_set = True
-				else:
-					if not income_account_set:
-						doc.append("item_defaults", {
-							"company": obj.company,
-							"income_account": d.income_account
-						})
+						break
+				if not income_account_set:
+					doc.append("item_defaults", {
+						"company": obj.company,
+						"income_account": d.income_account
+					})
 				doc.save()
