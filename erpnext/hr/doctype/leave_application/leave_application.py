@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
-	comma_or, get_fullname
-from erpnext.hr.utils import set_employee_name
+	comma_or, get_fullname, add_days
+from erpnext.hr.utils import set_employee_name, get_leave_period
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
@@ -15,6 +15,7 @@ class OverlapError(frappe.ValidationError): pass
 class InvalidLeaveApproverError(frappe.ValidationError): pass
 class LeaveApproverIdentityError(frappe.ValidationError): pass
 class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
+class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
@@ -31,6 +32,8 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
+		if frappe.db.get_value("Leave Type", self.leave_type, 'is_optional_leave'):
+			self.validate_optional_leave()
 
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
@@ -206,6 +209,19 @@ class LeaveApplication(Document):
 		if attendance:
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
 				AttendanceAlreadyMarkedError)
+
+	def validate_optional_leave(self):
+		leave_period = get_leave_period(self.from_date, self.to_date, self.company)
+		if not leave_period:
+			frappe.throw(_("Cannot find active Leave Period"))
+		optional_holiday_list = frappe.db.get_value("Leave Period", leave_period[0]["name"], "optional_holiday_list")
+		if not optional_holiday_list:
+			frappe.throw(_("Optional Holiday List not set for leave period {0}").format(leave_period[0]["name"]))
+		day = getdate(self.from_date)
+		while day <= getdate(self.to_date):
+			if not frappe.db.exists({"doctype": "Holiday", "parent": optional_holiday_list, "holiday_date": day}):
+				frappe.throw(_("{0} is not in Optional Holiday List").format(formatdate(day)), NotAnOptionalHoliday)
+			day = add_days(day, 1)
 
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)
