@@ -14,7 +14,7 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 
 class Budget(Document):
 	def autoname(self):
-		self.name = make_autoname(self.get(frappe.scrub(self.budget_against)) 
+		self.name = make_autoname(self.get(frappe.scrub(self.budget_against))
 			+ "/" + self.fiscal_year + "/.###")
 
 	def validate(self):
@@ -30,10 +30,10 @@ class Budget(Document):
 		existing_budget = frappe.db.get_value("Budget", {budget_against_field: budget_against,
 			"fiscal_year": self.fiscal_year, "company": self.company,
 			"name": ["!=", self.name], "docstatus": ["!=", 2]})
-		if existing_budget: 
+		if existing_budget:
 			frappe.throw(_("Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3}")
 				.format(existing_budget, self.budget_against, budget_against, self.fiscal_year), DuplicateBudgetError)
-	
+
 	def validate_accounts(self):
 		account_list = []
 		for d in self.get('accounts'):
@@ -84,7 +84,7 @@ def validate_expense_against_budget(args):
 			budget_records = frappe.db.sql("""
 				select
 					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
-					b.action_if_annual_budget_exceeded, 
+					b.action_if_annual_budget_exceeded,
 					b.action_if_accumulated_monthly_budget_exceeded
 				from 
 					`tabBudget` b, `tabBudget Account` ba
@@ -92,7 +92,7 @@ def validate_expense_against_budget(args):
 					b.name=ba.parent and b.fiscal_year=%s 
 					and ba.account=%s and b.docstatus=1
 					{condition}
-			""".format(condition=condition, 
+			""".format(condition=condition,
 				budget_against_field=frappe.scrub(args.get("budget_against_field"))),
 				(args.fiscal_year, args.account), as_dict=True)
 				
@@ -115,20 +115,20 @@ def validate_budget_records(args, budget_records):
 
 			if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
 				and yearly_action != monthly_action:
-				compare_expense_with_budget(args, flt(budget.budget_amount), 
+				compare_expense_with_budget(args, flt(budget.budget_amount),
 						_("Annual"), yearly_action, budget.budget_against)
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against):
-	actual_expense = get_actual_expense(args)
+	actual_expense = args.debit if args.debit else get_actual_expense(args)
 	if actual_expense > budget_amount:
 		diff = actual_expense - budget_amount
 		currency = frappe.db.get_value('Company', args.company, 'default_currency')
 
 		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(
-				_(action_for), frappe.bold(args.account), args.budget_against_field, 
+				_(action_for), frappe.bold(args.account), args.budget_against_field,
 				frappe.bold(budget_against),
-				frappe.bold(fmt_money(budget_amount, currency=currency)), 
+				frappe.bold(fmt_money(budget_amount, currency=currency)),
 				frappe.bold(fmt_money(diff, currency=currency)))
 
 		if action=="Stop":

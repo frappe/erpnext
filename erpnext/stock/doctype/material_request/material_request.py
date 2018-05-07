@@ -5,7 +5,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 
 from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
 from frappe import msgprint, _
@@ -14,6 +14,8 @@ from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries
+from erpnext.accounts.utils import get_fiscal_years
 
 from six import string_types
 
@@ -78,6 +80,36 @@ class MaterialRequest(BuyingController):
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
+	def make_gl_entries(self):
+		gl_entries = self.make_item_gl_entries()
+		gl_entries = merge_similar_entries(gl_entries)
+		make_gl_entries(gl_entries,  cancel=True, update_outstanding='Yes', merge_entries=False)
+
+	def make_item_gl_entries(self):
+		gl_entries = []
+		fiscal_years = get_fiscal_years(self.schedule_date, company=self.company)
+		if len(fiscal_years) > 1:
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.schedule_date)))
+		else:
+			fiscal_year = fiscal_years[0][0]
+		for item in self.get("items"):
+			gl_entries.append({
+				"account_currency": erpnext.get_company_currency(self.company),
+				"account": item.expense_account,
+				"company": self.company,
+				"is_opening": "No",
+				"fiscal_year": fiscal_year,
+				"debit": flt(item.amount),
+				"debit_in_account_currency": flt(item.amount),
+				"credit": 0,
+				"credit_in_account_currency": 0,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"cost_center": item.cost_center,
+				"posting_date": self.schedule_date
+			})
+		return gl_entries
+
 	def set_title(self):
 		'''Set title as comma separated list of items'''
 		items = []
@@ -93,6 +125,8 @@ class MaterialRequest(BuyingController):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		if self.material_request_type == "Purchase":
+			self.make_gl_entries()
 
 	def before_save(self):
 		self.set_status(update=True)
