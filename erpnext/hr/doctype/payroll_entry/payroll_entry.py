@@ -183,7 +183,7 @@ class PayrollEntry(Document):
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.loan_account,
+		return frappe.db.sql(""" select eld.loan_account, eld.loan
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
@@ -293,7 +293,7 @@ class PayrollEntry(Document):
 					})
 
 				if data.interest_amount and not data.interest_income_account:
-					frappe.throw(_("Select interest income account in employee loan {0}").format(data.employee_loan))
+					frappe.throw(_("Select interest income account in loan {0}").format(data.loan))
 
 				if data.interest_income_account and data.interest_amount:
 					accounts.append({
