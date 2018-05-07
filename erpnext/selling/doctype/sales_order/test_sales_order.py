@@ -359,14 +359,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 
-		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1,
-        'default_supplier': '_Test Supplier',
-		    "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		    "cost_center": "_Test Cost Center - _TC"
-			})
+		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
-		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  		  	"cost_center": "_Test Cost Center - _TC"})
+		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1})
 
 		so_items = [
 			{
