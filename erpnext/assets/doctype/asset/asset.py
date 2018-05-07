@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class Asset(Document):
 	def validate(self):
@@ -33,9 +32,6 @@ class Asset(Document):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
-
-	def on_update(self):
-		self.update_serial_nos()
 
 	def validate_item(self):
 		item = frappe.db.get_value("Item", self.item_code,
@@ -258,12 +254,6 @@ class Asset(Document):
 			status = "Cancelled"
 		return status
 
-	def update_serial_nos(self):
-		if self.serial_no:
-			serial_nos = get_serial_nos(self.serial_no)
-			frappe.db.sql(""" update `tabSerial No` set asset = '%s' where
-				name in(%s)"""%(self.name, ','.join(['%s'] * len(serial_nos))), tuple(serial_nos))
-
 	def update_stock_movement(self):
 		asset_movement = frappe.db.get_value('Asset Movement',
 			{'asset': self.name, 'reference_name': self.purchase_receipt, 'docstatus': 0}, 'name')
@@ -281,6 +271,10 @@ def update_maintenance_status():
 			asset.set_status('In Maintenance')
 		if frappe.db.exists('Asset Repair', {'asset_name': asset.name, 'repair_status': 'Pending'}):
 			asset.set_status('Out of Order')
+
+def get_asset_naming_series():
+	meta = frappe.get_meta('Asset')
+	return meta.get_field("naming_series").options
 
 @frappe.whitelist()
 def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, posting_date):

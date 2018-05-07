@@ -441,9 +441,10 @@ class BuyingController(StockController):
 			return
 
 		if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
-			if self.doctype == 'Purchase Receipt':
-				self.process_fixed_asset()
-			self.update_fixed_asset()
+			field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
+
+			self.process_fixed_asset()
+			self.update_fixed_asset(field)
 
 		update_last_purchase_rate(self, is_submit = 1)
 
@@ -453,12 +454,13 @@ class BuyingController(StockController):
 
 		update_last_purchase_rate(self, is_submit = 0)
 		if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
-			if self.doctype == 'Purchase Receipt':
-				self.delete_linked_asset()
-			self.update_fixed_asset()
+			field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
+
+			self.delete_linked_asset(field)
+			self.update_fixed_asset(field)
 
 	def process_fixed_asset(self):
-		if not self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
+		if self.doctype == 'Purchase Invoice' and not self.update_stock:
 			return
 
 		asset_items = [d.item_code for d in self.items if d.is_fixed_asset]
@@ -471,6 +473,9 @@ class BuyingController(StockController):
 		for d in self.items:
 			if d.is_fixed_asset:
 				item_data = items_data.get(d.item_code)
+				if not d.asset:
+					asset = self.make_asset(d)
+					d.db_set('asset', asset)
 
 				if item_data.get('has_serial_no'):
 					# If item has serial no
@@ -488,13 +493,10 @@ class BuyingController(StockController):
 						'company': self.company,
 						'actual_qty': d.qty,
 						'purchase_document_type': self.doctype,
-						'purchase_document_no': self.name
+						'purchase_document_no': self.name,
+						'asset': d.asset
 					})
 					d.db_set('serial_no', serial_nos)
-
-				if not d.asset:
-					asset = self.make_asset(d)
-					d.db_set('asset', asset)
 
 				if d.asset:
 					self.make_asset_movement(d)
@@ -503,9 +505,9 @@ class BuyingController(StockController):
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
-			'asset_name': '{0} - {1}'.format(self.name, row.item_code),
+			'asset_name': row.item_name,
+			'naming_series': frappe.db.get_value('Item', row.item_code, 'asset_naming_series') or 'AST',
 			'warehouse': row.warehouse,
-			'serial_no': row.serial_no,
 			'company': self.company,
 			'purchase_date': self.posting_date,
 			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
@@ -535,9 +537,7 @@ class BuyingController(StockController):
 
 		return asset_movement.name
 
-	def update_fixed_asset(self):
-		field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
-
+	def update_fixed_asset(self, field):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.asset:
 				asset = frappe.get_doc("Asset", d.asset)
@@ -555,13 +555,11 @@ class BuyingController(StockController):
 
 				asset.save()
 
-	def delete_linked_asset(self):
-		if not self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
+	def delete_linked_asset(self, field):
+		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
 			return
 
-		if self.doctype == 'Purchase Invoice' and self.get('update_stock'):
-			return
-
+		frappe.db.sql("delete from `tabAsset` where {0} = %s and docstatus = 0".format(field), self.name)
 		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
