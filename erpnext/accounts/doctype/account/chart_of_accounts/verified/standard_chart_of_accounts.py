@@ -24,7 +24,8 @@ def get():
 	                "account_type": "Cash"
 	            },
 	            _("Loans and Advances (Assets)"): {
-	            	"is_group": 1
+                    	_("Employee Advances"): {
+                    	},
 	            },
 	            _("Securities and Deposits"): {
 	                _("Earnest Money"): {}
