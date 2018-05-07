@@ -41,7 +41,6 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -73,7 +72,6 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -104,7 +102,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -134,7 +131,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -166,7 +162,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -198,7 +193,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -230,7 +224,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -239,6 +232,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "depends_on": "staffing_plan", 
    "fieldname": "planned_vacancies", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -261,7 +255,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -291,7 +284,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -322,7 +314,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -354,7 +345,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 1
   }, 
   {
@@ -385,7 +375,6 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -400,7 +389,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-18 19:27:15.004385", 
+ "modified": "2018-05-07 14:16:50.300247", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Opening", 
@@ -408,6 +397,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -427,6 +417,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
