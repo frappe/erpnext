@@ -13,6 +13,8 @@ class EmployeeTransfer(Document):
 	def validate(self):
 		if frappe.get_value("Employee", self.employee, "status") == "Left":
 			frappe.throw(_("Cannot transfer Employee with status Left"))
+		if self.new_company and self.company == self.new_company:
+			frappe.throw_("New Company must be different from current company")
 
 	def before_submit(self):
 		if getdate(self.transfer_date) > getdate():
@@ -23,6 +25,8 @@ class EmployeeTransfer(Document):
 		employee = frappe.get_doc("Employee", self.employee)
 		if self.create_new_employee_id:
 			new_employee = frappe.copy_doc(employee)
+			new_employee.name = None
+			new_employee.employee_number = None
 			new_employee = update_employee(new_employee, self.transfer_details)
 			if self.new_company:
 				new_employee.company = self.new_company
