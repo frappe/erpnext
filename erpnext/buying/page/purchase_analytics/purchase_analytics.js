@@ -130,14 +130,15 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 
 
 		if(!this.data || me.item_type != me.tree_type) {
+			var items;
 			if(me.tree_type=='Supplier') {
-				var items = frappe.report_dump.data["Supplier"];
-			} if(me.tree_type=='Supplier Group') {
-				var items = this.prepare_tree("Supplier", "Supplier Group");
+				items = frappe.report_dump.data["Supplier"];
+			} else if(me.tree_type=='Supplier Group') {
+				items = this.prepare_tree("Supplier", "Supplier Group");
 			} else if(me.tree_type=="Item Group") {
-				var items = this.prepare_tree("Item", "Item Group");
+				items = this.prepare_tree("Item", "Item Group");
 			} else if(me.tree_type=="Item") {
-				var items = frappe.report_dump.data["Item"];
+				items = frappe.report_dump.data["Item"];
 			}
 
 			me.item_type = me.tree_type
