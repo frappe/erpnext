@@ -1097,20 +1097,22 @@ def make_inter_company_invoice(doctype, source_name, target_doc=None):
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
 
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.income_account = ""
-		target_doc.expense_account = ""
-		target_doc.cost_center = ""
-		target_doc.warehouse = ""
-
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
-			"postprocess": update_details
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges"
+			]
 		},
 		doctype +" Item": {
 			"doctype": target_doctype + " Item",
-			"postprocess": update_item
+			"field_no_map": [
+				"income_account",
+				"expense_account",
+				"cost_center",
+				"warehouse"
+			]
 		}
 
 	}, target_doc, set_missing_values)

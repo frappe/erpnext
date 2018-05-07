@@ -196,22 +196,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Promotion",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Activity",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Activity Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Process Template",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Process",
 				}
 			]
 		},
