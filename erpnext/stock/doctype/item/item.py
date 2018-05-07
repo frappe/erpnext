@@ -16,6 +16,7 @@ from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
+
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -42,9 +43,17 @@ class Item(WebsiteGenerator):
 		super(Item, self).onload()
 
 		self.set_onload('stock_exists', self.stock_ledger_created())
+		self.set_asset_naming_series()
 		if self.is_fixed_asset:
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			self.set_onload("asset_exists", True if asset else False)
+
+	def set_asset_naming_series(self):
+		if not hasattr(self, '_asset_naming_series'):
+			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
+			self._asset_naming_series = get_asset_naming_series()
+
+		self.set_onload('asset_naming_series', self._asset_naming_series)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":

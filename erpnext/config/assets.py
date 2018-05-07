@@ -16,6 +16,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Asset Location"),
+					"name": "Location",
+				},
+				{
+					"type": "doctype",
 					"name": "Asset Settings",
 				}
 			]
