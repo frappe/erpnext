@@ -28,4 +28,4 @@ class TestLeavePeriod(unittest.TestCase):
 	def test_duplicate_grant(self):
 		leave_period = self.test_leave_grant()
 		self.assertRaises(DuplicateLeaveGrant, leave_period.grant_leaves)
-		
+
