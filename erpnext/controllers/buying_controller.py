@@ -79,7 +79,7 @@ class BuyingController(StockController):
 					break
 
 	def validate_stock_or_nonstock_items(self):
-		if self.meta.get_field("taxes") and not self.get_stock_items():
+		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
 			tax_for_valuation = [d for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 
@@ -87,6 +87,9 @@ class BuyingController(StockController):
 				for d in tax_for_valuation:
 					d.category = 'Total'
 				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
+
+	def get_asset_items(self):
+		return [d.item_code for d in self.items if d.is_fixed_asset]
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
@@ -112,7 +115,7 @@ class BuyingController(StockController):
 
 			TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		stock_items = self.get_stock_items()
+		stock_items = self.get_stock_items() + self.get_asset_items()
 
 		stock_items_qty, stock_items_amount = 0, 0
 		last_stock_item_idx = 1
@@ -456,14 +459,14 @@ class BuyingController(StockController):
 		if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
 			field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
 
-			self.delete_linked_asset(field)
-			self.update_fixed_asset(field)
+			self.delete_linked_asset()
+			self.update_fixed_asset(field, delete_asset=True)
 
 	def process_fixed_asset(self):
 		if self.doctype == 'Purchase Invoice' and not self.update_stock:
 			return
 
-		asset_items = [d.item_code for d in self.items if d.is_fixed_asset]
+		asset_items = self.get_asset_items()
 		if asset_items:
 			self.make_serial_nos_for_asset(asset_items)
 
@@ -537,10 +540,16 @@ class BuyingController(StockController):
 
 		return asset_movement.name
 
-	def update_fixed_asset(self, field):
+	def update_fixed_asset(self, field, delete_asset = False):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.asset:
 				asset = frappe.get_doc("Asset", d.asset)
+
+				if delete_asset and asset.docstatus == 0:
+					frappe.delete_doc("Asset", asset.name)
+					d.db_set('asset', None)
+					continue
+
 				if self.docstatus in [0, 1] and not asset.get(field):
 					asset.set(field, self.name)
 					asset.purchase_date = self.posting_date
@@ -555,11 +564,10 @@ class BuyingController(StockController):
 
 				asset.save()
 
-	def delete_linked_asset(self, field):
+	def delete_linked_asset(self):
 		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
 			return
 
-		frappe.db.sql("delete from `tabAsset` where {0} = %s and docstatus = 0".format(field), self.name)
 		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 

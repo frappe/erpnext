@@ -323,12 +323,12 @@ def make_serial_no(serial_no, args):
 	sr.company = args.get('company')
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
-	sr.insert()
 
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
 		sr.purchase_document_no = args.get('purchase_document_no')
 
+	sr.insert()
 	if args.get('warehouse'):
 		sr.warehouse = args.get('warehouse')
 		sr.save()
