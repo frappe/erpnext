@@ -41,6 +41,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -71,6 +72,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -101,6 +103,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -114,10 +117,10 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-07-12 14:28:01.985998", 
+ "modified": "2018-05-08 13:45:57.226530", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Physician Schedule Time Slot", 
+ "name": "Healthcare Schedule Time Slot", 
  "name_case": "", 
  "owner": "rmehta@gmail.com", 
  "permissions": [], 
