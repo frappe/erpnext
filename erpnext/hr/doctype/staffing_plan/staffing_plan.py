@@ -20,36 +20,47 @@ class StaffingPlan(Document):
 			overlap = (frappe.db.sql("""select spd.parent \
 				from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name \
 				where spd.designation='{0}' and sp.docstatus=1 \
-				and sp.to_date >= '{1}' and sp.from_date <='{2}'""".format(detail.designation, self.from_date, self.to_date)))
+				and sp.to_date >= '{1}' and sp.from_date <='{2}'"""
+			.format(detail.designation, self.from_date, self.to_date)))
 
 			if overlap and overlap [0][0]:
-				frappe.throw(_("Staffing Plan {0} already exist for designation {1}".format(overlap[0][0], detail.designation)))
+				frappe.throw(_("Staffing Plan {0} already exist for designation {1}"
+					.format(overlap[0][0], detail.designation)))
 
 @frappe.whitelist()
-def get_current_employee_count(designation):
+def get_current_employee_count(designation, company):
 	if not designation:
 		return False
-	employee_count = frappe.db.sql("""select count(*) from `tabEmployee` where \
-							designation = '{0}' and status='Active'""".format(designation))[0][0]
+
+	lft, rgt = frappe.db.get_value("Company", company, ["lft", "rgt"])
+	employee_count = frappe.db.sql("""select count(*) from `tabEmployee`
+		where designation = %s and status='Active'
+			and company in (select name from tabCompany where lft>=%s and rgt<=%s)
+		""", (designation, lft, rgt))[0][0]
 	return employee_count
 
-@frappe.whitelist()
 def get_active_staffing_plan_and_vacancies(company, designation, department=None, date=getdate(nowdate())):
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
 
-	conditions = "spd.designation='{0}' and sp.docstatus=1 and \
-	sp.company='{1}'".format(designation, company)
-
+	conditions = ""
 	if(department): #Department is an optional field
-		conditions += " and sp.department='{0}'".format(department)
+		conditions += " and sp.department='{0}'".format(frappe.db.escape(department))
 
 	if(date): #ToDo: Date should be mandatory?
 		conditions += " and '{0}' between sp.from_date and sp.to_date".format(date)
 
-	staffing_plan = frappe.db.sql("""select spd.parent, spd.vacancies \
+	staffing_plan = frappe.db.sql("""
+		select sp.name, spd.vacancies
 		from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name
-		where {0}""".format(conditions))
+		where company=%s and spd.designation=%s and sp.docstatus=1 {0}
+	""".format(conditions), (company, designation))
+
+	if not staffing_plan:
+		parent_company = frappe.db.get_value("Company", company, "parent_company")
+		if parent_company:
+			staffing_plan = get_active_staffing_plan_and_vacancies(parent_company,
+				designation, department, date)
 
 	# Only a signle staffing plan can be active for a designation on given date
-	return staffing_plan[0] if staffing_plan else False
+	return staffing_plan[0] if staffing_plan else None

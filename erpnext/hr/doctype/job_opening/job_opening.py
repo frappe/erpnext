@@ -20,20 +20,33 @@ class JobOpening(WebsiteGenerator):
 	def validate(self):
 		if not self.route:
 			self.route = frappe.scrub(self.job_title).replace('_', '-')
-
-		if self.staffing_plan:
-			self.validate_current_vacancies()
+		self.validate_current_vacancies()
 
 	def validate_current_vacancies(self):
-		current_count = get_current_employee_count(self.designation)
-		current_count+= frappe.db.sql("""select count(*) from `tabJob Opening` \
-						where designation = '{0}' and status='Open'""".format(self.designation))[0][0]
+		if not self.staffing_plan:
+			vacancies = get_active_staffing_plan_and_vacancies(self.company,
+				self.designation, self.department)
+			if vacancies:
+				self.staffing_plan = vacancies[0]
+				self.planned_vacancies = vacancies[1]
+		elif not self.planned_vacancies:
+			planned_vacancies = frappe.db.sql("""
+				select vacancies from `tabStaffing Plan Detail`
+				where parent=%s and designation=%s""", (self.staffing_plan, self.designation))
+			self.planned_vacancies = planned_vacancies[0][0] if planned_vacancies else None
 
-		vacancies = get_active_staffing_plan_and_vacancies(self.company, self.designation, self.department)[1]
-		# set staffing_plan too?
-		if vacancies and vacancies <= current_count:
-			frappe.throw(_("Job Openings for designation {0} already opened or hiring \
-						completed as per Staffing Plan {1}".format(self.designation, self.staffing_plan)))
+		if self.staffing_plan and self.planned_vacancies:
+			staffing_plan_company = frappe.db.get_value("Staffing Plan", self.staffing_plan, "company")
+			lft, rgt = frappe.db.get_value("Company", staffing_plan_company, ["lft", "rgt"])
+
+			current_count = get_current_employee_count(self.designation, staffing_plan_company)
+			current_count+= frappe.db.sql("""select count(*) from `tabJob Opening` \
+				where designation=%s and status='Open'
+					and company in (select name from tabCompany where lft>=%s and rgt<=%s)
+				""", (self.designation, lft, rgt))[0][0]
+
+			if self.planned_vacancies <= current_count:
+				frappe.throw(_("Job Openings for designation {0} and company {1} already opened or hiring completed as per Staffing Plan {2}".format(self.designation, staffing_plan_company, self.staffing_plan)))
 
 	def get_context(self, context):
 		context.parents = [{'route': 'jobs', 'title': _('All Jobs') }]
