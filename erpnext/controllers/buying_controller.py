@@ -517,6 +517,7 @@ class BuyingController(StockController):
 			'warehouse': row.warehouse,
 			'company': self.company,
 			'purchase_date': self.posting_date,
+			'calculate_depreciation': 1,
 			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
 			'purchase_invoice': self.name if self.doctype == 'Purchase Invoice' else None
 		})

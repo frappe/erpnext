@@ -131,9 +131,7 @@ frappe.ui.form.on('Asset', {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						$.each(r.message, function(field, value) {
-							frm.set_value(field, value);
-						})
+						frm.set_value('finance_books', r.message);
 					}
 				}
 			})
