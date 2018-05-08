@@ -133,4 +133,3 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
-	
