@@ -23,11 +23,12 @@ frappe.ui.form.on('Staffing Plan', {
 frappe.ui.form.on('Staffing Plan Detail', {
 	designation: function(frm, cdt, cdn) {
 		let child = locals[cdt][cdn]
-		if(child.designation){
+		if(frm.doc.company && child.designation){
 			frappe.call({
 				"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_current_employee_count",
 				args: {
-					designation: child.designation
+					designation: child.designation,
+					company: frm.doc.company
 				},
 				callback: function (data) {
 					if(data.message){
