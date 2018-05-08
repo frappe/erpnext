@@ -19,7 +19,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
-from erpnext.assets.doctype.asset_category.asset_category import get_cwip_account
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -442,7 +442,9 @@ class PurchaseInvoice(BuyingController):
 								if asset_rbnb_currency == self.company_currency else asset_amount)
 						}))
 					else:
-						cwip_account = get_cwip_account(item.item_code, self.company) or asset_accounts[2]
+						cwip_account = get_asset_category_account(item.asset,
+							'capital_work_in_progress_account') or asset_accounts[2]
+
 						cwip_account_currency = get_account_currency(cwip_account)
 						gl_entries.append(self.get_gl_dict({
 							"account": cwip_account,
@@ -733,20 +735,6 @@ class PurchaseInvoice(BuyingController):
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
-
-@frappe.whitelist()
-def get_fixed_asset_account(asset, account=None):
-	if account:
-		if frappe.db.get_value("Account", account, "account_type") != "Fixed Asset":
-			account=None
-
-	if not account:
-		asset_category, company = frappe.db.get_value("Asset", asset, ["asset_category", "company"])
-
-		account = frappe.db.get_value("Asset Category Account",
-			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
-
-	return account
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
