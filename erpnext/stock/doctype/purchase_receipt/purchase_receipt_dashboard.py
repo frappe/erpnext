@@ -28,7 +28,7 @@ def get_data():
 			},
 			{
 				'label': _('Subscription'),
-				'items': ['Subscription']
+				'items': ['Auto Repeat']
 			},
 		]
 	}
