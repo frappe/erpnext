@@ -13,7 +13,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
-from erpnext.assets.doctype.asset_category.asset_category import get_cwip_account
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -259,7 +259,8 @@ class PurchaseReceipt(BuyingController):
 					"asset_received_but_not_billed"])
 
 				# CWIP entry
-				cwip_account = get_cwip_account(d.item_code, self.company) or asset_accounts[0]
+				cwip_account = get_asset_category_account(d.asset,
+					'capital_work_in_progress_account') or asset_accounts[0]
 
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)

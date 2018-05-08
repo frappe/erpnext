@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff
 from frappe.model.document import Document
-from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
 
@@ -287,7 +287,7 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 		"item_code": item_code,
 		"is_fixed_asset": 1,
 		"asset": asset,
-		"expense_account": get_fixed_asset_account(asset),
+		"expense_account": get_asset_category_account(asset, 'fixed_asset_account'),
 		"qty": 1,
 		"price_list_rate": gross_purchase_amount,
 		"rate": gross_purchase_amount

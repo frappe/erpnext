@@ -505,11 +505,15 @@ class BuyingController(StockController):
 					self.make_asset_movement(d)
 
 	def make_asset(self, row):
+		item_data = frappe.db.get_value('Item',
+			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
+
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
 			'asset_name': row.item_name,
-			'naming_series': frappe.db.get_value('Item', row.item_code, 'asset_naming_series') or 'AST',
+			'naming_series': item_data.get('asset_naming_series') or 'AST',
+			'asset_category': item_data.get('asset_category'),
 			'warehouse': row.warehouse,
 			'company': self.company,
 			'purchase_date': self.posting_date,
