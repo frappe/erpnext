@@ -32,7 +32,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Quotation', 'Subscription']
+				'items': ['Quotation', 'Auto Repeat']
 			},
 			{
 				'label': _('Payment'),
