@@ -75,7 +75,8 @@ class Project(Document):
 		sum = 0
 		for task in self.tasks:
 			if task.task_weight > 0:
-				sum = sum + task.task_weight
+				sum = round(sum + task.task_weight, 3)
+				print("sum", sum)
 		if sum > 0 and sum != 1:
 			frappe.throw(_("Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly"))
 
