@@ -164,6 +164,11 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
 
+	if filters.get("finance_book"):
+		conditions.append("finance_book in (%(finance_book)s, '')")
+	else:
+		conditions.append("ifnull(finance_book, '')=''")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 

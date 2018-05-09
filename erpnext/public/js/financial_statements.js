@@ -71,6 +71,12 @@ function get_filters(){
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"from_fiscal_year",
 			"label": __("Start Year"),
 			"fieldtype": "Link",
