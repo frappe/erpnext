@@ -52,7 +52,7 @@ class LeaveApplication(Document):
 			frappe.throw(_("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted"))
 
 		self.validate_back_dated_application()
-
+		self.update_attendance()
 		# notify leave applier about approval
 		self.notify_employee(self.status)
 
@@ -99,6 +99,31 @@ class LeaveApplication(Document):
 		if future_allocation:
 			frappe.throw(_("Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
+
+	def update_attendance(self):
+		if self.status == "Approved":
+			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
+				and (attendance_date between %s and %s) and docstatus = 1""",(self.employee, self.from_date, self.to_date), as_dict=1)
+
+			if attendance:
+				for d in attendance:
+					doc = frappe.get_doc("Attendance", d.name)
+					attendance_date = (doc.attendance_date).strftime("%Y-%m-%d")
+					if self.half_day_date == attendance_date:
+						# doc.update({
+						# 	"status": "Half Day",
+						# 	"leave_type": self.leave_type
+						# })
+						status = "Half Day"
+					else:
+						status = "On Leave"
+						# doc.update({
+						# 	"status": "On Leave",
+						# 	"leave_type": self.leave_type
+						# })
+					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
+						where name = %s""",(status, self.leave_type, d.name))
+
 
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
