@@ -49,6 +49,7 @@ class PayrollEntry(Document):
 				where
 					t1.docstatus!=2
 					and t1.name = t2.employee
+					and t2.docstatus = 1
 			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
 			return emp_list
 
