@@ -64,7 +64,7 @@ class ProductionOrder(Document):
 						so.name, so_item.delivery_date, so.project
 					from
 						`tabSales Order` so, `tabSales Order Item` so_item, `tabPacked Item` packed_item
-					where so.name=%s 
+					where so.name=%s
 						and so.name=so_item.parent
 						and so.name=packed_item.parent
 						and so_item.item_code = packed_item.parent_item
@@ -88,7 +88,7 @@ class ProductionOrder(Document):
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
-	
+
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
 		for d in self.get("required_items"):
@@ -183,7 +183,10 @@ class ProductionOrder(Document):
 				from `tabStock Entry` where production_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
 
-			if qty > self.qty:
+			allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+				"over_production_allowance_percentage"))
+
+			if qty > self.qty + (allowance_percentage/100 * self.qty):
 				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
 					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
 
@@ -664,5 +667,5 @@ def query_sales_order(production_item):
 		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
 		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
 	""", (production_item, production_item))
-	
+
 	return out
