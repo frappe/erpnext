@@ -31,12 +31,12 @@ requirement.
 
 **Is Optional:** Check this Optional Leaves are holidays which Employees can choose to avail from a list of holidays published by the company. The Holiday List for optional leaves can have any number of holidays but you can restrict the number of such leaves granted to an Employee in a Leave Period by setting the Max Days Leave Allowed field.
 
-**Encashment:** It is possible that Employees can receive cash from their Employer for unused leaves granted to them in a Leave Period. Not all Leave Types need to be encashable, so you should set "Allow Encashment" for Leave Types which are encashable.
+**Encashment:** It is possible that Employees can receive cash from their Employer for unused leaves granted to them in a Leave Period. Not all Leave Types need to be encashable, so you should set "Allow Encashment" for Leave Types which are encashable. Leave encashment is allowed only in the last month of the Leave Period.
 
 <img class="screenshot" alt="Leave Encashment"
 	src="{{docs_base_url}}/assets/img/human-resources/leave-encashment.png">
 
-You can set the **Encashment Threshold Days** field so that encashment is only allowed for unused leaves older than that many days. You may also want to set the **Earning Component** for use in Salary Slip while paying out the encashed amount to Employees as part of their Salary.
+You can set the **Encashment Threshold Days** field so that the Employees wont be able to encash that many days. These days should be carry forwarded to the next Leave Period so that it can be either encashed or availed. You may also want to set the **Earning Component** for use in Salary Slip while paying out the encashed amount to Employees as part of their Salary.
 
 **Earned Leave:** Earned Leaves are leaves earned by an employee after working with the company for a certain amount of time. Checking "Is Earned Leave" will allot leaves pro rata by automatically updating Leave Allocation for leaves of this type at intervals set by **Earned Leave Frequency**. For example, if an employee earns 2 leaves of type Paid Leaves monthly, ERPNext automatically increments the Leave Allocation for Paid Leave at the end of every month by 2. The leave allotment process (background job) will only allot leaves considering the max leaves for the leave type, and will round to **Rounding** for fractions.
 
@@ -135,7 +135,7 @@ Leave Application section enables an employee to apply for leaves. Employee can 
 
 > Human Resources > Leaves and Holiday > Leave Block List > New Leave Block List
 
-Leave Block List is a list of dates in a year, on which employees cannot apply for leave. You can define a list of users who can approve Leave Application on blocked days, in case of urgency. You can also define whether the list will be applied on entire company or any specific departments.
+Leave Block List is a list of dates in a year, on which employees can not apply for leave. You can define a list of users who can approve Leave Application on blocked days, in case of urgency. You can also define whether the list will applied on entire company or any specific departments.
 
 <img class="screenshot" alt="Leave Allocation Tool"
 	src="{{docs_base_url}}/assets/img/human-resources/leave-block-list.png">
