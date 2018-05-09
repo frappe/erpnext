@@ -376,7 +376,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		if filters.get("cost_center"):
 			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
 		if filters.get("finance_book"):
-			additional_conditions.append("finance_book = '%s'" % frappe.db.escape(filters.get("finance_book")))
+			additional_conditions.append("finance_book in ('%s', '')" %
+				frappe.db.escape(filters.get("finance_book")))
 		else:
 			additional_conditions.append("ifnull(finance_book, '') = ''")
 
