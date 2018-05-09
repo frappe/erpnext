@@ -193,5 +193,8 @@ frappe.ui.form.on('Salary Detail', {
 		if(child.amount_based_on_formula == 1){
 			frappe.model.set_value(cdt, cdn, 'amount', null);
 		}
+		else{
+			frappe.model.set_value(cdt, cdn, 'formula', null);
+		}
 	}
 })
