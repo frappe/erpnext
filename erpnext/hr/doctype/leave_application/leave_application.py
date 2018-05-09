@@ -53,6 +53,7 @@ class LeaveApplication(Document):
 
 		self.validate_back_dated_application()
 		self.update_attendance()
+
 		# notify leave applier about approval
 		self.notify_employee(self.status)
 
@@ -110,20 +111,11 @@ class LeaveApplication(Document):
 					doc = frappe.get_doc("Attendance", d.name)
 					attendance_date = (doc.attendance_date).strftime("%Y-%m-%d")
 					if self.half_day_date == attendance_date:
-						# doc.update({
-						# 	"status": "Half Day",
-						# 	"leave_type": self.leave_type
-						# })
 						status = "Half Day"
 					else:
 						status = "On Leave"
-						# doc.update({
-						# 	"status": "On Leave",
-						# 	"leave_type": self.leave_type
-						# })
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
-
 
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
@@ -461,30 +453,17 @@ def add_department_leaves(events, start, end, employee, company):
 		and company=%s""", (department, company))
 
 	match_conditions = "and employee in (\"%s\")" % '", "'.join(department_employees)
-	add_leaves(events, start, end, filter_conditions=match_conditions)
+	add_leaves(events, start, end, match_conditions=match_conditions)
 
-def add_leaves(events, start, end, filter_conditions=None):
-	conditions = []
-
-	if filter_conditions:
-		conditions.append(filter_conditions)
-
-	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
-		from frappe.desk.reportview import build_match_conditions
-		match_conditions = build_match_conditions("Leave Application")
-
-		if match_conditions:
-			conditions.append(match_conditions)
-
+def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
 		and status!="Rejected" """
-
-	if conditions:
-		query += ' and '.join(conditions)
+	if match_conditions:
+		query += match_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {
