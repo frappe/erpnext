@@ -165,7 +165,7 @@ def get_conditions(filters):
 		conditions.append("project=%(project)s")
 
 	if filters.get("finance_book"):
-		conditions.append("finance_book=%(finance_book)s")
+		conditions.append("finance_book in (%(finance_book)s, '')")
 	else:
 		conditions.append("ifnull(finance_book, '')=''")
 

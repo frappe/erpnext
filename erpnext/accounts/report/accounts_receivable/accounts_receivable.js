@@ -14,15 +14,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
-			"options": "Finance Book",
-			"get_query": function() {
-				var company = frappe.query_report_filters_by_name.company.get_value();
-				return {
-					"filters": {
-						"company": company,
-					}
-				};
-			}
+			"options": "Finance Book"
 		},
 		{
 			"fieldname":"customer",
