@@ -321,6 +321,13 @@ class ReceivablePayableReport(object):
 			conditions.append("company=%s")
 			values.append(self.filters.company)
 
+		if self.filters.finance_book:
+			conditions.append("finance_book in (%s, '')")
+			values.append(self.filters.finance_book)
+		else:
+			conditions.append("ifnull(finance_book,'')=%s")
+			values.append('')
+
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")
 			values.append(self.filters.get(party_type_field))
