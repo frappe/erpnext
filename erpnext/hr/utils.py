@@ -49,3 +49,16 @@ def update_employee(employee, details, cancel=False):
 			new_data = get_datetime(new_data)
 		setattr(employee, item.fieldname, new_data)
 	return employee
+
+def validate_tax_declaration(declarations):
+	subcategories = []
+	for declaration in declarations:
+		if declaration.exemption_sub_category in  subcategories:
+			frappe.throw(_("More than one selection for {0} not \
+			allowed").format(declaration.exemption_sub_category), frappe.ValidationError)
+		subcategories.append(declaration.exemption_sub_category)
+		max_amount = frappe.db.get_value("Employee Tax Exemption Sub Category", \
+		declaration.exemption_sub_category, "max_amount")
+		if declaration.amount > max_amount:
+			frappe.throw(_("Max exemption amount for {0} is {1}").format(\
+			declaration.exemption_sub_category, max_amount), frappe.ValidationError)
