@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
-	comma_or, get_fullname
+	comma_or, get_fullname, nowdate
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
-
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -104,7 +104,7 @@ class LeaveApplication(Document):
 	def update_attendance(self):
 		if self.status == "Approved":
 			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
-				and (attendance_date between %s and %s) and docstatus = 1""",(self.employee, self.from_date, self.to_date), as_dict=1)
+				and (attendance_date between %s and %s) and docstatus < 2""",(self.employee, self.from_date, self.to_date), as_dict=1)
 
 			if attendance:
 				for d in attendance:
@@ -116,6 +116,26 @@ class LeaveApplication(Document):
 						status = "On Leave"
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
+			
+			elif self.from_date <= nowdate():
+				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
+					date = dt.strftime("%Y-%m-%d")
+					if not date == self.half_day_date:
+						doc = frappe.new_doc("Attendance")
+						doc.employee = self.employee
+						doc.attendance_date = date
+						doc.company = self.company
+						doc.status = "On Leave"
+						doc.leave_type = self.leave_type
+						doc.submit()
+					else:
+						doc = frappe.new_doc("Attendance")
+						doc.employee = self.employee
+						doc.attendance_date = date
+						doc.company = self.company
+						doc.status = "Half Day"
+						doc.leave_type = self.leave_type
+						doc.submit()
 
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
