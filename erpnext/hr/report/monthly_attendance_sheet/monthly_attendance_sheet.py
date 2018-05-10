@@ -80,7 +80,7 @@ def execute(filters=None):
 				row.append(leaves[d])
 			else:
 				row.append("0.0")
-			
+
 		data.append(row)
 	return columns, data
 
