@@ -11,7 +11,7 @@ from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
-from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -505,6 +505,9 @@ class BuyingController(StockController):
 					self.make_asset_movement(d)
 
 	def make_asset(self, row):
+		if not row.asset_location:
+			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
+
 		item_data = frappe.db.get_value('Item',
 			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
 
@@ -512,18 +515,21 @@ class BuyingController(StockController):
 			'doctype': 'Asset',
 			'item_code': row.item_code,
 			'asset_name': row.item_name,
+			'status': 'Receipt',
 			'naming_series': item_data.get('asset_naming_series') or 'AST',
 			'asset_category': item_data.get('asset_category'),
-			'warehouse': row.warehouse,
+			'location': row.asset_location,
 			'company': self.company,
 			'purchase_date': self.posting_date,
 			'calculate_depreciation': 1,
+			'gross_purchase_amount': flt(row.base_net_amount + row.item_tax_amount),
 			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
 			'purchase_invoice': self.name if self.doctype == 'Purchase Invoice' else None
 		})
 
 		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True
+		asset.set_missing_values()
 		asset.insert()
 
 		frappe.msgprint(_("Asset {0} created").format(asset.name))
@@ -533,10 +539,10 @@ class BuyingController(StockController):
 		asset_movement = frappe.get_doc({
 			'doctype': 'Asset Movement',
 			'asset': row.asset,
-			'source_warehouse': '',
-			'target_warehouse': row.warehouse,
+			'target_location': row.asset_location,
 			'purpose': 'Receipt',
 			'serial_no': row.serial_no,
+			'quantity': len(get_serial_nos(row.serial_no)),
 			'company': self.company,
 			'transaction_date': self.posting_date,
 			'reference_doctype': self.doctype,
@@ -559,7 +565,7 @@ class BuyingController(StockController):
 					asset.set(field, self.name)
 					asset.purchase_date = self.posting_date
 					asset.supplier = self.supplier
-				else:
+				elif self.docstatus == 2:
 					asset.set(field, None)
 					asset.supplier = None
 

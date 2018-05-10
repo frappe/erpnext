@@ -57,6 +57,19 @@ frappe.ui.form.on('Asset', {
 					erpnext.asset.restore_asset(frm);
 				});
 			}
+
+			if (frm.doc.purchase_receipt) {
+				frm.add_custom_button("General Ledger", function() {
+					frappe.route_options = {
+						"voucher_no": frm.doc.name,
+						"from_date": frm.doc.available_for_use_date,
+						"to_date": frm.doc.available_for_use_date,
+						"company": frm.doc.company
+					};
+					frappe.set_route("query-report", "General Ledger");
+				});
+			}
+
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
 				frm.add_custom_button(__("Purchase Invoice"), function() {
 					frm.trigger("make_purchase_invoice");
@@ -139,7 +152,7 @@ frappe.ui.form.on('Asset', {
 	},
 
 	is_existing_asset: function(frm) {
-		frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
+		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
 	},
 
 	opening_accumulated_depreciation: function(frm) {
@@ -289,15 +302,14 @@ erpnext.asset.transfer_asset = function(frm) {
 		title: __("Transfer Asset"),
 		fields: [
 			{
-				"label": __("Target Warehouse"),
-				"fieldname": "target_warehouse",
+				"label": __("Target Location"),
+				"fieldname": "target_location",
 				"fieldtype": "Link",
-				"options": "Warehouse",
+				"options": "Location",
 				"get_query": function () {
 					return {
 						filters: [
-							["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-							["Warehouse", "is_group", "=", 0]
+							["Location", "is_group", "=", 0]
 						]
 					}
 				},
@@ -324,8 +336,8 @@ erpnext.asset.transfer_asset = function(frm) {
 				args: {
 					"asset": frm.doc.name,
 					"transaction_date": args.transfer_date,
-					"source_warehouse": frm.doc.warehouse,
-					"target_warehouse": args.target_warehouse,
+					"source_warehouse": frm.doc.location,
+					"target_warehouse": args.target_location,
 					"company": frm.doc.company
 				}
 			},
