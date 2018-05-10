@@ -109,8 +109,7 @@ class LeaveApplication(Document):
 			if attendance:
 				for d in attendance:
 					doc = frappe.get_doc("Attendance", d.name)
-					attendance_date = (doc.attendance_date).strftime("%Y-%m-%d")
-					if self.half_day_date == attendance_date:
+					if getdate(self.half_day_date) == doc.attendance_date:
 						status = "Half Day"
 					else:
 						status = "On Leave"
