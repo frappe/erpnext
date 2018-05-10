@@ -273,15 +273,16 @@ class AccountsController(TransactionBase):
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 
-		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
+		posting_date = args.get('posting_date') or self.get('posting_date')
+		fiscal_years = get_fiscal_years(posting_date, company=self.company)
 		if len(fiscal_years) > 1:
-			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(posting_date)))
 		else:
 			fiscal_year = fiscal_years[0][0]
 
 		gl_dict = frappe._dict({
 			'company': self.company,
-			'posting_date': self.posting_date,
+			'posting_date': posting_date,
 			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,

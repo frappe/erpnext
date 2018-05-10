@@ -12,12 +12,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Asset Category",
+					"name": "Location",
 				},
 				{
 					"type": "doctype",
-					"label": _("Asset Location"),
-					"name": "Location",
+					"name": "Asset Category",
 				},
 				{
 					"type": "doctype",
