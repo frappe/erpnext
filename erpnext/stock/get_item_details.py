@@ -492,7 +492,6 @@ def get_price_list_rate_for(args, item_code):
 			"min_qty": args.get('qty'),
 			"transaction_date": args.get('transaction_date'),
 	}, item_code)
-
 	if price_list_rate:
 		desired_qty = args.get("qty")
 		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
@@ -502,21 +501,14 @@ def get_price_list_rate_for(args, item_code):
 				  'uom': args.get("uom"),
 				  'price_list': args.get("price_list"),
 				  'transaction_date': args.get("transaction_date", None)}
-		general_price_list_rate = frappe.db.sql(
-			"""
-				select price_list_rate
-				from `tabItem Price`
-				where item_code=%(item_code)s
-				and customer is Null
-				and supplier is Null
-				and UOM = %(uom)s
-				and price_list = %(price_list)s
-				and valid_from <= %(transaction_date)s
-				and valid_upto >= %(transaction_date)s
-			""",
-			values)
+		general_price_list_rate = get_item_price({
+				"item_code": args.get('item_code'),
+				"price_list": args.get('price_list'),
+				"uom": args.get('uom'),
+				"transaction_date": args.get('transaction_date'),
+		}, item_code)
 		if general_price_list_rate:
-			return general_price_list_rate[0][0]
+			return general_price_list_rate[0][1]
 		else:
 			return None
 
