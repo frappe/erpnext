@@ -14,7 +14,9 @@ frappe.ui.form.on('Salary Structure Assignment', {
 		frm.set_query("salary_structure", function() {
 			return {
 				filters: {
-					company: frm.doc.company
+					company: frm.doc.company,
+					is_active: "Yes",
+					docstatus: 1
 				}
 			}
 		});
