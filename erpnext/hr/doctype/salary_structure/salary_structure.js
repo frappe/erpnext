@@ -47,8 +47,18 @@ frappe.ui.form.on('Salary Structure', {
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
 
-		frm.add_custom_button(__("Preview Salary Slip"),
-			function() { frm.trigger('preview_salary_slip'); }, "fa fa-sitemap", "btn-default");
+		frm.add_custom_button(__("Preview Salary Slip"), function() {
+			frm.trigger('preview_salary_slip');
+		});
+
+		if(frm.doc.docstatus==1) {
+			frm.add_custom_button(__("Assign Salary Structure"), function() {
+				var doc = frappe.model.get_new_doc('Salary Structure Assignment');
+				doc.salary_structure = frm.doc.name;
+				doc.company = frm.doc.company;
+				frappe.set_route('Form', 'Salary Structure Assignment', doc.name);
+			});
+		}
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
