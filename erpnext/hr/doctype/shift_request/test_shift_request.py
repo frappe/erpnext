@@ -20,8 +20,8 @@ class TestShiftRequest(unittest.TestCase):
 		})
 		shift_request.insert()
 		shift_request.submit()
-		shift_assignment = frappe.db.sql("""select employee 
-											from `tabShift Assignment` 
+		shift_assignment = frappe.db.sql("""select employee
+											from `tabShift Assignment`
 											where shift_request = %s""", shift_request.name)
 		if shift_assignment:
 			employee = shift_assignment[0][0]
