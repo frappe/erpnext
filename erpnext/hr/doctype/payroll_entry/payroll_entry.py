@@ -40,15 +40,16 @@ class PayrollEntry(Document):
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
 
 		if sal_struct:
-			cond += "and t2.parent IN %(sal_struct)s "
+			cond += "and t2.salary_structure IN %(sal_struct)s "
 			emp_list = frappe.db.sql("""
 				select
 					t1.name as employee, t1.employee_name, t1.department, t1.designation
 				from
-					`tabEmployee` t1, `tabSalary Structure Employee` t2
+					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
 					t1.docstatus!=2
 					and t1.name = t2.employee
+					and t2.docstatus = 1
 			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
 			return emp_list
 
