@@ -10,6 +10,10 @@ from frappe.model.document import Document
 class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
 
+	def autoname(self):
+		abbr = frappe.db.get_value('Company', self.company, 'abbr')
+		self.name = '{0} - {1}'.format(self.department_name, abbr)
+
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
