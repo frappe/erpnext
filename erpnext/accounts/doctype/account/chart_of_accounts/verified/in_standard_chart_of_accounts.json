@@ -139,6 +139,9 @@
                     "Creditors": {
                         "account_type": "Payable"
                     },
+                    "TDS": {
+                        "account_type": "Payable"
+                    },
                     "Payroll Payable": {}
                 },
                 "Stock Liabilities": {
