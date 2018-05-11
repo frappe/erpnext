@@ -146,6 +146,7 @@ class PayrollEntry(Document):
 		ss_list = self.get_sal_slip_list(ss_status=0)
 		submitted_ss = []
 		not_submitted_ss = []
+		frappe.flags.via_payroll_entry = True
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			ss_dict = {}
@@ -159,7 +160,7 @@ class PayrollEntry(Document):
 			else:
 				try:
 					ss_obj.submit()
-					submitted_ss.append(ss_dict)
+					submitted_ss.append(ss_obj)
 
 				except frappe.ValidationError:
 					not_submitted_ss.append(ss_dict)
@@ -168,14 +169,21 @@ class PayrollEntry(Document):
 			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
 				.format(ss_obj.start_date, ss_obj.end_date))
 
+			self.email_salary_slip(submitted_ss)
+
 		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
+
+	def email_salary_slip(self, submitted_ss):
+		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
+			for ss in submitted_ss:
+				ss.email_salary_slip()
 
 	def get_loan_details(self):
 		"""
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.employee_loan_account, eld.employee_loan,
+		return frappe.db.sql(""" select eld.loan_account, eld.loan
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
@@ -277,15 +285,15 @@ class PayrollEntry(Document):
 						"project": self.project
 					})
 
-			# Employee loan
+			# Loan
 			for data in loan_details:
 				accounts.append({
-						"account": data.employee_loan_account,
+						"account": data.loan_account,
 						"credit_in_account_currency": data.principal_amount
 					})
 
 				if data.interest_amount and not data.interest_income_account:
-					frappe.throw(_("Select interest income account in employee loan {0}").format(data.employee_loan))
+					frappe.throw(_("Select interest income account in loan {0}").format(data.loan))
 
 				if data.interest_income_account and data.interest_amount:
 					accounts.append({

@@ -213,11 +213,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 	}
 }
 
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_receipt))
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
-}
-
 frappe.provide("erpnext.buying");
 
 frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {

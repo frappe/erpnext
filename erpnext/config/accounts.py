@@ -34,8 +34,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Subscription",
-					"label": _("Subscription"),
+					"name": "Auto Repeat",
+					"label": _("Auto Repeat"),
 					"description": _("To make recurring documents")
 				},
 				{

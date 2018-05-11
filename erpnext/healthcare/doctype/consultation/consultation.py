@@ -108,9 +108,11 @@ def insert_consultation_to_medical_record(doc):
 
 def update_consultation_to_medical_record(consultation):
 	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s", (consultation.name))
-	if(medical_record_id[0][0]):
+	if medical_record_id and medical_record_id[0][0]:
 		subject = set_subject_field(consultation)
 		frappe.db.set_value("Patient Medical Record", medical_record_id[0][0], "subject", subject)
+	else:
+		insert_consultation_to_medical_record(consultation)
 
 def delete_medical_record(consultation):
 	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (consultation.name))

@@ -27,22 +27,32 @@ def create_or_update_cheque_print_format(template_name):
 	doc = frappe.get_doc("Cheque Print Template", template_name)
 	
 	cheque_print.html = """
+<style>
+	.print-format {
+		padding: 0px;
+	}
+	@media screen {
+		.print-format {
+			padding: 0in;
+		}
+	}
+</style>
 <div style="position: relative; top:%(starting_position_from_top_edge)scm">
 	<div style="width:%(cheque_width)scm;height:%(cheque_height)scm;">
-		<span style="top: {{ %(acc_pay_dist_from_top_edge)s }}cm; left: {{ %(acc_pay_dist_from_left_edge)s }}cm;
-			border-bottom: solid 1px;border-top:solid 1px; position: absolute;">
+		<span style="top:%(acc_pay_dist_from_top_edge)scm; left:%(acc_pay_dist_from_left_edge)scm;
+			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
 				%(message_to_show)s
 		</span>
-		<span style="top:%(date_dist_from_top_edge)s cm; left:%(date_dist_from_left_edge)scm;
+		<span style="top:%(date_dist_from_top_edge)scm; left:%(date_dist_from_left_edge)scm;
 			position: absolute;">
 			{{ frappe.utils.formatdate(doc.reference_date) or '' }}
 		</span>
 		<span style="top:%(acc_no_dist_from_top_edge)scm;left:%(acc_no_dist_from_left_edge)scm;
-			position: absolute;">
+			position: absolute;  min-width: 6cm;">
 			{{ doc.account_no or '' }}
 		</span>
 		<span style="top:%(payer_name_from_top_edge)scm;left: %(payer_name_from_left_edge)scm;
-			position: absolute;">
+			position: absolute;  min-width: 6cm;">
 			{{doc.party_name}}
 		</span>
 		<span style="top:%(amt_in_words_from_top_edge)scm; left:%(amt_in_words_from_left_edge)scm;
@@ -51,11 +61,11 @@ def create_or_update_cheque_print_format(template_name):
 				{{frappe.utils.money_in_words(doc.base_paid_amount or doc.base_received_amount)}}
 		</span>
 		<span style="top:%(amt_in_figures_from_top_edge)scm;left: %(amt_in_figures_from_left_edge)scm;
-			position: absolute;">
+			position: absolute; min-width: 4cm;">
 			{{doc.get_formatted("base_paid_amount") or doc.get_formatted("base_received_amount")}}
 		</span>
 		<span style="top:%(signatory_from_top_edge)scm;left: %(signatory_from_left_edge)scm;
-			position: absolute;">
+			position: absolute;  min-width: 6cm;">
 			{{doc.company}}
 		</span>
 	</div>

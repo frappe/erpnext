@@ -567,7 +567,7 @@ def get_item_details(item, project = None):
 	if not res["bom_no"]:
 		if project:
 			res = get_item_details(item)
-			frappe.msgprint(_("Default BOM not found for Item {0} and Project {1}").format(item, project))
+			frappe.msgprint(_("Default BOM not found for Item {0} and Project {1}").format(item, project), alert=1)
 		else:
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 

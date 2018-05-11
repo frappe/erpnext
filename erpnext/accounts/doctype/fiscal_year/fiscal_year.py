@@ -104,6 +104,7 @@ def auto_create_fiscal_year():
 			start_year = cstr(new_fy.year_start_date.year)
 			end_year = cstr(new_fy.year_end_date.year)
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
+			new_fy.auto_created = 1
 
 			new_fy.insert(ignore_permissions=True)
 		except frappe.NameError:
