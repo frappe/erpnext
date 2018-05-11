@@ -2,7 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Benefit Application', {
-	refresh: function(frm) {
-
+	setup: function(frm) {
+		frm.set_query("earning_component", "employee_benefits", function() {
+			return {
+				filters: {
+					type: "Earning",
+					is_flexible_benefit: true,
+					disabled: false,
+					is_pro_rata_applicable: true
+				}
+			}
+		})
 	}
 });
