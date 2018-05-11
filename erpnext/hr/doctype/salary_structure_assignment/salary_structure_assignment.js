@@ -11,9 +11,36 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				}
 			}
 		});
+		frm.set_query("salary_structure", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_active: "Yes",
+					docstatus: 1
+				}
+			}
+		});
 	},
-
-	refresh: function(frm) {
-
+	employee: function(frm) {
+		if(frm.doc.employee){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args:{
+					doctype: "Employee",
+					fieldname: "company",
+					filters:{
+						name: frm.doc.employee
+					}
+				},
+				callback: function(data) {
+					if(data.message){
+						frm.set_value("company", data.message.company);
+					}
+				}
+			});
+		}
+		else{
+			frm.set_value("company", null);
+		}
 	}
 });
