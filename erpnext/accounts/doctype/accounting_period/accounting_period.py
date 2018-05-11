@@ -7,4 +7,9 @@ import frappe
 from frappe.model.document import Document
 
 class AccountingPeriod(Document):
-	pass
+	def validate(self):
+		self.validate_overlap()
+
+	def autoname(self):
+		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
+		self.name = " - ".join([self.period_name, company_abbr])
