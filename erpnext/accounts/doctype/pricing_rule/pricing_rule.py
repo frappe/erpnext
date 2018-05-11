@@ -178,11 +178,8 @@ def get_pricing_rule_for_item(args):
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-		if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency:
-			item_details.margin_type = pricing_rule.margin_type
-			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-
-		elif pricing_rule.margin_type == 'Percentage':
+		if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)\
+				or (pricing_rule.margin_type == 'Percentage'):
 			item_details.margin_type = pricing_rule.margin_type
 			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		else:
@@ -190,17 +187,13 @@ def get_pricing_rule_for_item(args):
 			item_details.margin_rate_or_amount = 0.0
 
 		if pricing_rule.rate_or_discount == 'Rate':
+			pricing_rule_rate = 0.0
 			if pricing_rule.currency == args.currency:
-				item_details.update({
-					"price_list_rate": pricing_rule.rate,
-					"discount_percentage": 0.0
-				})
-
-			else:
-				item_details.update({
-					"price_list_rate": 0.0,
-					"discount_percentage": 0.0
-				})
+				pricing_rule_rate = pricing_rule.rate
+			item_details.update({
+				"price_list_rate": pricing_rule_rate,
+				"discount_percentage": 0.0
+			})
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
 
