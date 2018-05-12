@@ -50,8 +50,19 @@ def update_employee(employee, details, cancel=False):
 		setattr(employee, item.fieldname, new_data)
 	return employee
 
-
 def get_leave_period(from_date, to_date, company):
-	return frappe.db.sql("""select name from `tabLeave Period`
-		where is_active=1 and company=%s 
-			and to_date >= %s and from_date <= %s""", (company, to_date, from_date))
+	leave_period = frappe.db.sql("""
+		select name, from_date, to_date
+		from `tabLeave Period`
+		where company=%(company)s and is_active=1
+			and (from_date between %(from_date)s and %(to_date)s
+				or to_date between %(from_date)s and %(to_date)s
+				or (from_date < %(from_date)s and to_date > %(to_date)s))
+	""", {
+		"from_date": from_date,
+		"to_date": to_date,
+		"company": company
+	}, as_dict=1)
+
+	if leave_period:
+		return leave_period
