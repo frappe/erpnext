@@ -240,7 +240,7 @@ def set_tax_withholding_category(docs, company):
 def set_tds_account(docs, company):
 	docs.extend([
 		{
-			'doctype': 'Account', 'account_name': 'TDS', 'account_type': 'Payable',
-			'parent_account': 'Accounts Payable', 'company': company
+			'doctype': 'Account', 'account_name': 'TDS', 'account_type': 'Tax',
+			'parent_account': 'Duties and Taxes', 'company': company
 		}
 	])

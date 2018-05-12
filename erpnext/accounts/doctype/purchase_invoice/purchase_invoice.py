@@ -8,7 +8,7 @@ from frappe import _, throw
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.party import get_party_account, get_due_date
+from erpnext.accounts.party import get_party_account, get_due_date, get_patry_tax_withholding_details
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 from erpnext.stock import get_warehouse_account_map
@@ -46,13 +46,13 @@ class PurchaseInvoice(BuyingController):
 			self.is_opening = 'No'
 
 		self.validate_posting_time()
+		self.set_tax_withholding()
 		super(PurchaseInvoice, self).validate()
 
 		if not self.is_return:
 			self.po_required()
 			self.pr_required()
 			self.validate_supplier_invoice()
-
 
 		# validate cash purchase
 		if (self.is_paid == 1):
@@ -167,7 +167,6 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 		super(PurchaseInvoice, self).validate_warehouse()
-
 
 	def validate_item_code(self):
 		for d in self.get('items'):
@@ -730,6 +729,22 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.due_date = None
+
+	def set_tax_withholding(self):
+		"""
+			1. Get TDS Configurations against Supplier or Pull Default One.
+			2. Form Purchase Order, identify partial payments
+			3. If sum of all invoices grand total is greater than threshold and If TDS not deducted in previos Invoices
+				then deduct TDS for sum amount else deduct TDS for current Invoice
+		"""
+		if not self.get("__islocal"):
+			return
+
+		tax_withholding_details = get_patry_tax_withholding_details(self)
+
+		if tax_withholding_details and\
+			flt(self.get("rounded_total") or self.grand_total) >= flt(tax_withholding_details['threshold']):
+			self.append('taxes', tax_withholding_details['taxes'])
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
