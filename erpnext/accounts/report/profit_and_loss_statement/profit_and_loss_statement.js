@@ -8,12 +8,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 
 	frappe.query_reports["Profit and Loss Statement"]["filters"].push(
 		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center"
-		},
-		{
 			"fieldname":"project",
 			"label": __("Project"),
 			"fieldtype": "Link",

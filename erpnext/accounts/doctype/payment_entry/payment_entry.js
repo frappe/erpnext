@@ -242,6 +242,14 @@ frappe.ui.form.on('Payment Entry', {
 			}
 			
 			frm.set_party_account_based_on_party = true;
+			var cost_center = "";
+			if(frm.doc.payment_type == "Receive"){
+				cost_center = frm.doc.cost_center_from;
+
+			}else if (frm.doc.payment_type == "Payment"){
+				cost_center = frm.doc.cost_center_to;
+
+			}
 
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details",
@@ -249,7 +257,8 @@ frappe.ui.form.on('Payment Entry', {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
-					date: frm.doc.posting_date
+					date: frm.doc.posting_date,
+					cost_center: cost_center
 				},
 				callback: function(r, rt) {
 					if(r.message) {
@@ -281,7 +290,7 @@ frappe.ui.form.on('Payment Entry', {
 	paid_from: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
 
-		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_from,
+		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_from, frm.doc.cost_center_from,
 			"paid_from_account_currency", "paid_from_account_balance", function(frm) {
 				if (frm.doc.payment_type == "Receive") {
 					frm.events.get_outstanding_documents(frm);
@@ -295,7 +304,7 @@ frappe.ui.form.on('Payment Entry', {
 	paid_to: function(frm) {
 		if(frm.set_party_account_based_on_party) return;
 
-		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_to,
+		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_to, frm.doc.cost_center_to,
 			"paid_to_account_currency", "paid_to_account_balance", function(frm) {
 				if(frm.doc.payment_type == "Pay") {
 					frm.events.get_outstanding_documents(frm);
@@ -314,14 +323,15 @@ frappe.ui.form.on('Payment Entry', {
 		);
 	},
 
-	set_account_currency_and_balance: function(frm, account, currency_field,
+	set_account_currency_and_balance: function(frm, account, cost_center, currency_field,
 			balance_field, callback_function) {
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
 				args: {
 					"account": account,
-					"date": frm.doc.posting_date
+					"date": frm.doc.posting_date,
+					"cost_center": cost_center
 				},
 				callback: function(r, rt) {
 					if(r.message) {
@@ -509,7 +519,8 @@ frappe.ui.form.on('Payment Entry', {
 					"party_type": frm.doc.party_type,
 					"payment_type": frm.doc.payment_type,
 					"party": frm.doc.party,
-					"party_account": frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to
+					"party_account": frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to,
+					"cost_center": frm.doc.payment_type=="Receive" ? frm.doc.cost_center_from : frm.doc.cost_center_to
 				}
 			},
 			callback: function(r, rt) {
@@ -851,4 +862,22 @@ frappe.ui.form.on('Payment Entry Deduction', {
 	deductions_remove: function(frm) {
 		frm.events.set_unallocated_amount(frm);
 	}
+})
+
+frappe.ui.form.on('Payment Entry', {
+	setup: function(frm){
+		frappe.db.get_value('Accounts Settings', {name: 'Accounts Settings'}, 'allow_cost_center_in_entry_of_bs_account', (r) => {
+			frm.toggle_display("cost_center_from", (r.allow_cost_center_in_entry_of_bs_account==1));
+			frm.toggle_display("cost_center_to", (r.allow_cost_center_in_entry_of_bs_account==1));
+
+		});
+	},
+	cost_center_from: function(frm){
+		frm.trigger("paid_from");
+
+	},
+	cost_center_to: function(frm){
+		frm.trigger("paid_to");
+	},
+
 })
