@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils.nestedset import rebuild_tree
 
 def execute():
 	frappe.reload_doc('assets', 'doctype', 'location')
@@ -21,6 +22,8 @@ def execute():
 			loc.save(ignore_permissions=True)
 		except frappe.DuplicateEntryError:
 			continue
+
+	rebuild_tree("Location", "parent_location")
 
 def get_parent_warehouse_name(warehouse):
 	return frappe.db.get_value('Warehouse', warehouse, 'warehouse_name')

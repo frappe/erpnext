@@ -10,9 +10,10 @@ from frappe.model.document import Document
 
 class AssetCategory(Document):
 	def validate(self):
-		for field in ("total_number_of_depreciations", "frequency_of_depreciation"):
-			if cint(self.get(field))<1:
-				frappe.throw(_("{0} must be greater than 0").format(self.meta.get_label(field)), frappe.MandatoryError)
+		for d in self.finance_books:
+			for field in ("Total Number of Depreciations", "Frequency of Depreciation"):
+				if cint(d.get(frappe.scrub(field)))<1:
+					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
 
 @frappe.whitelist()
 def get_asset_category_account(asset, fieldname, account=None, asset_category = None, company = None):
