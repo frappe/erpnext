@@ -63,9 +63,6 @@ class Asset(AccountsController):
 		if not self.calculate_depreciation:
 			return
 
-		self.value_after_depreciation = (flt(self.gross_purchase_amount) -
-			flt(self.opening_accumulated_depreciation))
-
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(nowdate()):
 			frappe.throw(_("Available-for-use Date is entered as past date"))
 
@@ -79,7 +76,9 @@ class Asset(AccountsController):
 			for d in self.get('finance_books'):
 				self.validate_asset_finance_books(d)
 
-				value_after_depreciation = flt(self.value_after_depreciation)
+				value_after_depreciation = (flt(self.gross_purchase_amount) -
+					flt(self.opening_accumulated_depreciation))
+
 				d.value_after_depreciation = value_after_depreciation
 
 				no_of_depreciations = cint(d.total_number_of_depreciations - 1) - cint(self.number_of_depreciations_booked)
@@ -139,7 +138,8 @@ class Asset(AccountsController):
 								depreciation_amount = days * rate_per_day
 								from_date = schedule_date
 							else:
-								depreciation_amount = self.get_depreciation_amount(value_after_depreciation,d)
+								depreciation_amount = self.get_depreciation_amount(value_after_depreciation,
+									d.total_number_of_depreciations, d)
 
 							if depreciation_amount:
 								value_after_depreciation -= flt(depreciation_amount)
@@ -187,21 +187,24 @@ class Asset(AccountsController):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
 
-	def set_accumulated_depreciation(self):
-		value_after_depreciation = flt(self.value_after_depreciation)
+	def set_accumulated_depreciation(self, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
 		finance_books = []
 
 		for i, d in enumerate(self.get("schedules")):
+			if ignore_booked_entry and d.journal_entry:
+				continue
+
 			if d.finance_book_id not in finance_books:
 				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
+				value_after_depreciation = flt(self.get_value_after_depreciation(d.finance_book_id))
 				finance_books.append(d.finance_book_id)
 
 			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
 			value_after_depreciation -= flt(depreciation_amount)
 
 			if straight_line_idx and i == max(straight_line_idx) - 1:
-				book = self.get('finance_books')[d.finance_book_id - 1]
+				book = self.get('finance_books')[cint(d.finance_book_id) - 1]
 				depreciation_amount += flt(value_after_depreciation -
 					flt(book.expected_value_after_useful_life), d.precision("depreciation_amount"))
 
@@ -210,10 +213,13 @@ class Asset(AccountsController):
 			d.accumulated_depreciation_amount = flt(accumulated_depreciation,
 				d.precision("accumulated_depreciation_amount"))
 
-	def get_depreciation_amount(self, depreciable_value, row):
+	def get_value_after_depreciation(self, idx):
+		return flt(self.get('finance_books')[cint(idx)-1].value_after_depreciation)
+
+	def get_depreciation_amount(self, depreciable_value, total_number_of_depreciations, row):
 		percentage_value = 100.0 if row.depreciation_method == 'Written Down Value' else 200.0
 
-		factor = percentage_value /  row.total_number_of_depreciations
+		factor = percentage_value /  total_number_of_depreciations
 		depreciation_amount = flt(depreciable_value * factor / 100, 0)
 
 		value_after_depreciation = flt(depreciable_value) - depreciation_amount
@@ -229,7 +235,7 @@ class Asset(AccountsController):
 			prorata_temporis = 1
 
 		if row.depreciation_method in ("Straight Line", "Manual"):
-			depreciation_amount = (flt(self.value_after_depreciation) -
+			depreciation_amount = (flt(row.value_after_depreciation) -
 				flt(row.expected_value_after_useful_life)) / (cint(row.total_number_of_depreciations) -
 				cint(self.number_of_depreciations_booked)) * prorata_temporis
 		else:
@@ -306,7 +312,7 @@ class Asset(AccountsController):
 			doc.submit()
 
 	def make_gl_entries(self):
-		if self.purchase_receipt:
+		if self.purchase_receipt and self.purchase_receipt_amount:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
 			gl_entries = []
@@ -320,8 +326,8 @@ class Asset(AccountsController):
 				"against": fixed_aseet_account,
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
-				"credit": self.gross_purchase_amount,
-				"credit_in_account_currency": self.gross_purchase_amount
+				"credit": self.purchase_receipt_amount,
+				"credit_in_account_currency": self.purchase_receipt_amount
 			}))
 
 			gl_entries.append(self.get_gl_dict({
@@ -329,8 +335,8 @@ class Asset(AccountsController):
 				"against": cwip_account,
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
-				"debit": self.gross_purchase_amount,
-				"debit_in_account_currency": self.gross_purchase_amount
+				"debit": self.purchase_receipt_amount,
+				"debit_in_account_currency": self.purchase_receipt_amount
 			}))
 
 			make_gl_entries(gl_entries)

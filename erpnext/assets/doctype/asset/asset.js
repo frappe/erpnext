@@ -80,6 +80,12 @@ frappe.ui.form.on('Asset', {
 					frm.trigger("create_asset_maintenance");
 				}, __("Make"));
 			}
+			if (frm.doc.status != 'Fully Depreciated') {
+				frm.add_custom_button(__("Asset Adjustment"), function() {
+					frm.trigger("create_asset_maintenance");
+				}, __("Make"));
+			}
+
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 			frm.trigger("setup_chart");
 		}
