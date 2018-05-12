@@ -89,6 +89,9 @@ class BuyingController(StockController):
 				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
 
 	def get_asset_items(self):
+		if self.doctype not in ['Purchase Invoice', 'Purchase Receipt']:
+			return []
+
 		return [d.item_code for d in self.items if d.is_fixed_asset]
 
 	def set_landed_cost_voucher_amount(self):
