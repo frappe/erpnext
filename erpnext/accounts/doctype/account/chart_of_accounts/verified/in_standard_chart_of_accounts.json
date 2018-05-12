@@ -139,9 +139,6 @@
                     "Creditors": {
                         "account_type": "Payable"
                     },
-                    "TDS": {
-                        "account_type": "Payable"
-                    },
                     "Payroll Payable": {}
                 },
                 "Stock Liabilities": {
@@ -150,8 +147,9 @@
                     }
                 },
                 "Duties and Taxes": {
-                    "account_type": "Tax",
-                    "is_group": 1
+                    "TDS": {
+                        "account_type": "Tax"
+                    }
                 },
                 "Loans (Liabilities)": {
                     "Secured Loans": {},
