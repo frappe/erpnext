@@ -45,6 +45,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Asset Adjustment",
+				},
+				{
+					"type": "doctype",
 					"name": "Asset Repair",
 				},
 			]

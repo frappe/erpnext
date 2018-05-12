@@ -511,6 +511,7 @@ class BuyingController(StockController):
 		item_data = frappe.db.get_value('Item',
 			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
 
+		purchase_amount = flt(row.base_net_amount + row.item_tax_amount)
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
@@ -522,7 +523,8 @@ class BuyingController(StockController):
 			'company': self.company,
 			'purchase_date': self.posting_date,
 			'calculate_depreciation': 1,
-			'gross_purchase_amount': flt(row.base_net_amount + row.item_tax_amount),
+			'purchase_receipt_amount': purchase_amount,
+			'gross_purchase_amount': purchase_amount,
 			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
 			'purchase_invoice': self.name if self.doctype == 'Purchase Invoice' else None
 		})
