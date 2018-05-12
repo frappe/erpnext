@@ -105,18 +105,18 @@ class Asset(AccountsController):
 								previous_scheduled_date = add_months(d.depreciation_start_date, (n-1) * 12)
 								depreciation_amount = \
 									self.get_depreciation_amount_prorata_temporis(value_after_depreciation,
-										row, previous_scheduled_date, schedule_date)
+										d, previous_scheduled_date, schedule_date)
 
 							elif n == range(number_of_pending_depreciations)[0]:
 								schedule_date = d.depreciation_start_date
 								depreciation_amount = \
 									self.get_depreciation_amount_prorata_temporis(value_after_depreciation,
-										row, self.available_for_use_date, schedule_date)
+										d, self.available_for_use_date, schedule_date)
 
 							else:
 								schedule_date = add_months(d.depreciation_start_date, n * 12)
 								depreciation_amount = \
-									 self.get_depreciation_amount_prorata_temporis(value_after_depreciation, row)
+									 self.get_depreciation_amount_prorata_temporis(value_after_depreciation, d)
 
 							if value_after_depreciation != 0:
 								value_after_depreciation -= flt(depreciation_amount)

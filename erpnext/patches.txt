@@ -529,3 +529,4 @@ erpnext.patches.v11_0.rename_health_insurance
 erpnext.patches.v11_0.rebuild_tree_for_company
 erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
+erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
