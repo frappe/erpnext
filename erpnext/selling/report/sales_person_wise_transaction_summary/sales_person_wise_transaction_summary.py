@@ -44,7 +44,7 @@ def get_entries(filters):
 	if filters["doc_type"] == "Sales Order":
 		qty_field = "delivered_qty"
 	else:
-		qty_field = "stock_qty"
+		qty_field = "qty"
 	conditions, values = get_conditions(filters, date_field)
 
 	entries = frappe.db.sql("""
@@ -52,15 +52,15 @@ def get_entries(filters):
 			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
 			st.sales_person, st.allocated_percentage,
 		CASE 
-			WHEN dt.status = "Closed" THEN dt_item.%s
+			WHEN dt.status = "Closed" THEN dt_item.%s * dt_item.conversion_factor
 			ELSE dt_item.stock_qty
 		END as stock_qty,
 		CASE
-			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.%s)
+			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor)
 			ELSE dt_item.base_net_amount
 		END as base_net_amount,
 		CASE
-			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.%s) * st.allocated_percentage/100)
+			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor) * st.allocated_percentage/100)
 			ELSE dt_item.base_net_amount * st.allocated_percentage/100
 		END as contribution_amt
 		from

@@ -93,11 +93,11 @@ def get_achieved_details(filters, sales_person, all_sales_persons, target_item_g
 	item_details = frappe.db.sql("""
 		SELECT st.sales_person, MONTHNAME(so.transaction_date) as month_name,
 		CASE
-			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * (st.allocated_percentage/100))
+			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * (st.allocated_percentage/100))
 			ELSE sum(soi.stock_qty * (st.allocated_percentage/100))
 		END as qty,
 		CASE
-			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.base_net_rate * (st.allocated_percentage/100))
+			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * soi.base_net_rate * (st.allocated_percentage/100))
 			ELSE soi.base_net_amount * (st.allocated_percentage/100))
 		END as amount
 		from
