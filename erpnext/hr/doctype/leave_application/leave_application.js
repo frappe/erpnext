@@ -95,6 +95,9 @@ frappe.ui.form.on("Leave Application", {
 					if (!r.exc && r.message) {
 						frm.set_value('leave_balance', r.message);
 					}
+					else {
+						frm.set_value('leave_balance', "0");
+					}
 				}
 			});
 		}
