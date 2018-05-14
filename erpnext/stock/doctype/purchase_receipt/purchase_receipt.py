@@ -13,6 +13,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -253,6 +254,40 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
+			elif d.is_fixed_asset:
+				asset_accounts = self.get_company_default(["capital_work_in_progress_account",
+					"asset_received_but_not_billed"])
+
+				# CWIP entry
+				cwip_account = get_asset_category_account(d.asset,
+					'capital_work_in_progress_account') or asset_accounts[0]
+
+				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
+				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
+
+				cwip_account_currency = get_account_currency(cwip_account)
+				gl_entries.append(self.get_gl_dict({
+					"account": cwip_account,
+					"against": asset_accounts[1],
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"debit": base_asset_amount,
+					"debit_in_account_currency": (base_asset_amount
+						if cwip_account_currency == self.company_currency else asset_amount)
+				}))
+
+				# Asset received but not billed
+				asset_rbnb_currency = get_account_currency(asset_accounts[1])
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_accounts[1],
+					"against": asset_accounts[0],
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"credit": base_asset_amount,
+					"credit_in_account_currency": (base_asset_amount
+						if asset_rbnb_currency == self.company_currency else asset_amount)
+				}))
+
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -393,6 +428,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"parent": "purchase_receipt",
 				"purchase_order_item": "po_detail",
 				"purchase_order": "purchase_order",
+				"is_fixed_asset": "is_fixed_asset",
+				"asset": "asset",
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0

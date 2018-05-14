@@ -42,6 +42,8 @@ class Employee(NestedSet):
 		self.validate_status()
 		self.validate_reports_to()
 		self.validate_preferred_email()
+		if self.job_applicant:
+			self.validate_onboarding_process()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -163,6 +165,14 @@ class Employee(NestedSet):
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+
+	def validate_onboarding_process(self):
+		employee_onboarding = frappe.get_all("Employee Onboarding",
+			filters={"job_applicant": self.job_applicant, "docstatus": 1, "status": ("!=", "Completed")})
+		if employee_onboarding:
+			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
+			doc.validate_employee_creation()
+			doc.db_set("employee", self.name)
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
