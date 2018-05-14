@@ -46,7 +46,7 @@ class AccountingPeriod(Document):
 		return docs_for_closing
 
 	def bootstrap_doctypes_for_closing(self):
-		if self.closed_documents.length == 0:
+		if len(self.closed_documents) == 0:
 			for doctype_for_closing in self.get_doctypes_for_closing():
 				self.append('closed_documents', {
 					"document_type": doctype_for_closing.document_type,
