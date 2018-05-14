@@ -117,7 +117,7 @@ frappe.ui.form.on('Pricing Rule', {
 	},
 
 	refresh: function(frm) {
-		var help_content = 
+		var help_content =
 			`<table class="table table-bordered" style="background-color: #f9f9f9;">
 				<tr><td>
 					<h4>
@@ -190,11 +190,11 @@ frappe.ui.form.on('Pricing Rule', {
 	selling: function(frm) {
 		frm.events.set_options_for_applicable_for(frm);
 	},
-	
+
 	buying: function(frm) {
 		frm.events.set_options_for_applicable_for(frm);
 	},
-	
+
 	//Dynamically change the description based on type of margin
 	margin_type: function(frm){
 		frm.set_df_property('margin_rate_or_amount', 'description', frm.doc.margin_type=='Percentage'?'In Percentage %':'In Amount');
@@ -203,7 +203,7 @@ frappe.ui.form.on('Pricing Rule', {
 	set_options_for_applicable_for: function(frm) {
 		var options = [""];
 		var applicable_for = frm.doc.applicable_for;
-	
+
 		if(frm.doc.selling) {
 			options = $.merge(options, ["Customer", "Customer Group", "Territory", "Sales Partner", "Campaign"]);
 		}

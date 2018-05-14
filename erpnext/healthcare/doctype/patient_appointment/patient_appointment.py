@@ -355,8 +355,8 @@ def get_events(start, end, filters=None):
 		{"start": start, "end": end}, as_dict=True, update={"allDay": 0})
 	for item in data:
 		item.end = item.start + datetime.timedelta(minutes = item.duration)
-	return data
 
+	return data
 @frappe.whitelist()
 def get_procedure_prescribed(patient):
 	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.physician,

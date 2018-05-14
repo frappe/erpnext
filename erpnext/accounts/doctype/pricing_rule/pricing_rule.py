@@ -23,6 +23,7 @@ class PricingRule(Document):
 		self.cleanup_fields_value()
 		self.validate_rate_or_discount()
 		self.validate_max_discount()
+		self.validate_price_list_with_currency()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -73,6 +74,11 @@ class PricingRule(Document):
 			if max_discount and flt(self.discount_percentage) > flt(max_discount):
 				throw(_("Max discount allowed for item: {0} is {1}%").format(self.item_code, max_discount))
 
+	def validate_price_list_with_currency(self):
+		if self.currency and self.for_price_list:
+			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency")
+			if not self.currency == price_list_currency:
+				throw(_("Currency should be same as Price List Currency: {0}").format(price_list_currency))
 
 #--------------------------------------------------------------------------------
 
