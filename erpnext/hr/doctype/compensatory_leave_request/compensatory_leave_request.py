@@ -25,7 +25,6 @@ class CompensatoryLeaveRequest(Document):
 			if leave_period:
 				leave_allocation = self.exists_allocation_for_period(leave_period)
 				if leave_allocation:
-					new_leaves_allocated = leave_allocation.new_leaves_allocated
 					leave_allocation.new_leaves_allocated += date_difference
 					leave_allocation.submit()
 				else:
@@ -52,7 +51,7 @@ class CompensatoryLeaveRequest(Document):
 		if leave_allocation:
 			return frappe.get_doc("Leave Allocation", leave_allocation[0].name)
 		else:
-			False
+			return False
 
 	def create_leave_allocation(self, leave_period, date_difference):
 		is_carry_forward = frappe.db.get_value("Leave Type", self.leave_type, "is_carry_forward")
