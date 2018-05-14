@@ -234,7 +234,8 @@ scheduler_events = {
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
-		"erpnext.assets.doctype.asset.asset.update_maintenance_status"
+		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
+		"erpnext.assets.doctype.asset.asset.make_post_gl_entry"
 	]
 }
 

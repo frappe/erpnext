@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, cint
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
@@ -47,6 +47,7 @@ def make_depreciation_entry(asset_name, date=None):
 			je.naming_series = depreciation_series
 			je.posting_date = d.schedule_date
 			je.company = asset.company
+			je.finance_book = d.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
 			je.append("accounts", {
@@ -68,9 +69,12 @@ def make_depreciation_entry(asset_name, date=None):
 			je.submit()
 
 			d.db_set("journal_entry", je.name)
-			asset.value_after_depreciation -= d.depreciation_amount
+			
+			idx = cint(d.finance_book_id)
+			finance_books = asset.get('finance_books')[idx - 1]
+			finance_books.value_after_depreciation -= d.depreciation_amount
+			finance_books.db_update()
 
-	asset.db_set("value_after_depreciation", asset.value_after_depreciation)
 	asset.set_status()
 
 	return asset

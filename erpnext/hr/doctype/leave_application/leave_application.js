@@ -30,13 +30,40 @@ frappe.ui.form.on("Leave Application", {
 					doctype: frm.doc.doctype
 				}
 			};
-		});
+		}); 
 
 		frm.set_query("employee", erpnext.queries.employee);
 	},
 
 	validate: function(frm) {
 		frm.toggle_reqd("half_day_date", frm.doc.half_day == 1);
+	},
+
+	make_dashboard: function(frm) {
+		var leave_details;
+		if (frm.doc.employee) {
+			frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_details",
+				async: false,
+				args: {
+					employee: frm.doc.employee,
+					date: frm.doc.posting_date
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						leave_details = r.message;
+					}
+				}
+			});
+
+			$("div").remove(".form-dashboard-section");
+			let section = frm.dashboard.add_section(
+				frappe.render_template('leave_application_dashboard', {
+					data: leave_details
+				})
+			);
+			frm.dashboard.show();
+		}
 	},
 
 	refresh: function(frm) {
@@ -50,6 +77,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	employee: function(frm) {
+		frm.trigger("make_dashboard");
 		frm.trigger("get_leave_balance");
 	},
 
