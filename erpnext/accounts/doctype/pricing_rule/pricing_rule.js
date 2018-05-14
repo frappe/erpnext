@@ -33,7 +33,7 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 						${__("Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.")}
 					</li>
 					<li>
-						${__("Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.")}
+						${__("Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Group, Campaign, Sales Partner etc.")}
 					</li>
 					<li>
 						${__('Pricing Rules are further filtered based on quantity.')}
@@ -51,7 +51,7 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 								${__('Customer > Customer Group > Territory')}
 							</li>
 							<li>
-								${__('Supplier > Supplier Type')}
+								${__('Supplier > Supplier Group')}
 							</li>
 						</ul>
 					</li>
@@ -75,7 +75,7 @@ cur_frm.cscript.set_options_for_applicable_for = function() {
 		options = $.merge(options, ["Customer", "Customer Group", "Territory", "Sales Partner", "Campaign"]);
 	}
 	if(cur_frm.doc.buying) {
-		$.merge(options, ["Supplier", "Supplier Type"]);
+		$.merge(options, ["Supplier", "Supplier Group"]);
 	}
 
 	set_field_options("applicable_for", options.join("\n"));

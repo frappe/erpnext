@@ -34,7 +34,7 @@ frappe.ui.form.on("Delivery Note", {
 
 		frm.set_query('transporter_name', function(doc) {
 			return {
-				filters: { 'supplier_type': "transporter" }
+				filters: { 'supplier_group': "transporter" }
 			}
 		});
 

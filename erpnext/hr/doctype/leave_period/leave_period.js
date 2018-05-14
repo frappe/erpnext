@@ -22,6 +22,15 @@ frappe.ui.form.on('Leave Period', {
 			},
 			freeze: true,
 			freeze_message: __("Grant allocations......")
-		});
+		})
+	},
+	onload: (frm) => {
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			}
+		})
 	}
 });

@@ -205,9 +205,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_fixed_asset_account",
+				method: "erpnext.assets.doctype.asset_category.asset_category.get_asset_category_account",
 				args: {
 					"asset": row.asset,
+					"fieldname": "fixed_asset_account",
 					"account": row.expense_account
 				},
 				callback: function(r, rt) {

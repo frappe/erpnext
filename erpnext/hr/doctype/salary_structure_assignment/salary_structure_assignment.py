@@ -11,6 +11,7 @@ from frappe.model.document import Document
 class SalaryStructureAssignment(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_duplicate_assignments()
 
 	def validate_dates(self):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
@@ -33,10 +34,14 @@ class SalaryStructureAssignment(Document):
 					.format(self.to_date, relieving_date))
 
 	def validate_duplicate_assignments(self):
+		if not self.name:
+ 			# hack! if name is null, it could cause problems with !=
+ 			self.name = "New "+self.doctype
 		assignment = frappe.db.sql("""
 			select name from `tabSalary Structure Assignment`
 			where employee=%(employee)s
-			and name != %(salary_struct)s
+			and name != %(name)s
+			and docstatus != 2
 			and (
 				(%(from_date)s between from_date and ifnull(to_date, '2199-12-31'))
 				or (%(to_date)s between from_date and ifnull(to_date, '2199-12-31'))
@@ -45,7 +50,7 @@ class SalaryStructureAssignment(Document):
 				'employee': self.employee,
 				'from_date': self.from_date,
 				'to_date': (self.to_date or '2199-12-31'),
-				'salary_struct': self.salary_struct
+				'name': self.name
 			})
 
 		if assignment:

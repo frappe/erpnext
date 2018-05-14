@@ -25,10 +25,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Attendance Request",
-				},
-				{
-					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True
 				}
@@ -125,12 +121,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Additional Salary Component",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Structure",
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Tax Exemption Category",
 				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Sub Category"
+				}
 			]
 		},
 		{

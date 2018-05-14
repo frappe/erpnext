@@ -168,6 +168,9 @@ class Company(NestedSet):
 		self._set_default_account("round_off_account", "Round Off")
 		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
 		self._set_default_account("depreciation_expense_account", "Depreciation")
+		self._set_default_account("capital_work_in_progress_account", "Capital Work in Progress")
+		self._set_default_account("asset_received_but_not_billed", "Asset Received But Not Billed")
+		self._set_default_account("expenses_included_in_asset_valuation", "Expenses Included In Asset Valuation")
 
 		if self.enable_perpetual_inventory:
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")

@@ -11,6 +11,7 @@ from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
+from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -78,7 +79,7 @@ class BuyingController(StockController):
 					break
 
 	def validate_stock_or_nonstock_items(self):
-		if self.meta.get_field("taxes") and not self.get_stock_items():
+		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
 			tax_for_valuation = [d for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 
@@ -86,6 +87,12 @@ class BuyingController(StockController):
 				for d in tax_for_valuation:
 					d.category = 'Total'
 				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
+
+	def get_asset_items(self):
+		if self.doctype not in ['Purchase Invoice', 'Purchase Receipt']:
+			return []
+
+		return [d.item_code for d in self.items if d.is_fixed_asset]
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
@@ -111,7 +118,7 @@ class BuyingController(StockController):
 
 			TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		stock_items = self.get_stock_items()
+		stock_items = self.get_stock_items() + self.get_asset_items()
 
 		stock_items_qty, stock_items_amount = 0, 0
 		last_stock_item_idx = 1
@@ -439,6 +446,12 @@ class BuyingController(StockController):
 		if self.get('is_return'):
 			return
 
+		if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
+			field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
+
+			self.process_fixed_asset()
+			self.update_fixed_asset(field)
+
 		update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
@@ -446,6 +459,133 @@ class BuyingController(StockController):
 			return
 
 		update_last_purchase_rate(self, is_submit = 0)
+		if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
+			field = 'purchase_invoice' if self.doctype == 'Purchase Invoice' else 'purchase_receipt'
+
+			self.delete_linked_asset()
+			self.update_fixed_asset(field, delete_asset=True)
+
+	def process_fixed_asset(self):
+		if self.doctype == 'Purchase Invoice' and not self.update_stock:
+			return
+
+		asset_items = self.get_asset_items()
+		if asset_items:
+			self.make_serial_nos_for_asset(asset_items)
+
+	def make_serial_nos_for_asset(self, asset_items):
+		items_data = get_asset_item_details(asset_items)
+
+		for d in self.items:
+			if d.is_fixed_asset:
+				item_data = items_data.get(d.item_code)
+				if not d.asset:
+					asset = self.make_asset(d)
+					d.db_set('asset', asset)
+
+				if item_data.get('has_serial_no'):
+					# If item has serial no
+					if item_data.get('serial_no_series') and not d.serial_no:
+						serial_nos = get_auto_serial_nos(item_data.get('serial_no_series'), d.qty)
+					elif d.serial_no:
+						serial_nos = d.serial_no
+					elif not d.serial_no:
+						frappe.throw(_("Serial no is mandatory for the item {0}").format(d.item_code))
+
+					auto_make_serial_nos({
+						'serial_no': serial_nos,
+						'item_code': d.item_code,
+						'via_stock_ledger': False,
+						'company': self.company,
+						'actual_qty': d.qty,
+						'purchase_document_type': self.doctype,
+						'purchase_document_no': self.name,
+						'asset': d.asset
+					})
+					d.db_set('serial_no', serial_nos)
+
+				if d.asset:
+					self.make_asset_movement(d)
+
+	def make_asset(self, row):
+		if not row.asset_location:
+			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
+
+		item_data = frappe.db.get_value('Item',
+			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
+
+		purchase_amount = flt(row.base_net_amount + row.item_tax_amount)
+		asset = frappe.get_doc({
+			'doctype': 'Asset',
+			'item_code': row.item_code,
+			'asset_name': row.item_name,
+			'status': 'Receipt',
+			'naming_series': item_data.get('asset_naming_series') or 'AST',
+			'asset_category': item_data.get('asset_category'),
+			'location': row.asset_location,
+			'company': self.company,
+			'purchase_date': self.posting_date,
+			'calculate_depreciation': 1,
+			'purchase_receipt_amount': purchase_amount,
+			'gross_purchase_amount': purchase_amount,
+			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
+			'purchase_invoice': self.name if self.doctype == 'Purchase Invoice' else None
+		})
+
+		asset.flags.ignore_validate = True
+		asset.flags.ignore_mandatory = True
+		asset.set_missing_values()
+		asset.insert()
+
+		frappe.msgprint(_("Asset {0} created").format(asset.name))
+		return asset.name
+
+	def make_asset_movement(self, row):
+		asset_movement = frappe.get_doc({
+			'doctype': 'Asset Movement',
+			'asset': row.asset,
+			'target_location': row.asset_location,
+			'purpose': 'Receipt',
+			'serial_no': row.serial_no,
+			'quantity': len(get_serial_nos(row.serial_no)),
+			'company': self.company,
+			'transaction_date': self.posting_date,
+			'reference_doctype': self.doctype,
+			'reference_name': self.name
+		}).insert()
+
+		return asset_movement.name
+
+	def update_fixed_asset(self, field, delete_asset = False):
+		for d in self.get("items"):
+			if d.is_fixed_asset and d.asset:
+				asset = frappe.get_doc("Asset", d.asset)
+
+				if delete_asset and asset.docstatus == 0:
+					frappe.delete_doc("Asset", asset.name)
+					d.db_set('asset', None)
+					continue
+
+				if self.docstatus in [0, 1] and not asset.get(field):
+					asset.set(field, self.name)
+					asset.purchase_date = self.posting_date
+					asset.supplier = self.supplier
+				elif self.docstatus == 2:
+					asset.set(field, None)
+					asset.supplier = None
+
+				asset.flags.ignore_validate_update_after_submit = True
+				if asset.docstatus == 0:
+					asset.flags.ignore_validate = True
+
+				asset.save()
+
+	def delete_linked_asset(self):
+		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
+			return
+
+		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
+		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
 		if not self.schedule_date:
@@ -480,3 +620,11 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
 
 	return bom_items
+
+def get_asset_item_details(asset_items):
+	asset_items_data = {}
+	for d in frappe.get_all('Item', fields = ["name", "has_serial_no", "serial_no_series"],
+		filters = {'name': ('in', asset_items)}):
+		asset_items_data.setdefault(d.name, d)
+
+	return asset_items_data
