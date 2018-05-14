@@ -15,8 +15,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
 			return {
 				filters: {
 					company: frm.doc.company,
-					is_active: "Yes",
-					docstatus: 1
+					docstatus: 1,
+					is_active: "Yes"
 				}
 			}
 		});
