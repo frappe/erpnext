@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint, cstr
 from frappe.utils.nestedset import NestedSet
 
 class CostCenter(NestedSet):
@@ -62,8 +63,68 @@ class CostCenter(NestedSet):
 		super(CostCenter, self).after_rename(olddn, newdn, merge)
 
 		if not merge:
-			frappe.db.set_value("Cost Center", newdn, "cost_center_name",
-				" - ".join(newdn.split(" - ")[:-1]))
+			new_cost_center = frappe.db.get_value("Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1)
+
+			# exclude company abbr
+			new_parts = newdn.split(" - ")[:-1]
+			# update cost center number and remove from parts
+			if new_parts[0][0].isdigit():
+				if len(new_parts) == 1:
+					new_parts = newdn.split(" ")
+				if new_cost_center.cost_center_number != new_parts[0]:
+					validate_field_number("Cost Center", self.name, new_parts[0], self.company, "cost_center_number")
+					self.cost_center_number = new_parts[0]
+					self.db_set("cost_center_number", new_parts[0])
+				new_parts = new_parts[1:]
+
+			# update cost center name
+			cost_center_name = " - ".join(new_parts)
+			if new_cost_center.cost_center_name != cost_center_name:
+				self.cost_center_name = cost_center_name
+				self.db_set("cost_center_name", cost_center_name)
 
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])
+
+def get_doc_name_autoname(field_value, doc_title, name, company):
+	if company:
+		name_split=name.split("-")
+		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
+	else:
+		parts = [doc_title.strip()]
+	if cstr(field_value).strip():
+		parts.insert(0, cstr(field_value).strip())
+	return ' - '.join(parts)
+
+def validate_field_number(doctype_name, name, field_value, company, field_name):
+	if field_value:
+		if company:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "company": company, "name": ["!=", name]})
+		else:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "name": ["!=", name]})
+		if doctype_with_same_number:
+			frappe.throw(_("{0} Number {1} already used in account {2}")
+				.format(doctype_name, field_value, doctype_with_same_number))
+
+@frappe.whitelist()
+def update_number_field(doctype_name, name, field_name, field_value, company):
+
+	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+
+	validate_field_number(doctype_name, name, field_value, company, field_name)
+
+	frappe.db.set_value(doctype_name, name, field_name, field_value)
+
+	if doc_title[0].isdigit():
+		separator = " - " if " - " in doc_title else " "
+		doc_title = doc_title.split(separator, 1)[1]
+
+	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
+
+	new_name = get_doc_name_autoname(field_value, doc_title, name, company)
+
+	if name != new_name:
+		frappe.rename_doc(doctype_name, name, new_name)
+		return new_name		
