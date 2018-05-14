@@ -275,7 +275,7 @@ def setup_supplier():
 		frappe.get_doc({
 			"doctype": "Supplier",
 			"supplier_name": s,
-			"supplier_type": random.choice(["Services", "Raw Material"]),
+			"supplier_group": random.choice(["Services", "Raw Material"]),
 		}).insert()
 
 def setup_warehouse():

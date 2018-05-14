@@ -121,6 +121,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Additional Salary Component",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Structure",
 				},
 				{
