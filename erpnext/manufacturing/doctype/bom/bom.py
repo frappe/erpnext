@@ -591,6 +591,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
+	items = list(items)
 	items.sort(key = functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
 
