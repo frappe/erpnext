@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
@@ -92,6 +92,7 @@ class JournalEntry(AccountsController):
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
+		self.unlink_asset_adjustment_entry()
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -109,9 +110,12 @@ class JournalEntry(AccountsController):
 				for s in asset.get("schedules"):
 					if s.journal_entry == self.name:
 						s.db_set("journal_entry", None)
-						asset.value_after_depreciation += s.depreciation_amount
 
-						asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+						idx = cint(s.finance_book_id) or 1
+						finance_books = asset.get('finance_books')[idx - 1]
+						finance_books.value_after_depreciation += s.depreciation_amount
+						finance_books.db_update()
+
 						asset.set_status()
 
 	def unlink_inter_company_jv(self):
@@ -120,6 +124,10 @@ class JournalEntry(AccountsController):
 				"inter_company_journal_entry_reference", "")
 			frappe.db.set_value("Journal Entry", self.name,\
 				"inter_company_journal_entry_reference", "")
+
+	def unlink_asset_adjustment_entry(self):
+		frappe.db.sql(""" update `tabAsset Adjustment`
+			set journal_entry = null where journal_entry = %s""", self.name)
 
 	def validate_party(self):
 		for d in self.get("accounts"):
