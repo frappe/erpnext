@@ -8,14 +8,14 @@ frappe.ui.form.on('Additional Salary Component', {
 				filters: {
 					type: "earning"
 				}
-			}
+			};
 		});
 		frm.set_query("employee", function() {
 			return {
 				filters: {
 					company: frm.doc.company
 				}
-			}
+			};
 		});
 	}
 });
