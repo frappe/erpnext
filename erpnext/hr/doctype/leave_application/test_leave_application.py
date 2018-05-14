@@ -7,7 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, nowdate, now_datetime
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -275,16 +275,119 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, today), 9)
 
 	def test_leaves_allowed(self):
-		# TODO: test cannot allocate more than max leaves
-		pass
+		employee = get_employee()
+		leave_period = get_leave_period()
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name = 'Test Leave Type',
+			doctype = 'Leave Type',
+			max_leaves_allowed = 5
+		)).insert()
+
+		date = add_days(nowdate(), -7)
+
+		allocate_leaves(employee, leave_period, leave_type.name, 5)
+
+		leave_application = frappe.get_doc(dict(
+		doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type.name,
+			from_date = date,
+			to_date = add_days(date, 2),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+
+		self.assertTrue(leave_application.insert())
+
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type.name,
+			from_date = add_days(date, 4),
+			to_date = add_days(date, 7),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+		self.assertRaises(frappe.ValidationError, leave_application.insert)
 
 	def test_applicable_after(self):
-		# TODO: test not applicable until applicable working days
-		pass
+		employee = get_employee()
+		leave_period = get_leave_period()
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name = 'Test Leave Type',
+			doctype = 'Leave Type',
+			applicable_after = 15
+		)).insert()
+
+		date = add_days(nowdate(), -7)
+
+		allocate_leaves(employee, leave_period, leave_type.name, 10)
+
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type.name,
+			from_date = date,
+			to_date = add_days(date, 4),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+
+		self.assertRaises(frappe.ValidationError, leave_application.insert)
+
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type 1", force=1)
+		leave_type_1 = frappe.get_doc(dict(
+			leave_type_name = 'Test Leave Type 1',
+			doctype = 'Leave Type'
+		)).insert()
+
+		allocate_leaves(employee, leave_period, leave_type_1.name, 10)
+
+		leave_application = frappe.get_doc(dict(
+		doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type_1.name,
+			from_date = date,
+			to_date = add_days(date, 4),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+
+		self.assertTrue(leave_application.insert())
 
 	def test_max_continuous_leaves(self):
-		# TODO: test cannot take continuous leaves more than
-		pass
+		employee = get_employee()
+		leave_period = get_leave_period()
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name = 'Test Leave Type',
+			doctype = 'Leave Type',
+			max_leaves_allowed = 15,
+			max_days_allowed = 3
+		)).insert()
+
+		date = add_days(nowdate(), -7)
+
+		allocate_leaves(employee, leave_period, leave_type.name, 10)
+
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type.name,
+			from_date = date,
+			to_date = add_days(date, 4),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+
+		self.assertRaises(frappe.ValidationError, leave_application.insert)
 
 	def test_earned_leave(self):
 		leave_period = get_leave_period()
@@ -320,3 +423,36 @@ def make_allocation_record(employee=None, leave_type=None):
 
 	allocation.insert(ignore_permissions=True)
 	allocation.submit()
+
+def get_employee():
+	return frappe.get_doc("Employee", "_T-Employee-00001")
+
+def get_leave_period():
+	leave_period_name = frappe.db.exists({
+		"doctype": "Leave Period",
+		"name": "Test Leave Period"
+	})
+	if leave_period_name:
+		return frappe.get_doc("Leave Period", leave_period_name[0][0])
+	else:
+		return frappe.get_doc(dict(
+				name = 'Test Leave Period',
+				doctype = 'Leave Period',
+				from_date = "{0}-01-01".format(now_datetime().year),
+				to_date = "{0}-12-31".format(now_datetime().year),
+				company = "_Test Company",
+				is_active = 1
+			)).insert()
+
+def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, eligible_leaves=0):
+	frappe.get_doc({
+		"doctype": "Leave Allocation",
+		"__islocal": 1,
+		"employee": employee.name,
+		"employee_name": employee.employee_name,
+		"leave_type": leave_type,
+		"from_date": leave_period.from_date,
+		"to_date": leave_period.to_date,
+		"new_leaves_allocated": new_leaves_allocated,
+		"docstatus": 1
+	}).insert()
