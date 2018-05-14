@@ -109,7 +109,8 @@ frappe.ui.form.on('Pricing Rule', {
 			return {
 				filters: {
 					'selling': doc.selling,
-					'buying': doc.buying
+					'buying': doc.buying,
+					'currency': doc.currency
 				}
 			};
 		};
