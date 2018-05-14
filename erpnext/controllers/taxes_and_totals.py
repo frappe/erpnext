@@ -558,7 +558,8 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
-			company_currency=erpnext.get_company_currency(doc.company)
+			conversion_rate=doc.conversion_rate,
+			currency=doc.currency
 		)
 	)
 
