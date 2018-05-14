@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -695,7 +695,7 @@ class SalesInvoice(SellingController):
 					account_currency = get_account_currency(item.income_account)
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.income_account,
+							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
 							"against": self.customer,
 							"credit": item.base_net_amount,
 							"credit_in_account_currency": item.base_net_amount \
@@ -911,6 +911,91 @@ class SalesInvoice(SellingController):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
+	
+	def book_income_for_deferred_revenue(self):
+		# book the income on the last day, but it will be trigger on the 1st of month at 12:00 AM
+		# start_date: 1st of the last month or the start date
+		# end_date: end_date or today-1
+		gl_entries = []
+		for item in self.get('items'):
+			last_gl_entry = False
+			import pdb
+			# pdb.set_trace()
+			booking_start_date = getdate(add_months(today(), -1))
+			booking_start_date = booked_start_date if booking_start_date>item.service_start_date else item.service_start_date
+
+			booking_end_date = getdate(add_days(today(), -1))
+			if booking_end_date>=item.service_end_date:
+				last_gl_entry = True
+				booking_end_date = item.service_end_date
+			total_days = date_diff(item.service_end_date, item.service_start_date)
+			total_booking_days = date_diff(booking_end_date, booking_start_date)
+
+			account_currency = get_account_currency(item.income_account)
+			if not last_gl_entry:
+				base_amount = flt(item.base_net_amount * total_booking_days / flt(total_days))
+				if account_currency==self.company_currency:
+					amount = base_amount
+				else:
+					amount = flt(item.net_amount * total_booking_days / flt(total_days))
+			else:
+				base_amount = ''
+				amount = ''
+				gl_entries_details = frappe.db.sql('''
+					select sum(credit)-sum(debit) as balance, sum(credit_in_account_currency)-sum(debit_in_account_currency) as
+					balance_in_account_currency, voucher_no from `tabGL Entry`
+					where company=%s and account=%s and voucher_type=%s and voucher_no=%s group by voucher_no
+				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name), as_dict=True)
+
+			# GL Entry for crediting the amount in the income
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": item.income_account,
+					"against": self.customer,
+					"credit": base_amount,
+					"credit_in_account_currency": amount,
+					"cost_center": item.cost_center
+				}, account_currency)
+			)
+			# GL Entry to debit the amount from the deferred account
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": item.deferred_revenue_account,
+					"against": self.customer,
+					"debit": base_amount,
+					"debit_in_account_currency": amount,
+					"cost_center": item.cost_center
+				}, account_currency)
+			)
+
+		# from erpnext.accounts.general_ledger import merge_similar_entries
+		# gl_entries = merge_similar_entries(gl_entries)
+		
+		if gl_entries:
+			from erpnext.accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
+	
+
+		frappe.throw("stop")
+
+	def make_gl_entries_for_deferred_revenue(self, items, gl_entries):
+		pass
+
+
+
+def booked_deferred_revenue():
+	# check for the sales invoice for which GL entries has to be done
+	print ("======================")
+	invoices = frappe.db.sql_list('''
+		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
+	''', (today(), add_months(today(), -1)))
+	print (invoices)
+
+	# ToDo also find the list on the basic of the GL entry
+	for invoice in invoices:
+		doc = frappe.get_doc("Sales Invoice", invoice)
+		doc.book_income_for_deferred_revenue()
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
