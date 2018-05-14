@@ -86,9 +86,9 @@ frappe.ui.form.on('Payment Entry', {
 		});
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
-			child = locals[cdt][cdn];
-			filters = {"docstatus": 1, "company": doc.company};
-			party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 
+			var child = locals[cdt][cdn];
+			var filters = {"docstatus": 1, "company": doc.company};
+			var party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 
 				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {

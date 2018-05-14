@@ -115,8 +115,8 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	allow_cost_center_in_entry_of_bs_account = frappe.db.get_value('Accounts Settings', None, \
-										'allow_cost_center_in_entry_of_bs_account')
+	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
+
 	if cost_center and allow_cost_center_in_entry_of_bs_account:
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
@@ -607,7 +607,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			voucher_no, voucher_type, cost_center, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
@@ -619,6 +619,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
 					and {payment_dr_or_cr} > 0
+					and payment_gl_entry.cost_center = invoice_gl_entry.cost_center
 			) as payment_amount
 		from
 			`tabGL Entry` invoice_gl_entry
@@ -629,7 +630,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no
+		group by voucher_type, voucher_no, cost_center
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
@@ -760,3 +761,10 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+def get_allow_cost_center_in_entry_of_bs_account():
+	def generator():
+		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
+
+	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
+
