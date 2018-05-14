@@ -14,7 +14,7 @@ class DuplicateBudgetError(frappe.ValidationError): pass
 
 class Budget(Document):
 	def autoname(self):
-		self.name = make_autoname(self.get(frappe.scrub(self.budget_against)) 
+		self.name = make_autoname(self.get(frappe.scrub(self.budget_against))
 			+ "/" + self.fiscal_year + "/.###")
 
 	def validate(self):
@@ -30,10 +30,10 @@ class Budget(Document):
 		existing_budget = frappe.db.get_value("Budget", {budget_against_field: budget_against,
 			"fiscal_year": self.fiscal_year, "company": self.company,
 			"name": ["!=", self.name], "docstatus": ["!=", 2]})
-		if existing_budget: 
+		if existing_budget:
 			frappe.throw(_("Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3}")
 				.format(existing_budget, self.budget_against, budget_against, self.fiscal_year), DuplicateBudgetError)
-	
+
 	def validate_accounts(self):
 		account_list = []
 		for d in self.get('accounts'):
@@ -62,12 +62,14 @@ class Budget(Document):
 			self.cost_center = None
 
 def validate_expense_against_budget(args):
+	for x in xrange(1,10):
+		print "in validate_expense_against_budget method"
 	args = frappe._dict(args)
 	if not args.cost_center and not args.project:
 		return
 	for budget_against in ['project', 'cost_center']:
 		if args.get(budget_against) \
-				and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
+			and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 
 			if args.project and budget_against == 'project':
 				condition = "and b.project='%s'" % frappe.db.escape(args.project)
@@ -81,29 +83,67 @@ def validate_expense_against_budget(args):
 
 			args.budget_against = args.get(budget_against)
 
-			budget_records = frappe.db.sql("""
-				select
-					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
-					b.action_if_annual_budget_exceeded, 
-					b.action_if_accumulated_monthly_budget_exceeded
-				from 
-					`tabBudget` b, `tabBudget Account` ba
-				where
-					b.name=ba.parent and b.fiscal_year=%s 
-					and ba.account=%s and b.docstatus=1
-					{condition}
-			""".format(condition=condition, 
-				budget_against_field=frappe.scrub(args.get("budget_against_field"))),
-				(args.fiscal_year, args.account), as_dict=True)
+			if args.voucher_type == "Material Request":
+				print "In MR sql"
+				budget_records = frappe.db.sql("""
+					select
+						b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
+						ba.parentfield,
+						b.action_if_annual_budget_exceeded_on_mr,
+						b.action_if_accumulated_monthly_budget_exceeded_on_mr
+					from 
+						`tabBudget` b, `tabBudget Account` ba
+					where
+						b.name=ba.parent and b.fiscal_year=%s 
+						and ba.account=%s and b.docstatus=1
+						{condition}
+				""".format(condition=condition,
+					budget_against_field=frappe.scrub(args.get("budget_against_field"))),
+					(args.fiscal_year, args.account), as_dict=True)
+			if args.voucher_type == "Purchase Order":
+				budget_records = frappe.db.sql("""
+					select
+						b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
+						ba.parentfield,
+						b.action_if_annual_budget_exceeded_on_po,
+						b.action_if_accumulated_monthly_budget_exceeded_on_po
+					from 
+						`tabBudget` b, `tabBudget Account` ba
+					where
+						b.name=ba.parent and b.fiscal_year=%s 
+						and ba.account=%s and b.docstatus=1
+						{condition}
+				""".format(condition=condition,
+					budget_against_field=frappe.scrub(args.get("budget_against_field"))),
+					(args.fiscal_year, args.account), as_dict=True)	
+
+			elif args.voucher_type != "Material Request" and args.voucher_type != "Purchase Order":
+				print "In else sql"
+				budget_records = frappe.db.sql("""
+					select
+						b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
+						ba.parentfield,
+						b.action_if_annual_budget_exceeded_on_actual,
+						b.action_if_accumulated_monthly_budget_exceeded_on_actual
+					from 
+						`tabBudget` b, `tabBudget Account` ba
+					where
+						b.name=ba.parent and b.fiscal_year=%s 
+						and ba.account=%s and b.docstatus=1
+						{condition}
+				""".format(condition=condition,
+					budget_against_field=frappe.scrub(args.get("budget_against_field"))),
+					(args.fiscal_year, args.account), as_dict=True)	
 				
 			if budget_records:
 				validate_budget_records(args, budget_records)
 
 def validate_budget_records(args, budget_records):
 	for budget in budget_records:
-		if flt(budget.budget_amount):
-			yearly_action = budget.action_if_annual_budget_exceeded
-			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded
+		if flt(budget.budget_amount) and budget.parentfield == "accounts" \
+			and args.voucher_type == "Material Request":
+			yearly_action = budget.action_if_annual_budget_exceeded_on_mr
+			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded_on_mr
 
 			if monthly_action in ["Stop", "Warn"]:
 				budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
@@ -115,20 +155,61 @@ def validate_budget_records(args, budget_records):
 
 			if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
 				and yearly_action != monthly_action:
-				compare_expense_with_budget(args, flt(budget.budget_amount), 
+				compare_expense_with_budget(args, flt(budget.budget_amount),
+						_("Annual"), yearly_action, budget.budget_against)
+
+		if flt(budget.budget_amount) and budget.parentfield == "budget_accounts_for_po" \
+			and args.voucher_type == "Purchase Order":
+			yearly_action = budget.action_if_annual_budget_exceeded_on_po
+			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded_on_po
+
+			if monthly_action in ["Stop", "Warn"]:
+				budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
+					args.posting_date, args.fiscal_year, budget.budget_amount)
+				args["month_end_date"] = get_last_day(args.posting_date)
+
+				compare_expense_with_budget(args, budget_amount, 
+					_("Accumulated Monthly"), monthly_action, budget.budget_against)
+
+			if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
+				and yearly_action != monthly_action:
+				compare_expense_with_budget(args, flt(budget.budget_amount),
+						_("Annual"), yearly_action, budget.budget_against)
+
+		elif flt(budget.budget_amount) and budget.parentfield == "budget_accounts_for_actual" \
+			and args.voucher_type != "Material Request" and args.voucher_type != "Purchase Order":
+			yearly_action = budget.action_if_annual_budget_exceeded_on_actual
+			monthly_action = budget.action_if_accumulated_monthly_budget_exceeded_on_actual	 
+
+			if monthly_action in ["Stop", "Warn"]:
+				budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
+					args.posting_date, args.fiscal_year, budget.budget_amount)
+				args["month_end_date"] = get_last_day(args.posting_date)
+
+				compare_expense_with_budget(args, budget_amount, 
+					_("Accumulated Monthly"), monthly_action, budget.budget_against)
+
+			if yearly_action in ("Stop", "Warn") and monthly_action != "Stop" \
+				and yearly_action != monthly_action:
+				compare_expense_with_budget(args, flt(budget.budget_amount),
 						_("Annual"), yearly_action, budget.budget_against)
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against):
-	actual_expense = get_actual_expense(args)
+	if args.voucher_type == "Purchase Order":
+		actual_expense = args.debit + get_actual_expense(args)
+		for x in xrange(1,10):
+			print "actual_expense and debit",get_actual_expense(args),args.debit
+	else :	
+		actual_expense = get_actual_expense(args)
 	if actual_expense > budget_amount:
 		diff = actual_expense - budget_amount
 		currency = frappe.db.get_value('Company', args.company, 'default_currency')
 
 		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(
-				_(action_for), frappe.bold(args.account), args.budget_against_field, 
+				_(action_for), frappe.bold(args.account), args.budget_against_field,
 				frappe.bold(budget_against),
-				frappe.bold(fmt_money(budget_amount, currency=currency)), 
+				frappe.bold(fmt_money(budget_amount, currency=currency)),
 				frappe.bold(fmt_money(diff, currency=currency)))
 
 		if action=="Stop":
@@ -172,7 +253,7 @@ def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_ye
 
 	dt = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
 	accumulated_percentage = 0.0
-
+	
 	while(dt <= getdate(posting_date)):
 		if monthly_distribution:
 			accumulated_percentage += distribution.get(getdate(dt).strftime("%B"), 0)

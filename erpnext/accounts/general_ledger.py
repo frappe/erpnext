@@ -53,25 +53,26 @@ def merge_similar_entries(gl_map):
 		# if there is already an entry in this account then just add it
 		# to that entry
 		same_head = check_if_in_list(entry, merged_gl_map)
+
 		if same_head:
-			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
-			same_head.debit_in_account_currency	= \
-				flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
-			same_head.credit = flt(same_head.credit) + flt(entry.credit)
-			same_head.credit_in_account_currency = \
-				flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
+			same_head["debit"] = flt(same_head["debit"]) + flt(entry["debit"])
+			same_head["debit_in_account_currency"] = \
+				flt(same_head["debit_in_account_currency"]) + flt(entry["debit_in_account_currency"])
+			same_head["credit"] = flt(same_head["credit"]) + flt(entry["credit"])
+			same_head["credit_in_account_currency"] = \
+				flt(same_head["credit_in_account_currency"]) + flt(entry["credit_in_account_currency"])
 		else:
 			merged_gl_map.append(entry)
 
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
+	merged_gl_map = filter(lambda x: flt(x["debit"], 9)!=0 or flt(x["credit"], 9)!=0, merged_gl_map)
 	merged_gl_map = list(merged_gl_map)
 		
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map):
 	for e in gl_map:
-		if e.account == gle.account \
+		if cstr(e.get("account")) == cstr(gle.get("account")) \
 			and cstr(e.get('party_type'))==cstr(gle.get('party_type')) \
 			and cstr(e.get('party'))==cstr(gle.get('party')) \
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \

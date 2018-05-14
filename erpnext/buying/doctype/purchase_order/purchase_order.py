@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import json
 from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
@@ -14,6 +14,9 @@ from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
 from six import string_types
+from erpnext.accounts.general_ledger import merge_similar_entries
+from erpnext.accounts.utils import get_fiscal_years
+from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -190,6 +193,37 @@ class PurchaseOrder(BuyingController):
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
 
+	def make_gl_entries(self):
+		gl_entries = self.make_item_gl_entries()
+		gl_entries = merge_similar_entries(gl_entries)
+		for entry in gl_entries:
+			validate_expense_against_budget(entry)
+
+	def make_item_gl_entries(self):
+		gl_entries = []
+		fiscal_years = get_fiscal_years(self.schedule_date, company=self.company)
+		if len(fiscal_years) > 1:
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.schedule_date)))
+		else:
+			fiscal_year = fiscal_years[0][0]
+		for item in self.get("items"):
+			gl_entries.append(frappe._dict({
+				"account_currency": erpnext.get_company_currency(self.company),
+				"account": item.expense_account,
+				"company": self.company,
+				"is_opening": "No",
+				"fiscal_year": fiscal_year,
+				"debit": flt(item.amount),
+				"debit_in_account_currency": flt(item.amount),
+				"credit": 0,
+				"credit_in_account_currency": 0,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"cost_center": item.cost_center,
+				"posting_date": self.schedule_date
+			}))
+		return gl_entries		
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -215,6 +249,7 @@ class PurchaseOrder(BuyingController):
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
+		self.make_gl_entries()
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
