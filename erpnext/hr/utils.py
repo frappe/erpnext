@@ -128,6 +128,30 @@ def get_employee_field_property(employee, fieldname):
 	else:
 		return False
 
+def update_employee(employee, details, cancel=False):
+	for item in details:
+		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
+		new_data = item.new if not cancel else item.current
+		if fieldtype == "Date" and new_data:
+			new_data = getdate(new_data)
+		elif fieldtype =="Datetime" and new_data:
+			new_data = get_datetime(new_data)
+		setattr(employee, item.fieldname, new_data)
+	return employee
+
+def validate_tax_declaration(declarations):
+	subcategories = []
+	for declaration in declarations:
+		if declaration.exemption_sub_category in  subcategories:
+			frappe.throw(_("More than one selection for {0} not \
+			allowed").format(declaration.exemption_sub_category), frappe.ValidationError)
+		subcategories.append(declaration.exemption_sub_category)
+		max_amount = frappe.db.get_value("Employee Tax Exemption Sub Category", \
+		declaration.exemption_sub_category, "max_amount")
+		if declaration.amount > max_amount:
+			frappe.throw(_("Max exemption amount for {0} is {1}").format(\
+			declaration.exemption_sub_category, max_amount), frappe.ValidationError)
+
 def get_leave_period(from_date, to_date, company):
 	leave_period = frappe.db.sql("""
 		select name, from_date, to_date
@@ -144,3 +168,4 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
+
