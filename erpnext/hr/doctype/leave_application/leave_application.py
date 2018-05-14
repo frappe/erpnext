@@ -19,6 +19,7 @@ class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
+
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
@@ -323,6 +324,24 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day 
 	return number_of_days
 
 @frappe.whitelist()
+def get_leave_details(employee, date):
+	allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
+	leave_allocation = {}
+	for d in allocation_records:
+		allocation = allocation_records.get(d, frappe._dict())
+		date = allocation.to_date
+		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, date, status="Approved")
+		leaves_pending = get_leaves_for_period(employee, d, allocation.from_date, date, status="Open")
+		remaining_leaves = allocation.total_leaves_allocated - leaves_taken - leaves_pending
+		leave_allocation[d] = {
+			"total_leaves": allocation.total_leaves_allocated,
+			"leaves_taken": leaves_taken,
+			"pending_leaves": leaves_pending,
+			"remaining_leaves": remaining_leaves}
+
+	return leave_allocation
+
+@frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 		consider_all_leaves_in_the_allocation_period=False):
 	if allocation_records == None:
@@ -332,16 +351,16 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
-	leaves_taken = get_approved_leaves_for_period(employee, leave_type, allocation.from_date, date)
+	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status=Approved)
 
 	return flt(allocation.total_leaves_allocated) - flt(leaves_taken)
 
-def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
+def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
 	leave_applications = frappe.db.sql("""
 		select employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
-			and docstatus=1
+			and status = %(status)s and docstatus=1
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
@@ -349,6 +368,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 		"from_date": from_date,
 		"to_date": to_date,
 		"employee": employee,
+		"status": status,
 		"leave_type": leave_type
 	}, as_dict=1)
 
