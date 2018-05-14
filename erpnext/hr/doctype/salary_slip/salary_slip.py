@@ -12,6 +12,7 @@ from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
+from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -57,6 +58,12 @@ class SalarySlip(TransactionBase):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
+
+		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
+		if additional_components:
+			for additional_component in additional_components:
+				additional_component = frappe._dict(additional_component)
+				self.update_component_row(frappe._dict(additional_component.struct_row), additional_component.amount, "earnings")
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None

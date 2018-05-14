@@ -289,12 +289,52 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
+	def test_serialized_asset_item(self):
+		asset_item = "Test Serialized Asset Item"
+
+		if not frappe.db.exists('Item', asset_item):
+			asset_category = frappe.get_all('Asset Category')
+
+			if asset_category:
+				asset_category = asset_category[0].name
+
+			if not asset_category:
+				doc = frappe.get_doc({
+					'doctype': 'Asset Category',
+					'asset_category_name': 'Test Asset Category',
+					'depreciation_method': 'Straight Line',
+					'total_number_of_depreciations': 12,
+					'frequency_of_depreciation': 1,
+					'accounts': [{
+						'company_name': '_Test Company',
+						'fixed_asset_account': '_Test Fixed Asset - _TC',
+						'accumulated_depreciation_account': 'Depreciation - _TC',
+						'depreciation_expense_account': 'Depreciation - _TC'
+					}]
+				}).insert()
+
+				asset_category = doc.name
+
+			asset_item = make_item(asset_item, {'is_stock_item':0,
+				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
+				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+
+		pr = make_purchase_receipt(item_code=asset_item, qty=3)
+		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
+		asset_movement = frappe.db.get_value('Asset Movement', {'reference_name': pr.name}, 'name')
+		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name')
+
+		self.assertEquals(len(serial_nos), 3)
+		pr.cancel()
+		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
+		self.assertEquals(len(serial_nos), 0)
+		frappe.db.sql("delete from `tabAsset Category`")
+		frappe.db.sql("delete from `tabAsset`")
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
-
 
 def make_purchase_receipt(**args):
 	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
