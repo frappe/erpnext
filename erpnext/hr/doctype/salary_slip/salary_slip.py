@@ -104,8 +104,8 @@ class SalarySlip(TransactionBase):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
-		data.update(frappe.get_doc("Salary Structure Employee",
-			{"employee": self.employee, "parent": self.salary_structure}).as_dict())
+		data.update(frappe.get_doc("Salary Structure Assignment",
+			{"employee": self.employee, "salary_structure": self.salary_structure}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
@@ -166,10 +166,10 @@ class SalarySlip(TransactionBase):
 		if self.payroll_frequency:
 			cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
+		st_name = frappe.db.sql("""select salary_structure from `tabSalary Structure Assignment`
 			where employee=%s and (from_date <= %s or from_date <= %s)
 			and (to_date is null or to_date >= %s or to_date >= %s)
-			and parent in (select name from `tabSalary Structure`
+			and salary_structure in (select name from `tabSalary Structure`
 				where is_active = 'Yes'%s)
 			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
@@ -327,7 +327,7 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
-		
+
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
 
