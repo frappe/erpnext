@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Job Opening', {
+	onload: function(frm) {
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
+	},
 	designation: function(frm) {
 		if(frm.doc.designation && frm.doc.company){
 			frappe.call({
