@@ -128,6 +128,12 @@ def get_data():
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Consolidated Financial Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
 			]
 		},
 		{
