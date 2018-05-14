@@ -23,9 +23,8 @@ class CompensatoryLeaveRequest(Document):
 			date_difference = date_diff(self.work_end_date, self.work_from_date) + 1
 			leave_period = get_leave_period(self.work_from_date, self.work_end_date, company)
 			if leave_period:
-				leave_allocation_name = self.exists_allocation_for_period(leave_period)
-				if leave_allocation_name:
-					leave_allocation = frappe.get_doc("Leave Allocation", leave_allocation_name)
+				leave_allocation = self.exists_allocation_for_period(leave_period)
+				if leave_allocation:
 					new_leaves_allocated = leave_allocation.new_leaves_allocated
 					leave_allocation.new_leaves_allocated += date_difference
 					leave_allocation.submit()
@@ -51,7 +50,7 @@ class CompensatoryLeaveRequest(Document):
 		}, as_dict=1)
 
 		if leave_allocation:
-			return leave_allocation[0].name
+			return frappe.get_doc("Leave Allocation", leave_allocation[0].name)
 		else:
 			False
 
