@@ -478,8 +478,8 @@ def get_party_shipping_address(doctype, name):
 
 def get_patry_tax_withholding_details(ref_doc):
 	supplier = frappe.get_doc("Supplier", ref_doc.supplier)
-	tax_withholding_details = {}
-
+	tax_withholding_details = []
+	print(supplier)
 	for tax in supplier.tax_withholding_config:
 		tax_mapper = get_tax_mapper()
 
@@ -492,19 +492,16 @@ def get_patry_tax_withholding_details(ref_doc):
 
 		prepare_tax_withholding_details(tax_mapper, tax_withholding_details)
 
-	if not tax_withholding_details:
-		tax_mapper = get_tax_mapper()
-		set_tax_withholding_details(tax_mapper, ref_doc, use_default=1)
-		prepare_tax_withholding_details(tax_mapper, tax_withholding_details)
-
 	return tax_withholding_details
 
 def prepare_tax_withholding_details(tax_mapper, tax_withholding_details):
 	if tax_mapper.get('account_head'):
-		tax_withholding_details.update({
+		
+		tax_withholding_details.append({
 			"threshold": tax_mapper['threshold'],
-			"taxes": tax_mapper
+			"tax": tax_mapper
 		})
+
 		del tax_mapper['threshold']
 
 def set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=None, use_default=0):

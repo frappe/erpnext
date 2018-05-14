@@ -732,19 +732,17 @@ class PurchaseInvoice(BuyingController):
 
 	def set_tax_withholding(self):
 		"""
-			1. Get TDS Configurations against Supplier or Pull Default One.
-			2. Form Purchase Order, identify partial payments
-			3. If sum of all invoices grand total is greater than threshold and If TDS not deducted in previos Invoices
-				then deduct TDS for sum amount else deduct TDS for current Invoice
+			1. Get TDS Configurations against Supplier
 		"""
-		if not self.get("__islocal"):
-			return
 
 		tax_withholding_details = get_patry_tax_withholding_details(self)
-
-		if tax_withholding_details and\
-			flt(self.get("rounded_total") or self.grand_total) >= flt(tax_withholding_details['threshold']):
-			self.append('taxes', tax_withholding_details['taxes'])
+		for tax_details in tax_withholding_details:
+			if flt(self.get("rounded_total") or self.grand_total) >= flt(tax_details['threshold']):
+				if self.taxes:
+					if tax_details['tax']['description'] not in [tax.description for tax in self.taxes]:
+						self.append('taxes', tax_details['tax'])
+				else:
+					self.append('taxes', tax_details['tax'])
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
