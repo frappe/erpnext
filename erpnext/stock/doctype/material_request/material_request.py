@@ -16,6 +16,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries
 from erpnext.accounts.utils import get_fiscal_years
+from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 
 from six import string_types
 
@@ -83,7 +84,9 @@ class MaterialRequest(BuyingController):
 	def make_gl_entries(self):
 		gl_entries = self.make_item_gl_entries()
 		gl_entries = merge_similar_entries(gl_entries)
-		make_gl_entries(gl_entries,  cancel=True, update_outstanding='Yes', merge_entries=False)
+		for entry in gl_entries:
+			validate_expense_against_budget(entry)
+		# make_gl_entries(gl_entries,  cancel=True, update_outstanding='Yes', merge_entries=False)
 
 	def make_item_gl_entries(self):
 		gl_entries = []
@@ -93,7 +96,7 @@ class MaterialRequest(BuyingController):
 		else:
 			fiscal_year = fiscal_years[0][0]
 		for item in self.get("items"):
-			gl_entries.append({
+			gl_entries.append(frappe._dict({
 				"account_currency": erpnext.get_company_currency(self.company),
 				"account": item.expense_account,
 				"company": self.company,
@@ -107,7 +110,7 @@ class MaterialRequest(BuyingController):
 				"voucher_no": self.name,
 				"cost_center": item.cost_center,
 				"posting_date": self.schedule_date
-			})
+			}))
 		return gl_entries
 
 	def set_title(self):
