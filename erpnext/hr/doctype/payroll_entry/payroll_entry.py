@@ -38,19 +38,19 @@ class PayrollEntry(Document):
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
+			cond += "and ((%(from_date)s between t2.from_date and ifnull(t2.to_date, '2199-12-31')) or (%(to_date)s between t2.from_date and ifnull(t2.to_date, '2199-12-31')) or (t2.from_date between %(from_date)s and %(to_date)s))"
 			emp_list = frappe.db.sql("""
 				select
-					t1.name as employee, t1.employee_name, t1.department, t1.designation
+					t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.name
 				from
 					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
 					t1.docstatus!=2
 					and t1.name = t2.employee
 					and t2.docstatus = 1
-			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
+			%s """% cond, {"sal_struct": sal_struct, "from_date": self.start_date, "to_date": self.end_date}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):

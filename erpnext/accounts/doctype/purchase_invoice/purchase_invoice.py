@@ -19,6 +19,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -305,23 +306,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries()
 
 		self.update_project()
-		self.update_fixed_asset()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
-
-	def update_fixed_asset(self):
-		for d in self.get("items"):
-			if d.is_fixed_asset:
-				asset = frappe.get_doc("Asset", d.asset)
-				if self.docstatus==1:
-					asset.purchase_invoice = self.name
-					asset.purchase_date = self.posting_date
-					asset.supplier = self.supplier
-				else:
-					asset.purchase_invoice = None
-					asset.supplier = None
-
-				asset.flags.ignore_validate_update_after_submit = True
-				asset.save()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -438,6 +423,50 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+
+				elif item.is_fixed_asset:
+					asset_accounts = self.get_company_default(["asset_received_but_not_billed",
+						"expenses_included_in_asset_valuation", "capital_work_in_progress_account"])
+
+					asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
+					base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+
+					if not self.update_stock:
+						asset_rbnb_currency = get_account_currency(asset_accounts[0])
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[0],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"debit": base_asset_amount,
+							"debit_in_account_currency": (base_asset_amount
+								if asset_rbnb_currency == self.company_currency else asset_amount)
+						}))
+					else:
+						cwip_account = get_asset_category_account(item.asset,
+							'capital_work_in_progress_account') or asset_accounts[2]
+
+						cwip_account_currency = get_account_currency(cwip_account)
+						gl_entries.append(self.get_gl_dict({
+							"account": cwip_account,
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"debit": base_asset_amount,
+							"debit_in_account_currency": (base_asset_amount
+								if cwip_account_currency == self.company_currency else asset_amount)
+						}))
+
+					if item.item_tax_amount:
+						asset_eiiav_currency = get_account_currency(asset_accounts[0])
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[1],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"cost_center": item.cost_center,
+							"credit": item.item_tax_amount,
+							"credit_in_account_currency": (item.item_tax_amount
+								if asset_eiiav_currency == self.company_currency else
+									item.item_tax_amount / self.conversion_rate)
+						}))
 				else:
 					gl_entries.append(
 						self.get_gl_dict({
@@ -636,7 +665,6 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
-		self.update_fixed_asset()
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -707,20 +735,6 @@ class PurchaseInvoice(BuyingController):
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
-
-@frappe.whitelist()
-def get_fixed_asset_account(asset, account=None):
-	if account:
-		if frappe.db.get_value("Account", account, "account_type") != "Fixed Asset":
-			account=None
-
-	if not account:
-		asset_category, company = frappe.db.get_value("Asset", asset, ["asset_category", "company"])
-
-		account = frappe.db.get_value("Asset Category Account",
-			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
-
-	return account
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):

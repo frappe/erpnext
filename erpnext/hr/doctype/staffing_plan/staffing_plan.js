@@ -17,6 +17,14 @@ frappe.ui.form.on('Staffing Plan', {
 				]
 			}
 		});
+
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
 	}
 });
 
