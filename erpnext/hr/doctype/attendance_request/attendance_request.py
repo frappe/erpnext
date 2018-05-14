@@ -4,14 +4,18 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import date_diff, add_days
+from frappe.utils import date_diff, add_days, getdate
 from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.hr.utils import validate_dates
 
 class AttendanceRequest(Document):
 	def validate(self):
 		validate_dates(self, self.from_date, self.to_date)
+		if self.half_day:
+			if not getdate(self.from_date)<=getdate(self.half_day_date)<=getdate(self.to_date):
+				frappe.throw(_("Half day date should be in between from date and to date"))
 
 	def on_submit(self):
 		self.create_attendance()
@@ -32,7 +36,10 @@ class AttendanceRequest(Document):
 				attendance = frappe.new_doc("Attendance")
 				attendance.employee = self.employee
 				attendance.employee_name = self.employee_name
-				attendance.status = "Present"
+				if self.half_day and date_diff(getdate(self.half_day_date), getdate(attendance_date)) == 0:
+					attendance.status = "Half Day"
+				else:
+					attendance.status = "Present"
 				attendance.attendance_date = attendance_date
 				attendance.company = self.company
 				attendance.attendance_request = self.name
