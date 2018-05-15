@@ -21,11 +21,11 @@ class EmployeeBoardingController(Document):
 
 	def on_submit(self):
 		# create the project for the given employee onboarding
-		project_name = _(self.doctype) + " : " + self.employee_name
+		project_name = _(self.doctype) + " : "
 		if self.doctype == "Employee Onboarding":
-			project_name += " (" + self.job_applicant + ")"
+			project_name += self.job_applicant
 		else:
-			project_name += " (" + self.employee + ")"
+			project_name += self.employee
 		project = frappe.get_doc({
 				"doctype": "Project",
 				"project_name": project_name,
