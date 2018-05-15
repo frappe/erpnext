@@ -56,7 +56,7 @@ def work():
 	if company_currency == party_account_currency:
 		exchange_rate = 1
 	else:
-		exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+		exchange_rate = get_exchange_rate(party_account_currency, company_currency, args="for_buying")
 
 	# make supplier quotations
 	if random.random() < 0.2:
