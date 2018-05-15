@@ -32,7 +32,7 @@ class AdditionalSalaryComponent(Document):
 		if getdate(sal_start_date) <= getdate(self.from_date):
 			start_date = getdate(self.from_date)
 		if getdate(sal_end_date) > getdate(self.to_date):
-			end_date = getdate(self.end_date)
+			end_date = getdate(self.to_date)
 		no_of_days = date_diff(getdate(end_date), getdate(start_date))
 		return amount_per_day * no_of_days
 
