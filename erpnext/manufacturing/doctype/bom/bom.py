@@ -303,7 +303,7 @@ class BOM(WebsiteGenerator):
 		if self.currency == self.company_currency():
 			self.conversion_rate = 1
 		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0:
-			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
+			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency(), args="for_buying")
 
 	def validate_materials(self):
 		""" Validate raw material entries """

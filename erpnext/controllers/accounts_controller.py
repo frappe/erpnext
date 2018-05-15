@@ -148,8 +148,13 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			# price list part
-			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
-				else "buying_price_list"
+			if buying_or_selling.lower() == "selling":
+				fieldname = "selling_price_list"
+				args = "for_selling"
+			else:
+				fieldname = "buying_price_list"
+				args = "for_buying"
+
 			if self.meta.get_field(fieldname) and self.get(fieldname):
 				self.price_list_currency = frappe.db.get_value("Price List",
 					self.get(fieldname), "currency")
@@ -159,7 +164,7 @@ class AccountsController(TransactionBase):
 
 				elif not self.plc_conversion_rate:
 					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency,
-						self.company_currency, transaction_date)
+						self.company_currency, transaction_date, args)
 
 			# currency
 			if not self.currency:
@@ -169,7 +174,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					self.company_currency, transaction_date)
+					self.company_currency, transaction_date, args)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
