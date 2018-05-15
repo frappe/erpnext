@@ -55,3 +55,20 @@ class SalaryStructureAssignment(Document):
 
 		if assignment:
 			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").format(assignment[0][0], self.employee))
+
+def get_assigned_salary_structure(employee, on_date):
+	if not employee or not on_date:
+		return None
+
+	salary_structure = frappe.db.sql("""
+		select salary_structure from `tabSalary Structure Assignment`
+		where employee=%(employee)s
+		and docstatus = 1
+		and (
+			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
+		)""", {
+			'employee': employee,
+			'on_date': on_date,
+		})
+
+	return salary_structure[0][0] if salary_structure else None
