@@ -101,6 +101,9 @@ def get_item_details(args):
 		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
+	if args.doctype == 'Material Request':
+		out.rate = args.rate or out.price_list_rate
+		out.amount = flt(args.qty * out.rate)
 
 	return out
 
@@ -320,9 +323,9 @@ def get_default_cost_center(args, item):
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
-	if meta.get_field("currency"):
+	if meta.get_field("currency") or args.get('currency'):
 		validate_price_list(args)
-		if args.price_list:
+		if meta.get_field("currency") and args.price_list:
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args.price_list, item_doc.name)
