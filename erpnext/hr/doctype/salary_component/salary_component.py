@@ -4,12 +4,27 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
 
 class SalaryComponent(Document):
 	def validate(self):
 		self.validate_abbr()
+		self.validate_flexi_defualt()
+
+	def validate_flexi_defualt(self):
+		if self.is_flexible_benefit and self.is_pro_rata_applicable and self.flexi_defualt:
+			salary_component = frappe.db.exists(
+				'Salary Component',
+				{
+					'is_flexible_benefit': 1,
+					'is_pro_rata_applicable': 1,
+					'flexi_defualt': 1
+				}
+			)
+			if salary_component and salary_component != self.name:
+				frappe.throw(_("{0} is already marked as default flexible component").format(salary_component))
 
 	def validate_abbr(self):
 		if not self.salary_component_abbr:

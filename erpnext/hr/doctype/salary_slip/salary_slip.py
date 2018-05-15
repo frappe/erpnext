@@ -13,6 +13,7 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -64,6 +65,12 @@ class SalarySlip(TransactionBase):
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
 				self.update_component_row(frappe._dict(additional_component.struct_row), additional_component.amount, "earnings")
+
+		employee_benefits = get_employee_benefit_application(self)
+		if employee_benefits:
+			for employee_benefit in employee_benefits:
+				benefit_component = frappe._dict(employee_benefit)
+				self.update_component_row(frappe._dict(benefit_component.struct_row), benefit_component.amount, "earnings")
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
