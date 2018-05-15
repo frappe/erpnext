@@ -272,15 +272,16 @@ class AccountsController(TransactionBase):
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 
-		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
+		posting_date = args.get('posting_date') or self.get('posting_date')
+		fiscal_years = get_fiscal_years(posting_date, company=self.company)
 		if len(fiscal_years) > 1:
-			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(posting_date)))
 		else:
 			fiscal_year = fiscal_years[0][0]
 
 		gl_dict = frappe._dict({
 			'company': self.company,
-			'posting_date': self.posting_date,
+			'posting_date': posting_date,
 			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
@@ -599,40 +600,36 @@ class AccountsController(TransactionBase):
 				if d.qty > 1:
 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
 
-				if d.meta.get_field("asset"):
-					if not d.asset:
-						frappe.throw(_("Row #{0}: Asset is mandatory for fixed asset purchase/sale")
-							.format(d.idx))
-					else:
-						asset = frappe.get_doc("Asset", d.asset)
+				if d.meta.get_field("asset") and d.asset:
+					asset = frappe.get_doc("Asset", d.asset)
 
-						if asset.company != self.company:
-							frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
-								.format(d.idx, d.asset, self.company))
+					if asset.company != self.company:
+						frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
+							.format(d.idx, d.asset, self.company))
 
-						elif asset.item_code != d.item_code:
-							frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
-								.format(d.idx, d.asset, d.item_code))
+					elif asset.item_code != d.item_code:
+						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
+							.format(d.idx, d.asset, d.item_code))
 
-						elif asset.docstatus != 1:
-							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+					elif asset.docstatus != 1:
+						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 
-						elif self.doctype == "Purchase Invoice":
-							if asset.status != "Submitted":
-								frappe.throw(_("Row #{0}: Asset {1} is already {2}")
-									.format(d.idx, d.asset, asset.status))
-							elif getdate(asset.purchase_date) != getdate(self.posting_date):
-								frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
-							elif asset.is_existing_asset:
-								frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
+					elif self.doctype == "Purchase Invoice":
+						if asset.status != "Submitted":
+							frappe.throw(_("Row #{0}: Asset {1} is already {2}")
+								.format(d.idx, d.asset, asset.status))
+						elif getdate(asset.purchase_date) != getdate(self.posting_date):
+							frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
+						elif asset.is_existing_asset:
+							frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
 
-						elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
-							if self.update_stock:
-								frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+					elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
+						if self.update_stock:
+							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
-								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
-									.format(d.idx, d.asset, asset.status))
+						elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+							frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
+								.format(d.idx, d.asset, asset.status))
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0

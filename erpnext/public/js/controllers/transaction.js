@@ -106,7 +106,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(
-			this.frm.docstatus < 2 
+			this.frm.docstatus < 2
 			&& this.frm.fields_dict["payment_terms_template"]
 			&& this.frm.fields_dict["payment_schedule"]
 			&& this.frm.doc.payment_terms_template
@@ -978,7 +978,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,
-			"supplier_type": me.frm.doc.supplier_type,
+			"supplier_group": me.frm.doc.supplier_group,
 			"currency": me.frm.doc.currency,
 			"conversion_rate": me.frm.doc.conversion_rate,
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
@@ -1097,6 +1097,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.in_apply_price_list = false;
 				}
 			}
+		}).always(() => {
+			me.in_apply_price_list = false;
 		});
 	},
 
