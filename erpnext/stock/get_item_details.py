@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, add_days, cstr
+from frappe.utils import flt, cint, add_days, cstr, add_months
 import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
@@ -254,6 +254,15 @@ def get_basic_details(args, item):
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0
 	})
 
+	if item.enable_deferred_revenue:
+		service_end_date = add_months(args.transaction_date, item.no_of_months)
+		out.update({
+			"enable_deferred_revenue": item.enable_deferred_revenue, 
+			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
+			"service_start_date": args.transaction_date,
+			"service_end_date": service_end_date
+		})
+
 	# calculate conversion factor
 	if item.stock_uom == args.uom:
 		out.conversion_factor = 1.0
@@ -293,6 +302,14 @@ def get_default_expense_account(args, item):
 	return (item.expense_account
 		or args.expense_account
 		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account"))
+
+def get_default_deferred_revenue_account(args, item):
+	if item.enable_deferred_revenue:
+		return (item.deferred_revenue_account
+			or args.deferred_revenue_account
+			or frappe.db.get_value("Company", args.company, "default_deferred_revenue_account"))
+	else:
+		return None
 
 def get_default_cost_center(args, item):
 	return (frappe.db.get_value("Project", args.get("project"), "cost_center")
