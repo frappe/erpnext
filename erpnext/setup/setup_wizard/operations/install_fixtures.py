@@ -104,22 +104,6 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
 
-		# Department
-		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
-		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments')},
-
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
 		{'doctype': 'Designation', 'designation_name': _('Manager')},
@@ -276,6 +260,14 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
+	make_fixture_records(records)
+
+	# set default customer group and territory
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.save()
+
+def make_fixture_records(records):
 	from frappe.modules import scrub
 	for r in records:
 		doc = frappe.new_doc(r.get("doctype"))
@@ -296,7 +288,23 @@ def install(country=None):
 			else:
 				raise
 
-	# set default customer group and territory
-	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.set_default_customer_group_and_territory()
-	selling_settings.save()
+def install_post_company_fixtures(company=None):
+	records = [
+		# Department
+		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
+		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': company},
+	]
+
+	make_fixture_records(records)
