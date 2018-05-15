@@ -28,7 +28,8 @@ class CompensatoryLeaveRequest(Document):
 					leave_allocation.new_leaves_allocated += date_difference
 					leave_allocation.submit()
 				else:
-					self.create_leave_allocation(leave_period, date_difference)
+					leave_allocation = self.create_leave_allocation(leave_period, date_difference)
+				self.db_set("leave_allocation", leave_allocation.name)
 			else:
 				frappe.throw(_("There is no leave period in between {0} and {1}").format(self.work_from_date, self.work_end_date))
 
@@ -63,9 +64,9 @@ class CompensatoryLeaveRequest(Document):
 		allocation.to_date = leave_period[0].to_date
 		allocation.new_leaves_allocated = date_difference
 		allocation.total_leaves_allocated = date_difference
-		allocation.compensatory_request = self.name
 		allocation.description = self.reason
 		if is_carry_forward == 1:
 			allocation.carry_forward = True
 		allocation.save(ignore_permissions = True)
 		allocation.submit()
+		return allocation
