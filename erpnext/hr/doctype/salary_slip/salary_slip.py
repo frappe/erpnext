@@ -13,7 +13,8 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
-from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
+from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -71,6 +72,27 @@ class SalarySlip(TransactionBase):
 			for employee_benefit in employee_benefits:
 				benefit_component = frappe._dict(employee_benefit)
 				self.update_component_row(frappe._dict(benefit_component.struct_row), benefit_component.amount, "earnings")
+		else:
+			max_benefits = self._salary_structure_doc.get("max_benefits")
+			if max_benefits > 0:
+				default_flexi_compenent = frappe.db.exists(
+					'Salary Component',
+					{
+						'is_flexible_benefit': 1,
+						'is_pro_rata_applicable': 1,
+						'flexi_default': 1
+					}
+				)
+				if default_flexi_compenent:
+					salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
+					flexi_struct_row = {}
+					flexi_struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
+					flexi_struct_row['salary_component'] = salary_component.name
+					flexi_struct_row['abbr'] = salary_component.salary_component_abbr
+					flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
+					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
+					amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
+					self.update_component_row(flexi_struct_row, amount, "earnings")
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
