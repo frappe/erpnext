@@ -5,8 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import nowdate
+from frappe.utils import nowdate, date_diff, getdate
 from frappe.model.document import Document
+from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -71,3 +72,50 @@ def get_assigned_salary_sturecture(employee, _date):
 		})
 	if salary_structure:
 		return salary_structure
+
+def get_employee_benefit_application(salary_slip):
+	employee_benefits = frappe.db.sql("""
+	select name from `tabEmployee Benefit Application`
+	where employee=%(employee)s
+	and docstatus = 1
+	and (date between %(start_date)s and %(end_date)s)
+	""", {
+		'employee': salary_slip.employee,
+		'start_date': salary_slip.start_date,
+		'end_date': salary_slip.end_date
+	})
+
+	if employee_benefits:
+		for employee_benefit in employee_benefits:
+			employee_benefit_obj = frappe.get_doc("Employee Benefit Application", employee_benefit[0])
+			return get_components(employee_benefit_obj, salary_slip)
+
+def get_components(employee_benefit_application, salary_slip):
+	salary_components_array = []
+	payroll_period_days = get_payroll_period_days(salary_slip.start_date, salary_slip.end_date, salary_slip.company)
+	for employee_benefit in employee_benefit_application.employee_benefits:
+		if employee_benefit.is_pro_rata_applicable == 1:
+			struct_row = {}
+			salary_components_dict = {}
+			salary_component = frappe.get_doc("Salary Component", employee_benefit.earning_component)
+			amount = get_amount(payroll_period_days, salary_slip.start_date, salary_slip.end_date, employee_benefit.amount)
+			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
+			struct_row['salary_component'] = salary_component.name
+			struct_row['abbr'] = salary_component.salary_component_abbr
+			struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
+			salary_components_dict['amount'] = amount
+			salary_components_dict['struct_row'] = struct_row
+			salary_components_array.append(salary_components_dict)
+
+	if len(salary_components_array) > 0:
+		return salary_components_array
+	return False
+
+def get_amount(payroll_period_days, start_date, end_date, amount):
+	salary_slip_days = date_diff(getdate(end_date), getdate(start_date)) + 1
+	amount_per_day = amount / payroll_period_days
+	total_amount = amount_per_day * salary_slip_days
+	if total_amount > amount:
+		return amount
+	else:
+		return total_amount
