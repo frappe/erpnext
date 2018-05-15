@@ -13,6 +13,7 @@ from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 
+from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
@@ -464,6 +465,16 @@ class BuyingController(StockController):
 
 			self.delete_linked_asset()
 			self.update_fixed_asset(field, delete_asset=True)
+
+	def validate_budget(self):
+		if self.docstatus == 1:
+			for data in self.get('items'):
+				validate_expense_against_budget({
+					'item_code': data.item_code,
+					'item_group': data.item_group,
+					'posting_date': data.schedule_date,
+					'doctype': self.doctype
+				}, self.company)
 
 	def process_fixed_asset(self):
 		if self.doctype == 'Purchase Invoice' and not self.update_stock:
