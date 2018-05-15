@@ -200,6 +200,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Promotion",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding"
 				}
 			]
 		},
