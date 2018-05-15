@@ -11,8 +11,11 @@ class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
 
 	def autoname(self):
-		abbr = frappe.db.get_value('Company', self.company, 'abbr')
-		self.name = '{0} - {1}'.format(self.department_name, abbr)
+		if not self.department_name=="All Departments":
+			abbr = frappe.db.get_value('Company', self.company, 'abbr')
+			self.name = '{0} - {1}'.format(self.department_name, abbr)
+		else:
+			self.name = self.department_name
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
