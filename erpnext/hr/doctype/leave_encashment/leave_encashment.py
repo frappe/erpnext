@@ -26,16 +26,16 @@ class LeaveEncashment(Document):
 	def on_submit(self):
 		if not self.leave_allocation:
 			self.leave_allocation = self.get_leave_allocation()
-		additional_component = frappe.new_doc({"doctype": "Additional Salary Component",
-									"company": frappe.get_value("Employee", self.employee, "company"),
-									"employee": self.employee,
-									"salary_component": frappe.get_value("Leave Type", self.leave_type, "earning_component"),
-									"from_date": self.encashment_date,
-									"to_date": self.encashment_date,
-									"amount": self.encashment_amount,
-									"docstatus": 1
-								}).insert()
-		self.set_value("additional_component", additional_component.name)
+		additional_component = frappe.new_doc("Additional Salary Component")
+		additional_component.company = frappe.get_value("Employee", self.employee, "company")
+		additional_component.employee = self.employee
+		additional_component.salary_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		additional_component.from_date = self.encashment_date
+		additional_component.to_date = self.encashment_date
+		additional_component.amount = self.encashment_amount
+		additional_component.submit()
+
+		self.db_set("additional_component", additional_component.name)
 
 		# Set encashed leaves in Allocation
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
