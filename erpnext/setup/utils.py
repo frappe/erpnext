@@ -55,7 +55,7 @@ def before_tests():
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(from_currency, to_currency, transaction_date=None):
+def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=None):
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
@@ -74,7 +74,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 		["from_currency", "=", from_currency],
 		["to_currency", "=", to_currency]
 	]
-
+	frappe.errprint(args)
+	if args == "for_buying":
+		filters.append(["for_buying", "=", "1"])
+	elif args == "for_selling":
+		filters.append(["for_selling", "=", 1])
+	frappe.errprint(filters)
 	if not allow_stale_rates:
 		stale_days = currency_settings.get("stale_days")
 		checkpoint_date = add_days(transaction_date, -stale_days)
@@ -84,7 +89,6 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 	entries = frappe.get_all(
 		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc",
 		limit=1)
-
 	if entries:
 		return flt(entries[0].exchange_rate)
 
