@@ -102,7 +102,7 @@ class JournalEntry(AccountsController):
 				d.reference_type = ''
 				d.reference_name = ''
 				d.db_update()
-				
+
 	def unlink_asset_reference(self):
 		for d in self.get("accounts"):
 			if d.reference_type=="Asset" and d.reference_name:

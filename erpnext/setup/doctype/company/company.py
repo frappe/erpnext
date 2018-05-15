@@ -126,6 +126,7 @@ class Company(NestedSet):
 						if not wh_detail["is_group"] else ""
 				})
 				warehouse.flags.ignore_permissions = True
+				warehouse.flags.ignore_mandatory = True
 				warehouse.insert()
 
 	def create_default_accounts(self):
@@ -191,6 +192,36 @@ class Company(NestedSet):
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
+
+		if not self.default_payroll_payable_account:
+			payroll_payable_account = frappe.db.get_value("Account",
+				{"account_name": _("Payroll Payable"), "company": self.name, "is_group": 0})
+
+			self.db_set("default_payroll_payable_account", payroll_payable_account)
+
+		if not self.default_employee_advance_account:
+			employe_advance_account = frappe.db.get_value("Account",
+				{"account_name": _("Employee Advances"), "company": self.name, "is_group": 0})
+
+			self.db_set("default_employee_advance_account", employe_advance_account)
+
+		if not self.write_off_account:
+			write_off_acct = frappe.db.get_value("Account",
+				{"account_name": _("Write Off"), "company": self.name, "is_group": 0})
+
+			self.db_set("write_off_account", write_off_acct)
+
+		if not self.exchange_gain_loss_account:
+			exchange_gain_loss_acct = frappe.db.get_value("Account",
+				{"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0})
+
+			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.disposal_account:
+			disposal_acct = frappe.db.get_value("Account",
+				{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0})
+
+			self.db_set("disposal_account", disposal_acct)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):

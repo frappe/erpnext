@@ -60,7 +60,6 @@ class LeavePeriod(Document):
 			frappe.throw(_("Employee {0} already have Leave Allocation {1} for this period").format(employee, leave_alloc[0][0])\
 			+ """ <b><a href="#Form/Leave Allocation/{0}">{0}</a></b>""".format(leave_alloc[0][0]))
 
-
 	def validate_dates(self):
 		if getdate(self.from_date) >= getdate(self.to_date):
 			frappe.throw(_("To date can not be equal or less than from date"))
@@ -79,3 +78,4 @@ class LeavePeriod(Document):
 				allocation.carry_forward = self.carry_forward_leaves
 		allocation.save(ignore_permissions = True)
 		allocation.submit()
+		frappe.msgprint(_("Leave Allocation {0} created").format(allocation.name))

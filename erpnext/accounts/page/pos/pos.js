@@ -405,7 +405,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_search: function () {
 		var me = this;
-		this.serach_item = frappe.ui.form.make_control({
+		this.search_item = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
 				"label": "Item",
@@ -416,13 +416,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			only_input: true,
 		});
 
-		this.serach_item.make_input();
+		this.search_item.make_input();
 
-		this.serach_item.$input.on("keypress", function (event) {
+		this.search_item.$input.on("keypress", function (event) {
 
 			clearTimeout(me.last_search_timeout);
 			me.last_search_timeout = setTimeout(() => {
-				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+				if((me.search_item.$input.val() != "") || (event.which == 13)) {
 					me.items = me.get_items();
 					me.make_item_list();
 				}
@@ -679,7 +679,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
 			this.set_customer_value_in_party_field();
-			this.serach_item.$input.focus();
+			this.search_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();
 		}
@@ -1073,8 +1073,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		if (this.items.length == 1
-			&& this.serach_item.$input.val()) {
-			this.serach_item.$input.val("");
+			&& this.search_item.$input.val()) {
+			this.search_item.$input.val("");
 			this.add_to_cart();
 		}
 	},
@@ -1096,7 +1096,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.items_list = this.apply_category();
 
-		key = this.serach_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
+		key = this.search_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
@@ -1104,15 +1104,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.serach_item.$input.val())) {
+					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
-						return me.item_batch_no[item.item_code] = me.serach_item.$input.val()
+						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
-						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.serach_item.$input.val())) {
+						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search_item.$input.val())) {
 						search_status = false;
-						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
+						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (in_list(me.barcode_data[item.item_code], me.serach_item.$input.val())) {
+					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||

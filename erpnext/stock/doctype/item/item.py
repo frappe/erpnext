@@ -536,8 +536,8 @@ class Item(WebsiteGenerator):
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, modified=NOW() where item_code=%s""",
-                    (self.item_name, self.description, self.name))
+			item_description=%s, brand=%s, modified=NOW() where item_code=%s""",
+                    (self.item_name, self.description, self.brand, self.name))
 
 	def on_trash(self):
 		super(Item, self).on_trash()
@@ -577,7 +577,7 @@ class Item(WebsiteGenerator):
 					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
 
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
-				if old_name in item_wise_tax_detail:
+				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:
 					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
 					item_wise_tax_detail.pop(old_name)
 
@@ -640,19 +640,20 @@ class Item(WebsiteGenerator):
 
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
-		if self.variant_of and self.show_in_website:
-			self.show_variant_in_website = 1
-			self.show_in_website = 0
+		if self.variant_of:
+			if self.show_in_website:
+				self.show_variant_in_website = 1
+				self.show_in_website = 0
 
-		if self.show_variant_in_website:
-			# show template
-			template_item = frappe.get_doc("Item", self.variant_of)
+			if self.show_variant_in_website:
+				# show template
+				template_item = frappe.get_doc("Item", self.variant_of)
 
-			if not template_item.show_in_website:
-				template_item.show_in_website = 1
-				template_item.flags.dont_update_variants = True
-				template_item.flags.ignore_permissions = True
-				template_item.save()
+				if not template_item.show_in_website:
+					template_item.show_in_website = 1
+					template_item.flags.dont_update_variants = True
+					template_item.flags.ignore_permissions = True
+					template_item.save()
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -676,10 +677,10 @@ class Item(WebsiteGenerator):
 
 	def validate_stock_exists_for_template_item(self):
 		if self.stock_ledger_created() and self._doc_before_save:
-			if (self._doc_before_save.has_variants != self.has_variants
-                                or self._doc_before_save.variant_of != self.variant_of):
-				frappe.throw(_("Cannot change Variant properties after stock transction. You will have to make a new Item to do this.").format(self.name),
-                                    StockExistsForTemplate)
+			if (cint(self._doc_before_save.has_variants) != cint(self.has_variants)
+				or self._doc_before_save.variant_of != self.variant_of):
+				frappe.throw(_("Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.").format(self.name),
+					StockExistsForTemplate)
 
 			if self.has_variants or self.variant_of:
 				if not self.is_child_table_same('attributes'):

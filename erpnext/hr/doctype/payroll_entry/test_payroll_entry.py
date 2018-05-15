@@ -57,7 +57,7 @@ class TestPayrollEntry(unittest.TestCase):
 			salary_component = frappe.get_doc('Salary Component', 'Basic Salary')
 			salary_component.append('accounts', {
 				'company': company,
-				'default_account': 'Salary - WP'
+				'default_account': "Salary - " + frappe.db.get_value('Company', company, 'abbr')
 			})
 
 		company_doc = frappe.get_doc('Company', company)

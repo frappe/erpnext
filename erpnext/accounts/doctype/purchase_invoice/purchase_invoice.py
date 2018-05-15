@@ -727,7 +727,7 @@ class PurchaseInvoice(BuyingController):
 				if account_type != 'Fixed Asset':
 					frappe.throw(_("Row {0}# Account must be of type 'Fixed Asset'").format(d.idx))
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
 
 	def set_tax_withholding(self):

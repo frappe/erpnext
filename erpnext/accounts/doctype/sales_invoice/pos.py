@@ -97,7 +97,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.conversion_rate = 1.0
 
 	if doc.currency != company_data.default_currency:
-		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date)
+		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date, args="for_selling")
 
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')

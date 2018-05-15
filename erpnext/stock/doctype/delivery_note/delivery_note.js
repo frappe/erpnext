@@ -66,11 +66,6 @@ frappe.ui.form.on("Delivery Note", {
 	},
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
-	},
-	on_submit: function(frm) {
-		if(cint(frappe.boot.notification_settings.delivery_note)) {
-			frm.email_doc(frappe.boot.notification_settings.delivery_note_message);
-		}
 	}
 });
 

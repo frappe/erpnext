@@ -37,6 +37,15 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 });
 frappe.ui.form.on('Employee',{
+	setup: function(frm) {
+		frm.set_query("leave_policy", function() {
+			return {
+				"filters": {
+					"docstatus": 1
+				}
+			};
+		});
+	},
 	onload:function(frm) {
 		frm.set_query("department", function() {
 			return {

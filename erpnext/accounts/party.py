@@ -130,15 +130,15 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions().get("Price List", []))
-	if isinstance(price_list, list):
-		price_list = price_list[0] if len(price_list)==1 else None
+	price_list = filter(None, get_user_permissions()
+		.get("Price List", {})
+		.get("docs", []))
+	price_list = list(price_list)
 
-	if not price_list:
-		price_list = get_default_price_list(party)
-
-	if not price_list:
-		price_list = given_price_list
+	if price_list:
+		price_list = price_list[0]
+	else:
+		price_list = get_default_price_list(party) or given_price_list
 
 	if price_list:
 		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency")

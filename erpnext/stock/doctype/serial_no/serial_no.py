@@ -17,6 +17,7 @@ class SerialNoRequiredError(ValidationError): pass
 class SerialNoQtyError(ValidationError): pass
 class SerialNoItemError(ValidationError): pass
 class SerialNoWarehouseError(ValidationError): pass
+class SerialNoBatchError(ValidationError): pass
 class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
@@ -188,6 +189,7 @@ def process_serial_no(sle):
 	update_serial_nos(sle, item_det)
 
 def validate_serial_no(sle, item_det):
+
 	if item_det.has_serial_no==0:
 		if sle.serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
@@ -199,7 +201,7 @@ def validate_serial_no(sle, item_det):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
 
 			if len(serial_nos) and len(serial_nos) != abs(cint(sle.actual_qty)):
-				frappe.throw(_("{0} Serial Numbers required for Item {1}. You have provided {2}.").format(sle.actual_qty, sle.item_code, len(serial_nos)),
+				frappe.throw(_("{0} Serial Numbers required for Item {1}. You have provided {2}.").format(abs(sle.actual_qty), sle.item_code, len(serial_nos)),
 					SerialNoQtyError)
 
 			if len(serial_nos) != len(set(serial_nos)):
@@ -229,8 +231,13 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
-							and sle.is_cancelled=="No" and not sr.warehouse:
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+
+							if sr.batch_no and sr.batch_no != sle.batch_no:
+								frappe.throw(_("Serial No {0} does not belong to Batch {1}").format(serial_no,
+									sle.batch_no), SerialNoBatchError)
+
+							if sle.is_cancelled=="No" and not sr.warehouse:
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
 
