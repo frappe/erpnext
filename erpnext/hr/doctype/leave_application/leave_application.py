@@ -351,7 +351,7 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
-	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status=Approved)
+	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved")
 
 	return flt(allocation.total_leaves_allocated) - flt(leaves_taken)
 
