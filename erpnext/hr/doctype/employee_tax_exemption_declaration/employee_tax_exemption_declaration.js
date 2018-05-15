@@ -11,14 +11,20 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 			}
 		});
 		frm.set_query('payroll_period', function() {
-			if(frm.doc.employee && frm.doc.company){
+			const fields = {'employee': 'Employee', 'company': 'Company'};
+
+			for (let [field, label] of Object.entries(fields)) {
+				if (!frm.doc[field]) {
+					frappe.msgprint(__("Please select {0}", [label]))
+				}
+			};
+
+			if (frm.doc.employee && frm.doc.company){
 				return {
 					filters: {
 						'company': frm.doc.company
 					}
 				}
-			}else {
-				frappe.msgprint(__("Please select Employee"));
 			}
 		});
 		frm.set_query('exemption_sub_category', 'declarations', function() {
