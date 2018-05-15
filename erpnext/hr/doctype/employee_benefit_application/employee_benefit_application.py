@@ -9,6 +9,10 @@ from frappe.utils import nowdate
 from frappe.model.document import Document
 
 class EmployeeBenefitApplication(Document):
+	def validate(self):
+		if self.max_benefits <= 0:
+			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
+
 	def before_submit(self):
 		self.validate_duplicate_on_payroll_period()
 		self.validate_max_benefit_for_component()
@@ -42,7 +46,13 @@ class EmployeeBenefitApplication(Document):
 	def get_max_benefits(self):
 		sal_struct = get_assigned_salary_sturecture(self.employee, self.date)
 		if sal_struct:
-			return frappe.db.get_value("Salary Structure", sal_struct[0][0], "max_benefits")
+			max_benefits = frappe.db.get_value("Salary Structure", sal_struct[0][0], "max_benefits")
+			if max_benefits > 0:
+				return max_benefits
+			else:
+				frappe.throw(_("Employee {0} has no max benefits in salary structure {1}").format(self.employee, sal_struct[0][0]))
+		else:
+			frappe.throw(_("Employee {0} has no salary structure assigned").format(self.employee))
 
 
 @frappe.whitelist()

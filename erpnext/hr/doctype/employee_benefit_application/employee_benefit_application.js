@@ -20,7 +20,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 			callback: function (data) {
 				if(!data.exc){
 					if(data.message){
-						frm.set_value("max_benefits", data.message)
+						frm.set_value("max_benefits", data.message);
 					}
 				}
 			}
