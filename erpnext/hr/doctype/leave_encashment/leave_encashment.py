@@ -44,6 +44,7 @@ class LeaveEncashment(Document):
 	def on_cancel(self):
 		if self.additional_component:
 			frappe.get_doc("Additional Salary Component", self.additional_component).cancel()
+			self.db_set("additional_component", "")
 
 		if self.leave_allocation:
 			frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
