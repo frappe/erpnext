@@ -7,7 +7,7 @@ import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_patry_tax_withholding_details
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -43,6 +43,7 @@ class PaymentEntry(AccountsController):
 
 	def validate(self):
 		self.setup_party_account_field()
+		self.set_tax_withholding()
 		self.set_missing_values()
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -510,6 +511,27 @@ class PaymentEntry(AccountsController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name
 		self.reference_date = nowdate()
+	
+	def set_tax_withholding(self):
+		if self.party_type != 'Supplier':
+			return 
+
+		self.supplier = self.party
+		tax_withholding_details = get_patry_tax_withholding_details(self)
+
+		for tax_details in tax_withholding_details:
+			if self.deductions:
+				if tax_details['tax']['account_head'] not in [deduction.account for deduction in self.deductions]:
+					self.append('deductions', self.calculate_deductions(tax_details))
+			else:
+				self.append('deductions', self.calculate_deductions(tax_details))
+
+	def calculate_deductions(self, tax_details):
+		return {
+			"account": tax_details['tax']['account_head'],
+			"cost_center": frappe.db.get_value("Company", self.company, "cost_center"),
+			"amount": self.total_allocated_amount * (tax_details['tax']['rate'] / 100)
+		}
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):

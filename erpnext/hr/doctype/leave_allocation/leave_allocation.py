@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import flt, date_diff, formatdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
+from erpnext.hr.utils import set_employee_name, get_leave_period
 from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
 
 class OverlapError(frappe.ValidationError): pass
@@ -25,6 +25,20 @@ class LeaveAllocation(Document):
 		self.validate_total_leaves_allocated()
 		self.validate_lwp()
 		set_employee_name(self)
+		self.validate_leave_allocation_days()
+
+	def validate_leave_allocation_days(self):
+		company = frappe.db.get_value("Employee", self.employee, "company")
+		leave_period = get_leave_period(self.from_date, self.to_date, company)
+		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
+		if max_leaves_allowed > 0:
+			leave_allocated = 0
+			if leave_period:
+				leave_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
+			leave_allocated += self.new_leaves_allocated
+			if leave_allocated > max_leaves_allowed:
+				frappe.throw(_("Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period")\
+				.format(self.leave_type, self.employee))
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()
@@ -96,6 +110,29 @@ class LeaveAllocation(Document):
 				frappe.msgprint(_("Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken))
 			else:
 				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
+
+def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
+	leave_allocated = 0
+	leave_allocations = frappe.db.sql("""
+		select employee, leave_type, from_date, to_date, total_leaves_allocated
+		from `tabLeave Allocation`
+		where employee=%(employee)s and leave_type=%(leave_type)s
+			and docstatus=1
+			and (from_date between %(from_date)s and %(to_date)s
+				or to_date between %(from_date)s and %(to_date)s
+				or (from_date < %(from_date)s and to_date > %(to_date)s))
+	""", {
+		"from_date": from_date,
+		"to_date": to_date,
+		"employee": employee,
+		"leave_type": leave_type
+	}, as_dict=1)
+
+	if leave_allocations:
+		for leave_alloc in leave_allocations:
+			leave_allocated += leave_alloc.total_leaves_allocated
+
+	return leave_allocated
 
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):

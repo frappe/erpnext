@@ -102,9 +102,9 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_type"]
+		fields = ["name", "supplier_group"]
 	else:
-		fields = ["name", "supplier_name", "supplier_type"]
+		fields = ["name", "supplier_name", "supplier_group"]
 	fields = ", ".join(fields)
 
 	return frappe.db.sql("""select {field} from `tabSupplier`
