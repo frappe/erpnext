@@ -18,7 +18,7 @@ Employee can apply for loan by going to:
 
 > Human Resources > Loan Management > Loan Application > New Loan Application
 
-<img class="screenshot" alt="Loan Application" src="{{docs_base_url}}/assets/img/human-resources/employee-loan-application.png">
+<img class="screenshot" alt="Loan Application" src="{{docs_base_url}}/assets/img/human-resources/loan-application.png">
 
 #### In the Loan Application,
 
@@ -35,7 +35,7 @@ Once the Loan is approved, Manager can create Loan record for the Employee.
 
 > Human Resources > Loan Management > Loan > New Loan
 
-<img class="screenshot" alt="Loan Application" src="{{docs_base_url}}/assets/img/human-resources/employee-loan.png">
+<img class="screenshot" alt="Loan Application" src="{{docs_base_url}}/assets/img/human-resources/loan.png">
 
 #### In the Loan,
 

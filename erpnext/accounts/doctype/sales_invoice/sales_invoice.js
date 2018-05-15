@@ -126,18 +126,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		$.each(doc["items"], function(i, row) {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 		})
-
-		if(this.frm.doc.is_pos) {
-			this.frm.msgbox = frappe.msgprint(
-				`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
-					${__('Print')}</a>
-				<a class="btn btn-default" href="javascript:frappe.new_doc(cur_frm.doctype);">
-					${__('New')}</a>`
-				);
-
-		} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
-			this.frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
-		}
 	},
 
 	set_default_print_format: function() {

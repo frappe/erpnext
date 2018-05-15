@@ -200,52 +200,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Promotion",
-				}
-			]
-		},
-		{
-			"label": _("Recruitment"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
 				},
 				{
 					"type": "doctype",
-					"name": "Job Opening",
+					"name": "Employee Separation"
 				},
 				{
 					"type": "doctype",
-					"name": "Job Offer",
-				},
-			]
-		},
-		{
-			"label": _("Employee Lifecycle"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Transfer",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Promotion",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Activity",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Activity Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Process Template",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Lifecycle Process",
+					"name": "Employee Onboarding"
 				}
 			]
 		},

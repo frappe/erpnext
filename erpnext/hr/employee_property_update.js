@@ -57,7 +57,10 @@ var show_dialog = function(frm, table, field_labels) {
 		primary_action_label: __('Add to Details'),
 		primary_action: () => {
 			d.get_primary_btn().attr('disabled', true);
-			if(d.data){
+			if(d.data) {
+				var input = $('[data-fieldname="field_html"] input');
+				d.data.new = input.val();
+				$(input).remove();
 				add_to_details(frm, d, table);
 			}
 		}
@@ -99,11 +102,6 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 	});
 	dynamic_field.make_input();
 	$(dynamic_field.label_area).text(__("New"));
-	dynamic_field.$input.on("change", function(e) {
-		d.data.new = e.target.value;
-	}).on("awesomplete-close", function(e) {
-		d.data.new = e.target.value;
-	});
 };
 
 var add_to_details = function(frm, d, table) {

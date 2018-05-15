@@ -29,7 +29,9 @@ def get():
                     "account_number": "1100"
                 },
                 _("Loans and Advances (Assets)"): {
-                    "is_group": 1,
+                    _("Employee Advances"): {
+                        "account_number": "1610"
+                    },
                     "account_number": "1600"
                 },
                 _("Securities and Deposits"): {

@@ -151,6 +151,7 @@ class ReceivablePayableReport(object):
 
 					# get due date
 					due_date = voucher_details.get(gle.voucher_no, {}).get("due_date", "")
+					bill_date = voucher_details.get(gle.voucher_no, {}).get("bill_date", "")
 
 					row += [gle.voucher_type, gle.voucher_no, due_date]
 
@@ -167,14 +168,24 @@ class ReceivablePayableReport(object):
 					row += [invoiced_amount, paid_amt, credit_note_amount, outstanding_amount]
 
 					# ageing data
-					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
+					if self.filters.ageing_based_on == "Due Date":
+					    entry_date = due_date 
+					elif self.filters.ageing_based_on == "Supplier Invoice Date": 
+					    entry_date = bill_date    
+					else:
+					    entry_date = gle.posting_date
 					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
+
 
 					# issue 6371-Ageing buckets should not have amounts if due date is not reached
 					if self.filters.ageing_based_on == "Due Date" \
 							and getdate(due_date) > getdate(self.filters.report_date):
 						row[-1]=row[-2]=row[-3]=row[-4]=0
+
+					if self.filters.ageing_based_on == "Supplier Invoice Date" \
+							and getdate(bill_date) > getdate(self.filters.report_date):
+						row[-1]=row[-2]=row[-3]=row[-4]=0	
 
 					if self.filters.get(scrub(args.get("party_type"))):
 						row.append(gle.account_currency)
