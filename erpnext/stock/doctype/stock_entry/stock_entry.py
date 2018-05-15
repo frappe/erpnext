@@ -968,6 +968,7 @@ class StockEntry(StockController):
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
+			se_child.allow_zero_valuation_rate = item_dict[d].get("allow_zero_valuation_rate", 0)
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")

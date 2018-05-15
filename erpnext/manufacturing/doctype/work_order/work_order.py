@@ -494,7 +494,8 @@ class WorkOrder(Document):
 						'description': item.description,
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
-						'source_warehouse': item.source_warehouse or item.default_warehouse
+						'source_warehouse': item.source_warehouse or item.default_warehouse,
+						'allow_zero_valuation_rate': item.allow_zero_valuation_rate
 					})
 
 			self.set_available_qty()
