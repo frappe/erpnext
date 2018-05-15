@@ -10,7 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 
 
 class EmployeeOnboarding(EmployeeBoardingController):
-	def validate():
+	def validate(self):
 		super(EmployeeOnboarding, self).validate()
 
 	def validate_employee_creation(self):
