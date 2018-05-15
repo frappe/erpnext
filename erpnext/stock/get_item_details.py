@@ -645,6 +645,11 @@ def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
 
+	if args.doctype in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		args.update({"exchange_rate": "for_selling"})
+	elif args.doctype in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		args.update({"exchange_rate": "for_buying"})
+
 	price_list_currency = get_price_list_currency(args.price_list)
 	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
@@ -654,7 +659,7 @@ def get_price_list_currency_and_exchange_rate(args):
 		and price_list_currency != args.price_list_currency):
 			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
 			plc_conversion_rate = get_exchange_rate(price_list_currency, company_currency,
-				args.transaction_date) or plc_conversion_rate
+				args.transaction_date, args.exchange_rate) or plc_conversion_rate
 
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
