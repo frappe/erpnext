@@ -106,6 +106,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Incentive",
 				},
+				{
+					"type": "doctype",
+					"name": "Retention Bonus",
+				},
 			]
 		},
 		{
