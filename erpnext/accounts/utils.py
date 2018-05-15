@@ -660,29 +660,23 @@ def get_companies():
 def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
-	doctype = frappe.db.escape(doctype)
-
-	# root
+	parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
+	fields = [
+		'name as value',
+		'is_group as expandable'
+	]
+	filters = [['docstatus', '<', 2]]
 	if is_root:
-		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql(""" select
-			name as value, is_group as expandable {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = ''
-			and `company` = %s	and docstatus<2
-			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
-				company, as_dict=1)
+		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
+		filters.append([parent_fieldname, '=', ''])
+		filters.append(['company', '=', company])
+
 	else:
-		# other
-		fields = ", account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql("""select
-			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = %s
-			and docstatus<2
-			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				parent, as_dict=1)
+		fields += ['account_currency'] if doctype == 'Account' else []
+		fields += [parent_fieldname + ' as parent']
+
+
+	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
 	if doctype == 'Account':
 		sort_accounts(acc, is_root, key="value")
