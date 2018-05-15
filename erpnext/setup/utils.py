@@ -59,13 +59,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
-
 	if from_currency == to_currency:
 		return 1
 
 	if not transaction_date:
 		transaction_date = nowdate()
-
 	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
 	allow_stale_rates = currency_settings.get("allow_stale")
 
@@ -74,12 +72,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		["from_currency", "=", from_currency],
 		["to_currency", "=", to_currency]
 	]
-	frappe.errprint(args)
+
 	if args == "for_buying":
 		filters.append(["for_buying", "=", "1"])
 	elif args == "for_selling":
-		filters.append(["for_selling", "=", 1])
-	frappe.errprint(filters)
+		filters.append(["for_selling", "=", "1"])
+
 	if not allow_stale_rates:
 		stale_days = currency_settings.get("stale_days")
 		checkpoint_date = add_days(transaction_date, -stale_days)
