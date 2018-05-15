@@ -30,22 +30,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 
 frappe.ui.form.on("Employee Benefit Application Detail",{
 	amount:  function(frm, cdt, cdn) {
-		calculate_all(frm.doc, cdt, cdn)
-		var child = locals[cdt][cdn];
-		if(child.amount && child.earning_component){
-			frappe.call({
-				"method": "frappe.client.get",
-				args: {
-					doctype: "Salary Component",
-					name: child.earning_component,
-				},
-				callback: function (data) {
-					if(data.message){
-						validate_max_benefit_for_component(frm.doc, data.message)
-					}
-				}
-			});
-		}
+		calculate_all(frm.doc, cdt, cdn);
 	},
 })
 
@@ -57,34 +42,12 @@ var calculate_all = function(doc, dt, dn) {
 		if(cint(tbl[i].amount) > 0) {
 			total_amount += flt(tbl[i].amount);
 		}
-		var amount = tbl[i].amount;
-		frappe.call({
-			method: "frappe.client.get_value",
-			args: {
-				doctype: "Salary Component",
-				fieldname: "is_pro_rata_applicable",
-				filters:{
-					name: tbl[i].earning_component
-				}
-			},
-			callback: function (data) {
-				if(data.message){
-					if(data.message.is_pro_rata_applicable == 1){
-						console.log("Any time here");
-						pro_rata_dispensed_amount += amount
-						console.log(amount);
-						console.log(pro_rata_dispensed_amount);
-					}
-				}
-			}
-		});
+		if(tbl[i].is_pro_rata_applicable == 1){
+			pro_rata_dispensed_amount += flt(tbl[i].amount)
+		}
 	}
 	doc.total_amount = total_amount;
-	doc.remainig_benefits = doc.max_benefits - total_amount
-	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount
+	doc.remainig_benefits = doc.max_benefits - total_amount;
+	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;
 	refresh_many(['pro_rata_dispensed_amount', 'total_amount','remainig_benefits']);
-}
-
-var validate_max_benefit_for_component = function(doc, salary_component) {
-	// TODO: Validate Max Benefit
 }
