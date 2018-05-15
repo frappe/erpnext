@@ -2,7 +2,9 @@ import frappe
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
-	frappe.reload_doc("hr", "doctype", "department")
+	for doctype in ['department', 'leave_period', 'staffing_plan']:
+		frappe.reload_doc("hr", "doctype", doctype)
+
 	companies = frappe.db.get_all("Company", fields=["name", "abbr"])
 	departments = frappe.db.get_all("Department")
 	comp_dict = {}
