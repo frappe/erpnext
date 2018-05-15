@@ -58,6 +58,17 @@ frappe.ui.form.on("Customer", {
 			frm.set_value("primary_address", "");
 		}
 	},
+
+	is_internal_customer: function(frm) {
+		frm.set_value("represents_company", "");
+		if (frm.doc.is_internal_customer == 1) {
+			frm.toggle_reqd("represents_company", true);
+		}
+		else {
+			frm.toggle_reqd("represents_company", false);
+		}
+	},
+
 	customer_primary_contact: function(frm){
 		if(!frm.doc.customer_primary_contact){
 			frm.set_value("mobile_no", "");
