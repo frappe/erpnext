@@ -32,10 +32,10 @@ def get_webhook_address(connector_name, method, exclude_uri=False):
 	if exclude_uri:
 		return endpoint
 
-	# try:
-# 		url = frappe.request.url
-# 	except RuntimeError:
-	url = "https://testshop1.localtunnel.me"
+	try:
+		url = frappe.request.url
+	except RuntimeError:
+		url = "http://localhost:8000"
 
 	server_url = '{uri.scheme}://{uri.netloc}/api/method/{endpoint}'.format(uri=urlparse(url), endpoint=endpoint)
 
