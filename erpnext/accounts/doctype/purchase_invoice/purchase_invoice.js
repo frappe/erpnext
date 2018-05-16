@@ -92,8 +92,21 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get items from"));
 		}
-
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+
+		var me = this;
+		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function() {
+				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
+				var internal = supplier.is_internal_supplier;
+				var disabled = supplier.disabled;
+				if (internal == 1 && disabled == 0) {
+					me.frm.add_custom_button("Inter Company Invoice", function() {
+						me.make_inter_company_invoice(me.frm);
+					}, __("Make"));
+				}
+			});
+		}
 	},
 
 	supplier: function() {
@@ -131,6 +144,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+	},
+
+	make_inter_company_invoice: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
+			frm: frm
+		});
 	},
 
 	is_paid: function() {
@@ -185,9 +205,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_fixed_asset_account",
+				method: "erpnext.assets.doctype.asset_category.asset_category.get_asset_category_account",
 				args: {
 					"asset": row.asset,
+					"fieldname": "fixed_asset_account",
 					"account": row.expense_account
 				},
 				callback: function(r, rt) {

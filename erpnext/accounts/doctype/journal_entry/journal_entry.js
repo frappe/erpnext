@@ -37,6 +37,55 @@ frappe.ui.form.on("Journal Entry", {
 
 		// hide /unhide fields based on currency
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
+
+		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_journal_entry_reference)) {
+			frm.add_custom_button(__("Make Inter Company Journal Entry"),
+				function() {
+					frm.trigger("make_inter_company_journal_entry");
+				}
+			);
+		}
+	},
+
+	make_inter_company_journal_entry: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Select Company"),
+			fields: [
+				{
+					'fieldname': 'company',
+					'fieldtype': 'Link',
+					'label': __('Company'),
+					'options': 'Company',
+					"get_query": function () {
+						return {
+							filters: [
+								["Company", "name", "!=", frm.doc.company]
+							]
+						};
+					},
+					'reqd': 1
+				}
+			],
+		});
+		d.set_primary_action(__("Make"), function() {
+			d.hide();
+			var args = d.get_values();
+			frappe.call({
+				args: {
+					"name": frm.doc.name,
+					"voucher_type": frm.doc.voucher_type,
+					"company": args.company
+				},
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_inter_company_journal_entry",
+				callback: function (r) {
+					if (r.message) {
+						var doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					}
+				}
+			});
+		});
+		d.show();
 	},
 
 	multi_currency: function(frm) {
@@ -549,9 +598,15 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	account_query: function(frm) {
+		var inter_company = 0;
+		if (frm.doc.voucher_type == "Inter Company Journal Entry") {
+			inter_company = 1;
+		}
+
 		var filters = {
 			company: frm.doc.company,
-			is_group: 0
+			is_group: 0,
+			inter_company_account: inter_company
 		};
 		if(!frm.doc.multi_currency) {
 			$.extend(filters, {

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, add_days, cstr
+from frappe.utils import flt, cint, add_days, cstr, add_months
 import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
@@ -101,6 +101,9 @@ def get_item_details(args):
 		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
+	if args.doctype == 'Material Request':
+		out.rate = args.rate or out.price_list_rate
+		out.amount = flt(args.qty * out.rate)
 
 	return out
 
@@ -254,6 +257,15 @@ def get_basic_details(args, item):
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0
 	})
 
+	if item.enable_deferred_revenue:
+		service_end_date = add_months(args.transaction_date, item.no_of_months)
+		out.update({
+			"enable_deferred_revenue": item.enable_deferred_revenue, 
+			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
+			"service_start_date": args.transaction_date,
+			"service_end_date": service_end_date
+		})
+
 	# calculate conversion factor
 	if item.stock_uom == args.uom:
 		out.conversion_factor = 1.0
@@ -294,6 +306,14 @@ def get_default_expense_account(args, item):
 		or args.expense_account
 		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account"))
 
+def get_default_deferred_revenue_account(args, item):
+	if item.enable_deferred_revenue:
+		return (item.deferred_revenue_account
+			or args.deferred_revenue_account
+			or frappe.db.get_value("Company", args.company, "default_deferred_revenue_account"))
+	else:
+		return None
+
 def get_default_cost_center(args, item):
 	return (frappe.db.get_value("Project", args.get("project"), "cost_center")
 		or (item.selling_cost_center if args.get("customer") else item.buying_cost_center)
@@ -303,9 +323,9 @@ def get_default_cost_center(args, item):
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
-	if meta.get_field("currency"):
+	if meta.get_field("currency") or args.get('currency'):
 		validate_price_list(args)
-		if args.price_list:
+		if meta.get_field("currency") and args.price_list:
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args.price_list, item_doc.name)
@@ -628,6 +648,11 @@ def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
 
+	if args.doctype in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		args.update({"exchange_rate": "for_selling"})
+	elif args.doctype in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		args.update({"exchange_rate": "for_buying"})
+
 	price_list_currency = get_price_list_currency(args.price_list)
 	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
@@ -637,7 +662,7 @@ def get_price_list_currency_and_exchange_rate(args):
 		and price_list_currency != args.price_list_currency):
 			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
 			plc_conversion_rate = get_exchange_rate(price_list_currency, company_currency,
-				args.transaction_date) or plc_conversion_rate
+				args.transaction_date, args.exchange_rate) or plc_conversion_rate
 
 	return frappe._dict({
 		"price_list_currency": price_list_currency,

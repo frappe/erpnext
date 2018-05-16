@@ -41,7 +41,7 @@ class PricingRule(Document):
 			throw(_("Selling must be checked, if Applicable For is selected as {0}"
 				.format(self.applicable_for)))
 
-		if not self.buying and self.applicable_for in ["Supplier", "Supplier Type"]:
+		if not self.buying and self.applicable_for in ["Supplier", "Supplier Group"]:
 			throw(_("Buying must be checked, if Applicable For is selected as {0}"
 				.format(self.applicable_for)))
 
@@ -85,7 +85,7 @@ def apply_pricing_rule(args):
 			"customer_group": "something",
 			"territory": "something",
 			"supplier": "something",
-			"supplier_type": "something",
+			"supplier_group": "something",
 			"currency": "something",
 			"conversion_rate": "something",
 			"price_list": "something",
@@ -165,10 +165,10 @@ def get_pricing_rule_for_item(args):
 			if customer:
 				args.customer_group, args.territory = customer
 
-		args.supplier = args.supplier_type = None
+		args.supplier = args.supplier_group = None
 
-	elif args.supplier and not args.supplier_type:
-		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
+	elif args.supplier and not args.supplier_group:
+		args.supplier_group = frappe.db.get_value("Supplier", args.supplier, "supplier_group")
 		args.customer = args.customer_group = args.territory = None
 
 	pricing_rules = get_pricing_rules(args)
@@ -258,7 +258,7 @@ def get_pricing_rules(args):
 	conditions = item_variant_condition = ""
 	values =  {"item_code": args.get("item_code"), "brand": args.get("brand")}
 
-	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
+	for field in ["company", "customer", "supplier", "supplier_group", "campaign", "sales_partner"]:
 		if args.get(field):
 			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 			values[field] = args.get(field)
@@ -324,11 +324,11 @@ def filter_pricing_rules(args, pricing_rules):
 
 	# apply internal priority
 	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory",
-		"supplier", "supplier_type", "campaign", "sales_partner", "variant_of"]
+		"supplier", "supplier_group", "campaign", "sales_partner", "variant_of"]
 
 	if len(pricing_rules) > 1:
 		for field_set in [["item_code", "variant_of", "item_group", "brand"],
-			["customer", "customer_group", "territory"], ["supplier", "supplier_type"]]:
+			["customer", "customer_group", "territory"], ["supplier", "supplier_group"]]:
 				remaining_fields = list(set(all_fields) - set(field_set))
 				if if_all_rules_same(pricing_rules, remaining_fields):
 					pricing_rules = apply_internal_priority(pricing_rules, field_set, args)

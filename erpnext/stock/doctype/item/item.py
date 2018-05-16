@@ -16,6 +16,7 @@ from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
+
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -42,9 +43,17 @@ class Item(WebsiteGenerator):
 		super(Item, self).onload()
 
 		self.set_onload('stock_exists', self.stock_ledger_created())
+		self.set_asset_naming_series()
 		if self.is_fixed_asset:
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			self.set_onload("asset_exists", True if asset else False)
+
+	def set_asset_naming_series(self):
+		if not hasattr(self, '_asset_naming_series'):
+			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
+			self._asset_naming_series = get_asset_naming_series()
+
+		self.set_onload('asset_naming_series', self._asset_naming_series)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":
@@ -444,7 +453,7 @@ class Item(WebsiteGenerator):
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
-		if self.has_serial_no == 1 and self.is_stock_item == 0:
+		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
 		if self.has_serial_no == 0 and self.serial_no_series:
@@ -631,19 +640,20 @@ class Item(WebsiteGenerator):
 
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
-		if self.variant_of and self.show_in_website:
-			self.show_variant_in_website = 1
-			self.show_in_website = 0
+		if self.variant_of:
+			if self.show_in_website:
+				self.show_variant_in_website = 1
+				self.show_in_website = 0
 
-		if self.show_variant_in_website:
-			# show template
-			template_item = frappe.get_doc("Item", self.variant_of)
+			if self.show_variant_in_website:
+				# show template
+				template_item = frappe.get_doc("Item", self.variant_of)
 
-			if not template_item.show_in_website:
-				template_item.show_in_website = 1
-				template_item.flags.dont_update_variants = True
-				template_item.flags.ignore_permissions = True
-				template_item.save()
+				if not template_item.show_in_website:
+					template_item.show_in_website = 1
+					template_item.flags.dont_update_variants = True
+					template_item.flags.ignore_permissions = True
+					template_item.save()
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -667,10 +677,10 @@ class Item(WebsiteGenerator):
 
 	def validate_stock_exists_for_template_item(self):
 		if self.stock_ledger_created() and self._doc_before_save:
-			if (self._doc_before_save.has_variants != self.has_variants
-                                or self._doc_before_save.variant_of != self.variant_of):
-				frappe.throw(_("Cannot change Variant properties after stock transction. You will have to make a new Item to do this.").format(self.name),
-                                    StockExistsForTemplate)
+			if (cint(self._doc_before_save.has_variants) != cint(self.has_variants)
+				or self._doc_before_save.variant_of != self.variant_of):
+				frappe.throw(_("Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.").format(self.name),
+					StockExistsForTemplate)
 
 			if self.has_variants or self.variant_of:
 				if not self.is_child_table_same('attributes'):
