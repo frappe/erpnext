@@ -35,6 +35,10 @@ frappe.ui.form.on('Consultation', {
 			create_medical_record(frm);
 		},"Create");
 
+		frm.add_custom_button(__("Procedure"),function(){
+			btn_create_procedure(frm);
+		},"Create");
+
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}
@@ -125,6 +129,17 @@ var btn_create_vital_signs = function (frm) {
 		"appointment": frm.doc.appointment
 	};
 	frappe.new_doc("Vital Signs");
+};
+
+var btn_create_procedure = function (frm) {
+	if(!frm.doc.patient){
+		frappe.throw("Please select patient");
+	}
+	frappe.route_options = {
+		"patient": frm.doc.patient,
+		"medical_department": frm.doc.visit_department
+	};
+	frappe.new_doc("Clinical Procedure");
 };
 
 frappe.ui.form.on("Consultation", "appointment", function(frm){
@@ -234,6 +249,25 @@ frappe.ui.form.on("Drug Prescription", {
 		var child = locals[cdt][cdn];
 		if(child.in_every == "Hour"){
 			frappe.model.set_value(cdt, cdn, 'dosage', null);
+		}
+	}
+});
+
+frappe.ui.form.on("Procedure Prescription", {
+	procedure:  function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.procedure){
+			frappe.call({
+				"method": "frappe.client.get_value",
+				args: {
+					doctype: "Clinical Procedure Template",
+					fieldname: "medical_department",
+					filters: {name: child.procedure}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, 'department',data.message.medical_department);
+				}
+			});
 		}
 	}
 });

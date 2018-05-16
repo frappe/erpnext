@@ -7,7 +7,7 @@ import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_patry_tax_withholding_details
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -43,6 +43,7 @@ class PaymentEntry(AccountsController):
 
 	def validate(self):
 		self.setup_party_account_field()
+		self.set_tax_withholding()
 		self.set_missing_values()
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -160,9 +161,9 @@ class PaymentEntry(AccountsController):
 			if not frappe.db.exists(self.party_type, self.party):
 				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
 
-			if self.party_account and self.party_type != "Employee":
-				party_account_type = "Receivable" if self.party_type in ("Customer", "Student") else "Payable"
-				self.validate_account_type(self.party_account, [party_account_type])
+			if self.party_account:
+				self.validate_account_type(self.party_account,
+					[erpnext.get_party_account_type(self.party_type)])
 
 	def validate_bank_accounts(self):
 		if self.payment_type in ("Pay", "Internal Transfer"):
@@ -413,7 +414,6 @@ class PaymentEntry(AccountsController):
 			else:
 				against_account = self.paid_from
 
-
 			party_gl_dict = self.get_gl_dict({
 				"account": self.party_account,
 				"party_type": self.party_type,
@@ -422,7 +422,7 @@ class PaymentEntry(AccountsController):
 				"account_currency": self.party_account_currency
 			})
 
-			dr_or_cr = "credit" if self.party_type in ["Customer", "Student"] else "debit"
+			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
 				gle = party_gl_dict.copy()
@@ -508,9 +508,30 @@ class PaymentEntry(AccountsController):
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
 					update_reimbursed_amount(doc)
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name
 		self.reference_date = nowdate()
+	
+	def set_tax_withholding(self):
+		if self.party_type != 'Supplier':
+			return 
+
+		self.supplier = self.party
+		tax_withholding_details = get_patry_tax_withholding_details(self)
+
+		for tax_details in tax_withholding_details:
+			if self.deductions:
+				if tax_details['tax']['account_head'] not in [deduction.account for deduction in self.deductions]:
+					self.append('deductions', self.calculate_deductions(tax_details))
+			else:
+				self.append('deductions', self.calculate_deductions(tax_details))
+
+	def calculate_deductions(self, tax_details):
+		return {
+			"account": tax_details['tax']['account_head'],
+			"cost_center": frappe.db.get_value("Company", self.company, "cost_center"),
+			"amount": self.total_allocated_amount * (tax_details['tax']['rate'] / 100)
+		}
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
@@ -785,6 +806,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_account = doc.receivable_account
 	elif dt == "Employee Advance":
 		party_account = doc.advance_account
+	elif dt == "Expense Claim":
+		party_account = doc.payable_account
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 

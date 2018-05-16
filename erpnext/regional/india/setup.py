@@ -16,7 +16,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	if not patch:
 		update_address_template()
-		make_fixtures()
+		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
@@ -180,20 +180,22 @@ def make_custom_fields():
 		'Sales Invoice Item': [hsn_sac_field],
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field]
+		'Purchase Invoice Item': [hsn_sac_field],
+		'Employee': [
+			dict(fieldname='ifsc_code', label='IFSC Code',
+				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
+				depends_on='eval:doc.salary_mode == "Bank"') ]
 	}
 
-	create_custom_fields(custom_fields)
+	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch)
 
-def make_fixtures():
-	docs = [
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
-	]
+def make_fixtures(company=None):
+	docs = []
+	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
+
+	set_salary_components(docs)
+	set_tds_account(docs, company)
+	set_tax_withholding_category(docs, company)
 
 	for d in docs:
 		try:
@@ -202,3 +204,43 @@ def make_fixtures():
 			doc.insert()
 		except frappe.NameError:
 			pass
+
+def set_salary_components(docs):
+	docs.extend([
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
+	])
+
+def set_tax_withholding_category(docs, company):
+	accounts = []
+	tds_account = frappe.db.get_value("Account", filter={"account_type": "Payable",
+		"account_name": "TDS", "company": company})
+
+	if company and tds_account:
+		accounts = [
+				{
+					'company': company,
+					'account': tds_account
+				}
+			]
+
+	docs.extend([
+		{
+			'doctype': 'Tax Withholding Category', '__newname': 'TDS',
+			'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
+			'book_on_advance': 0, "withhold_cumulative_tax_amount": 0,
+			'accounts': accounts
+		}
+	])
+
+def set_tds_account(docs, company):
+	docs.extend([
+		{
+			'doctype': 'Account', 'account_name': 'TDS', 'account_type': 'Tax',
+			'parent_account': 'Duties and Taxes', 'company': company
+		}
+	])

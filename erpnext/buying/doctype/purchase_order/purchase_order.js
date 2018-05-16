@@ -226,7 +226,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			me.frm.doc['supplied_items'].forEach((item, index) => {
 			if (item.rm_item_code && item.main_item_code) {
 					me.raw_material_data.push ({
-						'name':index,
+						'name':item.name,
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
 						'item_name': item.rm_item_code,
@@ -406,12 +406,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 			['BOM', 'docstatus', '=', '1'],
 			['BOM', 'company', '=', doc.company]
 		]
-	}
-}
-
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_order)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
 	}
 }
 

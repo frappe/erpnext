@@ -8,54 +8,60 @@ def execute():
 	if frappe.db.a_row_exists("Leave Application"):
 		frappe.reload_doc("hr", "doctype", "leave_application")
 		frappe.reload_doc("workflow", "doctype", "workflow")
-		states = {'Approved': 'Success', 'Rejected': 'Danger', 'Open': 'Warning'}
+		states = {"Approved": "Success", "Rejected": "Danger", "Open": "Warning"}
 
 		for state, style in states.items():
 			if not frappe.db.exists("Workflow State", state):
 				frappe.get_doc({
-					'doctype': 'Workflow State',
-					'workflow_state_name': state,
-					'style': style
+					"doctype": "Workflow State",
+					"workflow_state_name": state,
+					"style": style
 				}).insert(ignore_permissions=True)
 
-		for action in ['Approve', 'Reject']:
+		for action in ["Approve", "Reject"]:
 			if not frappe.db.exists("Workflow Action", action):
 				frappe.get_doc({
-					'doctype': 'Workflow Action',
-					'workflow_action_name': action
+					"doctype": "Workflow Action",
+					"workflow_action_name": action
 				}).insert(ignore_permissions=True)
 
 		if not frappe.db.exists("Workflow", "Leave Approval"):
 			frappe.get_doc({
-				'doctype': 'Workflow',
-				'workflow_name': 'Leave Approval',
-				'document_type': 'Leave Application',
-				'is_active': 1,
-				'workflow_state_field': 'workflow_state',
-				'states': [{
-					"state": 'Open',
+				"doctype": "Workflow",
+				"workflow_name": "Leave Approval",
+				"document_type": "Leave Application",
+				"is_active": 1,
+				"workflow_state_field": "workflow_state",
+				"states": [{
+					"state": "Open",
 					"doc_status": 0,
-					"allow_edit": 'Employee'
+					"update_field": "status",
+					"update_value": "Open",
+					"allow_edit": "Employee"
 				}, {
-					"state": 'Approved',
+					"state": "Approved",
 					"doc_status": 1,
-					"allow_edit": 'Leave Approver'
+					"update_field": "status",
+					"update_value": "Approved",
+					"allow_edit": "Leave Approver"
 				}, {
-					"state": 'Rejected',
+					"state": "Rejected",
 					"doc_status": 0,
-					"allow_edit": 'Leave Approver'
+					"update_field": "status",
+					"update_value": "Rejected",
+					"allow_edit": "Leave Approver"
 				}],
-				'transitions': [{
-					"state": 'Open',
-					"action": 'Approve',
-					"next_state": 'Approved',
-					"allowed": 'Leave Approver'
+				"transitions": [{
+					"state": "Open",
+					"action": "Approve",
+					"next_state": "Approved",
+					"allowed": "Leave Approver"
 				},
 				{
-					"state": 'Open',
-					"action": 'Reject',
-					"next_state": 'Rejected',
-					"allowed": 'Leave Approver'
+					"state": "Open",
+					"action": "Reject",
+					"next_state": "Rejected",
+					"allowed": "Leave Approver"
 				}]
 			}).insert(ignore_permissions=True)
 

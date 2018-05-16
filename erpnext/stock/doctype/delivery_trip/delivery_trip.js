@@ -3,6 +3,14 @@
 
 frappe.ui.form.on('Delivery Trip', {
 	setup: function(frm) {
+		frm.set_query("driver", function() {
+			return {
+				filters: {
+					"status": "Active"
+				}
+			};
+		});
+
 		frm.set_query("address", "delivery_stops", function(doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
 			if (row.customer) {

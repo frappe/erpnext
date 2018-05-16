@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
@@ -252,16 +252,11 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
-	if getattr(ac, 'is_root', None):
-		ac.parent_account=''
-
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
-	else:
-		ac.root_type = None
 
 	ac.insert()
 
@@ -327,7 +322,9 @@ def check_if_advance_entry_modified(args):
 			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 			and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 	else:
-		party_account_field = "paid_from" if args.party_type == "Customer" else "paid_to"
+		party_account_field = ("paid_from"
+			if erpnext.get_party_account_type(args.party_type) == 'Receivable' else "paid_to")
+
 		if args.voucher_detail_no:
 			ret = frappe.db.sql("""select t1.name
 				from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
@@ -595,16 +592,17 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	if party_type in ("Customer", "Student"):
+	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
+	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
-	invoice_list = frappe.db.sql("""
+
+  invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
@@ -681,36 +679,28 @@ def get_companies():
 
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False):
-	from erpnext.accounts.report.financial_statements import sort_root_accounts
+	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
-	doctype = frappe.db.escape(doctype)
-
-	# root
+	parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
+	fields = [
+		'name as value',
+		'is_group as expandable'
+	]
+	filters = [['docstatus', '<', 2]]
 	if is_root:
-		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql(""" select
-			name as value, is_group as expandable {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = ''
-			and `company` = %s	and docstatus<2
-			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
-				company, as_dict=1)
+		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
+		filters.append([parent_fieldname, '=', ''])
+		filters.append(['company', '=', company])
 
-		if parent=="Accounts":
-			sort_root_accounts(acc)
 	else:
-		# other
-		fields = ", account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql("""select
-			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = %s
-			and docstatus<2
-			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				parent, as_dict=1)
+		fields += ['account_currency'] if doctype == 'Account' else []
+		fields += [parent_fieldname + ' as parent']
+
+
+	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
 	if doctype == 'Account':
+		sort_accounts(acc, is_root, key="value")
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency

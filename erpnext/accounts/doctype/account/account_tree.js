@@ -32,9 +32,7 @@ frappe.treeview_settings["Account"] = {
 			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
 			depends_on: 'eval:doc.is_group && !doc.parent_account'},
 		{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-			options: ['', 'Accumulated Depreciation', 'Bank', 'Cash', 'Chargeable', 'Cost of Goods Sold', 'Depreciation',
-				'Equity', 'Expense Account', 'Expenses Included In Valuation', 'Fixed Asset', 'Income Account', 'Payable', 'Receivable',
-				'Round Off', 'Stock', 'Stock Adjustment', 'Stock Received But Not Billed', 'Tax', 'Temporary'].join('\n'),
+			options: frappe.get_meta("Account").fields.filter(d => d.fieldname=='account_type')[0].options,
 			description: __("Optional. This setting will be used to filter in various transactions.")
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
@@ -71,7 +69,7 @@ frappe.treeview_settings["Account"] = {
 
 		// financial statements
 		for (let report of ['Trial Balance', 'General Ledger', 'Balance Sheet',
-			'Profit and Loss', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
+			'Profit and Loss Statement', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
 			treeview.page.add_inner_button(__(report), function() {
 				frappe.set_route('query-report', report, {company: get_company()});
 			}, __('Financial Statements'));
