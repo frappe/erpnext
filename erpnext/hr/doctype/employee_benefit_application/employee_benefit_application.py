@@ -92,13 +92,22 @@ def get_employee_benefit_application(salary_slip):
 
 def get_components(employee_benefit_application, salary_slip):
 	salary_components_array = []
+	group_component_amount = {}
 	payroll_period_days = get_payroll_period_days(salary_slip.start_date, salary_slip.end_date, salary_slip.company)
 	for employee_benefit in employee_benefit_application.employee_benefits:
 		if employee_benefit.is_pro_rata_applicable == 1:
 			struct_row = {}
 			salary_components_dict = {}
-			salary_component = frappe.get_doc("Salary Component", employee_benefit.earning_component)
 			amount = get_amount(payroll_period_days, salary_slip.start_date, salary_slip.end_date, employee_benefit.amount)
+			sc = frappe.get_doc("Salary Component", employee_benefit.earning_component)
+			salary_component = sc
+			if sc.earning_component_group and not sc.is_group and not sc.flexi_default:
+				salary_component = frappe.get_doc("Salary Component", sc.earning_component_group)
+				if group_component_amount and group_component_amount.has_key(sc.earning_component_group):
+					group_component_amount[sc.earning_component_group] += amount
+				else:
+					group_component_amount[sc.earning_component_group] = amount
+				amount = group_component_amount[sc.earning_component_group]
 			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
 			struct_row['salary_component'] = salary_component.name
 			struct_row['abbr'] = salary_component.salary_component_abbr
