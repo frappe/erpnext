@@ -17,6 +17,10 @@ class Department(NestedSet):
 		else:
 			self.name = self.department_name
 
+	def validate(self):
+		if not self.parent_department:
+			self.parent_department = "All Departments"
+
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
