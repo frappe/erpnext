@@ -198,12 +198,12 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 
-		{'doctype': "Party Type", "party_type": "Customer"},
-		{'doctype': "Party Type", "party_type": "Supplier"},
-		{'doctype': "Party Type", "party_type": "Employee"},
-		{'doctype': "Party Type", "party_type": "Member"},
-		{'doctype': "Party Type", "party_type": "Shareholder"},
-		{'doctype': "Party Type", "party_type": "Student"},
+		{'doctype': "Party Type", "party_type": "Customer", "account_type": "Receivable"},
+		{'doctype': "Party Type", "party_type": "Supplier", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Employee", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Member", "account_type": "Receivable"},
+		{'doctype': "Party Type", "party_type": "Shareholder", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 
 		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},

@@ -160,9 +160,9 @@ class PaymentEntry(AccountsController):
 			if not frappe.db.exists(self.party_type, self.party):
 				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
 
-			if self.party_account and self.party_type != "Employee":
-				party_account_type = "Receivable" if self.party_type in ("Customer", "Student") else "Payable"
-				self.validate_account_type(self.party_account, [party_account_type])
+			if self.party_account:
+				self.validate_account_type(self.party_account,
+					[erpnext.get_party_account_type(self.party_type)])
 
 	def validate_bank_accounts(self):
 		if self.payment_type in ("Pay", "Internal Transfer"):
@@ -413,7 +413,6 @@ class PaymentEntry(AccountsController):
 			else:
 				against_account = self.paid_from
 
-
 			party_gl_dict = self.get_gl_dict({
 				"account": self.party_account,
 				"party_type": self.party_type,
@@ -422,7 +421,7 @@ class PaymentEntry(AccountsController):
 				"account_currency": self.party_account_currency
 			})
 
-			dr_or_cr = "credit" if self.party_type in ["Customer", "Student"] else "debit"
+			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
 				gle = party_gl_dict.copy()
