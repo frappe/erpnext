@@ -918,7 +918,7 @@ class SalesInvoice(SellingController):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
-	
+
 	def book_income_for_deferred_revenue(self):
 		# book the income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 		# start_date: 1st of the last month or the start date
