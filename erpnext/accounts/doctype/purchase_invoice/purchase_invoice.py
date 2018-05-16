@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, formatdate, flt, getdate
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
@@ -41,6 +41,13 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def before_save(self):
+		if not self.on_hold:
+			self.release_date = ''
+
+	def invoice_is_blocked(self):
+		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
+
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening = 'No'
@@ -61,6 +68,7 @@ class PurchaseInvoice(BuyingController):
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
 
+		self.validate_release_date()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -77,6 +85,10 @@ class PurchaseInvoice(BuyingController):
 		self.create_remarks()
 		self.set_status()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+
+	def validate_release_date(self):
+		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
+			frappe.msgprint('Release date must be in the future', raise_exception=True)
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -730,7 +742,15 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
 
-	def set_tax_withholding(self):
+	def block_invoice(self, hold_comment=None):
+		self.db_set('on_hold', 1)
+		self.db_set('hold_comment', cstr(hold_comment))
+
+	def unblock_invoice(self):
+		self.db_set('on_hold', 0)
+		self.db_set('release_date', None)
+
+  def set_tax_withholding(self):
 		"""
 			1. Get TDS Configurations against Supplier
 		"""
@@ -769,6 +789,27 @@ def make_stock_entry(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
+def change_release_date(name, release_date=None):
+	if frappe.db.exists('Purchase Invoice', name):
+		pi = frappe.get_doc('Purchase Invoice', name)
+		pi.db_set('release_date', release_date)
+
+
+@frappe.whitelist()
+def unblock_invoice(name):
+	if frappe.db.exists('Purchase Invoice', name):
+		pi = frappe.get_doc('Purchase Invoice', name)
+		pi.unblock_invoice()
+
+
+@frappe.whitelist()
+def block_invoice(name, hold_comment):
+	if frappe.db.exists('Purchase Invoice', name):
+		pi = frappe.get_doc('Purchase Invoice', name)
+		pi.block_invoice(hold_comment)
+
+@frappe.whitelist()
 def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
 	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
+

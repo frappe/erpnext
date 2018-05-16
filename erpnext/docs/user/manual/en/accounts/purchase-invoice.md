@@ -92,4 +92,42 @@ every transaction.
 
 For more help, please contact your Accountant!
 
+#### Hold Payments For A Purchase Invoice
+There are two ways to put a purchase invoice on hold:
+- Date Span Hold
+- Explicit Hold
+
+##### Explicit Hold
+Explicit hold holds the purchase invoice indefinitely. 
+To do it, in the "Hold Invoice" section of the purchase invoice form, simply 
+check the "Hold Invoice" checkbox. In the "Reason For Putting On Hold" text 
+field, type a comment explaining why the invoice is to be put on hold.
+
+If you need to hold a submitted invoice, click the "Make" drop down button 
+and click "Block Invoice". Also add a comment explaining why the invoice is 
+to be put on hold in the dialog that pops up and click "Save".
+
+##### Date Span Hold
+Date span hold holds the purchase invoice until a 
+specified date. To do it, in the "Hold Invoice" section of the purchase 
+invoice form, check the "Hold Invoice" checkbox. Next, input the release date 
+in the dialog that pops up and click "Save". The release date is the date 
+that the hold on the document expires.
+
+After the invoice has been saved, you can change the release date by clicking 
+on the "Hold Invoice" drop down button and then "Change Release Date". This 
+action will cause a dialog to appear. 
+
+<img class="screenshot" alt="Purchase Invoice on hold" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice-hold.png">
+
+Select the new release date and click "Save". You should also enter a comment 
+in the "Reason For Putting On Hold" field.
+
+Take note of the following:
+- All purchases that have been placed on hold will not included in a Payment Entry's references table
+- The release date cannot be in the past.
+- You can only block or unblock a purchase invoice if it is unpaid.
+- You can only change the release date if the invoice is unpaid.
+ 
+
 {next}
