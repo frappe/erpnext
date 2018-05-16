@@ -176,7 +176,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock:
 			for d in self.get('items'):
 				if not d.warehouse:
-					frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
+					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
+						format(d.idx, d.item_code, self.company))
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
@@ -352,6 +353,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.get_asset_gl_entry(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -434,50 +436,6 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
-
-				elif item.is_fixed_asset:
-					asset_accounts = self.get_company_default(["asset_received_but_not_billed",
-						"expenses_included_in_asset_valuation", "capital_work_in_progress_account"])
-
-					asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
-					base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
-
-					if not self.update_stock:
-						asset_rbnb_currency = get_account_currency(asset_accounts[0])
-						gl_entries.append(self.get_gl_dict({
-							"account": asset_accounts[0],
-							"against": self.supplier,
-							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"debit": base_asset_amount,
-							"debit_in_account_currency": (base_asset_amount
-								if asset_rbnb_currency == self.company_currency else asset_amount)
-						}))
-					else:
-						cwip_account = get_asset_category_account(item.asset,
-							'capital_work_in_progress_account') or asset_accounts[2]
-
-						cwip_account_currency = get_account_currency(cwip_account)
-						gl_entries.append(self.get_gl_dict({
-							"account": cwip_account,
-							"against": self.supplier,
-							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"debit": base_asset_amount,
-							"debit_in_account_currency": (base_asset_amount
-								if cwip_account_currency == self.company_currency else asset_amount)
-						}))
-
-					if item.item_tax_amount:
-						asset_eiiav_currency = get_account_currency(asset_accounts[0])
-						gl_entries.append(self.get_gl_dict({
-							"account": asset_accounts[1],
-							"against": self.supplier,
-							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"cost_center": item.cost_center,
-							"credit": item.item_tax_amount,
-							"credit_in_account_currency": (item.item_tax_amount
-								if asset_eiiav_currency == self.company_currency else
-									item.item_tax_amount / self.conversion_rate)
-						}))
 				else:
 					gl_entries.append(
 						self.get_gl_dict({
@@ -512,6 +470,67 @@ class PurchaseInvoice(BuyingController):
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
 								item.precision("item_tax_amount"))
+
+	def get_asset_gl_entry(self, gl_entries):
+		for item in self.get("items"):
+			if item.is_fixed_asset:
+				asset_accounts = self.get_company_default(["asset_received_but_not_billed",
+					"expenses_included_in_asset_valuation", "capital_work_in_progress_account"])
+
+				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
+				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+
+				if not self.update_stock:
+					asset_rbnb_currency = get_account_currency(asset_accounts[0])
+					gl_entries.append(self.get_gl_dict({
+						"account": asset_accounts[0],
+						"against": self.supplier,
+						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+						"debit": base_asset_amount,
+						"debit_in_account_currency": (base_asset_amount
+							if asset_rbnb_currency == self.company_currency else asset_amount)
+					}))
+
+					if item.item_tax_amount:
+						asset_eiiav_currency = get_account_currency(asset_accounts[0])
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[1],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"cost_center": item.cost_center,
+							"credit": item.item_tax_amount,
+							"credit_in_account_currency": (item.item_tax_amount
+								if asset_eiiav_currency == self.company_currency else
+									item.item_tax_amount / self.conversion_rate)
+						}))
+				else:
+					cwip_account = get_asset_category_account(item.asset,
+						'capital_work_in_progress_account') or asset_accounts[2]
+
+					cwip_account_currency = get_account_currency(cwip_account)
+					gl_entries.append(self.get_gl_dict({
+						"account": cwip_account,
+						"against": self.supplier,
+						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+						"debit": base_asset_amount,
+						"debit_in_account_currency": (base_asset_amount
+							if cwip_account_currency == self.company_currency else asset_amount)
+					}))
+
+					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+						asset_eiiav_currency = get_account_currency(asset_accounts[0])
+						gl_entries.append(self.get_gl_dict({
+							"account": asset_accounts[1],
+							"against": self.supplier,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"cost_center": item.cost_center,
+							"credit": item.item_tax_amount,
+							"credit_in_account_currency": (item.item_tax_amount
+								if asset_eiiav_currency == self.company_currency else
+									item.item_tax_amount / self.conversion_rate)
+						}))
+
+		return gl_entries
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
@@ -751,10 +770,6 @@ class PurchaseInvoice(BuyingController):
 		self.db_set('release_date', None)
 
 	def set_tax_withholding(self):
-		"""
-			1. Get TDS Configurations against Supplier
-		"""
-
 		tax_withholding_details = get_patry_tax_withholding_details(self)
 		for tax_details in tax_withholding_details:
 			if flt(self.get("rounded_total") or self.grand_total) >= flt(tax_details['threshold']):

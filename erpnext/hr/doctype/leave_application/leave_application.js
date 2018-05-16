@@ -50,8 +50,11 @@ frappe.ui.form.on("Leave Application", {
 					date: frm.doc.posting_date
 				},
 				callback: function(r) {
-					if (!r.exc && r.message) {
-						leave_details = r.message;
+					if (!r.exc && r.message['leave_allocation']) {
+						leave_details = r.message['leave_allocation'];
+					}
+					if (!r.exc && r.message['leave_approver']) {
+						frm.set_value('leave_approver', r.message['leave_approver']);
 					}
 				}
 			});
@@ -73,6 +76,13 @@ frappe.ui.form.on("Leave Application", {
 		cur_frm.set_intro("");
 		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
 			frm.set_intro(__("Fill the form and save it"));
+		}
+
+		if (!frm.doc.employee && frappe.defaults.get_user_permissions()) {
+			const perm = frappe.defaults.get_user_permissions();
+			if (perm && perm['Employee']) {
+				frm.set_value('employee', perm['Employee']["docs"][0])
+			}
 		}
 	},
 
