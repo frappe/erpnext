@@ -7,10 +7,8 @@ from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
-
 	columns = get_columns()
 	data = get_employees(filters)
-	dept = get_department(filters)
 	chart=get_chart_data(data)
 
 	return columns, data, None, chart
@@ -26,24 +24,19 @@ def get_employees(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select name, employee_name, date_of_birth,
 	branch, department, designation,
-	gender, company from tabEmployee where status = 'Active' %s""" % conditions, as_list=1)
-
-def get_department(filters):
-	return frappe.db.sql("""select count(*),department
-	from `tabEmployee`""", as_list=1)
-
+	gender, company from `tabEmployee` where status = 'Active' %s""" % conditions, as_list=1)
+	
 def get_conditions(filters):
 	conditions = ""
-	
 	if filters.get("department"): conditions += " and department = '%s'" % \
 		filters["department"].replace("'", "\\'")
 	return conditions
 
-def get_chart_data(dept):
-	labels = [row[1] for row in dept]
+def get_chart_data(data):
+	labels = [row[1] for row in data]
 	
 	datasets = []
-	if dept:
+	if data:
 		datasets.append({
 			'name': 'Employee',
 			'values': [1,2,3,4,5,6,7,8]
