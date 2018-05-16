@@ -1,0 +1,28 @@
+{
+ "add_total_row": 0, 
+ "creation": "2018-05-15 15:37:20.883263", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-05-15 17:19:32.934321", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Department Analytics", 
+ "owner": "Administrator", 
+ "ref_doctype": "Employee", 
+ "report_name": "Department Analytics", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Employee"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "HR Manager"
+  }
+ ]
+}
