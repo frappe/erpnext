@@ -13,15 +13,19 @@ class EmployeeBenefitApplication(Document):
 	def validate(self):
 		if self.max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
+		self.validate_max_benefit_for_component()
 
 	def before_submit(self):
 		self.validate_duplicate_on_payroll_period()
-		self.validate_max_benefit_for_component()
 
 	def validate_max_benefit_for_component(self):
 		if self.employee_benefits:
+			max_benefit_amount = 0
 			for employee_benefit in self.employee_benefits:
 				self.validate_max_benefit(employee_benefit.earning_component)
+				max_benefit_amount += employee_benefit.amount
+			if max_benefit_amount > self.max_benefits:
+				frappe.throw(_("Maximum benefit amount of employee {0} exceeds {1}").format(self.employee, self.max_benefits))
 
 	def validate_max_benefit(self, earning_component_name):
 		max_benefit_amount = frappe.db.get_value("Salary Component", earning_component_name, "max_benefit_amount")
