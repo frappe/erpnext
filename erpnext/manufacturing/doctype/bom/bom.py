@@ -624,28 +624,18 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		return
 
 	if frappe.form_dict.parent:
-		bom_items = frappe.get_list('BOM Item',
-			fields=['item_code', 'bom_no as value', 'stock_qty'],
-			filters=[['parent', '=', frappe.form_dict.parent]],
-			order_by='idx')
-
-		item_names = tuple(d.get('item_code') for d in bom_items)
-
-		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name'],
-			filters=[['name', 'in', item_names]]) # to get only required item dicts
-
-		for bom_item in bom_items:
-			# extend bom_item dict with respective item dict
-			bom_item.update(
-				# returns an item dict from items list which matches with item_code
-				(item for item in items if item.get('name')
-					== bom_item.get('item_code')).next()
-			)
-			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
-
-		return bom_items
-
+		return frappe.db.sql("""select
+			bom_item.item_code,
+			bom_item.bom_no as value,
+			bom_item.stock_qty,
+			if(ifnull(bom_item.bom_no, "")!="", 1, 0) as expandable,
+			item.image,
+			item.description
+			from `tabBOM Item` bom_item, tabItem item
+			where bom_item.parent=%s
+			and bom_item.item_code = item.name
+			order by bom_item.idx
+			""", frappe.form_dict.parent, as_dict=True)
 
 def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):

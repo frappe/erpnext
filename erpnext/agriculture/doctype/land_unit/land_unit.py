@@ -169,10 +169,11 @@ def get_children(doctype, parent, is_root=False):
 	if is_root:
 		parent = ''
 
-	land_units = frappe.get_list(doctype,
-		fields = ['name as value', 'is_group as expandable'],
-		filters= [['parent_land_unit', '=', parent]],
-		order_by='name')
+	land_units = frappe.db.sql("""select name as value,
+		is_group as expandable
+		from `tabLand Unit`
+		where ifnull(`parent_land_unit`,'') = %s
+		order by name""", (parent), as_dict=1)
 
 	# return nodes
 	return land_units
