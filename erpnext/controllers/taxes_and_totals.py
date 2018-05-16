@@ -518,10 +518,8 @@ class calculate_taxes_and_totals(object):
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
 
-				if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency:
-					item.margin_type = pricing_rule.margin_type
-					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-				elif pricing_rule.margin_type == 'Percentage':
+				if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
+						or (pricing_rule.margin_type == 'Percentage'):
 					item.margin_type = pricing_rule.margin_type
 					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 				else:
