@@ -602,7 +602,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
 
-  invoice_list = frappe.db.sql("""
+	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
