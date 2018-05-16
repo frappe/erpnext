@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
@@ -322,7 +322,9 @@ def check_if_advance_entry_modified(args):
 			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 			and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 	else:
-		party_account_field = "paid_from" if args.party_type == "Customer" else "paid_to"
+		party_account_field = ("paid_from"
+			if erpnext.get_party_account_type(args.party_type) == 'Receivable' else "paid_to")
+
 		if args.voucher_detail_no:
 			ret = frappe.db.sql("""select t1.name
 				from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
@@ -574,14 +576,14 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	if party_type in ("Customer", "Student"):
+	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
+	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,

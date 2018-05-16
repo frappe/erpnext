@@ -79,6 +79,16 @@ def is_perpetual_inventory_enabled(company):
 
 	return frappe.local.enable_perpetual_inventory[company]
 
+def get_party_account_type(party_type):
+	if not hasattr(frappe.local, 'party_account_types'):
+		frappe.local.party_account_types = {}
+
+	if not party_type in frappe.local.party_account_types:
+		frappe.local.party_account_types[party_type] = frappe.db.get_value("Party Type",
+			party_type, "account_type") or ''
+
+	return frappe.local.party_account_types[party_type]
+
 def get_region(company=None):
 	'''Return the default country based on flag, company or global settings
 
