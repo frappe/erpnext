@@ -48,16 +48,17 @@ class EmployeeBenefitApplication(Document):
 		if application:
 			frappe.throw(_("Employee {0} already submited an apllication {1} for the payroll period {2}").format(self.employee, application, self.payroll_period))
 
-	def get_max_benefits(self):
-		sal_struct = get_assigned_salary_sturecture(self.employee, self.date)
-		if sal_struct:
-			max_benefits = frappe.db.get_value("Salary Structure", sal_struct[0][0], "max_benefits")
-			if max_benefits > 0:
-				return max_benefits
-			else:
-				frappe.throw(_("Employee {0} has no max benefits in salary structure {1}").format(self.employee, sal_struct[0][0]))
+@frappe.whitelist()
+def get_max_benefits(employee, on_date):
+	sal_struct = get_assigned_salary_sturecture(employee, on_date)
+	if sal_struct:
+		max_benefits = frappe.db.get_value("Salary Structure", sal_struct[0][0], "max_benefits")
+		if max_benefits > 0:
+			return max_benefits
 		else:
-			frappe.throw(_("Employee {0} has no salary structure assigned").format(self.employee))
+			frappe.throw(_("Employee {0} has no max benefits in salary structure {1}").format(employee, sal_struct[0][0]))
+	else:
+		frappe.throw(_("Employee {0} has no salary structure assigned").format(employee))
 
 
 @frappe.whitelist()
