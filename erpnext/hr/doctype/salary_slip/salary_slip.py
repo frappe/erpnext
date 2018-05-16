@@ -84,15 +84,19 @@ class SalarySlip(TransactionBase):
 					}
 				)
 				if default_flexi_compenent:
-					salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
-					flexi_struct_row = {}
-					flexi_struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
-					flexi_struct_row['salary_component'] = salary_component.name
-					flexi_struct_row['abbr'] = salary_component.salary_component_abbr
-					flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
+					flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
 					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
 					amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
 					self.update_component_row(flexi_struct_row, amount, "earnings")
+
+	def create_flexi_struct_row(self, default_flexi_compenent):
+		salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
+		flexi_struct_row = {}
+		flexi_struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
+		flexi_struct_row['salary_component'] = salary_component.name
+		flexi_struct_row['abbr'] = salary_component.salary_component_abbr
+		flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
+		return frappe._dict(flexi_struct_row)
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
