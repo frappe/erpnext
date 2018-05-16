@@ -318,26 +318,26 @@ def get_employee_emails(employee_list):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
-	filters = [['company', '=', company]]
-	fields = ['name as value', 'employee_name as title']
+	condition = ''
 
 	if is_root:
-		parent = ''
+		parent = ""
 	if parent and company and parent!=company:
-		filters.append(['reports_to', '=', parent])
+		condition = ' and reports_to = "{0}"'.format(frappe.db.escape(parent))
 	else:
-		filters.append(['reports_to', '=', ''])
+		condition = ' and ifnull(reports_to, "")=""'
 
-	employees = frappe.get_list(doctype, fields=fields,
-		filters=filters, order_by='name')
+	employee = frappe.db.sql("""
+		select
+			name as value, employee_name as title,
+			exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
+		from
+			`tabEmployee` emp
+		where company='{company}' {condition} order by name"""
+		.format(company=company, condition=condition),  as_dict=1)
 
-	for employee in employees:
-		is_expandable = frappe.get_all(doctype, filters=[
-			['reports_to', '=', employee.get('value')]
-		])
-		employee.expandable = 1 if is_expandable else 0
-
-	return employees
+	# return employee
+	return employee
 
 
 def on_doctype_update():

@@ -14,15 +14,12 @@ class AssetMovement(Document):
 		self.validate_warehouses()
 
 	def validate_asset(self):
-		status, company, serial_no = frappe.db.get_value("Asset", self.asset, ["status", "company", "serial_no"])
+		status, company = frappe.db.get_value("Asset", self.asset, ["status", "company"])
 		if self.purpose == 'Transfer' and status in ("Draft", "Scrapped", "Sold"):
 			frappe.throw(_("{0} asset cannot be transferred").format(status))
 
 		if company != self.company:
 			frappe.throw(_("Asset {0} does not belong to company {1}").format(self.asset, self.company))
-
-		if serial_no and not self.serial_no:
-			self.serial_no = serial_no
 
 		if self.serial_no and len(get_serial_nos(self.serial_no)) != self.quantity:
 			frappe.throw(_("Number of serial nos and quantity must be the same"))
@@ -58,7 +55,5 @@ class AssetMovement(Document):
 		frappe.db.set_value("Asset", self.asset, "location", location)
 
 		if self.serial_no:
-			serial_nos = get_serial_nos(self.serial_no)
-
-			frappe.db.sql(""" update `tabSerial No` set location = %s where name in (%s)"""
-				%('%s', ','.join(['%s'] * len(serial_nos))), (location, tuple(serial_nos)))
+			for d in get_serial_nos(self.serial_no):
+				frappe.db.set_value('Serial No', d, 'location', location)

@@ -216,25 +216,25 @@ var set_customer_group = function(frm, cdt, cdn) {
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
-		frm.fields_dict['expense_account'].get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("expense_account").get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
 			}
 		}
 
-		frm.fields_dict['income_account'].get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("income_account").get_query = function(doc) {
 			return {
 				query: "erpnext.controllers.queries.get_income_account"
 			}
 		}
 
-		frm.fields_dict['buying_cost_center'].get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc) {
 			return {
 				filters: { "is_group": 0 }
 			}
 		}
 
-		frm.fields_dict['selling_cost_center'].get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("selling_cost_center").get_query = function(doc) {
 			return {
 				filters: { "is_group": 0 }
 			}
@@ -267,7 +267,7 @@ $.extend(erpnext.item, {
 			return { query: "erpnext.controllers.queries.supplier_query" }
 		}
 
-		frm.fields_dict['default_warehouse'].get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("default_warehouse").get_query = function(doc) {
 			return {
 				filters: { "is_group": 0 }
 			}
@@ -472,7 +472,8 @@ $.extend(erpnext.item, {
 							fields: ["attribute_value"],
 							limit_start: 0,
 							limit_page_length: 500,
-							parent: "Item"
+							parent: "Item",
+							order_by: "idx"
 						}
 					}).then((r) => {
 						if(r.message) {

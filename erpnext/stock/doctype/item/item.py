@@ -81,7 +81,8 @@ class Item(WebsiteGenerator):
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
-			self.add_price()
+			for default in self.item_defaults:
+				self.add_price(default.default_price_list)
 
 		if self.opening_stock:
 			self.set_opening_stock()
@@ -124,6 +125,9 @@ class Item(WebsiteGenerator):
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
 					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+		elif not self.item_defaults:
+			self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
+
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
@@ -166,15 +170,16 @@ class Item(WebsiteGenerator):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
-		default_warehouse = (self.default_warehouse
-        		or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
-                or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
+		for default in self.item_defaults:
+			default_warehouse = (default.default_warehouse
+					or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+					or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
 
-		if default_warehouse:
-			stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse,
-                                  qty=self.opening_stock, rate=self.valuation_rate)
+			if default_warehouse:
+				stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse, qty=self.opening_stock,
+												rate=self.valuation_rate, company=default.company)
 
-			stock_entry.add_comment("Comment", _("Opening Stock"))
+				stock_entry.add_comment("Comment", _("Opening Stock"))
 
 	def make_route(self):
 		if not self.route:
@@ -880,3 +885,19 @@ def check_stock_uom_with_bin(item, stock_uom):
 	if not matched:
 		frappe.throw(
 			_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
+
+def get_item_defaults(item, company):
+	item_defaults = frappe.db.sql('''
+		select
+			i.item_name, i.description, i.stock_uom, i.name, i.is_stock_item, i.item_code, i.item_group,
+			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center
+		from
+			`tabItem` i, `tabItem Default` id
+		where
+			i.name = id.parent and i.name = %s and id.company = %s
+	''', (item, company), as_dict=1)
+	if item_defaults:
+		return item_defaults[0]
+	else:
+		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
+			"is_stock_item", "item_code", "item_group"], as_dict=1)

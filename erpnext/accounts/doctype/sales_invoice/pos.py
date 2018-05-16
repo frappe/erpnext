@@ -39,7 +39,7 @@ def get_pos_data():
 	update_multi_mode_option(doc, pos_profile)
 	default_print_format = pos_profile.get('print_format') or "Point of Sale"
 	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
-	items_list = get_items_list(pos_profile)
+	items_list = get_items_list(pos_profile, doc.company)
 	customers = get_customers_list(pos_profile)
 
 	return {
@@ -151,25 +151,26 @@ def update_tax_table(doc):
 		doc.append('taxes', tax)
 
 
-def get_items_list(pos_profile):
-	cond = "1=1"
-	item_groups = []
+def get_items_list(pos_profile, company):
+	cond = ""
+	args_list = [company]
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
 		for d in pos_profile.get('item_groups'):
-			item_groups.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
-		cond = "item_group in (%s)" % (', '.join(['%s'] * len(item_groups)))
+			args_list.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
+		cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
 
 	return frappe.db.sql("""
 		select
-			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
-			has_serial_no, expense_account, selling_cost_center, stock_uom, image,
-			default_warehouse, is_stock_item, brand
+			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
+			i.has_serial_no, i.is_stock_item, i.brand, i.stock_uom, i.image,
+			id.expense_account, id.selling_cost_center, id.default_warehouse
 		from
-			tabItem
+			`tabItem` i, `tabItem Default` id
 		where
-			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
-		""".format(cond=cond), tuple(item_groups), as_dict=1)
+			id.parent = i.name and i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+			and id.company = %s {cond}
+		""".format(cond=cond), tuple(args_list), as_dict=1)
 
 
 def get_item_groups(pos_profile):
@@ -531,9 +532,12 @@ def validate_item(doc):
 			item_doc.item_code = item.get('item_code')
 			item_doc.item_name = item.get('item_name')
 			item_doc.description = item.get('description')
-			item_doc.default_warehouse = item.get('warehouse')
 			item_doc.stock_uom = item.get('stock_uom')
 			item_doc.item_group = item.get('item_group')
+			item_doc.append('item_defaults', {
+				"company": doc.get("company"),
+				"default_warehouse": item.get('warehouse')
+			})
 			item_doc.save(ignore_permissions=True)
 			frappe.db.commit()
 

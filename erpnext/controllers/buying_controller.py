@@ -216,8 +216,9 @@ class BuyingController(StockController):
 
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
-		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
-			from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
+		item_wh = frappe._dict(frappe.db.sql("""select i.item_code, id.default_warehouse
+			from `tabItem` i, `tabItem Default` id where id.company=%s and i.name in ({0})"""
+			.format(", ".join(["%s"] * len(items))), [self.company] + items))
 
 		for bom_item in bom_items:
 			if self.doctype == "Purchase Order":
@@ -473,6 +474,7 @@ class BuyingController(StockController):
 					'item_code': data.item_code,
 					'item_group': data.item_group,
 					'posting_date': data.schedule_date,
+					'project': data.project,
 					'doctype': self.doctype
 				}, self.company)
 
