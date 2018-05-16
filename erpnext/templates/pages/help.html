@@ -1,0 +1,20 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Help") }} {% endblock %}
+
+{% block header %}<h1>{{ _("Help") }}</h1>
+
+<h2>{{ _("What do you need help with?") }}</h2>
+<div class="search-results"></div>
+
+<h2>{{ _("Get Started") }}</h2>
+<div class="help-articles"></div>
+
+<h2>{{ _("Popular Posts") }}</h2>
+<div class="discuss-posts"></div>
+
+<h2>{{ _("Your tickets") }}</h2>
+<p>See all --> to List view of issues</p>
+<p>Open a new ticket</p>
+
+{% endblock %}
