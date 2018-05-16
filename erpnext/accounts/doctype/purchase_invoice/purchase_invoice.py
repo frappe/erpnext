@@ -750,7 +750,7 @@ class PurchaseInvoice(BuyingController):
 		self.db_set('on_hold', 0)
 		self.db_set('release_date', None)
 
-  def set_tax_withholding(self):
+	def set_tax_withholding(self):
 		"""
 			1. Get TDS Configurations against Supplier
 		"""
