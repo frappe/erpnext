@@ -51,7 +51,7 @@ class Asset(AccountsController):
 
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
-			frappe.throw(_("Available for use data is required"))
+			frappe.throw(_("Available for use date is required"))
 
 	def set_missing_values(self):
 		if not self.asset_category:
@@ -161,6 +161,9 @@ class Asset(AccountsController):
 		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount")
 				.format(row.idx))
+
+		if not row.depreciation_start_date:
+			frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
