@@ -343,10 +343,10 @@ def check_active_sales_items(obj):
 			item = frappe.db.sql("""select i.docstatus, id.income_account
 				from `tabItem` i, `tabItem Default` id
 				where i.name=%s and id.parent=i.name and id.company=%s""",
-				(d.item_code,obj.company), as_dict=True)[0]
+				(d.item_code,obj.company), as_dict=True)
 
 			income_account_set = False
-			if getattr(d, "income_account", None) and not item.income_account:
+			if getattr(d, "income_account", None) and item and not item[0].income_account:
 				doc = frappe.get_doc("Item", d.item_code)
 				for default in doc.item_defaults:
 					if default.company == obj.company:
