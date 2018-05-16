@@ -340,10 +340,22 @@ class SellingController(StockController):
 def check_active_sales_items(obj):
 	for d in obj.get("items"):
 		if d.item_code:
-			item = frappe.db.sql("""select docstatus,
-				income_account from tabItem where name = %s""",
-				d.item_code, as_dict=True)[0]
+			item = frappe.db.sql("""select i.docstatus, id.income_account
+				from `tabItem` i, `tabItem Default` id
+				where i.name=%s and id.parent=i.name and id.company=%s""",
+				(d.item_code,obj.company), as_dict=True)[0]
 
+			income_account_set = False
 			if getattr(d, "income_account", None) and not item.income_account:
-				frappe.db.set_value("Item", d.item_code, "income_account",
-					d.income_account)
+				doc = frappe.get_doc("Item", d.item_code)
+				for default in doc.item_defaults:
+					if default.company == obj.company:
+						default.income_account = d.income_account
+						income_account_set = True
+						break
+				if not income_account_set:
+					doc.append("item_defaults", {
+						"company": obj.company,
+						"income_account": d.income_account
+					})
+				doc.save()

@@ -268,12 +268,12 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time):
+def get_items(warehouse, posting_date, posting_time, company):
 	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
 
-	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse},
-			as_list=1)
+	items += frappe.db.sql_list('''select i.name from `tabItem` i, `tabItem Default` id where i.name = id.parent
+		and i.is_stock_item=1 and i.has_serial_no=0 and i.has_batch_no=0 and i.has_variants=0 and i.disabled=0
+		and id.default_warehouse=%s and id.company=%s''', (warehouse, company))
 
 	res = []
 	for item in set(items):

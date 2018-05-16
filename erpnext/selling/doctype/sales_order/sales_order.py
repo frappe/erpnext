@@ -15,6 +15,8 @@ from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.stock.doctype.item.item import get_item_defaults
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -493,7 +495,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, target.company)
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
@@ -557,7 +559,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if not target.cost_center and target.item_code:
-			item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
+			item = get_item_defaults(target.item_code, target.company)
 			target.cost_center = item.selling_cost_center \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 

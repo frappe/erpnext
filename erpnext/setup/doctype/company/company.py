@@ -291,9 +291,6 @@ class Company(NestedSet):
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
 		self.update_nsm_model()
-		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
-		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
-		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
@@ -308,33 +305,19 @@ class Company(NestedSet):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
-		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
+		for doctype in ["Mode of Payment Account", "Item Default"]:
+			frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 
 		# clear default accounts, warehouses from item
+		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
 		if warehouses:
-			for f in ["default_warehouse", "website_warehouse"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
-
 			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
-
-		if accounts:
-			for f in ["income_account", "expense_account"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
-
-		if cost_centers:
-			for f in ["selling_cost_center", "buying_cost_center"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
 		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
-		# delete mode of payment account
-		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)

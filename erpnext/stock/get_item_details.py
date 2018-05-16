@@ -11,6 +11,8 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext import get_company_currency
+from erpnext.stock.doctype.item.item import get_item_defaults
+
 
 from six import string_types, iteritems
 
@@ -52,7 +54,7 @@ def get_item_details(args):
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += \
-				flt(get_valuation_rate(bundle_item.item_code, out.get("warehouse")).get("valuation_rate") \
+				flt(get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get("valuation_rate") \
 					* bundle_item.qty)
 
 		out.update({
@@ -60,7 +62,7 @@ def get_item_details(args):
 		})
 
 	else:
-		out.update(get_valuation_rate(args.item_code, out.get("warehouse")))
+		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
 
 	get_price_list_rate(args, item_doc, out)
 
@@ -204,7 +206,8 @@ def get_basic_details(args, item):
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list) == 1 else ""
 
-	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
+	item_defaults = get_item_defaults(item.name, args.company)
+	warehouse = user_default_warehouse or item_defaults.default_warehouse or args.warehouse
 
 	material_request_type = ''
 	if args.get('doctype') == "Material Request":
@@ -227,9 +230,9 @@ def get_basic_details(args, item):
 		"description": cstr(item.description).strip(),
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
-		"income_account": get_default_income_account(args, item),
-		"expense_account": get_default_expense_account(args, item),
-		"cost_center": get_default_cost_center(args, item),
+		"income_account": get_default_income_account(args, item_defaults),
+		"expense_account": get_default_expense_account(args, item_defaults),
+		"cost_center": get_default_cost_center(args, item_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
@@ -677,8 +680,9 @@ def get_default_bom(item_code=None):
 		if bom:
 			return bom
 
-def get_valuation_rate(item_code, warehouse=None):
-	item = frappe.get_doc("Item", item_code)
+def get_valuation_rate(item_code, company, warehouse=None):
+	item = get_item_defaults(item_code, company)
+	# item = frappe.get_doc("Item", item_code)
 	if item.is_stock_item:
 		if not warehouse:
 			warehouse = item.default_warehouse
