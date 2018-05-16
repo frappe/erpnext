@@ -23,6 +23,7 @@ class PricingRule(Document):
 		self.cleanup_fields_value()
 		self.validate_rate_or_discount()
 		self.validate_max_discount()
+		self.validate_price_list_with_currency()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -73,6 +74,11 @@ class PricingRule(Document):
 			if max_discount and flt(self.discount_percentage) > flt(max_discount):
 				throw(_("Max discount allowed for item: {0} is {1}%").format(self.item_code, max_discount))
 
+	def validate_price_list_with_currency(self):
+		if self.currency and self.for_price_list:
+			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency")
+			if not self.currency == price_list_currency:
+				throw(_("Currency should be same as Price List Currency: {0}").format(price_list_currency))
 
 #--------------------------------------------------------------------------------
 
@@ -178,11 +184,8 @@ def get_pricing_rule_for_item(args):
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-		if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency:
-			item_details.margin_type = pricing_rule.margin_type
-			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-
-		elif pricing_rule.margin_type == 'Percentage':
+		if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)\
+				or (pricing_rule.margin_type == 'Percentage'):
 			item_details.margin_type = pricing_rule.margin_type
 			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		else:
@@ -190,17 +193,13 @@ def get_pricing_rule_for_item(args):
 			item_details.margin_rate_or_amount = 0.0
 
 		if pricing_rule.rate_or_discount == 'Rate':
+			pricing_rule_rate = 0.0
 			if pricing_rule.currency == args.currency:
-				item_details.update({
-					"price_list_rate": pricing_rule.rate,
-					"discount_percentage": 0.0
-				})
-
-			else:
-				item_details.update({
-					"price_list_rate": 0.0,
-					"discount_percentage": 0.0
-				})
+				pricing_rule_rate = pricing_rule.rate
+			item_details.update({
+				"price_list_rate": pricing_rule_rate,
+				"discount_percentage": 0.0
+			})
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
 
