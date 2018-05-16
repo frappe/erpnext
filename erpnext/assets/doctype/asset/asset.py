@@ -28,6 +28,7 @@ class Asset(AccountsController):
 			self.validate_expected_value_after_useful_life()
 
 	def on_submit(self):
+		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
 
@@ -47,6 +48,10 @@ class Asset(AccountsController):
 			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
 		elif item.is_stock_item:
 			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
+
+	def validate_in_use_date(self):
+		if not self.available_for_use_date:
+			frappe.throw(_("Available for use data is required"))
 
 	def set_missing_values(self):
 		if not self.asset_category:
