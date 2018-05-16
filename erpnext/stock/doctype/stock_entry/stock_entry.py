@@ -721,7 +721,7 @@ class StockEntry(StockController):
 
 		if not self.work_order and not to_warehouse:
 			# in case of BOM
-			to_warehouse = item.default_warehouse
+			to_warehouse = item.get("default_warehouse")
 
 		self.add_to_stock_entry_detail({
 			item.name: {
@@ -731,8 +731,8 @@ class StockEntry(StockController):
 				"item_name": item.item_name,
 				"description": item.description,
 				"stock_uom": item.stock_uom,
-				"expense_account": item.expense_account,
-				"cost_center": item.buying_cost_center,
+				"expense_account": item.get("expense_account"),
+				"cost_center": item.get("buying_cost_center"),
 			}
 		}, bom_no = self.bom_no)
 
@@ -807,8 +807,8 @@ class StockEntry(StockController):
 						"item_name": item.item_name,
 						"description": item.description,
 						"stock_uom": item_account_details.stock_uom,
-						"expense_account": item_account_details.expense_account,
-						"cost_center": item_account_details.buying_cost_center,
+						"expense_account": item_account_details.get("expense_account"),
+						"cost_center": item_account_details.get("buying_cost_center"),
 					}
 				})
 
