@@ -10,8 +10,8 @@ frappe.ui.form.on('Employee Benefit Application', {
 					is_flexible_benefit: true,
 					disabled: false
 				}
-			}
-		})
+			};
+		});
 	},
 	employee: function(frm) {
 		frappe.call({
@@ -31,8 +31,8 @@ frappe.ui.form.on('Employee Benefit Application', {
 frappe.ui.form.on("Employee Benefit Application Detail",{
 	amount:  function(frm, cdt, cdn) {
 		calculate_all(frm.doc, cdt, cdn);
-	},
-})
+	}
+});
 
 var calculate_all = function(doc, dt, dn) {
 	var tbl = doc.employee_benefits || [];
@@ -50,4 +50,4 @@ var calculate_all = function(doc, dt, dn) {
 	doc.remainig_benefits = doc.max_benefits - total_amount;
 	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;
 	refresh_many(['pro_rata_dispensed_amount', 'total_amount','remainig_benefits']);
-}
+};

@@ -26,5 +26,4 @@ def get_payroll_period_days(start_date, end_date, company):
 	})
 
 	if len(payroll_period_dates) > 0:
-		print payroll_period_dates[0][0], payroll_period_dates[0][1]
 		return date_diff(getdate(payroll_period_dates[0][1]), getdate(payroll_period_dates[0][0])) + 1
