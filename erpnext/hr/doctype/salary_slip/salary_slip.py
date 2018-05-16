@@ -15,6 +15,7 @@ from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
+from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_employee_benefit_claim
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -65,16 +66,18 @@ class SalarySlip(TransactionBase):
 		if additional_components:
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
-				self.update_component_row(frappe._dict(additional_component.struct_row), additional_component.amount, "earnings")
+				amount = self.update_amount_for_other_component(frappe._dict(additional_component.struct_row).salary_component, additional_component.amount)
+				self.update_component_row(frappe._dict(additional_component.struct_row), amount, "earnings")
 
-		employee_benefits = get_employee_benefit_application(self)
-		if employee_benefits:
-			for employee_benefit in employee_benefits:
-				benefit_component = frappe._dict(employee_benefit)
-				self.update_component_row(frappe._dict(benefit_component.struct_row), benefit_component.amount, "earnings")
-		else:
-			max_benefits = self._salary_structure_doc.get("max_benefits")
-			if max_benefits > 0:
+		max_benefits = self._salary_structure_doc.get("max_benefits")
+		if max_benefits > 0:
+			employee_benefits = get_employee_benefit_application(self)
+			if employee_benefits:
+				for employee_benefit in employee_benefits:
+					benefit_component = frappe._dict(employee_benefit)
+					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
+					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+			else:
 				default_flexi_compenent = frappe.db.exists(
 					'Salary Component',
 					{
@@ -86,10 +89,25 @@ class SalarySlip(TransactionBase):
 				if default_flexi_compenent:
 					flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
 					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
-					amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
+					amount = self.update_amount_for_other_component(default_flexi_compenent, get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits))
 					self.update_component_row(flexi_struct_row, amount, "earnings")
 				else:
 					frappe.throw(_("Configure default flexible benefit salary component for apply pro-rata benefit"))
+
+			benefit_claims = get_employee_benefit_claim(self)
+			if benefit_claims:
+				for benefit_claim in benefit_claims:
+					benefit_component = frappe._dict(benefit_claim)
+					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
+					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+
+	def update_amount_for_other_component(self, salary_component, new_amount):
+		amount = new_amount
+		for d in self.get("earnings"):
+			if d.salary_component == salary_component:
+				d.amount += new_amount
+				amount = d.amount
+		return amount
 
 	def create_flexi_struct_row(self, default_flexi_compenent):
 		salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
@@ -211,8 +229,9 @@ class SalarySlip(TransactionBase):
 		st_name = frappe.db.sql("""select salary_structure from `tabSalary Structure Assignment`
 			where employee=%s and (from_date <= %s or from_date <= %s)
 			and (to_date is null or to_date >= %s or to_date >= %s)
+			and docstatus = 1
 			and salary_structure in (select name from `tabSalary Structure`
-				where docstatus = 1 and is_active = 'Yes'%s)
+				where is_active = 'Yes'%s)
 			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
 		if st_name:
