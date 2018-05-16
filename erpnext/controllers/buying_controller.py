@@ -473,6 +473,7 @@ class BuyingController(StockController):
 					'item_code': data.item_code,
 					'item_group': data.item_group,
 					'posting_date': data.schedule_date,
+					'project': data.project,
 					'doctype': self.doctype
 				}, self.company)
 

@@ -181,27 +181,40 @@ def get_amount(args, budget):
 	amount = 0
 
 	if args.get('doctype') == 'Material Request' and budget.for_material_request:
-		amount = (get_requested_amount(args.item_code)
-			+ get_ordered_amount(args.item_code) + get_actual_expense(args))
+		amount = (get_requested_amount(args)
+			+ get_ordered_amount(args) + get_actual_expense(args))
 
 	elif args.get('doctype') == 'Purchase Order' and budget.for_purchase_order:
-		amount = get_ordered_amount(args.item_code) + get_actual_expense(args)
+		amount = get_ordered_amount(args) + get_actual_expense(args)
 
 	return amount
 
-def get_requested_amount(item_code):
+def get_requested_amount(args):
+	item_code = args.get('item_code')
+	condition = get_project_condiion(args)
+
 	data = frappe.db.sql(""" select ifnull((sum(stock_qty - ordered_qty) * rate), 0) as amount
 		from `tabMaterial Request Item` where item_code = %s and docstatus = 1
-		and stock_qty > ordered_qty """, item_code, as_list=1)
+		and stock_qty > ordered_qty and {0}""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
 
-def get_ordered_amount(item_code):
+def get_ordered_amount(args):
+	item_code = args.get('item_code')
+	condition = get_project_condiion(args)
+
 	data = frappe.db.sql(""" select ifnull(sum(amount - billed_amt), 0) as amount
 		from `tabPurchase Order Item` where item_code = %s and docstatus = 1
-		and amount > billed_amt""", item_code, as_list=1)
+		and amount > billed_amt and {0}""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
+
+def get_project_condiion(args):
+	condition = "1=1"
+	if args.get('project'):
+		condition = "project = '%s'" %(args.get('project'))
+
+	return condition
 
 def get_actual_expense(args):
 	condition1 = " and gle.posting_date <= %(month_end_date)s" \
