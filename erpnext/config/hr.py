@@ -142,7 +142,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Expense Claim"),
+			"label": _("Travel and Expense Claim"),
 			"items": [
 				{
 					"type": "doctype",
@@ -155,6 +155,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Expense Claim Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Travel Request",
 				},
 			]
 		},
