@@ -472,7 +472,8 @@ $.extend(erpnext.item, {
 							fields: ["attribute_value"],
 							limit_start: 0,
 							limit_page_length: 500,
-							parent: "Item"
+							parent: "Item",
+							order_by: "idx"
 						}
 					}).then((r) => {
 						if(r.message) {
