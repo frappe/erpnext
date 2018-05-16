@@ -155,6 +155,10 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				})
 			}, __("Get items from"));
+
+			frm.add_custom_button(__('Expired Batches'), function() {
+
+			}, __("Get items from"));
 		}
 
 		if (frm.doc.company) {
