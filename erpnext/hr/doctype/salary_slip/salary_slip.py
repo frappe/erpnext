@@ -212,7 +212,7 @@ class SalarySlip(TransactionBase):
 			where employee=%s and (from_date <= %s or from_date <= %s)
 			and (to_date is null or to_date >= %s or to_date >= %s)
 			and salary_structure in (select name from `tabSalary Structure`
-				where is_active = 'Yes'%s)
+				where docstatus = 1 and is_active = 'Yes'%s)
 			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
 		if st_name:
