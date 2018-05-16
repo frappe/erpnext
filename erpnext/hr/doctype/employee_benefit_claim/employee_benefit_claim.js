@@ -10,7 +10,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
 					is_flexible_benefit: true,
 					disabled: false
 				}
-			}
-		})
+			};
+		});
 	}
 });
