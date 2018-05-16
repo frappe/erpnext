@@ -3,8 +3,6 @@
 
 frappe.provide("erpnext.job_offer");
 
-cur_frm.add_fetch('company','default_letter_head','letter_head');
-
 frappe.ui.form.on("Job Offer", {
 	select_terms: function (frm) {
 		erpnext.utils.get_terms(frm.doc.select_terms, frm.doc, function (r) {
