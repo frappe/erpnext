@@ -88,6 +88,8 @@ class SalarySlip(TransactionBase):
 					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
 					amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
 					self.update_component_row(flexi_struct_row, amount, "earnings")
+				else:
+					frappe.throw(_("Configure default flexible benefit salary component for apply pro-rata benefit"))
 
 	def create_flexi_struct_row(self, default_flexi_compenent):
 		salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
