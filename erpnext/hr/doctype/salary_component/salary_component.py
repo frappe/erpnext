@@ -13,7 +13,7 @@ class SalaryComponent(Document):
 		self.validate_abbr()
 		self.validate_flexi_default()
 
-	def validate_flexi_defualt(self):
+	def validate_flexi_default(self):
 		if self.is_flexible_benefit and self.is_pro_rata_applicable and self.flexi_default:
 			salary_component = frappe.db.exists(
 				'Salary Component',
