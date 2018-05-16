@@ -378,7 +378,7 @@ def get_leave_details(employee, date):
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
-		consider_all_leaves_in_the_allocation_period=False, consider_encshed_leaves=True):
+		consider_all_leaves_in_the_allocation_period=False, consider_encashed_leaves=True):
 	if allocation_records == None:
 		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
 
@@ -389,7 +389,7 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved")
 
 	leaves_encashed = 0
-	if frappe.db.get_value("Leave Type", leave_type, 'allow_encashment') and consider_encshed_leaves:
+	if frappe.db.get_value("Leave Type", leave_type, 'allow_encashment') and consider_encashed_leaves:
 		leaves_encashed = flt(allocation.total_leaves_encashed)
 
 	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
