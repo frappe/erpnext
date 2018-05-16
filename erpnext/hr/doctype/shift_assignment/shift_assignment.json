@@ -42,7 +42,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -51,6 +51,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -74,7 +75,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -106,7 +107,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -137,7 +138,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -167,7 +168,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -199,7 +200,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -230,7 +231,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -262,7 +263,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -293,7 +294,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -307,7 +308,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-17 14:50:09.125737", 
+ "modified": "2018-05-16 22:42:45.024104",
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Shift Assignment", 
