@@ -527,6 +527,7 @@ erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
 erpnext.patches.v10_1.drop_old_subscription_records
 erpnext.patches.v11_0.update_brand_in_item_price
 erpnext.patches.v11_0.create_default_success_action
+erpnext.patches.v11_0.add_healthcare_service_unit_tree_root
 erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
 erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
 erpnext.patches.v11_0.rename_field_max_days_allowed
