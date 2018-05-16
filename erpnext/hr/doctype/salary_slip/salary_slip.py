@@ -13,6 +13,7 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
+from erpnext.hr.utils import get_payroll_period
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -58,6 +59,10 @@ class SalarySlip(TransactionBase):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
+				if key=="deductions" and struct_row.variable_based_on_taxable_salary:
+					tax_row, amount = self.calculate_pro_rata_tax(struct_row.salary_component)
+					if tax_row and amount:
+						self.update_component_row(frappe._dict(tax_row), amount, key)
 
 		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
 		if additional_components:
@@ -463,6 +468,52 @@ class SalarySlip(TransactionBase):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+	def calculate_pro_rata_tax(self, salary_component):
+		# Calculate total tax payable earnings
+		tax_applicable_components = []
+		for earning in self._salary_structure_doc.earnings:
+			#all tax applicable earnings which are not flexi
+			if earning.is_tax_applicable and not earning.is_flexible_benefit:
+				tax_applicable_components.append(earning.salary_component)
+		total_taxable_earning = 0
+		for earning in self.earnings:
+			if earning.salary_component in tax_applicable_components:
+				total_taxable_earning += earning.amount
+
+		# Get payroll period, prorata frequency
+		days = date_diff(self.end_date, self.start_date) + 1
+		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
+		if not payroll_period:
+			frappe.throw(_("Start and end dates not in a valid Payroll Period"))
+		total_days = date_diff(payroll_period.end_date, payroll_period.start_date) + 1
+		prorata_frequency = flt(total_days)/flt(days)
+		annual_earning = total_taxable_earning * prorata_frequency
+
+		# Calculate total exemption declaration
+		exemption_amount = 0
+		if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
+		"payroll_period": payroll_period.parent, "docstatus": 1}):
+			exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
+				{"employee": self.employee, "payroll_period": "2018", "docstatus": 1}, #fix period
+				"total_exemption_amount")
+		annual_earning = annual_earning - exemption_amount
+
+		# Get tax calc by component
+		component = frappe.get_doc("Salary Component", salary_component)
+		annual_tax = component.calculate_tax(annual_earning)
+
+		# Calc prorata tax
+		pro_rata_tax = annual_tax/prorata_frequency
+
+		# Data for update_component_row
+		struct_row = {}
+		struct_row['depends_on_lwp'] = 0
+		struct_row['salary_component'] = component.name
+		struct_row['abbr'] = component.salary_component_abbr
+		struct_row['do_not_include_in_total'] = 0
+
+		return struct_row, pro_rata_tax
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
