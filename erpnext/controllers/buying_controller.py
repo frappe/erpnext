@@ -586,6 +586,7 @@ class BuyingController(StockController):
 					asset.supplier = None
 
 				asset.flags.ignore_validate_update_after_submit = True
+				asset.flags.ignore_mandatory = True
 				if asset.docstatus == 0:
 					asset.flags.ignore_validate = True
 
