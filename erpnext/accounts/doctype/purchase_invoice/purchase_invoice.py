@@ -812,4 +812,3 @@ def block_invoice(name, hold_comment):
 def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
 	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
-
