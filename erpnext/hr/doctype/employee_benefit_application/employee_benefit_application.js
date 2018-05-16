@@ -15,8 +15,11 @@ frappe.ui.form.on('Employee Benefit Application', {
 	},
 	employee: function(frm) {
 		frappe.call({
-			doc: frm.doc,
-			method: "get_max_benefits",
+			method: "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits",
+			args:{
+				employee: frm.doc.employee,
+				on_date: frm.doc.date
+			},
 			callback: function (data) {
 				if(!data.exc){
 					if(data.message){
