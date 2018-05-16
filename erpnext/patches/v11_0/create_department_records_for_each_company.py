@@ -67,9 +67,10 @@ def update_instructors(comp_dict):
 				THEN "%s"
 			'''%(employee.name, department, records[department]))
 
-	frappe.db.sql("""
-		update
-			`tabInstructor`
-		set
-			department = CASE %s END
-	"""%(" ".join(when_then)))
+	if when_then:
+		frappe.db.sql("""
+			update
+				`tabInstructor`
+			set
+				department = CASE %s END
+		"""%(" ".join(when_then)))
