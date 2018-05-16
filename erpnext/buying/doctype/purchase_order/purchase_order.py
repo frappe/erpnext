@@ -375,7 +375,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
-		item = get_item_defaults(target.item_code, target.company)
+		item = get_item_defaults(target.item_code, source_parent.company)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
 			or item.buying_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
