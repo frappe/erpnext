@@ -887,7 +887,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 			_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 
 def get_item_defaults(item, company):
-	return frappe.db.sql('''
+	item_defaults = frappe.db.sql('''
 		select
 			i.item_name, i.description, i.stock_uom, i.name, i.is_stock_item, i.item_code, i.item_group,
 			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center
@@ -896,3 +896,8 @@ def get_item_defaults(item, company):
 		where
 			i.name = id.parent and i.name = %s and id.company = %s
 	''', (item, company), as_dict=1)
+	if item_defaults:
+		return item_defaults[0]
+	else:
+		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
+			"is_stock_item", "item_code", "item_group"], as_dict=1)
