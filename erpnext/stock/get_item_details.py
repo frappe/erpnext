@@ -300,12 +300,12 @@ def get_basic_details(args, item):
 
 
 def get_default_income_account(args, item):
-	return (item.income_account
+	return (item.get("income_account")
 		or args.income_account
 		or frappe.db.get_value("Item Group", item.item_group, "default_income_account"))
 
 def get_default_expense_account(args, item):
-	return (item.expense_account
+	return (item.get("expense_account")
 		or args.expense_account
 		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account"))
 
@@ -319,7 +319,7 @@ def get_default_deferred_revenue_account(args, item):
 
 def get_default_cost_center(args, item):
 	return (frappe.db.get_value("Project", args.get("project"), "cost_center")
-		or (item.selling_cost_center if args.get("customer") else item.buying_cost_center)
+		or (item.get("selling_cost_center") if args.get("customer") else item.get("buying_cost_center"))
 		or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 		or args.get("cost_center"))
 

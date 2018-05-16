@@ -499,7 +499,7 @@ def make_delivery_note(source_name, target_doc=None):
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-				or item.selling_cost_center \
+				or item.get("selling_cost_center") \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
@@ -559,8 +559,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if not target.cost_center and target.item_code:
-			item = get_item_defaults(target.item_code, source_parent.company)
-			target.cost_center = item.selling_cost_center \
+			item = get_item_defaults(target.item_code, target.company)
+			target.cost_center = item.get("selling_cost_center") \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
