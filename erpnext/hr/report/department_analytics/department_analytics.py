@@ -3,9 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-import erpnext
 from frappe import _
-from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -29,11 +27,10 @@ def get_employees(filters):
 	return frappe.db.sql("""select name, employee_name, date_of_birth,
 	branch, department, designation,
 	gender, company from tabEmployee where status = 'Active' %s""" % conditions, as_list=1)
-	
+
 def get_department(filters):
-	conditions = get_conditions(filters)
 	return frappe.db.sql("""select count(*),department
-	from tabEmployee """, as_list=1)
+	from `tabEmployee`""", as_list=1)
 
 def get_conditions(filters):
 	conditions = ""

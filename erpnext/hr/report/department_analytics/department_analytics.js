@@ -10,4 +10,4 @@ frappe.query_reports["Department Analytics"] = {
 			"options": "Department",
 		}
 	]
-}
+};
