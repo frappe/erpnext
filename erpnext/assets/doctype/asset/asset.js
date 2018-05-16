@@ -157,6 +157,13 @@ frappe.ui.form.on('Asset', {
 		}
 	},
 
+	available_for_use_date: function(frm) {
+		$.each(frm.doc.finance_books || [], function(i, d) {
+			if(!d.depreciation_start_date) d.depreciation_start_date = frm.doc.available_for_use_date;
+		});
+		refresh_field("finance_books");
+	},
+
 	is_existing_asset: function(frm) {
 		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
 	},
