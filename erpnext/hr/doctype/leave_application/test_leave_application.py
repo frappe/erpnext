@@ -71,7 +71,7 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test1@example.com", "Leave Approver")
 		clear_user_permissions_for_doctype("Employee")
 
-		frappe.db.set_value("Department", "_Test Department",
+		frappe.db.set_value("Department", "_Test Department - _TC",
 			"leave_block_list", "_Test Leave Block List")
 
 		make_allocation_record()
@@ -214,7 +214,7 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
 			"applies_to_all_departments", 1)
 		frappe.db.set_value("Employee", "_T-Employee-00002", "department",
-			"_Test Department")
+			"_Test Department - _TC")
 
 		frappe.set_user("test1@example.com")
 		application.insert()
