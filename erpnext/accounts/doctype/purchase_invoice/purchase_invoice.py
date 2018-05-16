@@ -436,7 +436,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
-				else:
+				elif not item.is_fixed_asset:
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account,
