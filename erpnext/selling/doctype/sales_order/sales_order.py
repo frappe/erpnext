@@ -495,7 +495,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-		item = get_item_defaults(target.item_code, target.company)
+		item = get_item_defaults(target.item_code, source_parent.company)
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
@@ -559,7 +559,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if not target.cost_center and target.item_code:
-			item = get_item_defaults(target.item_code, target.company)
+			item = get_item_defaults(target.item_code, source_parent.company)
 			target.cost_center = item.selling_cost_center \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
