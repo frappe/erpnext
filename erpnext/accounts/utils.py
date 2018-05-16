@@ -572,6 +572,22 @@ def get_stock_rbnb_difference(posting_date, company):
 	return flt(stock_rbnb) + flt(sys_bal)
 
 
+def get_held_invoices(party_type, party):
+	"""
+	Returns a list of names Purchase Invoices for the given party that are on hold
+	"""
+	held_invoices = None
+
+	if party_type == 'Supplier':
+		held_invoices = frappe.db.sql(
+			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
+			as_dict=1
+		)
+		held_invoices = [d['name'] for d in held_invoices]
+
+	return held_invoices
+
+
 def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
@@ -584,7 +600,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
 	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
-	invoice_list = frappe.db.sql("""
+	held_invoices = get_held_invoices(party_type, party)
+
+  invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
@@ -622,20 +640,21 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		}, as_dict=True)
 
 	for d in invoice_list:
-		due_date = frappe.db.get_value(d.voucher_type, d.voucher_no,
-			"posting_date" if party_type == "Employee" else "due_date")
+		if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
+			due_date = frappe.db.get_value(
+				d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
 
-		outstanding_invoices.append(
-			frappe._dict({
-				'voucher_no': d.voucher_no,
-				'voucher_type': d.voucher_type,
-				'posting_date': d.posting_date,
-				'invoice_amount': flt(d.invoice_amount),
-				'payment_amount': flt(d.payment_amount),
-				'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-				'due_date': due_date
-			})
-		)
+			outstanding_invoices.append(
+				frappe._dict({
+					'voucher_no': d.voucher_no,
+					'voucher_type': d.voucher_type,
+					'posting_date': d.posting_date,
+					'invoice_amount': flt(d.invoice_amount),
+					'payment_amount': flt(d.payment_amount),
+					'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
+					'due_date': due_date
+				})
+			)
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 
