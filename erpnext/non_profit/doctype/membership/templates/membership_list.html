@@ -1,0 +1,27 @@
+{% if doc.paid %}
+
+  <br>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr class="active">
+          <th style="width: 150px">Membership Number</th>
+          <th style="width: 150px">Membership Type</th>
+          <th style="width: 100px">From</th>
+          <th style="width: 100px">To</th>
+          <th style="width: 100px">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr>
+            <td>{{ doc.name }}</td>
+            <td>{{ doc.membership_type }}</td>
+            <td>{{ frappe.format_date(doc.from_date) }}</td>
+            <td>{{ frappe.format_date(doc.to_date) }}</td>
+            <td>{{ doc.amount }}</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+
+{% endif %}
