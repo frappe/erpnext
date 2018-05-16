@@ -49,7 +49,7 @@ $.extend(frappe.create_routes, {
 $.extend(frappe.breadcrumbs.preferred, {
 	"Item Group": "Stock",
 	"Customer Group": "Selling",
-	"Supplier Type": "Buying",
+	"Supplier Group": "Buying",
 	"Territory": "Selling",
 	"Sales Person": "Selling",
 	"Sales Partner": "Selling",

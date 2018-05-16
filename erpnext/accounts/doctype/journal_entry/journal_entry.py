@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
@@ -40,15 +40,17 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
+		self.validate_inter_company_accounts()
 		if not self.title:
 			self.title = self.get_title()
 
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
-		self.update_loan()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.update_loan()
+		self.update_inter_company_jv()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -64,6 +66,20 @@ class JournalEntry(AccountsController):
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
+	def validate_inter_company_accounts(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			doc = frappe.get_doc("Journal Entry", self.inter_company_journal_entry_reference)
+			account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			previous_account_currency = frappe.db.get_value("Company", doc.company, "default_currency")
+			if account_currency == previous_account_currency:
+				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
+					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
+
+	def update_inter_company_jv(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
+				"inter_company_journal_entry_reference", self.name)
+
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
@@ -75,6 +91,8 @@ class JournalEntry(AccountsController):
 		self.update_loan()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
+		self.unlink_inter_company_jv()
+		self.unlink_asset_adjustment_entry()
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -92,10 +110,24 @@ class JournalEntry(AccountsController):
 				for s in asset.get("schedules"):
 					if s.journal_entry == self.name:
 						s.db_set("journal_entry", None)
-						asset.value_after_depreciation += s.depreciation_amount
 
-						asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+						idx = cint(s.finance_book_id) or 1
+						finance_books = asset.get('finance_books')[idx - 1]
+						finance_books.value_after_depreciation += s.depreciation_amount
+						finance_books.db_update()
+
 						asset.set_status()
+
+	def unlink_inter_company_jv(self):
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
+				"inter_company_journal_entry_reference", "")
+			frappe.db.set_value("Journal Entry", self.name,\
+				"inter_company_journal_entry_reference", "")
+
+	def unlink_asset_adjustment_entry(self):
+		frappe.db.sql(""" update `tabAsset Adjustment`
+			set journal_entry = null where journal_entry = %s""", self.name)
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -127,7 +159,7 @@ class JournalEntry(AccountsController):
 				if (d.party_type == 'Customer' and flt(d.credit) > 0) or \
 						(d.party_type == 'Supplier' and flt(d.debit) > 0):
 					if d.is_advance=="No":
-						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account), alert=1)
+						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account), alert=True)
 					elif d.reference_type in ("Sales Order", "Purchase Order") and d.is_advance != "Yes":
 						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
@@ -436,7 +468,8 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project
+						"project": d.project,
+						"finance_book": self.finance_book
 					})
 				)
 
@@ -811,14 +844,14 @@ def get_outstanding(args):
 		}
 
 @frappe.whitelist()
-def get_party_account_and_balance(company, party_type, party, cost_center):
+def get_party_account_and_balance(company, party_type, party):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	account = get_party_account(party_type, party, company)
 
-	account_balance = get_balance_on(account=account, cost_center=cost_center)
-	party_balance = get_balance_on(party_type=party_type, party=party, company=company, cost_center=cost_center)
+	account_balance = get_balance_on(account=account)
+	party_balance = get_balance_on(party_type=party_type, party=party, company=company)
 
 	return {
 		"account": account,
@@ -829,7 +862,7 @@ def get_party_account_and_balance(company, party_type, party, cost_center):
 
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None, cost_center=None):
+def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
@@ -848,7 +881,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		party_type = ""
 
 	grid_values = {
-		"balance": get_balance_on(account, date, cost_center=cost_center),
+		"balance": get_balance_on(account, date),
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,

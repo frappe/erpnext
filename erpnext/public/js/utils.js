@@ -287,9 +287,13 @@ erpnext.utils.select_alternate_items = function(opts) {
 
 			alternative_items.forEach(d => {
 				let row = frappe.get_doc(opts.child_doctype, d.docname);
-				let qty = row.qty;
+				let qty = null;
+				if (row.doctype === 'Work Order Item') {
+					qty = row.required_qty;
+				} else {
+					qty = row.qty;
+				}
 				row[item_field] = d.alternate_item;
-
 				frm.script_manager.trigger(item_field, row.doctype, row.name)
 					.then(() => {
 						frappe.model.set_value(row.doctype, row.name, 'qty', qty);

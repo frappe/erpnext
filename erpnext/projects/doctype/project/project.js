@@ -87,25 +87,27 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
-	edit_task: function (frm, doctype, name) {
+});
+
+frappe.ui.form.on("Project Task", {
+	edit_task: function(frm, doctype, name) {
 		var doc = frappe.get_doc(doctype, name);
-		if (doc.task_id) {
+		if(doc.task_id) {
 			frappe.set_route("Form", "Task", doc.task_id);
 		} else {
 			frappe.msgprint(__("Save the document first."));
 		}
 	},
-	edit_timesheet: function (frm, cdt, cdn) {
+
+	edit_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.route_options = {
-			"project": frm.doc.project_name,
-			"task": child.task_id
-		};
+		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
 		frappe.set_route("List", "Timesheet");
 	},
-	make_timesheet: function (frm, cdt, cdn) {
+
+	make_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.model.with_doctype('Timesheet', function () {
+		frappe.model.with_doctype('Timesheet', function() {
 			var doc = frappe.model.get_new_doc('Timesheet');
 			var row = frappe.model.add_child(doc, 'time_logs');
 			row.project = frm.doc.project_name;
@@ -114,12 +116,10 @@ frappe.ui.form.on("Project", {
 		})
 	},
 
-	status: function (frm, doctype, name) {
+	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
-
 });
-
 
 frappe.ui.form.on("Project", "validate", function (frm) {
 	frappe.call({

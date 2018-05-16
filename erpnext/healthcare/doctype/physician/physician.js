@@ -23,6 +23,7 @@ frappe.ui.form.on('Physician', {
 			return {
 				filters: {
 					"is_group": false,
+					"allow_appointments": true
 				}
 			};
 		});
