@@ -13,7 +13,7 @@ from erpnext.accounts.party import get_party_account_currency, validate_party_fr
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 
-force_item_fields = ("item_group", "brand", "stock_uom")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
