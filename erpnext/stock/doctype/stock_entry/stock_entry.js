@@ -155,9 +155,27 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				})
 			}, __("Get items from"));
-
+		}
+		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
-
+				frappe.call({
+					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
+					callback: function(r) {
+						if (!r.exc && r.message) {
+							frm.set_value("items", []);
+							r.message.forEach(function(element) {
+								let d = frm.add_child("items");
+								d.item_code = element.item;
+								d.s_warehouse = element.warehouse;
+								d.qty = element.qty;
+								d.uom = element.stock_uom;
+								d.conversion_factor = 1;
+								d.transfer_qty = element.qty;
+								frm.refresh_fields();
+							});
+						}
+					}
+				});
 			}, __("Get items from"));
 		}
 
