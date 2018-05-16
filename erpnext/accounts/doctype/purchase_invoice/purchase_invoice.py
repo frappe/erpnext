@@ -81,7 +81,6 @@ class PurchaseInvoice(BuyingController):
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
 		self.validate_fixed_asset()
-		self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
@@ -479,11 +478,17 @@ class PurchaseInvoice(BuyingController):
 
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+				item.expense_account = item.expense_account or asset_accounts[0]
+
+				if (not item.expense_account or frappe.db.get_value('Account',
+					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):
+					frappe.throw(_("Row {0}: Expense account must be of type Asset Received But Not Billed").
+						format(item.idx))
 
 				if not self.update_stock:
-					asset_rbnb_currency = get_account_currency(asset_accounts[0])
+					asset_rbnb_currency = get_account_currency(item.expense_account)
 					gl_entries.append(self.get_gl_dict({
-						"account": asset_accounts[0],
+						"account": item.expense_account,
 						"against": self.supplier,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": base_asset_amount,
@@ -518,7 +523,7 @@ class PurchaseInvoice(BuyingController):
 					}))
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-						asset_eiiav_currency = get_account_currency(asset_accounts[0])
+						asset_eiiav_currency = get_account_currency(asset_accounts[1])
 						gl_entries.append(self.get_gl_dict({
 							"account": asset_accounts[1],
 							"against": self.supplier,
@@ -750,13 +755,6 @@ class PurchaseInvoice(BuyingController):
 
 		for pr in set(updated_pr):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
-
-	def validate_fixed_asset_account(self):
-		for d in self.get('items'):
-			if d.is_fixed_asset:
-				account_type = frappe.db.get_value("Account", d.expense_account, "account_type")
-				if account_type != 'Fixed Asset':
-					frappe.throw(_("Row {0}# Account must be of type 'Fixed Asset'").format(d.idx))
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
