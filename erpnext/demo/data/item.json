@@ -1,7 +1,9 @@
 [
  {
   "default_supplier": "Asiatic Solutions",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "For Upper Bearing",
   "image": "/assets/erpnext_demo/images/disc.png",
   "item_code": "Disc Collars",
@@ -10,7 +12,9 @@
  },
  {
   "default_supplier": "Nan Duskin",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "CAST IRON, MCMASTER PART NO. 3710T13",
   "image": "/assets/erpnext_demo/images/bearing.jpg",
   "item_code": "Bearing Block",
@@ -19,7 +23,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Wind Mill C Series for Commercial Use 18ft",
   "image": "/assets/erpnext_demo/images/wind-turbine-2.png",
   "item_code": "Wind MIll C Series",
@@ -28,7 +34,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Wind Mill A Series for Home Use 9ft",
   "image": "/assets/erpnext_demo/images/wind-turbine.png",
   "item_code": "Wind Mill A Series",
@@ -37,7 +45,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->",
   "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
   "item_code": "Wind Turbine",
@@ -51,7 +61,9 @@
  },
  {
   "default_supplier": "HomeBase",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1.5 in. Diameter x 36 in. Mild Steel Tubing",
   "image": null,
   "item_code": "Bearing Pipe",
@@ -60,7 +72,9 @@
  },
  {
   "default_supplier": "New World Realty",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet",
   "image": null,
   "item_code": "Wing Sheet",
@@ -69,7 +83,9 @@
  },
  {
   "default_supplier": "Eagle Hardware",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "3/16 in. x 6 in. x 6 in. Low Carbon Steel Plate",
   "image": null,
   "item_code": "Upper Bearing Plate",
@@ -78,7 +94,9 @@
  },
  {
   "default_supplier": "Asiatic Solutions",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "Bearing Assembly",
   "image": null,
   "item_code": "Bearing Assembly",
@@ -87,7 +105,9 @@
  },
  {
   "default_supplier": "HomeBase",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "3/4 in. x 2 ft. x 4 ft. Pine Plywood",
   "image": null,
   "item_code": "Base Plate",
@@ -97,7 +117,9 @@
  },
  {
   "default_supplier": "Scott Ties",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "N/A",
   "image": null,
   "item_code": "Stand",
@@ -106,7 +128,9 @@
  },
  {
   "default_supplier": "Eagle Hardware",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar",
   "image": null,
   "item_code": "Bearing Collar",
@@ -115,7 +139,9 @@
  },
  {
   "default_supplier": "Eagle Hardware",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1/4 in. x 6 in. x 6 in. Mild Steel Plate",
   "image": null,
   "item_code": "Base Bearing Plate",
@@ -124,7 +150,9 @@
  },
  {
   "default_supplier": "HomeBase",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing",
   "image": null,
   "item_code": "External Disc",
@@ -133,7 +161,9 @@
  },
  {
   "default_supplier": "Eagle Hardware",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1.25 in. Diameter x 6 ft. Mild Steel Tubing",
   "image": null,
   "item_code": "Shaft",
@@ -142,7 +172,9 @@
  },
  {
   "default_supplier": "Ks Merchandise",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "1/2 in. x 2 ft. x 4 ft. Pine Plywood",
   "image": null,
   "item_code": "Blade Rib",
@@ -151,7 +183,9 @@
  },
  {
   "default_supplier": "HomeBase",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "For Bearing Collar",
   "image": null,
   "item_code": "Internal Disc",
@@ -160,7 +194,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Small</p>",
   "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
   "item_code": "Wind Turbine-S",
@@ -177,7 +213,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Medium</p>",
   "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
   "item_code": "Wind Turbine-M",
@@ -194,7 +232,9 @@
  },
  {
   "default_supplier": null,
-  "default_warehouse": "Finished Goods",
+  "item_defaults": [{
+      "default_warehouse": "Finished Goods"
+  }],
   "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Large</p>",
   "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
   "item_code": "Wind Turbine-L",
@@ -218,7 +258,9 @@
  },
  {
   "default_supplier": "HomeBase",
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "3/4 in. x 2 ft. x 4 ft. Pine Plywood",
   "image": null,
   "item_code": "Base Plate Un Painted",
@@ -284,7 +326,9 @@
   "has_batch_no": 1,
   "create_new_batch": 1,
   "valuation_rate": 200,
-  "default_warehouse": "Stores",
+  "item_defaults": [{
+      "default_warehouse": "Stores"
+  }],
   "description": "Corrugated Box",
   "item_code": "Corrugated Box",
   "item_name": "Corrugated Box",
