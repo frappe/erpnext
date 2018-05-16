@@ -210,6 +210,8 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		self.validate_budget()
+
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 

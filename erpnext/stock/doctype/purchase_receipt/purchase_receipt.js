@@ -65,6 +65,20 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
+
+			this.frm.add_custom_button(__('Asset'), function() {
+				frappe.route_options = {
+					purchase_receipt: me.frm.doc.name,
+				};
+				frappe.set_route("List", "Asset");
+			}, __("View"));
+
+			this.frm.add_custom_button(__('Asset Movement'), function() {
+				frappe.route_options = {
+					reference_name: me.frm.doc.name,
+				};
+				frappe.set_route("List", "Asset Movement");
+			}, __("View"));
 		}
 
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
@@ -211,11 +225,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 			['BOM', 'docstatus', '=', '1']
 		]
 	}
-}
-
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_receipt))
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
 
 frappe.provide("erpnext.buying");

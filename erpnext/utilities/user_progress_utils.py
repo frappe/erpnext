@@ -63,7 +63,7 @@ def create_suppliers(args_data):
 				doc = frappe.get_doc({
 					"doctype":"Supplier",
 					"supplier_name": supplier,
-					"supplier_type": _("Local"),
+					"supplier_group": _("Local"),
 					"company": defaults.get("company")
 				}).insert()
 

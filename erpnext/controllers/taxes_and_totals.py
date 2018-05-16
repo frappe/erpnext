@@ -29,6 +29,7 @@ class calculate_taxes_and_totals(object):
 			self.set_item_wise_tax_breakup()
 
 	def _calculate(self):
+		self.validate_conversion_rate()
 		self.calculate_item_values()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
@@ -566,7 +567,8 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
-			company_currency=erpnext.get_company_currency(doc.company)
+			conversion_rate=doc.conversion_rate,
+			currency=doc.currency
 		)
 	)
 

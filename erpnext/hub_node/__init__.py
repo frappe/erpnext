@@ -187,7 +187,7 @@ def make_supplier(supplier):
 		supplier_doc = frappe.get_doc({
 			'doctype': 'Supplier',
 			'supplier_name': supplier.supplier_name,
-			'supplier_type': supplier.supplier_type,
+			'supplier_group': supplier.supplier_group,
 			'supplier_email': supplier.supplier_email
 		}).insert()
 	else:

@@ -19,7 +19,9 @@ frappe.ui.form.on("Item", {
 
 		// should never check Private
 		frm.fields_dict["website_image"].df.is_private = 0;
-
+		if (frm.doc.is_fixed_asset) {
+			frm.trigger("set_asset_naming_series");
+		}
 	},
 
 	refresh: function(frm) {
@@ -124,7 +126,20 @@ frappe.ui.form.on("Item", {
 	},
 
 	is_fixed_asset: function(frm) {
-		frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
+		frm.call({
+			method: "set_asset_naming_series",
+			doc: frm.doc,
+			callback: function() {
+				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
+				frm.trigger("set_asset_naming_series");
+			}
+		})
+	},
+
+	set_asset_naming_series: function(frm) {
+		if (frm.doc.__onload && frm.doc.__onload.asset_naming_series) {
+			frm.set_df_property("asset_naming_series", "options", frm.doc.__onload.asset_naming_series);
+		}
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
