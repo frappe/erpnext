@@ -176,7 +176,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock:
 			for d in self.get('items'):
 				if not d.warehouse:
-					frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
+					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
+						format(d.idx, d.item_code, self.company))
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
@@ -390,10 +391,10 @@ class PurchaseInvoice(BuyingController):
 		warehouse_account = get_warehouse_account_map()
 
 		for item in self.get("items"):
-			if flt(item.base_net_amount) and item.item_code in stock_items:
+			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 
-				if self.update_stock and self.auto_accounting_for_stock:
+				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
 					val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
 					# warehouse account
