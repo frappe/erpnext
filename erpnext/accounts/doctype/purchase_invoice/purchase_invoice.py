@@ -751,10 +751,6 @@ class PurchaseInvoice(BuyingController):
 		self.db_set('release_date', None)
 
 	def set_tax_withholding(self):
-		"""
-			1. Get TDS Configurations against Supplier
-		"""
-
 		tax_withholding_details = get_patry_tax_withholding_details(self)
 		for tax_details in tax_withholding_details:
 			if flt(self.get("rounded_total") or self.grand_total) >= flt(tax_details['threshold']):
