@@ -207,7 +207,7 @@ def get_basic_details(args, item):
 		if len(user_default_warehouse_list) == 1 else ""
 
 	item_defaults = get_item_defaults(item.name, args.company)
-	warehouse = user_default_warehouse or item_defaults.default_warehouse or args.warehouse
+	warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or args.warehouse
 
 	material_request_type = ''
 	if args.get('doctype') == "Material Request":
@@ -683,14 +683,14 @@ def get_default_bom(item_code=None):
 def get_valuation_rate(item_code, company, warehouse=None):
 	item = get_item_defaults(item_code, company)
 	# item = frappe.get_doc("Item", item_code)
-	if item.is_stock_item:
+	if item.get("is_stock_item"):
 		if not warehouse:
-			warehouse = item.default_warehouse
+			warehouse = item.get("default_warehouse")
 
 		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
 
-	elif not item.is_stock_item:
+	elif not item.get("is_stock_item"):
 		valuation_rate =frappe.db.sql("""select sum(base_net_amount) / sum(qty*conversion_factor)
 			from `tabPurchase Invoice Item`
 			where item_code = %s and docstatus=1""", item_code)
