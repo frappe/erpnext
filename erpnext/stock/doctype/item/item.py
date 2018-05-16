@@ -125,6 +125,9 @@ class Item(WebsiteGenerator):
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
 					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+		elif not self.item_defaults:
+			self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
+
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
@@ -892,4 +895,4 @@ def get_item_defaults(item, company):
 			`tabItem` i, `tabItem Default` id
 		where
 			i.name = id.parent and i.name = %s and id.company = %s
-	''', (item, company), as_dict=1)[0]
+	''', (item, company), as_dict=1)
