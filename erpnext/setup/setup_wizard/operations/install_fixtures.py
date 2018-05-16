@@ -84,15 +84,15 @@ def install(country=None):
 
 		# leave type
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
-			'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', 'include_holiday': 1},
+			'allow_encashment': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
-			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
-			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
-			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'),
-			'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1},
 
 		# Employment Type
 		{'doctype': 'Employment Type', 'employee_type_name': _('Full-time')},
@@ -103,22 +103,6 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Piecework')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
-
-		# Department
-		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
-		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments')},
-		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments')},
 
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
@@ -147,14 +131,15 @@ def install(country=None):
 		{'doctype': 'Customer Group', 'customer_group_name': _('Non Profit'), 'is_group': 0, 'parent_customer_group': _('All Customer Groups')},
 		{'doctype': 'Customer Group', 'customer_group_name': _('Government'), 'is_group': 0, 'parent_customer_group': _('All Customer Groups')},
 
-		# supplier type
-		{'doctype': 'Supplier Type', 'supplier_type': _('Services')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Local')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Raw Material')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Electrical')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Hardware')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Pharmaceutical')},
-		{'doctype': 'Supplier Type', 'supplier_type': _('Distributor')},
+		# supplier group
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('All Supplier Groups'), 'is_group': 1, 'name': _('All Supplier Groups'), 'parent_supplier_group': ''},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Services'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Local'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Raw Material'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Electrical'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Hardware'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Pharmaceutical'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
+		{'doctype': 'Supplier Group', 'supplier_group_name': _('Distributor'), 'is_group': 0, 'parent_supplier_group': _('All Supplier Groups')},
 
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': 1, "parent_sales_person": ""},
@@ -213,12 +198,12 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 
-		{'doctype': "Party Type", "party_type": "Customer"},
-		{'doctype': "Party Type", "party_type": "Supplier"},
-		{'doctype': "Party Type", "party_type": "Employee"},
-		{'doctype': "Party Type", "party_type": "Member"},
-		{'doctype': "Party Type", "party_type": "Shareholder"},
-		{'doctype': "Party Type", "party_type": "Student"},
+		{'doctype': "Party Type", "party_type": "Customer", "account_type": "Receivable"},
+		{'doctype': "Party Type", "party_type": "Supplier", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Employee", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Member", "account_type": "Receivable"},
+		{'doctype': "Party Type", "party_type": "Shareholder", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 
 		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
@@ -275,6 +260,14 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
+	make_fixture_records(records)
+
+	# set default customer group and territory
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.save()
+
+def make_fixture_records(records):
 	from frappe.modules import scrub
 	for r in records:
 		doc = frappe.new_doc(r.get("doctype"))
@@ -295,7 +288,23 @@ def install(country=None):
 			else:
 				raise
 
-	# set default customer group and territory
-	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.set_default_customer_group_and_territory()
-	selling_settings.save()
+def install_post_company_fixtures(company=None):
+	records = [
+		# Department
+		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
+		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': company},
+	]
+
+	make_fixture_records(records)

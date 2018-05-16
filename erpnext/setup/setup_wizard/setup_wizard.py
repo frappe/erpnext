@@ -56,6 +56,11 @@ def get_setup_stages(args=None):
 				'fail_msg': 'Failed to set defaults',
 				'tasks': [
 					{
+						'fn': setup_post_company_fixtures,
+						'args': args,
+						'fail_msg': _("Failed to setup post company fixtures")
+					},
+					{
 						'fn': stage_three,
 						'args': args,
 						'fail_msg': _("Failed to set defaults")
@@ -92,6 +97,7 @@ def setup_complete(args=None):
 	stage_fixtures(args)
 	setup_company(args)
 	setup_taxes(args)
+	setup_post_company_fixtures(args)
 	stage_three(args)
 	stage_four(args)
 	fin(args)
@@ -107,6 +113,9 @@ def setup_company(args):
 
 def setup_taxes(args):
 	taxes_setup.create_sales_tax(args)
+
+def setup_post_company_fixtures(args):
+	install_fixtures.install_post_company_fixtures(args.get("company_name"))
 
 def stage_three(args):
 	defaults_setup.create_employee_for_self(args)

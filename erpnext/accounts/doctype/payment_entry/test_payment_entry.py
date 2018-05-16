@@ -40,6 +40,69 @@ class TestPaymentEntry(unittest.TestCase):
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
+	def test_payment_entry_for_blocked_supplier_invoice(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = nowdate()
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_past_date(self):
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
+
+				pi = make_purchase_invoice()
+
+				get_payment_entry('Purchase Invoice', pi.name, bank_account="_Test Bank - _TC")
+
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
+
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)

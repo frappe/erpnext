@@ -40,5 +40,16 @@ frappe.ui.form.on('Asset Category', {
 			};
 		});
 
+		frm.set_query('capital_work_in_progress_account', 'accounts', function(doc, cdt, cdn) {
+			var d  = locals[cdt][cdn];
+			return {
+				"filters": {
+					"account_type": "Capital Work in Progress",
+					"is_group": 0,
+					"company": d.company_name
+				}
+			};
+		});
+
 	}
 });

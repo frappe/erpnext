@@ -37,14 +37,20 @@ def execute():
 				'states': [{
 					"state": 'Draft',
 					"doc_status": 0,
+					"update_field": "approval_status",
+					"update_value": "Draft",
 					"allow_edit": 'Employee'
 				}, {
 					"state": 'Approved',
 					"doc_status": 1,
+					"update_field": "approval_status",
+					"update_value": "Approved",
 					"allow_edit": 'Expense Approver'
 				}, {
 					"state": 'Rejected',
 					"doc_status": 0,
+					"update_field": "approval_status",
+					"update_value": "Rejected",
 					"allow_edit": 'Expense Approver'
 				}],
 				'transitions': [{
