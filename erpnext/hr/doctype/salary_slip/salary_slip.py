@@ -13,10 +13,10 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
+from erpnext.hr.utils import get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_employee_benefit_claim
-from erpnext.hr.utils import get_payroll_period
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -71,46 +71,49 @@ class SalarySlip(TransactionBase):
 		if additional_components:
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
-				amount = self.update_amount_for_other_component(frappe._dict(additional_component.struct_row).salary_component, additional_component.amount)
+				amount = additional_component.amount + self.get_amount_from_exisiting_component(frappe._dict(additional_component.struct_row).salary_component)
 				self.update_component_row(frappe._dict(additional_component.struct_row), amount, "earnings")
 
 		max_benefits = self._salary_structure_doc.get("max_benefits")
 		if max_benefits > 0:
-			employee_benefits = get_employee_benefit_application(self)
-			if employee_benefits:
-				for employee_benefit in employee_benefits:
-					benefit_component = frappe._dict(employee_benefit)
-					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
-					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+			self.add_employee_benefits(max_benefits)
+
+	def add_employee_benefits(self, max_benefits):
+		employee_benefits = get_employee_benefit_application(self.employee, self.start_date, self.end_date)
+		if employee_benefits:
+			for employee_benefit in employee_benefits:
+				benefit_component = frappe._dict(employee_benefit)
+				amount = benefit_component.amount + self.get_amount_from_exisiting_component(frappe._dict(benefit_component.struct_row).salary_component)
+				self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+		else:
+			default_flexi_compenent = frappe.db.exists(
+				'Salary Component',
+				{
+					'is_flexible_benefit': 1,
+					'is_pro_rata_applicable': 1,
+					'flexi_default': 1
+				}
+			)
+			if default_flexi_compenent:
+				flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
+				payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
+				amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
+				amount += self.get_amount_from_exisiting_component(default_flexi_compenent)
+				self.update_component_row(flexi_struct_row, amount, "earnings")
 			else:
-				default_flexi_compenent = frappe.db.exists(
-					'Salary Component',
-					{
-						'is_flexible_benefit': 1,
-						'is_pro_rata_applicable': 1,
-						'flexi_default': 1
-					}
-				)
-				if default_flexi_compenent:
-					flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
-					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
-					amount = self.update_amount_for_other_component(default_flexi_compenent, get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits))
-					self.update_component_row(flexi_struct_row, amount, "earnings")
-				else:
-					frappe.throw(_("Configure default flexible benefit salary component for apply pro-rata benefit"))
+				frappe.throw(_("Configure default flexible benefit salary component to apply pro-rata benefit"))
 
-			benefit_claims = get_employee_benefit_claim(self)
-			if benefit_claims:
-				for benefit_claim in benefit_claims:
-					benefit_component = frappe._dict(benefit_claim)
-					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
-					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+		benefit_claims = get_employee_benefit_claim(self.employee, self.start_date, self.end_date)
+		if benefit_claims:
+			for benefit_claim in benefit_claims:
+				benefit_component = frappe._dict(benefit_claim)
+				amount = benefit_component.amount + self.get_amount_from_exisiting_component(frappe._dict(benefit_component.struct_row).salary_component)
+				self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
 
-	def update_amount_for_other_component(self, salary_component, new_amount):
-		amount = new_amount
+	def get_amount_from_exisiting_component(self, salary_component):
+		amount = 0
 		for d in self.get("earnings"):
 			if d.salary_component == salary_component:
-				d.amount += new_amount
 				amount = d.amount
 		return amount
 

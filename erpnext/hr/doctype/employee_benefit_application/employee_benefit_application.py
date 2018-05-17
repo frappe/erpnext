@@ -78,32 +78,32 @@ def get_assigned_salary_sturecture(employee, _date):
 	if salary_structure:
 		return salary_structure
 
-def get_employee_benefit_application(salary_slip):
+def get_employee_benefit_application(employee, start_date, end_date):
 	employee_benefits = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
 	where employee=%(employee)s
 	and docstatus = 1
 	and (date between %(start_date)s and %(end_date)s)
 	""", {
-		'employee': salary_slip.employee,
-		'start_date': salary_slip.start_date,
-		'end_date': salary_slip.end_date
+		'employee': employee,
+		'start_date': start_date,
+		'end_date': end_date
 	})
 
 	if employee_benefits:
 		for employee_benefit in employee_benefits:
 			employee_benefit_obj = frappe.get_doc("Employee Benefit Application", employee_benefit[0])
-			return get_components(employee_benefit_obj, salary_slip)
+			return get_benefit_components(employee_benefit_obj, employee, start_date, end_date)
 
-def get_components(employee_benefit_application, salary_slip):
+def get_benefit_components(employee_benefit_application, employee, start_date, end_date):
 	salary_components_array = []
 	group_component_amount = {}
-	payroll_period_days = get_payroll_period_days(salary_slip.start_date, salary_slip.end_date, salary_slip.company)
+	payroll_period_days = get_payroll_period_days(start_date, end_date, frappe.db.get_value("Employee", employee, "company"))
 	for employee_benefit in employee_benefit_application.employee_benefits:
 		if employee_benefit.is_pro_rata_applicable == 1:
 			struct_row = {}
 			salary_components_dict = {}
-			amount = get_amount(payroll_period_days, salary_slip.start_date, salary_slip.end_date, employee_benefit.amount)
+			amount = get_amount(payroll_period_days, start_date, end_date, employee_benefit.amount)
 			sc = frappe.get_doc("Salary Component", employee_benefit.earning_component)
 			salary_component = sc
 			if sc.earning_component_group and not sc.is_group and not sc.flexi_default:
@@ -129,7 +129,4 @@ def get_amount(payroll_period_days, start_date, end_date, amount):
 	salary_slip_days = date_diff(getdate(end_date), getdate(start_date)) + 1
 	amount_per_day = amount / payroll_period_days
 	total_amount = amount_per_day * salary_slip_days
-	if total_amount > amount:
-		return amount
-	else:
-		return total_amount
+	return total_amount

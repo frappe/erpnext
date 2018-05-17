@@ -14,7 +14,7 @@ frappe.ui.form.on('Salary Component', {
 				}
 			};
 		});
-		frm.set_query("earning_component_group", function(frm) {
+		frm.set_query("earning_component_group", function() {
 			return {
 				filters: {
 					"is_group": 1,

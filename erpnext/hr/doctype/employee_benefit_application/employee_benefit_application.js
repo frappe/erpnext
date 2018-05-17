@@ -32,12 +32,12 @@ frappe.ui.form.on('Employee Benefit Application', {
 });
 
 frappe.ui.form.on("Employee Benefit Application Detail",{
-	amount:  function(frm, cdt, cdn) {
-		calculate_all(frm.doc, cdt, cdn);
+	amount:  function(frm) {
+		calculate_all(frm.doc);
 	}
 });
 
-var calculate_all = function(doc, dt, dn) {
+var calculate_all = function(doc) {
 	var tbl = doc.employee_benefits || [];
 	var pro_rata_dispensed_amount = 0;
 	var total_amount = 0;
@@ -46,7 +46,7 @@ var calculate_all = function(doc, dt, dn) {
 			total_amount += flt(tbl[i].amount);
 		}
 		if(tbl[i].is_pro_rata_applicable == 1){
-			pro_rata_dispensed_amount += flt(tbl[i].amount)
+			pro_rata_dispensed_amount += flt(tbl[i].amount);
 		}
 	}
 	doc.total_amount = total_amount;
