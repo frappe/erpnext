@@ -621,8 +621,8 @@ class AccountsController(TransactionBase):
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				if d.qty > 1:
-					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
+				# if d.qty > 1:
+# 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
 
 				if d.meta.get_field("asset") and d.asset:
 					asset = frappe.get_doc("Asset", d.asset)
@@ -635,8 +635,8 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
 							.format(d.idx, d.asset, d.item_code))
 
-					elif asset.docstatus != 1:
-						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+					# elif asset.docstatus != 1:
+# 						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 
 					elif self.doctype == "Purchase Invoice":
 						# if asset.status != "Submitted":

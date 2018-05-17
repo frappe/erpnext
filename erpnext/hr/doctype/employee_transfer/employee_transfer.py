@@ -14,7 +14,7 @@ class EmployeeTransfer(Document):
 		if frappe.get_value("Employee", self.employee, "status") == "Left":
 			frappe.throw(_("Cannot transfer Employee with status Left"))
 		if self.new_company and self.company == self.new_company:
-			frappe.throw_("New Company must be different from current company")
+			frappe.throw(_("New Company must be different from current company"))
 
 	def before_submit(self):
 		if getdate(self.transfer_date) > getdate():
