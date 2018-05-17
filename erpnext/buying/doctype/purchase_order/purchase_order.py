@@ -69,7 +69,7 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["project", "="], ["item_code", "="], 
+				"compare_fields": [["project", "="], ["item_code", "="],
 					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
 			}
@@ -478,3 +478,37 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
+
+@frappe.whitelist()
+def update_child_qty_rate(name, rate, qty):
+	# po = frappe.get_doc("Purchase Order", parent)
+	poitem = frappe.get_doc("Purchase Order Item", name)
+	for field in poitem.meta.fields:
+		if field.fieldname:
+			poi_field = poitem.meta.get_field(field.fieldname)
+			if poi_field:
+	poi_field.allow_on_submit = True
+	poitem.qty = float(qty)
+	poitem.rate = float(rate)
+	poitem.save()
+	poitem.reload()
+	return {
+		'poitem': poitem
+	}
+
+@frappe.whitelist()
+def update_po(po):
+	po = frappe.get_doc('Purchase Order', po)
+	for field in po.meta.fields:
+		if field.fieldname:
+			po_field = po.meta.get_field(field.fieldname)
+			if po_field:
+				po_field.allow_on_submit = True
+
+	po.reload()
+	for a in po.payment_schedule:
+		a.payment_amount = float(a.invoice_portion/100) * float(po.grand_total)
+	po.save()
+	return {
+		'po': po
+	}

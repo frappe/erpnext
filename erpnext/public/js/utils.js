@@ -343,6 +343,144 @@ erpnext.utils.select_alternate_items = function(opts) {
 	dialog.show();
 }
 
+erpnext.utils.update_child_items = function(opts) {
+	const frm = opts.frm;
+
+	this.data = [];
+	const dialog = new frappe.ui.Dialog({
+		title: __("Update Items"),
+		fields: [
+			{fieldtype:'Section Break', label: __('Items')},
+			{
+				fieldname: "trans_items", fieldtype: "Table", cannot_add_rows: true,
+				in_place_edit: true, data: this.data,
+				get_data: () => {
+					return this.data;
+				},
+				fields: [{
+					fieldtype:'Data',
+					fieldname:"docname",
+					hidden: 0,
+				}, {
+					fieldtype:'Link',
+					fieldname:"item_code",
+					options: 'Item',
+					in_list_view: 1,
+					read_only: 1,
+					label: __('Item Code')
+				}, {
+					fieldtype:'Float',
+					fieldname:"qty",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Qty')
+				}, {
+					fieldtype:'Currency',
+					fieldname:"rate",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Rate')
+				}]
+			},
+		],
+		primary_action: function() {
+			const trans_items = this.get_values()["trans_items"];
+			trans_items.forEach(d => {
+				let row = frappe.get_doc(opts.child_doctype, d.docname);
+				if (opts.child_doctype == 'Purchase Order Detail') {
+					frappe.call({
+						method: 'erpnext.buying.doctype.purchase_order.purchase_order.update_child_qty_rate',
+						args: {
+							'name': d.docname,
+							'rate': d.rate,
+							'qty': d.qty
+						},
+						callback: function(r) {
+							frappe.call({
+								method: 'erpnext.buying.doctype.purchase_order.purchase_order.purchase_order.update_po',
+								freeze: true,
+								freeze_message: "Updating Purchace Order",
+								args: {
+									po: cur_frm.doc.name,
+								},
+								callback: function(r){
+										frappe.model.set_value(cdt, cdn, 'qty', values.qty);
+										frappe.model.set_value(cdt, cdn, 'rate', values.rate);
+										refresh_field('items');
+										cur_frm.reload_doc()
+								}
+							})
+						}
+					});
+				} else {
+					frappe.call({
+						method: 'erpnext.selling.doctype.sales_order.sales_order.update_child_qty_rate',
+						args: {
+							'name': d.docname,
+							'rate': d.rate,
+							'qty': d.qty
+						},
+						callback: function(r) {
+							frappe.call({
+								method: 'erpnext.selling.doctype.sales_order.sales_order.update_po',
+								freeze: true,
+								freeze_message: "Updating Sales Order",
+								args: {
+									so: cur_frm.doc.name,
+								},
+								callback: function(r){
+										frappe.model.set_value(cdt, cdn, 'qty', values.qty);
+										frappe.model.set_value(cdt, cdn, 'rate', values.rate);
+										refresh_field('items');
+										cur_frm.reload_doc()
+								}
+							})
+						}
+					});
+				}
+			});
+			this.hide();
+			frm.reload_doc()
+			refresh_field("items");
+			},
+		primary_action_label: __('Update')
+	});
+
+	frm.doc[opts.child_docname].forEach(d => {
+		console.log(opts.child_doctype)
+		console.log("Im here")
+		if (opts.child_doctype == 'Purchase Order Detail') {
+			console.log("Im here in Purchase Order")
+			if (d.qty > d.received_qty) {
+				var po_qty = d.qty - d.received_qty
+				console.log(po_qty)
+				dialog.fields_dict.trans_items.df.data.push({
+					"docname": d.name,
+					"item_code": d.item_code,
+					"qty": po_qty,
+					"rate": d.rate,
+				});
+			}
+		} else {
+			if (d.qty > d.delivered_qty) {
+				var dn_qty = d.qty - d.delivered_qty
+				console.log(dn_qty)
+				dialog.fields_dict.trans_items.df.data.push({
+					"docname": d.name,
+					"item_code": d.item_code,
+					"qty": dn_qty,
+					"rate": d.rate,
+				});
+			}
+		}
+		this.data = dialog.fields_dict.trans_items.df.data;
+		dialog.fields_dict.trans_items.grid.refresh();
+	})
+	dialog.show();
+}
+
 erpnext.utils.map_current_doc = function(opts) {
 	if(opts.get_query_filters) {
 		opts.get_query = function() {

@@ -824,3 +824,37 @@ def get_default_bom_item(item_code):
 	bom = bom[0].name if bom else None
 
 	return bom
+
+@frappe.whitelist()
+def update_child_qty_rate(name, rate, qty):
+
+	soitem = frappe.get_doc("Purchase Order Item", name)
+	for field in soitem.meta.fields:
+		if field.fieldname:
+			poi_field = soitem.meta.get_field(field.fieldname)
+			if poi_field:
+	soi_field.allow_on_submit = True
+	soitem.qty = float(qty)
+	soitem.rate = float(rate)
+	soitem.save()
+	soitem.reload()
+	return {
+		'soitem': soitem
+	}
+
+@frappe.whitelist()
+def update_so(so):
+	so = frappe.get_doc('Sales Order', so)
+	for field in po.meta.fields:
+		if field.fieldname:
+			so_field = so.meta.get_field(field.fieldname)
+			if so_field:
+				so_field.allow_on_submit = True
+
+	so.reload()
+	for a in so.payment_schedule:
+		a.payment_amount = float(a.invoice_portion/100) * float(so.grand_total)
+	so.save()
+	return {
+		'so': so
+	}
