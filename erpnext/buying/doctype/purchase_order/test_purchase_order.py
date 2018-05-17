@@ -10,6 +10,7 @@ from frappe.utils import flt, add_days, nowdate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 
 class TestPurchaseOrder(unittest.TestCase):
@@ -49,12 +50,12 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
-		
+
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
 
 		po = create_purchase_order()
-		
+
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
@@ -64,7 +65,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi.items[0].qty = 12
 		pi.insert()
 		pi.submit()
-		
+
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
@@ -75,6 +76,20 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
+
+	def test_update_child_qty_rate(self):
+		po = create_purchase_order(item_code= "_Test Item", qty=4)
+
+		create_pr_against_po(po.name)
+
+		make_purchase_invoice(po.name)
+
+		trans_item = {'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		self.assertEqual(po.get("items")[0].rate, 200)
+		self.assertEqual(po.get("items")[0].qty, 7)
+		self.assertEqual(po.get("items")[0].amount, 1400)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -141,7 +156,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.update_status("Closed")
 
 		self.assertEqual(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
-		
+
 	def test_group_same_items(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 		frappe.get_doc({
