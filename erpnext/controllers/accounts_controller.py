@@ -635,8 +635,8 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
 							.format(d.idx, d.asset, d.item_code))
 
-					elif asset.docstatus != 1:
-						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+					# elif asset.docstatus != 1:
+# 						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 
 					elif self.doctype == "Purchase Invoice":
 						# if asset.status != "Submitted":
