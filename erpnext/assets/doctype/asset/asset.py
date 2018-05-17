@@ -422,9 +422,23 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 	return asset_maintenance
 
 @frappe.whitelist()
+def create_asset_adjustment(asset, asset_category, company):
+	asset_maintenance = frappe.new_doc("Asset Adjustment")
+	asset_maintenance.update({
+		"asset": asset,
+		"company": company,
+		"asset_category": asset_category
+	})
+	return asset_maintenance
+
+@frappe.whitelist()
 def transfer_asset(args):
 	import json
 	args = json.loads(args)
+
+	if args.get('serial_no'):
+		args['quantity'] = len(args.get('serial_no').split('\n'))
+
 	movement_entry = frappe.new_doc("Asset Movement")
 	movement_entry.update(args)
 	movement_entry.insert()

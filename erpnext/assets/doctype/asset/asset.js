@@ -82,7 +82,7 @@ frappe.ui.form.on('Asset', {
 			}
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Asset Adjustment"), function() {
-					frm.trigger("create_asset_maintenance");
+					frm.trigger("create_asset_adjustment");
 				}, __("Make"));
 			}
 
@@ -233,6 +233,22 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
+	create_asset_adjustment: function(frm) {
+		frappe.call({
+			args: {
+				"asset": frm.doc.name,
+				"asset_category": frm.doc.asset_category,
+				"company": frm.doc.company
+			},
+			method: "erpnext.assets.doctype.asset.asset.create_asset_adjustment",
+			freeze: 1,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
 	calculate_depreciation: function(frm) {
 		frappe.db.get_value("Asset Settings", {'name':"Asset Settings"}, 'schedule_based_on_fiscal_year', (data) => {
 			if (data.schedule_based_on_fiscal_year == 1) {
@@ -329,6 +345,42 @@ erpnext.asset.transfer_asset = function(frm) {
 				"reqd": 1
 			},
 			{
+				"label": __("Select Serial No"),
+				"fieldname": "serial_nos",
+				"fieldtype": "Link",
+				"options": "Serial No",
+				"get_query": function () {
+					return {
+						filters: {
+							'asset': frm.doc.name
+						}
+					}
+				},
+				"onchange": function() {
+					let val = this.get_value();
+					if (val) {
+						let serial_nos = dialog.get_value("serial_no") || val;
+						if (serial_nos) {
+							serial_nos = serial_nos.split('\n');
+							serial_nos.push(val);
+
+							const unique_sn = serial_nos.filter(function(elem, index, self) {
+							    return index === self.indexOf(elem);
+							});
+
+							dialog.set_value("serial_no", unique_sn.join('\n'));
+							dialog.set_value("serial_nos", "");
+						}
+					}
+				}
+			},
+			{
+				"label": __("Serial No"),
+				"fieldname": "serial_no",
+				"read_only": 1,
+				"fieldtype": "Small Text"
+			},
+			{
 				"label": __("Date"),
 				"fieldname": "transfer_date",
 				"fieldtype": "Datetime",
@@ -349,8 +401,9 @@ erpnext.asset.transfer_asset = function(frm) {
 				args: {
 					"asset": frm.doc.name,
 					"transaction_date": args.transfer_date,
-					"source_warehouse": frm.doc.location,
-					"target_warehouse": args.target_location,
+					"source_location": frm.doc.location,
+					"target_location": args.target_location,
+					"serial_no": args.serial_no,
 					"company": frm.doc.company
 				}
 			},
