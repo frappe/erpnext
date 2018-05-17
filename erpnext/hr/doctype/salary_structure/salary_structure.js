@@ -123,15 +123,6 @@ frappe.ui.form.on('Salary Structure', {
 	}
 });
 
-frappe.ui.form.on('Salary Structure Employee', {
-	from_date: function(frm, cdt, cdn) {
-		validate_date(frm, cdt, cdn);
-	},
-	to_date: function(frm, cdt, cdn) {
-		validate_date(frm, cdt, cdn);
-	}
-});
-
 var validate_date = function(frm, cdt, cdn) {
 	var doc = locals[cdt][cdn];
 	if(doc.to_date && doc.from_date) {
