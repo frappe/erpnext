@@ -69,7 +69,7 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["project", "="], ["item_code", "="], 
+				"compare_fields": [["project", "="], ["item_code", "="],
 					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
 			}
