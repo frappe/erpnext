@@ -51,7 +51,7 @@ class Asset(AccountsController):
 
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
-			frappe.throw(_("Available for use data is required"))
+			frappe.throw(_("Available for use date is required"))
 
 	def set_missing_values(self):
 		if not self.asset_category:
@@ -161,6 +161,9 @@ class Asset(AccountsController):
 		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount")
 				.format(row.idx))
+
+		if not row.depreciation_start_date:
+			frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
@@ -419,9 +422,23 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 	return asset_maintenance
 
 @frappe.whitelist()
+def create_asset_adjustment(asset, asset_category, company):
+	asset_maintenance = frappe.new_doc("Asset Adjustment")
+	asset_maintenance.update({
+		"asset": asset,
+		"company": company,
+		"asset_category": asset_category
+	})
+	return asset_maintenance
+
+@frappe.whitelist()
 def transfer_asset(args):
 	import json
 	args = json.loads(args)
+
+	if args.get('serial_no'):
+		args['quantity'] = len(args.get('serial_no').split('\n'))
+
 	movement_entry = frappe.new_doc("Asset Movement")
 	movement_entry.update(args)
 	movement_entry.insert()

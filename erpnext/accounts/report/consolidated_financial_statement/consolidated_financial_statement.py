@@ -15,6 +15,10 @@ from erpnext.accounts.report.cash_flow.cash_flow import (get_cash_flow_accounts,
 
 def execute(filters=None):
 	columns, data, message, chart = [], [], [], []
+
+	if not filters.get('company'):
+		return columns, data, message, chart
+
 	fiscal_year = get_fiscal_year_data(filters.get('from_fiscal_year'), filters.get('to_fiscal_year'))
 	companies_column, companies = get_companies(filters)
 	columns = get_columns(companies_column)
