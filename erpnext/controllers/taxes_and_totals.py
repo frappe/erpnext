@@ -167,6 +167,7 @@ class calculate_taxes_and_totals(object):
 		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
 		for item in self.doc.get("items"):
 			self.doc.total += item.amount
+			self.doc.total_qty += item.qty
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
