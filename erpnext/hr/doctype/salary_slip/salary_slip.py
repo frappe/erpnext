@@ -493,9 +493,9 @@ class SalarySlip(TransactionBase):
 		# Calculate total exemption declaration
 		exemption_amount = 0
 		if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
-		"payroll_period": payroll_period.parent, "docstatus": 1}):
+		"payroll_period": payroll_period.name, "docstatus": 1}):
 			exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
-				{"employee": self.employee, "payroll_period": "2018", "docstatus": 1}, #fix period
+				{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1}, #fix period
 				"total_exemption_amount")
 		annual_earning = annual_earning - exemption_amount
 
