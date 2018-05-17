@@ -4,6 +4,7 @@ def get_data():
 	return {
 		'heatmap': True,
 		'heatmap_message': _('This is based on the Time Sheets created against this project'),
+		'method' : 'erpnext.projects.doctype.project.project.get_timeline_data',
 		'fieldname': 'project',
 		'transactions': [
 			{
