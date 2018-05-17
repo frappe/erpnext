@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from frappe.utils import getdate, cstr, flt, fmt_money
@@ -168,9 +168,10 @@ def get_conditions(filters):
 		conditions.append("project=%(project)s")
 
 	if filters.get("finance_book"):
-		conditions.append("finance_book in (%(finance_book)s, '')")
+		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
 	else:
-		conditions.append("ifnull(finance_book, '')=''")
+		filters['finance_book'] = erpnext.get_default_finance_book(filters.get("company"))
+		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")

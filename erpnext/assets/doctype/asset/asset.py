@@ -140,6 +140,8 @@ class Asset(AccountsController):
 
 							if d.depreciation_method in ("Straight Line", "Manual"):
 								days = date_diff(schedule_date, from_date)
+								if n == 0: days += 1
+
 								depreciation_amount = days * rate_per_day
 								from_date = schedule_date
 							else:
