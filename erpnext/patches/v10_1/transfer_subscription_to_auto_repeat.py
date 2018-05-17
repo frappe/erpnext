@@ -21,7 +21,8 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'delivery_note')
 
 	for doctype in to_rename:
-		rename_field(doctype, 'subscription', 'auto_repeat')
+		if frappe.db.has_column(doctype, 'subscription'):
+			rename_field(doctype, 'subscription', 'auto_repeat')
 
 	subscriptions = frappe.db.sql('select * from `tabSubscription`', as_dict=1)
 

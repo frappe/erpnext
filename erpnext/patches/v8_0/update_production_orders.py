@@ -10,6 +10,9 @@ def execute():
 		"BOM Item", "BOM Explosion Item", "BOM"):
 			frappe.reload_doctype(doctype)
 
+	frappe.reload_doc("stock", "doctype", "item")
+	frappe.reload_doc("stock", "doctype", "item_default")
+
 	# fetch all draft and submitted work orders
 	fields = ["name"]
 	if "source_warehouse" in frappe.db.get_table_columns("Work Order"):

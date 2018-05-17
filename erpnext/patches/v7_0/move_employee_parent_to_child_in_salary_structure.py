@@ -3,6 +3,8 @@ import frappe
 def execute():
 	frappe.reload_doc('hr', 'doctype', 'salary_structure')
 	frappe.reload_doc('hr', 'doctype', 'salary_structure_employee')
+	if not frappe.db.has_column('Salary Structure', 'employees'):
+		return
 	for ss in frappe.db.sql(""" select employee, name from `tabSalary Structure`""", as_dict=True):
 		ss_doc = frappe.get_doc('Salary Structure', ss.name)
 		salary_employee = ss_doc.append('employees',{})

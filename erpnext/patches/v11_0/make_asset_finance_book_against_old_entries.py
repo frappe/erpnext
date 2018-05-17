@@ -11,6 +11,7 @@ def execute():
 	frappe.reload_doc('assets', 'doctype', 'asset_category')
 	frappe.reload_doc('assets', 'doctype', 'asset')
 	frappe.reload_doc('assets', 'doctype', 'asset_movement')
+	frappe.reload_doc('assets', 'doctype', 'asset_category_account')
 
 	frappe.db.sql(""" update `tabAsset` ast, `tabWarehouse` wh
 		set ast.location = wh.warehouse_name where ast.warehouse = wh.name""")
@@ -36,8 +37,8 @@ def execute():
 	frappe.db.sql(""" update `tabDepreciation Schedule` ds, `tabAsset` ast 
 		set ds.depreciation_method = ast.depreciation_method, ds.finance_book_id = 1 where ds.parent = ast.name """)
 
-	for catergory in frappe.get_all('Asset Category'):
-		asset_category_doc = frappe.get_doc("Asset Category", catergory)
+	for category in frappe.get_all('Asset Category'):
+		asset_category_doc = frappe.get_doc("Asset Category", category)
 		row = asset_category_doc.append('finance_books', {
 			'depreciation_method': asset_category_doc.depreciation_method,
 			'total_number_of_depreciations': asset_category_doc.total_number_of_depreciations,
