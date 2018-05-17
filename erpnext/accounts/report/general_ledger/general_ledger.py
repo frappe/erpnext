@@ -11,6 +11,9 @@ from erpnext.accounts.utils import get_account_currency
 
 
 def execute(filters=None):
+	if not filters:
+		return [], []
+
 	account_details = {}
 
 	if filters and filters.get('print_in_account_currency') and \

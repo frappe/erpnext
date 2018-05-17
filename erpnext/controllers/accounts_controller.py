@@ -621,8 +621,8 @@ class AccountsController(TransactionBase):
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				if d.qty > 1:
-					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
+				# if d.qty > 1:
+# 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
 
 				if d.meta.get_field("asset") and d.asset:
 					asset = frappe.get_doc("Asset", d.asset)
