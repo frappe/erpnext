@@ -9,6 +9,7 @@ from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 
 
@@ -252,6 +253,20 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
+
+	def test_update_child_qty_rate(self):
+		so = make_sales_order(item_code= "_Test Item", qty=4)
+
+		make_delivery_note(so.name)
+
+		make_sales_invoice(so.name)
+
+		trans_item = {'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+
+		self.assertEqual(so.get("items")[0].rate, 200)
+		self.assertEqual(so.get("items")[0].qty, 7)
+		self.assertEqual(so.get("items")[0].amount, 1400)
 
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
