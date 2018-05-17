@@ -266,6 +266,7 @@ class Project(Document):
 					task_doc.append('depends_on', {"task": dt_name})
 				task_doc.save()
 
+@frappe.whitelist()
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
