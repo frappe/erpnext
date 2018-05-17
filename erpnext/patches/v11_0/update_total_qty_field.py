@@ -16,9 +16,12 @@ def execute():
 	for doctype in doctypes:
 		frappe.db.sql('''
 			UPDATE
-				`tab%s` dt SET dt.total_qty = (SELECT SUM(dt_item.qty)
-			FROM
-				`tab%s Item` dt_item\
-			WHERE
-				dt_item.parent=dt.name)
+				`tab%s` dt SET dt.total_qty =
+			(
+				SELECT SUM(dt_item.qty)
+				FROM
+					`tab%s Item` dt_item
+				WHERE
+					dt_item.parent=dt.name
+			)
 		''' % (doctype, doctype))
