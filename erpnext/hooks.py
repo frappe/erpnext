@@ -238,7 +238,8 @@ scheduler_events = {
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry"
   ],
 	"monthly": [
-		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue"
+		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",
+		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }
 
