@@ -5,9 +5,9 @@ frappe.ui.form.on('Employee Benefit Claim', {
 	setup: function(frm) {
 		frm.set_query("earning_component", function() {
 			return {
-		    query : "erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim.get_earning_components_for_claim",
+				query : "erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim.get_earning_components_for_claim",
 				filters: {claim_date: frm.doc.claim_date, employee: frm.doc.employee}
-		  };
+			};
 		});
 	},
 	employee: function(frm) {
