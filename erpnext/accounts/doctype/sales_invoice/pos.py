@@ -291,7 +291,7 @@ def get_barcode_data(items_list):
 		for barcode in barcodes:
 			if item.item_code not in itemwise_barcode:
 				itemwise_barcode.setdefault(item.item_code, [])
-			itemwise_barcode[item.item_code].append(barcode)
+			itemwise_barcode[item.item_code].append(barcode.get("barcode"))
 
 	return itemwise_barcode
 
