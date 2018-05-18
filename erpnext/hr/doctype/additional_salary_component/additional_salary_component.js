@@ -6,7 +6,8 @@ frappe.ui.form.on('Additional Salary Component', {
 		frm.set_query("salary_component", function() {
 			return {
 				filters: {
-					type: "earning"
+					type: "earning",
+					is_additional_component: true
 				}
 			};
 		});
