@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
 from erpnext.hr.utils import get_payroll_period
+from frappe.desk.reportview import get_match_cond
 
 class EmployeeBenefitClaim(Document):
 	def validate(self):
@@ -120,3 +121,48 @@ def get_employee_benefit_claim(employee, start_date, end_date):
 		if len(salary_components_array) > 0:
 			return salary_components_array
 	return False
+
+def get_earning_components_for_claim(doctype, txt, searchfield, start, page_len, filters):
+	if len(filters) < 2:
+		return {}
+	employee = filters['employee']
+	claim_date = filters['claim_date']
+
+	payroll_period = get_payroll_period(claim_date, claim_date, frappe.db.get_value("Employee", employee, "company"))
+	application = frappe.db.exists(
+		"Employee Benefit Application",
+		{
+			'employee': employee,
+			'payroll_period': payroll_period.name,
+			'docstatus': 1
+		}
+	)
+	earning_components = get_earning_components_from_application(doctype, application, start, page_len)
+
+	if not earning_components:
+		earning_components = get_all_pro_rata_earning_components(doctype, start, page_len)
+	return earning_components
+
+def get_earning_components_from_application(doctype, parent, start, page_len):
+	query = """select earning_component from `tabEmployee Benefit Application Detail` where parent = '{parent}'
+	order by name"""
+
+	return frappe.db.sql(query.format(**{
+		"parent": parent,
+		"mcond": get_match_cond(doctype)
+	}), {
+		'start': start,
+		'page_len': page_len
+	})
+
+def get_all_pro_rata_earning_components(doctype, start, page_len):
+	return frappe.db.sql("""
+		select name from `tabSalary Component`
+		where is_flexible_benefit = 1 and is_pro_rata_applicable = 1
+		and type = 'Earning' and disabled = 0
+	""".format(**{
+		"mcond": get_match_cond(doctype)
+	}), {
+		'start': start,
+		'page_len': page_len
+	})
