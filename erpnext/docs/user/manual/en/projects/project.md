@@ -1,31 +1,14 @@
 # Project
 
-Project management in ERPNext is Task driven. You can create Project and assign multiple Tasks against it.
+Project is an individual or collaborative enterprise, possibly involving research or design, that is carefully planned, usually by a project team, to achieve a particular aim
 
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project.png">
+In ERPNext, Project management in is Task driven. You can a create Project and divide into multiple and assignabls Tasks.
 
-<div class="embed-container">
-  <iframe src="https://www.youtube.com/embed/gCzShu9Niu4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-  </iframe>
-</div>
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-1.png">
 
-You can also track % Completion of a Project using different methods.
+### Managing Tasks
 
-  1. Task Completion
-  2. Task Progress
-  3. Task Weight
-
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-percent-complete.png">
-
-Some examples of how the % Completion is calculated based on Tasks.
-
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-calc.png">
-
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-formula.png">
-
-### Managing tasks
-Project can be divided into multiple Tasks.
-Task can be created via Project document itself or can be created via  [Task](/docs/user/manual/en/projects/tasks.html)
+Project is divided into multiple Tasks. These Tasks can be created from a Project itself or a [Task](/docs/user/manual/en/projects/tasks.html) can be created separtely as well.
 
 <img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project_task.png">
 
@@ -44,8 +27,23 @@ Task can be created via Project document itself or can be created via  [Task](/d
 <img class="screenshot" alt="Project - Task Grid" src="{{docs_base_url}}/assets/img/project/tasks.png">
 <img class="screenshot" alt="Project - Task Grid" src="{{docs_base_url}}/assets/img/project/task-weights.png">
 
+### Task Completion
 
-### Managing time
+You can also track % Completion of a Project using different methods.
+
+  1. Task Completion
+  2. Task Progress
+  3. Task Weight
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-2.png">
+
+Some examples of how the % Completion is calculated based on Tasks.
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-calc.png">
+
+<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-formula.png">
+
+### Managing Time
 
 ERPNext uses [Time Log](/docs/user/manual/en/projects/time-log.html) to track the progress of a Project.
 You can create Time Logs against each task.
@@ -61,7 +59,7 @@ The Actual Start and End Time along with the costing shall then be updated based
 
 <img class="screenshot" alt="Project - Link Time Log" src="{{docs_base_url}}/assets/img/project/project_time_log_link.png">
 
-### Managing expenses
+### Managing Expenses
 
 You can book [Expense Claim](/docs/user/manual/en/human-resources/expense-claim.html) against a project task.
 The system shall update the total amount from expense claims in the project costing section.
@@ -84,7 +82,7 @@ You can make a [Cost Center](/docs/user/manual/en/accounts/setup/cost-center.htm
 
 <img class="screenshot" alt="Project - Cost Center" src="{{docs_base_url}}/assets/img/project/project_cost_center.png">
 
-###Project Costing
+### Project Costing
 
 The Project Costing section helps you track the time, expenses and purchases incurred against the project.
 
@@ -94,15 +92,14 @@ The Project Costing section helps you track the time, expenses and purchases inc
 
 * The Gross Margin is the difference between Total Billed Amount and the Total Cost Amount for this project.
 
-###Billing
+### Billing
 
 You can make/link a [Sales Order](/docs/user/manual/en/selling/sales-order.html) against a project. Once linked you can use the standard sales module to bill your customer against the Project.
 
 <img class="screenshot" alt="Project - Sales Order" src="{{docs_base_url}}/assets/img/project/project_sales_order.png">
 
-###Gantt Chart
+### Gantt Chart
 
-A Gantt Chart illustrates a project schedule.
 ERPNext gives you a illustrated view of tasks scheduled against that project in Gantt Chart View.
 
 * To view gantt chart against a project, go to that project and click on 'Gantt Chart'
@@ -110,5 +107,12 @@ ERPNext gives you a illustrated view of tasks scheduled against that project in 
 <img class="screenshot" alt="Project - View Gantt Chart" src="{{docs_base_url}}/assets/img/project/project_view_gantt_chart.png">
 
 <img class="screenshot" alt="Project - Gantt Chart" src="{{docs_base_url}}/assets/img/project/project_gantt_chart.png">
+
+### Project Help Video
+
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/gCzShu9Niu4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
 
 {next}
