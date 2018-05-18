@@ -29,6 +29,11 @@ def get_help_results_sections(text):
 			response_json = get_response(api, text)
 			topics_data = get_topics_data(api, response_json)
 			results = prepare_api_results(api, topics_data)
+		else:
+			# Source type is Doctype
+			doctype = api.source_doctype
+			raw = search(text, 0, 20, doctype)
+			results = prepare_doctype_results(api, raw)
 
 		if results:
 			# Add section
@@ -69,3 +74,21 @@ def prepare_api_results(api, topics_data=[]):
 			'route': route
 		}))
 	return results[:5]
+
+def prepare_doctype_results(api, raw):
+	results = []
+	for r in raw:
+		prepared_result = {}
+		parts = r["content"].split(' ||| ')
+
+		for part in parts:
+			pair = part.split(' : ', 1)
+			prepared_result[pair[0]] = pair[1]
+
+		results.append(frappe._dict({
+			'title': prepared_result[api.result_title_field],
+			'preview': prepared_result[api.result_preview_field],
+			'route': prepared_result[api.result_route_field]
+		}))
+
+	return results
