@@ -8,6 +8,8 @@ frappe.ui.form.on('Employee Benefit Application', {
 				filters: {
 					type: "Earning",
 					is_flexible_benefit: true,
+					is_group: false,
+					flexi_default: false,
 					disabled: false
 				}
 			};
