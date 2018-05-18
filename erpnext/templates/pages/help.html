@@ -4,17 +4,56 @@
 
 {% block header %}<h1>{{ _("Help") }}</h1>
 
-<h2>{{ _("What do you need help with?") }}</h2>
-<div class="search-results"></div>
+<div style="margin-bottom: 20px;">
+	<form action='{{ route }}'>
+	<input name='q' class='form-control' type='text'
+		style='max-width: 400px; display: inline-block; margin-right: 10px;'
+		value='{{ frappe.form_dict.q or ''}}'
+		{% if not frappe.form_dict.q%}placeholder="{{ _("What do you need help with?") }}"{% endif %}>
+	<input type='submit'
+		class='btn btn-sm btn-primary btn-search' value="{{ _("Search") }}">
+	</form>
+</div>
 
-<h2>{{ _("Get Started") }}</h2>
-<div class="help-articles"></div>
+{% for section in get_started_sections %}
+<div style="margin-bottom: 20px;">
+	<h2>{{ section["name"] }}</h2>
+	{% for item in section["items"] %}
+		<a href="{{ item.link }}">
+			<h4>{{ item.title }}</h4>
+		</a>
+		{% if item.description -%}
+		<p>{{ item.description }}</p>
+		{%- endif %}
+	<hr>
+	{% endfor %}
+</div>
+{% endfor %}
 
-<h2>{{ _("Popular Posts") }}</h2>
-<div class="discuss-posts"></div>
+<div style="margin-bottom: 20px;">
+	<h2>{{ _("Forum Activity") }}</h2>
+	{% for topic in topics %}
+		<a href="{{ topic[post_params.link] }}">
+			<h4>{{ topic[post_params.title] }}</h4>
+		</a>
+		{% if topic[post_params.description] -%}
+		<p>{{ topic[post_params.description] }}</p>
+		{%- endif %}
+		<hr>
+		{% endfor %}
+	<p><a href="{{ forum_url }}">{{ _("Visit the forums") }}</a></p>
+</div>
 
-<h2>{{ _("Your tickets") }}</h2>
-<p>See all --> to List view of issues</p>
-<p>Open a new ticket</p>
+<div style="margin-bottom: 20px;">
+	<h2>{{ _("Your tickets") }}</h2>
+		{% for doc in issues %}
+			{% include "templates/includes/issue_row.html" %}
+		{% endfor %}
+	<p><a href="/issues">{{ _("See all open tickets") }}</a></p>
+</div>
+
+<a href="/issues?new=1" class="btn btn-primary btn-new btn-sm">
+	{{ _("Open a new ticket") }}
+</a>
 
 {% endblock %}

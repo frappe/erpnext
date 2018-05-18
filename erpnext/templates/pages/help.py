@@ -1,13 +1,43 @@
 from __future__ import unicode_literals
-import frappe
+import frappe, json
+
+import requests
 
 from frappe import _
 
 def get_context(context):
 	context.no_cache = 1
+	settings = frappe.get_doc("Support Settings", "Support Settings")
+	s = settings
 
-def get_discuss_posts():
-	pass
+	# Get Started sections
+	sections = json.loads(s.get_started_sections)
+	context.get_started_sections = sections
 
-def get_users_tickets():
-	pass
+	# Forum posts
+	topics_data, post_params = get_forum_posts(s)
+	context.post_params = post_params
+	context.forum_url = s.forum_url
+	context.topics = topics_data[:3]
+
+	# Issues
+	context.issues = frappe.get_list("Issue")[:3]
+
+def get_forum_posts(s):
+	response = requests.get(s.forum_url + '/' + s.get_latest_query)
+	response.raise_for_status()
+	results = response.json()
+
+	topics_data = {} # it will actually be an array
+	key_list = s.response_key_list.split(',')
+	for key in key_list:
+		topics_data = results.get(key) if not topics_data else topics_data.get(key)
+
+	for topic in topics_data:
+		topic["link"] = s.forum_url + '/' + s.post_route_string + '/' + str(topic.get(s.post_route_key))
+
+	post_params = {
+		"title": s.post_title_key,
+		"description": s.post_description_key
+	}
+	return topics_data, post_params
