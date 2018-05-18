@@ -243,8 +243,6 @@ def get_payroll_period(from_date, to_date, company):
 	return payroll_period[0] if payroll_period else None
 
 
-
-@frappe.whitelist()
 def allocate_earned_leaves():
 	'''Allocate earned leaves to Employees'''
 	e_leave_types = frappe.get_all("Leave Type",
