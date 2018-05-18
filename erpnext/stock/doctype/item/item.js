@@ -228,9 +228,13 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc) {
+		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
 			return {
-				filters: { "is_group": 0 }
+				filters: { 
+					"is_group": 0,
+					"company": row.company
+				}
 			}
 		}
 
