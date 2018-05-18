@@ -19,7 +19,7 @@ frappe.ui.form.on('Share Transfer', {
 		if (frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Make Journal Entry'), function () {
 				erpnext.share_transfer.make_jv(frm);
-			})
+			});
 		}
 	},
 	no_of_shares: (frm) => {
@@ -32,16 +32,16 @@ frappe.ui.form.on('Share Transfer', {
 			erpnext.share_transfer.update_amount(frm);
 		}
 	},
-	company: function(frm) {
+	company: async function(frm) {
 		if (frm.doc.company) {
-			let currency = frappe.db.get_value("Company", frm.doc.company, "default_currency", function(r) {});
+			let currency = (await frappe.db.get_value("Company", frm.doc.company, "default_currency")).message.default_currency;
 			frm.set_query("equity_or_liability_account", function() {
 				return {
 					filters: {
 						"is_group":0,
 						"root_type": ["in",["Equity","Liability"]],
 						"company": frm.doc.company,
-						"account_currency": currency.responseJSON.message.default_currency
+						"account_currency": currency
 					}
 				};
 			});
@@ -51,7 +51,7 @@ frappe.ui.form.on('Share Transfer', {
 						"is_group":0,
 						"root_type":"Asset",
 						"company": frm.doc.company,
-						"account_currency": currency.responseJSON.message.default_currency
+						"account_currency": currency
 					}
 				};
 			});
