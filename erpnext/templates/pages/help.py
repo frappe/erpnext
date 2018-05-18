@@ -26,12 +26,12 @@ def get_context(context):
 def get_forum_posts(s):
 	response = requests.get(s.forum_url + '/' + s.get_latest_query)
 	response.raise_for_status()
-	results = response.json()
+	response_json = response.json()
 
 	topics_data = {} # it will actually be an array
 	key_list = s.response_key_list.split(',')
 	for key in key_list:
-		topics_data = results.get(key) if not topics_data else topics_data.get(key)
+		topics_data = response_json.get(key) if not topics_data else topics_data.get(key)
 
 	for topic in topics_data:
 		topic["link"] = s.forum_url + '/' + s.post_route_string + '/' + str(topic.get(s.post_route_key))
