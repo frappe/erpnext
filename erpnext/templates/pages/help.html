@@ -16,32 +16,35 @@
 </div>
 
 {% for section in get_started_sections %}
-<div style="margin-bottom: 20px;">
+<div style="margin-bottom: 30px;">
 	<h2>{{ section["name"] }}</h2>
 	{% for item in section["items"] %}
-		<a href="{{ item.link }}">
-			<h4>{{ item.title }}</h4>
-		</a>
+	<div style="margin: 20px 0;">
+		<a href="{{ item.link }}"><b>{{ item.title }}</b></a>
 		{% if item.description -%}
 		<p>{{ item.description }}</p>
 		{%- endif %}
-	<hr>
+	</div>
 	{% endfor %}
+	<p><a href="/kb/support">{{ _("See All Articles") }}</a></p>
+	<hr>
 </div>
 {% endfor %}
 
-<div style="margin-bottom: 20px;">
+<div style="margin-bottom: 30px;">
 	<h2>{{ _("Forum Activity") }}</h2>
 	{% for topic in topics %}
+	<div style="margin: 20px 0;">
 		<a href="{{ topic[post_params.link] }}">
-			<h4>{{ topic[post_params.title] }}</h4>
+			<b>{{ topic[post_params.title] }}</b>
 		</a>
 		{% if topic[post_params.description] -%}
 		<p>{{ topic[post_params.description] }}</p>
 		{%- endif %}
-		<hr>
-		{% endfor %}
+	</div>
+	{% endfor %}
 	<p><a href="{{ forum_url }}">{{ _("Visit the forums") }}</a></p>
+	<hr>
 </div>
 
 <div style="margin-bottom: 20px;">

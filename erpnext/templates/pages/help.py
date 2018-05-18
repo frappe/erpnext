@@ -3,8 +3,6 @@ import frappe, json
 
 import requests
 
-from frappe import _
-
 def get_context(context):
 	context.no_cache = 1
 	settings = frappe.get_doc("Support Settings", "Support Settings")

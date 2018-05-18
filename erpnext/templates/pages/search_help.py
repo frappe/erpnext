@@ -52,7 +52,9 @@ def get_response(api, text):
 	response.raise_for_status()
 	return response.json()
 
-def get_topics_data(api, response_json={}):
+def get_topics_data(api, response_json):
+	if not response_json:
+		response_json = {}
 	topics_data = {} # it will actually be an array
 	key_list = api.response_result_key_path.split(',')
 
@@ -61,7 +63,10 @@ def get_topics_data(api, response_json={}):
 
 	return topics_data or []
 
-def prepare_api_results(api, topics_data=[]):
+def prepare_api_results(api, topics_data):
+	if not topics_data:
+		topics_data = []
+
 	results = []
 	for topic in topics_data:
 		route = api.base_url + '/' + (api.post_route  + '/' if api.post_route else "")
