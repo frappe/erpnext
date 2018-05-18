@@ -45,6 +45,8 @@ frappe.ui.form.on('Material Request', {
 					stock_qty: item.stock_qty,
 					company: frm.doc.company,
 					conversion_rate: 1,
+					name: frm.doc.name,
+					material_request_type: frm.doc.material_request_type,
 					plc_conversion_rate: 1,
 					rate: item.rate,
 					conversion_factor: item.conversion_factor
