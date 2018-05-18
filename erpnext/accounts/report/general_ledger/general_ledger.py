@@ -167,11 +167,12 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
 
-	if filters.get("finance_book"):
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
+		filters['finance_book'] = company_finance_book
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
-	else:
-		filters['finance_book'] = erpnext.get_default_finance_book(filters.get("company"))
-		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+	elif filters.get("finance_book"):
+		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
