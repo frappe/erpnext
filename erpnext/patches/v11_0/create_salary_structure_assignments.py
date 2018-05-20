@@ -18,6 +18,9 @@ def execute():
 		s.base = d.base
 		s.variable = d.variable
 		s.company = d.company
+
+		# to migrate the data of the old employees
+		s.flags.old_employee = True
 		s.save()
 
 	frappe.db.sql("update `tabSalary Structure` set docstatus=1")

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint
 
@@ -332,12 +332,14 @@ class ReceivablePayableReport(object):
 			conditions.append("company=%s")
 			values.append(self.filters.company)
 
-		if self.filters.finance_book:
-			conditions.append("finance_book in (%s, '')")
+		company_finance_book = erpnext.get_default_finance_book(self.filters.company)
+
+		if not self.filters.finance_book or (self.filters.finance_book == company_finance_book):
+			conditions.append("ifnull(finance_book,'') in (%s, '')")
+			values.append(company_finance_book)
+		elif self.filters.finance_book:
+			conditions.append("ifnull(finance_book,'') = %s")
 			values.append(self.filters.finance_book)
-		else:
-			conditions.append("ifnull(finance_book,'')=%s")
-			values.append('')
 
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")

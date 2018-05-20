@@ -67,6 +67,9 @@ def update_instructors(comp_dict):
 				THEN "%s"
 			'''%(employee.name, department, records[department]))
 
+	if not when_then:
+		return
+
 	frappe.db.sql("""
 		update
 			`tabInstructor`
