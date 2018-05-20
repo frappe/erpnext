@@ -251,7 +251,7 @@ def get_basic_details(args, item):
 		"net_rate": 0.0,
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
-		"supplier": item_defaults.get("supplier") or '',
+		"supplier": item_defaults.get("default_supplier"),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,
