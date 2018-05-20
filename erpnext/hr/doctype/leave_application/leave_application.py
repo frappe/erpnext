@@ -530,3 +530,8 @@ def add_holidays(events, start, end, employee, company):
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})
+
+@frappe.whitelist()
+def get_leave_approver_data(employee):
+	return frappe.db.get_value("Employee Leave Approver",
+		{'parent': employee}, 'leave_approver')
