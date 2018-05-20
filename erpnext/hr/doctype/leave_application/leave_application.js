@@ -5,6 +5,19 @@ cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.add_fetch('employee','company','company');
 
 frappe.ui.form.on("Leave Application", {
+	setup: function(frm) {
+		frm.set_query("leave_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
+				}
+			};
+		}); 
+
+		frm.set_query("employee", erpnext.queries.employee);
+	},
 	onload: function(frm) {
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
@@ -22,17 +35,6 @@ frappe.ui.form.on("Leave Application", {
 				}
 			});
 		}
-		frm.set_query("leave_approver", function() {
-			return {
-				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
-				filters: {
-					employee: frm.doc.employee,
-					doctype: frm.doc.doctype
-				}
-			};
-		}); 
-
-		frm.set_query("employee", erpnext.queries.employee);
 	},
 
 	validate: function(frm) {
