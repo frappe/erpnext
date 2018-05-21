@@ -126,6 +126,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "On Leave"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 					else:
 						doc = frappe.new_doc("Attendance")
@@ -134,6 +135,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "Half Day"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 
 	def validate_salary_processed_days(self):
