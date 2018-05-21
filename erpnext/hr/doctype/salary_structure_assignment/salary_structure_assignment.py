@@ -31,7 +31,7 @@ class SalaryStructureAssignment(Document):
 			if self.from_date and getdate(self.from_date) > getdate(self.to_date):
 				frappe.throw(_("From Date {0} cannot be after To Date {1}")
 					.format(self.from_date, self.to_date))
-			if relieving_date and getdate(self.to_date) > relieving_date and not self.flags.old_employee:
+			if relieving_date and getdate(self.to_date) > getdate(relieving_date) and not self.flags.old_employee:
 				frappe.throw(_("To Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.to_date, relieving_date))
 
