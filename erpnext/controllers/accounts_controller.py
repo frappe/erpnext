@@ -731,7 +731,7 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
-				li.append('{0} in row {1}'.format(d.due_date, d.idx))
+				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
 			dates.append(d.due_date)
 
 		if li:
