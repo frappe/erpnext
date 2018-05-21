@@ -566,7 +566,7 @@ class StockEntry(StockController):
 		item = frappe.db.sql("""select i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no,
 				id.expense_account, id.buying_cost_center
-			from `tabItem`, `tabItem Default` id
+			from `tabItem` i, `tabItem Default` id
 			where i.name=%s and i.name=id.parent and id.company=%s
 				and i.disabled=0
 				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
