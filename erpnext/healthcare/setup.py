@@ -17,6 +17,7 @@ def setup_healthcare():
 	create_lab_test_items()
 	create_lab_test_template()
 	create_sensitivity()
+	add_healthcare_service_unit_tree_root()
 
 def create_medical_departments():
 	departments = [
@@ -260,3 +261,13 @@ def create_sensitivity():
 		{"doctype": "Sensitivity", "sensitivity": _("Intermediate")}
 	]
 	insert_record(records)
+
+def add_healthcare_service_unit_tree_root():
+	record = [
+	 {
+	  "doctype": "Healthcare Service Unit",
+	  "healthcare_service_unit_name": "All Healthcare Service Unit",
+	  "is_group": 1
+	 }
+	]
+	insert_record(record)

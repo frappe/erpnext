@@ -12,10 +12,8 @@ frappe.ui.form.on('Payment Entry', {
 
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
-			var party_account_type = in_list(["Customer", "Student"], frm.doc.party_type) ?
-				"Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash"] : party_account_type;
+				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 
 			return {
 				filters: {
@@ -29,16 +27,14 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party_type", function() {
 			return{
 				"filters": {
-					"name": ["in",["Customer","Supplier", "Employee", "Student"]],
+					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			}
 		});
 
 		frm.set_query("paid_to", function() {
-			var party_account_type = in_list(["Customer", "Student"], frm.doc.party_type) ?
-				"Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash"] : party_account_type;
+				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 
 			return {
 				filters: {
@@ -86,9 +82,9 @@ frappe.ui.form.on('Payment Entry', {
 		});
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
-			child = locals[cdt][cdn];
-			filters = {"docstatus": 1, "company": doc.company};
-			party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 
+			const child = locals[cdt][cdn];
+			const filters = {"docstatus": 1, "company": doc.company};
+			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
 				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {

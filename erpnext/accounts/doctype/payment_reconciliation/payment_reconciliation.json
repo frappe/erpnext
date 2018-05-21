@@ -391,7 +391,7 @@
  "icon": "fa fa-resize-horizontal", 
  "idx": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
+
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
