@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import getdate
 from frappe.model.document import Document
 
+class DuplicateAssignment(frappe.ValidationError): pass
+
 class SalaryStructureAssignment(Document):
 	def validate(self):
 		self.validate_dates()
@@ -56,7 +58,8 @@ class SalaryStructureAssignment(Document):
 			})
 
 		if assignment:
-			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").format(assignment[0][0], self.employee))
+			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").
+				format(assignment[0][0], self.employee), DuplicateAssignment)
 
 def get_assigned_salary_structure(employee, on_date):
 	if not employee or not on_date:
