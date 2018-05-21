@@ -285,13 +285,13 @@ def get_barcode_data(items_list):
 	itemwise_barcode = {}
 	for item in items_list:
 		barcodes = frappe.db.sql("""
-		select barcode from `tabItem Barcode` where parent = '{0}'
-		""".format(item.item_code), as_dict=1)
+			select barcode from `tabItem Barcode` where parent = %s
+		""", item.item_code, as_dict=1)
 
 		for barcode in barcodes:
 			if item.item_code not in itemwise_barcode:
 				itemwise_barcode.setdefault(item.item_code, [])
-			itemwise_barcode[item.item_code].append(barcode)
+			itemwise_barcode[item.item_code].append(barcode.get("barcode"))
 
 	return itemwise_barcode
 
