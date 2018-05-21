@@ -159,6 +159,12 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 	item_code: function(doc, cdt, cdn){
 		var scrap_items = false;
 		var child = locals[cdt][cdn];
+		frappe.db.get_value('Item', {item_code: child.item_code}, 'item_group', (r) => {
+			if (r) {
+				frappe.model.set_value('BOM Item', child.name, 'item_group',
+					r.item_group)
+			}
+		});
 		if(child.doctype == 'BOM Scrap Item') {
 			scrap_items = true;
 		}
