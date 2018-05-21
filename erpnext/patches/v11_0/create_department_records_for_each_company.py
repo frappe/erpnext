@@ -47,6 +47,9 @@ def update_records(doctype, comp_dict):
 				THEN "%s"
 			'''%(company, department, records[department]))
 
+	if not when_then:
+		return
+
 	frappe.db.sql("""
 		update
 			`tab%s`
@@ -66,6 +69,9 @@ def update_instructors(comp_dict):
 				WHEN employee = "%s" and department = "%s"
 				THEN "%s"
 			'''%(employee.name, department, records[department]))
+
+	if not when_then:
+		return
 
 	frappe.db.sql("""
 		update

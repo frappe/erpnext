@@ -153,12 +153,14 @@ def update_tax_table(doc):
 
 def get_items_list(pos_profile, company):
 	cond = ""
-	args_list = [company]
+	args_list = []
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
 		for d in pos_profile.get('item_groups'):
 			args_list.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
 		cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
+		
+		args_list = [company] + args_list
 
 	return frappe.db.sql("""
 		select
@@ -285,13 +287,13 @@ def get_barcode_data(items_list):
 	itemwise_barcode = {}
 	for item in items_list:
 		barcodes = frappe.db.sql("""
-		select barcode from `tabItem Barcode` where parent = '{0}'
-		""".format(item.item_code), as_dict=1)
+			select barcode from `tabItem Barcode` where parent = %s
+		""", item.item_code, as_dict=1)
 
 		for barcode in barcodes:
 			if item.item_code not in itemwise_barcode:
 				itemwise_barcode.setdefault(item.item_code, [])
-			itemwise_barcode[item.item_code].append(barcode)
+			itemwise_barcode[item.item_code].append(barcode.get("barcode"))
 
 	return itemwise_barcode
 

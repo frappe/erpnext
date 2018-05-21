@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Benefit Claim', {
-	refresh: function(frm) {
-
+	setup: function(frm) {
+		frm.set_query("earning_component", function() {
+			return {
+				filters: {
+					type: "Earning",
+					is_flexible_benefit: true,
+					disabled: false
+				}
+			};
+		});
 	}
 });

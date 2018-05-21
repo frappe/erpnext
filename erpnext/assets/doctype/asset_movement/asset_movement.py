@@ -55,7 +55,5 @@ class AssetMovement(Document):
 		frappe.db.set_value("Asset", self.asset, "location", location)
 
 		if self.serial_no:
-			serial_nos = get_serial_nos(self.serial_no)
-
-			frappe.db.sql(""" update `tabSerial No` set location = %s where name in (%s)"""
-				%('%s', ','.join(['%s'] * len(serial_nos))), (location, tuple(serial_nos)))
+			for d in get_serial_nos(self.serial_no):
+				frappe.db.set_value('Serial No', d, 'location', location)
