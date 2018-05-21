@@ -65,8 +65,8 @@ erpnext.share_transfer.update_amount = function(frm) {
 };
 
 erpnext.share_transfer.make_jv = function (frm) {
-	var account,payment_account,credit_applicant_type,credit_applicant,
-		debit_applicant_type,debit_applicant;
+	var account, payment_account, credit_applicant_type, credit_applicant,
+		debit_applicant_type, debit_applicant;
 
 	if (frm.doc.transfer_type == "Transfer") {
 		account = frm.doc.equity_or_liability_account;
@@ -76,13 +76,21 @@ erpnext.share_transfer.make_jv = function (frm) {
 		debit_applicant_type = "Shareholder";
 		debit_applicant = frm.doc.from_shareholder;
 	}
+	else if (frm.doc.transfer_type == "Issue") {
+		account = frm.doc.asset_account;
+		payment_account = frm.doc.equity_or_liability_account;
+		credit_applicant_type = "Shareholder";
+		credit_applicant = frm.doc.to_shareholder;
+		debit_applicant_type = "";
+		debit_applicant = "";
+	}
 	else {
-		account =(frm.doc.transfer_type == "Issue") ? frm.doc.asset_account : frm.doc.equity_or_liability_account;
-		payment_account = (frm.doc.transfer_type == "Issue") ? frm.doc.equity_or_liability_account : frm.doc.asset_account;
-		credit_applicant_type = (frm.doc.transfer_type == "Issue") ? "Shareholder" :"";
-		credit_applicant = (frm.doc.transfer_type == "Issue") ? frm.doc.to_shareholder :"";
-		debit_applicant_type = (frm.doc.transfer_type == "Purchase") ? "Shareholder" :"";
-		debit_applicant = (frm.doc.transfer_type == "Purchase") ? frm.doc.from_shareholder :"";
+		account = frm.doc.equity_or_liability_account;
+		payment_account = frm.doc.asset_account;
+		credit_applicant_type = "";
+		credit_applicant = "";
+		debit_applicant_type = "Shareholder";
+		debit_applicant = frm.doc.from_shareholder;
 	}
 	frappe.call({
 		args: {
