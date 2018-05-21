@@ -58,7 +58,6 @@ frappe.ui.form.on('Material Request', {
 					$.each(r.message, function(k, v) {
 						if(!d[k]) d[k] = v;
 					});
-					debugger
 				}
 			}
 		});
