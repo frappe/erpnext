@@ -1,12 +1,18 @@
 frappe.ui.form.on("Communication", {
 	refresh: (frm) => {
-		// setup custom Make button only if Communication is Email
-		if(frm.doc.communication_medium == "Email" && frm.doc.sent_or_received == "Received") {
+		// setup custom Make button only if Communication is Email/Phone
+		if((frm.doc.communication_medium == "Email" || frm.doc.communication_medium == "Phone") && frm.doc.sent_or_received == "Received") {
 			frm.events.setup_custom_buttons(frm);
 		}
 	},
 
 	setup_custom_buttons: (frm) => {
+		if(frm.doc.communication_medium == "Phone"){		
+			frm.add_custom_button(__("Callback"), function() {
+				frm.trigger('callback');
+			});
+		}
+
 		let confirm_msg = "Are you sure you want to create {0} from this email";
 		if(frm.doc.reference_doctype !== "Issue") {
 			frm.add_custom_button(__("Issue"), () => {
@@ -74,5 +80,23 @@ frappe.ui.form.on("Communication", {
 				}
 			}
 		})
-	}
+	},
+
+	callback:(frm) => {
+		frappe.call({
+			method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
+			args: {
+				"To": frm.doc.phone_no,
+				"CallerId": frm.doc.exophone,
+				"reference_doctype": frm.doc.reference_doctype || "",
+				"reference_name": frm.doc.reference_name || ""
+			},
+			freeze: true,
+			freeze_message: __("Calling.."),
+			callback: function(r) {
+				frappe.msgprint(__("Call Connected"))
+				console.log("Outbound calls communication",r);
+			}
+		})
+	},
 });
