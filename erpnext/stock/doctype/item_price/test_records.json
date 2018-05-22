@@ -3,24 +3,47 @@
   "doctype": "Item Price",
   "item_code": "_Test Item",
   "price_list": "_Test Price List",
-  "price_list_rate": 100
+  "price_list_rate": 100,
+  "min_qty": 2,
+  "valid_from": "2017-04-18",
+  "valid_upto": "2017-04-26"
  },
  {
   "doctype": "Item Price",
   "item_code": "_Test Item",
   "price_list": "_Test Price List Rest of the World",
-  "price_list_rate": 10
+  "price_list_rate": 10,
+  "min_qty": 5
  },
  {
   "doctype": "Item Price",
   "item_code": "_Test Item 2",
   "price_list": "_Test Price List Rest of the World",
-  "price_list_rate": 20
+  "price_list_rate": 20,
+  "valid_from": "2017-04-18",
+  "valid_upto": "2017-04-26",
+  "min_qty": 7,
+  "customer": "_Test Customer",
+  "uom": "_Test UOM"
  },
  {
   "doctype": "Item Price",
   "item_code": "_Test Item Home Desktop 100",
   "price_list": "_Test Price List",
-  "price_list_rate": 1000
+  "price_list_rate": 1000,
+  "min_qty" : 10,
+  "valid_from": "2017-04-10",
+  "valid_upto": "2017-04-17",
+  "min_qty": 2
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item Home Desktop Manufactured",
+  "price_list": "_Test Price List",
+  "price_list_rate": 1000,
+  "min_qty" : 10,
+  "valid_from": "2017-04-10",
+  "valid_upto": "2017-04-17",
+  "min_qty": 2
  }
 ]
