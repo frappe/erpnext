@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import nowdate, date_diff, getdate
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
+from frappe.desk.reportview import get_match_cond
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -130,3 +131,25 @@ def get_amount(payroll_period_days, start_date, end_date, amount):
 	amount_per_day = amount / payroll_period_days
 	total_amount = amount_per_day * salary_slip_days
 	return total_amount
+
+def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
+	if len(filters) < 2:
+		return {}
+	employee = filters['employee']
+	date = filters['date']
+	salary_structure = get_assigned_salary_sturecture(employee, date)
+
+	if len(salary_structure) > 0:
+		query = """select salary_component from `tabSalary Detail` where parent = '{salary_structure}'
+		and is_flexible_benefit = 1
+		order by name"""
+
+		return frappe.db.sql(query.format(**{
+			"salary_structure": salary_structure[0][0],
+			"mcond": get_match_cond(doctype)
+		}), {
+			'start': start,
+			'page_len': page_len
+		})
+
+	return {}
