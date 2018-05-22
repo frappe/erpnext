@@ -23,7 +23,7 @@ class Gstr1Report(object):
 			posting_date,
 			base_grand_total,
 			base_rounded_total,
-			customer_gstin,
+			COALESCE(NULLIF(customer_gstin,''), NULLIF(billing_address_gstin, '')) as customer_gstin,
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
