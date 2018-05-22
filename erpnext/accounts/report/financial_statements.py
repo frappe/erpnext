@@ -7,7 +7,7 @@ import re
 from past.builtins import cmp
 import functools
 
-import frappe
+import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
@@ -381,6 +381,15 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		else:
 			additional_conditions.append("ifnull(finance_book, '') = ''")
 
+
+		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+
+		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
+			additional_conditions.append("finance_book in ('%s', '')" %
+				frappe.db.escape(company_finance_book))
+		elif filters.get("finance_book"):
+			additional_conditions.append("finance_book = '%s' " %
+				frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

@@ -541,7 +541,7 @@ class Item(WebsiteGenerator):
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s, modified=NOW() where item_code=%s""",
+			item_description=%s, brand=%s where item_code=%s""",
                     (self.item_name, self.description, self.brand, self.name))
 
 	def on_trash(self):
@@ -890,7 +890,7 @@ def get_item_defaults(item, company):
 	item_defaults = frappe.db.sql('''
 		select
 			i.item_name, i.description, i.stock_uom, i.name, i.is_stock_item, i.item_code, i.item_group,
-			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center
+			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center, id.default_supplier
 		from
 			`tabItem` i, `tabItem Default` id
 		where

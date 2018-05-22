@@ -285,6 +285,12 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customers Without Any Sales Transactions",
+					"doctype": "Customer"
+				},
 			]
 		},
 		{

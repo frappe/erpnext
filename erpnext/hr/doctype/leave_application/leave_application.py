@@ -127,7 +127,7 @@ class LeaveApplication(Document):
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
 
-			elif self.from_date <= nowdate():
+			elif self.to_date <= nowdate():
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
 					if not date == self.half_day_date:
@@ -137,6 +137,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "On Leave"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 					else:
 						doc = frappe.new_doc("Attendance")
@@ -145,6 +146,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "Half Day"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 
 	def validate_salary_processed_days(self):
@@ -374,7 +376,12 @@ def get_leave_details(employee, date):
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
 
-	return leave_allocation
+	ret = {
+		'leave_allocation': leave_allocation,
+		'leave_approver': get_leave_approver(employee)
+	}
+
+	return ret
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
@@ -603,3 +610,10 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 
 	return leave_days
 	
+def get_leave_approver(employee, department=None):
+	if not department:
+		department = frappe.db.get_value('Employee', employee, 'department')
+
+	if department:
+		return frappe.db.get_value('Department Approver', {'parent': department,
+			'parentfield': 'leave_approver', 'idx': 1}, 'approver')

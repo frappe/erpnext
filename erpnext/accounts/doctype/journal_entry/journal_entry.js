@@ -17,7 +17,8 @@ frappe.ui.form.on("Journal Entry", {
 					"from_date": frm.doc.posting_date,
 					"to_date": frm.doc.posting_date,
 					"company": frm.doc.company,
-					group_by_voucher: 0
+					"finance_book": frm.doc.finance_book,
+					"group_by_voucher": 0
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");

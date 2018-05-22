@@ -621,8 +621,8 @@ class AccountsController(TransactionBase):
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				if d.qty > 1:
-					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
+				# if d.qty > 1:
+# 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
 
 				if d.meta.get_field("asset") and d.asset:
 					asset = frappe.get_doc("Asset", d.asset)
@@ -635,14 +635,14 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
 							.format(d.idx, d.asset, d.item_code))
 
-					elif asset.docstatus != 1:
-						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+					# elif asset.docstatus != 1:
+# 						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 
 					elif self.doctype == "Purchase Invoice":
-						if asset.status != "Submitted":
-							frappe.throw(_("Row #{0}: Asset {1} is already {2}")
-								.format(d.idx, d.asset, asset.status))
-						elif getdate(asset.purchase_date) != getdate(self.posting_date):
+						# if asset.status != "Submitted":
+# 							frappe.throw(_("Row #{0}: Asset {1} is already {2}")
+# 								.format(d.idx, d.asset, asset.status))
+						if getdate(asset.purchase_date) != getdate(self.posting_date):
 							frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
 						elif asset.is_existing_asset:
 							frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
@@ -731,7 +731,7 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
-				li.append('{0} in row {1}'.format(d.due_date, d.idx))
+				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
 			dates.append(d.due_date)
 
 		if li:

@@ -35,6 +35,10 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
@@ -62,9 +66,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
-			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
-				this.show_general_ledger();
-			}
+			//removed for temporary
+			this.show_general_ledger();
 
 			this.frm.add_custom_button(__('Asset'), function() {
 				frappe.route_options = {

@@ -16,11 +16,13 @@ class AssetAdjustment(Document):
 
 	def on_submit(self):
 		self.make_depreciation_entry()
-		self.reschedule_depreciations()
+		self.reschedule_depreciations(self.new_asset_value)
 
 	def on_cancel(self):
 		if self.journal_entry:
 			frappe.throw(_("Cancel the journal entry {0} first").format(self.journal_entry))
+
+		self.reschedule_depreciations(self.current_asset_value)
 
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.current_asset_value - self.new_asset_value)
@@ -47,12 +49,13 @@ class AssetAdjustment(Document):
 		je.append("accounts", {
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
+			"cost_center": depreciation_cost_center or self.cost_center
 		})
 
 		je.append("accounts", {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
-			"cost_center": depreciation_cost_center
+			"cost_center": depreciation_cost_center or self.cost_center
 		})
 
 		je.flags.ignore_permissions = True
@@ -60,11 +63,11 @@ class AssetAdjustment(Document):
 
 		self.db_set("journal_entry", je.name)
 
-	def reschedule_depreciations(self):
+	def reschedule_depreciations(self, asset_value):
 		asset = frappe.get_doc('Asset', self.asset)
 
 		for d in asset.finance_books:
-			d.value_after_depreciation = self.new_asset_value
+			d.value_after_depreciation = asset_value
 
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max([s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx])

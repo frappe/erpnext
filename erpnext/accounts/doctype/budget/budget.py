@@ -264,9 +264,12 @@ def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_ye
 def get_item_details(args):
 	cost_center, expense_account = None, None
 
+	if not args.get('company'):
+		return cost_center, expense_account
+
 	if args.item_code:
-		cost_center, expense_account = frappe.db.get_value('Item',
-			args.item_code, ['buying_cost_center', 'expense_account'])
+		cost_center, expense_account = frappe.db.get_value('Item Default',
+			{'parent': args.item_code, 'company': args.get('company')}, ['buying_cost_center', 'expense_account'])
 
 	if not (cost_center and expense_account):
 		for doctype in ['Item Group', 'Company']:
@@ -286,6 +289,6 @@ def get_item_details(args):
 
 def get_expense_cost_center(doctype, value):
 	fields = (['default_cost_center', 'default_expense_account']
-		if doctype == 'Item Group'else ['cost_center', 'default_expense_account'])
+		if doctype == 'Item Group' else ['cost_center', 'default_expense_account'])
 
 	return frappe.db.get_value(doctype, value, fields)

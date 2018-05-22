@@ -210,8 +210,8 @@ def get_basic_details(args, item):
 	warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or args.warehouse
 
 	material_request_type = ''
-	if args.get('doctype') == "Material Request":
-		material_request_type = frappe.db.get_value('Material Request',
+	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
+		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type')
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
@@ -219,7 +219,7 @@ def get_basic_details(args, item):
 		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
-			(args.get('doctype') == 'Material Request' and material_request_type == 'Purchase'):
+			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom
@@ -251,7 +251,7 @@ def get_basic_details(args, item):
 		"net_rate": 0.0,
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
-		"supplier": item.default_supplier,
+		"supplier": item_defaults.get("default_supplier"),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,

@@ -487,7 +487,7 @@ def get_patry_tax_withholding_details(ref_doc):
 
 		if tax.valid_till and date_diff(tax.valid_till, ref_doc.posting_date) > 0:
 			tax_mapper.update({
-				"rate": tax.applicable_percentage
+				"rate": tax.applicable_percent
 			})
 
 		prepare_tax_withholding_details(tax_mapper, tax_withholding_details)

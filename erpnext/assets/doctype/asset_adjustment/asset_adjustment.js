@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Adjustment', {
+	setup: function(frm) {
+		frm.add_fetch('company', 'cost_center', 'cost_center');
+		frm.set_query('cost_center', function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			}
+		});
+	},
+
 	asset: function(frm) {
 		frm.trigger("set_current_asset_value");
 	},
@@ -11,7 +23,6 @@ frappe.ui.form.on('Asset Adjustment', {
 	},
 
 	set_current_asset_value: function(frm) {
-		debugger
 		if (frm.doc.finance_book && frm.doc.asset) {
 			frm.call({
 				method: "erpnext.assets.doctype.asset_adjustment.asset_adjustment.get_current_asset_value",

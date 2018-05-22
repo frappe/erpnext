@@ -10,7 +10,7 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'warehouse')
 
 	for d in frappe.get_all('Warehouse',
-		fields = ['warehouse_name', 'is_group', 'parent_warehouse'], order_by="is_group desc"):
+		fields = ['warehouse_name', 'is_group', 'parent_warehouse'], order_by="lft asc"):
 		try:
 			loc = frappe.new_doc('Location')
 			loc.location_name = d.warehouse_name

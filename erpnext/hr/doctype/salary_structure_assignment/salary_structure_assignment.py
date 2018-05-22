@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import getdate
 from frappe.model.document import Document
 
+class DuplicateAssignment(frappe.ValidationError): pass
+
 class SalaryStructureAssignment(Document):
 	def validate(self):
 		self.validate_dates()
@@ -21,7 +23,9 @@ class SalaryStructureAssignment(Document):
 			if joining_date and getdate(self.from_date) < joining_date:
 				frappe.throw(_("From Date {0} cannot be before employee's joining Date {1}")
 					.format(self.from_date, joining_date))
-			if relieving_date and getdate(self.from_date) > relieving_date:
+
+			# flag - old_employee is for migrating the old employees data via patch
+			if relieving_date and getdate(self.from_date) > relieving_date and not self.flags.old_employee:
 				frappe.throw(_("From Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.from_date, relieving_date))
 
@@ -29,7 +33,7 @@ class SalaryStructureAssignment(Document):
 			if self.from_date and getdate(self.from_date) > getdate(self.to_date):
 				frappe.throw(_("From Date {0} cannot be after To Date {1}")
 					.format(self.from_date, self.to_date))
-			if relieving_date and getdate(self.to_date) > relieving_date:
+			if relieving_date and getdate(self.to_date) > getdate(relieving_date) and not self.flags.old_employee:
 				frappe.throw(_("To Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.to_date, relieving_date))
 
@@ -54,7 +58,8 @@ class SalaryStructureAssignment(Document):
 			})
 
 		if assignment:
-			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").format(assignment[0][0], self.employee))
+			frappe.throw(_("Active Salary Structure Assignment {0} found for employee {1} for the given dates").
+				format(assignment[0][0], self.employee), DuplicateAssignment)
 
 def get_assigned_salary_structure(employee, on_date):
 	if not employee or not on_date:
