@@ -12,12 +12,10 @@ from frappe.desk.reportview import get_match_cond
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
+		self.validate_duplicate_on_payroll_period()
 		if self.max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		self.validate_max_benefit_for_component()
-
-	def before_submit(self):
-		self.validate_duplicate_on_payroll_period()
 
 	def validate_max_benefit_for_component(self):
 		if self.employee_benefits:
