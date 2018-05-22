@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, os
 from frappe import _
+from frappe.utils import get_timestamp
 
 from frappe.utils import cint, today, formatdate
 import frappe.defaults
@@ -441,3 +442,56 @@ def add_node():
 		args.parent_company = None
 
 	frappe.get_doc(args).insert()
+
+def get_timeline_data(doctype, name):
+	'''returns timeline data based on linked records in dashboard'''
+
+	out = {}
+
+	items = frappe.db.sql('''
+		select transaction_date, count(*) as count
+
+		from (
+			select name, transaction_date, company
+			from `tabQuotation`
+
+			UNION ALL
+
+			select name, transaction_date, company
+			from `tabSales Order`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabDelivery Note`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabSales Invoice`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabIssue`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabProject`
+		) t
+
+		where
+			company=%s
+			and
+			transaction_date > date_sub(curdate(), interval 1 year)
+
+		group by
+			transaction_date
+			''', (name), as_dict=True)
+
+	for d in items:
+		timestamp = get_timestamp(d["transaction_date"])
+		out.update({ timestamp: d["count"] })
+
+	return out
