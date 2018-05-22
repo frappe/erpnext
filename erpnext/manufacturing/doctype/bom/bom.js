@@ -159,12 +159,6 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 	item_code: function(doc, cdt, cdn){
 		var scrap_items = false;
 		var child = locals[cdt][cdn];
-		frappe.db.get_value('Item', {item_code: child.item_code}, 'item_group', (r) => {
-			if (r) {
-				frappe.model.set_value('BOM Item', child.name, 'item_group',
-					r.item_group)
-			}
-		});
 		if(child.doctype == 'BOM Scrap Item') {
 			scrap_items = true;
 		}
@@ -393,7 +387,13 @@ frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
 	frappe.db.get_value('Item', {name: d.item_code}, 'allow_alternative_item', (r) => {
 		d.allow_alternative_item = r.allow_alternative_item
 	})
+	frappe.db.get_value('Item', {name: d.item_code}, 'item_group', (r) => {
+		d.item_group = r.item_group
+	});
+
 	refresh_field("allow_alternative_item", d.name, d.parentfield);
+	refresh_field("item_qroup", d.name, d.parentfield);
+
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
