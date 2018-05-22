@@ -31,13 +31,15 @@ class SalaryStructure(Document):
 
 	def validate_max_benefits_with_flexi(self):
 		have_a_flexi = False
-		if self.max_benefits > 0 and self.earnings:
+		if self.earnings:
 			flexi_amount = 0
 			for earning_component in self.earnings:
 				if earning_component.is_flexible_benefit == 1:
 					have_a_flexi = True
 					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
 					flexi_amount += max_of_component
+			if have_a_flexi and self.max_benefits == 0:
+				frappe.throw(_("Max benefits should be greater than zero to despense flexi"))
 			if self.max_benefits > flexi_amount:
 				frappe.throw(_("Total flexi component amount {0} should not be less \
 				than max benefits {1}").format(flexi_amount, self.max_benefits))
