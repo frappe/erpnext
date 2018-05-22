@@ -84,4 +84,55 @@ Then you can use that as a condition in the **Condition** rules to ensure emails
 1. Setting the Recipients and Message
     <img class="screenshot" alt="Set Message" src="{{docs_base_url}}/assets/img/setup/email/email-alert-2.png">
 
+---
+
+# Slack Notifications
+
+If you prefer to have your email alerts sent to a dedicated Slack channel, you can also choose the option "Slack" in the channel options and select the appropriate Slack Webhook URL.
+
+### Slack Webhook url
+
+A Slack webhook URL is an URL pointing directly to a Slack channel.
+
+In order to generate webhook URLs, you need to create a new Slack App:
+
+1. Go to https://api.slack.com/slack-apps
+2. Click on "Create a Slack App"
+<img class="screenshot" alt="New Slack App" src="{{docs_base_url}}/assets/img/setup/email/new-slack-app.png">
+
+3. Give your App a name and choose the right workspace
+<img class="screenshot" alt="Slack Incoming Webhooks" src="{{docs_base_url}}/assets/img/setup/email/slack-webhooks.png">
+
+Once your app is created, go to the "Incoming Webhooks" section and add a new Webhook to Workspace.
+<img class="screenshot" alt="Slack Webhook URL in ERPNext" src="{{docs_base_url}}/assets/img/setup/email/slack-webhook-url.png">
+
+Just select the channel you want to post to and you're done.
+
+Copy the created link, go back to ERPNext and use it to create a new Slack Webhook URL in Integrations > Slack Webhook URL.
+
+### Message Format
+
+Unlike Email messages, Slack doesn't allow HTML formatting.
+
+Instead you can use markdown formatting: [Slack Documentation](https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages)
+
+Example:
+	{% raw %}
+	*Order Overdue*
+
+	Transaction {{ doc.name }} has exceeded Due Date. Please take necessary action.
+
+
+	{% if comments %}
+	Last comment: {{ comments[-1].comment }} by {{ comments[-1].by }}
+	{% endif %}
+
+	*Details*
+
+	• Customer: {{ doc.customer }}
+	• Amount: {{ doc.grand_total }}
+	{% endraw %}
+
+<img class="screenshot" alt="Slack Notification" src="{{docs_base_url}}/assets/img/setup/email/slack-message.png">
+
 {next}
