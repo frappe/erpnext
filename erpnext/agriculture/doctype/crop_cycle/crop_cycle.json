@@ -286,7 +286,7 @@
    "label": "End Date", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "project.expected_end_date", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

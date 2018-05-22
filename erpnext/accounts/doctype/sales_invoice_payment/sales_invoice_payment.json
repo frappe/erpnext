@@ -190,7 +190,7 @@
    "label": "Type", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "mode_of_payment.type", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

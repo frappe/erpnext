@@ -63,7 +63,7 @@
    "label": "Abbr", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "salary_component.salary_component_abbr", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

@@ -96,7 +96,7 @@
    "label": "Employee Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "job_applicant.applicant_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

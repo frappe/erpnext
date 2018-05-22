@@ -344,7 +344,7 @@
    "label": "Reference Owner", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "reference_name.owner", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 

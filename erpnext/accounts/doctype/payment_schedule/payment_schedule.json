@@ -64,7 +64,7 @@
    "label": "Description", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "payment_term.description", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

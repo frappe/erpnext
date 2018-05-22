@@ -63,7 +63,7 @@
    "label": "Procedure Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "procedure.template", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

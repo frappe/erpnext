@@ -193,7 +193,7 @@
    "no_copy": 0, 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
-   "options": "expense_type.description", 
+   "options": "", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 

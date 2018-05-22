@@ -65,7 +65,7 @@
    "label": "Full Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "team_member.full_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

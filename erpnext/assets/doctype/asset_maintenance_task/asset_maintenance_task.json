@@ -437,7 +437,7 @@
    "label": "Assign to Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "assign_to.full_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

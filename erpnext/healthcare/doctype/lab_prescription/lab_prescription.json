@@ -62,7 +62,7 @@
    "label": "Test", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "test_code.test_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

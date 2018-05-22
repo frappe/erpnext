@@ -99,7 +99,7 @@
    "no_copy": 0, 
    "oldfieldname": "employee_name", 
    "oldfieldtype": "Data", 
-   "options": "employee.employee_name", 
+   "options": "", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 

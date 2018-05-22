@@ -439,7 +439,7 @@
    "label": "Country", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "company.country", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

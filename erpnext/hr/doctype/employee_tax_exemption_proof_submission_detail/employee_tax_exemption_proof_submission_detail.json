@@ -63,7 +63,7 @@
    "label": "Exemption Category", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "exemption_sub_category.exemption_category", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
