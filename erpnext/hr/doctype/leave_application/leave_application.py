@@ -127,7 +127,7 @@ class LeaveApplication(Document):
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
 
-			elif self.from_date <= nowdate():
+			elif self.to_date <= nowdate():
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
 					if not date == self.half_day_date:
@@ -137,6 +137,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "On Leave"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 					else:
 						doc = frappe.new_doc("Attendance")
@@ -145,6 +146,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "Half Day"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 
 	def validate_salary_processed_days(self):
