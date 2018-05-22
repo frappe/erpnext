@@ -18,4 +18,6 @@ human-resource-setup
 daily-work-summary
 fleet-management
 loan-management
+employee-promotion
+employee-transfer
 articles

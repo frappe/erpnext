@@ -518,10 +518,8 @@ class calculate_taxes_and_totals(object):
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
 
-				if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency:
-					item.margin_type = pricing_rule.margin_type
-					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-				elif pricing_rule.margin_type == 'Percentage':
+				if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
+						or (pricing_rule.margin_type == 'Percentage'):
 					item.margin_type = pricing_rule.margin_type
 					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 				else:
@@ -567,7 +565,8 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
-			company_currency=erpnext.get_company_currency(doc.company)
+			conversion_rate=doc.conversion_rate,
+			currency=doc.currency
 		)
 	)
 

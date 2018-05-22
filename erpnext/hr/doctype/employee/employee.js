@@ -51,6 +51,24 @@ function total_previous_experience(doc){
 }
 
 frappe.ui.form.on('Employee',{
+	setup: function(frm) {
+		frm.set_query("leave_policy", function() {
+			return {
+				"filters": {
+					"docstatus": 1
+				}
+			};
+		});
+	},
+	onload:function(frm) {
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
+	},
 	prefered_contact_email:function(frm){		
 		frm.events.update_contact(frm)		
 	},

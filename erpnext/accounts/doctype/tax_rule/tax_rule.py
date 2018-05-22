@@ -30,7 +30,7 @@ class TaxRule(Document):
 
 	def validate_tax_template(self):
 		if self.tax_type== "Sales":
-			self.purchase_tax_template = self.supplier = self.supplier_type = None
+			self.purchase_tax_template = self.supplier = self.supplier_group = None
 			if self.customer:
 				self.customer_group = None
 
@@ -38,7 +38,7 @@ class TaxRule(Document):
 			self.sales_tax_template = self.customer = self.customer_group = None
 
 			if self.supplier:
-				self.supplier_type = None
+				self.supplier_group = None
 
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
@@ -53,7 +53,7 @@ class TaxRule(Document):
 			"customer": 		self.customer,
 			"customer_group": 	self.customer_group,
 			"supplier":			self.supplier,
-			"supplier_type":	self.supplier_type,
+			"supplier_group":	self.supplier_group,
 			"billing_city":		self.billing_city,
 			"billing_county":	self.billing_county,
 			"billing_state": 	self.billing_state,
