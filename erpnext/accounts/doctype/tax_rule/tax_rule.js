@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch("customer", "customer_group", "customer_group" );
-cur_frm.add_fetch("supplier", "supplier_type", "supplier_type" );
+cur_frm.add_fetch("supplier", "supplier_group_name", "supplier_group" );
 
 frappe.ui.form.on("Tax Rule", "tax_type", function(frm) {
 	frm.toggle_reqd("sales_tax_template", frm.doc.tax_type=="Sales");

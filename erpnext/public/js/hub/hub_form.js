@@ -444,8 +444,8 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 				{ label: __('Supplier Name'), fieldtype: 'Data', fieldname: 'supplier_name', default: item.company_name },
 				{ label: __('Supplier Email'), fieldtype: 'Data', fieldname: 'supplier_email', default: item.seller },
 				{ fieldtype: 'Column Break' },
-				{ label: __('Supplier Type'), fieldname: 'supplier_type',
-					fieldtype: 'Link', options: 'Supplier Type' }
+				{ label: __('Supplier Group'), fieldname: 'supplier_group',
+					fieldtype: 'Link', options: 'Supplier Group' }
 			];
 			fields = fields.map(f => { f.reqd = 1; return f; });
 

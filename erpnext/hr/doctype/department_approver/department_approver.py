@@ -10,16 +10,6 @@ from frappe.model.document import Document
 class DepartmentApprover(Document):
 	pass
 
-def get_department_approvers(doctype, txt, searchfield, start, page_len, filters):
-	return get_approver_list(filters.get("user"))
-
-def get_approver_list(name):
-	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
-		tabUser user where
-		user.enabled and
-		user.name != %s 
-		""", name or "")
-
 @frappe.whitelist()
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 
@@ -27,6 +17,8 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 		frappe.throw(_("Please select Employee Record first."))
 
 	approvers = []
+	department_details = {}
+	department_list = []
 	employee_department = filters.get("department") or frappe.get_value("Employee", filters.get("employee"), "department")
 	if employee_department:
 		department_details = frappe.db.get_value("Department", {"name": employee_department}, ["lft", "rgt"], as_dict=True)

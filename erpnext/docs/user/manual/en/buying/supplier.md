@@ -38,7 +38,20 @@ If you don't want to customize payable account, and proceed with default payable
 You can add multiple companies in your ERPNext instance, and one Supplier can be used across multiple companies. In this case, you should define Companywise Payable Account for the Supplier in the "Default Payable Accounts" table.
 
 <iframe width="660" height="371" src="https://www.youtube.com/embed/anoGi_RpQ20" frameborder="0" allowfullscreen></iframe>
-
 (Check from 2:20)
+
+### Place Supplier On Hold
+In the Supplier form, check the "Block Supplier" checkbox. Next, choose the "Hold Type".
+
+The hold types are as follows:
+- Invoices: ERPNext will not allow Purchase Invoices or Purchase Orders to be created for the supplier
+- Payments: ERPNext will not allow Payment Entries to be created for the Supplier
+- All: ERPNext will apply both hold types above
+
+After selecting the hold type, you can optionally set a release date in the "Release Date" field.
+
+Take note of the following:
+- If you do not select a hold type, ERPNext will set it to "All"
+- If you do not set a release date, ERPNext will hold the Supplier indefinitely 
 
 {next}

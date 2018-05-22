@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -13,7 +13,7 @@ from erpnext.accounts.party import get_party_account_currency, validate_party_fr
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 
-force_item_fields = ("item_group", "brand", "stock_uom")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -36,9 +36,28 @@ class AccountsController(TransactionBase):
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
+	def ensure_supplier_is_not_blocked(self):
+		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
+		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
+		supplier = None
+		supplier_name = None
+
+		if is_buying_invoice or is_supplier_payment:
+			supplier_name = self.supplier if is_buying_invoice else self.party
+			supplier = frappe.get_doc('Supplier', supplier_name)
+
+		if supplier and supplier_name and supplier.on_hold:
+			if (is_buying_invoice and supplier.hold_type in ['All', 'Invoices']) or \
+					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
+				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
+					frappe.msgprint(
+						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
+
+		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
 
@@ -148,8 +167,13 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			# price list part
-			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
-				else "buying_price_list"
+			if buying_or_selling.lower() == "selling":
+				fieldname = "selling_price_list"
+				args = "for_selling"
+			else:
+				fieldname = "buying_price_list"
+				args = "for_buying"
+
 			if self.meta.get_field(fieldname) and self.get(fieldname):
 				self.price_list_currency = frappe.db.get_value("Price List",
 					self.get(fieldname), "currency")
@@ -159,7 +183,7 @@ class AccountsController(TransactionBase):
 
 				elif not self.plc_conversion_rate:
 					self.plc_conversion_rate = get_exchange_rate(self.price_list_currency,
-						self.company_currency, transaction_date)
+						self.company_currency, transaction_date, args)
 
 			# currency
 			if not self.currency:
@@ -169,7 +193,7 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
-					self.company_currency, transaction_date)
+					self.company_currency, transaction_date, args)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
@@ -198,7 +222,6 @@ class AccountsController(TransactionBase):
 
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
-
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
@@ -273,15 +296,16 @@ class AccountsController(TransactionBase):
 	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 
-		fiscal_years = get_fiscal_years(self.posting_date, company=self.company)
+		posting_date = args.get('posting_date') or self.get('posting_date')
+		fiscal_years = get_fiscal_years(posting_date, company=self.company)
 		if len(fiscal_years) > 1:
-			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(self.posting_date)))
+			frappe.throw(_("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(formatdate(posting_date)))
 		else:
 			fiscal_year = fiscal_years[0][0]
 
 		gl_dict = frappe._dict({
 			'company': self.company,
-			'posting_date': self.posting_date,
+			'posting_date': posting_date,
 			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
@@ -597,43 +621,39 @@ class AccountsController(TransactionBase):
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				if d.qty > 1:
-					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
+				# if d.qty > 1:
+# 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
 
-				if d.meta.get_field("asset"):
-					if not d.asset:
-						frappe.throw(_("Row #{0}: Asset is mandatory for fixed asset purchase/sale")
-							.format(d.idx))
-					else:
-						asset = frappe.get_doc("Asset", d.asset)
+				if d.meta.get_field("asset") and d.asset:
+					asset = frappe.get_doc("Asset", d.asset)
 
-						if asset.company != self.company:
-							frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
-								.format(d.idx, d.asset, self.company))
+					if asset.company != self.company:
+						frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
+							.format(d.idx, d.asset, self.company))
 
-						elif asset.item_code != d.item_code:
-							frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
-								.format(d.idx, d.asset, d.item_code))
+					elif asset.item_code != d.item_code:
+						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
+							.format(d.idx, d.asset, d.item_code))
 
-						elif asset.docstatus != 1:
-							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
+					# elif asset.docstatus != 1:
+# 						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 
-						elif self.doctype == "Purchase Invoice":
-							if asset.status != "Submitted":
-								frappe.throw(_("Row #{0}: Asset {1} is already {2}")
-									.format(d.idx, d.asset, asset.status))
-							elif getdate(asset.purchase_date) != getdate(self.posting_date):
-								frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
-							elif asset.is_existing_asset:
-								frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
+					elif self.doctype == "Purchase Invoice":
+						# if asset.status != "Submitted":
+# 							frappe.throw(_("Row #{0}: Asset {1} is already {2}")
+# 								.format(d.idx, d.asset, asset.status))
+						if getdate(asset.purchase_date) != getdate(self.posting_date):
+							frappe.throw(_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx, asset.purchase_date, d.asset))
+						elif asset.is_existing_asset:
+							frappe.throw(_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(d.idx, d.asset))
 
-						elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
-							if self.update_stock:
-								frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+					elif self.docstatus=="Sales Invoice" and self.docstatus == 1:
+						if self.update_stock:
+							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-							elif asset.status in ("Scrapped", "Cancelled", "Sold"):
-								frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
-									.format(d.idx, d.asset, asset.status))
+						elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+							frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
+								.format(d.idx, d.asset, asset.status))
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
@@ -711,7 +731,7 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
-				li.append('{0} in row {1}'.format(d.due_date, d.idx))
+				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
 			dates.append(d.due_date)
 
 		if li:
@@ -968,3 +988,18 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
 		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date
+
+
+def get_supplier_block_status(party_name):
+	"""
+	Returns a dict containing the values of `on_hold`, `release_date` and `hold_type` of
+	a `Supplier`
+	"""
+	supplier = frappe.get_doc('Supplier', party_name)
+	info = {
+		'on_hold': supplier.on_hold,
+		'release_date': supplier.release_date,
+		'hold_type': supplier.hold_type
+	}
+	return info
+

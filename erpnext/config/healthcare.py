@@ -33,6 +33,11 @@ def get_data():
 					"type": "page",
 					"name": "appointment-analytic",
 					"label": _("Appointment Analytics"),
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure",
+					"label": _("Clinical Procedure"),
 				}
 			]
 		},
@@ -89,8 +94,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Patient Service Unit",
-					"label": _("Patient Service Unit")
+					"name": "Healthcare Service Unit",
+					"label": _("Healthcare Service Unit")
 				}
 			]
 		},
@@ -157,6 +162,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Lab Test Template",
 					"label": _("Lab Test Template")
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure Template",
+					"label": _("Clinical Procedure Template"),
 				}
 			]
 		}

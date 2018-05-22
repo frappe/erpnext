@@ -118,29 +118,20 @@ class TestTimesheet(unittest.TestCase):
 
 
 def make_salary_structure(employee):
-	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
+	name = frappe.db.get_value('Salary Structure Assignment', {'employee': employee}, 'salary_structure')
 	if name:
 		salary_structure = frappe.get_doc('Salary Structure', name)
 	else:
 		salary_structure = frappe.new_doc("Salary Structure")
 		salary_structure.name = "Timesheet Salary Structure Test"
 		salary_structure.salary_slip_based_on_timesheet = 1
-		salary_structure.from_date = add_days(nowdate(), -30)
 		salary_structure.salary_component = "Basic"
 		salary_structure.hour_rate = 50.0
 		salary_structure.company = "_Test Company"
 		salary_structure.payment_account = get_random("Account")
 
-		salary_structure.set('employees', [])
 		salary_structure.set('earnings', [])
 		salary_structure.set('deductions', [])
-
-		es = salary_structure.append('employees', {
-			"employee": employee,
-			"base": 1200,
-			"from_date": add_months(nowdate(),-1)
-		})
-
 
 		es = salary_structure.append('earnings', {
 			"salary_component": "_Test Allowance",
@@ -153,6 +144,14 @@ def make_salary_structure(employee):
 		})
 
 		salary_structure.save(ignore_permissions=True)
+
+		salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
+		salary_structure_assignment.employee = employee
+		salary_structure_assignment.base = 1200
+		salary_structure_assignment.from_date = add_months(nowdate(), -1)
+		salary_structure_assignment.salary_structure = salary_structure.name
+		salary_structure_assignment.company = "_Test Company"
+		salary_structure_assignment.save(ignore_permissions=True)
 
 	return salary_structure
 
