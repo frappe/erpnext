@@ -91,6 +91,7 @@ frappe.ui.form.on("Leave Application", {
 	employee: function(frm) {
 		frm.trigger("make_dashboard");
 		frm.trigger("get_leave_balance");
+		frm.trigger("set_leave_approver");
 	},
 
 	leave_approver: function(frm) {
@@ -189,4 +190,21 @@ frappe.ui.form.on("Leave Application", {
 			});
 		}
 	},
+
+	set_leave_approver: function(frm) {
+		if(frm.doc.employee) {
+				// server call is done to include holidays in leave days calculations
+			return frappe.call({
+				method: 'erpnext.hr.doctype.leave_application.leave_application.get_leave_approver_data',
+				args: {
+					"employee": frm.doc.employee,
+				},
+				callback: function(r) {
+					if (r && r.message) {
+						frm.set_value('leave_approver', r.message);
+					}
+				}
+			});
+		}
+	}
 });
