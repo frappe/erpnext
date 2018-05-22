@@ -11,6 +11,8 @@
 
 * Make Payment via Journal Entry: If checked, from invoice, if user choose to make payment, this will open the journal entry instead of payment entry
 
+* Allow Cost Center in Entry of Balance Sheet Account: If checked, system will allow user to tag entry in Balance Sheet Account against a Cost Center.
+
 * Unlink Payment on Cancellation of Invoice: If checked, system will unlink the payment against the invoice. Otherwise, it will show the link error.
 
 * Allow Stale Exchange Rate:  This should be unchecked if you want ERPNext to check the age of records fetched from Currency Exchange in foreign currency transactions. If it is unchecked, the exchange rate field will be read-only in documents. 
