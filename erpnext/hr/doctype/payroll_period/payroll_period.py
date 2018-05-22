@@ -12,13 +12,10 @@ class PayrollPeriod(Document):
 
 def get_payroll_period_days(start_date, end_date, company):
 	payroll_period_dates = frappe.db.sql("""
-	select ppd.start_date, ppd.end_date from `tabPayroll Period Date` ppd, `tabPayroll Period` pp
-	where pp.company=%(company)s
-	and ppd.parent = pp.name
+	select start_date, end_date from `tabPayroll Period`
+	where company=%(company)s
 	and (
-		(%(start_date)s between ppd.start_date and ppd.end_date)
-		or (%(end_date)s between ppd.start_date and ppd.end_date)
-		or (ppd.start_date between %(start_date)s and %(end_date)s)
+		start_date between %(start_date)s and %(end_date)s
 	)""", {
 		'company': company,
 		'start_date': start_date,

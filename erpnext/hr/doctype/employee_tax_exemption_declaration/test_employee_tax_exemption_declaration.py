@@ -84,10 +84,8 @@ def create_payroll_period():
 			doctype = 'Payroll Period',
 			name = "_Test Payroll Period",
 			company = "_Test Company",
-			periods = [
-				dict(start_date = date(date.today().year, 1, 1),
-				end_date = date(date.today().year, 12, 31))
-			]
+			start_date = date(date.today().year, 1, 1),
+			end_date = date(date.today().year, 12, 31)
 		)).insert()
 
 def create_exemption_category():
