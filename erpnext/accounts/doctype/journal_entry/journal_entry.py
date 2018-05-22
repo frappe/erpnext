@@ -941,3 +941,12 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
+
+@frappe.whitelist()
+def make_inter_company_journal_entry(name, voucher_type, company):
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = voucher_type
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	journal_entry.inter_company_journal_entry_reference = name
+	return journal_entry.as_dict()
