@@ -383,15 +383,17 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 frappe.ui.form.on("BOM Item", "before_items_remove", function(frm, cdt, cdn) {
 	// Remove related Child of child records
 	var d = locals[cdt][cdn];
-	frappe.call({
-		method: 'erpnext.manufacturing.doctype.bom.bom.remove_bomline_alt_items',
-		args: {
-			bom: frm.doc.name,
-			parent_item_code: d.item_code
-		},
-		callback:function(r){
-		}
-	})
+	if (d.item_code) {
+		frappe.call({
+			method: 'erpnext.manufacturing.doctype.bom.bom.remove_bomline_alt_items',
+			args: {
+				bom: frm.doc.name,
+				parent_item_code: d.item_code
+			},
+			callback:function(r){
+			}
+		})
+	}
 });
 
 frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
