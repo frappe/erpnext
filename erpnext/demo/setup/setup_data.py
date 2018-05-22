@@ -241,10 +241,10 @@ def setup_user_roles():
 def setup_leave_allocation():
 	year = now_datetime().year
 	for employee in frappe.get_all('Employee', fields=['name']):
-		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_days_allowed'])
+		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_continuous_days_allowed'])
 		for leave_type in leave_types:
-			if not leave_type.max_days_allowed:
-				leave_type.max_days_allowed = 10
+			if not leave_type.max_continuous_days_allowed:
+				leave_type.max_continuous_days_allowed = 10
 
 		leave_allocation = frappe.get_doc({
 			"doctype": "Leave Allocation",
@@ -252,7 +252,7 @@ def setup_leave_allocation():
 			"from_date": "{0}-01-01".format(year),
 			"to_date": "{0}-12-31".format(year),
 			"leave_type": leave_type.name,
-			"new_leaves_allocated": random.randint(1, int(leave_type.max_days_allowed))
+			"new_leaves_allocated": random.randint(1, int(leave_type.max_continuous_days_allowed))
 		})
 		leave_allocation.insert()
 		leave_allocation.submit()
