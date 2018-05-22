@@ -116,7 +116,7 @@ class LeaveApplication(Document):
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
 
-			elif self.from_date <= nowdate():
+			elif self.to_date <= nowdate():
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
 					if not date == self.half_day_date:
@@ -126,6 +126,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "On Leave"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 					else:
 						doc = frappe.new_doc("Attendance")
@@ -134,6 +135,7 @@ class LeaveApplication(Document):
 						doc.company = self.company
 						doc.status = "Half Day"
 						doc.leave_type = self.leave_type
+						doc.insert(ignore_permissions=True)
 						doc.submit()
 
 	def validate_salary_processed_days(self):
@@ -530,3 +532,8 @@ def add_holidays(events, start, end, employee, company):
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})
+
+@frappe.whitelist()
+def get_leave_approver_data(employee):
+	return frappe.db.get_value("Employee Leave Approver",
+		{'parent': employee}, 'leave_approver')

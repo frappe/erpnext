@@ -146,7 +146,6 @@ frappe.Leaderboard = Class.extend({
 
 				me.$graph_area.show().empty();
 				let args = {
-					parent: '.leaderboard-graph',
 					data: {
 						datasets: [
 							{
@@ -160,7 +159,7 @@ frappe.Leaderboard = Class.extend({
 					type: 'bar',
 					height: 140
 				};
-				new Chart(args);
+				new frappeChart.Chart('.leaderboard-graph', args);
 
 				notify(me, r, $container);
 			}
@@ -280,7 +279,7 @@ frappe.Leaderboard = Class.extend({
 			fields.map(col => {
 					let val = item[col];
 					if(col=="name") {
-						var formatted_value = `<a class="grey list-id ellipsis" 
+						var formatted_value = `<a class="grey list-id ellipsis"
 							href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
 					} else {
 						var formatted_value = `<span class="text-muted ellipsis">
