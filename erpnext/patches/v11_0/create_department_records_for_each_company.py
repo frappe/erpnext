@@ -2,7 +2,7 @@ import frappe
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
-	for doctype in ['department', 'leave_period', 'staffing_plan', 'job_opening']:
+	for doctype in ['department', 'leave_period', 'staffing_plan', 'job_opening', 'payroll_entry']:
 		frappe.reload_doc("hr", "doctype", doctype)
 
 	companies = frappe.db.get_all("Company", fields=["name", "abbr"])
