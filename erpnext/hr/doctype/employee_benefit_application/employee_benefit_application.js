@@ -33,6 +33,9 @@ frappe.ui.form.on('Employee Benefit Application', {
 frappe.ui.form.on("Employee Benefit Application Detail",{
 	amount:  function(frm) {
 		calculate_all(frm.doc);
+	},
+	employee_benefits_remove: function(frm) {
+		calculate_all(frm.doc);
 	}
 });
 
