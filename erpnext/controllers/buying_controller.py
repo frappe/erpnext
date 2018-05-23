@@ -217,7 +217,8 @@ class BuyingController(StockController):
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select i.item_code, id.default_warehouse
-			from `tabItem` i, `tabItem Default` id where id.company=%s and i.name in ({0})"""
+			from `tabItem` i, `tabItem Default` id
+			where id.parent=i.name and id.company=%s and i.name in ({0})"""
 			.format(", ".join(["%s"] * len(items))), [self.company] + items))
 
 		for bom_item in bom_items:
