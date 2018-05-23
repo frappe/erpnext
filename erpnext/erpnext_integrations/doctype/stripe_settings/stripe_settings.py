@@ -86,7 +86,7 @@ class StripeSettings(Document):
 				self.flags.status_changed_to = "Completed"
 
 			else:
-				frappe.log_error(str(resp), 'Stripe Payment not completed')
+				frappe.log_error(charge.failure_message, 'Stripe Payment not completed')
 
 		except:
 			frappe.log_error(frappe.get_traceback())
