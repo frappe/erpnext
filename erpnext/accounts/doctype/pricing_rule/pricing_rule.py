@@ -288,8 +288,8 @@ def filter_pricing_rules(args, pricing_rules):
 	if pricing_rules:
 		stock_qty = flt(args.get('qty')) * args.get('conversion_factor', 1)
 
-		pricing_rules = filter(lambda x: (flt(stock_qty)>=flt(x.min_qty)
-			and (flt(stock_qty)<=x.max_qty if x.max_qty else True)), pricing_rules)
+		pricing_rules = list(filter(lambda x: (flt(stock_qty)>=flt(x.min_qty)
+			and (flt(stock_qty)<=x.max_qty if x.max_qty else True)), pricing_rules))
 
 		# add variant_of property in pricing rule
 		for p in pricing_rules:
@@ -302,7 +302,7 @@ def filter_pricing_rules(args, pricing_rules):
 	if pricing_rules:
 		max_priority = max([cint(p.priority) for p in pricing_rules])
 		if max_priority:
-			pricing_rules = filter(lambda x: cint(x.priority)==max_priority, pricing_rules)
+			pricing_rules = list(filter(lambda x: cint(x.priority)==max_priority, pricing_rules))
 
 	# apply internal priority
 	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory",
