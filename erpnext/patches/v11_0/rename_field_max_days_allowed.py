@@ -1,4 +1,5 @@
 import frappe
+from frappe.model.utils import rename_field
 
 def execute():
 	frappe.db.sql("""
