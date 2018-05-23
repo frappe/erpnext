@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 
 import json
 
@@ -14,7 +14,7 @@ from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.utils import nowdate
 
-from six import string_types
+from six import string_types, iteritems
 
 
 @frappe.whitelist()
@@ -368,7 +368,7 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	customers_list = make_customer_and_address(customers_list)
 	name_list = []
 	for docs in doc_list:
-		for name, doc in docs.items():
+		for name, doc in iteritems(docs):
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
@@ -414,7 +414,7 @@ def get_customer_id(doc, customer=None):
 
 def make_customer_and_address(customers):
 	customers_list = []
-	for customer, data in customers.items():
+	for customer, data in iteritems(customers):
 		data = json.loads(data)
 		cust_id = get_customer_id(data, customer)
 		if not cust_id:
@@ -511,7 +511,7 @@ def make_address(args, customer):
 
 def make_email_queue(email_queue):
 	name_list = []
-	for key, data in email_queue.items():
+	for key, data in iteritems(email_queue):
 		name = frappe.db.get_value('Sales Invoice', {'offline_pos_name': key}, 'name')
 		data = json.loads(data)
 		sender = frappe.session.user

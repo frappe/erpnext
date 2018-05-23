@@ -1,14 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 
 import frappe, erpnext
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate, get_number_format_info
-
+from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
@@ -423,7 +423,7 @@ def update_reference_in_payment_entry(d, payment_entry):
 		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
 			new_row.docstatus = 1
-			for field in reference_details.keys():
+			for field in list(reference_details):
 				new_row.set(field, original_row[field])
 
 			new_row.allocated_amount = original_row.allocated_amount - d.allocated_amount
@@ -526,7 +526,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	difference = {}
 	warehouse_account = get_warehouse_account_map()
 
-	for warehouse, account_data in warehouse_account.items():
+	for warehouse, account_data in iteritems(warehouse_account):
 		if account_data.get('account') in account_list:
 			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
 			stock_value = get_stock_value_on(warehouse, posting_date)

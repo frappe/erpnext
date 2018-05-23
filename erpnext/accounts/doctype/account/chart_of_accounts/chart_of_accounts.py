@@ -1,10 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
+from six import iteritems
 
 def create_charts(company, chart_template=None, existing_company=None):
 	chart = get_chart(chart_template, existing_company)
@@ -12,7 +13,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
-			for account_name, child in children.items():
+			for account_name, child in iteritems(children):
 				if root_account:
 					root_type = child.get("root_type")
 
@@ -184,7 +185,7 @@ def validate_bank_account(coa, bank_account):
 	
 	if chart:
 		def _get_account_names(account_master):
-			for account_name, child in account_master.items():
+			for account_name, child in iteritems(account_master):
 				if account_name not in ["account_number", "account_type",
 					"root_type", "is_group", "tax_rate"]:
 					accounts.append(account_name)

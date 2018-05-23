@@ -9,6 +9,7 @@ from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
+from six import iteritems
 
 def execute(filters=None):
 	if not filters:
@@ -194,7 +195,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data.append(totals.opening)
 
 	if filters.get("group_by") in ["Group by Account", "Group by Party"]:
-		for acc, acc_dict in gle_map.items():
+		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
 				# opening
