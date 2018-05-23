@@ -113,7 +113,7 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
-   "fieldname": "max_days_allowed",
+   "fieldname": "max_continuous_days_allowed",
    "fieldtype": "Int",
    "hidden": 0,
    "ignore_user_permissions": 0,
