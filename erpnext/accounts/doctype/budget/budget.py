@@ -227,7 +227,7 @@ def get_actual_expense(args):
 			where lft>=%(lft)s and rgt<=%(rgt)s and name=gle.cost_center)"""
 	
 	elif args.budget_against_field == "Project":
-		condition2 = "and exists(select name from `tabProject` where name=gle.project)"
+		condition2 = "and exists(select name from `tabProject` where name=gle.project and gle.project = %(budget_against)s)"
 
 	return flt(frappe.db.sql("""
 		select sum(gle.debit) - sum(gle.credit)
