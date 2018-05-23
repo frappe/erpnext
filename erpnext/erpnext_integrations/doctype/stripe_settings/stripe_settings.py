@@ -112,7 +112,7 @@ class StripeSettings(Document):
 
 			else:
 				self.integration_request.db_set('status', 'Failed', update_modified=False)
-				frappe.log_error(str(resp), 'Stripe Payment not completed')
+				frappe.log_error('Subscription N°: ' + subscription.id, 'Stripe Payment not completed')
 
 		except:
 			self.integration_request.db_set('status', 'Failed', update_modified=False)
