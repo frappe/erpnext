@@ -9,7 +9,7 @@ from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from frappe import _, ValidationError
 
 from erpnext.controllers.stock_controller import StockController
-
+from six.moves import map
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
@@ -174,7 +174,7 @@ class SerialNo(StockController):
 				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s
 					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(serial_nos), item[0]))
+					('\n'.join(list(serial_nos)), item[0]))
 
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.get("__islocal"):

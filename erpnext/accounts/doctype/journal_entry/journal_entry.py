@@ -62,7 +62,7 @@ class JournalEntry(AccountsController):
 				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
-		for voucher_type, order_list in advance_paid.items():
+		for voucher_type, order_list in iteritems(advance_paid):
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
@@ -219,7 +219,7 @@ class JournalEntry(AccountsController):
 				d.reference_name = None
 			if not d.reference_name:
 				d.reference_type = None
-			if d.reference_type and d.reference_name and (d.reference_type in field_dict.keys()):
+			if d.reference_type and d.reference_name and (d.reference_type in list(field_dict)):
 				dr_or_cr = "credit_in_account_currency" \
 					if d.reference_type in ("Sales Order", "Sales Invoice") else "debit_in_account_currency"
 

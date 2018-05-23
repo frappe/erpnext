@@ -14,7 +14,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
 
-from six import string_types
+from six import string_types, iteritems
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -147,7 +147,7 @@ class PaymentEntry(AccountsController):
 				ref_details = get_reference_details(d.reference_doctype,
 					d.reference_name, self.party_account_currency)
 
-				for field, value in ref_details.items():
+				for field, value in iteritems(ref_details):
 					if not d.get(field) or force:
 						d.set(field, value)
 

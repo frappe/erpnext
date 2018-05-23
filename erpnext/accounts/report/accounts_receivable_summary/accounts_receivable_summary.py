@@ -7,6 +7,9 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
+from six import iteritems
+from six.moves import zip
+
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
@@ -52,7 +55,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
 
-		for party, party_dict in partywise_total.items():
+		for party, party_dict in iteritems(partywise_total):
 			row = [party]
 
 			if party_naming_by == "Naming Series":
@@ -88,7 +91,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range4": 0
 				})
 			)
-			for k in party_total[d.party].keys():
+			for k in list(party_total[d.party]):
 				if k != "currency":
 					party_total[d.party][k] += flt(d.get(k, 0))
 				

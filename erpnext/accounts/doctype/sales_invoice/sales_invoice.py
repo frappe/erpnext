@@ -22,6 +22,8 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 
+from six import iteritems
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -340,7 +342,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					for fname, val in get_pos_profile_item_details(pos,
-						frappe._dict(item.as_dict()), pos).items():
+						iteritems(frappe._dict(item.as_dict()), pos)):
 
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
