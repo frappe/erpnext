@@ -4,7 +4,7 @@ We can also send the feedback request to Customer/User without configuring the
 Feedback Trigger.
 
 To request a feedback manually go to respective document e.g. Sales Order, Issue etc.
-and click on Ask a Feedback option in Menu.
+and click on Request Feedback option in Menu.
 
 <img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/feedback/manual-feedback-request-option.png">
 

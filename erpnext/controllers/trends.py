@@ -235,16 +235,16 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ''
 
 	elif based_on == 'Supplier':
-		based_on_details["based_on_cols"] = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:140"]
-		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_type,"
+		based_on_details["based_on_cols"] = ["Supplier:Link/Supplier:120", "Supplier Group:Link/Supplier Group:140"]
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
 		based_on_details["based_on_group_by"] = 't1.supplier'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
-	elif based_on == 'Supplier Type':
-		based_on_details["based_on_cols"] = ["Supplier Type:Link/Supplier Type:140"]
-		based_on_details["based_on_select"] = "t3.supplier_type,"
-		based_on_details["based_on_group_by"] = 't3.supplier_type'
+	elif based_on == 'Supplier Group':
+		based_on_details["based_on_cols"] = ["Supplier Group:Link/Supplier Group:140"]
+		based_on_details["based_on_select"] = "t3.supplier_group,"
+		based_on_details["based_on_group_by"] = 't3.supplier_group'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 

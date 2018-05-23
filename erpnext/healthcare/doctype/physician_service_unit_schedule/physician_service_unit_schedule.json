@@ -41,6 +41,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
@@ -61,7 +62,7 @@
    "label": "Service Unit", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Patient Service Unit", 
+   "options": "Healthcare Service Unit", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -72,6 +73,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -85,7 +87,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-12-27 10:57:42.301295", 
+ "modified": "2018-05-02 03:38:09.935153", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Physician Service Unit Schedule", 

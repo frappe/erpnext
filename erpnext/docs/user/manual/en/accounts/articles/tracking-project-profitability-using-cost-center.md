@@ -1,4 +1,4 @@
-#Tracking Project Profibitability using Cost Center
+#Tracking Project Profitability using Cost Center
 
 To track expenses and profibility for a project, you can use Cost Centers. You should create separate Cost Center for each Project. This will allow you to.
 

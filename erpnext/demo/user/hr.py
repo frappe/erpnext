@@ -34,14 +34,14 @@ def work():
 		payroll_entry.salary_slip_based_on_timesheet = 0
 		payroll_entry.create_salary_slips()
 		payroll_entry.submit_salary_slips()
-		payroll_entry.make_accural_jv_entry()
+		payroll_entry.make_accrual_jv_entry()
 		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
 		payroll_entry.salary_slip_based_on_timesheet = 1
 		payroll_entry.create_salary_slips()
 		payroll_entry.submit_salary_slips()
-		payroll_entry.make_accural_jv_entry()
+		payroll_entry.make_accrual_jv_entry()
 		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
@@ -105,10 +105,9 @@ def get_timesheet_based_salary_slip_employee():
 			and docstatus != 2""")
 	if sal_struct:
 		employees = frappe.db.sql("""
-				select employee from `tabSalary Structure Employee`
-				where parent IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
+				select employee from `tabSalary Structure Assignment`
+				where salary_structure IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
 		return employees
-
 	else:
 		return []
 

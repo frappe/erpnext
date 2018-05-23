@@ -38,18 +38,19 @@ class PayrollEntry(Document):
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-
 		if sal_struct:
-			cond += "and t2.parent IN %(sal_struct)s "
+			cond += "and t2.salary_structure IN %(sal_struct)s "
+			cond += "and ((%(from_date)s between t2.from_date and ifnull(t2.to_date, '2199-12-31')) or (%(to_date)s between t2.from_date and ifnull(t2.to_date, '2199-12-31')) or (t2.from_date between %(from_date)s and %(to_date)s))"
 			emp_list = frappe.db.sql("""
 				select
-					t1.name as employee, t1.employee_name, t1.department, t1.designation
+					t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.name
 				from
-					`tabEmployee` t1, `tabSalary Structure Employee` t2
+					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
 					t1.docstatus!=2
 					and t1.name = t2.employee
-			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
+					and t2.docstatus = 1
+			%s """% cond, {"sal_struct": sal_struct, "from_date": self.start_date, "to_date": self.end_date}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):
@@ -146,6 +147,7 @@ class PayrollEntry(Document):
 		ss_list = self.get_sal_slip_list(ss_status=0)
 		submitted_ss = []
 		not_submitted_ss = []
+		frappe.flags.via_payroll_entry = True
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			ss_dict = {}
@@ -159,23 +161,30 @@ class PayrollEntry(Document):
 			else:
 				try:
 					ss_obj.submit()
-					submitted_ss.append(ss_dict)
+					submitted_ss.append(ss_obj)
 
 				except frappe.ValidationError:
 					not_submitted_ss.append(ss_dict)
 		if submitted_ss:
-			jv_name = self.make_accural_jv_entry()
+			jv_name = self.make_accrual_jv_entry()
 			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
 				.format(ss_obj.start_date, ss_obj.end_date))
 
+			self.email_salary_slip(submitted_ss)
+
 		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
+
+	def email_salary_slip(self, submitted_ss):
+		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
+			for ss in submitted_ss:
+				ss.email_salary_slip()
 
 	def get_loan_details(self):
 		"""
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.employee_loan_account, eld.employee_loan,
+		return frappe.db.sql(""" select eld.loan_account, eld.loan
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
@@ -237,7 +246,7 @@ class PayrollEntry(Document):
 
 		return payroll_payable_account
 
-	def make_accural_jv_entry(self):
+	def make_accrual_jv_entry(self):
 		self.check_permission('write')
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
@@ -249,7 +258,7 @@ class PayrollEntry(Document):
 		if earnings or deductions:
 			journal_entry = frappe.new_doc('Journal Entry')
 			journal_entry.voucher_type = 'Journal Entry'
-			journal_entry.user_remark = _('Accural Journal Entry for salaries from {0} to {1}')\
+			journal_entry.user_remark = _('Accrual Journal Entry for salaries from {0} to {1}')\
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = self.posting_date
@@ -277,15 +286,15 @@ class PayrollEntry(Document):
 						"project": self.project
 					})
 
-			# Employee loan
+			# Loan
 			for data in loan_details:
 				accounts.append({
-						"account": data.employee_loan_account,
+						"account": data.loan_account,
 						"credit_in_account_currency": data.principal_amount
 					})
 
 				if data.interest_amount and not data.interest_income_account:
-					frappe.throw(_("Select interest income account in employee loan {0}").format(data.employee_loan))
+					frappe.throw(_("Select interest income account in loan {0}").format(data.loan))
 
 				if data.interest_income_account and data.interest_amount:
 					accounts.append({

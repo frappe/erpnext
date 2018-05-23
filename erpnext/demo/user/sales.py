@@ -89,7 +89,7 @@ def make_quotation():
 		if company_currency == party_account_currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency, args="for_selling")
 
 		qtn = frappe.get_doc({
 			"creation": frappe.flags.current_date,

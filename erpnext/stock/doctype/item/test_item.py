@@ -35,8 +35,9 @@ def make_item(item_code, properties=None):
 		item.update(properties)
 
 
-	if item.is_stock_item and not item.default_warehouse:
-		item.default_warehouse = "_Test Warehouse - _TC"
+	if item.is_stock_item:
+		for item_default in [doc for doc in item.item_defaults if not doc.default_warehouse]:
+			item_default.default_warehouse = "_Test Warehouse - _TC"
 
 	item.insert()
 
@@ -199,7 +200,12 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC",
+			"item_defaults": [
+				{
+					"default_warehouse": "_Test Warehouse - _TC",
+					"company": "_Test Company"
+				}
+			],
 			"has_variants": 1
 		})
 
@@ -305,5 +311,8 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None)
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item or 1
 		item.valuation_rate = valuation_rate or 0.0
-		item.default_warehouse = warehouse or '_Test Warehouse - _TC'
+		item.append("item_defaults", {
+			"default_warehouse": warehouse or '_Test Warehouse - _TC',
+			"company": "_Test Company"
+		})
 		item.save()

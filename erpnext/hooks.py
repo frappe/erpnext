@@ -199,7 +199,6 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		'validate': 'erpnext.regional.india.utils.set_place_of_supply',
 		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
@@ -210,15 +209,15 @@ doc_events = {
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	'Purchase Invoice': {
+	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
 
 scheduler_events = {
 	"hourly": [
-		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
-		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails'
+		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
+		"erpnext.accounts.doctype.subscription.subscription.process_all"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -235,7 +234,11 @@ scheduler_events = {
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
-		"erpnext.assets.doctype.asset.asset.update_maintenance_status"
+		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
+		"erpnext.assets.doctype.asset.asset.make_post_gl_entry"
+  ],
+	"monthly": [
+		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue"
 	]
 }
 

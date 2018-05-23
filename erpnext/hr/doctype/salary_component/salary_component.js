@@ -12,7 +12,15 @@ frappe.ui.form.on('Salary Component', {
 					"is_group": 0,
 					"company": d.company
 				}
-			}
-		})
+			};
+		});
+		frm.set_query("earning_component_group", function(frm) {
+			return {
+				filters: {
+					"is_group": 1,
+					"is_flexible_benefit": 1
+				}
+			};
+		});
 	}
 });

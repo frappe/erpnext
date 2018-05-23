@@ -10,7 +10,7 @@ def validate_gstin_for_india(doc, method):
 
 	if doc.gstin:
 		doc.gstin = doc.gstin.upper()
-		if doc.gstin != "NA":
+		if doc.gstin not in ["NA", "na"]:
 			p = re.compile("[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[1-9A-Za-z]{1}[Z]{1}[0-9a-zA-Z]{1}")
 			if not p.match(doc.gstin):
 				frappe.throw(_("Invalid GSTIN or Enter NA for Unregistered"))
@@ -64,7 +64,7 @@ def get_itemised_tax_breakup_data(doc):
 def set_place_of_supply(doc, method):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
-	if doc.doctype == "Sales Invoice":
+	if doc.doctype in ("Sales Invoice", "Delivery Note"):
 		address_name = doc.shipping_address_name or doc.customer_address
 	elif doc.doctype == "Purchase Invoice":
 		address_name = doc.shipping_address or doc.supplier_address

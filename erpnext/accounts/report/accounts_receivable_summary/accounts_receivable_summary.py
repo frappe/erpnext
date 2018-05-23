@@ -38,7 +38,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				_("Customer Group") + ":Link/Customer Group:120"
 			]
 		if args.get("party_type") == "Supplier":
-			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
+			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
 			
 		columns.append({
 			"fieldname": "currency",
@@ -69,7 +69,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			if args.get("party_type") == "Customer":
 				row += [self.get_territory(party), self.get_customer_group(party)]
 			if args.get("party_type") == "Supplier":
-				row += [self.get_supplier_type(party)]
+				row += [self.get_supplier_group(party)]
 				
 			row.append(party_dict.currency)
 			data.append(row)
@@ -116,7 +116,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
 
 		if args.get("party_type") == "Supplier":
-			cols += ["supplier_type", "remarks"]
+			cols += ["supplier_group", "remarks"]
 		if args.get("party_type") == "Customer":
 			cols += ["territory", "customer_group", "remarks"]
 

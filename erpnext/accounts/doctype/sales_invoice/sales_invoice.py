@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -75,6 +75,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -112,7 +113,7 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		self.validate_pos_paid_amount()
 
-		if not self.subscription:
+		if not self.auto_repeat:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 				self.company, self.base_grand_total, self)
 
@@ -148,6 +149,7 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
+		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -187,6 +189,8 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
+
+		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -697,7 +701,7 @@ class SalesInvoice(SellingController):
 					account_currency = get_account_currency(item.income_account)
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.income_account,
+							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
 							"against": self.customer,
 							"credit": item.base_net_amount,
 							"credit_in_account_currency": item.base_net_amount \
@@ -830,7 +834,7 @@ class SalesInvoice(SellingController):
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		for fieldname in ("c_form_applicable", "c_form_no", "write_off_amount"):
 			self.set(fieldname, reference_doc.get(fieldname))
 
@@ -909,10 +913,127 @@ class SalesInvoice(SellingController):
 			project.update_billed_amount()
 			project.save()
 
+
 	def verify_payment_amount_is_positive(self):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
+	
+	def book_income_for_deferred_revenue(self):
+		# book the income on the last day, but it will be trigger on the 1st of month at 12:00 AM
+		# start_date: 1st of the last month or the start date
+		# end_date: end_date or today-1
+
+		gl_entries = []
+		for item in self.get('items'):
+			last_gl_entry = False
+
+			booking_start_date = getdate(add_months(today(), -1))
+			booking_start_date = booking_start_date if booking_start_date>item.service_start_date else item.service_start_date
+
+			booking_end_date = getdate(add_days(today(), -1))
+			if booking_end_date>=item.service_end_date:
+				last_gl_entry = True
+				booking_end_date = item.service_end_date
+
+			total_days = date_diff(item.service_end_date, item.service_start_date)
+			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
+
+			account_currency = get_account_currency(item.income_account)
+			if not last_gl_entry:
+				base_amount = flt(item.base_net_amount*total_booking_days/flt(total_days), item.precision("base_net_amount"))
+				if account_currency==self.company_currency:
+					amount = base_amount
+				else:
+					amount = flt(item.net_amount*total_booking_days/flt(total_days), item.precision("net_amount"))
+			else:
+				gl_entries_details = frappe.db.sql('''
+					select sum(debit) as total_debit, sum(debit_in_account_currency) as total_debit_in_account_currency, voucher_detail_no
+					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
+					group by voucher_detail_no
+				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
+				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
+				if account_currency==self.company_currency:
+					amount = base_amount
+				else:
+					amount = flt(item.net_amount - gl_entries_details.total_debit_in_account_currency, item.precision("net_amount"))
+
+			# GL Entry for crediting the amount in the income
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": item.income_account,
+					"against": self.customer,
+					"credit": base_amount,
+					"credit_in_account_currency": amount,
+					"cost_center": item.cost_center,
+					'posting_date': booking_end_date
+				}, account_currency)
+			)
+			# GL Entry to debit the amount from the deferred account
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": item.deferred_revenue_account,
+					"against": self.customer,
+					"debit": base_amount,
+					"debit_in_account_currency": amount,
+					"cost_center": item.cost_center,
+					"voucher_detail_no": item.name,
+					'posting_date': booking_end_date
+				}, account_currency)
+			)
+
+		if gl_entries:
+			from erpnext.accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
+
+
+def booked_deferred_revenue():
+	# check for the sales invoice for which GL entries has to be done
+	invoices = frappe.db.sql_list('''
+		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
+	''', (today(), add_months(today(), -1)))
+
+	# ToDo also find the list on the basic of the GL entry, and make another list
+	for invoice in invoices:
+		doc = frappe.get_doc("Sales Invoice", invoice)
+		doc.book_income_for_deferred_revenue()
+
+
+def validate_inter_company_party(doctype, party, company, inter_company_invoice_reference):
+	if doctype == "Sales Invoice":
+		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
+		ref_doc =  "Purchase Invoice"
+	else:
+		partytype, ref_partytype, internal = "Supplier", "Customer", "is_internal_supplier"
+		ref_doc =  "Sales Invoice"
+
+	if inter_company_invoice_reference:
+		doc = frappe.get_doc(ref_doc, inter_company_invoice_reference)
+		ref_party = doc.supplier if doctype == "Sales Invoice" else doc.customer
+		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
+			frappe.throw(_("Invalid {0} for Inter Company Invoice.").format(partytype))
+		if not frappe.db.get_value(ref_partytype, {"name": ref_party}, "represents_company") == company:
+			frappe.throw(_("Invalid Company for Inter Company Invoice."))
+
+	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
+		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
+			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1)
+		companies = [d[0] for d in companies]
+		if not company in companies:
+			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
+
+def update_linked_invoice(doctype, name, inter_company_invoice_reference):
+	if inter_company_invoice_reference:
+		frappe.db.set_value(doctype, inter_company_invoice_reference,\
+			"inter_company_invoice_reference", name)
+
+def unlink_inter_company_invoice(doctype, name, inter_company_invoice_reference):
+	ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
+	if inter_company_invoice_reference:
+		frappe.db.set_value(doctype, name,\
+			"inter_company_invoice_reference", "")
+		frappe.db.set_value(ref_doc, inter_company_invoice_reference,\
+			"inter_company_invoice_reference", "")
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -994,3 +1115,88 @@ def set_account_for_mode_of_payment(self):
 	for data in self.payments:
 		if not data.account:
 			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
+
+def get_inter_company_details(doc, doctype):
+	if doctype == "Sales Invoice":
+		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
+		company = frappe.db.get_value("Customer", {"name": doc.customer}, "represents_company")
+	else:
+		party = frappe.db.get_value("Customer", {"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company}, "name")
+		company = frappe.db.get_value("Supplier", {"name": doc.supplier}, "represents_company")
+
+	return {
+		"party": party,
+		"company": company
+	}
+
+
+def validate_inter_company_invoice(doc, doctype):
+
+	details = get_inter_company_details(doc, doctype)
+	price_list = doc.selling_price_list if doctype == "Sales Invoice" else doc.buying_price_list
+	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
+	if not valid_price_list:
+		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
+
+	party = details.get("party")
+	if not party:
+		partytype = "Supplier" if doctype == "Sales Invoice" else "Customer"
+		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
+
+	company = details.get("company")
+	default_currency = frappe.db.get_value("Company", company, "default_currency")
+	if default_currency != doc.currency:
+		frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
+
+	return
+
+@frappe.whitelist()
+def make_inter_company_purchase_invoice(source_name, target_doc=None):
+	return make_inter_company_invoice("Sales Invoice", source_name, target_doc)
+
+def make_inter_company_invoice(doctype, source_name, target_doc=None):
+	if doctype == "Sales Invoice":
+		source_doc = frappe.get_doc("Sales Invoice", source_name)
+		target_doctype = "Purchase Invoice"
+	else:
+		source_doc = frappe.get_doc("Purchase Invoice", source_name)
+		target_doctype = "Sales Invoice"
+
+	validate_inter_company_invoice(source_doc, doctype)
+	details = get_inter_company_details(source_doc, doctype)
+
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	def update_details(source_doc, target_doc, source_parent):
+		target_doc.inter_company_invoice_reference = source_doc.name
+		if target_doc.doctype == "Purchase Invoice":
+			target_doc.company = details.get("company")
+			target_doc.supplier = details.get("party")
+			target_doc.buying_price_list = source_doc.selling_price_list
+		else:
+			target_doc.company = details.get("company")
+			target_doc.customer = details.get("party")
+			target_doc.selling_price_list = source_doc.buying_price_list
+
+	doclist = get_mapped_doc(doctype, source_name,	{
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges"
+			]
+		},
+		doctype +" Item": {
+			"doctype": target_doctype + " Item",
+			"field_no_map": [
+				"income_account",
+				"expense_account",
+				"cost_center",
+				"warehouse"
+			]
+		}
+
+	}, target_doc, set_missing_values)
+
+	return doclist

@@ -7,7 +7,7 @@ import frappe, random, erpnext
 from frappe.utils.make_random import how_many
 from frappe.desk import query_report
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.manufacturing.doctype.work_order.test_work_order import make_prod_order_test_record
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
@@ -49,7 +49,7 @@ def work():
 			make_stock_entry_from_pro(pro[0], "Manufacture")
 
 	for bom in frappe.get_all('BOM', fields=['item'], filters = {'with_operations': 1}):
-		pro_order = make_prod_order_test_record(item=bom.item, qty=2,
+		pro_order = make_wo_order_test_record(item=bom.item, qty=2,
 			source_warehouse="Stores - WPL", wip_warehouse = "Work in Progress - WPL",
 			fg_warehouse = "Stores - WPL", company = erpnext.get_default_company(),
 			stock_uom = frappe.db.get_value('Item', bom.item, 'stock_uom'),

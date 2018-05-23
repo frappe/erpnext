@@ -40,7 +40,9 @@ def get_data(item):
 		name = item_dict["variant_name"]
 
 		for d in attribute_list:
-			item_dict[d] = attr_val_map[name][d]
+			attr_dict = attr_val_map[name]
+			if attr_dict and attr_dict.get(d):
+				item_dict[d] = attr_val_map[name][d]
 
 		item_dict["Open Orders"] = order_count_map.get(name) or 0
 

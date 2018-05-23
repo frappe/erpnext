@@ -27,7 +27,7 @@ def insert_vital_signs_to_medical_record(doc):
 
 def delete_vital_signs_from_medical_record(doc):
 	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s",(doc.name))
-	if(medical_record_id[0][0]):
+	if medical_record_id and medical_record_id[0][0]:
 		frappe.delete_doc("Patient Medical Record", medical_record_id[0][0])
 
 def set_subject_field(doc):

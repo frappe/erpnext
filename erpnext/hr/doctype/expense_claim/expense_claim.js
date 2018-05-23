@@ -16,7 +16,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		if(!d.expense_type) {
 			return;
 		}
-
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
@@ -82,9 +81,9 @@ cur_frm.cscript.refresh = function(doc) {
 			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read(entry_doctype)) {
 				cur_frm.add_custom_button(__('Bank Entries'), function() {
 					frappe.route_options = {
-						entry_route_doctype: me.frm.doc.doctype,
-						entry_route_name: me.frm.doc.name,
-						company: me.frm.doc.company
+						party_type: "Employee",
+						party: doc.employee,
+						company: doc.company
 					};
 					frappe.set_route("List", entry_doctype);
 				}, __("View"));
@@ -121,12 +120,6 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 };
 
-cur_frm.cscript.on_submit = function() {
-	if(cint(frappe.boot.notification_settings && frappe.boot.notification_settings.expense_claim)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.expense_claim_message);
-	}
-};
-
 erpnext.expense_claim = {
 	set_title :function(frm) {
 		if (!frm.doc.task) {
@@ -154,6 +147,31 @@ frappe.ui.form.on("Expense Claim", {
 				]
 			};
 		});
+		frm.set_query("expense_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
+				}
+			};
+		});
+	},
+
+	onload: function(frm) {
+		if (frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frm.toggle_reqd("expense_approver", true);
+					}
+				}
+			});
+		}
 	},
 
 	refresh: function(frm) {
@@ -181,7 +199,7 @@ frappe.ui.form.on("Expense Claim", {
 	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
-			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry"
+			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry";
 		}
 		return frappe.call({
 			method: method,
@@ -195,7 +213,7 @@ frappe.ui.form.on("Expense Claim", {
 			}
 		});
 	},
-	
+
 	set_query_for_cost_center: function(frm) {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
@@ -246,7 +264,7 @@ frappe.ui.form.on("Expense Claim", {
 					employee: frm.doc.employee
 				},
 				callback: function(r, rt) {
-				
+
 					if(r.message) {
 						$.each(r.message, function(i, d) {
 							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");

@@ -12,6 +12,11 @@ from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
+from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
+from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
+from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_employee_benefit_claim
+from erpnext.hr.utils import get_payroll_period
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -57,6 +62,66 @@ class SalarySlip(TransactionBase):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
+				if key=="deductions" and struct_row.variable_based_on_taxable_salary:
+					tax_row, amount = self.calculate_pro_rata_tax(struct_row.salary_component)
+					if tax_row and amount:
+						self.update_component_row(frappe._dict(tax_row), amount, key)
+
+		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
+		if additional_components:
+			for additional_component in additional_components:
+				additional_component = frappe._dict(additional_component)
+				amount = self.update_amount_for_other_component(frappe._dict(additional_component.struct_row).salary_component, additional_component.amount)
+				self.update_component_row(frappe._dict(additional_component.struct_row), amount, "earnings")
+
+		max_benefits = self._salary_structure_doc.get("max_benefits")
+		if max_benefits > 0:
+			employee_benefits = get_employee_benefit_application(self)
+			if employee_benefits:
+				for employee_benefit in employee_benefits:
+					benefit_component = frappe._dict(employee_benefit)
+					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
+					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+			else:
+				default_flexi_compenent = frappe.db.exists(
+					'Salary Component',
+					{
+						'is_flexible_benefit': 1,
+						'is_pro_rata_applicable': 1,
+						'flexi_default': 1
+					}
+				)
+				if default_flexi_compenent:
+					flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
+					payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
+					amount = self.update_amount_for_other_component(default_flexi_compenent, get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits))
+					self.update_component_row(flexi_struct_row, amount, "earnings")
+				else:
+					frappe.throw(_("Configure default flexible benefit salary component for apply pro-rata benefit"))
+
+			benefit_claims = get_employee_benefit_claim(self)
+			if benefit_claims:
+				for benefit_claim in benefit_claims:
+					benefit_component = frappe._dict(benefit_claim)
+					amount = self.update_amount_for_other_component(frappe._dict(benefit_component.struct_row).salary_component, benefit_component.amount)
+					self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+
+	def update_amount_for_other_component(self, salary_component, new_amount):
+		amount = new_amount
+		for d in self.get("earnings"):
+			if d.salary_component == salary_component:
+				d.amount += new_amount
+				amount = d.amount
+		return amount
+
+	def create_flexi_struct_row(self, default_flexi_compenent):
+		salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
+		flexi_struct_row = {}
+		flexi_struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
+		flexi_struct_row['salary_component'] = salary_component.name
+		flexi_struct_row['abbr'] = salary_component.salary_component_abbr
+		flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
+		return frappe._dict(flexi_struct_row)
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
@@ -104,8 +169,8 @@ class SalarySlip(TransactionBase):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
-		data.update(frappe.get_doc("Salary Structure Employee",
-			{"employee": self.employee, "parent": self.salary_structure}).as_dict())
+		data.update(frappe.get_doc("Salary Structure Assignment",
+			{"employee": self.employee, "salary_structure": self.salary_structure}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
@@ -166,10 +231,11 @@ class SalarySlip(TransactionBase):
 		if self.payroll_frequency:
 			cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
+		st_name = frappe.db.sql("""select salary_structure from `tabSalary Structure Assignment`
 			where employee=%s and (from_date <= %s or from_date <= %s)
 			and (to_date is null or to_date >= %s or to_date >= %s)
-			and parent in (select name from `tabSalary Structure`
+			and docstatus = 1
+			and salary_structure in (select name from `tabSalary Structure`
 				where is_active = 'Yes'%s)
 			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
@@ -327,7 +393,7 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
-		
+
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
 
@@ -380,13 +446,13 @@ class SalarySlip(TransactionBase):
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		for loan in self.get_employee_loan_details():
+		for loan in self.get_loan_details():
 			self.append('loans', {
-				'employee_loan': loan.name,
+				'loan': loan.name,
 				'total_payment': loan.total_payment,
 				'interest_amount': loan.interest_amount,
 				'principal_amount': loan.principal_amount,
-				'employee_loan_account': loan.employee_loan_account,
+				'loan_account': loan.loan_account,
 				'interest_income_account': loan.interest_income_account
 			})
 
@@ -394,14 +460,14 @@ class SalarySlip(TransactionBase):
 			self.total_interest_amount += loan.interest_amount
 			self.total_principal_amount += loan.principal_amount
 
-	def get_employee_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, el.name,
-				rps.total_payment, el.employee_loan_account, el.interest_income_account
+	def get_loan_details(self):
+		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, l.name,
+				rps.total_payment, l.loan_account, l.interest_income_account
 			from
-				`tabRepayment Schedule` as rps, `tabEmployee Loan` as el
+				`tabRepayment Schedule` as rps, `tabLoan` as l
 			where
-				el.name = rps.parent and rps.payment_date between %s and %s and
-				el.repay_from_salary = 1 and el.docstatus = 1 and el.employee = %s""",
+				l.name = rps.parent and rps.payment_date between %s and %s and
+				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
 			(self.start_date, self.end_date, self.employee), as_dict=True) or []
 
 	def on_submit(self):
@@ -410,7 +476,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
-			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
+			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
@@ -456,6 +522,52 @@ class SalarySlip(TransactionBase):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+	def calculate_pro_rata_tax(self, salary_component):
+		# Calculate total tax payable earnings
+		tax_applicable_components = []
+		for earning in self._salary_structure_doc.earnings:
+			#all tax applicable earnings which are not flexi
+			if earning.is_tax_applicable and not earning.is_flexible_benefit:
+				tax_applicable_components.append(earning.salary_component)
+		total_taxable_earning = 0
+		for earning in self.earnings:
+			if earning.salary_component in tax_applicable_components:
+				total_taxable_earning += earning.amount
+
+		# Get payroll period, prorata frequency
+		days = date_diff(self.end_date, self.start_date) + 1
+		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
+		if not payroll_period:
+			frappe.throw(_("Start and end dates not in a valid Payroll Period"))
+		total_days = date_diff(payroll_period.end_date, payroll_period.start_date) + 1
+		prorata_frequency = flt(total_days)/flt(days)
+		annual_earning = total_taxable_earning * prorata_frequency
+
+		# Calculate total exemption declaration
+		exemption_amount = 0
+		if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
+		"payroll_period": payroll_period.name, "docstatus": 1}):
+			exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
+				{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1}, #fix period
+				"total_exemption_amount")
+		annual_earning = annual_earning - exemption_amount
+
+		# Get tax calc by component
+		component = frappe.get_doc("Salary Component", salary_component)
+		annual_tax = component.calculate_tax(annual_earning)
+
+		# Calc prorata tax
+		pro_rata_tax = annual_tax/prorata_frequency
+
+		# Data for update_component_row
+		struct_row = {}
+		struct_row['depends_on_lwp'] = 0
+		struct_row['salary_component'] = component.name
+		struct_row['abbr'] = component.salary_component_abbr
+		struct_row['do_not_include_in_total'] = 0
+
+		return struct_row, pro_rata_tax
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`

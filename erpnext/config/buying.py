@@ -39,8 +39,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Supplier Type",
-					"description": _("Supplier Type master.")
+					"name": "Supplier Group",
+					"description": _("Supplier Group master.")
 				},
 				{
 					"type": "doctype",

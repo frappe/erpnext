@@ -42,9 +42,21 @@ submit button / option if you have not specified it in the workflow.
 > Note 4: If you wish to give the option to cancel, you will have to write a
 workflow transition step that says from submitted you can cancel.
 
-  
+#### Conditions
 
-#### Example of a Leave Application Process:  
+> New in Version 11
+
+In Version 11, you can also add a condition for the transition to be applicable. For example in this case if someone applies to leave for more than 5 days, a particular role must approve. For this in the particular transition you can set a property for `Condition` as:
+
+```
+doc.total_leave_days <= 5
+```
+
+Then if someone applied for leave for less than 5 days, only that particular transition will apply.
+
+This can be extended to any property of the document.
+
+#### Example of a Leave Application Process:
 
 When a Leave Application is saved by Employee, the status of the document changes to "Applied"
 

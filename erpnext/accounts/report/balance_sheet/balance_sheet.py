@@ -58,7 +58,7 @@ def execute(filters=None):
 
 	return columns, data, message, chart
 
-def get_provisional_profit_loss(asset, liability, equity, period_list, company):
+def get_provisional_profit_loss(asset, liability, equity, period_list, company, consolidated=False):
 	provisional_profit_loss = {}
 	total_row = {}
 	if asset and (liability or equity):
@@ -73,22 +73,23 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 		has_value = False
 
 		for period in period_list:
+			key = period if consolidated else period.key
 			effective_liability = 0.0
 			if liability:
-				effective_liability += flt(liability[-2].get(period.key))
+				effective_liability += flt(liability[-2].get(key))
 			if equity:
-				effective_liability += flt(equity[-2].get(period.key))
+				effective_liability += flt(equity[-2].get(key))
 
-			provisional_profit_loss[period.key] = flt(asset[-2].get(period.key)) - effective_liability
-			total_row[period.key] = effective_liability + provisional_profit_loss[period.key]
+			provisional_profit_loss[key] = flt(asset[-2].get(key)) - effective_liability
+			total_row[key] = effective_liability + provisional_profit_loss[key]
 
-			if provisional_profit_loss[period.key]:
+			if provisional_profit_loss[key]:
 				has_value = True
 
-			total += flt(provisional_profit_loss[period.key])
+			total += flt(provisional_profit_loss[key])
 			provisional_profit_loss["total"] = total
 
-			total_row_total += flt(total_row[period.key])
+			total_row_total += flt(total_row[key])
 			total_row["total"] = total_row_total
 
 		if has_value:

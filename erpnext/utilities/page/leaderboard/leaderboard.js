@@ -24,7 +24,7 @@ frappe.Leaderboard = Class.extend({
 			"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
 				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
 			"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
-			"Sales Partner": ["total_sales_amount", "total_commision"],
+			"Sales Partner": ["total_sales_amount", "total_commission"],
 			"Sales Person": ["total_sales_amount"],
 		};
 

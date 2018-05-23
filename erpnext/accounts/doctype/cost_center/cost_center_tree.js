@@ -48,5 +48,10 @@ frappe.treeview_settings["Cost Center"] = {
 		}, __('Budget'));
 
 	},
+	onrender: function(node) {
+		if(node.is_root){
+			node.hide_add = true;
+		}
+	}
 
 }
