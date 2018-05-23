@@ -2,8 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os
+import frappe, os, json
 from frappe import _
+from frappe.utils import get_timestamp
 
 from frappe.utils import cint, today, formatdate
 import frappe.defaults
@@ -407,10 +408,18 @@ def update_company_monthly_sales(company):
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
 
+def update_transactions_annual_history(company, commit=False):
+	transactions_history = get_all_transactions_annual_history(company)
+	frappe.db.set_value("Company", company, "transactions_annual_history", json.dumps(transactions_history))
+
+	if commit:
+		frappe.db.commit()
+
 def cache_companies_monthly_sales_history():
 	companies = [d['name'] for d in frappe.get_list("Company")]
 	for company in companies:
 		update_company_monthly_sales(company)
+		update_transactions_annual_history(company)
 	frappe.db.commit()
 
 @frappe.whitelist()
@@ -441,3 +450,73 @@ def add_node():
 		args.parent_company = None
 
 	frappe.get_doc(args).insert()
+
+def get_all_transactions_annual_history(company):
+	out = {}
+
+	items = frappe.db.sql('''
+		select transaction_date, count(*) as count
+
+		from (
+			select name, transaction_date, company
+			from `tabQuotation`
+
+			UNION ALL
+
+			select name, transaction_date, company
+			from `tabSales Order`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabDelivery Note`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabSales Invoice`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabIssue`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabProject`
+		) t
+
+		where
+			company=%s
+			and
+			transaction_date > date_sub(curdate(), interval 1 year)
+
+		group by
+			transaction_date
+			''', (company), as_dict=True)
+
+	for d in items:
+		timestamp = get_timestamp(d["transaction_date"])
+		out.update({ timestamp: d["count"] })
+
+	return out
+
+def get_timeline_data(doctype, name):
+	'''returns timeline data based on linked records in dashboard'''
+	out = {}
+	date_to_value_dict = {}
+
+	history = frappe.db.get_value("Company", name, "transactions_annual_history")
+
+	try:
+		date_to_value_dict = json.loads(history) if history and '{' in history else None
+	except ValueError:
+		date_to_value_dict = None
+
+	if date_to_value_dict is None:
+		update_transactions_annual_history(name, True)
+		history = frappe.db.get_value("Company", name, "transactions_annual_history")
+		return json.loads(history) if history and '{' in history else {}
+
+	return date_to_value_dict
