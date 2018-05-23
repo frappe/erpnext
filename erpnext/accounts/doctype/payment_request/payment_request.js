@@ -13,6 +13,14 @@ frappe.ui.form.on("Payment Request", "onload", function(frm, dt, dn){
 			}
 		})
 	}
+
+	frm.set_query("payment_plan", function() {
+		return {
+			"filters": {
+				"payment_gateway": ["=", frm.doc.payment_gateway_account]
+			}
+		};
+	});
 })
 
 frappe.ui.form.on("Payment Request", "refresh", function(frm) {
@@ -31,7 +39,7 @@ frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 			});
 		});
 	}
-	
+
 	if(!frm.doc.payment_gateway_account && frm.doc.status == "Initiated") {
 		frm.add_custom_button(__('Make Payment Entry'), function(){
 			frappe.call({
@@ -48,4 +56,3 @@ frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 		}).addClass("btn-primary");
 	}
 });
-
