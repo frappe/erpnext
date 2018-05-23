@@ -16,6 +16,39 @@ class EmployeeBenefitApplication(Document):
 		if self.max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		self.validate_max_benefit_for_component()
+		if self.remainig_benefits > 0:
+			self.validate_remaining_benefit_amount()
+
+	def validate_remaining_benefit_amount(self):
+		# check salary structure earnings have flexi component (sum of max_benefit_amount)
+		# without pro-rata which satisfy the remainig_benefits
+		# else pro-rata component for the amount
+		# again comes the same validation and satisfy or throw
+		benefit_components = []
+		if self.employee_benefits:
+			for employee_benefit in self.employee_benefits:
+				benefit_components.append(employee_benefit.earning_component)
+		salary_struct_name = get_assigned_salary_sturecture(self.employee, self.date)
+		if len(salary_struct_name) > 0:
+			non_pro_rata_amount = 0
+			pro_rata_amount = 0
+			salary_structure = frappe.get_doc("Salary Structure", salary_struct_name[0][0])
+			if salary_structure.earnings:
+				for earnings in salary_structure.earnings:
+					if earnings.is_flexible_benefit == 1 and earnings.salary_component not in benefit_components:
+						is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", earnings.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
+						if is_pro_rata_applicable == 1:
+							pro_rata_amount += max_benefit_amount
+						else:
+							non_pro_rata_amount += max_benefit_amount
+			if pro_rata_amount == 0  and non_pro_rata_amount == 0:
+				frappe.throw(_("Please add the remainig benefits {0} to any of the existing component").format(self.remainig_benefits))
+			elif non_pro_rata_amount > 0 and non_pro_rata_amount < self.remainig_benefits:
+				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application \
+				as pro-rata component").format(non_pro_rata_amount, self.remainig_benefits - non_pro_rata_amount))
+			elif non_pro_rata_amount == 0:
+				frappe.throw(_("Please add the remainig benefits {0} to the application as \
+				pro-rata component").format(self.remainig_benefits))
 
 	def validate_max_benefit_for_component(self):
 		if self.employee_benefits:
@@ -143,11 +176,7 @@ def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
 		order by name"""
 
 		return frappe.db.sql(query.format(**{
-			"salary_structure": salary_structure[0][0],
-			"mcond": get_match_cond(doctype)
-		}), {
-			'start': start,
-			'page_len': page_len
-		})
+			"salary_structure": salary_structure[0][0]
+		}))
 
 	return {}
