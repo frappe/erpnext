@@ -268,8 +268,11 @@ def get_item_details(args):
 		return cost_center, expense_account
 
 	if args.item_code:
-		cost_center, expense_account = frappe.db.get_value('Item Default',
-			{'parent': args.item_code, 'company': args.get('company')}, ['buying_cost_center', 'expense_account'])
+		item_defaults = frappe.db.get_value('Item Default',
+			{'parent': args.item_code, 'company': args.get('company')},
+			['buying_cost_center', 'expense_account'])
+		if item_defaults:
+			cost_center, expense_account = item_defaults
 
 	if not (cost_center and expense_account):
 		for doctype in ['Item Group', 'Company']:
