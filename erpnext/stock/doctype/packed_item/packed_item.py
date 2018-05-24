@@ -21,9 +21,9 @@ def get_product_bundle_items(item_code):
 def get_packing_item_details(item, company):
 	return frappe.db.sql("""
 		select i.item_name, i.description, i.stock_uom, id.default_warehouse
-		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name
-		where i.name = %s and id.company""",
-		(item, company), as_dict = 1)[0]
+		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
+		where i.name = %s""",
+		(company, item), as_dict = 1)[0]
 
 def get_bin_qty(item, warehouse):
 	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
