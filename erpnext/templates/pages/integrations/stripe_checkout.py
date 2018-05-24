@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, fmt_money
+from frappe.utils import cint, fmt_money
 import json
 from erpnext.erpnext_integrations.doctype.stripe_settings.stripe_settings import get_gateway_controller
 
