@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe import _
 from six.moves.urllib.parse import urlencode
 from frappe.utils import get_url, call_hook_method, cint, flt
-from frappe.integrations.utils import make_get_request, make_post_request, create_request_log, create_payment_gateway
+from frappe.integrations.utils import make_get_request, create_request_log, create_payment_gateway
 import stripe
 
 class StripeSettings(Document):
@@ -88,10 +88,8 @@ class StripeSettings(Document):
 			else:
 				frappe.log_error(charge.failure_message, 'Stripe Payment not completed')
 
-		except:
+		except Exception:
 			frappe.log_error(frappe.get_traceback())
-			# failed
-			pass
 
 		return self.finalize_request()
 
@@ -114,11 +112,9 @@ class StripeSettings(Document):
 				self.integration_request.db_set('status', 'Failed', update_modified=False)
 				frappe.log_error('Subscription N°: ' + subscription.id, 'Stripe Payment not completed')
 
-		except:
+		except Exception:
 			self.integration_request.db_set('status', 'Failed', update_modified=False)
 			frappe.log_error(frappe.get_traceback())
-			# failed
-			pass
 
 		return self.finalize_request()
 
