@@ -168,10 +168,10 @@ def get_items_list(pos_profile, company):
 			i.has_serial_no, i.is_stock_item, i.brand, i.stock_uom, i.image,
 			id.expense_account, id.selling_cost_center, id.default_warehouse
 		from
-			`tabItem` i LEFT JOIN `tabItem Default` id ON id.parent = i.name
+			`tabItem` i LEFT JOIN `tabItem Default` id ON id.parent = i.name and id.company = %s
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
-			and id.company = %s {cond}
+			{cond}
 		""".format(cond=cond), tuple(args_list), as_dict=1)
 
 

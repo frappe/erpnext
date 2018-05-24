@@ -566,11 +566,12 @@ class StockEntry(StockController):
 		item = frappe.db.sql("""select i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no,
 				id.expense_account, id.buying_cost_center
-			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent
-			where i.name=%s and id.company=%s
+			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
+			where i.name=%s
 				and i.disabled=0
 				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
-			(args.get('item_code'), self.company, nowdate()), as_dict = 1)
+			(self.company, args.get('item_code'), nowdate()), as_dict = 1)
+
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
 

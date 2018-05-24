@@ -298,10 +298,10 @@ class ProductionPlan(Document):
 						`tabBOM Explosion Item` bei 
 						JOIN `tabBOM` bom ON bom.name = bei.parent
 						JOIN `tabItem` item ON item.name = bei.item_code
-						LEFT JOIN `tabItem Default` item_default ON item_default.parent = item.name
+						LEFT JOIN `tabItem Default` item_default
+							ON item_default.parent = item.name and item_default.company=%s
 					where
 						bei.docstatus < 2 
-						and item_default.company=%s
 						and bom.name=%s and item.is_stock_item in (1, {0})
 					group by bei.item_code, bei.stock_uom""".format(self.include_non_stock_items),
 					(self.company, data.bom_no), as_dict=1):
@@ -326,11 +326,11 @@ class ProductionPlan(Document):
 				`tabBOM Item` bom_item
 				JOIN `tabBOM` bom ON bom.name = bom_item.parent
 				JOIN tabItem item ON bom_item.item_code = item.name
-				LEFT JOIN `tabItem Default` item_default ON item.name = item_default.parent
+				LEFT JOIN `tabItem Default` item_default
+					ON item.name = item_default.parent and item_default.company = %(company)s
 			where
 				bom.name = %(bom)s
 				and bom_item.docstatus < 2
-				and item_default.company = %(company)s
 				and item.is_stock_item in (1, {0})
 			group by bom_item.item_code""".format(self.include_non_stock_items),{
 				'bom': bom_no,

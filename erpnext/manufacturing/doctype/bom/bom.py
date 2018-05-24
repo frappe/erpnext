@@ -552,10 +552,10 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				`tab{table}` bom_item
 				JOIN `tabBOM` bom ON bom_item.parent = bom.name
 				JOIN `tabItem` item ON item.name = bom_item.item_code
-				LEFT JOIN `tabItem Default` item_default ON item_default.parent = item.name
+				LEFT JOIN `tabItem Default` item_default
+					ON item_default.parent = item.name and item_default.company = %(company)s
 			where
 				bom_item.docstatus < 2
-				and item_default.company = %(company)s
 				and bom.name = %(bom)s
 				and is_stock_item = 1
 				{where_conditions}
