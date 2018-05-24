@@ -289,8 +289,7 @@ def get_basic_details(args, item):
 		["Account", "expense_account", "default_expense_account"],
 		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""]]:
-			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
-			if not out[d[1]] or (company and args.company != company):
+			if not out[d[1]]:
 				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):

@@ -61,5 +61,6 @@ def create_appointment(patient, physician, appointment_date, department):
 	appointment.physician = physician
 	appointment.department = department
 	appointment.appointment_date = appointment_date
+	appointment.company = "_Test Company"
 	appointment.save(ignore_permissions=True)
 	return appointment
