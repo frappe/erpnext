@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cstr
 
 class VitalSigns(Document):
 	def on_submit(self):
@@ -33,16 +34,16 @@ def delete_vital_signs_from_medical_record(doc):
 def set_subject_field(doc):
 	subject = " "
 	if(doc.temperature):
-		subject += "Temperature: \n"+ str(doc.temperature)+". "
+		subject += "Temperature: \n"+ cstr(doc.temperature)+". "
 	if(doc.pulse):
-		subject += "Pulse: \n"+ str(doc.pulse)+". "
+		subject += "Pulse: \n"+ cstr(doc.pulse)+". "
 	if(doc.respiratory_rate):
-		subject += "Respiratory Rate: \n"+ str(doc.respiratory_rate)+". "
+		subject += "Respiratory Rate: \n"+ cstr(doc.respiratory_rate)+". "
 	if(doc.bp):
-		subject += "BP: \n"+ str(doc.bp)+". "
+		subject += "BP: \n"+ cstr(doc.bp)+". "
 	if(doc.bmi):
-		subject += "BMI: \n"+ str(doc.bmi)+". "
+		subject += "BMI: \n"+ cstr(doc.bmi)+". "
 	if(doc.nutrition_note):
-		subject += "Note: \n"+ str(doc.nutrition_note)+". "
+		subject += "Note: \n"+ cstr(doc.nutrition_note)+". "
 
 	return subject
