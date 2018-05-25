@@ -11,6 +11,9 @@ from frappe.utils import add_days, add_months, add_years, getdate, nowdate
 
 class AssetMaintenance(Document):
 	def validate(self):
+		if not self.serial_no:
+			self.serial_no = frappe.db.get_value("Asset", self.asset_name, 'serial_no')
+
 		for task in self.get('asset_maintenance_tasks'):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))

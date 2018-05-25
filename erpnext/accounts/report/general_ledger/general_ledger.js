@@ -85,7 +85,6 @@ frappe.query_reports["General Ledger"] = {
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
 				var parties = frappe.query_report_filters_by_name.party.get_value();
 				if(!party_type) return;
-
 				const values = parties.split(/\s*,\s*/).filter(d => d);
 				const txt = parties.match(/[^,\s*]*$/)[0] || '';
 				let data = [];

@@ -394,6 +394,12 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
 				},
+				{
+					"type": "page",
+					"name": "sales-invoice-funnel",
+					"label": _("Sales Invoice Funnel"),
+					"icon": "fa fa-bar-chart",
+				},
 			]
 		},
 		{

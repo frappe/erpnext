@@ -123,6 +123,12 @@ class SalarySlip(TransactionBase):
 		flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
 		return frappe._dict(flexi_struct_row)
 
+		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
+		if additional_components:
+			for additional_component in additional_components:
+				additional_component = frappe._dict(additional_component)
+				self.update_component_row(frappe._dict(additional_component.struct_row), additional_component.amount, "earnings")
+
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
 		for d in self.get(key):

@@ -1,0 +1,27 @@
+{
+ "content": null, 
+ "creation": "2018-05-09 13:08:25.675509", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-funnel-chart", 
+ "idx": 0, 
+ "modified": "2018-05-09 13:10:03.177468", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "sales-invoice-funnel", 
+ "owner": "Administrator", 
+ "page_name": "sales-invoice-funnel", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Sales Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Sales Invoice Funnel"
+}
