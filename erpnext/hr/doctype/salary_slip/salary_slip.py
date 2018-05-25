@@ -14,9 +14,8 @@ from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
 from erpnext.hr.utils import get_payroll_period
-from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
-from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
-from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_employee_benefit_claim
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
+from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -62,6 +61,10 @@ class SalarySlip(TransactionBase):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
+
+				if key=="earnings" and struct_row.is_flexible_benefit == 1:
+					self.add_employee_flexi_benefits(struct_row)
+
 				if key=="deductions" and struct_row.variable_based_on_taxable_salary:
 					tax_row, amount = self.calculate_pro_rata_tax(struct_row.salary_component)
 					if tax_row and amount:
@@ -74,41 +77,15 @@ class SalarySlip(TransactionBase):
 				amount = additional_component.amount + self.get_amount_from_exisiting_component(frappe._dict(additional_component.struct_row).salary_component)
 				self.update_component_row(frappe._dict(additional_component.struct_row), amount, "earnings")
 
-		max_benefits = self._salary_structure_doc.get("max_benefits")
-		if max_benefits > 0:
-			self.add_employee_benefits(max_benefits)
-
-	def add_employee_benefits(self, max_benefits):
-		employee_benefits = get_employee_benefit_application(self.employee, self.start_date, self.end_date)
-		if employee_benefits:
-			for employee_benefit in employee_benefits:
-				benefit_component = frappe._dict(employee_benefit)
-				amount = benefit_component.amount + self.get_amount_from_exisiting_component(frappe._dict(benefit_component.struct_row).salary_component)
-				self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+	def add_employee_flexi_benefits(self, struct_row):
+		if frappe.db.get_value("Salary Component", struct_row.salary_component, "is_pro_rata_applicable") == 1:
+			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, struct_row, self._salary_structure_doc)
+			if benefit_component_amount:
+				self.update_component_row(struct_row, benefit_component_amount, "earnings")
 		else:
-			default_flexi_compenent = frappe.db.exists(
-				'Salary Component',
-				{
-					'is_flexible_benefit': 1,
-					'is_pro_rata_applicable': 1,
-					'flexi_default': 1
-				}
-			)
-			if default_flexi_compenent:
-				flexi_struct_row = self.create_flexi_struct_row(default_flexi_compenent)
-				payroll_period_days = get_payroll_period_days(self.start_date, self.end_date, self.company)
-				amount = get_amount(payroll_period_days, self.start_date, self.end_date, max_benefits)
-				amount += self.get_amount_from_exisiting_component(default_flexi_compenent)
-				self.update_component_row(flexi_struct_row, amount, "earnings")
-			else:
-				frappe.throw(_("Configure default flexible benefit salary component to apply pro-rata benefit"))
-
-		benefit_claims = get_employee_benefit_claim(self.employee, self.start_date, self.end_date)
-		if benefit_claims:
-			for benefit_claim in benefit_claims:
-				benefit_component = frappe._dict(benefit_claim)
-				amount = benefit_component.amount + self.get_amount_from_exisiting_component(frappe._dict(benefit_component.struct_row).salary_component)
-				self.update_component_row(frappe._dict(benefit_component.struct_row), amount, "earnings")
+			benefit_claim_amount = get_benefit_claim_amount(self.employee, self.start_date, self.end_date, struct_row)
+			if benefit_claim_amount:
+				self.update_component_row(struct_row, benefit_claim_amount, "earnings")
 
 	def get_amount_from_exisiting_component(self, salary_component):
 		amount = 0
@@ -116,15 +93,6 @@ class SalarySlip(TransactionBase):
 			if d.salary_component == salary_component:
 				amount = d.amount
 		return amount
-
-	def create_flexi_struct_row(self, default_flexi_compenent):
-		salary_component = frappe.get_doc("Salary Component", default_flexi_compenent)
-		flexi_struct_row = {}
-		flexi_struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
-		flexi_struct_row['salary_component'] = salary_component.name
-		flexi_struct_row['abbr'] = salary_component.salary_component_abbr
-		flexi_struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
-		return frappe._dict(flexi_struct_row)
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
