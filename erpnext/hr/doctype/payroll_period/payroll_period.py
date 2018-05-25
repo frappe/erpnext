@@ -49,7 +49,9 @@ def get_payroll_period_days(start_date, end_date, company):
 	select start_date, end_date from `tabPayroll Period`
 	where company=%(company)s
 	and (
-		start_date between %(start_date)s and %(end_date)s
+		(%(start_date)s between start_date and end_date)
+		or (%(end_date)s between start_date and end_date)
+		or (start_date between %(start_date)s and %(end_date)s)
 	)""", {
 		'company': company,
 		'start_date': start_date,
