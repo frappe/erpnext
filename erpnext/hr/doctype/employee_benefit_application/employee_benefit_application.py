@@ -110,8 +110,9 @@ def get_assigned_salary_sturecture(employee, _date):
 	if salary_structure:
 		return salary_structure
 
-def get_employee_benefit_application(employee, start_date, end_date):
-	employee_benefits = frappe.db.sql("""
+def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct):
+	# Considering there is only one application for an year
+	benefit_application_name = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
 	where employee=%(employee)s
 	and docstatus = 1
@@ -122,40 +123,40 @@ def get_employee_benefit_application(employee, start_date, end_date):
 		'end_date': end_date
 	})
 
-	if employee_benefits:
-		for employee_benefit in employee_benefits:
-			employee_benefit_obj = frappe.get_doc("Employee Benefit Application", employee_benefit[0])
-			return get_benefit_components(employee_benefit_obj, employee, start_date, end_date)
-
-def get_benefit_components(employee_benefit_application, employee, start_date, end_date):
-	salary_components_array = []
-	group_component_amount = {}
 	payroll_period_days = get_payroll_period_days(start_date, end_date, frappe.db.get_value("Employee", employee, "company"))
-	for employee_benefit in employee_benefit_application.employee_benefits:
-		if employee_benefit.is_pro_rata_applicable == 1:
-			struct_row = {}
-			salary_components_dict = {}
-			amount = get_amount(payroll_period_days, start_date, end_date, employee_benefit.amount)
-			sc = frappe.get_doc("Salary Component", employee_benefit.earning_component)
-			salary_component = sc
-			if sc.earning_component_group and not sc.is_group and not sc.flexi_default:
-				salary_component = frappe.get_doc("Salary Component", sc.earning_component_group)
-				if group_component_amount and group_component_amount.has_key(sc.earning_component_group):
-					group_component_amount[sc.earning_component_group] += amount
-				else:
-					group_component_amount[sc.earning_component_group] = amount
-				amount = group_component_amount[sc.earning_component_group]
-			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
-			struct_row['salary_component'] = salary_component.name
-			struct_row['abbr'] = salary_component.salary_component_abbr
-			struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
-			salary_components_dict['amount'] = amount
-			salary_components_dict['struct_row'] = struct_row
-			salary_components_array.append(salary_components_dict)
+	if payroll_period_days:
+		# If there is application for benefit claim then fetch the amount from it.
+		if benefit_application_name:
+			benefit_application = frappe.get_doc("Employee Benefit Application", benefit_application_name[0][0])
+			return get_benefit_amount(benefit_application, start_date, end_date, struct_row, payroll_period_days)
 
-	if len(salary_components_array) > 0:
-		return salary_components_array
+		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount
+		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
+		else:
+			component_max = frappe.db.get_value("Salary Component", struct_row.salary_component, "max_benefit_amount")
+			if component_max > 0:
+				return get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, start_date, end_date)
 	return False
+
+def get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, start_date, end_date):
+	total_pro_rata_max = 0
+	for sal_struct_row in sal_struct.get("earnings"):
+		is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
+		if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+			total_pro_rata_max += max_benefit_amount
+	if total_pro_rata_max > 0:
+		benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max
+		if benefit_amount > component_max:
+			benefit_amount = component_max
+		return get_amount(payroll_period_days, start_date, end_date, benefit_amount)
+	return False
+
+def get_benefit_amount(application, start_date, end_date, struct_row, payroll_period_days):
+	amount = 0
+	for employee_benefit in application.employee_benefits:
+		if employee_benefit.earning_component == struct_row.salary_component:
+			amount += get_amount(payroll_period_days, start_date, end_date, employee_benefit.amount)
+	return amount if amount > 0 else False
 
 def get_amount(payroll_period_days, start_date, end_date, amount):
 	salary_slip_days = date_diff(getdate(end_date), getdate(start_date)) + 1
