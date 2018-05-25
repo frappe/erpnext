@@ -497,7 +497,7 @@ def get_company_default(company, fieldname):
 
 	if not value:
 		throw(_("Please set default {0} in Company {1}")
-		      .format(frappe.get_meta("Company").get_label(fieldname), company))
+			.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 
@@ -550,16 +550,16 @@ def get_stock_rbnb_difference(posting_date, company):
 	pr_valuation_amount = frappe.db.sql("""
 		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+		where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
 		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+		('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
 
 	pi_valuation_amount = frappe.db.sql("""
 		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
 		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
-	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+		where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
 		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+		('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
 
 	# Balance should be
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
@@ -695,6 +695,7 @@ def get_children(doctype, parent, company, is_root=False):
 	else:
 		fields += ['account_currency'] if doctype == 'Account' else []
 		fields += [parent_fieldname + ' as parent']
+		filters.append([parent_fieldname, '=', parent])
 
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
