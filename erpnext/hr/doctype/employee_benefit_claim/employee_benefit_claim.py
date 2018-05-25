@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits, get_assigned_salary_sturecture
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
 from erpnext.hr.utils import get_payroll_period
-from frappe.desk.reportview import get_match_cond
+from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 class EmployeeBenefitClaim(Document):
 	def validate(self):
@@ -53,9 +53,9 @@ class EmployeeBenefitClaim(Document):
 			amount and previous claimed amount").format(self.employee, max_benefits, pro_rata_amount+claimed_amount-max_benefits))
 
 	def get_benefit_pro_rata_ratio_amount(self):
-		sal_struct_name = get_assigned_salary_sturecture(self.employee, self.claim_date)
-		if len(sal_struct_name) > 0:
-			sal_struct = frappe.get_doc("Salary Structure", sal_struct_name[0][0])
+		sal_struct_name = get_assigned_salary_structure(self.employee, self.claim_date)
+		if sal_struct_name:
+			sal_struct = frappe.get_doc("Salary Structure", sal_struct_name)
 			total_pro_rata_max = 0
 			benefit_amount_total = 0
 			for sal_struct_row in sal_struct.get("earnings"):
