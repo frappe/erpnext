@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
+from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits, get_assigned_salary_sturecture
 from erpnext.hr.utils import get_payroll_period
 from frappe.desk.reportview import get_match_cond
 
@@ -41,15 +41,38 @@ class EmployeeBenefitClaim(Document):
 		claimed_amount = self.claimed_amount
 		pro_rata_amount = self.get_pro_rata_amount_in_application(payroll_period.name)
 		if not pro_rata_amount:
-			pro_rata_amount = 0
-			# TODO: 
 			# Get pro_rata_amount if there is no application,
-			# get salary slip for the period and calculate pro-rata amount per day and mulitply with payroll_period_days
+			# get salary structure for the date and calculate pro-rata amount
+			pro_rata_amount = self.get_benefit_pro_rata_ratio_amount()
+		if not pro_rata_amount:
+			pro_rata_amount = 0
 
 		claimed_amount += self.get_previous_claimed_amount(payroll_period, True)
 		if max_benefits < pro_rata_amount + claimed_amount:
 			frappe.throw(_("Maximum benefit of employee {0} exceeds {1} by the sum {2} of benefit application pro-rata component\
 			amount and previous claimed amount").format(self.employee, max_benefits, pro_rata_amount+claimed_amount-max_benefits))
+
+	def get_benefit_pro_rata_ratio_amount(self):
+		sal_struct_name = get_assigned_salary_sturecture(self.employee, self.claim_date)
+		if len(sal_struct_name) > 0:
+			sal_struct = frappe.get_doc("Salary Structure", sal_struct_name[0][0])
+			total_pro_rata_max = 0
+			benefit_amount_total = 0
+			for sal_struct_row in sal_struct.get("earnings"):
+				is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
+				if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+					total_pro_rata_max += max_benefit_amount
+			if total_pro_rata_max > 0:
+				for sal_struct_row in sal_struct.get("earnings"):
+					is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
+					if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+						component_max = max_benefit_amount
+						benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max
+						if benefit_amount > component_max:
+							benefit_amount = component_max
+						benefit_amount_total += benefit_amount
+				return benefit_amount_total
+		return False
 
 	def get_pro_rata_amount_in_application(self, payroll_period):
 		application = frappe.db.exists(
