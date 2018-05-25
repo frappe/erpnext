@@ -168,7 +168,7 @@ class Employee(NestedSet):
 
 	def validate_onboarding_process(self):
 		employee_onboarding = frappe.get_all("Employee Onboarding",
-			filters={"job_applicant": self.job_applicant, "docstatus": 1, "status": ("!=", "Completed")})
+			filters={"job_applicant": self.job_applicant, "docstatus": 1, "boarding_status": ("!=", "Completed")})
 		if employee_onboarding:
 			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
 			doc.validate_employee_creation()
