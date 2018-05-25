@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import nowdate, date_diff, getdate
+from frappe.utils import date_diff, getdate
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
