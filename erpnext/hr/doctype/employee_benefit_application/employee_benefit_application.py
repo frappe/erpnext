@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import nowdate, date_diff, getdate
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
-from frappe.desk.reportview import get_match_cond
+from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -28,11 +28,11 @@ class EmployeeBenefitApplication(Document):
 		if self.employee_benefits:
 			for employee_benefit in self.employee_benefits:
 				benefit_components.append(employee_benefit.earning_component)
-		salary_struct_name = get_assigned_salary_sturecture(self.employee, self.date)
-		if len(salary_struct_name) > 0:
+		salary_struct_name = get_assigned_salary_structure(self.employee, self.date)
+		if salary_struct_name:
 			non_pro_rata_amount = 0
 			pro_rata_amount = 0
-			salary_structure = frappe.get_doc("Salary Structure", salary_struct_name[0][0])
+			salary_structure = frappe.get_doc("Salary Structure", salary_struct_name)
 			if salary_structure.earnings:
 				for earnings in salary_structure.earnings:
 					if earnings.is_flexible_benefit == 1 and earnings.salary_component not in benefit_components:
@@ -82,33 +82,15 @@ class EmployeeBenefitApplication(Document):
 
 @frappe.whitelist()
 def get_max_benefits(employee, on_date):
-	sal_struct = get_assigned_salary_sturecture(employee, on_date)
+	sal_struct = get_assigned_salary_structure(employee, on_date)
 	if sal_struct:
-		max_benefits = frappe.db.get_value("Salary Structure", sal_struct[0][0], "max_benefits")
+		max_benefits = frappe.db.get_value("Salary Structure", sal_struct, "max_benefits")
 		if max_benefits > 0:
 			return max_benefits
 		else:
 			frappe.throw(_("Employee {0} has no max benefits in salary structure {1}").format(employee, sal_struct[0][0]))
 	else:
 		frappe.throw(_("Employee {0} has no salary structure assigned").format(employee))
-
-
-@frappe.whitelist()
-def get_assigned_salary_sturecture(employee, _date):
-	if not _date:
-		_date = nowdate()
-	salary_structure = frappe.db.sql("""
-		select salary_structure from `tabSalary Structure Assignment`
-		where employee=%(employee)s
-		and docstatus = 1
-		and (
-			(%(_date)s between from_date and ifnull(to_date, '2199-12-31'))
-		)""", {
-			'employee': employee,
-			'_date': _date,
-		})
-	if salary_structure:
-		return salary_structure
 
 def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct):
 	# Considering there is only one application for an year
@@ -130,7 +112,7 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 			benefit_application = frappe.get_doc("Employee Benefit Application", benefit_application_name[0][0])
 			return get_benefit_amount(benefit_application, start_date, end_date, struct_row, payroll_period_days)
 
-		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount
+		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount (Late Benefit Application)
 		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
 		else:
 			component_max = frappe.db.get_value("Salary Component", struct_row.salary_component, "max_benefit_amount")
@@ -169,15 +151,15 @@ def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
 		return {}
 	employee = filters['employee']
 	date = filters['date']
-	salary_structure = get_assigned_salary_sturecture(employee, date)
+	salary_structure = get_assigned_salary_structure(employee, date)
 
-	if len(salary_structure) > 0:
+	if salary_structure:
 		query = """select salary_component from `tabSalary Detail` where parent = '{salary_structure}'
 		and is_flexible_benefit = 1
 		order by name"""
 
 		return frappe.db.sql(query.format(**{
-			"salary_structure": salary_structure[0][0]
+			"salary_structure": salary_structure
 		}))
 
 	return {}
