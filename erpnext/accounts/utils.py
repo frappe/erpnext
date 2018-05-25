@@ -687,16 +687,16 @@ def get_children(doctype, parent, company, is_root=False):
 		'is_group as expandable'
 	]
 	filters = [['docstatus', '<', 2]]
+
+	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
+
 	if is_root:
 		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
-		filters.append([parent_fieldname, '=', ''])
 		filters.append(['company', '=', company])
 
 	else:
 		fields += ['account_currency'] if doctype == 'Account' else []
 		fields += [parent_fieldname + ' as parent']
-		filters.append([parent_fieldname, '=', parent])
-
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
