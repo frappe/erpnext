@@ -19,6 +19,6 @@ Assessment Criteria is be used when scheduling Assessment Plan for Student Group
         <iframe src='https://www.youtube.com/embed/t8ZDDq4qtIk?end=52' frameborder='0' allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 {next}

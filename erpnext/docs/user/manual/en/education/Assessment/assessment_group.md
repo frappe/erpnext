@@ -19,6 +19,6 @@ On the same lines, you can also define multiple Assessment Group bases on assess
         <iframe src='https://www.youtube.com/embed/I1T7Z2JbcP4' frameborder='0' allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 {next}
