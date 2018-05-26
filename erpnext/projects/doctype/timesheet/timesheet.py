@@ -343,6 +343,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	billing_rate = billing_amount / hours
 
+	target.company = timesheet.company
 	if customer:
 		target.customer = customer
 

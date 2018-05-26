@@ -270,7 +270,7 @@ def make_deduction_salary_component(salary_components):
 
 def make_salary_structure(sal_struct, payroll_frequency, employee):
 	if not frappe.db.exists('Salary Structure', sal_struct):
-		frappe.get_doc({
+		salary_structure = frappe.get_doc({
 			"doctype": "Salary Structure",
 			"name": sal_struct,
 			"company": "_Test Company",
@@ -280,12 +280,10 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 			"payment_account": get_random("Account")
 		}).insert()
 
-		create_salary_structure_assignment(employee, sal_struct)
+		create_salary_structure_assignment(employee, salary_structure)
 
 	elif not frappe.db.get_value("Salary Structure Assignment",{'salary_structure':sal_struct, 'employee':employee},'name'):
-		sal_struct = frappe.get_doc("Salary Structure", sal_struct)
 		create_salary_structure_assignment(employee, sal_struct)
-		sal_struct = sal_struct.name
 	return sal_struct
 
 def create_salary_structure_assignment(employee, salary_structure):
