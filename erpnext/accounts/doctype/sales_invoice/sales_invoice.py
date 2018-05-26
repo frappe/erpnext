@@ -341,9 +341,8 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					for fname, val in get_pos_profile_item_details(pos,
-						iteritems(frappe._dict(item.as_dict()), pos)):
-
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
