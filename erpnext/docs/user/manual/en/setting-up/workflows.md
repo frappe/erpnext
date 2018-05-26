@@ -71,7 +71,7 @@ When the Leave Approver opens the Leave Application page, he can finally "Approv
 
 <img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-5.png">
 
-<div class-"embed-container">
+<div class="embed-container">
     <iframe src="https://www.youtube.com/embed/yObJUg9FxFs?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
     </iframe>
 </div>
