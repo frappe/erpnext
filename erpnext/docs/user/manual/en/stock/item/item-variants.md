@@ -65,6 +65,6 @@ To set the fields Goto Stock > Item Variant Settings
 <div class="embed-container">
 	<iframe src="https://www.youtube.com/embed/SngZtDIMdiQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
 	</iframe>
-<div>
+</div>
 
 {next}
