@@ -25,10 +25,13 @@ def build_tree():
 		where is_group = 0""".format(_('All Supplier Groups')))
 
 	if not frappe.db.exists("Supplier Group", _('All Supplier Groups')):
-		frappe.get_doc({
+		supplier_group = frappe.get_doc({
 			'doctype': 'Supplier Group',
 			'supplier_group_name': _('All Supplier Groups'),
-			'is_group': 1
-		}).insert(ignore_permissions=True)
+			'is_group': 1,
+			'parent_supplier_group': ''
+		})
+		supplier_group.flags.ignore_validate=True
+		supplier_group.insert(ignore_permissions=True)
 
 	rebuild_tree("Supplier Group", "parent_supplier_group")
