@@ -74,7 +74,8 @@ class BuyingController(StockController):
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
 			for d in self.get("items"):
-				supplier = frappe.db.get_value("Item", d.item_code, "default_supplier")
+				supplier = frappe.db.get_value("Item Default",
+					{"parent": d.item_code, "company": self.company}, "default_supplier")
 				if supplier:
 					self.supplier = supplier
 					break
