@@ -8,8 +8,8 @@ from frappe.utils import cstr
 
 def execute(filters=None):
 	columns, data = [], []
-	columns=get_columns()
-	data=get_sales_payment_data(filters, columns)
+	columns = get_columns(filters)
+	data = get_pos_sales_payment_data(filters) if filters.get('is_pos') else get_sales_payment_data(filters, columns)
 	return columns, data
 
 
@@ -24,6 +24,21 @@ def get_pos_columns():
 		_("Warehouse") + ":Data:200",
 		_("Cost Center") + ":Data:200"
 	]
+
+
+def get_columns(filters):
+	if filters.get('is_pos'):
+		return get_pos_columns()
+	else:
+		return [
+			_("Date") + ":Date:80",
+			_("Owner") + ":Data:200",
+			_("Payment Mode") + ":Data:240",
+			_("Sales and Returns") + ":Currency/currency:120",
+			_("Taxes") + ":Currency/currency:120",
+			_("Payments") + ":Currency/currency:120",
+			_("Warehouse") + ":Data:200"
+		]
 
 
 def get_pos_sales_payment_data(filters):
@@ -42,49 +57,6 @@ def get_pos_sales_payment_data(filters):
 
 	return data
 
-
-def get_pos_invoice_data(filters):
-	conditions = get_conditions(filters)
-	result = frappe.db.sql(''
-						   'SELECT '
-						   'posting_date, owner, sum(net_total) as "net_total", sum(total_taxes) as "total_taxes", '
-						   'sum(paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount", '
-						   'mode_of_payment, warehouse, cost_center '
-						   'FROM ('
-						   'SELECT '
-						   'parent, item_code, sum(amount) as "base_total", warehouse, cost_center '
-						   'from `tabSales Invoice Item`  group by parent'
-						   ') t1 '
-						   'left join '
-						   '(select parent, mode_of_payment from `tabSales Invoice Payment` group by parent) t3 '
-						   'on (t3.parent = t1.parent) '
-						   'JOIN ('
-						   'SELECT '
-						   'docstatus, company, is_pos, name, posting_date, owner, sum(base_total) as "base_total", '
-						   'sum(net_total) as "net_total", sum(total_taxes_and_charges) as "total_taxes", '
-						   'sum(base_paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount" '
-						   'FROM `tabSales Invoice` '
-						   'GROUP BY name'
-						   ') a '
-						   'ON ('
-						   't1.parent = a.name and t1.base_total = a.base_total) '
-						   'WHERE a.docstatus = 1'
-						   ' AND {conditions} '
-						   'GROUP BY '
-						   'owner, posting_date, warehouse'.format(conditions=conditions), filters, as_dict=1
-						   )
-	return result
-
-
-def get_columns():
-	return [
-		_("Date") + ":Date:80",
-		_("Owner") + ":Data:200",
-		_("Payment Mode") + ":Data:240",
-		_("Sales and Returns") + ":Currency/currency:120",
-		_("Taxes") + ":Currency/currency:120",
-		_("Payments") + ":Currency/currency:120"
-	]
 
 def get_sales_payment_data(filters, columns):
 	data = []
@@ -126,6 +98,40 @@ def get_conditions(filters):
 	if filters.get("is_pos"): conditions += " and a.is_pos = %(is_pos)s"
 	return conditions
 
+
+def get_pos_invoice_data(filters):
+	conditions = get_conditions(filters)
+	result = frappe.db.sql(''
+						   'SELECT '
+						   'posting_date, owner, sum(net_total) as "net_total", sum(total_taxes) as "total_taxes", '
+						   'sum(paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount", '
+						   'mode_of_payment, warehouse, cost_center '
+						   'FROM ('
+						   'SELECT '
+						   'parent, item_code, sum(amount) as "base_total", warehouse, cost_center '
+						   'from `tabSales Invoice Item`  group by parent'
+						   ') t1 '
+						   'left join '
+						   '(select parent, mode_of_payment from `tabSales Invoice Payment` group by parent) t3 '
+						   'on (t3.parent = t1.parent) '
+						   'JOIN ('
+						   'SELECT '
+						   'docstatus, company, is_pos, name, posting_date, owner, sum(base_total) as "base_total", '
+						   'sum(net_total) as "net_total", sum(total_taxes_and_charges) as "total_taxes", '
+						   'sum(base_paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount" '
+						   'FROM `tabSales Invoice` '
+						   'GROUP BY name'
+						   ') a '
+						   'ON ('
+						   't1.parent = a.name and t1.base_total = a.base_total) '
+						   'WHERE a.docstatus = 1'
+						   ' AND {conditions} '
+						   'GROUP BY '
+						   'owner, posting_date, warehouse'.format(conditions=conditions), filters, as_dict=1
+						   )
+	return result
+
+
 def get_sales_invoice_data(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
@@ -141,6 +147,7 @@ def get_sales_invoice_data(filters):
 			group by
 			a.owner, a.posting_date
 	""".format(conditions=conditions), filters, as_dict=1)
+
 
 def get_mode_of_payments(filters):
 	mode_of_payments = {}
