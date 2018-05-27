@@ -14,7 +14,8 @@ class StaffingPlan(Document):
 		if self.from_date and self.to_date and self.from_date > self.to_date:
 			frappe.throw(_("From Date cannot be greater than To Date"))
 
-		# Validate if any submitted Staffing Plan exist for Designations in this plan
+		self.total_estimated_budget = 0
+		# Validate if any submitted Staffing Plan exist for any Designations in this plan
 		# and spd.vacancies>0 ?
 		for detail in self.get("staffing_details"):
 			overlap = (frappe.db.sql("""select spd.parent \
@@ -22,10 +23,20 @@ class StaffingPlan(Document):
 				where spd.designation='{0}' and sp.docstatus=1 \
 				and sp.to_date >= '{1}' and sp.from_date <='{2}'"""
 			.format(detail.designation, self.from_date, self.to_date)))
-
 			if overlap and overlap [0][0]:
 				frappe.throw(_("Staffing Plan {0} already exist for designation {1}"
 					.format(overlap[0][0], detail.designation)))
+			#Set readonly fields
+			detail.current_count = get_current_employee_count(detail.designation, self.company)
+			if detail.number_of_positions > 0:
+				detail.vacancies = detail.number_of_positions - detail.current_count
+				if detail.vacancies > 0 and detail.estimated_cost_per_position:
+					detail.total_estimated_cost = detail.vacancies * detail.estimated_cost_per_position
+				else: detail.total_estimated_cost = 0
+			else: detail.vacancies = detail.number_of_positions = detail.total_estimated_cost = 0
+			self.total_estimated_budget += detail.total_estimated_cost
+
+		#TODO Validate vacancies and budget for parent and child companies
 
 @frappe.whitelist()
 def get_current_employee_count(designation, company):

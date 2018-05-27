@@ -41,6 +41,9 @@ frappe.ui.form.on('Staffing Plan Detail', {
 				callback: function (data) {
 					if(data.message){
 						frappe.model.set_value(cdt, cdn, 'current_count', data.message);
+						if (child.number_of_positions < data.message){
+							frappe.model.set_value(cdt, cdn, 'number_of_positions', data.message)
+						}
 					}
 					else{ // No employees for this designation
 						frappe.model.set_value(cdt, cdn, 'current_count', 0);
@@ -67,19 +70,21 @@ frappe.ui.form.on('Staffing Plan Detail', {
 
 var set_vacancies = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn]
-	if(child.number_of_positions) {
+	if(child.number_of_positions > 0) {
 		frappe.model.set_value(cdt, cdn, 'vacancies', child.number_of_positions - child.current_count);
 	}
 	else{
 		frappe.model.set_value(cdt, cdn, 'vacancies', 0);
 	}
+
 	set_total_estimated_cost(frm, cdt, cdn);
 }
 
 // Note: Estimated Cost is calculated on number of Vacancies
+// Validate for > 0 ?
 var set_total_estimated_cost = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn]
-	if(child.number_of_positions && child.estimated_cost_per_position) {
+	if(child.vacancies > 0 && child.estimated_cost_per_position) {
 		frappe.model.set_value(cdt, cdn, 'total_estimated_cost', child.vacancies * child.estimated_cost_per_position);
 	}
 	else {
