@@ -88,14 +88,21 @@ def get_sales_payment_data(filters, columns):
 			data.append(row)
 	return data
 
+
 def get_conditions(filters):
 	conditions = "1=1"
-	if filters.get("from_date"): conditions += " and a.posting_date >= %(from_date)s"
-	if filters.get("to_date"): conditions += " and a.posting_date <= %(to_date)s"
-	if filters.get("company"): conditions += " and a.company=%(company)s"
-	if filters.get("customer"): conditions += " and a.customer = %(customer)s"
-	if filters.get("owner"): conditions += " and a.owner = %(owner)s"
-	if filters.get("is_pos"): conditions += " and a.is_pos = %(is_pos)s"
+	if filters.get("from_date"):
+		conditions += " and a.posting_date >= %(from_date)s"
+	if filters.get("to_date"):
+		conditions += " and a.posting_date <= %(to_date)s"
+	if filters.get("company"):
+		conditions += " and a.company=%(company)s"
+	if filters.get("customer"):
+		conditions += " and a.customer = %(customer)s"
+	if filters.get("owner"):
+		conditions += " and a.owner = %(owner)s"
+	if filters.get("is_pos"):
+		conditions += " and a.is_pos = %(is_pos)s"
 	return conditions
 
 
@@ -177,12 +184,14 @@ def get_mode_of_payments(filters):
 			mode_of_payments.setdefault(d["owner"]+cstr(d["posting_date"]), []).append(d.mode_of_payment)
 	return mode_of_payments
 
+
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select a.name
 		from `tabSales Invoice` a
 		where a.docstatus = 1 and {conditions}""".format(conditions=conditions),
 		filters, as_dict=1)
+
 
 def get_mode_of_payment_details(filters):
 	mode_of_payment_details = {}
