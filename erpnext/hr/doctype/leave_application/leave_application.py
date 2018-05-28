@@ -610,6 +610,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 
 	return leave_days
 
+@frappe.whitelist()
 def get_leave_approver(employee, department=None):
 	if not department:
 		department = frappe.db.get_value('Employee', employee, 'department')
