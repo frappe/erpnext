@@ -127,7 +127,7 @@ class LeaveApplication(Document):
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
 
-			elif self.to_date <= nowdate():
+			elif getdate(self.to_date) <= getdate(nowdate()):
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
 					if not date == self.half_day_date:
@@ -252,7 +252,7 @@ class LeaveApplication(Document):
 		return leave_count_on_half_day_date * 0.5
 
 	def validate_max_days(self):
-		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
+		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_continuous_days_allowed")
 		if max_days and self.total_leave_days > cint(max_days):
 			frappe.throw(_("Leave of type {0} cannot be longer than {1}").format(self.leave_type, max_days))
 
@@ -567,10 +567,10 @@ def add_holidays(events, start, end, employee, company):
 def get_mandatory_approval(doctype):
 	mandatory = ""
 	if doctype == "Leave Application":
-		mandatory = frappe.db.get_single_value('HR Settings', 
+		mandatory = frappe.db.get_single_value('HR Settings',
 				'leave_approver_mandatory_in_leave_application')
 	else:
-		mandatory = frappe.db.get_single_value('HR Settings', 
+		mandatory = frappe.db.get_single_value('HR Settings',
 				'expense_approver_mandatory_in_expense_claim')
 
 	return mandatory
@@ -609,7 +609,8 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 				leave_app.from_date, leave_app.to_date)
 
 	return leave_days
-	
+
+@frappe.whitelist()
 def get_leave_approver(employee, department=None):
 	if not department:
 		department = frappe.db.get_value('Employee', employee, 'department')

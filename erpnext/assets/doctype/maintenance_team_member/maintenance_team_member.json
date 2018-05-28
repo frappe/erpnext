@@ -42,6 +42,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -51,6 +52,7 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "", 
+   "fetch_from": "team_member.full_name",
    "fieldname": "full_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -63,7 +65,7 @@
    "label": "Full Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "team_member.full_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -74,6 +76,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -105,6 +108,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -118,7 +122,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-10-24 15:51:58.295745", 
+ "modified": "2018-05-16 22:43:15.255185",
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Maintenance Team Member", 

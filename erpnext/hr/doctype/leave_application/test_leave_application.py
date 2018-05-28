@@ -367,7 +367,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name = 'Test Leave Type',
 			doctype = 'Leave Type',
 			max_leaves_allowed = 15,
-			max_days_allowed = 3
+			max_continuous_days_allowed = 3
 		)).insert()
 
 		date = add_days(nowdate(), -7)

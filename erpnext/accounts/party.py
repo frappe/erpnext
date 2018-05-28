@@ -479,7 +479,6 @@ def get_party_shipping_address(doctype, name):
 def get_patry_tax_withholding_details(ref_doc):
 	supplier = frappe.get_doc("Supplier", ref_doc.supplier)
 	tax_withholding_details = []
-	print(supplier)
 	for tax in supplier.tax_withholding_config:
 		tax_mapper = get_tax_mapper()
 

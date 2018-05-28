@@ -74,7 +74,8 @@ class BuyingController(StockController):
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
 			for d in self.get("items"):
-				supplier = frappe.db.get_value("Item", d.item_code, "default_supplier")
+				supplier = frappe.db.get_value("Item Default",
+					{"parent": d.item_code, "company": self.company}, "default_supplier")
 				if supplier:
 					self.supplier = supplier
 					break
@@ -217,7 +218,8 @@ class BuyingController(StockController):
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select i.item_code, id.default_warehouse
-			from `tabItem` i, `tabItem Default` id where id.company=%s and i.name in ({0})"""
+			from `tabItem` i, `tabItem Default` id
+			where id.parent=i.name and id.company=%s and i.name in ({0})"""
 			.format(", ".join(["%s"] * len(items))), [self.company] + items))
 
 		for bom_item in bom_items:

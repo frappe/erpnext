@@ -29,7 +29,7 @@ Check the following video to educate yourself on the ERPNext features for servic
         <iframe src='https://www.youtube.com/embed/mI8IkiGhaPA' frameborder='0' allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 ### User Manual
 

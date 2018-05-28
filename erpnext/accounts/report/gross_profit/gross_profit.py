@@ -149,7 +149,7 @@ class GrossProfitGenerator(object):
 
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
-		for key in self.grouped.keys():
+		for key in list(self.grouped):
 			if self.filters.get("group_by") != "Invoice":
 				for i, row in enumerate(self.grouped[key]):
 					if i==0:

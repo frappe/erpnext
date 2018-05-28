@@ -397,5 +397,16 @@ def get_data():
 					"youtube_id": "5SZHJF--ZFY"
 				}
 			]
+		},
+		{
+			"label": _("Analytics"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Department Analytics",
+					"doctype": "Employee"
+				},
+			]
 		}
 	]
