@@ -144,17 +144,19 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	if is_root:
 		parent = ""
 
-	warehouses = frappe.db.sql("""select name as value,
-		is_group as expandable
-		from `tabWarehouse`
-		where docstatus < 2
-		and ifnull(`parent_warehouse`,'') = %s
-		and (`company` = %s or company is null or company = '')
-		order by name""", (parent, company), as_dict=1)
+	fields = ['name as value', 'is_group as expandable']
+	filters = [
+		['docstatus', '<', '2'],
+		['ifnull(`parent_warehouse`, "")', '=', parent],
+		['company', 'in', (company, None,'')]
+	]
+
+	warehouses = frappe.get_list(doctype, fields=fields, filters=filters, order_by='name')
 
 	# return warehouses
 	for wh in warehouses:
 		wh["balance"] = get_stock_value_on(warehouse=wh.value)
+
 	return warehouses
 
 @frappe.whitelist()
