@@ -170,6 +170,7 @@ frappe.ui.form.on('Stock Entry', {
 								d.qty = element.qty;
 								d.uom = element.stock_uom;
 								d.conversion_factor = 1;
+								d.batch_no = element.batch_no;
 								d.transfer_qty = element.qty;
 								frm.refresh_fields();
 							});
