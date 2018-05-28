@@ -3,41 +3,28 @@
 
 frappe.ui.form.on('Blanket Order', {
 	refresh: function(frm) {
-		if (frm.doc.customer) {
+		if (frm.doc.customer && frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('View Orders'), function() {
 				frappe.set_route('List', 'Sales Order', {blanket_order: frm.doc.name});
 			});
-			if (frm.doc.docstatus === 1) {
-				frm.add_primary_button(__("Create Sales Order"), function(){
-					
+			frm.add_custom_button(__("Create Sales Order"), function(){
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_sales_order",
+					frm: frm
 				});
-			}
+			}).addClass("btn-primary");
 		}
 
-		if (frm.doc.supplier) {
+		if (frm.doc.supplier && frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('View Orders'), function() {
 				frappe.set_route('List', 'Purchase Order', {blanket_order: frm.doc.name});
 			});
-		}
-
-		// if (frm.doc.project) {
-		// 	frm.add_custom_button(__('Project'), function() {
-		// 		frappe.set_route("Form", "Project", frm.doc.project);
-		// 	},__("View"));
-		// 	frm.add_custom_button(__('Task'), function() {
-		// 		frappe.set_route('List', 'Task', {project: frm.doc.project});
-		// 	},__("View"));
-		// }
-
-		if ((!frm.doc.employee) && (frm.doc.docstatus === 1)) {
-			frm.add_custom_button(__('Employee'), function () {
+			frm.add_custom_button(__("Create Purchase Order"), function(){
 				frappe.model.open_mapped_doc({
-					method: "erpnext.hr.doctype.employee_onboarding.employee_onboarding.make_employee",
+					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_purchase_order",
 					frm: frm
 				});
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}).addClass("btn-primary");
 		}
-
 	}
 });
