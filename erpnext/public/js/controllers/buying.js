@@ -108,8 +108,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		let item_rate = item.price_list_rate;
+		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
+			item_rate = item.blanket_order_rate;
+		}
+		item.rate = flt(item_rate * (1 - item.discount_percentage / 100.0), precision("rate", item));
 
 		this.calculate_taxes_and_totals();
 	},

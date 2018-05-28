@@ -1324,6 +1324,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			})
 		}
+	},
+
+	blanket_order: function(doc, cdt, cdn) {
+		var me = this;
+		var item = locals[cdt][cdn];
+		if (item.blanket_order && (item.parenttype=="Sales Order" || item.parenttype=="Purchase Order")) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_blanket_order_details",
+				args: {
+					args:{
+						item_code: item.item_code,
+						customer: doc.customer,
+						supplier: doc.supplier,
+						company: doc.company,
+						transaction_date: doc.transaction_date,
+						blanket_order: item.blanket_order
+					}
+				},
+				callback: function(r) {
+					if (!r.message) {
+						frappe.throw(__("Invalid Blanket Order for the selected Customer and Item"))
+					} else {
+						frappe.run_serially([
+							() => frappe.model.set_value(cdt, cdn, "blanket_order_rate", r.message.blanket_order_rate),
+							() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn)
+						]);
+					}
+				}
+			})
+		}
 	}
 });
 
