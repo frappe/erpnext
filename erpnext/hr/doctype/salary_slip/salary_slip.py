@@ -619,6 +619,7 @@ class SalarySlip(TransactionBase):
 		between '{1}' and '{2}'""".format(self.employee, start_date, self.end_date))
 		if sum_benefit_claim and sum_benefit_claim[0][0]:
 			total_benefit_claim = sum_benefit_claim[0][0]
+		return total_benefit - total_benefit_claim
 
 	def get_taxable_earnings(self, include_flexi=0, only_flexi=0):
 		# TODO remove this, iterate in self.earnings. map_doc fails to copy field values from Salary Structure to Slary Slip
