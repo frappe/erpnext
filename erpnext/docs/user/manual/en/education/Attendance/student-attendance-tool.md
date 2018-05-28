@@ -21,6 +21,6 @@ Student detials will be autofetched and you can mark the attendance of the given
     <iframe src='https://www.youtube.com/embed//j9pgkPuyiaI?start=63' frameborder='0' allowfullscreen>
     </iframe>
   </div>
-<div>
+</div>
 
 {next}
