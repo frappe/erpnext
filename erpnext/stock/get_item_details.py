@@ -64,6 +64,8 @@ def get_item_details(args):
 	else:
 		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
 
+	update_party_blanket_order(args, out)
+
 	get_price_list_rate(args, item_doc, out)
 
 	if args.customer and cint(args.is_pos):
@@ -185,7 +187,6 @@ def get_basic_details(args, item):
 			company: "",
 			order_type: "",
 			is_pos: "",
-			ignore_pricing_rule: "",
 			project: "",
 			qty: "",
 			stock_qty: "",
@@ -735,3 +736,32 @@ def get_serial_no(args, serial_nos=None):
 		serial_no = serial_nos
 
 	return serial_no
+
+
+def update_party_blanket_order(args, out):
+	blanket_order_details = get_blanket_order_details(args)
+	if blanket_order_details:
+		out.update(blanket_order_details)
+
+@frappe.whitelist()
+def get_blanket_order_details(args):
+	if isinstance(args, string_types):
+		args = frappe._dict(json.loads(args))
+
+	blanket_order_details = None
+	condition1, condition2 = ' ', ' '
+	if args.item_code:
+		if args.customer and args.doctype == "Sales Order":
+			condition1 = ' and bo.customer=%(customer)s '
+		elif args.supplier and args.doctype == "Purchase Order":
+			condition1 = ' and bo.supplier=%(supplier)s '
+		if args.blanket_order:
+			condition2 = ' and bo.name =%(blanket_order)s '
+		blanket_order_details = frappe.db.sql('''
+				select boi.rate as blanket_order_rate, bo.name as blanket_order
+				from `tabBlanket Order` bo, `tabBlanket Order Item` boi
+				where bo.to_date>=%(transaction_date)s and bo.company=%(company)s and boi.item_code=%(item_code)s
+					and bo.docstatus=1 and bo.name = boi.parent {0} {1}
+			'''.format(condition1, condition2), args, as_dict=True)
+		blanket_order_details = blanket_order_details[0] if blanket_order_details else ''
+	return blanket_order_details

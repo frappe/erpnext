@@ -4,12 +4,15 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
-
+		let effective_item_rate = item.price_list_rate;
+		if (item.parenttype === "Sales Order" && item.blanket_order_rate) {
+			effective_item_rate = item.blanket_order_rate;
+		}
 		if(item.margin_type == "Percentage"){
-			item.rate_with_margin = flt(item.price_list_rate)
-				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
+			item.rate_with_margin = flt(effective_item_rate)
+				+ flt(effective_item_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
-			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
+			item.rate_with_margin = flt(effective_item_rate) + flt(item.margin_rate_or_amount);
 			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 		}
 
