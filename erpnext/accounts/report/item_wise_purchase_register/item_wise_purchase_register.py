@@ -49,7 +49,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row += [
 			d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
-			purchase_receipt, expense_account, d.stock_qty, d.stock_uom, d.base_net_rate, d.base_net_amount
+			purchase_receipt, expense_account, d.stock_qty, d.stock_uom, d.base_net_amount / d.stock_qty, d.base_net_amount
 		]
 
 		total_tax = 0
@@ -120,8 +120,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
-			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_rate`,
-			`tabPurchase Invoice Item`.`base_net_amount`,
+			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
 			`tabPurchase Invoice`.supplier_name, `tabPurchase Invoice`.mode_of_payment {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
