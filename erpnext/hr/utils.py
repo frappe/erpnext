@@ -234,3 +234,10 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
+
+def get_payroll_period(from_date, to_date, company):
+	payroll_period = frappe.db.sql("""select pp.name, pd.start_date, pd.end_date from
+		`tabPayroll Period Date` pd join `tabPayroll Period` pp on
+		pd.parent=pp.name where pd.start_date<=%s and pd.end_date>= %s
+		and pp.company=%s""", (from_date, to_date, company), as_dict=1)
+	return payroll_period[0] if payroll_period else None

@@ -29,6 +29,12 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"report",
 			"label": __("Report"),
 			"fieldtype": "Select",

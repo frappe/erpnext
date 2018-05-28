@@ -19,3 +19,6 @@ class EmployeeTaxExemptionDeclaration(Document):
 							"docstatus": 1}):
 			frappe.throw(_("Tax Declaration of {0} for period {1} already submitted.")\
 			.format(self.employee, self.payroll_period), frappe.DocstatusTransitionError)
+		self.total_exemption_amount = 0
+		for item in self.declarations:
+			self.total_exemption_amount += item.amount

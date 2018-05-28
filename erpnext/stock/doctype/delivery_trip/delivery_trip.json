@@ -42,7 +42,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -74,7 +74,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -104,7 +104,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -135,7 +135,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -165,7 +165,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -196,7 +196,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -227,7 +227,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -257,7 +257,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -289,7 +289,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -298,6 +298,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "driver.full_name",
    "fieldname": "driver_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -310,7 +311,7 @@
    "label": "Driver Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "driver.full_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -321,7 +322,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -353,7 +354,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -384,7 +385,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -416,7 +417,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -448,7 +449,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -478,7 +479,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -511,7 +512,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -542,7 +543,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -556,7 +557,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-14 14:24:16.773657", 
+ "modified": "2018-05-16 22:42:43.660128",
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Trip", 

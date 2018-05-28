@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, cint
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
@@ -322,7 +322,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 	company_lft, company_rgt = frappe.db.get_value('Company',
 		filters.get('company'), ["lft", "rgt"])
 
-	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries)
+	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 		gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
@@ -353,7 +353,7 @@ def validate_entries(key, entry, accounts_by_name):
 		field = "Account number" if entry.account_number else "Account name"
 		frappe.throw(_("{0} {1} is not present in the parent company").format(field, key))
 
-def get_additional_conditions(from_date, ignore_closing_entries):
+def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
 
 	if ignore_closing_entries:
@@ -361,6 +361,15 @@ def get_additional_conditions(from_date, ignore_closing_entries):
 
 	if from_date:
 		additional_conditions.append("gl.posting_date >= %(from_date)s")
+
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+
+	if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
+		additional_conditions.append("finance_book in ('%s', '')" %
+			frappe.db.escape(company_finance_book))
+	elif filters.get("finance_book"):
+		additional_conditions.append("finance_book = '%s' " %
+			frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

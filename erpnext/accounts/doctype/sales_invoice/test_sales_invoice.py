@@ -16,7 +16,7 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-
+from six import iteritems
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -277,7 +277,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for k, v in expected_values[i].items():
+			for k, v in iteritems(expected_values[i]):
 				self.assertEqual(d.get(k), v)
 
 		# check net total
@@ -523,7 +523,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for key, val in expected_values[i].items():
+			for key, val in iteritems(expected_values[i]):
 				self.assertEqual(d.get(key), val)
 
 		# check net total

@@ -42,6 +42,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -73,6 +74,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -81,6 +83,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_maintenance.asset_name",
    "fieldname": "asset_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -93,7 +96,7 @@
    "label": "Asset Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_maintenance.asset_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -104,6 +107,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -133,6 +137,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -141,6 +146,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_maintenance.item_code",
    "fieldname": "item_code", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -153,7 +159,7 @@
    "label": "Item Code", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_maintenance.item_code", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -164,6 +170,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -172,6 +179,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_maintenance.item_name",
    "fieldname": "item_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -184,7 +192,7 @@
    "label": "Item Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_maintenance.item_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -195,6 +203,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -224,6 +233,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -255,6 +265,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -263,6 +274,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.maintenance_type",
    "fieldname": "maintenance_type", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -275,7 +287,7 @@
    "label": "Maintenance Type", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.maintenance_type", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -286,6 +298,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -294,6 +307,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.periodicity",
    "fieldname": "periodicity", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -306,7 +320,7 @@
    "label": "Periodicity", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.periodicity", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -317,6 +331,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -325,6 +340,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.assign_to_name",
    "fieldname": "assign_to_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -337,7 +353,7 @@
    "label": "Assign To", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.assign_to_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -348,6 +364,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -377,6 +394,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -385,6 +403,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.next_due_date", 
    "fieldname": "due_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -397,7 +416,7 @@
    "label": "Due Date", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.next_due_date", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -408,6 +427,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -438,6 +458,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -469,6 +490,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -498,6 +520,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -506,6 +529,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.has_certificate", 
    "fieldname": "has_certificate", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -518,7 +542,7 @@
    "label": "Has Certificate ", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.has_certificate", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -529,6 +553,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -560,6 +585,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -589,6 +615,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -597,6 +624,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "task.description",
    "fieldname": "description", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -609,7 +637,7 @@
    "label": "Description", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "task.description", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -620,6 +648,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -649,6 +678,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -679,6 +709,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -710,6 +741,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -723,7 +755,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-11-28 13:15:01.689318", 
+ "modified": "2018-05-25 22:43:39.866477",
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset Maintenance Log", 
@@ -732,7 +764,6 @@
  "permissions": [
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

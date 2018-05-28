@@ -227,7 +227,7 @@ def get_actual_expense(args):
 			where lft>=%(lft)s and rgt<=%(rgt)s and name=gle.cost_center)"""
 	
 	elif args.budget_against_field == "Project":
-		condition2 = "and exists(select name from `tabProject` where name=gle.project)"
+		condition2 = "and exists(select name from `tabProject` where name=gle.project and gle.project = %(budget_against)s)"
 
 	return flt(frappe.db.sql("""
 		select sum(gle.debit) - sum(gle.credit)
@@ -264,9 +264,15 @@ def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_ye
 def get_item_details(args):
 	cost_center, expense_account = None, None
 
+	if not args.get('company'):
+		return cost_center, expense_account
+
 	if args.item_code:
-		cost_center, expense_account = frappe.db.get_value('Item',
-			args.item_code, ['buying_cost_center', 'expense_account'])
+		item_defaults = frappe.db.get_value('Item Default',
+			{'parent': args.item_code, 'company': args.get('company')},
+			['buying_cost_center', 'expense_account'])
+		if item_defaults:
+			cost_center, expense_account = item_defaults
 
 	if not (cost_center and expense_account):
 		for doctype in ['Item Group', 'Company']:
@@ -286,6 +292,6 @@ def get_item_details(args):
 
 def get_expense_cost_center(doctype, value):
 	fields = (['default_cost_center', 'default_expense_account']
-		if doctype == 'Item Group'else ['cost_center', 'default_expense_account'])
+		if doctype == 'Item Group' else ['cost_center', 'default_expense_account'])
 
 	return frappe.db.get_value(doctype, value, fields)

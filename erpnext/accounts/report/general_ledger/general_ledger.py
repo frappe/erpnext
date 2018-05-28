@@ -2,13 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
+from six import iteritems
 
 def execute(filters=None):
 	if not filters:
@@ -87,8 +88,8 @@ def set_account_currency(filters):
 			if gle_currency:
 				account_currency = gle_currency
 			else:
-				account_currency = None if filters.party_type in ["Employee", "Student", "Shareholder"] else \
-					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency")
+				account_currency = (None if filters.party_type in ["Employee", "Student", "Shareholder", "Member"] else
+					frappe.db.get_value(filters.party_type, filters.party, "default_currency"))
 
 		filters["account_currency"] = account_currency or filters.company_currency
 
@@ -167,10 +168,12 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
 
-	if filters.get("finance_book"):
-		conditions.append("finance_book in (%(finance_book)s, '')")
-	else:
-		conditions.append("ifnull(finance_book, '')=''")
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
+		filters['finance_book'] = company_finance_book
+		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+	elif filters.get("finance_book"):
+		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
@@ -192,7 +195,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data.append(totals.opening)
 
 	if filters.get("group_by") in ["Group by Account", "Group by Party"]:
-		for acc, acc_dict in gle_map.items():
+		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
 				# opening

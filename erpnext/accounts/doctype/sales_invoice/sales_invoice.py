@@ -22,6 +22,8 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 
+from six import iteritems
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -339,9 +341,8 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					for fname, val in get_pos_profile_item_details(pos,
-						frappe._dict(item.as_dict()), pos).items():
-
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
@@ -916,7 +917,7 @@ class SalesInvoice(SellingController):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
-	
+
 	def book_income_for_deferred_revenue(self):
 		# book the income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 		# start_date: 1st of the last month or the start date
