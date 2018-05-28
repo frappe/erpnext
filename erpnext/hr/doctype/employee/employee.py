@@ -168,7 +168,7 @@ class Employee(NestedSet):
 
 	def validate_onboarding_process(self):
 		employee_onboarding = frappe.get_all("Employee Onboarding",
-			filters={"job_applicant": self.job_applicant, "docstatus": 1, "status": ("!=", "Completed")})
+			filters={"job_applicant": self.job_applicant, "docstatus": 1, "boarding_status": ("!=", "Completed")})
 		if employee_onboarding:
 			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
 			doc.validate_employee_creation()
@@ -318,26 +318,26 @@ def get_employee_emails(employee_list):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
-	condition = ''
+	filters = [['company', '=', company]]
+	fields = ['name as value', 'employee_name as title']
 
 	if is_root:
-		parent = ""
+		parent = ''
 	if parent and company and parent!=company:
-		condition = ' and reports_to = "{0}"'.format(frappe.db.escape(parent))
+		filters.append(['reports_to', '=', parent])
 	else:
-		condition = ' and ifnull(reports_to, "")=""'
+		filters.append(['reports_to', '=', ''])
 
-	employee = frappe.db.sql("""
-		select
-			name as value, employee_name as title,
-			exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
-		from
-			`tabEmployee` emp
-		where company='{company}' {condition} order by name"""
-		.format(company=company, condition=condition),  as_dict=1)
+	employees = frappe.get_list(doctype, fields=fields,
+		filters=filters, order_by='name')
 
-	# return employee
-	return employee
+	for employee in employees:
+		is_expandable = frappe.get_all(doctype, filters=[
+			['reports_to', '=', employee.get('value')]
+		])
+		employee.expandable = 1 if is_expandable else 0
+
+	return employees
 
 
 def on_doctype_update():

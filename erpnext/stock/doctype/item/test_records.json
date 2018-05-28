@@ -4,7 +4,6 @@
   "doctype": "Item",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
@@ -20,7 +19,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }],
   "reorder_levels": [
    {
@@ -64,9 +63,8 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
-  }],
-  
+    "income_account": "Sales - _TC"
+  }]
  },
  {
   "description": "_Test Item Home Desktop 100 3",
@@ -86,9 +84,8 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }],
-  
   "taxes": [
    {
     "doctype": "Item Tax",
@@ -116,7 +113,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -137,7 +134,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -158,7 +155,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -192,7 +189,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -214,7 +211,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -235,7 +232,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -256,7 +253,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }]
  },
  {
@@ -278,7 +275,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }],
   "attributes": [
 	  {
@@ -313,7 +310,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "buying_cost_center": "_Test Cost Center - _TC",
     "selling_cost_center": "_Test Cost Center - _TC",
-    "income_account": "Sales - _TC",
+    "income_account": "Sales - _TC"
   }],
   "reorder_levels": [
    {
