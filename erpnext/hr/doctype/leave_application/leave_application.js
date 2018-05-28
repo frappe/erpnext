@@ -195,7 +195,7 @@ frappe.ui.form.on("Leave Application", {
 		if(frm.doc.employee) {
 				// server call is done to include holidays in leave days calculations
 			return frappe.call({
-				method: 'erpnext.hr.doctype.leave_application.leave_application.get_leave_approver_data',
+				method: 'erpnext.hr.doctype.leave_application.leave_application.get_leave_approver',
 				args: {
 					"employee": frm.doc.employee,
 				},
