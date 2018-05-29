@@ -1344,7 +1344,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				},
 				callback: function(r) {
 					if (!r.message) {
-						frappe.throw(__("Invalid Blanket Order for the selected Customer and Item"))
+						frappe.throw(__("Invalid Blanket Order for the selected Customer and Item"));
 					} else {
 						frappe.run_serially([
 							() => frappe.model.set_value(cdt, cdn, "blanket_order_rate", r.message.blanket_order_rate),
