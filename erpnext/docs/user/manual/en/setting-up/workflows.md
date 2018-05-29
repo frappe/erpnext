@@ -83,13 +83,12 @@ When the Leave Approver opens the Leave Application page, he can finally "Approv
 
 > New in Version 11
 
-Workflow Actions facilitates communication to the users via email and also creates a list of pending Workflow Actions.
+Workflow Actions is a single place to manage all the pending actions you can take on Workflows.
 
-For example, when an employee creates a leave application the next actions would be to `Approve` or `Reject` that application.
-Based on allowed roles to perform these actions, users will be sent email with Next Action buttons and a print format of the application.
+If a User is eligible to take action on some workflows, emails will be sent to the user, with the relevant document as attachment, from where the user can `Approve` or `Reject` the Workflow.
 <img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-email.png">
 
-Also the users will see entries in there Workflow Action list.
+Also the users will see entries in their Workflow Action list.
 <img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-list.png">
 
 **Note:** You can set email template for Workflow Actions on each state.
