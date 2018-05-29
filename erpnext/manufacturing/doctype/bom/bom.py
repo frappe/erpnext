@@ -170,9 +170,10 @@ class BOM(WebsiteGenerator):
 					if price_list_currency != self.company_currency():
 						rate = flt(rate * self.conversion_rate)
 
-				if not rate:
-					frappe.msgprint(_("{0} not found for Item {1}")
-						.format(self.rm_cost_as_per, arg["item_code"]))
+				# ESO specific
+				# if not rate:
+				# 	frappe.msgprint(_("{0} not found for Item {1}")
+				# 		.format(self.rm_cost_as_per, arg["item_code"]))
 
 		return flt(rate)
 
