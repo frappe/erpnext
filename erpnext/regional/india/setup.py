@@ -115,7 +115,7 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='supplier_address',
 				fetch_from='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
-				fieldtype='Data', insert_after='company_address',
+				fieldtype='Data', insert_after='shipping_address_display',
 				fetch_from='shipping_address.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',

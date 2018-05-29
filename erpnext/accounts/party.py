@@ -83,7 +83,12 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 		out.update(get_company_address(company))
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
-			get_regional_address_details(out, doctype, company)
+		get_regional_address_details(out, doctype, company)
+	elif doctype and doctype == "Purchase Invoice":
+		out.update(get_company_address(company))
+		if out.company_address:
+			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
+		get_regional_address_details(out, doctype, company)
 
 @erpnext.allow_regional
 def get_regional_address_details(out, doctype, company):
