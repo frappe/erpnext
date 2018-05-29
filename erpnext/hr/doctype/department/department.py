@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 from erpnext.utilities.transaction_base import delete_events
 from frappe.model.document import Document
 
@@ -12,16 +12,17 @@ class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
 
 	def autoname(self):
-		if not self.department_name==_("All Departments"):
+		if self.department_name != get_root_of("Department"):
 			abbr = frappe.db.get_value('Company', self.company, 'abbr')
 			self.name = '{0} - {1}'.format(self.department_name, abbr)
 		else:
 			self.name = self.department_name
 
 	def validate(self):
-		if not self.parent_department and self.department_name != _("All Departments") \
-			and frappe.db.exists("Department", _("All Departments")):
-				self.parent_department = _("All Departments")
+		if not self.parent_department:
+			root = get_root_of("Department")
+			if root:
+				self.parent_department = root
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
@@ -40,7 +41,7 @@ def on_doctype_update():
 def get_children(doctype, parent=None, company=None, is_root=False):
 	condition = ''
 	if company == parent:
-		condition = 'name="All Departments"'
+		condition = "name='%s'".format(get_root_of("Department"))
 	elif company:
 		condition = "parent_department='{0}' and company='{1}'".format(parent, company)
 	else:
