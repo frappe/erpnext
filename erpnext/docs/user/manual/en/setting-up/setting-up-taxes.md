@@ -102,7 +102,7 @@ add value to the item) or for both.
   <div class="embed-container">
     <iframe src="https://www.youtube.com/embed/a8Eh4zLIrkU?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
     </iframe>
-  <div> 
+  </div>
 </div>
 
 {next}

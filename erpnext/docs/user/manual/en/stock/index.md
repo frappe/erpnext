@@ -25,7 +25,7 @@ When Tarun Gupta's security services startup Neural Integrated Services started 
         <iframe src='https://www.youtube.com/embed/7tPifRTfbGo' frameborder='0' allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 ### User Manual
 
