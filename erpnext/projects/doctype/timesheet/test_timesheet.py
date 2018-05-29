@@ -159,6 +159,7 @@ def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test 
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
+	timesheet.company = company or '_Test Company'
 	timesheet_detail = timesheet.append('time_logs', {})
 	timesheet_detail.billable = billable
 	timesheet_detail.activity_type = activity_type
@@ -167,7 +168,6 @@ def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test 
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours= timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
-	timesheet_detail.company = company or '_Test Company'
 
 	for data in timesheet.get('time_logs'):
 		if simulate:
