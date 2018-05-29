@@ -248,9 +248,8 @@ def age_calculation(doc, method):
 	department = doc.department or False
 	company = doc.company or False
 	if company:
-		company_emps = get_employees_by_filter({'company': company,
-		                                        'status': 'Active'},
-		                                       ['name', 'employee_age'])
+		company_emps = frappe.get_all('Employee', dict(company = company,\
+							 status = 'Active'), ['name', 'employee_age'])
 		if company_emps:
 			update_age_calculation('Company', str(company),
 			                       company_emps)
