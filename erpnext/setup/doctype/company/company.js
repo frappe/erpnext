@@ -6,6 +6,16 @@ frappe.provide("erpnext.company");
 frappe.ui.form.on("Company", {
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
+		frm.set_query("hra_component", function(){
+			return {
+				filters: {"type": "Earning"}
+			}
+		});
+		frm.set_query("arrear_component", function(){
+			return {
+				filters: {"is_additional_component": 1}
+			}
+		});
 	},
 
 	company_name: function(frm) {
