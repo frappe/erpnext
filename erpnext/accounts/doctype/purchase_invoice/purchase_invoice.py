@@ -334,7 +334,7 @@ class PurchaseInvoice(BuyingController):
 
 			if update_outstanding == "No":
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
-					self.doctype, self.return_against if cint(self.is_return) else self.name)
+					self.doctype, self.return_against if cint(self.is_return and self.return_against) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -379,7 +379,7 @@ class PurchaseInvoice(BuyingController):
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -618,7 +618,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_paid_amount,
 					"debit_in_account_currency": self.base_paid_amount \
 						if self.party_account_currency==self.company_currency else self.paid_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -648,7 +648,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)

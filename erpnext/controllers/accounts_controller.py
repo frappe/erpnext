@@ -82,6 +82,9 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice'] and self.is_return:
+			self.validate_qty()
+
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
