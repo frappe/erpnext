@@ -19,7 +19,7 @@ The healthcare domain of ERPNext is a first domain to be competely contributed b
         <iframe src='https://www.youtube.com/embed/1n4_YqX8ArA' frameborder='0' allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 ### User Manual
 
