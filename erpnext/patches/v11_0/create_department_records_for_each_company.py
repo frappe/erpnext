@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
@@ -15,7 +16,7 @@ def execute():
 
 	for department in departments:
 		# skip root node
-		if department.name == "All Departments":
+		if department.name == _("All Departments"):
 			continue
 
 		# for each company, create a copy of the doc
