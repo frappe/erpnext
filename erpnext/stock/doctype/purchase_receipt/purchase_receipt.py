@@ -13,6 +13,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
+from six import iteritems
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
@@ -283,7 +284,7 @@ class PurchaseReceipt(BuyingController):
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in valuation_tax.items():
+			for cost_center, amount in iteritems(valuation_tax):
 				if i == len(valuation_tax):
 					applicable_amount = amount_including_divisional_loss
 				else:

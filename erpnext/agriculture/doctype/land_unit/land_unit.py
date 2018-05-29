@@ -25,12 +25,12 @@ class LandUnit(NestedSet):
 	def on_trash(self):
 		ancestors = self.get_ancestors()
 		for ancestor in ancestors:
-			ancestor_doc = frappe.get_doc('Land Unit', ancestor)	
+			ancestor_doc = frappe.get_doc('Land Unit', ancestor)
 			ancestor_child_features, ancestor_non_child_features = ancestor_doc.feature_seperator(child_feature = self.get('land_unit_name'))
 			ancestor_features = ancestor_non_child_features
 			for index,feature in enumerate(ancestor_features):
 				ancestor_features[index] = json.loads(feature)
-			ancestor_doc.set_location_value(features = ancestor_features)	
+			ancestor_doc.set_location_value(features = ancestor_features)
 			ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')-self.get('area'),commit=True)
 		super(LandUnit, self).on_update()
 
@@ -42,7 +42,7 @@ class LandUnit(NestedSet):
 				features = json.loads(self.get('location')).get('features')
 			new_area = compute_area(features)
 			self.area_difference = new_area - flt(self.area)
-			self.area = new_area	
+			self.area = new_area
 
 			if self.get('parent_land_unit'):
 				ancestors = self.get_ancestors()
@@ -55,8 +55,8 @@ class LandUnit(NestedSet):
 					ancestor_features = list(set(ancestor_non_child_features))
 					child_features = set(ancestor_child_features)
 
-					if not (self_features.issubset(child_features) and child_features.issubset(self_features)): 
-						features_to_be_appended =	self_features - child_features 
+					if not (self_features.issubset(child_features) and child_features.issubset(self_features)):
+						features_to_be_appended =	self_features - child_features
 						features_to_be_discarded = 	child_features - self_features
 						for feature in features_to_be_discarded:
 							child_features.discard(feature)
@@ -67,7 +67,7 @@ class LandUnit(NestedSet):
 					ancestor_features.extend(child_features)
 					for index,feature in enumerate(ancestor_features):
 						ancestor_features[index] = json.loads(feature)
-					ancestor_doc.set_location_value(features = ancestor_features)	
+					ancestor_doc.set_location_value(features = ancestor_features)
 					ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')+\
 						self.get('area_difference'),commit=True)
 
@@ -84,18 +84,18 @@ class LandUnit(NestedSet):
 	def add_child_property(self):
 		location = self.get('location')
 		if location:
-			features = json.loads(location).get('features')	
+			features = json.loads(location).get('features')
 			if type(features) != list:
 				features = json.loads(features)
 			filter_features = [feature for feature in features if feature.get('properties').get('child_feature') != True]
 			for index,feature in enumerate(filter_features):
 				feature['properties'].update({'child_feature': True, 'feature_of': self.land_unit_name})
 				filter_features[index] = json.dumps(filter_features[index])
-			return filter_features 
+			return filter_features
 		return []
 
 	def feature_seperator(self, child_feature=None):
-		doc = self 
+		doc = self
 		child_features = []
 		non_child_features = []
 		location = doc.get('location')
@@ -108,11 +108,11 @@ class LandUnit(NestedSet):
 					child_features.extend([json.dumps(feature)])
 				else:
 					non_child_features.extend([json.dumps(feature)])
-		
+
 		return child_features, non_child_features
 
 
-def compute_area(features):                                
+def compute_area(features):
 	layer_area = 0
 	for feature in features:
 		if feature.get('geometry').get('type') == 'Polygon':
@@ -128,10 +128,10 @@ def polygon_area(coords):
 	area = 0
 	if coords and len(coords) > 0:
 		area += math.fabs(ring_area(coords[0]));
-		for i in range(1, len(coords)): 
+		for i in range(1, len(coords)):
 			area -= math.fabs(ring_area(coords[i]));
 	return area;
-	
+
 def ring_area(coords):
 	p1 = 0
 	p2 = 0
@@ -142,7 +142,7 @@ def ring_area(coords):
 	i = 0
 	area = 0
 	coords_length = len(coords)
-	if coords_length > 2: 
+	if coords_length > 2:
 		for i in range(0, coords_length):
 			if i == coords_length - 2: # i = N-2
 				lower_index = coords_length - 2;
@@ -169,11 +169,10 @@ def get_children(doctype, parent, is_root=False):
 	if is_root:
 		parent = ''
 
-	land_units = frappe.db.sql("""select name as value,
-		is_group as expandable
-		from `tabLand Unit`
-		where ifnull(`parent_land_unit`,'') = %s
-		order by name""", (parent), as_dict=1)
+	land_units = frappe.get_list(doctype,
+		fields = ['name as value', 'is_group as expandable'],
+		filters= [['ifnull(`parent_land_unit`, "")', '=', parent]],
+		order_by='name')
 
 	# return nodes
 	return land_units

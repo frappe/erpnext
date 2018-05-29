@@ -892,10 +892,10 @@ def get_item_defaults(item, company):
 			i.item_name, i.description, i.stock_uom, i.name, i.is_stock_item, i.item_code, i.item_group,
 			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center, id.default_supplier
 		from
-			`tabItem` i, `tabItem Default` id
+			`tabItem` i LEFT JOIN `tabItem Default` id ON i.name = id.parent and id.company = %s
 		where
-			i.name = id.parent and i.name = %s and id.company = %s
-	''', (item, company), as_dict=1)
+			i.name = %s
+	''', (company, item), as_dict=1)
 	if item_defaults:
 		return item_defaults[0]
 	else:

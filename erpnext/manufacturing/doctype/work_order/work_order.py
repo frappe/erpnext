@@ -24,6 +24,8 @@ class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
 
+from six import string_types
+
 form_grid_templates = {
 	"operations": "templates/form_grid/work_order_grid.html"
 }
@@ -660,10 +662,10 @@ def make_timesheet(work_order, company):
 
 @frappe.whitelist()
 def add_timesheet_detail(timesheet, args):
-	if isinstance(timesheet, unicode):
+	if isinstance(timesheet, string_types):
 		timesheet = frappe.get_doc('Timesheet', timesheet)
 
-	if isinstance(args, unicode):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	timesheet.append('time_logs', args)

@@ -10,17 +10,16 @@
 			<th style="width: 20%" class="text-right">{{ __("Pending Leaves") }}</th>
 			<th style="width: 20%" class="text-right">{{ __("Available Leaves") }}</th>
 		</tr>
-		<!-- <p> {{data["Sick Leave"][0]["leaves_taken"]}}</p> -->
-		
+
 	</thead>
 	<tbody>
 		{% for(const [key, value] of Object.entries(data)) { %}
 			<tr>
 				<td> {%= key %} </td>
-				<td> {%= value["total_leaves"] %} </td>
-				<td> {%= value["leaves_taken"] %} </td>
-				<td> {%= value["pending_leaves"] %} </td>
-				<td> {%= value["remaining_leaves"] %} </td>
+				<td class="text-right"> {%= value["total_leaves"] %} </td>
+				<td class="text-right"> {%= value["leaves_taken"] %} </td>
+				<td class="text-right"> {%= value["pending_leaves"] %} </td>
+				<td class="text-right"> {%= value["remaining_leaves"] %} </td>
 			</tr>
 		{% } %}
 	</tbody>

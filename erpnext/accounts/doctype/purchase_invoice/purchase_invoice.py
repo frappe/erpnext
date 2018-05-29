@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe, erpnext
 from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from frappe.model.mapper import get_mapped_doc
+from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
@@ -572,7 +573,7 @@ class PurchaseInvoice(BuyingController):
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = self.negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in valuation_tax.items():
+			for cost_center, amount in iteritems(valuation_tax):
 				if i == len(valuation_tax):
 					applicable_amount = amount_including_divisional_loss
 				else:
@@ -592,7 +593,7 @@ class PurchaseInvoice(BuyingController):
 				i += 1
 
 		if self.auto_accounting_for_stock and self.update_stock and valuation_tax:
-			for cost_center, amount in valuation_tax.items():
+			for cost_center, amount in iteritems(valuation_tax):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.expenses_included_in_valuation,

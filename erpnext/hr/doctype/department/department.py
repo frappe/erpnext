@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils.nestedset import NestedSet
 from erpnext.utilities.transaction_base import delete_events
 from frappe.model.document import Document
@@ -11,11 +12,16 @@ class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
 
 	def autoname(self):
-		if not self.department_name=="All Departments":
+		if not self.department_name==_("All Departments"):
 			abbr = frappe.db.get_value('Company', self.company, 'abbr')
 			self.name = '{0} - {1}'.format(self.department_name, abbr)
 		else:
 			self.name = self.department_name
+
+	def validate(self):
+		if not self.parent_department and self.department_name != _("All Departments") \
+			and frappe.db.exists("Department", _("All Departments")):
+				self.parent_department = _("All Departments")
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
