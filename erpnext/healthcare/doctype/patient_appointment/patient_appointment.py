@@ -207,6 +207,7 @@ def invoice_appointment(appointment_doc):
 	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
 	sales_invoice.is_pos = '0'
+	sales_invoice.company = appointment_doc.company
 	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
 	fee_validity = get_fee_validity(appointment_doc.physician, appointment_doc.patient, appointment_doc.appointment_date)
