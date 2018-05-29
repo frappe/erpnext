@@ -42,6 +42,14 @@ submit button / option if you have not specified it in the workflow.
 > Note 4: If you wish to give the option to cancel, you will have to write a
 workflow transition step that says from submitted you can cancel.
 
+
+#### Enable/Disable Self approval
+
+> New in Version 11
+
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-6.png">
+
+
 #### Conditions
 
 > New in Version 11
@@ -81,3 +89,19 @@ When the Leave Approver opens the Leave Application page, he can finally "Approv
 </div>
 
 {next}
+
+#### Workflow Actions
+
+> New in Version 11
+
+Workflow Actions facilitates communication to the users via email and also creates a list of pending Workflow Actions.
+
+For example, when an employee creates a leave application the next actions would be to Approve or Reject that application.
+Based on allowed roles to perform these actions, users will be sent email with Next Action buttons and a print format of the application.
+Also the users will see entries in Workflow Action list.
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-email.png">
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-list.png">
+
+Note: You can set email template for Workflow Actions on each state.
+The template might consist message for users to proceed with the next Workflow Actions
+
