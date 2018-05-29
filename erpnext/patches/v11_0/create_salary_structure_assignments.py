@@ -25,6 +25,7 @@ def execute():
 			# to migrate the data of the old employees
 			s.flags.old_employee = True
 			s.save()
+			s.submit()
 		except DuplicateAssignment:
 			pass
 
