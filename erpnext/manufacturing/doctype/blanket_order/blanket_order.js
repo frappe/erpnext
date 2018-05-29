@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Blanket Order', {
+	setup: function(frm) {
+		frm.add_fetch("customer", "customer_name", "customer_name");
+		frm.add_fetch("supplier", "supplier_name", "supplier_name");
+	},
+
 	refresh: function(frm) {
 		if (frm.doc.customer && frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('View Orders'), function() {

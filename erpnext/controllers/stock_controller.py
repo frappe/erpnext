@@ -345,13 +345,13 @@ class StockController(AccountsController):
 	def update_blanket_order(self, cancel=False):
 		for item in self.items:
 			if item.blanket_order:
-				ordered_qty, doc_name = frappe.db.get_value("Blanket Order Item", {"parent": item.blanket_order}, ["ordered_qty", "name"])
+				ordered_quantity, doc_name = frappe.db.get_value("Blanket Order Item", {"parent": item.blanket_order}, ["ordered_quantity", "name"])
 				if not cancel:
-					ordered_qty = ordered_qty + item.qty
+					ordered_quantity = ordered_quantity + item.qty
 				else:
-					ordered_qty = ordered_qty - item.qty
-				ordered_qty = flt(ordered_qty, item.precision("qty"))
-				frappe.db.set_value("Blanket Order Item", doc_name, "ordered_qty", ordered_qty)
+					ordered_quantity = ordered_quantity - item.qty
+				ordered_quantity = flt(ordered_quantity, item.precision("qty"))
+				frappe.db.set_value("Blanket Order Item", doc_name, "ordered_quantity", ordered_quantity)
 
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
