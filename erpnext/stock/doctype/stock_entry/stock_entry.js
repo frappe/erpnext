@@ -350,7 +350,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
-	},
+	}
 })
 
 frappe.ui.form.on('Stock Entry Detail', {
