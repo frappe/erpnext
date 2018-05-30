@@ -13,29 +13,46 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "sales_taxes_and_charges_template")
 	frappe.reload_doc("accounts", "doctype", "purchase_taxes_and_charges_template")
 
+	# set is_inter_state in Taxes And Charges Templates
 	if frappe.db.has_column("Sales Taxes And Charges Template", "is_inter_state") and\
 		frappe.db.has_column("Purchase Taxes And Charges Template", "is_inter_state"):
 
-		igst_accounts = frappe.get_list("GST Account",
-		{"parent": "GST Settings"},
-		["igst_account"], as_list=True)
+		igst_accounts = set(frappe.db.sql_list('''SELECT igst_account from `tabGST Account` WHERE parent = "GST Settings"'''))
+		cgst_accounts = set(frappe.db.sql_list('''SELECT cgst_account FROM `tabGST Account` WHERE parenttype = "GST Settings"'''))
 
-		cgst_accounts = frappe.get_list("GST Account",
-		{"parent": "GST Settings"},
-		["cgst_account"], as_list=True)
+		when_then_sales = get_formatted_data("Sales Taxes and Charges", igst_accounts, cgst_accounts)
+		when_then_purchase = get_formatted_data("Purchase Taxes and Charges", igst_accounts, cgst_accounts)
 
-		if not igst_accounts:
-			return
-		for doctype in ["Sales Taxes And Charges", "Purchase Taxes And Charges"]:
-			frappe.db.sql('''
-				UPDATE `tab%s Template` tct, `tab%s` tc
-				SET tct.is_inter_state = 1
-				WHERE
-					tct.name = tc.parent
-				AND
-					tc.account_head in (%s)
-				AND
-					tc.account_head not in ( %s)
-			''', (doctype, doctype, d.get("igst_account"), d.get("cgst_account"))
+		if when_then_sales:
+			frappe.db.sql('''update `tabSales Taxes and Charges Template`
+				set is_inter_state = Case {when_then} Else 0 End
+			'''.format(when_then=" ".join(when_then_sales)))
 
-			select * from `tabSales Taxes And Charges Template` st, `tabSales Taxes And Charges` stc where stc.parent = st.name and stc.account_head in ("Freight and Forwarding Charges - NFECT", "Freight and Forwarding Charges - _TC") and stc.account_head not in ("CGST - NFECT", "Creditors - T")
+		if when_then_purchase:
+			frappe.db.sql('''update `tabPurchase Taxes and Charges Template`
+				set is_inter_state = Case {when_then} Else 0 End
+			'''.format(when_then=" ".join(when_then_purchase)))
+
+def get_formatted_data(doctype, igst_accounts, cgst_accounts):
+	# fetch all the rows data from child table
+	all_details = frappe.db.sql('''
+		select parent, account_head from `tab{doctype}`
+		where parenttype="{doctype} Template"'''.format(doctype=doctype), as_dict=True)
+
+	# group the data in the form "parent: [list of accounts]""
+	group_detail = {}
+	for i in all_details:
+		if  not i['parent'] in group_detail: group_detail[i['parent']] = []
+		for j in all_details:
+			if i['parent']==j['parent']:
+				group_detail[i['parent']].append(j['account_head'])
+
+	# form when_then condition based on - if list of accounts for a document
+	# matches any account in igst_accounts list and not matches any in cgst_accounts list
+	when_then = []
+	for i in group_detail:
+		temp = set(group_detail[i])
+		if not temp.isdisjoint(igst_accounts) and temp.isdisjoint(cgst_accounts):
+			when_then.append('''When name='{name}' Then 1'''.format(name=i))
+
+	return when_then

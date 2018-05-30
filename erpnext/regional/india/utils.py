@@ -84,8 +84,8 @@ def get_place_of_supply(out, doctype):
 
 	if doctype in ("Sales Invoice", "Delivery Note"):
 		address_name = out.shipping_address_name or out.customer_address
-	elif doc.doctype == "Purchase Invoice":
-		address_name = doc.shipping_address or doc.supplier_address
+	elif doctype == "Purchase Invoice":
+		address_name = out.shipping_address or out.supplier_address
 
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
@@ -99,15 +99,18 @@ def get_regional_address_details(out, doctype, company):
 		master_doctype = "Sales Taxes and Charges Template"
 		if not (out.company_gstin or out.place_of_supply):
 			return
-	elif:
+	else:
 		master_doctype = "Purchase Taxes and Charges Template"
 		if not (out.supplier_gstin or out.place_of_supply):
 			return
 
-	if doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin[:2] == out.place_of_supply[:2]\
-		or doctype == "Purchase Invoice" and out.supplier_gstin[:2] == out.place_of_supply[:2]:
-		default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1})
-		if not default_tax:
-			return
-		out["taxes_and_charges"] = default_tax
-		out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+	if doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin[:2] != out.place_of_supply[:2]\
+		or (doctype == "Purchase Invoice" and out.supplier_gstin[:2] != out.place_of_supply[:2]):
+		default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0})
+	else:
+		default_tax = frappe.db.get_value(master_doctype, {"company": company, "disabled":0, "is_default": 1})
+
+	if not default_tax:
+		return
+	out["taxes_and_charges"] = default_tax
+	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
