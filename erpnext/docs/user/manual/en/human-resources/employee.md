@@ -1,8 +1,8 @@
 # Employee
 
-An individual who works part-time or full-time under a contract of employment, whether, and has recognized rights and duties is your Employee.
+An individual who works part-time or full-time under a contract of employment, and has recognized rights and duties is your Employee.
 
-In ERPNext, you can manage Employee master. The Employee master captures demongraphic, personal and professional details. 
+In ERPNext, you can manage Employee master. The Employee master captures demographics, personal and professional details. 
 
 <img class="screenshot" alt="Employee" src="{{docs_base_url}}/assets/img/human-resources/employee-view.gif">
 
