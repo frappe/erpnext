@@ -21,10 +21,10 @@ def setup(domain):
 	employees = frappe.get_all('Employee',  fields=['name', 'date_of_joining'])
 
 	# monthly salary
-	#setup_salary_structure(employees[:5], 0)
+	setup_salary_structure(employees[:5], 0)
 
 	# based on timesheet
-	#setup_salary_structure(employees[5:], 1)
+	setup_salary_structure(employees[5:], 1)
 
 	setup_leave_allocation()
 	setup_customer()
@@ -138,20 +138,8 @@ def setup_employee():
 	import_json('Employee')
 
 def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
-	f = frappe.get_doc('Fiscal Year', frappe.defaults.get_global_default('fiscal_year'))
-
-	#ss = frappe.new_doc('Salary Structure')
-	#ss.name = "Sample Salary Structure - " + random_string(5)
-	#for e in employees:
-	#	ss.append('employees', {
-	#		'employee': e.name,
-	#		'from_date': "2015-01-01",
-	#		'base': random.random() * 10000
-	#	})
-
-	ss.from_date = e.date_of_joining if (e.date_of_joining
-		and e.date_of_joining > f.year_start_date) else f.year_start_date
-	ss.to_date = f.year_end_date
+	ss = frappe.new_doc('Salary Structure')
+	ss.name = "Sample Salary Structure - " + random_string(5)
 	ss.salary_slip_based_on_timesheet = salary_slip_based_on_timesheet
 
 	if salary_slip_based_on_timesheet:
@@ -178,6 +166,12 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		"idx": 1
 	})
 	ss.insert()
+
+	for e in employees:
+		sa  = frappe.new_doc("Salary Structure Assignment")
+		sa.employee = e.name
+		sa.from_date = "2015-01-01"
+		sa.base = random.random() * 10000
 
 	return ss
 

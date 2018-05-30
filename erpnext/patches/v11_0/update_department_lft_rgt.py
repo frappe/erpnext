@@ -5,7 +5,6 @@ from frappe.utils.nestedset import rebuild_tree
 def execute():
 	""" assign lft and rgt appropriately """
 	frappe.reload_doc("hr", "doctype", "department")
-
 	if not frappe.db.exists("Department", _('All Departments')):
 		frappe.get_doc({
 			'doctype': 'Department',

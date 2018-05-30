@@ -28,7 +28,8 @@ def build_tree():
 		frappe.get_doc({
 			'doctype': 'Supplier Group',
 			'supplier_group_name': _('All Supplier Groups'),
-			'is_group': 1
+			'is_group': 1,
+			'parent_supplier_group': ''
 		}).insert(ignore_permissions=True)
 
 	rebuild_tree("Supplier Group", "parent_supplier_group")
