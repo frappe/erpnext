@@ -33,12 +33,21 @@ class Company(NestedSet):
 		return exists
 
 	def validate(self):
+		self.validate_countable_experience()
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.check_country_change()
+
+	def validate_countable_experience(self):
+		if self.countable_exp_percent and \
+			self.countable_exp_percent > 100:
+			frappe.throw(_("Countable Experience (%) should be <= 100"))
+		elif self.countable_exp_percent and \
+			self.countable_exp_percent < 0.00:
+			frappe.throw(_("Countable Experience (%) should be >= 0.00"))
 
 	def validate_abbr(self):
 		if not self.abbr:
