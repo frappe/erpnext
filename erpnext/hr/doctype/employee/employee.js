@@ -3,18 +3,18 @@
 
 frappe.provide("erpnext.hr");
 frappe.ui.form.on("Employee External Work History", {
-	total_experience_in_months: function (frm, cdt) {
-		total_previous_experience(cur_frm.doc);
+	total_experience_in_months: function (frm) {
+		total_previous_experience(frm);
 	}
 });
 
-function total_previous_experience(doc){
+function total_previous_experience(frm){
 	var total_months = 0;
-	for(var i=0;i< doc.external_work_history.length;i++){
-		var row = doc.external_work_history[i];
+	for(var i=0;i< frm.doc.external_work_history.length;i++){
+		var row = frm.doc.external_work_history[i];
 		total_months += parseFloat(row.total_experience_in_months);
 	}
-	me.set_value("total_previous_experience_months", total_months);
+	frm.set_value("total_previous_experience_months", total_months);
 }
 
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
