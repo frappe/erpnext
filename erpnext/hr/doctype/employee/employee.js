@@ -17,6 +17,11 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var me = this;
 		erpnext.toggle_naming_series();
+		frappe.ui.form.on("Employee External Work History", {
+			total_experience_months: function () {
+				total_previous_experience(cur_frm.doc);
+			}
+		});
 	},
 
 	date_of_birth: function() {
@@ -36,6 +41,15 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	},
 
 });
+function total_previous_experience(doc){
+	var total_months = 0;
+	for(var i=0;i< doc.external_work_history.length;i++){
+		var row = doc.external_work_history[i];
+		total_months += parseFloat(row.total_experience_months);
+	}
+	cur_frm.set_value("total_previous_experience_months", total_months);
+}
+
 frappe.ui.form.on('Employee',{
 	setup: function(frm) {
 		frm.set_query("leave_policy", function() {
@@ -71,6 +85,35 @@ frappe.ui.form.on('Employee',{
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';
 		frm.set_value("prefered_email",
 			frm.fields_dict[prefered_email_fieldname].value)
+	},
+	date_of_joining: function(frm) {
+		frm.trigger("update_employee_experince");
+	},
+	gap: function(frm) {
+		frm.trigger("update_employee_experince");
+	},
+	company: function(frm) {
+		frm.trigger("update_employee_experince");
+	},
+	total_previous_experience_months: function(frm) {
+		frm.trigger("update_employee_experince");
+	},
+	update_employee_experince: function(frm) {
+		return frm.call({
+			method: "get_experience",
+			args: {
+				company: frm.doc.company,
+				date_of_joining: frm.doc.date_of_joining,
+				gap: frm.doc.gap,
+				previous_experience: frm.doc.total_previous_experience_months
+			},
+			callback: function(r)
+			{
+				frm.set_value("current_experience_months", r.message['current_experience']);
+				frm.set_value("total_experience_months", r.message['total_experience']);
+				frm.set_value("countable_experience_months", r.message['countable_experience']);
+			}
+		});
 	},
 	status: function(frm) {
 		return frm.call({

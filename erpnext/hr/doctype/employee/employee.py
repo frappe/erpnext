@@ -11,6 +11,8 @@ import frappe.permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
@@ -37,6 +39,7 @@ class Employee(NestedSet):
 		validate_status(self.status, ["Active", "Left"])
 
 		self.employee = self.name
+		self.validate_gap()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -108,6 +111,10 @@ class Employee(NestedSet):
 					pass
 
 		user.save()
+
+	def validate_gap(self):
+		if self.gap and self.gap < 0.00:
+			frappe.throw(_("Gap (Months) should be greater than Or equals to 0.00"))
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -262,6 +269,35 @@ def is_holiday(employee, date=None):
 
 	if holiday_list:
 		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+
+@frappe.whitelist()
+def get_experience(company=None, date_of_joining = None, gap=None,
+                   previous_experience=None):
+	current_dt = datetime.now().date()
+	current_experience = 0.0
+	total_experience = 0.0
+	countable_experience = 0.0
+	if not gap:
+		gap = 0.0
+	if not previous_experience:
+		previous_experience = 0.0
+	if date_of_joining:
+		emp_dt_joining = datetime.strptime(date_of_joining, "%Y-%m-%d").date()
+		total_diff = relativedelta(current_dt, emp_dt_joining)
+		current_experience = (total_diff.years * 12) + total_diff.months or 0.0
+		total_experience = (current_experience + float(previous_experience))\
+		                   - float(gap)
+		if company:
+			company_rec = frappe.get_doc("Company", company);
+			countable_experience = (((float(previous_experience) *
+			                        company_rec.countable_exp_percent) / 100)\
+			                       + current_experience) - float(gap)
+		return {'current_experience': current_experience or 0.0,
+		        'total_experience': total_experience or 0.0,
+		        'countable_experience': countable_experience or 0.0}
+	return {'current_experience': current_experience or 0.0,
+	        'total_experience': total_experience or 0.0,
+	        'countable_experience': countable_experience or 0.0}
 
 @frappe.whitelist()
 def deactivate_sales_person(status = None, employee = None):
