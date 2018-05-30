@@ -77,10 +77,11 @@
  "in_create": 0, 
 
  "is_submittable": 0, 
+ "search_fields": "supplier_part_no", 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-02-20 13:29:32.569715", 
+ "modified": "2018-04-06 13:29:32.569715", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Supplier", 
