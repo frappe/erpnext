@@ -17,7 +17,12 @@ class Contract(Document):
 		if self.contract_template:
 			name += " - {} Agreement".format(self.contract_template)
 
-		self.name = name
+		# If identical, append contract name with the next number in the iteration
+		if frappe.db.exists("Contract", name):
+			count = len(frappe.get_all("Contract", filters={"name": ["like", "%{}%".format(name)]}))
+			name = "{} - {}".format(name, count)
+
+		self.name = _(name)
 
 	def validate(self):
 		self.validate_dates()
@@ -32,7 +37,7 @@ class Contract(Document):
 
 	def validate_dates(self):
 		if self.end_date and self.end_date < self.start_date:
-			frappe.throw("End Date cannot be before Start Date!")
+			frappe.throw(_("End Date cannot be before Start Date!"))
 
 	def update_contract_status(self):
 		if self.is_signed:
@@ -49,7 +54,7 @@ class Contract(Document):
 			if not fulfilment_progress:
 				fulfilment_status = "Unfulfilled"
 			elif fulfilment_progress < len(self.fulfilment_terms):
-				fulfilment_status = "Partially Unfulfilled"
+				fulfilment_status = "Partially Fulfilled"
 			elif fulfilment_progress == len(self.fulfilment_terms):
 				fulfilment_status = "Fulfilled"
 
@@ -97,7 +102,10 @@ def update_status_for_contracts():
 	and submitted Contracts
 	"""
 
-	contracts = frappe.get_all("Contract", filters={"is_signed": True, "docstatus": 1}, fields=["name", "start_date", "end_date"])
+	contracts = frappe.get_all("Contract",
+								filters={"is_signed": True,
+										"docstatus": 1},
+								fields=["name", "start_date", "end_date"])
 
 	for contract in contracts:
 		status = get_status(contract.get("start_date"),
