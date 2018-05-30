@@ -22,13 +22,13 @@ You can also track % Completion of a Project using different methods.
   2. Task Progress
   3. Task Weight
 
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-2.png">
+<img class="screenshot" alt="Project 2" src="{{docs_base_url}}/assets/img/project/project-2.png">
 
 Some examples of how the % Completion is calculated based on Tasks.
 
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-calc.png">
+<img class="screenshot" alt="Project 3" src="{{docs_base_url}}/assets/img/project/percent-complete-calc.png">
 
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/percent-complete-formula.png">
+<img class="screenshot" alt="Project 4" src="{{docs_base_url}}/assets/img/project/percent-complete-formula.png">
 
 ### Project Costing
 
@@ -46,7 +46,7 @@ ERPNext gives you an illustrated view of tasks scheduled for that project in Gan
 
 * To view Gantt chart against a project, go to the Task list and Apply filter on the Project.
 
-<img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project-1.1.png">
+<img class="screenshot" alt="Project Gantt" src="{{docs_base_url}}/assets/img/project/project-1.1.png">
 
 ### Project Help Video
 

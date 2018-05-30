@@ -6,14 +6,7 @@ You can create a new Supplier from:
 
 `Explore > Supplier > New Supplier`
 
-<img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-master.png">
-
-<div>
-    <div class='embed-container'>
-        <iframe src='https://www.youtube.com/embed//zsrrVDk6VBs?start=213' frameborder='0' allowfullscreen>
-        </iframe>
-    </div>
-</div>
+<img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier1.1.png">
 
 ### Contacts and Addresses
 
@@ -37,8 +30,12 @@ If you don't want to customize payable account, and proceed with default payable
 
 You can add multiple companies in your ERPNext instance, and one Supplier can be used across multiple companies. In this case, you should define Companywise Payable Account for the Supplier in the "Default Payable Accounts" table.
 
-<iframe width="660" height="371" src="https://www.youtube.com/embed/anoGi_RpQ20" frameborder="0" allowfullscreen></iframe>
-(Check from 2:20)
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//zsrrVDk6VBs?start=213' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
 
 ### Place Supplier On Hold
 In the Supplier form, check the "Block Supplier" checkbox. Next, choose the "Hold Type".
