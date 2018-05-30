@@ -58,12 +58,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 				label: __('Favourites'),
 				action: () => frappe.set_route('Hub', 'Favourites'),
 				standard: true
-			},
-			// {
-			// 	label: __('Toggle Sidebar'),
-			// 	action: () => this.toggle_side_bar(),
-			// 	standard: true
-			// }
+			}
 		];
 
 		return items;
@@ -110,18 +105,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		this.data_dict = {};
 	}
 
-	freeze(toggle) {
-		// if(!this.$freeze) return;
-		// this.$freeze.toggle(toggle);
-		// if (this.$freeze.find('.image-view-container').length) return;
-
-		// const html = Array.from(new Array(4)).map(d => this.card_html({
-		// 	name: 'Loading...',
-		// 	item_name: 'Loading...'
-		// })).join('');
-
-		// this.$freeze.html(`<div class="image-view-container border-top">${html}</div>`);
-	}
+	freeze(toggle) { }
 
 	render() {
 		this.data_dict = {};
