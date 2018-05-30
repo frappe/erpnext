@@ -7,11 +7,11 @@ Step 1: Create Custom Script for _**Sales Invoice**_ (parent) doctype
 
 Step 2: Script as below & Save
 
-`frappe.ui.form.on("Sales Invoice Item", "batch_no", function(frm, cdt, cdn) {`
-	`var d = locals[cdt][cdn];`
-
-    	`frappe.db.get_value("Batch", {"name": d.batch_no}, "expiry_date", function(value) {`
-    		`d.expiry_date = value.expiry_date;`
-    	`});`
-`});`
-
+```
+frappe.ui.form.on("Sales Invoice Item", "batch_no", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+    	frappe.db.get_value("Batch", {"name": d.batch_no}, "expiry_date", function(value) {
+    		d.expiry_date = value.expiry_date;
+    	});
+});
+```
