@@ -241,3 +241,16 @@ def get_payroll_period(from_date, to_date, company):
 		pd.parent=pp.name where pd.start_date<=%s and pd.end_date>= %s
 		and pp.company=%s""", (from_date, to_date, company), as_dict=1)
 	return payroll_period[0] if payroll_period else None
+
+def get_salary_assignment(employee, date):
+	assignment = frappe.db.sql("""
+		select * from `tabSalary Structure Assignment`
+		where employee=%(employee)s
+		and docstatus = 1
+		and (
+			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
+		)""", {
+			'employee': employee,
+			'on_date': date,
+		}, as_dict=1)
+	return assignment[0] if assignment else None
