@@ -111,7 +111,7 @@ class Employee(NestedSet):
 					pass
 
 		user.save()
-		
+
 	def validate_gap(self):
 		if self.gap and self.gap < 0.00:
 			frappe.throw(_("Gap (Months) should be >= 0.00"))

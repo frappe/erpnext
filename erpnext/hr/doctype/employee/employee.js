@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.hr");
 frappe.ui.form.on("Employee External Work History", {
-	total_experience_in_months: function (frm, cdt, cdn) {
+	total_experience_in_months: function (frm, cdt) {
 		total_previous_experience(cur_frm.doc);
 	}
 });
@@ -14,7 +14,7 @@ function total_previous_experience(doc){
 		var row = doc.external_work_history[i];
 		total_months += parseFloat(row.total_experience_in_months);
 	}
-	frm.set_value("total_previous_experience_months", total_months);
+	me.set_value("total_previous_experience_months", total_months);
 }
 
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
@@ -92,7 +92,6 @@ frappe.ui.form.on('Employee',{
 	},
 	gap: function(frm) {
 		frm.trigger("update_employee_experince");
-		
 	},
 	company: function(frm) {
 		frm.trigger("update_employee_experince");
@@ -104,17 +103,17 @@ frappe.ui.form.on('Employee',{
 		return frm.call({
 			method: "get_experience",
 			args: {
-					company: frm.doc.company,
-					date_of_joining: frm.doc.date_of_joining,
-					gap: frm.doc.gap,
-					previous_experience: frm.doc.total_previous_experience_months
-				},
-				callback: function(r)
-				{
-					frm.set_value("current_experience_months", r.message['current_experience']);
-					frm.set_value("total_experience_months", r.message['total_experience']);
-					frm.set_value("countable_experience_months", r.message['countable_experience']);
-				}
+				company: frm.doc.company,
+				date_of_joining: frm.doc.date_of_joining,
+				gap: frm.doc.gap,
+				previous_experience: frm.doc.total_previous_experience_months
+			},
+			callback: function(r)
+			{
+				frm.set_value("current_experience_months", r.message['current_experience']);
+				frm.set_value("total_experience_months", r.message['total_experience']);
+				frm.set_value("countable_experience_months", r.message['countable_experience']);
+			}
 		});
 	},
 	status: function(frm) {
