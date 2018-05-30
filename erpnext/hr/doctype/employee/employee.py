@@ -11,6 +11,8 @@ import frappe.permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
@@ -209,6 +211,79 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
+def age_calculate(employees):
+	no_of_emp = 0.0
+	total_age = 0.0
+	average_age = 0.0
+	if employees:
+		total_age = 0.0
+		average_age = 0.0
+		for emp in employees:
+			total_age += emp.get('employee_age', 0.0)
+		emp_lst = [emp['name'] for emp in employees if emp.get('name', False)]
+		no_of_emp = len(emp_lst)
+		if no_of_emp > 0:
+			average_age = total_age / no_of_emp
+		return no_of_emp, total_age, average_age
+	return no_of_emp, total_age, average_age
+
+def get_employees_by_filter(filters, fields):
+	if not filters:
+		filters = {}
+	if not fields:
+		fields = []
+	employees = frappe.get_all('Employee', filters=filters, fields=fields)
+	return employees
+
+def update_age_calculation(doctype, name, employees):
+	if doctype and name and employees:
+		no_of_emp, total_age, average_age = age_calculate(employees)
+		frappe.db.set_value(doctype, str(name),
+		                    "total_number_of_employee", no_of_emp)
+		frappe.db.set_value(doctype, str(name), "total_age", total_age)
+		frappe.db.set_value(doctype, str(name), "average_age", average_age)
+
+def age_calculation(doc, method):
+	# called vis hooks.py doc event
+	department = doc.department or False
+	company = doc.company or False
+	if company:
+		company_emps = frappe.get_all('Employee', dict(company = company,\
+							 status = 'Active'), ['name', 'employee_age'])
+		if company_emps:
+			update_age_calculation('Company', str(company),
+			                       company_emps)
+	else:
+		companys = frappe.get_all('Company', fields=['name'])
+		if companys:
+			for comp_dict in companys:
+				if comp_dict and comp_dict.get('name', False):
+					comp_employees = get_employees_by_filter(
+						{'company': comp_dict['name'], 'status': 'Active'},
+						['name', 'employee_age'])
+					if comp_employees:
+						update_age_calculation('Company', str(comp_dict[
+							'name']), comp_employees)
+	if department:
+		dept_employees = get_employees_by_filter({'department': department,
+		                                          'status': 'Active'},
+		                                        ['name', 'employee_age'])
+		if dept_employees:
+			update_age_calculation('Department', str(department),
+			                       dept_employees)
+	else:
+		departments = frappe.get_all('Department', fields=['name'])
+		if departments:
+			for dept_dict in departments:
+				if dept_dict and dept_dict.get('name', False):
+					dept_employees = get_employees_by_filter(
+						{'department': dept_dict['name'],
+						 'status': 'Active'},
+						['name', 'employee_age'])
+					if dept_employees:
+						update_age_calculation('Department', str(dept_dict[
+							'name']), dept_employees)
+
 def send_birthday_reminders():
 	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
 	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
@@ -269,6 +344,16 @@ def deactivate_sales_person(status = None, employee = None):
 		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
 		if sales_person:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+
+@frappe.whitelist()
+def get_age(date_of_birth=None):
+	age = 0.0
+	if date_of_birth:
+		d1 = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+		d2 = datetime.today()
+		rd = relativedelta(d2, d1)
+		return rd.years or 0.0
+	return age
 
 @frappe.whitelist()
 def create_user(employee, user = None, email=None):

@@ -81,6 +81,18 @@ frappe.ui.form.on('Employee',{
 			}
 		});
 	},
+	date_of_birth: function(frm) {
+		return frm.call({
+			method: "get_age",
+			args: {
+				date_of_birth: frm.doc.date_of_birth
+			},
+			callback: function(r)
+			{
+				frm.set_value("employee_age", r.message);
+			}
+		});
+	},
 	create_user: function(frm) {
 		if (!frm.doc.prefered_email)
 		{
