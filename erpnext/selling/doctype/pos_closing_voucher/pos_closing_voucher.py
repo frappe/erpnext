@@ -5,8 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import _
-from frappe.utils import cstr
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 import json
@@ -23,10 +21,14 @@ def get_closing_voucher_details(**kwargs):
 	data['sales_summary'] = get_sales_summary(invoice_list)
 	data['mop'] = get_mode_of_payment_details(invoice_list)
 	data['taxes'] = get_tax_details(invoice_list)
-	data['currency'] = get_company_currency(kwargs)
-	data['payment_reconciliation_details'] = get_payment_reconciliation_details(data)
 
 	return data
+
+@frappe.whitelist()
+def get_payment_reconciliation_details(doc):
+	doc = json.loads(doc)
+	currency = get_company_currency(doc)
+	return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html", {"data": doc, "currency": currency})
 
 def get_mode_of_payment_details(invoice_list):
 	mode_of_payment_details = []
@@ -108,12 +110,10 @@ def get_sales_summary(invoice_list):
 
 	return {'net_total': net_total, 'grand_total': grand_total, 'total_qty': total_qty}
 
-def get_company_currency(filters):
-	currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+def get_company_currency(doc):
+	currency = frappe.db.get_value("Company", doc['company'], "default_currency")
 	return frappe.get_doc('Currency', currency)
 
-def get_payment_reconciliation_details(data):
-	return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html", {"data": data})
 
 def get_invoices(filters):
 	return frappe.db.sql("""select a.name, a.base_grand_total as grand_total,

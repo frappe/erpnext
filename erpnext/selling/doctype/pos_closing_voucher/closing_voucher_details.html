@@ -13,15 +13,15 @@
 								<tbody>
 									<tr>
 										<td class="text-left">{{ _('Grand Total') }}</td>
-										<td class='text-right'>{{ data.sales_summary.grand_total }} {{ data.currency.symbol }}</td>
+										<td class='text-right'>{{ data.grand_total or '' }} {{ currency.symbol }}</td>
 									</tr>
 									<tr>
 										<td class="text-left">{{ _('Net Total') }}</td>
-										<td class='text-right'>{{ data.sales_summary.net_total }} {{ data.currency.symbol }}</td>
+										<td class='text-right'>{{ data.net_total or '' }} {{ currency.symbol }}</td>
 									</tr>
 									<tr>
 										<td class="text-left">{{ _('Total Quantity') }}</td>
-										<td class='text-right'>{{ data.sales_summary.total_qty }}</td>
+										<td class='text-right'>{{ data.total_quantity or '' }}</td>
 									</tr>
 
 							</tbody>
@@ -42,10 +42,10 @@
 									</tr>
 								</thead>
 								<tbody>
-								{% for d in data.mop %}
+								{% for d in data.payment_reconciliation %}
 									<tr>
-										<td class="text-left">{{ d.name }}</td>
-										<td class='text-right'>{{ d.amount }} {{ data.currency.symbol }}</td>
+										<td class="text-left">{{ d.mode_of_payment }}</td>
+										<td class='text-right'>{{ d.expected_amount }} {{ currency.symbol }}</td>
 									</tr>
 								{% endfor %}
 							</tbody>
@@ -69,7 +69,7 @@
 								{% for d in data.taxes %}
 									<tr>
 										<td class="text-left">{{ d.rate }} %</td>
-										<td class='text-right'>{{ d.amount }} {{ data.currency.symbol }}</td>
+										<td class='text-right'>{{ d.amount }} {{ currency.symbol }}</td>
 									</tr>
 								{% endfor %}
 							</tbody>
