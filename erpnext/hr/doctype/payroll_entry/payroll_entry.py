@@ -184,7 +184,7 @@ class PayrollEntry(Document):
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.loan_account, eld.loan
+		return frappe.db.sql(""" select eld.loan_account, eld.loan,
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld

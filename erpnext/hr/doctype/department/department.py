@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 from erpnext.utilities.transaction_base import delete_events
 from frappe.model.document import Document
@@ -12,7 +11,8 @@ class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
 
 	def autoname(self):
-		if self.department_name != get_root_of("Department"):
+		root = get_root_of("Department")
+		if root and self.department_name != root:
 			abbr = frappe.db.get_value('Company', self.company, 'abbr')
 			self.name = '{0} - {1}'.format(self.department_name, abbr)
 		else:
