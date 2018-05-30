@@ -49,7 +49,8 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.qty = flt(qty)
 	pi.description = description
 	if not pi.warehouse:
-		pi.warehouse = item.default_warehouse or main_item_row.warehouse
+		pi.warehouse = (main_item_row.warehouse
+			if (doc.get('is_pos') or not item.default_warehouse) else item.default_warehouse)
 	if not pi.batch_no:
 		pi.batch_no = cstr(main_item_row.get("batch_no"))
 	if not pi.target_warehouse:
