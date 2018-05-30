@@ -80,7 +80,15 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		});
 	}
 
-	setup_view() { }
+	setup_view() {
+		if(frappe.route_options){
+			const filters = [];
+			for (let field in frappe.route_options) {
+				var value = frappe.route_options[field];
+				this.page.fields_dict[field].set_value(value);
+			}
+		}
+	}
 
 	get_args() {
 		return {
@@ -513,7 +521,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 						(${reviewLength})
 					</div>
 					<div class="list-row-col">
-						<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
+						<a href="${'#Hub/Company/'+company_name+'/Items'}"><p>${ company_name }</p></a>
 					</div>
 				</div>
 				<div class="image-view-body">

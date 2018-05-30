@@ -35,11 +35,20 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 							});
 						}
 					});
-				} else {
+				} else if (!route[3]){
 					frappe.require(assets['Form'], () => {
 						erpnext.hub.pages[page_name] = new erpnext.hub[page+'Page']({
 							unique_id: route[2],
 							doctype: route[2],
+							parent: this.make_page(true, page_name),
+							hub_settings: this.hub_settings
+						});
+					});
+				} else {
+					frappe.require(assets['List'], () => {
+						frappe.route_options = {};
+						frappe.route_options["company_name"] = route[2]
+						erpnext.hub.pages[page_name] = new erpnext.hub['ItemListing']({
 							parent: this.make_page(true, page_name),
 							hub_settings: this.hub_settings
 						});
