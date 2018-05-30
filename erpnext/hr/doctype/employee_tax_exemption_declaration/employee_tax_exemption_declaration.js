@@ -61,14 +61,14 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 		}
 	},
 	monthly_house_rent: function(frm) {
-		frm.trigger("calculate_hra_component");
+		frm.trigger("calculate_hra_exemption");
 	},
 	rented_in_metro_city: function(frm) {
-		frm.trigger("calculate_hra_component");
+		frm.trigger("calculate_hra_exemption");
 	},
-	calculate_hra_component: function(frm) {
+	calculate_hra_exemption: function(frm) {
 		frappe.call({
-			method: "calculate_hra_component",
+			method: "calculate_hra_exemption",
 			doc: frm.doc,
 			callback: function(r) {
 				frm.refresh_fields();

@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate
+from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
+from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 
 class EmployeeBoardingController(Document):
 	'''
@@ -254,3 +255,56 @@ def get_salary_assignment(employee, date):
 			'on_date': date,
 		}, as_dict=1)
 	return assignment[0] if assignment else None
+
+def calculate_eligible_hra_exemption(company, employee, monthly_house_rent, rented_in_metro_city):
+	hra_component = frappe.db.get_value("Company", company, "hra_component")
+	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
+	if hra_component:
+		assignment = get_salary_assignment(employee, getdate())
+		if assignment and frappe.db.exists("Salary Detail", {
+			"parent": assignment.salary_structure,
+			"salary_component": hra_component, "parentfield": "earnings"}):
+			hra_amount = get_hra_from_salary_slip(employee, assignment.salary_structure, hra_component)
+			if hra_amount:
+				if monthly_house_rent:
+					annual_exemption = calculate_hra_exemption(assignment.salary_structure,
+					 				assignment.base, hra_amount, monthly_house_rent,
+									rented_in_metro_city)
+					if annual_exemption > 0:
+						monthly_exemption = annual_exemption / 12
+					else:
+						annual_exemption = 0
+	return {"hra_amount": hra_amount, "annual_exemption": annual_exemption, "monthly_exemption": monthly_exemption}
+
+def get_hra_from_salary_slip(employee, salary_structure, hra_component):
+	salary_slip = make_salary_slip(salary_structure, employee=employee)
+	for earning in salary_slip.earnings:
+		if earning.salary_component == hra_component:
+			return earning.amount
+
+def calculate_hra_exemption(salary_structure, base, monthly_hra, monthly_house_rent, rented_in_metro_city):
+	# TODO make this configurable
+	exemptions = []
+	frequency = frappe.get_value("Salary Structure", salary_structure, "payroll_frequency")
+	# case 1: The actual amount allotted by the employer as the HRA.
+	exemptions.append(get_annual_component_pay(frequency, monthly_hra))
+	actual_annual_rent = monthly_house_rent * 12
+	annual_base = get_annual_component_pay(frequency, base)
+	# case 2: Actual rent paid less 10% of the basic salary.
+	exemptions.append(flt(actual_annual_rent) - flt(annual_base * 0.1))
+	# case 3: 50% of the basic salary, if the employee is staying in a metro city (40% for a non-metro city).
+	exemptions.append(annual_base * 0.5 if rented_in_metro_city else annual_base * 0.4)
+	# return minimum of 3 cases
+	return min(exemptions)
+
+def get_annual_component_pay(frequency, amount):
+	if frequency == "Daily":
+		return amount * 365
+	elif frequency == "Weekly":
+		return amount * 52
+	elif frequency == "Fortnightly":
+		return amount * 26
+	elif frequency == "Monthly":
+		return amount * 12
+	elif frequency == "Bimonthly":
+		return amount * 6
