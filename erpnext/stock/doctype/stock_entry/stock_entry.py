@@ -1166,6 +1166,15 @@ def get_uom_details(item_code, uom, qty):
 	return ret
 
 @frappe.whitelist()
+def get_expired_batch_items():
+	return frappe.db.sql("""select b.item, sum(sle.actual_qty) as qty, sle.batch_no, sle.warehouse, sle.stock_uom\
+	from `tabBatch` b, `tabStock Ledger Entry` sle
+	where b.expiry_date <= %s
+	and b.expiry_date is not NULL
+	and b.batch_id = sle.batch_no
+	group by sle.warehouse, sle.item_code, sle.batch_no""",(nowdate()), as_dict=1)
+
+@frappe.whitelist()
 def get_warehouse_details(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
