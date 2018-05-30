@@ -1,20 +1,33 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+cur_frm.add_fetch('bank_account','account','account');
+cur_frm.add_fetch('bank_account','bank_account_no','bank_account_no');
+cur_frm.add_fetch('bank_account','iban','iban');
+cur_frm.add_fetch('bank_account','branch_code','branch_code');
+cur_frm.add_fetch('bank_account','swift_number','swift_number');
+
 frappe.ui.form.on('Bank Guarantee', {
 	setup: function(frm) {
-		cur_frm.set_query("account", function() {
+		frm.set_query("bank", function() {
 			return {
-				"filters": {
-					"account_type": "Bank",
-					"is_group": 0
+				filters: {
+					company: frm.doc.company
 				}
 			};
 		});
-		cur_frm.set_query("project", function() {
+		frm.set_query("bank_account", function() {
 			return {
-				"filters": {
-					"customer": cur_frm.doc.customer
+				filters: {
+					company: frm.doc.company,
+					bank: frm.doc.bank
+				}
+			}
+		});
+		frm.set_query("project", function() {
+			return {
+				filters: {
+					customer: frm.doc.customer
 				}
 			};
 		});
