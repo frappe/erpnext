@@ -23,8 +23,8 @@ frappe.ui.form.on('Job Opening', {
 				},
 				callback: function (data) {
 					if(data.message){
-						frm.set_value('staffing_plan', data.message[0]);
-						frm.set_value('planned_vacancies', data.message[1]);
+						frm.set_value('staffing_plan', data.message.name);
+						frm.set_value('planned_vacancies', data.message.vacancies);
 					} else {
 						frm.set_value('staffing_plan', "");
 						frm.set_value('planned_vacancies', 0);

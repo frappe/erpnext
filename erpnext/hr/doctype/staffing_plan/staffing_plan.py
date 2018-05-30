@@ -65,7 +65,7 @@ def get_active_staffing_plan_and_vacancies(company, designation, department=None
 		select sp.name, spd.vacancies
 		from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name
 		where company=%s and spd.designation=%s and sp.docstatus=1 {0}
-	""".format(conditions), (company, designation))
+	""".format(conditions), (company, designation), as_dict = 1)
 
 	if not staffing_plan:
 		parent_company = frappe.db.get_value("Company", company, "parent_company")

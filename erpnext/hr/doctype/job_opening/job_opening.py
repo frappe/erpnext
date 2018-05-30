@@ -24,11 +24,11 @@ class JobOpening(WebsiteGenerator):
 
 	def validate_current_vacancies(self):
 		if not self.staffing_plan:
-			vacancies = get_active_staffing_plan_and_vacancies(self.company,
+			staffing_plan = get_active_staffing_plan_and_vacancies(self.company,
 				self.designation, self.department)
-			if vacancies:
-				self.staffing_plan = vacancies[0]
-				self.planned_vacancies = vacancies[1]
+			if staffing_plan:
+				self.staffing_plan = staffing_plan.name
+				self.planned_vacancies = staffing_plan.vacancies
 		elif not self.planned_vacancies:
 			planned_vacancies = frappe.db.sql("""
 				select vacancies from `tabStaffing Plan Detail`
@@ -46,7 +46,9 @@ class JobOpening(WebsiteGenerator):
 				""", (self.designation, lft, rgt))[0][0]
 
 			if self.planned_vacancies <= current_count:
-				frappe.throw(_("Job Openings for designation {0} and company {1} already opened or hiring completed as per Staffing Plan {2}".format(self.designation, staffing_plan_company, self.staffing_plan)))
+				frappe.throw(_("Job Openings for designation {0} already open \
+					or hiring completed as per Staffing Plan {1}"
+					.format(self.designation, self.staffing_plan)))
 
 	def get_context(self, context):
 		context.parents = [{'route': 'jobs', 'title': _('All Jobs') }]
