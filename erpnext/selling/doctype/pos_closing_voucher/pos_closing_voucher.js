@@ -79,7 +79,7 @@ var get_closing_voucher_details = function(frm) {
 			}
 		}
 	});
-}
+};
 
 var get_z_ticket = function(frm) {
 
@@ -88,10 +88,10 @@ var get_z_ticket = function(frm) {
 		args: {
 			doc: frm.doc
 		},
-		callback: function(r, rt) {
-				if (r.message) {
-						frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
-				}
+		callback: function(r) {
+			if (r.message) {
+					frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
+			}
 		}
 	});
-}
+};
