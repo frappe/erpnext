@@ -11,24 +11,73 @@ import json
 
 
 class POSClosingVoucher(Document):
-	pass
+	def get_closing_voucher_details(self):
+		filters = {
+			'doc': self.name,
+			'from_date': self.period_start_date,
+			'to_date': self.period_end_date,
+			'company': self.company,
+			'pos_profile': self.pos_profile,
+			'user': self.user,
+			'is_pos': 1
+		}
+		frappe.log_error(filters)
+
+		invoice_list = get_invoices(filters)
+		self.set_invoice_list(invoice_list)
+
+		sales_summary = get_sales_summary(invoice_list)
+		self.set_sales_summary_values(sales_summary)
+
+		mop = get_mode_of_payment_details(invoice_list)
+		self.set_mode_of_payments(mop)
+
+		taxes = get_tax_details(invoice_list)
+		self.set_taxes(taxes)
+
+		return self.get_payment_reconciliation_details()
+
+	def set_invoice_list(self, invoice_list):
+		self.sales_invoices_summary = []
+		for invoice in invoice_list:
+			self.append('sales_invoices_summary', {
+				'invoice': invoice['name'],
+				'qty_of_items': invoice['pos_total_qty'],
+				'grand_total': invoice['grand_total']
+			})
+
+	def set_sales_summary_values(self, sales_summary):
+		self.grand_total = sales_summary['grand_total']
+		self.net_total = sales_summary['net_total']
+		self.total_quantity = sales_summary['total_qty']
+
+	def set_mode_of_payments(self, mop):
+		self.payment_reconciliation = []
+		for m in mop:
+			self.append('payment_reconciliation', {
+				'mode_of_payment': m['name'],
+				'expected_amount': m['amount']
+			})
+
+	def set_taxes(self, taxes):
+		self.taxes = []
+		for tax in taxes:
+			self.append('taxes', {
+				'rate': tax['rate'],
+				'amount': tax['amount']
+			})
+
+
+	def get_payment_reconciliation_details(self):
+		currency = get_company_currency(self)
+		return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html", {"data": self, "currency": currency})
+
 
 @frappe.whitelist()
-def get_closing_voucher_details(**kwargs):
-	data = {}
-	invoice_list = get_invoices(kwargs)
-	data['invoices'] = invoice_list
-	data['sales_summary'] = get_sales_summary(invoice_list)
-	data['mop'] = get_mode_of_payment_details(invoice_list)
-	data['taxes'] = get_tax_details(invoice_list)
-
-	return data
-
-@frappe.whitelist()
-def get_payment_reconciliation_details(doc):
-	doc = json.loads(doc)
-	currency = get_company_currency(doc)
-	return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html", {"data": doc, "currency": currency})
+def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
+	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
+	cashiers = [cashier for cashier in set(c['user'] for c in cashiers_list)]
+	return [[c] for c in cashiers]
 
 def get_mode_of_payment_details(invoice_list):
 	mode_of_payment_details = []
@@ -111,7 +160,7 @@ def get_sales_summary(invoice_list):
 	return {'net_total': net_total, 'grand_total': grand_total, 'total_qty': total_qty}
 
 def get_company_currency(doc):
-	currency = frappe.db.get_value("Company", doc['company'], "default_currency")
+	currency = frappe.db.get_value("Company", doc.company, "default_currency")
 	return frappe.get_doc('Currency', currency)
 
 
@@ -121,5 +170,6 @@ def get_invoices(filters):
 		from `tabSales Invoice` a
 		where a.docstatus = 1 and a.posting_date >= %(from_date)s
 		and a.posting_date <= %(to_date)s and a.company=%(company)s
-		and a.pos_profile = %(pos_profile)s and a.is_pos = %(is_pos)s""",
+		and a.pos_profile = %(pos_profile)s and a.is_pos = %(is_pos)s
+		and a.owner = %(user)s""",
 		filters, as_dict=1)
