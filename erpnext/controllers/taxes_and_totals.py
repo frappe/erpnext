@@ -38,6 +38,7 @@ class calculate_taxes_and_totals(object):
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
+		self.calculate_total_net_weight()
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -327,6 +328,13 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 		self.set_rounded_total()
+
+	def calculate_total_net_weight(self):
+		if self.doc.meta.get_field('total_net_weight'):
+			self.doc.total_net_weight = 0.0
+			for d in self.doc.items:
+				if d.total_weight:
+					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
 		if self.doc.meta.get_field("rounded_total"):
