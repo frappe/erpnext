@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import date_diff, flt, getdate, get_first_day, get_last_day
+from frappe.utils import date_diff, flt
 from erpnext.hr.utils import validate_tax_declaration, calculate_eligible_hra_exemption
 
 class EmployeeTaxExemptionProofSubmission(Document):
