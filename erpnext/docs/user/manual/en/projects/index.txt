@@ -1,7 +1,9 @@
 tasks
 project
-time-log-batch
+timesheet
+project-customer-portal
+project-profitability
+project-expense-claims
 activity-type
 activity-cost
 articles
-timesheet
