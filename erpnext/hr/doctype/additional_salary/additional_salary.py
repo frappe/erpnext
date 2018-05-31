@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate, date_diff
 
-class AdditionalSalaryComponent(Document):
+class AdditionalSalary(Document):
 	def validate(self):
 		self.validate_dates()
 		if self.amount <= 0:
@@ -25,6 +25,11 @@ class AdditionalSalaryComponent(Document):
  			frappe.throw(_("To date can not greater than employee's relieving date"))
 
 	def get_amount(self, sal_start_date, sal_end_date):
+		# If additional salary dates in between the salary slip dates
+		# then return complete additional salary amount
+		if getdate(sal_start_date) <= getdate(self.from_date) <= getdate(sal_end_date)\
+			and getdate(sal_end_date) >= getdate(self.to_date) >= getdate(sal_start_date):
+			return self.amount
 		start_date = getdate(sal_start_date)
 		end_date = getdate(sal_end_date)
 		total_days = date_diff(getdate(self.to_date), getdate(self.from_date)) + 1
@@ -42,7 +47,7 @@ class AdditionalSalaryComponent(Document):
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date):
 	additional_components = frappe.db.sql("""
-	select name from `tabAdditional Salary Component`
+	select name from `tabAdditional Salary`
 	where employee=%(employee)s
 	and docstatus = 1
 	and (
@@ -60,7 +65,7 @@ def get_additional_salary_component(employee, start_date, end_date):
 		for additional_component in additional_components:
 			struct_row = {}
 			additional_components_dict = {}
-			additional_component_obj = frappe.get_doc("Additional Salary Component", additional_component[0])
+			additional_component_obj = frappe.get_doc("Additional Salary", additional_component[0])
 			amount = additional_component_obj.get_amount(start_date, end_date)
 			salary_component = frappe.get_doc("Salary Component", additional_component_obj.salary_component)
 			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
