@@ -98,7 +98,7 @@ def get_achieved_details(filters, sales_person, all_sales_persons, target_item_g
 		END as qty,
 		CASE
 			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * soi.base_net_rate * (st.allocated_percentage/100))
-			ELSE soi.base_net_amount * (st.allocated_percentage/100))
+			ELSE sum(soi.base_net_amount * (st.allocated_percentage/100))
 		END as amount
 		from
 			`tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st

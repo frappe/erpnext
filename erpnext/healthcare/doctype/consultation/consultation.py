@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import getdate, cstr
 import json
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
@@ -120,7 +120,7 @@ def delete_medical_record(consultation):
 def set_subject_field(consultation):
 	subject = "No Diagnosis "
 	if(consultation.diagnosis):
-		subject = "Diagnosis: "+ str(consultation.diagnosis)+". "
+		subject = "Diagnosis: \n"+ cstr(consultation.diagnosis)+". "
 	if(consultation.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
 	if(consultation.test_prescription):
