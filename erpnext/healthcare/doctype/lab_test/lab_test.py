@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate
+from frappe.utils import getdate, cstr
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account
 from frappe import _
 
@@ -228,9 +228,10 @@ def get_employee_by_user_id(user_id):
 	return employee
 
 def insert_lab_test_to_medical_record(doc):
-	subject = str(doc.test_name)
+	subject = cstr(doc.test_name)
 	if(doc.test_comment):
-		subject += ", "+str(doc.test_comment)
+		subject += ", \n"+ cstr(doc.test_comment)
+
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject

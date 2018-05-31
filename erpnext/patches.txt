@@ -543,3 +543,4 @@ erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
 erpnext.patches.v11_0.refactor_erpnext_shopify
 erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany
 erpnext.patches.v11_0.rename_overproduction_percent_field
+erpnext.patches.v10_0.update_status_in_purchase_receipt
