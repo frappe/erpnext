@@ -91,6 +91,3 @@ def check_shopping_cart_enabled():
 
 def show_attachments():
 	return get_shopping_cart_settings().show_attachments
-
-def show_price_in_website():
-	return get_shopping_cart_settings().show_price_in_website
