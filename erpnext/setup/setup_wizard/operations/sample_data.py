@@ -29,7 +29,7 @@ def make_sample_data(domains, make_dependent = False):
 			make_material_request(frappe.get_all("Item"))
 
 	make_projects(domains)
-	notification()
+	import_notification()
 
 def make_opportunity(items, customer):
 	b = frappe.get_doc({
