@@ -120,7 +120,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Addresses And Contacts",
+					"name": "Address And Contacts",
 					"label": _("Sales Partner Addresses And Contacts"),
 					"doctype": "Address",
 					"route_options": {
@@ -230,7 +230,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Addresses And Contacts",
+					"name": "Address And Contacts",
 					"label": _("Customer Addresses And Contacts"),
 					"doctype": "Address",
 					"route_options": {
