@@ -35,6 +35,7 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
+		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
@@ -456,3 +457,21 @@ class BuyingController(StockController):
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
 
+	def validate_items(self):
+		# validate items to see if they have is_purchase_item or is_subcontracted_item enabled
+		if self.is_subcontracted:
+			items_validate(self, "and is_sub_contracted_item=0", "Non subcontractable")
+		else:
+			items_validate(self, "and is_purchase_item=0", "Non purchaseable")
+
+def items_validate(doc, condition, message):
+	# iterate through items and check if they are valid sales or purchase items
+	items = [d.item_code for d in doc.items]
+	item_condition = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
+
+	invalid_items = [d[0] for d in frappe.db.sql("""
+		select item_code from tabItem where name in ({0}) {1}
+		""".format(item_condition, condition), as_list=True)]
+
+	if invalid_items:
+		frappe.throw(_("{0} items: {1}".format(message, ", ".join([d for d in invalid_items]))))
