@@ -38,7 +38,6 @@ def get_columns(filters):
 	]
 
 def get_data(filters):
-	data = []
 	party_type = filters.get("party_type")
 	party = filters.get("party_name")
 	party_group = get_party_group(party_type)
