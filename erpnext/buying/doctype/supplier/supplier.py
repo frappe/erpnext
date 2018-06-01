@@ -70,4 +70,4 @@ class Supplier(TransactionBase):
 		elif validation_criteria == "Tax ID":
 			supplier_with_same_values = frappe.db.get_value("Supplier",filters={"tax_id":tax_id})
 			if supplier_with_same_values:
-				frappe.throw(_('Supplier with same Tax ID already exists'))				
+				frappe.throw(_('Supplier with same Tax ID already exists'))

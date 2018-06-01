@@ -59,7 +59,7 @@ class Customer(TransactionBase):
 		name = self.name
 		tax_id = self.tax_id
 		pan_no = self.pan_no
-		if validation_criteria == "Supplier ID + Tax ID + Pan No.":
+		if validation_criteria == "Customer ID + Tax ID + Pan No.":
 			customer_with_same_values = frappe.db.get_value("Customer",filters={"name":name,"tax_id":tax_id,"pan_no":pan_no})
 			if customer_with_same_values:
 				frappe.throw(_('Customer with same Customer ID ,Tax ID and Pan No. already exists'))
@@ -74,7 +74,7 @@ class Customer(TransactionBase):
 		elif validation_criteria == "Tax ID":
 			customer_with_same_values = frappe.db.get_value("Customer",filters={"tax_id":tax_id})
 			if customer_with_same_values:
-				frappe.throw(_('Customer with same Tax ID already exists'))	
+				frappe.throw(_('Customer with same Tax ID already exists'))
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
