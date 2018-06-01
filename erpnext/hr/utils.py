@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate
+from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
 
@@ -241,3 +241,52 @@ def get_payroll_period(from_date, to_date, company):
 		pd.parent=pp.name where pd.start_date<=%s and pd.end_date>= %s
 		and pp.company=%s""", (from_date, to_date, company), as_dict=1)
 	return payroll_period[0] if payroll_period else None
+
+
+def allocate_earned_leaves():
+	'''Allocate earned leaves to Employees'''
+	e_leave_types = frappe.get_all("Leave Type",
+		fields=["name", "max_leaves_allowed", "earned_leave_frequency", "rounding"],
+		filters={'is_earned_leave' : 1})
+	today = getdate()
+	divide_by_frequency = {"Yearly": 1, "Quarterly": 4, "Monthly": 12}
+	if e_leave_types:
+		for e_leave_type in e_leave_types:
+			leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where '{0}'
+				between from_date and to_date and docstatus=1 and leave_type='{1}'"""
+				.format(today, e_leave_type.name), as_dict=1)
+			for allocation in leave_allocations:
+				leave_policy = get_employee_leave_policy(allocation.employee)
+				if not leave_policy:
+					continue
+				if not e_leave_type.earned_leave_frequency == "Monthly":
+					if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
+						continue
+				annual_allocation = frappe.db.sql("""select annual_allocation from `tabLeave Policy Detail`
+					where parent=%s and leave_type=%s""", (leave_policy.name, e_leave_type.name))
+				if annual_allocation and annual_allocation[0]:
+					earned_leaves = flt(annual_allocation[0][0]) / divide_by_frequency[e_leave_type.earned_leave_frequency]
+					if e_leave_type.rounding == "0.5":
+						earned_leaves = round(earned_leaves * 2) / 2
+					else:
+						earned_leaves = round(earned_leaves)
+
+					allocated_leaves = frappe.db.get_value('Leave Allocation', allocation.name, 'total_leaves_allocated')
+					new_allocation = flt(allocated_leaves) + flt(earned_leaves)
+					new_allocation = new_allocation if new_allocation <= e_leave_type.max_leaves_allowed else e_leave_type.max_leaves_allowed
+					frappe.db.set_value('Leave Allocation', allocation.name, 'total_leaves_allocated', new_allocation)
+
+def check_frequency_hit(from_date, to_date, frequency):
+	'''Return True if current date matches frequency'''
+	from_dt = get_datetime(from_date)
+	to_dt = get_datetime(to_date)
+	from dateutil import relativedelta
+	rd = relativedelta.relativedelta(to_dt, from_dt)
+	months = rd.months
+	if frequency == "Quarterly":
+		if not months % 3:
+			return True
+	elif frequency == "Yearly":
+		if not months % 12:
+			return True
+	return False

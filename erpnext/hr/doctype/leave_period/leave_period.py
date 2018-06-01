@@ -71,7 +71,8 @@ class LeavePeriod(Document):
 		allocation.leave_type = leave_type
 		allocation.from_date = self.from_date
 		allocation.to_date = self.to_date
-		allocation.new_leaves_allocated = new_leaves_allocated
+		'''Earned Leaves are allocated by scheduler, initially allocate 0'''
+		allocation.new_leaves_allocated = new_leaves_allocated if not frappe.db.get_value("Leave Type", leave_type, "is_earned_leave") else 0
 		allocation.leave_period = self.name
 		if self.carry_forward_leaves:
 			if frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
