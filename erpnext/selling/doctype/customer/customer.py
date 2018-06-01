@@ -52,6 +52,29 @@ class Customer(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.check_customer_group_change()
+		self.validation_criteria()
+
+	def validation_criteria(self):
+		validation_criteria = frappe.db.get_value("Selling Settings",None,"validation_criteria")
+		name = self.name
+		tax_id = self.tax_id
+		pan_no = self.pan_no
+		if validation_criteria == "Customer ID + Tax ID + Pan No.":
+			customer_with_same_values = frappe.db.get_value("Customer",filters={"name":name,"tax_id":tax_id,"pan_no":pan_no})
+			if customer_with_same_values:
+				frappe.throw(_('Customer with same Customer ID ,Tax ID and Pan No. already exists'))
+		elif validation_criteria == "Tax ID + Pan No.":
+			customer_with_same_values = frappe.db.get_value("Customer",filters={"tax_id":tax_id,"pan_no":pan_no})
+			if customer_with_same_values:
+				frappe.throw(_('Customer with same Tax ID and Pan No. already exists'))
+		elif validation_criteria == "Pan No.":
+			customer_with_same_values = frappe.db.get_value("Customer",filters={"pan_no":pan_no})
+			if customer_with_same_values:
+				frappe.throw(_('Customer with same Pan No. already exists'))
+		elif validation_criteria == "Tax ID":
+			customer_with_same_values = frappe.db.get_value("Customer",filters={"tax_id":tax_id})
+			if customer_with_same_values:
+				frappe.throw(_('Customer with same Tax ID already exists'))
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
