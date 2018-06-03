@@ -11080,316 +11080,314 @@ DocType: Account,Cash,نقد
 
 DocType: Employee,Short biography for website and other publications.,نبذة على موقع الويب وغيره من المنشورات.
 
-,Customer,العميل
+Customer,العميل,
 
-,Customer Name in Arabic,اسم العميل بالعربية
+Customer Name in Arabic,اسم العميل بالعربية,
 
-,Permit Number,رقم الترخيص
+Permit Number,رقم الترخيص,
 
-,VAT DETAILS,تفاصيل ضريبة القيمة المضافة
+VAT DETAILS,تفاصيل ضريبة القيمة المضافة,
 
-,Reverse Charge Applicable,عكس الرسوم المطبقة 
+Reverse Charge Applicable,عكس الرسوم المطبقة ,
 
-,"CUSTOMER PO DETAILS
+"CUSTOMER PO DETAILS
 
-",تفاصيل العميل
+",تفاصيل العميل,
 
-,Supplier Name in Arabic,اسم المورد باللغة العربية
+Supplier Name in Arabic,اسم المورد باللغة العربية,
 
-,Tax Id,الرقم الضريبي
+Tax Id,الرقم الضريبي,
 
-,Company TRN,TRN الشركة 
+Company TRN,TRN الشركة ,
 
-,Standard Buying,الشراء المتعارف
+Standard Buying,الشراء المتعارف,
 
-,VAT DETAILS,تفاصيل ضريبة القيمة المضافة
+VAT DETAILS,تفاصيل ضريبة القيمة المضافة,
 
-,Remove,إزالة
+Remove,إزالة,
 
-,Drag to sort columns,اسحب لفرز الأعمدة
+Drag to sort columns,اسحب لفرز الأعمدة,
 
-,Ascending,تصاعدي
+Ascending,تصاعدي,
 
-,Descending,تنازلي
+Descending,تنازلي,
 
-,Then By (optional),حسب (اختياري)
+Then By (optional),حسب (اختياري),
 
-,Bank Draft,مسودة البنك
+Bank Draft,مسودة البنك,
 
-,Administrator,مدير
+Administrator,مدير,
 
-,Point of Sale,نقطة بيع
+Point of Sale,نقطة بيع,
 
-,Reference Doctype,المرجع
+Reference Doctype,المرجع,
 
-,Submit on Creation,انشاء تقديم
+Submit on Creation,انشاء تقديم,
 
-,Standard Selling,الشراء المتعارف
+Standard Selling,الشراء المتعارف,
 
-,Standard Buying,البيع المتعارف
+Standard Buying,البيع المتعارف,
 
-,Application of Funds,تطبيق الصناديق
+Application of Funds,تطبيق الصناديق,
 
-,Assets,الأصول
+Assets,الأصول,
 
-,Current Assets,الأصول المتداولة
+Current Assets,الأصول المتداولة,
 
-,Accounts Receivable,الحسابات المستحقة
+Accounts Receivable,الحسابات المستحقة,
 
-,Debtors,المدينين
+Debtors,المدينين,
 
-,Bank Accounts,حسابات بنكية
+Bank Accounts,حسابات بنكية,
 
-,rajhi,الراجحي
+rajhi,الراجحي,
 
-,Cash In Hand,نقد في اليد
+Cash In Hand,نقد في اليد,
 
-,Cash,السيولة النقدية
+Cash,السيولة النقدية,
 
-,Loans and Advances,القروض والسلف
+Loans and Advances,القروض والسلف,
 
-,Securities and Deposits,الأوراق المالية والودائع
+Securities and Deposits,الأوراق المالية والودائع,
 
-,Earnest Money,العربون
+Earnest Money,العربون,
 
-,Stock Assets,أصول الأسهم
+Stock Assets,أصول الأسهم,
 
-,Stock In Hand,الاسهم في اليد
+Stock In Hand,الاسهم في اليد,
 
-,Tax Assets,أصول ضريبية
+Tax Assets,أصول ضريبية,
 
-,Fixed Assets,أصول ثابتة
+Fixed Assets,أصول ثابتة,
 
-,Accumulated Depreciation,الاستهلاك المتراكم
+Accumulated Depreciation,الاستهلاك المتراكم,
 
-,Buildings,البنايات
+Buildings,البنايات,
 
-,Capital Equipments,معدلات رأس المال
+Capital Equipments,معدلات رأس المال,
 
-,Electronic Equipments,المعدات الالكترونية
+Electronic Equipments,المعدات الالكترونية,
 
-,Furnitures and Fixtures,أثاث ولوازم
+Furnitures and Fixtures,أثاث ولوازم,
 
-,Office Equipments,المعدات المكتبية
+Office Equipments,المعدات المكتبية,
 
-,Plants and Machineries,مصانع ومكائن
+Plants and Machineries,مصانع ومكائن,
 
-,Softwares,البرامج
+Softwares,البرامج,
 
-,Investments,الاستثمارات
+Investments,الاستثمارات,
 
-,Temporary Accounts,الحسابات المؤقتة
+Temporary Accounts,الحسابات المؤقتة,
 
-,Temporary Opening,افتتاح مؤقت
+Temporary Opening,افتتاح مؤقت,
 
-,Equity,القيمة المالية
+Equity,القيمة المالية,
 
-,Capital Stock,أسهم رأس المال
+Capital Stock,أسهم رأس المال,
 
-,Dividends Paid,الأرباح الموزعة
+Dividends Paid,الأرباح الموزعة,
 
-,Opening Balance Equity,افتتاح الاسهم المتوازنة
+Opening Balance Equity,افتتاح الاسهم المتوازنة,
 
-,Retained Earnings,الأرباح المحتجزة
+Retained Earnings,الأرباح المحتجزة,
 
-,Expenses,النفقات
+Expenses,النفقات,
 
-,Direct Expenses,المصروفات المباشرة
+Direct Expenses,المصروفات المباشرة,
 
-,Stock Expenses,نفقات المخزون
+Stock Expenses,نفقات المخزون,
 
-,Cost of Goods Sold,تكلفة البضاعة المباعة
+Cost of Goods Sold,تكلفة البضاعة المباعة,
 
-,Expenses Included In Valuation,النفقات المدرجة في التقييم
+Expenses Included In Valuation,النفقات المدرجة في التقييم,
 
-,Stock Adjustment,تعديل الأسهم
+Stock Adjustment,تعديل الأسهم,
 
-,Indirect Expenses,المصروفات غير المباشرة
+Indirect Expenses,المصروفات غير المباشرة,
 
-,Administrative Expenses,المصروفات الإدارية
+Administrative Expenses,المصروفات الإدارية,
 
-,Commission on Sales,لجنة المبيعات
+Commission on Sales,لجنة المبيعات,
 
-,Depreciation,الاستهلاك
+Depreciation,الاستهلاك,
 
-,Entertainment Expenses,نفقات الترفيه
+Entertainment Expenses,نفقات الترفيه,
 
-,Exchange Gain/Loss,تبادل كسب / خسارة
+Exchange Gain/Loss,تبادل كسب / خسارة,
 
-,Freight and Forwarding Charges,رسوم الشحن والتخليص
+Freight and Forwarding Charges,رسوم الشحن والتخليص,
 
-,Gain/Loss on Asset Disposal,كسب / خسارة   على التخلص من الأصول
+Gain/Loss on Asset Disposal,كسب / خسارة   على التخلص من الأصول,
 
-,Legal Expenses,نفقات قانونية
+Legal Expenses,نفقات قانونية,
 
-,Marketing Expenses,تكاليف التسويق
+Marketing Expenses,تكاليف التسويق,
 
-,Miscellaneous Expenses,النفقات المتنوعة
+Miscellaneous Expenses,النفقات المتنوعة,
 
-,Office Maintenance Expenses,نفقات صيانة المكتب
+Office Maintenance Expenses,نفقات صيانة المكتب,
 
-,Office Rent,ايجار المكتب
+Office Rent,ايجار المكتب,
 
-,Postal Expenses,النفقات البريدية
+Postal Expenses,النفقات البريدية,
 
-,Print and Stationery,طباعة وقرطاسية
+Print and Stationery,طباعة وقرطاسية,
 
-,Round Off,نهاية الجولة
+Round Off,نهاية الجولة,
 
-,Salary,راتب
+Salary,راتب,
 
-,Sales Expenses,نفقات المبيعات
+Sales Expenses,نفقات المبيعات,
 
-,Telephone Expenses,نفقات الهاتف
+Telephone Expenses,نفقات الهاتف,
 
-,Travel Expenses,مصاريف السفر
+Travel Expenses,مصاريف السفر,
 
-,Utility Expenses,نفقات المرافق العامة
+Utility Expenses,نفقات المرافق العامة,
 
-,Write Off,لا تصلح
+Write Off,لا تصلح,
 
-,Income,الإيرادات
+Income,الإيرادات,
 
-,Direct Income,الدخل المباشر
+Direct Income,الدخل المباشر,
 
-,Sales,المبيعات
+Sales,المبيعات,
 
-,Service,الخدمات
+Service,الخدمات,
 
-,Indirect Income,الدخل غير المباشر
+Indirect Income,الدخل غير المباشر,
 
-,Source of Funds (Liabilities),مصدر الأموال (المطلوبات)
+Source of Funds (Liabilities),مصدر الأموال (المطلوبات),
 
-,Current Liabilities,المطلوبات المتداولة
+Current Liabilities,المطلوبات المتداولة,
 
-,Accounts Payable,حسابات قابلة للدفع
+Accounts Payable,حسابات قابلة للدفع,
 
-,Creditors,الدائنين
+Creditors,الدائنين,
 
-,Payroll Payable,رواتب الرواتب
+Payroll Payable,رواتب الرواتب,
 
-,Duties and Taxes,الرسوم والضرائب
+Duties and Taxes,الرسوم والضرائب,
 
-,Excise 100%,خصم 100%
+Excise 100%,خصم 100%,
 
-,Excise 50%,خصم 50%
+Excise 50%,خصم 50%,
 
-,VAT 5%,ضريبة القيمة المضافة 5 ٪
+VAT 5%,ضريبة القيمة المضافة 5 ٪,
 
-,VAT Exempted,ضريبة القيمة المضافة المستثناة
+VAT Exempted,ضريبة القيمة المضافة المستثناة,
 
-,VAT Zero,ضريبة القيمة المضافة صفر
+VAT Zero,ضريبة القيمة المضافة صفر,
 
-,Loans (Liabilities),القروض (المطلوبات)
+Loans (Liabilities),القروض (المطلوبات),
 
-,Bank Overdraft Account,حساب السحب على المكشوف لدى البنك
+Bank Overdraft Account,حساب السحب على المكشوف لدى البنك,
 
-,Secured Loans,القروض المضمونة
+Secured Loans,القروض المضمونة,
 
-,Unsecured Loans,القروض غير المضمونة
+Unsecured Loans,القروض غير المضمونة,
 
-,Stock Liabilities,خصوم المخزون
+Stock Liabilities,خصوم المخزون,
 
-,Stock Received But Not Billed,الأسهم المستلمة ولكن لم تتم محاسبتها
+Stock Received But Not Billed,الأسهم المستلمة ولكن لم تتم محاسبتها,
 
-,Alarm Passport Expiry,انتهاء صلاحية إنذار المنبه
+Alarm Passport Expiry,انتهاء صلاحية إنذار المنبه,
 
-,Health Insurance Number,رقم التأمين الصحي
+Health Insurance Number,رقم التأمين الصحي,
 
-,Health Insurance Valid to,التأمين الصحي
+Health Insurance Valid to,التأمين الصحي,
 
-,Alarm Inssurance Expiry,انقضاء الإنذار
+Alarm Inssurance Expiry,انقضاء الإنذار,
 
-,Residence Valid to,الإقامة صالحة ل
+Residence Valid to,الإقامة صالحة ل,
 
-,Alarm Residence Expiry,انذار بانتهاء الاقامة
+Alarm Residence Expiry,انذار بانتهاء الاقامة,
 
-,Dr,الدكتور
+Dr,الدكتور,
 
-,Saturdays,السبت
+Saturdays,السبت,
 
-,Fridays,الجمعة
+Fridays,الجمعة,
 
-,Creditors,الدائنين
+Creditors,الدائنين,
 
-,Feedback,"ردود الفعل
+Feedback,"ردود الفعل",
 
-"
+LEAVE SETTINGS,مغادرة الاعدادات,
 
-,LEAVE SETTINGS,مغادرة الاعدادات
+Show Leaves Of All Department Members In Calendar,إظهار أوراق جميع أعضاء القسم في التقويم,
 
-,Show Leaves Of All Department Members In Calendar,إظهار أوراق جميع أعضاء القسم في التقويم
+Employee record is created using selected field.,يتم إنشاء سجل الموظف باستخدام الحقل المحدد.,
 
-,Employee record is created using selected field.,يتم إنشاء سجل الموظف باستخدام الحقل المحدد.
+Apprentice,متدرب على حرفة ما,
 
-,Apprentice,متدرب على حرفة ما
+Intern,المتدرب,
 
-,Intern,المتدرب
+Piecework,مقاولة,
 
-,Piecework,مقاولة
+Commission,عمولة,
 
-,Commission,عمولة
+Contract,عقد,
 
-,Contract,عقد
+Probation,فترة تجربة,
 
-,Probation,فترة تجربة
+Part-time,دوام جزئي,
 
-,Part-time,دوام جزئي
+Full-time,دوام كامل,
 
-,Full-time,دوام كامل
+Legal,قانوني,
 
-,Legal,قانوني
+Research & Development,البحث والتنمية,
 
-,Research & Development,البحث والتنمية
+Quality Management,إدارة الجودة,
 
-,Quality Management,إدارة الجودة
+Management,إدارة,
 
-,Management,إدارة
+Human Resources,الموارد البشرية,
 
-,Human Resources,الموارد البشرية
+Customer Service,خدمة الزبائن,
 
-,Customer Service,خدمة الزبائن
+Dispatch,إيفاد,
 
-,Dispatch,إيفاد
+Production,الإنتاج,
 
-,Production,الإنتاج
+Operations,العمليات,
 
-,Operations,العمليات
+Purchase,الشراء,
 
-,Purchase,الشراء
+Sales,المبيعات,
 
-,Sales,المبيعات
+Marketing,التسويق,
 
-,Marketing,التسويق
+Accounts,الحسابات,
 
-,Accounts,الحسابات
+Researcher,الباحث,
 
-,Researcher,الباحث
+Designer,المصمم,
 
-,Designer,المصمم
+Software Developer,مطور البرامج,
 
-,Software Developer,مطور البرامج
+Head of Marketing and Sales,رئيس قسم التسويق والمبيعات,
 
-,Head of Marketing and Sales,رئيس قسم التسويق والمبيعات
+Project Manager,مدير المشروع,
 
-,Project Manager,مدير المشروع
+HR Manager,مدير الموارد البشرية,
 
-,HR Manager,مدير الموارد البشرية
+Business Development Manager,مدير تطوير الاعمال,
 
-,Business Development Manager,مدير تطوير الاعمال
+Administrative Officer,موظف اداري,
 
-,Administrative Officer,موظف اداري
+Associate,مساعد,
 
-,Associate,مساعد
+Secretary,سكرتير,
 
-,Secretary,سكرتير
+Accountant,محاسب,
 
-,Accountant,محاسب
+Engineer,مهندس,
 
-,Engineer,مهندس
+Analyst,محلل,
 
-,Analyst,محلل
+Manager,مدير,
 
-,Manager,مدير
-
-,CEO,المدير التنفيذي
+CEO,المدير التنفيذي,
