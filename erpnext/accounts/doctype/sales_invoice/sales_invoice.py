@@ -66,6 +66,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
+		
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -90,7 +91,8 @@ class SalesInvoice(SellingController):
 		self.set_status()
 		if self.get("__islocal") :
 				self.title = self.get_title()
-				
+		self.set_items_income_account()
+		
 	def get_title(self):
 		from frappe.utils import getdate
 		
@@ -117,13 +119,18 @@ class SalesInvoice(SellingController):
 			nammeing_doc.save()
 			return title
 		
-	def set_items_by_project(self):
-		if self.total_from_project_cost and  self.payment_terms and  self.payment_term_unit:
-			payment_terms= frappe.get_doc("Payment Terms",{"name":self.payment_terms})
-			payment_term_unit = frappe.get_doc("Payment Term Unit",{"name":self.payment_term_unit})
-			self.items =[]
-			child = self.append('items', {})
-			child.income_account = payment_term_unit.income_account
+	def set_items_income_account(self):
+		if self.get("payment_schedule") : 
+			payment_schedule = self.get("payment_schedule")
+			for pt in payment_schedule : 
+				
+				if pt.is_advance == 1 and pt.payment_term == self.payment_term:
+					for item in self.get("items"):
+						item.income_account=pt.account
+				
+				if pt.is_retention == 1 and pt.payment_term == self.payment_term:
+					for item in self.get("items"):
+						item.income_account=pt.account
 			
 		
 	def get_payment_units_share(self):
@@ -593,7 +600,7 @@ class SalesInvoice(SellingController):
 
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
-
+			
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
 
@@ -615,23 +622,167 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
+		
+		detail =frappe.get_list("Payment Terms Template Detail",
+				fields=["name","is_advance", "apply_tax","is_retention","payment_term"],
+				filters={"parent":self.get("payment_terms_template"),"payment_term":self.payment_term},
+				ignore_permissions=True)
+			
+		status = "All"
+		
+		if detail :
+			if detail[0]["is_advance"] ==1:
+				status = "Advance"
+			elif detail[0]["is_retention"] ==1:
+				status = "Retention"
+					
+		if status == "Advance" or status == "Retention":
+			self.make_customer_gl_entry(gl_entries)
 
-		self.make_customer_gl_entry(gl_entries)
+			self.make_tax_gl_entries(gl_entries)
 
-		self.make_tax_gl_entries(gl_entries)
+			self.make_item_gl_entries(gl_entries)
 
-		self.make_item_gl_entries(gl_entries)
+			# merge gl entries before adding pos entries
+			gl_entries = merge_similar_entries(gl_entries)
 
-		# merge gl entries before adding pos entries
-		gl_entries = merge_similar_entries(gl_entries)
+			self.make_pos_gl_entries(gl_entries)
+			self.make_gle_for_change_amount(gl_entries)
 
-		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
+			self.make_write_off_gl_entry(gl_entries)
+		
+		elif  status == "All" : 
+			self.make_payment_term_gl_entry(gl_entries)
+			self.make_tax_gl_entries(gl_entries)
+			self.make_item_gl_entries(gl_entries)
+		
+		else:
+			self.make_customer_gl_entry(gl_entries)
 
-		self.make_write_off_gl_entry(gl_entries)
+			self.make_tax_gl_entries(gl_entries)
+
+			self.make_item_gl_entries(gl_entries)
+
+			# merge gl entries before adding pos entries
+			gl_entries = merge_similar_entries(gl_entries)
+
+			self.make_pos_gl_entries(gl_entries)
+			self.make_gle_for_change_amount(gl_entries)
+
+			self.make_write_off_gl_entry(gl_entries)
 
 		return gl_entries
 
+	def make_payment_term_gl_entry(self, gl_entries):
+		if self.total :
+			# Didnot use base_grand_total to book rounding loss gle
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+				self.precision("grand_total"))
+			invoice_portions_total = 0
+			tax_destribution= {}
+			advance_invoice_portion = 0
+			retention_invoice_portion = 0
+			for payment_term in self.payment_schedule :				
+				if payment_term.apply_tax == 1 :
+					tax_destribution[payment_term.payment_term] = payment_term.invoice_portion*self.total_taxes_and_charges/100.0000
+					invoice_portions_total += payment_term.invoice_portion
+					print ("invoice_portions_total")
+					print (invoice_portions_total)
+					print ("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+					print (tax_destribution[payment_term.payment_term])
+					print ("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+					if payment_term.is_advance == 1:
+						tax_destribution[payment_term.payment_term] = 0
+						advance_invoice_portion = payment_term.invoice_portion
+					
+					if payment_term.is_retention == 1:
+						retention_invoice_portion = payment_term.invoice_portion
+
+			
+			for payment_term in self.payment_schedule :
+				if payment_term.apply_tax == 1 and payment_term.is_advance == 0 and payment_term.is_retention == 0:
+					print ("HIT NOT@@")
+					print (invoice_portions_total)
+					tax_destribution[payment_term.payment_term] += (100.0000-invoice_portions_total)*self.total_taxes_and_charges/100.0000
+					break
+			
+
+					
+			detail =frappe.get_list("Payment Terms Template Detail",
+				fields=["name","is_advance", "apply_tax","is_retention","payment_term"],
+				filters={"parent":self.get("payment_terms_template"),"payment_term":self.payment_term},
+				ignore_permissions=True)
+			
+			status = "All"
+			
+			if detail :
+				if detail[0]["is_advance"] ==1:
+					status = "Advance"
+				elif detail[0]["is_retention"] ==1:
+					status = "Retention"
+					
+				
+			for payment_term in self.payment_schedule :
+				debit = payment_term.invoice_portion*self.total /100.0000 
+				tax = tax_destribution[payment_term.payment_term] if payment_term.payment_term in tax_destribution else 0.00
+				if status == "All":
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": payment_term.account,
+							"party_type": "Customer",
+							"party": self.customer,
+							"against": self.against_income_account,
+							"debit":  debit+tax,
+							"title": self.title,
+							"debit_in_account_currency": grand_total_in_company_currency \
+								if self.party_account_currency==self.company_currency else self.grand_total,
+							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher_type": self.doctype
+						}, self.party_account_currency)
+					)
+				else:
+					if payment_term.payment_term == self.payment_term : 
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": payment_term.account,
+								"party_type": "Customer",
+								"party": self.customer,
+								"against": self.against_income_account,
+								"debit":  debit+tax,
+								"title": self.title,
+								#~ "debit_in_account_currency": grand_total_in_company_currency \
+									#~ if self.party_account_currency==self.company_currency else self.grand_total,
+								"debit_in_account_currency": debit+tax,
+								"against_voucher": self.return_against if cint(self.is_return) else self.name,
+								"against_voucher_type": self.doctype
+							}, self.party_account_currency)
+						)
+			
+			if advance_invoice_portion != 0:
+				print ("#################################################")
+				print ("Hit")
+				print (invoice_portions_total)
+				for tax in self.get("taxes"):
+					if flt(tax.base_tax_amount_after_discount_amount):
+						account_currency = get_account_currency(tax.account_head)
+						print (self.invoice_portion)
+						print (self.total_taxes_and_charges)
+						print (self.invoice_portion*self.total_taxes_and_charges/100.0000)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": tax.account_head,
+								"against": self.customer,
+								"debit": flt((advance_invoice_portion)*self.total_taxes_and_charges/100.0000),
+								#~ "debit_in_account_currency": flt(tax.base_tax_amount_after_discount_amount) \
+									#~ if account_currency==self.company_currency else flt(tax.tax_amount_after_discount_amount),
+								"debit_in_account_currency": flt((100.0000-invoice_portions_total)*self.total_taxes_and_charges/100.0000),
+								"cost_center": tax.cost_center
+							}, account_currency)
+						)
+
+				print ("#################################################")
+
+			
 	def make_customer_gl_entry(self, gl_entries):
 		if self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
@@ -688,7 +839,7 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict({
 							"account": item.income_account,
 							"against": self.customer,
-							"credit": item.base_net_amount,
+							"credit": item.base_net_amount ,
 							"credit_in_account_currency": item.base_net_amount \
 								if account_currency==self.company_currency else item.net_amount,
 							"cost_center": item.cost_center

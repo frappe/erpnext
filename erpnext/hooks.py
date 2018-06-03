@@ -226,6 +226,7 @@ scheduler_events = {
 		'erpnext.hr.doctype.attendance.attendance.validate_absence_and_notify',
 		'erpnext.hr.doctype.leave_application.leave_application.hooked_leave_allocation_builder',
 		'erpnext.hr.doctype.leave_allocation.leave_allocation.check_max_allocation_balance',
+		'erpnext.hr.doctype.employee.employee.passport_validate_check',
 		'erpnext.hr.doctype.salary_structure.salary_structure.set_salary_structure_active'
 	]
 }

@@ -35,7 +35,30 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_commission();
 			this.calculate_contribution();
 		}
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "invoice_portion", this.frm.doc.name)) {
+			//~ this.frm.doc.base_grand_total = this.frm.doc.base_grand_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.grand_total = this.frm.doc.grand_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.rounded_total = this.frm.doc.rounded_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.total_taxes_and_charges = this.frm.doc.total_taxes_and_charges * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.base_total_taxes_and_charges = this.frm.doc.base_total_taxes_and_charges * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.base_rounded_total = this.frm.doc.base_rounded_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.base_net_total = this.frm.doc.base_net_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.base_total = this.frm.doc.base_net_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.net_total = this.frm.doc.base_net_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.total = this.frm.doc.base_net_total * this.frm.doc.invoice_portion /100.0000;
+			//~ this.frm.doc.outstanding_amount = 0;
 
+
+			//~ // Round grand total as per precision
+			//~ frappe.model.round_floats_in(this.frm.doc, ["grand_total", "base_grand_total"]);
+
+			//~ // rounded totals
+			//~ if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
+				//~ this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(this.frm.doc.grand_total,
+					//~ this.frm.doc.currency, precision("rounded_total"));
+			//~ }
+
+		}
 		this.frm.refresh_fields();
 	},
 

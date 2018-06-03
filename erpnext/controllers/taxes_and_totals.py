@@ -332,10 +332,19 @@ class calculate_taxes_and_totals(object):
 			self.doc.base_rounded_total = \
 				round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
 					company_currency, self.doc.precision("base_rounded_total"))
+		
+
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+		
+		#~ if self.doc.meta.get_field("invoice_portion"):
+			#~ self.doc.base_grand_total = flt(self.doc.base_grand_total*self.doc.invoice_portion /100.0000)
+			#~ self.doc.grand_total = flt(self.doc.grand_total*self.doc.invoice_portion /100.0000)
+			#~ self.doc.base_rounded_total = flt(self.doc.base_rounded_total*self.doc.invoice_portion /100.0000)
+			#~ self.doc.rounded_total = flt(self.doc.rounded_total*self.doc.invoice_portion /100.0000)
+			#~ self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:

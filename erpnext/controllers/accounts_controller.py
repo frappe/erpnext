@@ -128,7 +128,7 @@ class AccountsController(TransactionBase):
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
-		calculate_taxes_and_totals(self)
+		print calculate_taxes_and_totals(self)
 
 		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.calculate_commission()
@@ -913,6 +913,9 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
+	term_details.apply_tax = term.apply_tax
+	term_details.is_advance = term.is_advance
+	term_details.is_retention = term.is_retention
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
@@ -924,6 +927,7 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
 	term_details.mode_of_payment = term.mode_of_payment
+	term_details.account = term.account
 
 	return term_details
 

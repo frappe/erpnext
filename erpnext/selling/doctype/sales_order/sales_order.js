@@ -66,9 +66,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// sales invoice
-				if(flt(doc.per_billed, 2) < 100) {
+				//~ if(flt(doc.per_billed, 2) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice, __("Make"));
-				}
+				//~ }
 
 				// material request
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
@@ -146,7 +146,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_sales_invoice: function() {
 		var d = new frappe.ui.Dialog({
-			title: __('Update Account Number'),
+			
 			fields: [
 				{
 					"label": "Payment Term",

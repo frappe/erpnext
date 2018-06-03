@@ -474,17 +474,19 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 		#~ update_payment_schedule(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
 		target.set_advances()
+		target.set_items_income_account()
+		update_payment_schedule(source, target)
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
-		target.ignore_pricing_rule = 1
-		target.payment_terms_template = source.payment_terms_template
-		update_payment_schedule(source, target)
+		target.ignore_pricing_rule = 1	
+		update_items(source, target)
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
+		
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
@@ -493,22 +495,99 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
-	
+
 	def update_payment_schedule(source, target):
 		target.payment_schedule = []
 		payment_schedule = source.get("payment_schedule")
 		if payment_schedule:
+			target.payment_terms_template = source.payment_terms_template
+			target.payment_term = payment_term
+			
 			for payment in payment_schedule:
-				if payment.payment_term == payment_term : 
-					child = target.append('payment_schedule', {})
-					child.payment_term = payment.payment_term
-					child.description = payment.description
-					child.due_date = payment.due_date
-					child.invoice_portion = payment.invoice_portion
-					child.payment_amount = payment.payment_amount
-					child.account = payment.account
+				
+				if payment.payment_term == payment_term :
+					target.invoice_portion = payment.invoice_portion
+					 
+				child = target.append('payment_schedule', {})
+				child.payment_term = payment.payment_term
+				child.description = payment.description
+				child.due_date = payment.due_date
+				child.invoice_portion = payment.invoice_portion
+				child.payment_amount = payment.payment_amount
+				child.account = payment.account
+				child.is_advance = payment.is_advance
+				child.apply_tax = payment.apply_tax
+				child.is_retention = payment.is_retention
+	
+	def update_items(source, target):
+		payment_schedule = source.get("payment_schedule")
+		if payment_schedule and payment_term :
+			detail =frappe.get_list("Payment Terms Template Detail",
+				fields=["name","is_advance", "apply_tax","is_retention","payment_term"],
+				filters={"parent":source.get("payment_terms_template"),"payment_term":payment_term},
+				ignore_permissions=True)
+			items_list =[]
+			
+			for item in target.get("items"):
+				is_advance_item = frappe.db.get_value("Item", item.item_code, "is_advance_item")
+				is_retention_item = frappe.db.get_value("Item", item.item_code, "is_retention")
+				
+				if detail[0]["is_advance"] ==1 and is_advance_item == 1: 
+					items_list.append(item)
+				
+				if detail[0]["is_advance"] ==0 and detail[0]["is_retention"] ==0  and is_advance_item == 0 and is_retention_item == 0: 
+					items_list.append(item)
+
+				if detail[0]["is_advance"] ==0 and detail[0]["is_retention"] ==1  and is_advance_item == 0 and is_retention_item == 1: 
+					items_list.append(item)
+								
+			if detail[0]["apply_tax"] ==0 : 
+				target.taxs = [] 
 					
-					
+			target.items =items_list
+
+	def change_rate(doclist):
+		payment_schedule = doclist.get("payment_schedule")
+		source =frappe.get_doc("Sales Order",source_name)
+		if payment_schedule and payment_term :
+			detail =frappe.get_list("Payment Terms Template Detail",
+				fields=["name","is_advance", "apply_tax","is_retention","payment_term","invoice_portion"],
+				filters={"parent":doclist.get("payment_terms_template"),"payment_term":payment_term},
+				ignore_permissions=True)
+			items_list =[]
+			if detail[0]["is_advance"] ==1 : 
+				for item in doclist.get("items"):
+					is_advance_item = frappe.db.get_value("Item", item.item_code, "is_advance_item")
+					if is_advance_item != 1 : 
+						print ("HIT2")
+						print ("$$$$$$$$$$$$7")	
+						print (item.item_code)	
+						print ("$$$$$$$$$$$$7")	
+					else :
+						item.discount_percentage = 0
+						item.rate = source.total * detail[0]["invoice_portion"] / 100.0000
+						item.base_rate = source.base_total * detail[0]["invoice_portion"] / 100.0000
+			
+			
+			if detail[0]["is_retention"] ==1 : 
+				for item in doclist.get("items"):
+					is_retention_item = frappe.db.get_value("Item", item.item_code, "is_retention")
+					if is_retention_item != 1 : 
+						print ("HIT2")
+						print ("$$$$$$$$$$$$7")	
+						print (item.item_code)	
+						print ("$$$$$$$$$$$$7")	
+					else :
+						item.discount_percentage = 0
+						item.rate = source.total * detail[0]["invoice_portion"] / 100.0000
+						item.base_rate = source.base_total * detail[0]["invoice_portion"] / 100.0000
+			
+			
+			if detail[0]["apply_tax"] ==0 : 
+				doclist.taxes =[]
+			
+				
+								
 
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
@@ -530,20 +609,20 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 			"postprocess": update_item,
 			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
 		},
-		"Payment Schedule": {
-			"doctype": "Payment Schedule",
-			"field_map": {
-				"payment_term": "payment_term",
-				"description": "description",
-				"due_date": "due_date",
-				"invoice_portion": "invoice_portion",
-				"payment_amount": "payment_amount",
-				"account": "account",
-				"parent": "sales_order",
-			},
+		#~ "Payment Schedule": {
+			#~ "doctype": "Payment Schedule",
+			#~ "field_map": {
+				#~ "payment_term": "payment_term",
+				#~ "description": "description",
+				#~ "due_date": "due_date",
+				#~ "invoice_portion": "invoice_portion",
+				#~ "payment_amount": "payment_amount",
+				#~ "account": "account",
+				#~ "parent": "sales_order",
+			#~ },
 			#~ "postprocess": update_item,
 			#~ "condition": lambda doc: doc.payment_term == payment_term
-		},
+		#~ },
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
 			"add_if_empty": True
@@ -553,9 +632,13 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
-
+	print ("doclist")
+	
+	change_rate(doclist)
+	print (doclist.items)
 	return doclist
-
+	
+	
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
 	maint_schedule = frappe.db.sql("""select t1.name
