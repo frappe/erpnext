@@ -8,7 +8,7 @@ import frappe
 
 from frappe.website.website_generator import WebsiteGenerator
 from frappe import _
-from erpnext.hr.doctype.staffing_plan.staffing_plan import get_current_employee_count, get_active_staffing_plan_and_vacancies
+from erpnext.hr.doctype.staffing_plan.staffing_plan import get_designation_counts, get_active_staffing_plan_details
 
 class JobOpening(WebsiteGenerator):
 	website = frappe._dict(
@@ -24,11 +24,11 @@ class JobOpening(WebsiteGenerator):
 
 	def validate_current_vacancies(self):
 		if not self.staffing_plan:
-			staffing_plan = get_active_staffing_plan_and_vacancies(self.company,
+			staffing_plan = get_active_staffing_plan_details(self.company,
 				self.designation, self.department)
 			if staffing_plan:
-				self.staffing_plan = staffing_plan.name
-				self.planned_vacancies = staffing_plan.vacancies
+				self.staffing_plan = staffing_plan[0].name
+				self.planned_vacancies = staffing_plan[0].vacancies
 		elif not self.planned_vacancies:
 			planned_vacancies = frappe.db.sql("""
 				select vacancies from `tabStaffing Plan Detail`
@@ -39,11 +39,8 @@ class JobOpening(WebsiteGenerator):
 			staffing_plan_company = frappe.db.get_value("Staffing Plan", self.staffing_plan, "company")
 			lft, rgt = frappe.db.get_value("Company", staffing_plan_company, ["lft", "rgt"])
 
-			current_count = get_current_employee_count(self.designation, staffing_plan_company)
-			current_count+= frappe.db.sql("""select count(*) from `tabJob Opening` \
-				where designation=%s and status='Open'
-					and company in (select name from tabCompany where lft>=%s and rgt<=%s)
-				""", (self.designation, lft, rgt))[0][0]
+			designation_counts = get_designation_counts(self.designation, self.company)
+			current_count = designation_counts['employee_count'] + designation_counts['job_openings']
 
 			if self.planned_vacancies <= current_count:
 				frappe.throw(_("Job Openings for designation {0} already open \

@@ -33,20 +33,22 @@ frappe.ui.form.on('Staffing Plan Detail', {
 		let child = locals[cdt][cdn]
 		if(frm.doc.company && child.designation){
 			frappe.call({
-				"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_current_employee_count",
+				"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_designation_counts",
 				args: {
 					designation: child.designation,
 					company: frm.doc.company
 				},
 				callback: function (data) {
 					if(data.message){
-						frappe.model.set_value(cdt, cdn, 'current_count', data.message);
-						if (child.number_of_positions < data.message){
-							frappe.model.set_value(cdt, cdn, 'number_of_positions', data.message)
+						frappe.model.set_value(cdt, cdn, 'current_count', data.message.employee_count);
+						frappe.model.set_value(cdt, cdn, 'current_openings', data.message.job_openings);
+						if (child.number_of_positions < (data.message.employee_count +  data.message.job_openings)){
+							frappe.model.set_value(cdt, cdn, 'number_of_positions', data.message.employee_count +  data.message.job_openings);
 						}
 					}
 					else{ // No employees for this designation
 						frappe.model.set_value(cdt, cdn, 'current_count', 0);
+						frappe.model.set_value(cdt, cdn, 'current_openings', 0);
 					}
 				}
 			});
@@ -70,8 +72,12 @@ frappe.ui.form.on('Staffing Plan Detail', {
 
 var set_vacancies = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn]
+	if (child.number_of_positions < (child.current_count + child.current_openings)){
+		frappe.throw(__("Number of positions cannot be less then current count of employees"))
+	}
+
 	if(child.number_of_positions > 0) {
-		frappe.model.set_value(cdt, cdn, 'vacancies', child.number_of_positions - child.current_count);
+		frappe.model.set_value(cdt, cdn, 'vacancies', child.number_of_positions - (child.current_count + child.current_openings));
 	}
 	else{
 		frappe.model.set_value(cdt, cdn, 'vacancies', 0);
