@@ -4,6 +4,7 @@ sales-invoice
 point-of-sale-pos-invoice
 point-of-sales
 purchase-invoice
+inter-company-invoices
 payments
 journal-entry
 inter-company-journal-entry
