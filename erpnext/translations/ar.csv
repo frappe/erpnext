@@ -11127,3 +11127,269 @@ DocType: Employee,Short biography for website and other publications.,نبذة �
 ,Standard Selling,الشراء المتعارف
 
 ,Standard Buying,البيع المتعارف
+
+,Application of Funds,تطبيق الصناديق
+
+,Assets,الأصول
+
+,Current Assets,الأصول المتداولة
+
+,Accounts Receivable,الحسابات المستحقة
+
+,Debtors,المدينين
+
+,Bank Accounts,حسابات بنكية
+
+,rajhi,الراجحي
+
+,Cash In Hand,نقد في اليد
+
+,Cash,السيولة النقدية
+
+,Loans and Advances,القروض والسلف
+
+,Securities and Deposits,الأوراق المالية والودائع
+
+,Earnest Money,العربون
+
+,Stock Assets,أصول الأسهم
+
+,Stock In Hand,الاسهم في اليد
+
+,Tax Assets,أصول ضريبية
+
+,Fixed Assets,أصول ثابتة
+
+,Accumulated Depreciation,الاستهلاك المتراكم
+
+,Buildings,البنايات
+
+,Capital Equipments,معدلات رأس المال
+
+,Electronic Equipments,المعدات الالكترونية
+
+,Furnitures and Fixtures,أثاث ولوازم
+
+,Office Equipments,المعدات المكتبية
+
+,Plants and Machineries,مصانع ومكائن
+
+,Softwares,البرامج
+
+,Investments,الاستثمارات
+
+,Temporary Accounts,الحسابات المؤقتة
+
+,Temporary Opening,افتتاح مؤقت
+
+,Equity,القيمة المالية
+
+,Capital Stock,أسهم رأس المال
+
+,Dividends Paid,الأرباح الموزعة
+
+,Opening Balance Equity,افتتاح الاسهم المتوازنة
+
+,Retained Earnings,الأرباح المحتجزة
+
+,Expenses,النفقات
+
+,Direct Expenses,المصروفات المباشرة
+
+,Stock Expenses,نفقات المخزون
+
+,Cost of Goods Sold,تكلفة البضاعة المباعة
+
+,Expenses Included In Valuation,النفقات المدرجة في التقييم
+
+,Stock Adjustment,تعديل الأسهم
+
+,Indirect Expenses,المصروفات غير المباشرة
+
+,Administrative Expenses,المصروفات الإدارية
+
+,Commission on Sales,لجنة المبيعات
+
+,Depreciation,الاستهلاك
+
+,Entertainment Expenses,نفقات الترفيه
+
+,Exchange Gain/Loss,تبادل كسب / خسارة
+
+,Freight and Forwarding Charges,رسوم الشحن والتخليص
+
+,Gain/Loss on Asset Disposal,كسب / خسارة   على التخلص من الأصول
+
+,Legal Expenses,نفقات قانونية
+
+,Marketing Expenses,تكاليف التسويق
+
+,Miscellaneous Expenses,النفقات المتنوعة
+
+,Office Maintenance Expenses,نفقات صيانة المكتب
+
+,Office Rent,ايجار المكتب
+
+,Postal Expenses,النفقات البريدية
+
+,Print and Stationery,طباعة وقرطاسية
+
+,Round Off,نهاية الجولة
+
+,Salary,راتب
+
+,Sales Expenses,نفقات المبيعات
+
+,Telephone Expenses,نفقات الهاتف
+
+,Travel Expenses,مصاريف السفر
+
+,Utility Expenses,نفقات المرافق العامة
+
+,Write Off,لا تصلح
+
+,Income,الإيرادات
+
+,Direct Income,الدخل المباشر
+
+,Sales,المبيعات
+
+,Service,الخدمات
+
+,Indirect Income,الدخل غير المباشر
+
+,Source of Funds (Liabilities),مصدر الأموال (المطلوبات)
+
+,Current Liabilities,المطلوبات المتداولة
+
+,Accounts Payable,حسابات قابلة للدفع
+
+,Creditors,الدائنين
+
+,Payroll Payable,رواتب الرواتب
+
+,Duties and Taxes,الرسوم والضرائب
+
+,Excise 100%,خصم 100%
+
+,Excise 50%,خصم 50%
+
+,VAT 5%,ضريبة القيمة المضافة 5 ٪
+
+,VAT Exempted,ضريبة القيمة المضافة المستثناة
+
+,VAT Zero,ضريبة القيمة المضافة صفر
+
+,Loans (Liabilities),القروض (المطلوبات)
+
+,Bank Overdraft Account,حساب السحب على المكشوف لدى البنك
+
+,Secured Loans,القروض المضمونة
+
+,Unsecured Loans,القروض غير المضمونة
+
+,Stock Liabilities,خصوم المخزون
+
+,Stock Received But Not Billed,الأسهم المستلمة ولكن لم تتم محاسبتها
+
+,Alarm Passport Expiry,انتهاء صلاحية إنذار المنبه
+
+,Health Insurance Number,رقم التأمين الصحي
+
+,Health Insurance Valid to,التأمين الصحي
+
+,Alarm Inssurance Expiry,انقضاء الإنذار
+
+,Residence Valid to,الإقامة صالحة ل
+
+,Alarm Residence Expiry,انذار بانتهاء الاقامة
+
+,Dr,الدكتور
+
+,Saturdays,السبت
+
+,Fridays,الجمعة
+
+,Creditors,الدائنين
+
+,Feedback,"ردود الفعل
+
+"
+
+,LEAVE SETTINGS,مغادرة الاعدادات
+
+,Show Leaves Of All Department Members In Calendar,إظهار أوراق جميع أعضاء القسم في التقويم
+
+,Employee record is created using selected field.,يتم إنشاء سجل الموظف باستخدام الحقل المحدد.
+
+,Apprentice,متدرب على حرفة ما
+
+,Intern,المتدرب
+
+,Piecework,مقاولة
+
+,Commission,عمولة
+
+,Contract,عقد
+
+,Probation,فترة تجربة
+
+,Part-time,دوام جزئي
+
+,Full-time,دوام كامل
+
+,Legal,قانوني
+
+,Research & Development,البحث والتنمية
+
+,Quality Management,إدارة الجودة
+
+,Management,إدارة
+
+,Human Resources,الموارد البشرية
+
+,Customer Service,خدمة الزبائن
+
+,Dispatch,إيفاد
+
+,Production,الإنتاج
+
+,Operations,العمليات
+
+,Purchase,الشراء
+
+,Sales,المبيعات
+
+,Marketing,التسويق
+
+,Accounts,الحسابات
+
+,Researcher,الباحث
+
+,Designer,المصمم
+
+,Software Developer,مطور البرامج
+
+,Head of Marketing and Sales,رئيس قسم التسويق والمبيعات
+
+,Project Manager,مدير المشروع
+
+,HR Manager,مدير الموارد البشرية
+
+,Business Development Manager,مدير تطوير الاعمال
+
+,Administrative Officer,موظف اداري
+
+,Associate,مساعد
+
+,Secretary,سكرتير
+
+,Accountant,محاسب
+
+,Engineer,مهندس
+
+,Analyst,محلل
+
+,Manager,مدير
+
+,CEO,المدير التنفيذي
