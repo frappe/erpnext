@@ -252,10 +252,13 @@ class StockEntry(StockController):
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
 		prod_order = frappe.get_doc("Work Order", self.work_order)
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))
 
 		for d in prod_order.get("operations"):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
-			if total_completed_qty > flt(d.completed_qty):
+			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
+			if total_completed_qty > flt(completed_qty):
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs")
 					.format(d.idx, d.operation, total_completed_qty, self.work_order), OperationsNotCompleteError)
 
@@ -469,8 +472,11 @@ class StockEntry(StockController):
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))
+
 		for d in self.get('items'):
-			if self.purpose != "Subcontract" and d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
+			if self.purpose != "Subcontract" and d.bom_no and flt(d.transfer_qty) > flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -478,8 +484,14 @@ class StockEntry(StockController):
 				items_with_target_warehouse.append(d.item_code)
 
 		if self.work_order and self.purpose == "Manufacture":
-			production_item = frappe.db.get_value("Work Order",
-				self.work_order, "production_item")
+			production_item, wo_qty = frappe.db.get_value("Work Order",
+				self.work_order, ["production_item", "qty"])
+
+			allowed_qty = wo_qty + (allowance_percentage/100 * wo_qty)
+			if self.fg_completed_qty > allowed_qty:
+				frappe.throw(_("For quantity {0} should not be grater than work order quantity {1}")
+					.format(flt(self.fg_completed_qty), wo_qty))
+
 			if production_item not in items_with_target_warehouse:
 				frappe.throw(_("Finished Item {0} must be entered for Manufacture type entry")
 					.format(production_item))
@@ -1152,6 +1164,15 @@ def get_uom_details(item_code, uom, qty):
 			'transfer_qty'			: flt(qty) * flt(conversion_factor)
 		}
 	return ret
+
+@frappe.whitelist()
+def get_expired_batch_items():
+	return frappe.db.sql("""select b.item, sum(sle.actual_qty) as qty, sle.batch_no, sle.warehouse, sle.stock_uom\
+	from `tabBatch` b, `tabStock Ledger Entry` sle
+	where b.expiry_date <= %s
+	and b.expiry_date is not NULL
+	and b.batch_id = sle.batch_no
+	group by sle.warehouse, sle.item_code, sle.batch_no""",(nowdate()), as_dict=1)
 
 @frappe.whitelist()
 def get_warehouse_details(args):

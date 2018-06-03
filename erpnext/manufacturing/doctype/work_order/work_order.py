@@ -133,7 +133,7 @@ class WorkOrder(Document):
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
-			"over_production_allowance_percentage"))
+			"overproduction_percentage_for_sales_order"))
 
 		if total_qty > so_qty + (allowance_percentage/100 * so_qty):
 			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}")
@@ -168,7 +168,7 @@ class WorkOrder(Document):
 				if stock_entries:
 					status = "In Process"
 					produced_qty = stock_entries.get("Manufacture")
-					if flt(produced_qty) == flt(self.qty):
+					if flt(produced_qty) >= flt(self.qty):
 						status = "Completed"
 		else:
 			status = 'Cancelled'
@@ -179,15 +179,20 @@ class WorkOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 			based on Stock Entry"""
 
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))
+
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
+
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
 				from `tabStock Entry` where work_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
 
-			if qty > self.qty:
+			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
+			if qty > completed_qty:
 				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
-					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
+					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
 
