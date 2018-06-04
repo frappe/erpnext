@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
+from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 
 class EmployeeBoardingController(Document):
 	'''
@@ -126,17 +127,6 @@ def get_employee_field_property(employee, fieldname):
 	else:
 		return False
 
-def update_employee(employee, details, cancel=False):
-	for item in details:
-		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
-		new_data = item.new if not cancel else item.current
-		if fieldtype == "Date" and new_data:
-			new_data = getdate(new_data)
-		elif fieldtype =="Datetime" and new_data:
-			new_data = get_datetime(new_data)
-		setattr(employee, item.fieldname, new_data)
-	return employee
-
 def validate_dates(doc, from_date, to_date):
 	date_of_joining, relieving_date = frappe.db.get_value("Employee", doc.employee, ["date_of_joining", "relieving_date"])
 	if getdate(from_date) > getdate(to_date):
@@ -241,7 +231,6 @@ def get_payroll_period(from_date, to_date, company):
 		where start_date<=%s and end_date>= %s and company=%s""", (from_date, to_date, company), as_dict=1)
 	return payroll_period[0] if payroll_period else None
 
-
 def allocate_earned_leaves():
 	'''Allocate earned leaves to Employees'''
 	e_leave_types = frappe.get_all("Leave Type",
@@ -289,3 +278,69 @@ def check_frequency_hit(from_date, to_date, frequency):
 		if not months % 12:
 			return True
 	return False
+
+def get_salary_assignment(employee, date):
+	assignment = frappe.db.sql("""
+		select * from `tabSalary Structure Assignment`
+		where employee=%(employee)s
+		and docstatus = 1
+		and (
+			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
+		)""", {
+			'employee': employee,
+			'on_date': date,
+		}, as_dict=1)
+	return assignment[0] if assignment else None
+
+def calculate_eligible_hra_exemption(company, employee, monthly_house_rent, rented_in_metro_city):
+	hra_component = frappe.db.get_value("Company", company, "hra_component")
+	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
+	if hra_component:
+		assignment = get_salary_assignment(employee, getdate())
+		if assignment and frappe.db.exists("Salary Detail", {
+			"parent": assignment.salary_structure,
+			"salary_component": hra_component, "parentfield": "earnings"}):
+			hra_amount = get_hra_from_salary_slip(employee, assignment.salary_structure, hra_component)
+			if hra_amount:
+				if monthly_house_rent:
+					annual_exemption = calculate_hra_exemption(assignment.salary_structure,
+					 				assignment.base, hra_amount, monthly_house_rent,
+									rented_in_metro_city)
+					if annual_exemption > 0:
+						monthly_exemption = annual_exemption / 12
+					else:
+						annual_exemption = 0
+	return {"hra_amount": hra_amount, "annual_exemption": annual_exemption, "monthly_exemption": monthly_exemption}
+
+def get_hra_from_salary_slip(employee, salary_structure, hra_component):
+	salary_slip = make_salary_slip(salary_structure, employee=employee)
+	for earning in salary_slip.earnings:
+		if earning.salary_component == hra_component:
+			return earning.amount
+
+def calculate_hra_exemption(salary_structure, base, monthly_hra, monthly_house_rent, rented_in_metro_city):
+	# TODO make this configurable
+	exemptions = []
+	frequency = frappe.get_value("Salary Structure", salary_structure, "payroll_frequency")
+	# case 1: The actual amount allotted by the employer as the HRA.
+	exemptions.append(get_annual_component_pay(frequency, monthly_hra))
+	actual_annual_rent = monthly_house_rent * 12
+	annual_base = get_annual_component_pay(frequency, base)
+	# case 2: Actual rent paid less 10% of the basic salary.
+	exemptions.append(flt(actual_annual_rent) - flt(annual_base * 0.1))
+	# case 3: 50% of the basic salary, if the employee is staying in a metro city (40% for a non-metro city).
+	exemptions.append(annual_base * 0.5 if rented_in_metro_city else annual_base * 0.4)
+	# return minimum of 3 cases
+	return min(exemptions)
+
+def get_annual_component_pay(frequency, amount):
+	if frequency == "Daily":
+		return amount * 365
+	elif frequency == "Weekly":
+		return amount * 52
+	elif frequency == "Fortnightly":
+		return amount * 26
+	elif frequency == "Monthly":
+		return amount * 12
+	elif frequency == "Bimonthly":
+		return amount * 6
