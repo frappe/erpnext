@@ -35,6 +35,7 @@ class SellingController(StockController):
 
 	def validate(self):
 		super(SellingController, self).validate()
+		self.validate_items()
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
@@ -336,6 +337,11 @@ class SellingController(StockController):
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
 				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+
+	def validate_items(self):
+		# validate items to see if they have is_sales_item enabled
+		from erpnext.controllers.buying_controller import validate_item_type
+		validate_item_type(self, "is_sales_item", "sales")
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):
