@@ -273,7 +273,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		item_code = frappe.db.get_value('Item', {'has_serial_no': 1})
+		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0})
 		if not item_code:
 			item = make_item("Test Serial Item 1", dict(has_serial_no=1))
 			item_code = item.name
@@ -298,7 +298,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			if asset_category:
 				asset_category = asset_category[0].name
 
-			if not asset_category:
+			if not asset_category: 
 				doc = frappe.get_doc({
 					'doctype': 'Asset Category',
 					'asset_category_name': 'Test Asset Category',
@@ -318,6 +318,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 			asset_item = make_item(asset_item, {'is_stock_item':0,
 				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
 				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+			
+		if not frappe.db.exists('Location', 'Test Location'):
+			location = frappe.get_doc({
+				'doctype': 'Location',
+				'location_name': 'Test Location'
+			}).insert()
 
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
@@ -328,6 +334,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
 		self.assertEquals(len(serial_nos), 0)
+		# frappe.db.sql("delete from `tabLocation")
 		frappe.db.sql("delete from `tabAsset Category`")
 		frappe.db.sql("delete from `tabAsset`")
 
@@ -365,7 +372,8 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
-		"uom": args.uom or "_Test UOM"
+		"uom": args.uom or "_Test UOM",
+		"asset_location": "Test Location" if args.item_code == "Test Serialized Asset Item" else ""
 	})
 
 	if not args.do_not_save:
