@@ -4,5 +4,5 @@
 from __future__ import unicode_literals
 import unittest
 
-class TestAdditionalSalaryComponent(unittest.TestCase):
+class TestAdditionalSalary(unittest.TestCase):
 	pass
