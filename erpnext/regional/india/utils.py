@@ -63,16 +63,7 @@ def get_itemised_tax_breakup_data(doc):
 	return hsn_tax, hsn_taxable_amount
 
 def set_place_of_supply(doc, method=None):
-	if not frappe.get_meta('Address').has_field('gst_state'): return
-
-	if doc.doctype in ("Sales Invoice", "Delivery Note"):
-		address_name = doc.shipping_address_name or doc.customer_address
-	elif doc.doctype == "Purchase Invoice":
-		address_name = doc.shipping_address or doc.supplier_address
-
-	if address_name:
-		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
-		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
+	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
 
 # don't remove this function it is used in tests
 def test_method():
@@ -89,11 +80,13 @@ def get_place_of_supply(out, doctype):
 
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
-		out.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
+		return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 def get_regional_address_details(out, doctype, company):
 
-	get_place_of_supply(out, doctype)
+	out.place_of_supply = get_place_of_supply(out, doctype)
+
+	if not out.place_of_supply: return
 
 	if doctype in ("Sales Invoice", "Delivery Note"):
 		master_doctype = "Sales Taxes and Charges Template"
