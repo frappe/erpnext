@@ -57,15 +57,19 @@ class StaffingPlan(Document):
 		if not parent_plan_details:
 			return #no staffing plan for any parent Company in herarchy
 
+		# Fetch parent company which owns the staffing plan. NOTE: Parent could be higher up in the heirarchy
+		parent_company = frappe.db.get_value("Staffing Plan", parent_plan_details[0].name, "company")
+
 		# Parent plan available, validate with parent, siblings as well as children of staffing plan Company
 		if staffing_plan_detail.vacancies > cint(parent_plan_details[0].vacancies) or \
 			staffing_plan_detail.total_estimated_cost > flt(parent_plan_details[0].total_estimated_cost):
-			frappe.throw(_("Vacancies and estimated cost for '{0}' \
-				should not be more than Staffing Plan - {1}" \
-				.format(staffing_plan_detail.designation, parent_plan_details[0].name)))
-
-		# Fetch parent company which owns the staffing plan. NOTE: Parent could be higher up in the heirarchy
-		parent_company = frappe.db.get_value("Staffing Plan", parent_plan_details[0].name, "company")
+			frappe.throw(_("You can only plan for upto {0} vacancies and budget {1} \
+				for {2} as per staffing plan {3} for parent company {4}"
+				.format(cint(parent_plan_details[0].vacancies),
+					parent_plan_details[0].total_estimated_cost,
+					frappe.bold(staffing_plan_detail.designation),
+					parent_plan_details[0].name,
+					parent_company)))
 
 		#Get vacanices already planned for all companies down the herarchy of Parent Company
 		lft, rgt = frappe.db.get_value("Company", parent_company, ["lft", "rgt"])
@@ -81,9 +85,15 @@ class StaffingPlan(Document):
 			(staffing_plan_detail.vacancies + cint(all_sibling_details.vacancies))) or \
 			(flt(parent_plan_details[0].total_estimated_cost) < \
 			(staffing_plan_detail.total_estimated_cost + flt(all_sibling_details.total_estimated_cost))):
-			frappe.throw(_("Vacancies and budget for '{0}' of \
-				all subsidary companies should not be above Staffing Plan - {1} of - {2}"
-				.format(staffing_plan_detail.designation, parent_plan_details[0].name, parent_company)))
+			frappe.throw(_("{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. \
+				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}"
+				.format(cint(all_sibling_details.vacancies),
+					all_sibling_details.total_estimated_cost,
+					frappe.bold(staffing_plan_detail.designation),
+					parent_company,
+					cint(parent_plan_details[0].vacancies),
+					parent_plan_details[0].total_estimated_cost,
+					parent_plan_details[0].name)))
 
 	def validate_with_subsidiary_plans(self, staffing_plan_detail):
 		#Valdate this plan with all child company plan
@@ -98,9 +108,12 @@ class StaffingPlan(Document):
 		if children_details and \
 			staffing_plan_detail.vacancies < cint(children_details.vacancies) or \
 			staffing_plan_detail.total_estimated_cost < flt(children_details.total_estimated_cost):
-			frappe.throw(_("Plan for {0} should allocate more vacancies and budget for {1} \
-				than planned for subsidiary companies"
-				.format(self.company, staffing_plan_detail.designation)))
+			frappe.throw(_("Subsidiary companies have already planned for {1} vacancies at a budget of {2}. \
+				Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies"
+				.format(self.company,
+					cint(children_details.vacancies),
+					children_details.total_estimated_cost,
+					frappe.bold(staffing_plan_detail.designation))))
 
 @frappe.whitelist()
 def get_designation_counts(designation, company):
