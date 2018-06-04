@@ -544,4 +544,4 @@ erpnext.patches.v11_0.refactor_erpnext_shopify
 erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v10_0.update_status_in_purchase_receipt
-erpnext.patches.v11_0.rename_members_with_naming_series
+erpnext.patches.v11_0.rename_members_with_naming_series #04-06-2018
