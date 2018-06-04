@@ -12,7 +12,7 @@ from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
-from erpnext.hr.doctype.additional_salary_component.additional_salary_component import get_additional_salary_component
+from erpnext.hr.doctype.additional_salary.additional_salary import get_additional_salary_component
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_employee_benefit_application, get_amount
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_employee_benefit_claim
