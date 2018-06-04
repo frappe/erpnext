@@ -45,7 +45,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 40500)
-		self.assertEqual(ss.net_pay, 29918)
+		self.assertEqual(ss.net_pay, 30500)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -64,7 +64,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 40500)
-		self.assertEqual(ss.net_pay, 29918)
+		self.assertEqual(ss.net_pay, 30500)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -144,7 +144,7 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 		ss.submit()
-		self.assertEqual(ss.total_loan_repayment, 582)
+		self.assertEqual(ss.total_loan_repayment, 0)
 		self.assertEqual(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
@@ -279,7 +279,6 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}).insert()
-
 		create_salary_structure_assignment(employee, salary_structure)
 
 	elif not frappe.db.get_value("Salary Structure Assignment",{'salary_structure':sal_struct, 'employee':employee},'name'):
