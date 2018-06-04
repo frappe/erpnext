@@ -467,7 +467,12 @@ class BuyingController(StockController):
 
 def validate_item_type(doc, fieldname, message):
 	# iterate through items and check if they are valid sales or purchase items
-	items = [d.item_code for d in doc.items]
+	items = [d.item_code for d in doc.items if d.item_code]
+
+	# No validation check inase of creating transaction using 'Opening Invoice Creation Tool'
+	if not items:
+		return
+
 	item_list = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
 
 	invalid_items = [d[0] for d in frappe.db.sql("""
