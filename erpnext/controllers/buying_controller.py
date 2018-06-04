@@ -459,19 +459,24 @@ class BuyingController(StockController):
 
 	def validate_items(self):
 		# validate items to see if they have is_purchase_item or is_subcontracted_item enabled
-		if self.is_subcontracted:
-			items_validate(self, "and is_sub_contracted_item=0", "Non subcontractable")
-		else:
-			items_validate(self, "and is_purchase_item=0", "Non purchaseable")
 
-def items_validate(doc, condition, message):
+		if self.is_subcontracted:
+			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
+		else:
+			validate_item_type(self, "is_purchase_item", "purchase")
+
+def validate_item_type(doc, fieldname, message):
 	# iterate through items and check if they are valid sales or purchase items
 	items = [d.item_code for d in doc.items]
-	item_condition = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
+	item_list = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
 
 	invalid_items = [d[0] for d in frappe.db.sql("""
-		select item_code from tabItem where name in ({0}) {1}
-		""".format(item_condition, condition), as_list=True)]
+		select item_code from tabItem where name in ({0}) and {1}=0
+		""".format(item_list, fieldname), as_list=True)]
 
 	if invalid_items:
-		frappe.throw(_("{0} items: {1}".format(message, ", ".join([d for d in invalid_items]))))
+		frappe.throw(_("Following item {items} {verb} not marked as {message} item.\
+			You can enable them as {message} item from its Item master".format(
+				items = ", ".join([d for d in invalid_items]),
+				verb = "are" if len(invalid_items) > 1 else "is",
+				message = message)))
