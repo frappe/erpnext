@@ -501,7 +501,7 @@ class SalarySlip(TransactionBase):
 		if not payroll_period:
 			frappe.msgprint(_("Start and end dates not in a valid Payroll Period, \
 			cannot calculate {0}.").format(tax_component))
-			return
+			return False, False
 		if self.deduct_tax_for_unclaimed_employee_benefits and not self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 			total_taxable_benefit = self.calculate_unclaimed_benefit_amount(payroll_period)
 			total_taxable_benefit += self.get_taxable_earnings(only_flexi=True)
