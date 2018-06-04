@@ -360,7 +360,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Item';
-		this.page_title = __('Products');
+		this.page_title = __('Marketplace');
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
 		this.filters = [];
 	}
