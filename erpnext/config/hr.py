@@ -96,6 +96,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Additional Salary",
+				},
+				{
+					"type": "doctype",
 					"name": "Employee Tax Exemption Declaration",
 				},
 				{
@@ -122,10 +126,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Salary Component",
-				},
-				{
-					"type": "doctype",
-					"name": "Additional Salary Component",
 				},
 				{
 					"type": "doctype",
