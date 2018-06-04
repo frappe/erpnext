@@ -13,6 +13,7 @@ class SalaryStructure(Document):
 	def validate(self):
 		self.validate_amount()
 		self.strip_condition_and_formula_fields()
+		self.validate_max_benefits_with_flexi()
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
@@ -28,11 +29,29 @@ class SalaryStructure(Document):
 			row.condition = row.condition.strip() if row.condition else ""
 			row.formula = row.formula.strip() if row.formula else ""
 
+	def validate_max_benefits_with_flexi(self):
+		have_a_flexi = False
+		if self.earnings:
+			flexi_amount = 0
+			for earning_component in self.earnings:
+				if earning_component.is_flexible_benefit == 1:
+					have_a_flexi = True
+					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
+					flexi_amount += max_of_component
+			if have_a_flexi and self.max_benefits == 0:
+				frappe.throw(_("Max benefits should be greater than zero to despense flexi"))
+			if self.max_benefits > flexi_amount:
+				frappe.throw(_("Total flexi component amount {0} should not be less \
+				than max benefits {1}").format(flexi_amount, self.max_benefits))
+		if not have_a_flexi and self.max_benefits > 0:
+			frappe.throw(_("Flexi component require to add max benefit"))
+
+
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
 	def postprocess(source, target):
 		if employee:
-			employee_details = frappe.db.get_value("Employee", employee, 
+			employee_details = frappe.db.get_value("Employee", employee,
 				["employee_name", "branch", "designation", "department"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name

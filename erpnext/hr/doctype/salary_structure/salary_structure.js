@@ -19,7 +19,9 @@ frappe.ui.form.on('Salary Structure', {
 		frm.set_query("salary_component", "earnings", function() {
 			return {
 				filters: {
-					type: "earning"
+					type: "earning",
+					is_additional_component: 0,
+					is_group: 0
 				}
 			}
 		});
