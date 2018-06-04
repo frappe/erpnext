@@ -15,6 +15,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -47,6 +48,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -77,6 +79,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -93,6 +96,7 @@
    "label": "From", 
    "length": 0, 
    "no_copy": 0, 
+   "options": "UOM", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -108,6 +112,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -124,6 +129,7 @@
    "label": "To", 
    "length": 0, 
    "no_copy": 0, 
+   "options": "UOM", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -139,6 +145,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -179,7 +186,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-30 22:03:16.654979", 
+ "modified": "2018-06-04 11:15:48.196686", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "UOM Conversion Factor", 

@@ -147,35 +147,9 @@ def install(country=None):
 		# UOM
 		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': _('Unit'), "must_be_whole_number": 1},
 		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': _('Box'), "must_be_whole_number": 1},
-		{'uom_name': _('Kg'), 'doctype': 'UOM', 'name': _('Kg')},
-		{'uom_name': _('Meter'), 'doctype': 'UOM', 'name': _('Meter')},
-		{'uom_name': _('Litre'), 'doctype': 'UOM', 'name': _('Litre')},
-		{'uom_name': _('Gram'), 'doctype': 'UOM', 'name': _('Gram')},
 		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': _('Nos'), "must_be_whole_number": 1},
 		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': _('Pair'), "must_be_whole_number": 1},
 		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': _('Set'), "must_be_whole_number": 1},
-		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
-		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
-
-		#UOM Category
-		{'category_name': _('Length'), 'doctype': 'UOM Category', 'name': _('Length')},
-		{'category_name': _('Area'), 'doctype': 'UOM Category', 'name': _('Area')},
-		{'category_name': _('Angle'), 'doctype': 'UOM Category', 'name': _('Angle')},
-		{'category_name': _('Agriculture'), 'doctype': 'UOM Category', 'name': _('Agriculture')},
-		{'category_name': _('Speed'), 'doctype': 'UOM Category', 'name': _('Speed')},
-		{'category_name': _('Mass'), 'doctype': 'UOM Category', 'name': _('Mass')},
-		{'category_name': _('Density'), 'doctype': 'UOM Category', 'name': _('Density')},
-		{'category_name': _('Volume'), 'doctype': 'UOM Category', 'name': _('Volume')},
-		{'category_name': _('Time'), 'doctype': 'UOM Category', 'name': _('Time')},
-		{'category_name': _('Pressure'), 'doctype': 'UOM Category', 'name': _('Pressure')},
-		{'category_name': _('Force'), 'doctype': 'UOM Category', 'name': _('Force')},
-		{'category_name': _('Energy'), 'doctype': 'UOM Category', 'name': _('Energy')},
-		{'category_name': _('Power'), 'doctype': 'UOM Category', 'name': _('Power')},
-		{'category_name': _('Temperature'), 'doctype': 'UOM Category', 'name': _('Temperature')},
-		{'category_name': _('Frequency And Wavelength'), 'doctype': 'UOM Category', 'name': _('Frequency And Wavelength')},
-		{'category_name': _('Electrical Charge'), 'doctype': 'UOM Category', 'name': _('Electrical Charge')},
-		{'category_name': _('Electric Current'), 'doctype': 'UOM Category', 'name': _('Electric Current')},
-		{'category_name': _('Magnetic Induction'), 'doctype': 'UOM Category', 'name': _('Magnetic Induction')},
 
 		# Mode of Payment
 		{'doctype': 'Mode of Payment',
@@ -289,20 +263,19 @@ def install(country=None):
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
 	for d in uom_conversions:
+		if not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({
+				"doctype": "UOM Category",
+				"category_name": d.get("category")
+			}).insert(ignore_permissions=True)
+		if not frappe.db.exists("UOM", d.get("to_uom")):
+			frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": d.get("to_uom")
+			}).insert(ignore_permissions=True)
 		uom_conversion = frappe.new_doc('UOM Conversion Factor')
-		uom_conversion.flags.ignore_mandatory = True
 		uom_conversion.update(d)
 		uom_conversion.save(ignore_permissions=True)
-
-	uom = frappe.db.sql("""select to_uom from `tabUOM Conversion Factor`\
-		where to_uom not in ("Kg", "Gram", "Meter", "Hour", "Minute", "Litre")""", as_dict=True)
-	for d in uom:
-		doc = frappe.new_doc('UOM')
-		doc.update({
-			"uom_name": d.to_uom
-		})
-		doc.flags.ignore_mandatory = True
-		doc.save(ignore_permissions=True)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub
