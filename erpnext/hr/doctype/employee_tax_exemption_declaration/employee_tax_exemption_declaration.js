@@ -78,8 +78,8 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 		});
 	},
 	set_null_value(frm){
-		let fields = ['salary_structure_hra', 'monthly_house_rent','annual_hra', 'monthly_hra',
-			'total_exemption_amount', 'payroll_period'];
+		let fields = ['salary_structure_hra', 'monthly_house_rent','annual_hra_exemption',
+			'monthly_hra_exemption', 'total_exemption_amount', 'payroll_period'];
 		fields.forEach(function(field) {
 			frm.set_value(field, '');
 		});
