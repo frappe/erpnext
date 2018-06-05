@@ -315,14 +315,14 @@ $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur
 
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
-	$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
+	$c('runserverobj', {'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
 		cur_frm.refresh();
 	});
 };
 
 cur_frm.cscript['Unstop Material Request'] = function(){
 	var doc = cur_frm.doc;
-	$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
+	$c('runserverobj', {'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
 		cur_frm.refresh();
 	});
 };
