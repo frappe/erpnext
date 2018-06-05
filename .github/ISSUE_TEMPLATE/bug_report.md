@@ -64,5 +64,5 @@ Add any other context about the problem here.
 **Possible Solution** :bookmark_tabs:
 Any idea what might be causing the issue. Or if you have a proposed solution to the problem,
 
-**Please don't be intimidated by the long list of options you've fill. Try to fill out as much as you can. Remember, the more the information the easier it is for us to replicate and fix the issue** :grin: 
+**Please don't be intimidated by the long list of options you've to fill. Try to fill out as much as you can. Remember, the more the information the easier it is for us to replicate and fix the issue** :grin: 
 
