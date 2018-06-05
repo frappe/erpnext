@@ -14,8 +14,8 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "purchase_taxes_and_charges_template")
 
 	# set is_inter_state in Taxes And Charges Templates
-	if frappe.db.has_column("Sales Taxes And Charges Template", "is_inter_state") and\
-		frappe.db.has_column("Purchase Taxes And Charges Template", "is_inter_state"):
+	if frappe.db.has_column("Sales Taxes and Charges Template", "is_inter_state") and\
+		frappe.db.has_column("Purchase Taxes and Charges Template", "is_inter_state"):
 
 		igst_accounts = set(frappe.db.sql_list('''SELECT igst_account from `tabGST Account` WHERE parent = "GST Settings"'''))
 		cgst_accounts = set(frappe.db.sql_list('''SELECT cgst_account FROM `tabGST Account` WHERE parenttype = "GST Settings"'''))
