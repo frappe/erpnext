@@ -308,6 +308,12 @@ def create_asset():
 	if not frappe.db.exists("Item", "Macbook Pro"):
 		create_fixed_asset_item()
 
+	if not frappe.db.exists("Location", "Test Location"):
+		frappe.get_doc({
+			'doctype': 'Location',
+			'location_name': 'Test Location'
+		}).insert()
+
 	asset = frappe.get_doc({
 		"doctype": "Asset",
 		"asset_name": "Macbook Pro 1",
@@ -320,6 +326,7 @@ def create_asset():
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,
 		"warehouse": "_Test Warehouse - _TC",
+		"location": "Test Location",
 		"asset_owner": "Company"
 	})
 	try:
