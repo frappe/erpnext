@@ -37,7 +37,7 @@ class TestBatch(unittest.TestCase):
 					item_code='ITEM-BATCH-1',
 					qty=batch_qty,
 					rate=10,
-					warehouse= 'Stores - W'
+					warehouse= 'Stores - WP'
 				)
 			]
 		)).insert()
