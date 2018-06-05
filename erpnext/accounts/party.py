@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
@@ -43,12 +43,12 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party = frappe.get_doc(party_type, party)
 	currency = party.default_currency if party.default_currency else get_company_currency(company)
 
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
+	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 	set_address_details(out, party, party_type, doctype, company)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
-	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -83,6 +83,18 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 		out.update(get_company_address(company))
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
+		get_regional_address_details(out, doctype, company)
+
+	elif doctype and doctype == "Purchase Invoice":
+		out.update(get_company_address(company))
+		if out.company_address:
+			out["shipping_address"] = out["company_address"]
+			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
+		get_regional_address_details(out, doctype, company)
+
+@erpnext.allow_regional
+def get_regional_address_details(out, doctype, company):
+	pass
 
 def set_contact_details(out, party, party_type):
 	out.contact_person = get_default_contact(party_type, party.name)
@@ -400,10 +412,21 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
+	fields = 'date(creation), count(name)'
+	after = add_years(None, -1).strftime('%Y-%m-%d')
+	group_by='group by date(creation)'
+
 	data = get_communication_data(doctype, name,
-		fields = 'date(creation), count(name)',
-		after = add_years(None, -1).strftime('%Y-%m-%d'),
-		group_by='group by date(creation)', as_dict=False)
+		fields=fields, after=after, group_by=group_by, as_dict=False)
+
+	# fetch and append data from Activity Log
+	data += frappe.db.sql("""select {fields}
+		from `tabActivity Log`
+		where reference_doctype='{doctype}' and reference_name='{name}'
+		and status!='Success' and creation > {after}
+		{group_by} order by creation desc
+		""".format(doctype=doctype, name=name, fields=fields,
+			group_by=group_by, after=after), as_dict=False)
 
 	timeline_items = dict(data)
 

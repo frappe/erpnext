@@ -5,39 +5,41 @@ frappe.ui.form.on('Employee Benefit Application', {
 	setup: function(frm) {
 		frm.set_query("earning_component", "employee_benefits", function() {
 			return {
-				filters: {
-					type: "Earning",
-					is_flexible_benefit: true,
-					disabled: false
-				}
+				query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
+				filters: {date: frm.doc.date, employee: frm.doc.employee}
 			};
 		});
 	},
 	employee: function(frm) {
-		frappe.call({
-			method: "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits",
-			args:{
-				employee: frm.doc.employee,
-				on_date: frm.doc.date
-			},
-			callback: function (data) {
-				if(!data.exc){
-					if(data.message){
-						frm.set_value("max_benefits", data.message);
+		if(frm.doc.employee && frm.doc.date){
+			frappe.call({
+				method: "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits",
+				args:{
+					employee: frm.doc.employee,
+					on_date: frm.doc.date
+				},
+				callback: function (data) {
+					if(!data.exc){
+						if(data.message){
+							frm.set_value("max_benefits", data.message);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 });
 
 frappe.ui.form.on("Employee Benefit Application Detail",{
-	amount:  function(frm, cdt, cdn) {
-		calculate_all(frm.doc, cdt, cdn);
+	amount:  function(frm) {
+		calculate_all(frm.doc);
+	},
+	employee_benefits_remove: function(frm) {
+		calculate_all(frm.doc);
 	}
 });
 
-var calculate_all = function(doc, dt, dn) {
+var calculate_all = function(doc) {
 	var tbl = doc.employee_benefits || [];
 	var pro_rata_dispensed_amount = 0;
 	var total_amount = 0;
@@ -46,7 +48,7 @@ var calculate_all = function(doc, dt, dn) {
 			total_amount += flt(tbl[i].amount);
 		}
 		if(tbl[i].is_pro_rata_applicable == 1){
-			pro_rata_dispensed_amount += flt(tbl[i].amount)
+			pro_rata_dispensed_amount += flt(tbl[i].amount);
 		}
 	}
 	doc.total_amount = total_amount;

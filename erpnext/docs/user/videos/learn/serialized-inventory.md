@@ -1,8 +1,8 @@
 # Serialized Inventory
 
-<iframe width="660" height="371" src="https://www.youtube.com/embed/gvOVlEwFDAk" frameborder="0" allowfullscreen></iframe>
+<iframe width="660" height="371" src="https://www.youtube.com/embed/Q4tYKYTbVek" frameborder="0" allowfullscreen></iframe>
 
-**Duration: 4:11**
+**Duration: 5:33**
 
 If an Item is serialized, a Serial Number (Serial No) record is maintained for each unit of that Item. This information is helpful in tracking the location of the Serial No, its warranty and end-of-life (expiry) information.
 

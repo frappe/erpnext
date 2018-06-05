@@ -890,7 +890,8 @@ def get_item_defaults(item, company):
 	item_defaults = frappe.db.sql('''
 		select
 			i.item_name, i.description, i.stock_uom, i.name, i.is_stock_item, i.item_code, i.item_group,
-			id.expense_account, id.buying_cost_center, id.default_warehouse, id.selling_cost_center, id.default_supplier
+			id.expense_account, id.income_account, id.buying_cost_center, id.default_warehouse,
+			id.selling_cost_center, id.default_supplier
 		from
 			`tabItem` i LEFT JOIN `tabItem Default` id ON i.name = id.parent and id.company = %s
 		where

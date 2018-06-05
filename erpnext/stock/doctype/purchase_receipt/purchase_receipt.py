@@ -122,6 +122,8 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		if self.per_billed < 100:
 			self.update_billing_status()
+		else:
+			self.status = "Completed"
 
 		
 		# Updating stock ledger should always be called after updating prevdoc status,

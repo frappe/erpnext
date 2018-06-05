@@ -279,7 +279,6 @@ def make_salary_structure(sal_struct, payroll_frequency, employee):
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}).insert()
-
 		create_salary_structure_assignment(employee, salary_structure)
 
 	elif not frappe.db.get_value("Salary Structure Assignment",{'salary_structure':sal_struct, 'employee':employee},'name'):

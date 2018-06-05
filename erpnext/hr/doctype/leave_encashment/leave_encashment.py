@@ -26,25 +26,25 @@ class LeaveEncashment(Document):
 	def on_submit(self):
 		if not self.leave_allocation:
 			self.leave_allocation = self.get_leave_allocation()
-		additional_component = frappe.new_doc("Additional Salary Component")
-		additional_component.company = frappe.get_value("Employee", self.employee, "company")
-		additional_component.employee = self.employee
-		additional_component.salary_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
-		additional_component.from_date = self.encashment_date
-		additional_component.to_date = self.encashment_date
-		additional_component.amount = self.encashment_amount
-		additional_component.submit()
+		additional_salary = frappe.new_doc("Additional Salary")
+		additional_salary.company = frappe.get_value("Employee", self.employee, "company")
+		additional_salary.employee = self.employee
+		additional_salary.salary_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		additional_salary.from_date = self.encashment_date
+		additional_salary.to_date = self.encashment_date
+		additional_salary.amount = self.encashment_amount
+		additional_salary.submit()
 
-		self.db_set("additional_component", additional_component.name)
+		self.db_set("additional_salary", additional_salary.name)
 
 		# Set encashed leaves in Allocation
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') + self.encashable_days)
 
 	def on_cancel(self):
-		if self.additional_component:
-			frappe.get_doc("Additional Salary Component", self.additional_component).cancel()
-			self.db_set("additional_component", "")
+		if self.additional_salary:
+			frappe.get_doc("Additional Salary", self.additional_salary).cancel()
+			self.db_set("additional_salary", "")
 
 		if self.leave_allocation:
 			frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",

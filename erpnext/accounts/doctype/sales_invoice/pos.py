@@ -158,9 +158,8 @@ def get_items_list(pos_profile, company):
 		# Get items based on the item groups defined in the POS profile
 		for d in pos_profile.get('item_groups'):
 			args_list.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
-		cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
-		
-		args_list = [company] + args_list
+		if args_list:
+			cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
 
 	return frappe.db.sql("""
 		select
@@ -172,7 +171,7 @@ def get_items_list(pos_profile, company):
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
 			{cond}
-		""".format(cond=cond), tuple(args_list), as_dict=1)
+		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
 
 
 def get_item_groups(pos_profile):

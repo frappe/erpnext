@@ -15,8 +15,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test()
 		for d in self.users:
 			# check that email is sent to users
-			self.assertTrue(d.email in [d.recipient for d in self.emails
-				if self.groups.subject in d.message])
+			if d.message:
+				self.assertTrue(d.email in [d.recipient for d in self.emails
+					if self.groups.subject in d.message])
 
 	def test_email_trigger_failed(self):
 		hour = '00:00'

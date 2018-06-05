@@ -102,7 +102,8 @@ class Gstr1Report(object):
 
 		for opts in (("company", " and company=%(company)s"),
 			("from_date", " and posting_date>=%(from_date)s"),
-			("to_date", " and posting_date<=%(to_date)s")):
+			("to_date", " and posting_date<=%(to_date)s"),
+			("company_address", " and company_address=%(company_address)s")):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
