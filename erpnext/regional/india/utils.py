@@ -90,11 +90,11 @@ def get_regional_address_details(out, doctype, company):
 
 	if doctype in ("Sales Invoice", "Delivery Note"):
 		master_doctype = "Sales Taxes and Charges Template"
-		if not (out.company_gstin or out.place_of_supply):
+		if not out.company_gstin:
 			return
-	else:
+	elif doctype == "Purchase Invoice":
 		master_doctype = "Purchase Taxes and Charges Template"
-		if not (out.supplier_gstin or out.place_of_supply):
+		if not out.supplier_gstin:
 			return
 
 	if doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin[:2] != out.place_of_supply[:2]\
