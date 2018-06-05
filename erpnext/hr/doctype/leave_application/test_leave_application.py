@@ -241,7 +241,6 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 
 		frappe.db.set_value('Leave Period', leave_period.name, 'optional_holiday_list', holiday_list.name)
-
 		leave_type = frappe.get_doc(dict(
 			leave_type_name = 'Test Optional Type',
 			doctype = 'Leave Type',
@@ -320,9 +319,8 @@ class TestLeaveApplication(unittest.TestCase):
 			doctype = 'Leave Type',
 			applicable_after = 15
 		)).insert()
-
 		date = add_days(nowdate(), -7)
-
+		frappe.db.set_value('Employee', employee.name, "date_of_joining", date)
 		allocate_leaves(employee, leave_period, leave_type.name, 10)
 
 		leave_application = frappe.get_doc(dict(
@@ -358,6 +356,7 @@ class TestLeaveApplication(unittest.TestCase):
 		))
 
 		self.assertTrue(leave_application.insert())
+		frappe.db.set_value('Employee', employee.name, "date_of_joining", "2010-01-01")
 
 	def test_max_continuous_leaves(self):
 		employee = get_employee()
