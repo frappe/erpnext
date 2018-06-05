@@ -56,3 +56,8 @@ frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 		}).addClass("btn-primary");
 	}
 });
+
+frappe.ui.form.on("Payment Request", "is_a_subscription", function(frm) {
+		frm.toggle_reqd("payment_gateway_account", frm.doc.is_a_subscription);
+		frm.toggle_reqd("payment_plan", frm.doc.is_a_subscription);
+});
