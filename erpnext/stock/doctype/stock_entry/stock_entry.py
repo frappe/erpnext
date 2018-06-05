@@ -441,7 +441,11 @@ class StockEntry(StockController):
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
 		the raw materials supplied table"""
-		if self.purpose == "Subcontract" and self.purchase_order:
+		backflush_raw_materials_based_on = frappe.db.get_single_value("Buying Settings",
+			"backflush_raw_materials_of_subcontract_based_on")
+
+		if (self.purpose == "Subcontract" and self.purchase_order and
+			backflush_raw_materials_based_on == 'BOM'):
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
 				item_code = se_item.original_item or se_item.item_code
@@ -981,6 +985,7 @@ class StockEntry(StockController):
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
+			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")
