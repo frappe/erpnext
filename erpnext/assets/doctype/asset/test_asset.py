@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate, flt
+from frappe.utils import cstr, nowdate, getdate, flt, add_days
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 
@@ -326,6 +326,7 @@ def create_asset():
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,
 		"warehouse": "_Test Warehouse - _TC",
+		"available_for_use_date": add_days(nowdate(),3),
 		"location": "Test Location",
 		"asset_owner": "Company"
 	})
