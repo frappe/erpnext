@@ -62,7 +62,7 @@ frappe.ui.form.on('Salary Structure', {
 			});
 		}
 		frm.set_df_property("is_tax_applicable", "read_only", 1, "Salary Detail", "earnings");
-		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"]
+		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
 		fields_read_only.forEach(function(field) {
 			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
 		});
