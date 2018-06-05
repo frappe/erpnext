@@ -1020,7 +1020,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1210,7 +1210,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Afskrivninger indtastning
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Vælg dokumenttypen først
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,"Annuller Materiale Besøg {0}, før den annullerer denne vedligeholdelse Besøg"
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 standard
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 standard
 DocType: Pricing Rule,Rate or Discount,Pris eller rabat
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Serienummer {0} hører ikke til vare {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Nødvendigt antal
@@ -3034,7 +3034,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3936,11 +3936,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Vælg en medarbejder for at få medarbejderen forskud.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Vælg venligst en gyldig dato
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Vælg arten af din virksomhed.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -4157,7 +4157,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.py +54,Progress % for a task can
 DocType: Stock Reconciliation Item,Before reconciliation,Før forsoning
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +12,To {0},Til {0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),Skatter og Afgifter Tilføjet (Company Valuta)
-apps/erpnext/erpnext/stock/doctype/item/item.py +476,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,"Varemoms række {0} skal have en konto med 
+apps/erpnext/erpnext/stock/doctype/item/item.py +476,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,"Varemoms række {0} skal have en konto med
 typen moms, indtægt, omkostning eller kan debiteres"
 DocType: Sales Order,Partly Billed,Delvist faktureret
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +43,Item {0} must be a Fixed Asset Item,Vare {0} skal være en anlægsaktiv-vare
@@ -5027,7 +5027,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Ansøgernavn
 DocType: Authorization Rule,Customer / Item Name,Kunde / Varenavn
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Hvis aktiveret, hentes de sidste købsoplysninger for varer ikke fra tidligere købsordre eller købskvittering"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

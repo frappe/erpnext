@@ -1028,7 +1028,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1039,15 +1039,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","O modelo de impostos padrão que pode ser aplicado a todas as Transações de Vendas. Este modelo pode conter a lista de livros fiscais e também outros livros de despesas / receitas como ""Envio"", ""Seguro"", ""Processamento"" etc. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","O modelo de impostos padrão que pode ser aplicado a todas as Transações de Vendas. Este modelo pode conter a lista de livros fiscais e também outros livros de despesas / receitas como ""Envio"", ""Seguro"", ""Processamento"" etc.
 
- #### Nota 
+ #### Nota
 
 A taxa de imposto que definir aqui será a taxa normal de IVA para todos os **Itens**. Se houver **Itens** que possuam taxas diferentes, eles devem ser adicionados na tabela **Imposto de Item** no definidor de **Item**.
 
- #### Descrição das Colunas 
+ #### Descrição das Colunas
 
- 1. Tipo de Cálculo: 
+ 1. Tipo de Cálculo:
     - Isto pode ser no **Total Líquido** (que é a soma do montante base).
     - **Na linha Total / Montante Anterior** (para os impostos ou encargos cumulativos). Se selecionar esta opção, o imposto será aplicado como uma percentagem do montante da linha anterior (na tabela de impostos) ou montante total.
  - **Atual** (como indicado).
@@ -1237,7 +1237,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Registo de Depreciação
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,"Por favor, selecione primeiro o tipo de documento"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancelar Visitas Materiais {0} antes de cancelar esta Visita de Manutenção
-DocType: Crop Cycle,ISO 8016 standard,Padrão ISO 8016
+DocType: Crop Cycle,ISO 8601 standard,Padrão ISO 8601
 DocType: Pricing Rule,Rate or Discount,Taxa ou desconto
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},O Nr. de Série {0} não pertence ao Item {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Qtd Necessária
@@ -3087,7 +3087,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3099,15 +3099,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","O modelo de impostos padrão que pode ser aplicado a todas as Operações de Compra. Este modelo pode conter a lista de títulos de impostos e também outros títulos de despesas como ""Envio"", ""Seguro"", ""Manutenção"" etc. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","O modelo de impostos padrão que pode ser aplicado a todas as Operações de Compra. Este modelo pode conter a lista de títulos de impostos e também outros títulos de despesas como ""Envio"", ""Seguro"", ""Manutenção"" etc.
 
- #### Nota 
+ #### Nota
 
  A taxa de imposto que definir aqui será a taxa normal de impostos para todos os **Itens**. Se houver **Itens** que têm taxas diferentes, eles devem ser adicionados na tabela de **Imposto do Item** no definidor de **Item**.
 
- #### Descrição das Colunas 
+ #### Descrição das Colunas
 
- 1. Tipo de Cálculo: 
+ 1. Tipo de Cálculo:
  - Isto pode ser em **Total Líquido** (que é a soma do montante de base).
  - **No Total / Montante da Linha Anterior** (para os impostos ou encargos cumulativos). Se você essa opção, o imposto será aplicado como uma percentagem da linha anterior (na tabela de impostos) ou montante total.
  - **Real** (como mencionado).
@@ -3391,7 +3391,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Termos e Condições Padrão que podem ser adicionados às Compras e Vendas.
 
- Exemplos: 
+ Exemplos:
 
  1. Validade da oferta.
  1. Condições de pagamento (Com Antecedência, No Crédito, parte com antecedência etc).
@@ -3400,7 +3400,7 @@ Examples:
  1. Garantia, se houver.
  1. Política de Devolução.
  1. Condições de entrega, caso seja aplicável.
- 1. Formas de abordar litígios, indemnização, responsabilidade, etc. 
+ 1. Formas de abordar litígios, indemnização, responsabilidade, etc.
  1. Endereço e Contacto da sua Empresa."
 DocType: Issue,Issue Type,Tipo de problema
 DocType: Attendance,Leave Type,Tipo de Licença
@@ -4031,11 +4031,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Selecione um funcionário para obter o adiantamento do funcionário.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Por favor selecione uma data válida
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Seleccione a natureza do seu negócio.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5139,7 +5139,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Nome do Candidato
 DocType: Authorization Rule,Customer / Item Name,Cliente / Nome do Item
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Se ativado, os detalhes da última compra dos itens não serão obtidos do pedido anterior ou recibo de compra"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

@@ -1030,7 +1030,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1041,19 +1041,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standaard belasting sjabloon die kan worden toegepast op alle verkooptransacties. Deze sjabloon kan lijst van fiscale hoofden en ook andere kosten / baten koppen als ""Verzenden"", ""Verzekering"" bevatten, ""Omgaan met"" enz 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standaard belasting sjabloon die kan worden toegepast op alle verkooptransacties. Deze sjabloon kan lijst van fiscale hoofden en ook andere kosten / baten koppen als ""Verzenden"", ""Verzekering"" bevatten, ""Omgaan met"" enz
 
- #### Opmerking 
+ #### Opmerking
 
  Het belastingtarief u definiëren hier zal het normale belastingtarief voor alle ** Items worden **. Als er ** Items ** dat verschillende tarieven hebben, moeten ze worden toegevoegd in de ** Item Tax ** tafel in de ** Item ** meester.
 
- #### Beschrijving van Kolommen 
+ #### Beschrijving van Kolommen
 
- 1. Berekening Type: 
+ 1. Berekening Type:
  - Dit kan op ** Netto Totaal ** (dat is de som van het basisbedrag).
  - ** Op Vorige Row Total / Bedrag ** (voor cumulatieve belastingen of heffingen). Als u deze optie selecteert, zal de belasting worden berekend als een percentage van de vorige rij (in de fiscale tabel) bedrag of totaal.
  - ** Werkelijke ** (zoals vermeld).
- 2. Account Head: De Account grootboek waaronder deze belasting 
+ 2. Account Head: De Account grootboek waaronder deze belasting
  3 zal worden geboekt. Cost Center: Als de belasting / heffing is een inkomen (zoals de scheepvaart) of kosten die het nodig heeft tegen een kostenplaats worden geboekt.
  4. Beschrijving: Beschrijving van de belasting (die zullen worden afgedrukt in de facturen / offertes).
  5. Rate: belastingtarief.
@@ -1239,7 +1239,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,afschrijvingen Entry
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Selecteer eerst het documenttype
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Annuleren Materiaal Bezoeken {0} voor het annuleren van deze Maintenance Visit
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016-norm
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601-norm
 DocType: Pricing Rule,Rate or Discount,Tarief of korting
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Serienummer {0} behoort niet tot Artikel {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Benodigde hoeveelheid
@@ -3087,7 +3087,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3099,19 +3099,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standaard belasting sjabloon die kan worden toegepast op alle inkooptransacties. Deze sjabloon kan lijst van fiscale hoofden en ook andere kosten koppen als ""Verzenden"", ""Verzekering"" bevatten, ""Omgaan met"" enz 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standaard belasting sjabloon die kan worden toegepast op alle inkooptransacties. Deze sjabloon kan lijst van fiscale hoofden en ook andere kosten koppen als ""Verzenden"", ""Verzekering"" bevatten, ""Omgaan met"" enz
 
- #### Opmerking 
+ #### Opmerking
 
  De belastingdruk die u hier definieert zal het normale belastingtarief voor alle ** Items worden **. Als er ** Items ** dat verschillende tarieven hebben, moeten ze worden toegevoegd in de ** Item Tax ** tafel in de ** Item ** meester.
 
- #### Beschrijving van Kolommen 
+ #### Beschrijving van Kolommen
 
- 1. Berekening Type: 
+ 1. Berekening Type:
  - Dit kan op ** Netto Totaal ** (dat is de som van het basisbedrag).
  - ** Op Vorige Row Total / Bedrag ** (voor cumulatieve belastingen of heffingen). Als u deze optie selecteert, zal de belasting worden berekend als een percentage van de vorige rij (in de fiscale tabel) bedrag of totaal.
  - ** Werkelijke ** (zoals vermeld).
- 2. Account Head: De Account grootboek waaronder deze belasting 
+ 2. Account Head: De Account grootboek waaronder deze belasting
  3 zal worden geboekt. Cost Center: Als de belasting / heffing is een inkomen (zoals de scheepvaart) of kosten die het nodig heeft tegen een kostenplaats worden geboekt.
  4. Beschrijving: Beschrijving van de belasting (die zullen worden afgedrukt in de facturen / offertes).
  5. Rate: belastingtarief.
@@ -3390,7 +3390,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Algemene Voorwaarden die kunnen worden toegevoegd aan de verkopen en aankopen.
 
- Voorbeelden: 
+ Voorbeelden:
 
  1. Geldigheid van het aanbod.
  1. Betalingscondities (In Advance, op krediet, een deel vooraf etc).
@@ -3399,7 +3399,7 @@ Examples:
  1. Garantie indien van toepassing.
  1. Returns Policy '.
  1. Termen van de scheepvaart, indien van toepassing.
- 1. Methoden voor het aanpakken geschillen, schadevergoeding, aansprakelijkheid, enz. 
+ 1. Methoden voor het aanpakken geschillen, schadevergoeding, aansprakelijkheid, enz.
  1. Adres en contactgegevens van uw bedrijf."
 DocType: Issue,Issue Type,Uitgiftetype
 DocType: Attendance,Leave Type,Verlof Type
@@ -4030,11 +4030,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Selecteer een medewerker om de werknemer voor te bereiden.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Selecteer een geldige datum alstublieft
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Selecteer de aard van uw bedrijf.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -4872,7 +4872,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +15,Brokerage,makelaardij
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +207,Attendance for employee {0} is already marked for this day,Attendance voor personeelsbeloningen {0} is al gemarkeerd voor deze dag
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","in Minuten 
+Updated via 'Time Log'","in Minuten
  Bijgewerkt via 'Time Log'"
 DocType: Customer,From Lead,Van Lead
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Orders vrijgegeven voor productie.
@@ -5139,7 +5139,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Aanvrager Naam
 DocType: Authorization Rule,Customer / Item Name,Klant / Naam van het punt
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Indien ingeschakeld, worden de laatste aankoopgegevens van items niet opgehaald van de vorige bestelling of aankoopbon"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

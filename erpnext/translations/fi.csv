@@ -1020,7 +1020,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1210,7 +1210,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Poistot Entry
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Valitse ensin asiakirjan tyyppi
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Peru materiaalikäynti {0} ennen huoltokäynnin perumista
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 -standardi
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 -standardi
 DocType: Pricing Rule,Rate or Discount,Hinta tai alennus
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Sarjanumero {0} ei kuulu tuotteelle {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,vaadittu yksikkömäärä
@@ -3034,7 +3034,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3936,11 +3936,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,"Valitse työntekijä, jotta työntekijä etenee."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Valitse voimassa oleva päivämäärä
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Valitse liiketoiminnan luonteesta.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5026,18 +5026,18 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,hakijan nimi
 DocType: Authorization Rule,Customer / Item Name,Asiakas / Nimikkeen nimi
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Jos tämä asetus on otettu käyttöön, viimeisiä ostotiedot eivät noudu edellisestä ostotilauksesta tai ostokuitista"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
 For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.
 
-Note: BOM = Bill of Materials","Koosta useita nimikkeitä tuotepaketiksi. 
+Note: BOM = Bill of Materials","Koosta useita nimikkeitä tuotepaketiksi.
 Koostaminen on kätevä tapa ryhmitellä tietyt nimikkeet paketiksi ja se mahdollistaa paketissa olevien nimikkeiden varastosaldon seurannan tuotepaketti -nimikkeen sijaan.
 
 Tuotepaketti -nimike ""ei ole varastonimike"" mutta ""on myyntinimike"".
 
-Esimerkki: 
+Esimerkki:
 Myytäessä kannettavia tietokoneita sekä niihin sopivia laukkuja, asiakkaalle annetaan alennus mikäli hän ostaa molemmat. Täten ""tietokone + laukku"" muodostavat uuden tuotepaketin."
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +42,Serial No is mandatory for Item {0},Sarjanumero vaaditaan tuotteelle {0}
 DocType: Item Variant Attribute,Attribute,tuntomerkki
