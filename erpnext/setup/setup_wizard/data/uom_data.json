@@ -1,1575 +1,952 @@
 [
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Meter",
-		"abbr": "m",
-		"value": "1"
+		"uom_name": "Unit",
+		"must_be_whole_number": 1
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Barleycorn",
-		"value": "0.008467"
+		"uom_name": "Box",
+		"must_be_whole_number": 1
+	},	{
+		"uom_name": "Nos",
+		"must_be_whole_number": 1
+	},	{
+		"uom_name": "Pair",
+		"must_be_whole_number": 1
+	},	{
+		"uom_name": "Set",
+		"must_be_whole_number": 1
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Calibre",
-		"abbr": "cal",
-		"value": "0.0254"
+		"uom_name": "Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Cable Length (UK)",
-		"abbr": "cables",
-		"value": "182.88"
+		"uom_name": "Barleycorn",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Cable Length (US)",
-		"abbr": "cables",
-		"value": "219.456"
+		"uom_name": "Calibre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Cable Length",
-		"abbr": "cables",
-		"value": "185.2"
+		"uom_name": "Cable Length (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Centimeter",
-		"abbr": "cm",
-		"value": "0.01"
+		"uom_name": "Cable Length (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Chain",
-		"abbr": "ch",
-		"value": "20.1168"
+		"uom_name": "Cable Length",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Decimeter",
-		"abbr": "dm",
-		"value": "0.1"
+		"uom_name": "Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Ells (UK)",
-		"abbr": "ells",
-		"value": "0.875"
+		"uom_name": "Chain",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Ems(Pica)",
-		"abbr": "ems",
-		"value": "0.004233"
+		"uom_name": "Decimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Fathom",
-		"abbr": "fm",
-		"value": "1.8288"
+		"uom_name": "Ells (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Foot",
-		"abbr": "ft",
-		"value": "0.3048"
+		"uom_name": "Ems(Pica)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Furlong",
-		"abbr": "fur",
-		"value": "201.168"
+		"uom_name": "Fathom",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Hand",
-		"abbr": "hand",
-		"value": "0.1016"
+		"uom_name": "Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Hectometer",
-		"abbr": "hm",
-		"value": "100"
+		"uom_name": "Furlong",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Inch",
-		"abbr": "in",
-		"value": "0.0254"
+		"uom_name": "Hand",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Kilometer",
-		"abbr": "km",
-		"value": "1000"
+		"uom_name": "Hectometer",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Link",
-		"abbr": "li",
-		"value": "0.201168"
+		"uom_name": "Inch",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Micrometer",
-		"abbr": "µm",
-		"value": "0.000001"
+		"uom_name": "Kilometer",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Mile",
-		"abbr": "mi",
-		"value": "1609.344"
+		"uom_name": "Link",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Mile (Nautical)",
-		"abbr": "nmi(NM)",
-		"value": "1852"
+		"uom_name": "Micrometer",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Millimeter",
-		"abbr": "mm",
-		"value": "0.001"
+		"uom_name": "Mile",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Nanometer",
-		"abbr": "nm",
-		"value": "0.000000001"
+		"uom_name": "Mile (Nautical)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Rod",
-		"abbr": "rd",
-		"value": "5.02921"
+		"uom_name": "Millimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Vara",
-		"abbr": "V",
-		"value": "0.835906"
+		"uom_name": "Nanometer",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Versta",
-		"value": "1066.8"
+		"uom_name": "Rod",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Yard",
-		"abbr": "yd",
-		"value": "0.9144"
+		"uom_name": "Vara",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Arshin",
-		"value": "0.7112"
+		"uom_name": "Versta",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Sazhen",
-		"value": "2.1336"
+		"uom_name": "Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Length",
-		"from_uom": "Meter",
-		"to_uom": "Medio Metro",
-		"abbr": "mediom",
-		"value": "0.5"
+		"uom_name": "Arshin",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Meter",
-		"value": "1"
+		"uom_name": "Sazhen",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Centiarea",
-		"abbr": "CentArea",
-		"value": "1"
+		"uom_name": "Medio Metro",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Area",
-		"abbr": "Area",
-		"value": "100"
+		"uom_name": "Square Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Manzana",
-		"abbr": "Mz",
-		"value": "6987.388"
+		"uom_name": "Centiarea",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Caballeria",
-		"abbr": "Cbll",
-		"value": "447192.86"
+		"uom_name": "Area",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Kilometer",
-		"value": "1000000"
+		"uom_name": "Manzana",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Are",
-		"abbr": "a",
-		"value": "100"
+		"uom_name": "Caballeria",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Acre",
-		"abbr": "ac",
-		"value": "4046.856422"
+		"uom_name": "Square Kilometer",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Acre (US)",
-		"abbr": "ac",
-		"value": "4046.87261"
+		"uom_name": "Are",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Hectare",
-		"abbr": "ha",
-		"value": "10000"
+		"uom_name": "Acre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Yard",
-		"value": "0.83612736"
+		"uom_name": "Acre (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Foot",
-		"value": "0.09290304"
+		"uom_name": "Hectare",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Inch",
-		"value": "0.00064516"
+		"uom_name": "Square Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Centimeter",
-		"value": "0.0001"
+		"uom_name": "Square Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Area",
-		"from_uom": "Square Meter",
-		"to_uom": "Square Mile",
-		"value": "2589988.11"
+		"uom_name": "Square Inch",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Meter/Second",
-		"abbr": "m/s",
-		"value": "1"
+		"uom_name": "Square Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Inch/Minute",
-		"abbr": "ipm",
-		"value": "0.000423333"
+		"uom_name": "Square Mile",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Foot/Minute",
-		"abbr": "fpm",
-		"value": "0.00508"
+		"uom_name": "Meter/Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Inch/Second",
-		"abbr": "ips",
-		"value": "0.0254"
+		"uom_name": "Inch/Minute",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Kilometer/Hour",
-		"abbr": "km/h",
-		"value": "0.277777778"
+		"uom_name": "Foot/Minute",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Foot/Second",
-		"abbr": "fps",
-		"value": "0.3048"
+		"uom_name": "Inch/Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Mile/Hour",
-		"abbr": "mph",
-		"value": "0.44704"
+		"uom_name": "Kilometer/Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Knot",
-		"abbr": "kn",
-		"value": "0.514444"
+		"uom_name": "Foot/Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Mile/Minute",
-		"abbr": "mpm",
-		"value": "26.8224"
+		"uom_name": "Mile/Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Speed",
-		"from_uom": "Meter/Second",
-		"to_uom": "Mile/Second",
-		"abbr": "mps",
-		"value": "1609.344"
+		"uom_name": "Knot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Carat",
-		"abbr": "carat",
-		"value": "0.0002"
+		"uom_name": "Mile/Minute",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Cental",
-		"abbr": "cental",
-		"value": "45.359237"
+		"uom_name": "Mile/Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Dram",
-		"abbr": "dr",
-		"value": "0.001771845"
+		"uom_name": "Carat",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Grain",
-		"abbr": "gr",
-		"value": "0.000065"
+		"uom_name": "Cental",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Gram",
-		"abbr": "g",
-		"value": "0.001"
+		"uom_name": "Dram",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Hundredweight",
-		"abbr": "cwt",
-		"value": "45.359237"
+		"uom_name": "Grain",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Quintal",
-		"abbr": "qq",
-		"value": "45.359237"
+		"uom_name": "Gram",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Kg",
-		"abbr": "kg",
-		"value": "1"
+		"uom_name": "Hundredweight",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Microgram",
-		"value": "0.000000001"
+		"uom_name": "Quintal",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Milligram",
-		"abbr": "mg",
-		"value": "0.000001"
+		"uom_name": "Kg",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Ounce",
-		"abbr": "oz",
-		"value": "0.02835"
+		"uom_name": "Microgram",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Pood",
-		"abbr": "pood",
-		"value": "16.3805"
+		"uom_name": "Milligram",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Pound",
-		"abbr": "lbm",
-		"value": "0.45359237"
+		"uom_name": "Ounce",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Slug",
-		"abbr": "slug",
-		"value": "14.5939029"
+		"uom_name": "Pood",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Stone",
-		"abbr": "stone",
-		"value": "6.350293"
+		"uom_name": "Pound",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Tonne",
-		"abbr": "t",
-		"value": "1000"
+		"uom_name": "Slug",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Mass",
-		"from_uom": "Kg",
-		"to_uom": "Kip",
-		"abbr": "kip",
-		"value": "453.59237"
+		"uom_name": "Stone",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Barrel(Beer)",
-		"abbr": "bbl",
-		"value": "117.3478"
+		"uom_name": "Tonne",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Barrel (Oil)",
-		"abbr": "bbl",
-		"value": "158.987295"
+		"uom_name": "Kip",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Bushel (UK)",
-		"abbr": "bu",
-		"value": "36.36872"
+		"uom_name": "Barrel(Beer)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Bushel (US Dry Level)",
-		"abbr": "bu",
-		"value": "35.23907017"
+		"uom_name": "Barrel (Oil)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Centilitre",
-		"abbr": "cl",
-		"value": "0.01"
+		"uom_name": "Bushel (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Centimeter",
-		"value": "0.001"
+		"uom_name": "Bushel (US Dry Level)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Decimeter",
-		"value": "1"
+		"uom_name": "Centilitre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Foot",
-		"value": "28.31684659"
+		"uom_name": "Cubic Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Inch",
-		"value": "0.016387064"
+		"uom_name": "Cubic Decimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Meter",
-		"value": "1000"
+		"uom_name": "Cubic Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Millimeter",
-		"value": "0.000001"
+		"uom_name": "Cubic Inch",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cubic Yard",
-		"value": "764.554858"
+		"uom_name": "Cubic Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Cup",
-		"abbr": "cp",
-		"value": "0.236588"
+		"uom_name": "Cubic Millimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Decilitre",
-		"abbr": "dl",
-		"value": "0.1"
+		"uom_name": "Cubic Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Fluid Ounce (UK)",
-		"abbr": "fl oz",
-		"value": "0.028413"
+		"uom_name": "Cup",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Fluid Ounce (US)",
-		"abbr": "fl oz",
-		"value": "0.029574"
+		"uom_name": "Decilitre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Gallon (UK)",
-		"abbr": "gal",
-		"value": "4.54609"
+		"uom_name": "Fluid Ounce (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Gallon Dry (US)",
-		"abbr": "gal",
-		"value": "4.404884"
+		"uom_name": "Fluid Ounce (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Gallon Liquid (US)",
-		"abbr": "gal",
-		"value": "3.785411784"
+		"uom_name": "Gallon (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Litre",
-		"abbr": "L",
-		"value": "1"
+		"uom_name": "Gallon Dry (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Millilitre",
-		"abbr": "ml",
-		"value": "0.001"
+		"uom_name": "Gallon Liquid (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Peck",
-		"abbr": "pk",
-		"value": "8.809768"
+		"uom_name": "Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Pint (UK)",
-		"abbr": "pt",
-		"value": "0.568261"
+		"uom_name": "Millilitre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Pint, Dry (US)",
-		"abbr": "pt",
-		"value": "0.55061"
+		"uom_name": "Peck",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Pint, Liquid (US)",
-		"abbr": "pt",
-		"value": "0.473176475"
+		"uom_name": "Pint (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Quart (UK)",
-		"abbr": "qt",
-		"value": "1.136523"
+		"uom_name": "Pint, Dry (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Quart Dry (US)",
-		"abbr": "qt",
-		"value": "1.136523"
+		"uom_name": "Pint, Liquid (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Quart Liquid (US)",
-		"abbr": "qt",
-		"value": "1.136523"
+		"uom_name": "Quart (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Tablespoon (US)",
-		"abbr": "tbsp",
-		"value": "0.014787"
+		"uom_name": "Quart Dry (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Volume",
-		"from_uom": "Litre",
-		"to_uom": "Teaspoon",
-		"abbr": "tsp",
-		"value": "0.004929"
+		"uom_name": "Quart Liquid (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Day",
-		"value": "86400"
+		"uom_name": "Tablespoon (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Hour",
-		"abbr": "h",
-		"value": "3600"
+		"uom_name": "Teaspoon",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Minute",
-		"abbr": "min",
-		"value": "60"
+		"uom_name": "Day",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Second",
-		"abbr": "s",
-		"value": "1"
+		"uom_name": "Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Millisecond",
-		"abbr": "ms",
-		"value": "0.001"
+		"uom_name": "Minute",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Microsecond",
-		"value": "0.000001"
+		"uom_name": "Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Nanosecond",
-		"abbr": "ns",
-		"value": "0.000000001"
+		"uom_name": "Millisecond",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Time",
-		"from_uom": "Second",
-		"to_uom": "Week",
-		"value": "604800"
+		"uom_name": "Microsecond",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Atmosphere",
-		"abbr": "atm",
-		"value": "101325"
+		"uom_name": "Nanosecond",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Pascal",
-		"abbr": "Pa",
-		"value": "1"
+		"uom_name": "Week",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Bar",
-		"abbr": "bar",
-		"value": "100000"
+		"uom_name": "Atmosphere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Foot Of Water",
-		"abbr": "ftH2O",
-		"value": "2989.06692"
+		"uom_name": "Pascal",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Hectopascal",
-		"abbr": "hPa",
-		"value": "100"
+		"uom_name": "Bar",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Iches Of Water",
-		"abbr": "inH2O",
-		"value": "249.08891"
+		"uom_name": "Foot Of Water",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Inches Of Mercury",
-		"abbr": "inHg",
-		"value": "3386.388"
+		"uom_name": "Hectopascal",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Kilopascal",
-		"abbr": "kPa",
-		"value": "1000"
+		"uom_name": "Iches Of Water",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Meter Of Water",
-		"abbr": "mH2O",
-		"value": "9806.65"
+		"uom_name": "Inches Of Mercury",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Microbar",
-		"value": "0.1"
+		"uom_name": "Kilopascal",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Milibar",
-		"abbr": "mbar",
-		"value": "100"
+		"uom_name": "Meter Of Water",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Millimeter Of Mercury",
-		"abbr": "mmHg",
-		"value": "133.322"
+		"uom_name": "Microbar",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Millimeter Of Water",
-		"abbr": "mmH2O",
-		"value": "9.80665"
+		"uom_name": "Milibar",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Technical Atmosphere",
-		"abbr": "at",
-		"value": "98066.5"
+		"uom_name": "Millimeter Of Mercury",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Pressure",
-		"from_uom": "Pascal",
-		"to_uom": "Torr",
-		"abbr": "torr",
-		"value": "133.322"
+		"uom_name": "Millimeter Of Water",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Dyne",
-		"abbr": "dyn",
-		"value": "0.00001"
+		"uom_name": "Technical Atmosphere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Gram-Force",
-		"abbr": "gf",
-		"value": "0.00980665"
+		"uom_name": "Torr",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Joule/Meter",
-		"abbr": "J/m",
-		"value": "1"
+		"uom_name": "Dyne",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Kilogram-Force",
-		"abbr": "kgf",
-		"value": "9.80665"
+		"uom_name": "Gram-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Kilopond",
-		"abbr": "kp",
-		"value": "9.80665"
+		"uom_name": "Joule/Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Kilopound-Force",
-		"abbr": "kipf",
-		"value": "4448.221615"
+		"uom_name": "Kilogram-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Newton",
-		"abbr": "N",
-		"value": "1"
+		"uom_name": "Kilopond",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Ounce-Force",
-		"abbr": "ozf",
-		"value": "0.278013851"
+		"uom_name": "Kilopound-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Pond",
-		"abbr": "p",
-		"value": "0.00980665"
+		"uom_name": "Newton",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Pound-Force",
-		"abbr": "lbf",
-		"value": "4.448222"
+		"uom_name": "Ounce-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Poundal",
-		"abbr": "pdl",
-		"value": "0.138254954"
+		"uom_name": "Pond",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Tonne-Force(Metric)",
-		"abbr": "tf",
-		"value": "9806.65"
+		"uom_name": "Pound-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Ton-Force (UK)",
-		"abbr": "tf(UK)",
-		"value": "9964.016418"
+		"uom_name": "Poundal",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Force",
-		"from_uom": "Newton",
-		"to_uom": "Ton-Force (US)",
-		"abbr": "tf(US)",
-		"value": "8896.443231"
+		"uom_name": "Tonne-Force(Metric)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Btu (It)",
-		"abbr": "dyn",
-		"value": "1055.056"
+		"uom_name": "Ton-Force (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Btu (Th)",
-		"value": "1054.35"
+		"uom_name": "Ton-Force (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Btu (Mean)",
-		"value": "1055.87"
+		"uom_name": "Btu (It)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Calorie (It)",
-		"abbr": "cal",
-		"value": "4.1868"
+		"uom_name": "Btu (Th)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Calorie (Th)",
-		"value": "4.184"
+		"uom_name": "Btu (Mean)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Calorie (Mean)",
-		"value": "4.19002"
+		"uom_name": "Calorie (It)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Calorie (Food)",
-		"value": "4186"
+		"uom_name": "Calorie (Th)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Erg",
-		"abbr": "erg",
-		"value": "0.0000001"
+		"uom_name": "Calorie (Mean)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Horsepower-Hours",
-		"abbr": "hph",
-		"value": "2684520"
+		"uom_name": "Calorie (Food)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Inch Pound-Force",
-		"abbr": "in lbf",
-		"value": "0.112985"
+		"uom_name": "Erg",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Joule",
-		"abbr": "J",
-		"value": "1"
+		"uom_name": "Horsepower-Hours",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Kilojoule",
-		"abbr": "kJ",
-		"value": "1000"
+		"uom_name": "Inch Pound-Force",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Kilocalorie",
-		"abbr": "kcal",
-		"value": "4184"
+		"uom_name": "Joule",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Kilowatt-Hour",
-		"abbr": "kWh",
-		"value": "3600000"
+		"uom_name": "Kilojoule",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Litre-Atmosphere",
-		"abbr": "litre-atm",
-		"value": "101.3253354"
+		"uom_name": "Kilocalorie",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Megajoule",
-		"abbr": "MJ",
-		"value": "1000000"
+		"uom_name": "Kilowatt-Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Energy",
-		"from_uom": "Joule",
-		"to_uom": "Watt-Hour",
-		"abbr": "Wh",
-		"value": "3600"
+		"uom_name": "Litre-Atmosphere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Btu/Hour",
-		"abbr": "B/h",
-		"value": "0.29301067"
+		"uom_name": "Megajoule",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Btu/Minutes",
-		"abbr": "B/min",
-		"value": "17.56863"
+		"uom_name": "Watt-Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Btu/Seconds",
-		"abbr": "B/s",
-		"value": "1055.056"
+		"uom_name": "Btu/Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Calorie/Seconds",
-		"abbr": "cal/s",
-		"value": "4.183076"
+		"uom_name": "Btu/Minutes",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Horsepower",
-		"abbr": "hp",
-		"value": "745.6998716"
+		"uom_name": "Btu/Seconds",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Kilowatt",
-		"abbr": "kW",
-		"value": "1000"
+		"uom_name": "Calorie/Seconds",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Megawatt",
-		"abbr": "MW",
-		"value": "1000000"
+		"uom_name": "Horsepower",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Volt-Ampere",
-		"abbr": "VA",
-		"value": "1"
+		"uom_name": "Kilowatt",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Power",
-		"from_uom": "Watt",
-		"to_uom": "Watt",
-		"abbr": "W",
-		"value": "1"
+		"uom_name": "Megawatt",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Centigram/Litre",
-		"abbr": "cg/l",
-		"value": "0.01"
+		"uom_name": "Volt-Ampere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Decigram/Litre",
-		"abbr": "dg/l",
-		"value": "0.1"
+		"uom_name": "Watt",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Dekagram/Litre",
-		"abbr": "dag/l",
-		"value": "10"
+		"uom_name": "Centigram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Hectogram/Litre",
-		"abbr": "hg/l",
-		"value": "100"
+		"uom_name": "Decigram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Gram/Cubic Meter",
-		"value": "0.001"
+		"uom_name": "Dekagram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Gram/Cubic Centimeter",
-		"value": "1000"
+		"uom_name": "Hectogram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Gram/Cubic Millimeter",
-		"value": "1000000"
+		"uom_name": "Gram/Cubic Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Gram/Litre",
-		"abbr": "g/l",
-		"value": "1"
+		"uom_name": "Gram/Cubic Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Grain/Gallon (US)",
-		"value": "0.017118061"
+		"uom_name": "Gram/Cubic Millimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Grain/Gallon (UK)",
-		"value": "0.014253768"
+		"uom_name": "Gram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Grain/Cubic Foot",
-		"value": "0.002288352"
+		"uom_name": "Grain/Gallon (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Kilogram/Cubic Meter",
-		"value": "1"
+		"uom_name": "Grain/Gallon (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Kilogram/Cubic Centimeter",
-		"value": "1000000"
+		"uom_name": "Grain/Cubic Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Kilogram/Litre",
-		"abbr": "kg/l",
-		"value": "1000"
+		"uom_name": "Kilogram/Cubic Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Milligram/Cubic Meter",
-		"value": "0.000001"
+		"uom_name": "Kilogram/Cubic Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Milligram/Cubic Centimeter",
-		"value": "1"
+		"uom_name": "Kilogram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Milligram/Cubic Millimeter",
-		"value": "1000"
+		"uom_name": "Milligram/Cubic Meter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Megagram/Litre",
-		"abbr": "Mg/l",
-		"value": "1000000"
+		"uom_name": "Milligram/Cubic Centimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Milligram/Litre",
-		"abbr": "mg/l",
-		"value": "0.001"
+		"uom_name": "Milligram/Cubic Millimeter",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Microgram/Litre",
-		"abbr": "µm/l",
-		"value": "0.000001"
+		"uom_name": "Megagram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Nanogram/Litre",
-		"abbr": "ng/l",
-		"value": "0.000000001"
+		"uom_name": "Milligram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ounce/Cubic Inch",
-		"value": "1729.994044"
+		"uom_name": "Microgram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ounce/Cubic Foot",
-		"value": "1.001153961"
+		"uom_name": "Nanogram/Litre",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ounce/Gallon (US)",
-		"abbr": "oz/gal(US)",
-		"value": "7.489151707"
+		"uom_name": "Ounce/Cubic Inch",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ounce/Gallon (UK)",
-		"abbr": "oz/gal(UK)",
-		"value": "6.236023291"
+		"uom_name": "Ounce/Cubic Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Pound/Cubic Inch",
-		"value": "27679.90471"
+		"uom_name": "Ounce/Gallon (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Pound/Cubic Foot",
-		"value": "16.01846337"
+		"uom_name": "Ounce/Gallon (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Pound Cubic Yard",
-		"value": "0.593276421"
+		"uom_name": "Pound/Cubic Inch",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Pound/Gallon (US)",
-		"abbr": "lb/gal(US)",
-		"value": "119.8264273"
+		"uom_name": "Pound/Cubic Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Pound/Gallon (UK)",
-		"abbr": "lb/gal(UK)",
-		"value": "99.77637266"
+		"uom_name": "Pound Cubic Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Psi/1000 Feet",
-		"abbr": "psi/1000 ft",
-		"value": "2.306658726"
+		"uom_name": "Pound/Gallon (US)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Slug/Cubic Foot",
-		"value": "515.3788184"
+		"uom_name": "Pound/Gallon (UK)",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ton (Short)/Cubic Yard",
-		"abbr": "ton(short)/yd³",
-		"value": "1186.552843"
+		"uom_name": "Psi/1000 Feet",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Density",
-		"from_uom": "Gram/Litre",
-		"to_uom": "Ton (Long)/Cubic Yard",
-		"abbr": "ton(long)/yd³",
-		"value": "1328.939184"
+		"uom_name": "Slug/Cubic Foot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Temperature",
-		"from_uom": "Celsius",
-		"to_uom": "Celsius",
-		"value": "1"
+		"uom_name": "Ton (Short)/Cubic Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Temperature",
-		"from_uom": "Celsius",
-		"to_uom": "Fahrenheit",
-		"value": "0.555555556"
+		"uom_name": "Ton (Long)/Cubic Yard",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Temperature",
-		"from_uom": "Celsius",
-		"to_uom": "Kelvin",
-		"value": "1"
+		"uom_name": "Celsius",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Cycle/Second",
-		"value": "1"
+		"uom_name": "Fahrenheit",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Nanohertz",
-		"abbr": "nHz",
-		"value": "0.000000001"
+		"uom_name": "Kelvin",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Millihertz",
-		"abbr": "mHz",
-		"value": "0.001"
+		"uom_name": "Cycle/Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Hertz",
-		"abbr": "Hz",
-		"value": "1"
+		"uom_name": "Nanohertz",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Kilohertz",
-		"abbr": "kHz",
-		"value": "1000"
+		"uom_name": "Millihertz",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Megahertz",
-		"abbr": "MHz",
-		"value": "1000000"
+		"uom_name": "Hertz",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Wavelength In Gigametres",
-		"value": "0.299792458"
+		"uom_name": "Kilohertz",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Wavelength In Megametres",
-		"value": "299.792458"
+		"uom_name": "Megahertz",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Frequency and Wavelength",
-		"from_uom": "Hertz",
-		"to_uom": "Wavelength In Kilometres",
-		"value": "299792.458"
+		"uom_name": "Wavelength In Gigametres",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Ampere-Hour",
-		"value": "3600"
+		"uom_name": "Wavelength In Megametres",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Ampere-Minute",
-		"value": "60"
+		"uom_name": "Wavelength In Kilometres",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Ampere-Second",
-		"value": "1"
+		"uom_name": "Ampere-Hour",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Coulomb",
-		"abbr": "C",
-		"value": "1"
+		"uom_name": "Ampere-Minute",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "EMU Of Charge",
-		"value": "10"
+		"uom_name": "Ampere-Second",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Faraday",
-		"value": "96485.309"
+		"uom_name": "Coulomb",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Kilocoulomb",
-		"abbr": "kC",
-		"value": "1000"
+		"uom_name": "EMU Of Charge",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Megacoulomb",
-		"abbr": "MC",
-		"value": "1000000"
+		"uom_name": "Faraday",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Millicoulomb",
-		"abbr": "mC",
-		"value": "0.001"
+		"uom_name": "Kilocoulomb",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electrical Charge",
-		"from_uom": "Coulomb",
-		"to_uom": "Nanocoulomb",
-		"abbr": "nC",
-		"value": "0.000000001"
+		"uom_name": "Megacoulomb",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "ampere",
-		"abbr": "A",
-		"value": "1"
+		"uom_name": "Millicoulomb",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "Abampere",
-		"abbr": "abA",
-		"value": "10"
+		"uom_name": "Nanocoulomb",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "Biot",
-		"abbr": "Bi",
-		"value": "10"
+		"uom_name": "Ampere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "EMU of current",
-		"abbr": "EMU",
-		"value": "10"
+		"uom_name": "Abampere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "Kiloampere",
-		"abbr": "kA",
-		"value": "1000"
+		"uom_name": "Biot",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Electric Current",
-		"from_uom": "ampere",
-		"to_uom": "Milliampere",
-		"abbr": "mA",
-		"value": "0.001"
+		"uom_name": "EMU of current",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Magnetic Induction",
-		"from_uom": "Gauss",
-		"to_uom": "Gamma",
-		"value": "0.00001"
+		"uom_name": "Kiloampere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Magnetic Induction",
-		"from_uom": "Gauss",
-		"to_uom": "Gauss",
-		"abbr": "G",
-		"value": "1"
+		"uom_name": "Milliampere",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Magnetic Induction",
-		"from_uom": "Gauss",
-		"to_uom": "Tesla",
-		"abbr": "T",
-		"value": "10000"
+		"uom_name": "Gamma",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Agriculture",
-		"from_uom": "Percent",
-		"to_uom": "Percent",
-		"abbr": "%",
-		"value": "1"
+		"uom_name": "Gauss",
+		"must_be_whole_number": 0
 	},
 	{
-		"category": "Agriculture",
-		"from_uom": "Percent",
-		"to_uom": "Parts Per Million",
-		"abbr": "ppm",
-		"value": "0.0001"
+		"uom_name": "Tesla",
+		"must_be_whole_number": 0
+	},
+	{
+		"uom_name": "Percent",
+		"must_be_whole_number": 0
+	},
+	{
+		"uom_name": "Parts Per Million",
+		"must_be_whole_number": 0
 	}
+
 ]

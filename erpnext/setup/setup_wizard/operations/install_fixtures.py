@@ -144,13 +144,6 @@ def install(country=None):
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': 1, "parent_sales_person": ""},
 
-		# UOM
-		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': _('Unit'), "must_be_whole_number": 1},
-		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': _('Box'), "must_be_whole_number": 1},
-		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': _('Nos'), "must_be_whole_number": 1},
-		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': _('Pair'), "must_be_whole_number": 1},
-		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': _('Set'), "must_be_whole_number": 1},
-
 		# Mode of Payment
 		{'doctype': 'Mode of Payment',
 			'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),
@@ -260,19 +253,26 @@ def install(country=None):
 	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.save()
 
+	add_uom_data()
+
+def add_uom_data():
+	# add UOMs
+	uoms = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
+	for d in uoms:
+		if not frappe.db.exists('UOM', d.get("uom_name")):
+			uom_doc = frappe.new_doc('UOM')
+			uom_doc.update(d)
+			uom_doc.save(ignore_permissions=True)
+
 	# bootstrap uom conversion factors
-	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
+	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
 	for d in uom_conversions:
 		if not frappe.db.exists("UOM Category", d.get("category")):
 			frappe.get_doc({
 				"doctype": "UOM Category",
 				"category_name": d.get("category")
 			}).insert(ignore_permissions=True)
-		if not frappe.db.exists("UOM", d.get("to_uom")):
-			frappe.get_doc({
-				"doctype": "UOM",
-				"uom_name": d.get("to_uom")
-			}).insert(ignore_permissions=True)
+
 		uom_conversion = frappe.new_doc('UOM Conversion Factor')
 		uom_conversion.update(d)
 		uom_conversion.save(ignore_permissions=True)
