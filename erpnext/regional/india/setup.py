@@ -113,10 +113,10 @@ def make_custom_fields():
 	purchase_invoice_gst_fields = [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
-				options='supplier_address.gstin', print_hide=1),
+				fetch_from='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
-				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address.gstin', print_hide=1),
+				fieldtype='Data', insert_after='shipping_address_display',
+				fetch_from='shipping_address.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
@@ -136,16 +136,16 @@ def make_custom_fields():
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
 				fieldtype='Data', insert_after='customer_address',
-				options='customer_address.gstin', print_hide=1),
+				fetch_from='customer_address.gstin', print_hide=1),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
-				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address_name.gstin', print_hide=1),
+				fieldtype='Data', insert_after='shipping_address_name',
+				fetch_from='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin',
 				print_hide=1, read_only=0),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				options='company_address.gstin', print_hide=1),
+				fetch_from='company_address.gstin', print_hide=1),
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' "),
@@ -156,6 +156,11 @@ def make_custom_fields():
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' ")
 		]
+
+	inter_state_gst_field = [
+		dict(fieldname='is_inter_state', label='Is Inter State',
+			fieldtype='Check', insert_after='disabled', print_hide=1)
+	]
 
 	custom_fields = {
 		'Address': [
@@ -168,7 +173,9 @@ def make_custom_fields():
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
 		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
-		"Delivery Note": sales_invoice_gst_fields,
+		'Delivery Note': sales_invoice_gst_fields,
+		'Sales Taxes and Charges Template': inter_state_gst_field,
+		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
