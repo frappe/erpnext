@@ -298,7 +298,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			if asset_category:
 				asset_category = asset_category[0].name
 
-			if not asset_category: 
+			if not asset_category:
 				doc = frappe.get_doc({
 					'doctype': 'Asset Category',
 					'asset_category_name': 'Test Asset Category',
@@ -318,9 +318,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 			asset_item = make_item(asset_item, {'is_stock_item':0,
 				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
 				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
-			
+
 		if not frappe.db.exists('Location', 'Test Location'):
-			location = frappe.get_doc({
+			frappe.get_doc({
 				'doctype': 'Location',
 				'location_name': 'Test Location'
 			}).insert()
@@ -334,7 +334,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
 		self.assertEquals(len(serial_nos), 0)
-		# frappe.db.sql("delete from `tabLocation")
+		frappe.db.sql("delete from `tabLocation")
 		frappe.db.sql("delete from `tabAsset Category`")
 		frappe.db.sql("delete from `tabAsset`")
 
