@@ -243,21 +243,15 @@ class TestItem(unittest.TestCase):
 	def test_uom_conversion_factor(self):
 		if frappe.db.exists('Item', 'Test Item UOM'):
 			frappe.delete_doc('Item', 'Test Item UOM')
+
 		item_doc = make_item("Test Item UOM", {
 			"stock_uom": "Gram",
-			"uoms": [
-				{
-					"uom": "Carat"
-				},
-				{
-					"uom": "Kg"
-				}
-			]
+			"uoms": [dict(uom='Carat'), dict(uom='Kg')]
 		})
+
 		for d in item_doc.uoms:
 			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
 			d.conversion_factor = value
-		item_doc.save()
 
 		self.assertEqual(item_doc.uoms[0].uom, "Carat")
 		self.assertEqual(item_doc.uoms[0].conversion_factor, 5)
