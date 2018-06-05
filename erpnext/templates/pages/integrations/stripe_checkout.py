@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import cint, fmt_money
 import json
 from erpnext.erpnext_integrations.doctype.stripe_settings.stripe_settings import get_gateway_controller
+from erpnext.erpnext_integrations.doctype.payment_plan.payment_plan import create_stripe_subscription
 
 no_cache = 1
 no_sitemap = 1
@@ -59,6 +60,11 @@ def make_payment(stripe_token_id, data, reference_doctype=None, reference_docnam
 	})
 
 	gateway_controller = get_gateway_controller(reference_docname)
-	data =  frappe.get_doc("Stripe Settings", gateway_controller).create_request(data)
+
+	if frappe.db.get_value("Payment Request", reference_docname, 'is_a_subscription'):
+		data =  create_stripe_subscription(gateway_controller, data)
+	else:
+		data =  frappe.get_doc("Stripe Settings", gateway_controller).create_request(data)
+
 	frappe.db.commit()
 	return data
