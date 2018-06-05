@@ -12,8 +12,6 @@ from erpnext.utilities.product import get_price, get_qty_in_stock
 @frappe.whitelist(allow_guest=True)
 def get_product_info_for_website(item_code):
 	"""get product price / stock info for website"""
-	if not is_cart_enabled():
-		return {}
 
 	cart_quotation = _get_cart_quotation()
 	cart_settings = get_shopping_cart_settings()
@@ -43,7 +41,10 @@ def get_product_info_for_website(item_code):
 			if item:
 				product_info["qty"] = item[0].qty
 
-	return product_info
+	return {
+		"product_info": product_info,
+		"cart_settings": cart_settings
+	}
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
