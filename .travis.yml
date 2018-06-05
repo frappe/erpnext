@@ -45,7 +45,7 @@ jobs:
     - stage: test
       script:
         - set -e
-        - bench --verbose run-tests
+        - bench run-tests
       env: Server Side Test
     - # stage
       script:
