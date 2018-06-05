@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe, unittest
+from frappe.utils import flt
 from erpnext.setup.utils import get_exchange_rate
 
 test_records = frappe.get_test_records('Currency Exchange')
@@ -44,7 +45,7 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		# Start with allow_stale is True
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
-		self.assertEqual(exchange_rate, 60.0)
+		self.assertEqual(flt(exchange_rate, 3), 60.0)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
 		self.assertEqual(exchange_rate, 65.1)
@@ -56,7 +57,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
 		self.assertFalse(exchange_rate == 60)
-		self.assertEqual(exchange_rate, 66.894)
+		self.assertEqual(flt(exchange_rate, 3), 66.894)
 
 	def test_exchange_rate_strict(self):
 		# strict currency settings
@@ -69,7 +70,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		# Will fetch from fixer.io
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 67.79)
+		self.assertEqual(flt(exchange_rate, 3), 67.79)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30")
 		self.assertEqual(exchange_rate, 62.9)
@@ -77,7 +78,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
-		self.assertEqual(exchange_rate, 66.894)
+		self.assertEqual(flt(exchange_rate, 3), 66.894)
 
 		exchange_rate = get_exchange_rate("INR", "NGN", "2016-01-10")
 		self.assertEqual(exchange_rate, 65.1)
@@ -100,4 +101,4 @@ class TestCurrencyExchange(unittest.TestCase):
 		# Will fetch from fixer.io
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 67.79)
+		self.assertEqual(flt(exchange_rate, 3), 67.79)

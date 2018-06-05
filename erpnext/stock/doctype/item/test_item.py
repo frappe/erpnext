@@ -66,7 +66,7 @@ class TestItem(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center 2 - _TC",
+			"cost_center": "_Test Cost Center - _TC",
 			"qty": 1.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
@@ -144,14 +144,14 @@ class TestItem(unittest.TestCase):
 			})
 			item_attribute.save()
 
+		template = frappe.get_doc('Item', '_Test Variant Item')
+		template.item_group = "_Test Item Group D"
+		template.save()
+
 		variant = create_variant("_Test Variant Item", {"Test Size": "Extra Large"})
 		variant.item_code = "_Test Variant Item-XL"
 		variant.item_name = "_Test Variant Item-XL"
 		variant.save()
-
-		template = frappe.get_doc('Item', '_Test Variant Item')
-		template.item_group = "_Test Item Group D"
-		template.save()
 
 		variant = frappe.get_doc('Item', '_Test Variant Item-XL')
 		for fieldname in allow_fields:

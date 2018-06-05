@@ -381,6 +381,11 @@ def set_missing_values(time_sheet, target):
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
 	target.posting_date = doc.modified
+	target.total_working_hours = doc.total_hours
+	target.append('timesheets', {
+		'time_sheet': doc.name,
+		'working_hours': doc.total_hours
+	})
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
