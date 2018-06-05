@@ -9,11 +9,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Stripe Settings",
-					"description": _("Stripe payment gateway settings"),
-				},
-				{
-					"type": "doctype",
 					"name": "GoCardless Settings",
 					"description": _("GoCardless payment gateway settings"),
 				},
