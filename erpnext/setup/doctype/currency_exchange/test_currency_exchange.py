@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe, unittest
+from frappe.utils import flt
 from erpnext.setup.utils import get_exchange_rate
 
 test_records = frappe.get_test_records('Currency Exchange')
@@ -43,61 +44,70 @@ class TestCurrencyExchange(unittest.TestCase):
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
 
 		# Start with allow_stale is True
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
-		self.assertEqual(exchange_rate, 60.0)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-01")
+		self.assertEqual(flt(exchange_rate, 3), 66.154)
 
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 65.1)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-15")
+		self.assertEqual(flt(exchange_rate, 3), 67.79)
 
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30")
-		self.assertEqual(exchange_rate, 62.9)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-30")
+		self.assertEqual(flt(exchange_rate, 3), 67.861)
 		
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		self.clear_cache()
-		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
-		self.assertFalse(exchange_rate == 60)
-		self.assertEqual(exchange_rate, 66.894)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2015-12-15")
+		self.assertFalse(flt(exchange_rate, 3) == 60)
+		self.assertEqual(flt(exchange_rate, 3), 66.894)
 
 	def test_exchange_rate_strict(self):
 		# strict currency settings
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
 		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
 
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
-		self.assertEqual(exchange_rate, 60.0)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-01")
+		self.assertEqual(flt(exchange_rate, 3), 66.154)
 
 		# Will fetch from fixer.io
 		self.clear_cache()
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 67.79)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-15")
+		self.assertEqual(flt(exchange_rate, 3), 67.79)
 
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30")
-		self.assertEqual(exchange_rate, 62.9)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-30")
+		self.assertEqual(flt(exchange_rate, 3), 67.861)
 
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		self.clear_cache()
-		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
-		self.assertEqual(exchange_rate, 66.894)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2015-12-15")
+		self.assertEqual(flt(exchange_rate, 3), 66.894)
 
-		exchange_rate = get_exchange_rate("INR", "NGN", "2016-01-10")
-		self.assertEqual(exchange_rate, 65.1)
+		# exchange_rate = _exchangeratesapi("INR", "NGN", "2016-01-10")
+		# self.assertEqual(flt(exchange_rate, 3), 67.789)
 
-		# NGN is not available on fixer.io so these should return 0
-		exchange_rate = get_exchange_rate("INR", "NGN", "2016-01-09")
-		self.assertEqual(exchange_rate, 0)
+		# # NGN is not available on fixer.io so these should return 0
+		# exchange_rate = _exchangeratesapi("INR", "NGN", "2016-01-09")
+		# self.assertEqual(flt(exchange_rate, 3), 0)
 
-		exchange_rate = get_exchange_rate("INR", "NGN", "2016-01-11")
-		self.assertEqual(exchange_rate, 0)
+		# exchange_rate = _exchangeratesapi("INR", "NGN", "2016-01-11")
+		# self.assertEqual(flt(exchange_rate, 3), 0)
 
 	def test_exchange_rate_strict_switched(self):
 		# Start with allow_stale is True
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 65.1)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-15")
+		self.assertEqual(flt(exchange_rate, 3), 67.79)
 
 		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
 		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
 
 		# Will fetch from fixer.io
 		self.clear_cache()
-		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 67.79)
+		exchange_rate = _exchangeratesapi("USD", "INR", "2016-01-15")
+		self.assertEqual(flt(exchange_rate, 3), 67.79)
+
+def _exchangeratesapi(base, symbol, date):
+	import requests
+	api_url = "https://exchangeratesapi.io/api/{0}".format(date)
+	response = requests.get(api_url, params={
+		"base": base,
+		"symbol": symbol
+	})
+	return response.json()["rates"][symbol]
