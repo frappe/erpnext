@@ -448,6 +448,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
+							'main_item_code': rm_item_data["item_code"],
 							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
 						}
 					}

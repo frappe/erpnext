@@ -186,16 +186,22 @@ class BuyingController(StockController):
 	def create_raw_materials_supplied(self, raw_material_table):
 		if self.is_subcontracted=="Yes":
 			parent_items = []
-			for item in self.get("items"):
-				if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-					item.rm_supp_cost = 0.0
-				if item.bom and item.item_code in self.sub_contracted_items:
-					self.update_raw_materials_supplied(item, raw_material_table)
+			backflush_raw_materials_based_on = frappe.db.get_single_value("Buying Settings",
+				"backflush_raw_materials_of_subcontract_based_on")
+			if (self.doctype == 'Purchase Receipt' and
+				backflush_raw_materials_based_on != 'BOM'):
+				self.update_raw_materials_supplied_based_on_stock_entries(raw_material_table)
+			else:
+				for item in self.get("items"):
+					if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+						item.rm_supp_cost = 0.0
+					if item.bom and item.item_code in self.sub_contracted_items:
+						self.update_raw_materials_supplied_based_on_bom(item, raw_material_table)
 
-					if [item.item_code, item.name] not in parent_items:
-						parent_items.append([item.item_code, item.name])
+						if [item.item_code, item.name] not in parent_items:
+							parent_items.append([item.item_code, item.name])
 
-			self.cleanup_raw_materials_supplied(parent_items, raw_material_table)
+				self.cleanup_raw_materials_supplied(parent_items, raw_material_table)
 
 		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			for item in self.get("items"):
@@ -204,7 +210,43 @@ class BuyingController(StockController):
 		if self.is_subcontracted == "No" and self.get("supplied_items"):
 			self.set('supplied_items', [])
 
-	def update_raw_materials_supplied(self, item, raw_material_table):
+	def update_raw_materials_supplied_based_on_stock_entries(self, raw_material_table):
+		self.set(raw_material_table, [])
+		purchase_orders = [d.purchase_order for d in self.items]
+		if purchase_orders:
+			items = get_subcontracted_raw_materials_from_se(purchase_orders)
+			backflushed_raw_materials = get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, self.name)
+
+			for d in items:
+				qty = d.qty - backflushed_raw_materials.get(d.item_code, 0)
+				rm = self.append(raw_material_table, {})
+				rm.rm_item_code = d.item_code
+				rm.item_name = d.item_name
+				rm.main_item_code = d.main_item_code
+				rm.description = d.description
+				rm.stock_uom = d.stock_uom
+				rm.required_qty = qty
+				rm.consumed_qty = qty
+				rm.serial_no = d.serial_no
+				rm.batch_no = d.batch_no
+
+				# get raw materials rate
+				from erpnext.stock.utils import get_incoming_rate
+				rm.rate = get_incoming_rate({
+					"item_code": d.item_code,
+					"warehouse": self.supplier_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": -1 * qty,
+					"serial_no": rm.serial_no
+				})
+				if not rm.rate:
+					rm.rate = get_valuation_rate(d.item_code, self.supplier_warehouse,
+						self.doctype, self.name, currency=self.company_currency, company = self.company)
+
+				rm.amount = qty * flt(rm.rate)
+
+	def update_raw_materials_supplied_based_on_bom(self, item, raw_material_table):
 		exploded_item = 1
 		if hasattr(item, 'include_exploded_items'):
 			exploded_item = item.get('include_exploded_items')
@@ -636,6 +678,29 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
 
 	return bom_items
+
+def get_subcontracted_raw_materials_from_se(purchase_orders):
+	return frappe.db.sql("""
+		select
+			sed.item_name, sed.item_code, sum(sed.qty) as qty, sed.description,
+			sed.stock_uom, sed.subcontracted_item as main_item_code, sed.serial_no, sed.batch_no
+		from `tabStock Entry` se,`tabStock Entry Detail` sed
+		where
+			se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+			and se.purchase_order= (%s) and ifnull(sed.t_warehouse, '') != ''
+		group by sed.item_code, sed.t_warehouse
+	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders), as_dict=1)
+
+def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, purchase_receipt):
+	return frappe._dict(frappe.db.sql("""
+		select
+			prsi.rm_item_code as item_code, sum(prsi.consumed_qty) as qty
+		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
+		where
+			pr.name = pri.parent and pr.name = prsi.parent and pri.purchase_order= (%s)
+			and pri.item_code = prsi.main_item_code and pr.name != '%s'
+		group by prsi.rm_item_code
+	""" % (','.join(['%s'] * len(purchase_orders)), purchase_receipt), tuple(purchase_orders)))
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
