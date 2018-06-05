@@ -14,7 +14,7 @@ frappe.ui.form.on('Job Opening', {
 	designation: function(frm) {
 		if(frm.doc.designation && frm.doc.company){
 			frappe.call({
-				"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_active_staffing_plan_and_vacancies",
+				"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_active_staffing_plan_details",
 				args: {
 					company: frm.doc.company,
 					designation: frm.doc.designation,
@@ -23,8 +23,8 @@ frappe.ui.form.on('Job Opening', {
 				},
 				callback: function (data) {
 					if(data.message){
-						frm.set_value('staffing_plan', data.message[0]);
-						frm.set_value('planned_vacancies', data.message[1]);
+						frm.set_value('staffing_plan', data.message[0].name);
+						frm.set_value('planned_vacancies', data.message[0].vacancies);
 					} else {
 						frm.set_value('staffing_plan', "");
 						frm.set_value('planned_vacancies', 0);
