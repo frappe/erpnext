@@ -305,10 +305,11 @@ class Asset(AccountsController):
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
-			elif flt(value_after_depreciation) <= expected_value_after_useful_life:
-				status = "Fully Depreciated"
-			elif flt(self.value_after_depreciation) < flt(self.gross_purchase_amount):
-				status = 'Partially Depreciated'
+			elif self.finance_books:
+				if flt(value_after_depreciation) <= expected_value_after_useful_life:
+					status = "Fully Depreciated"
+				elif flt(self.value_after_depreciation) < flt(self.gross_purchase_amount):
+					status = 'Partially Depreciated'
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
