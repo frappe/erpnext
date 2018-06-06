@@ -35,6 +35,7 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
+		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
@@ -456,3 +457,31 @@ class BuyingController(StockController):
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
 
+	def validate_items(self):
+		# validate items to see if they have is_purchase_item or is_subcontracted_item enabled
+
+		if hasattr(self, "is_subcontracted") and self.is_subcontracted == 'Yes':
+			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
+		else:
+			validate_item_type(self, "is_purchase_item", "purchase")
+
+def validate_item_type(doc, fieldname, message):
+	# iterate through items and check if they are valid sales or purchase items
+	items = [d.item_code for d in doc.items if d.item_code]
+
+	# No validation check inase of creating transaction using 'Opening Invoice Creation Tool'
+	if not items:
+		return
+
+	item_list = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
+
+	invalid_items = [d[0] for d in frappe.db.sql("""
+		select item_code from tabItem where name in ({0}) and {1}=0
+		""".format(item_list, fieldname), as_list=True)]
+
+	if invalid_items:
+		frappe.throw(_("Following item {items} {verb} not marked as {message} item.\
+			You can enable them as {message} item from its Item master".format(
+				items = ", ".join([d for d in invalid_items]),
+				verb = "are" if len(invalid_items) > 1 else "is",
+				message = message)))
