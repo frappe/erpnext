@@ -49,7 +49,7 @@ in Search box.
 ### Removing an Item from the Cart
 
 1. Select row in the cart and clik on delete button in the numeric keypad
-  
+
 <img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos_deleted_item.gif">
 
 
@@ -67,7 +67,7 @@ ready to make the Payment. Payment process is divided into 3 steps -
   1. Click on “Make Payment” to get the Payment window.
   2. Select your “Mode of Payment”.
   3. Click on “Pay” button to Save the document.
-  
+
 <img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-payment.png">
 
 Submit the document to finalise the record. After the document is submitted,
@@ -96,12 +96,12 @@ All the records from the POS stores into the browser's local storegae and sync s
 
 Debits:
 
-  * Customer (grand total) 
+  * Customer (grand total)
   * Bank / Cash (payment)
 
 Credits:
 
-  * Income (net total, minus taxes for each Item) 
+  * Income (net total, minus taxes for each Item)
   * Taxes (liabilities to be paid to the government)
   * Customer (payment)
   * Write Off (optional)
@@ -113,5 +113,19 @@ To see entries after “Submit”, click on “View Ledger”.
 User can send email from the POS, after submission of an order, user has to click on menu > email
 <img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-email.png">
 After sync of an order, email sent to the customer with the print of the bill in the attachment
+
+
+### POS Closing Voucher
+
+At the end of its shift, the cashier can close his/her PoS by creating a POS Closing Voucher.
+
+Click on the menu and select "Close the POS"
+
+Select the period, your POS Profile and your user to retrieve all sales registered.
+
+<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-closing-voucher.png">
+
+Enter the collected amount for each mode of payment.
+If you notice any difference between the theoretical amount and the collected amount, create a difference posting.
 
 {next}
