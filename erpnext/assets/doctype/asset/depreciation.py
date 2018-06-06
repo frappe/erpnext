@@ -11,7 +11,6 @@ def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
 	if not frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically"):
 		return
-		
 	if not date:
 		date = today()
 	for asset in get_depreciable_assets(date):
@@ -28,7 +27,7 @@ def get_depreciable_assets(date):
 @frappe.whitelist()
 def make_depreciation_entry(asset_name, date=None):
 	frappe.has_permission('Journal Entry', throw=True)
-	
+
 	if not date:
 		date = today()
 
@@ -38,7 +37,6 @@ def make_depreciation_entry(asset_name, date=None):
 
 	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
 		["depreciation_cost_center", "series_for_depreciation_entry"])
-	
 
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
@@ -81,7 +79,7 @@ def make_depreciation_entry(asset_name, date=None):
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None
-	
+
 	accounts = frappe.db.get_value("Asset Category Account",
 		filters={'parent': asset.asset_category, 'company_name': asset.company},
 		fieldname = ['fixed_asset_account', 'accumulated_depreciation_account',

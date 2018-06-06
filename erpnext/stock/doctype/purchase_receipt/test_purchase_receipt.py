@@ -95,7 +95,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
-		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", add_days(nowdate(), 2))
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
 		self.assertEqual(len(pr.get("supplied_items")), 2)
 
