@@ -12,6 +12,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
+from erpnext.erpnext_integrations.doctype.payment_plan.payment_plan import create_stripe_subscription
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -234,6 +235,10 @@ class PaymentRequest(Document):
 					redirect_to = get_url("/orders/{0}".format(self.reference_name))
 
 			return redirect_to
+
+	def create_subscription(self, payment_provider, gateway_controller, data):
+		if payment_provider == "stripe":
+			return create_stripe_subscription(gateway_controller, data)
 
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
