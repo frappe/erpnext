@@ -58,6 +58,7 @@ def setup_asset():
 		asset.set_missing_values()
 		asset.make_depreciation_schedule()
 		asset.flags.ignore_validate = True
+		asset.flags.ignore_mandatory = True
 		asset.save()
 		asset.submit()
 
@@ -66,7 +67,7 @@ def setup_item():
 	for i in items:
 		item = frappe.new_doc('Item')
 		item.update(i)
-		if item.item_defaults[0].default_warehouse:
+		if hasattr(item, 'item_defaults') and item.item_defaults[0].default_warehouse:
 			item.item_defaults[0].company = data.get("Manufacturing").get('company_name')
 			warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.item_defaults[0].default_warehouse}, limit=1)
 			if warehouse:
