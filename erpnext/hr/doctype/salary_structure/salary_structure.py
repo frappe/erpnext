@@ -40,7 +40,7 @@ class SalaryStructure(Document):
 					flexi_amount += max_of_component
 			if have_a_flexi and self.max_benefits == 0:
 				frappe.throw(_("Max benefits should be greater than zero to despense flexi"))
-			if self.max_benefits > flexi_amount:
+			if have_a_flexi and self.max_benefits > flexi_amount:
 				frappe.throw(_("Total flexi component amount {0} should not be less \
 				than max benefits {1}").format(flexi_amount, self.max_benefits))
 		if not have_a_flexi and self.max_benefits > 0:
