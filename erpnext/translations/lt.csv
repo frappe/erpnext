@@ -1033,7 +1033,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1224,7 +1224,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Nusidėvėjimas įrašas
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Prašome pasirinkti dokumento tipą pirmas
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Atšaukti Medžiaga Apsilankymai {0} prieš atšaukiant šią Priežiūros vizitas
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 standartas
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 standartas
 DocType: Pricing Rule,Rate or Discount,Įkainiai arba nuolaidos
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Serijos Nr {0} nepriklauso punkte {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Reikalinga Kiekis
@@ -1517,7 +1517,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +18,Select your Domains,Pasirinki
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +34,Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3},Kitas Biudžeto įrašas &#39;{0} &quot;jau egzistuoja nuo {1} {2}&quot; fiskalinio metų {3}
 DocType: Item Variant Settings,Fields will be copied over only at time of creation.,Laukai bus kopijuojami tik kūrimo metu.
 DocType: Setup Progress Action,Domains,Domenai
-apps/erpnext/erpnext/projects/doctype/task/task.py +41,'Actual Start Date' can not be greater than 'Actual End Date',"'Pradžios data' negali būti didesnė nei 
+apps/erpnext/erpnext/projects/doctype/task/task.py +41,'Actual Start Date' can not be greater than 'Actual End Date',"'Pradžios data' negali būti didesnė nei
 'Pabaigos data'"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +118,Management,valdymas
 DocType: Cheque Print Template,Payer Settings,mokėtojo Nustatymai
@@ -3076,7 +3076,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3988,11 +3988,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,"Pasirinkite darbuotoją, kad darbuotojas gautų anksčiau."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Pasirinkite teisingą datą
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Pasirinkite savo verslo pobūdį.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5096,7 +5096,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Vardas pareiškėjas
 DocType: Authorization Rule,Customer / Item Name,Klientas / Prekės pavadinimas
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Jei įjungta, paskutiniai elementų pirkimo duomenys nebus surinkti iš ankstesnio pirkimo užsakymo ar pirkimo kvito"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

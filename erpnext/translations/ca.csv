@@ -1020,7 +1020,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1031,19 +1031,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Plantilla de gravamen que es pot aplicar a totes les transaccions de venda. Aquesta plantilla pot contenir llista de caps d'impostos i també altres caps de despeses / ingressos com ""enviament"", ""Assegurances"", ""Maneig"", etc. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Plantilla de gravamen que es pot aplicar a totes les transaccions de venda. Aquesta plantilla pot contenir llista de caps d'impostos i també altres caps de despeses / ingressos com ""enviament"", ""Assegurances"", ""Maneig"", etc.
 
- #### Nota 
+ #### Nota
 
  La taxa d'impost que definir aquí serà el tipus impositiu general per a tots els articles ** **. Si hi ha ** ** Els articles que tenen diferents taxes, han de ser afegits en l'Impost ** ** Article taula a l'article ** ** mestre.
 
- #### Descripció de les Columnes 
+ #### Descripció de les Columnes
 
- 1. Tipus de Càlcul: 
+ 1. Tipus de Càlcul:
  - Això pot ser en ** Net Total ** (que és la suma de la quantitat bàsica).
  - ** En Fila Anterior total / import ** (per impostos o càrrecs acumulats). Si seleccioneu aquesta opció, l'impost s'aplica com un percentatge de la fila anterior (a la taula d'impostos) Quantitat o total.
  - Actual ** ** (com s'ha esmentat).
- 2. Compte Cap: El llibre major de comptes en què es va reservar aquest impost 
+ 2. Compte Cap: El llibre major de comptes en què es va reservar aquest impost
  3. Centre de Cost: Si l'impost / càrrega és un ingrés (com l'enviament) o despesa en què ha de ser reservat en contra d'un centre de costos.
  4. Descripció: Descripció de l'impost (que s'imprimiran en factures / cometes).
  5. Rate: Taxa d'impost.
@@ -1229,7 +1229,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Entrada depreciació
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Si us plau. Primer seleccioneu el tipus de document
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel·la Visites Materials {0} abans de cancel·lar aquesta visita de manteniment
-DocType: Crop Cycle,ISO 8016 standard,Norma ISO 8016
+DocType: Crop Cycle,ISO 8601 standard,Norma ISO 8601
 DocType: Pricing Rule,Rate or Discount,Tarifa o descompte
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},El número de Sèrie {0} no pertany a l'article {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Quantitat necessària
@@ -3054,7 +3054,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3066,19 +3066,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Plantilla de gravamen que es pot aplicar a totes les operacions de compra. Aquesta plantilla pot contenir llista de caps d'impostos i també altres caps de despeses com ""enviament"", ""Assegurances"", ""Maneig"", etc. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Plantilla de gravamen que es pot aplicar a totes les operacions de compra. Aquesta plantilla pot contenir llista de caps d'impostos i també altres caps de despeses com ""enviament"", ""Assegurances"", ""Maneig"", etc.
 
- #### Nota 
+ #### Nota
 
  El tipus impositiu es defineix aquí serà el tipus de gravamen general per a tots els articles ** **. Si hi ha ** ** Els articles que tenen diferents taxes, han de ser afegits en l'Impost ** ** Article taula a l'article ** ** mestre.
 
- #### Descripció de les Columnes 
+ #### Descripció de les Columnes
 
- 1. Tipus de Càlcul: 
+ 1. Tipus de Càlcul:
  - Això pot ser en ** Net Total ** (que és la suma de la quantitat bàsica).
  - ** En Fila Anterior total / import ** (per impostos o càrrecs acumulats). Si seleccioneu aquesta opció, l'impost s'aplica com un percentatge de la fila anterior (a la taula d'impostos) Quantitat o total.
  - Actual ** ** (com s'ha esmentat).
- 2. Compte Cap: El llibre major de comptes en què es va reservar aquest impost 
+ 2. Compte Cap: El llibre major de comptes en què es va reservar aquest impost
  3. Centre de Cost: Si l'impost / càrrega és un ingrés (com l'enviament) o despesa en què ha de ser reservat en contra d'un centre de costos.
  4. Descripció: Descripció de l'impost (que s'imprimiran en factures / cometes).
  5. Rate: Taxa d'impost.
@@ -3356,7 +3356,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Termes i Condicions que es poden afegir a compres i vendes estàndard.
 
- Exemples: 
+ Exemples:
 
  1. Validesa de l'oferta.
  1. Condicions de pagament (per avançat, el crèdit, part antelació etc.).
@@ -3365,7 +3365,7 @@ Examples:
  1. Garantia si n'hi ha.
  1. Política de les voltes.
  1. Termes d'enviament, si escau.
- 1. Formes de disputes que aborden, indemnització, responsabilitat, etc. 
+ 1. Formes de disputes que aborden, indemnització, responsabilitat, etc.
  1. Adreça i contacte de la seva empresa."
 DocType: Issue,Issue Type,Tipus d&#39;emissió
 DocType: Attendance,Leave Type,Tipus de llicència
@@ -3988,11 +3988,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Seleccioneu un empleat per fer avançar l&#39;empleat.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Seleccioneu una data vàlida
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Seleccioneu la naturalesa del seu negoci.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -4816,7 +4816,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +15,Brokerage,Corretatge
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +207,Attendance for employee {0} is already marked for this day,L&#39;assistència per a l&#39;empleat {0} ja està marcat per al dia d&#39;avui
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","en minuts 
+Updated via 'Time Log'","en minuts
  Actualitzat a través de 'Hora de registre'"
 DocType: Customer,From Lead,De client potencial
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Comandes llançades per a la producció.
@@ -5080,7 +5080,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Nom del sol·licitant
 DocType: Authorization Rule,Customer / Item Name,Client / Nom de l'article
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Si està habilitat, els detalls de l&#39;última compra dels articles no seran obtinguts a partir de l&#39;ordre de compra anterior o el rebut de compra"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -5543,7 +5543,7 @@ DocType: Purchase Invoice Item,Rejected Serial No,Número de sèrie Rebutjat
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start date or end date is overlapping with {0}. To avoid please set company,"Any d'inici o any finalització es solapa amb {0}. Per evitar, configuri l'empresa"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},La data d'inici ha de ser anterior a la data de finalització per l'article {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple :. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple :. ABCD #####
  Si la sèrie s'estableix i Nombre de sèrie no s'esmenta en les transaccions, nombre de sèrie a continuació automàtica es crearà sobre la base d'aquesta sèrie. Si sempre vol esmentar explícitament els números de sèrie per a aquest article. deixeu en blanc."
 DocType: Upload Attendance,Upload Attendance,Pujar Assistència
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,Llista de materials i de fabricació es requereixen Quantitat

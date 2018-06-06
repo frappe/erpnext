@@ -1032,7 +1032,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1043,19 +1043,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","모든 판매 거래에 적용 할 수있는 표준 세금 템플릿입니다.이 템플릿은 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","모든 판매 거래에 적용 할 수있는 표준 세금 템플릿입니다.이 템플릿은
 
- 세율을 주 #### 
+ 세율을 주 ####
 
  등 ""처리"", 세금 머리와 ""배송"", ""보험""와 같은 다른 비용 / 소득 헤드의 목록을 포함 할 수 있습니다 ** 모든 ** 항목에 대한 표준 세율 될 것입니다 여기에 정의합니다.다른 비율이 ** ** 항목이있는 경우, 그들은 ** 항목 세금에 추가해야합니다 ** ** 항목 ** 마스터 테이블.
 
- #### 열 
+ #### 열
 
- 1에 대한 설명.계산 유형 : 
+ 1에 대한 설명.계산 유형 :
  -이에있을 수 있습니다 ** 순 (즉, 기본 금액의 합계입니다) ** 총.
  - ** 이전 행 전체 / 양 **에 (누적 세금이나 요금에 대한).이 옵션을 선택하면 세금 금액 또는 총 (세금 테이블에) 이전 행의 비율로 적용됩니다.
  - ** 실제 (언급 한 바와 같이).
- 2.계정 머리 :이 세금 
+ 2.계정 머리 :이 세금
  3을 예약 할하는 계정 원장.비용 센터 : 세금 / 요금 (운송 등) 소득 또는 경비 경우는 비용 센터에 예약 할 필요가있다.
  4.설명 : 세금의 설명 (즉,이 송장 / 따옴표로 인쇄됩니다).
  5.속도 : 세율.
@@ -1242,7 +1242,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,감가 상각 항목
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,첫 번째 문서 유형을 선택하세요
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,"이 유지 보수 방문을 취소하기 전, 재질 방문 {0} 취소"
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 표준
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 표준
 DocType: Pricing Rule,Rate or Discount,요금 또는 할인
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},일련 번호 {0} 항목에 속하지 않는 {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,필요한 수량
@@ -3093,7 +3093,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3105,19 +3105,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","모든 구매 거래에 적용 할 수있는 표준 세금 템플릿입니다.이 템플릿은 여기에 정의 
+10. Add or Deduct: Whether you want to add or deduct the tax.","모든 구매 거래에 적용 할 수있는 표준 세금 템플릿입니다.이 템플릿은 여기에 정의
 
- 세율을 주 #### 
+ 세율을 주 ####
 
  등 ""처리"", 세금 머리와 ""배송"", ""보험""와 같은 다른 비용 헤드의 목록을 포함 할 수 있습니다 ** 모든 ** 항목에 대한 표준 세율 될 것입니다.다른 비율이 ** ** 항목이있는 경우, 그들은 ** 항목 세금에 추가해야합니다 ** ** 항목 ** 마스터 테이블.
 
- #### 열 
+ #### 열
 
- 1에 대한 설명.계산 유형 : 
+ 1에 대한 설명.계산 유형 :
  -이에있을 수 있습니다 ** 순 (즉, 기본 금액의 합계입니다) ** 총.
  - ** 이전 행 전체 / 양 **에 (누적 세금이나 요금에 대한).이 옵션을 선택하면 세금 금액 또는 총 (세금 테이블에) 이전 행의 비율로 적용됩니다.
  - ** 실제 (언급 한 바와 같이).
- 2.계정 머리 :이 세금 
+ 2.계정 머리 :이 세금
  3을 예약 할하는 계정 원장.비용 센터 : 세금 / 요금 (운송 등) 소득 또는 경비 경우는 비용 센터에 예약 할 필요가있다.
  4.설명 : 세금의 설명 (즉,이 송장 / 따옴표로 인쇄됩니다).
  5.속도 : 세율.
@@ -3397,7 +3397,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","표준 약관과 판매 및 구매에 추가 할 수있는 조건.
 
- 예 : 
+ 예 :
 
  1.제안의 유효 기간.
  1.지불 조건 (신용에 사전에, 일부 사전 등).
@@ -3406,7 +3406,7 @@ Examples:
  1.보증 (있는 경우).
  1.정책을 돌려줍니다.
  1.운송 약관 (해당되는 경우).
- 1.등 주소 분쟁, 손해 배상, 책임, 
+ 1.등 주소 분쟁, 손해 배상, 책임,
  하나의 방법.주소 및 회사의 연락."
 DocType: Issue,Issue Type,이슈 유형
 DocType: Attendance,Leave Type,휴가 유형
@@ -4038,11 +4038,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,직원을 선택하여 직원을 진급시킬 수 있습니다.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,유효한 날짜를 선택하십시오.
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,비즈니스의 성격을 선택합니다.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5146,7 +5146,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,신청자 이름
 DocType: Authorization Rule,Customer / Item Name,고객 / 상품 이름
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt",이 옵션을 사용하면 이전 구매 주문 또는 구매 영수증에서 항목의 마지막 구매 세부 정보를 가져올 수 없습니다
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -5615,7 +5615,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start 
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +122,Please mention the Lead Name in Lead {0},Lead {0}의 리드 이름을 언급하십시오.
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},시작 날짜는 항목에 대한 종료 날짜보다 작아야합니다 {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","예 :. 시리즈가 설정되고 일련 번호가 트랜잭션에 언급되지 않은 경우 ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","예 :. 시리즈가 설정되고 일련 번호가 트랜잭션에 언급되지 않은 경우 ABCD #####
  후 자동 일련 번호는이 시리즈를 기반으로 생성됩니다.당신은 항상 명시 적으로이 항목에 대한 일련 번호를 언급합니다. 이 비워 둡니다."
 DocType: Upload Attendance,Upload Attendance,출석 업로드
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,BOM 및 제조 수량이 필요합니다

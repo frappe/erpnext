@@ -1163,7 +1163,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1174,19 +1174,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Tüm Satış İşlemlerine uygulanabilir standart vergi şablonu. Bu şablon 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Tüm Satış İşlemlerine uygulanabilir standart vergi şablonu. Bu şablon
 
- vergi oranını size Not #### 
+ vergi oranını size Not ####
 
  vb ""Handling"", vergi başkanları ve ""Denizcilik"", ""Sigorta"" gibi diğer gider / gelir başkanları listesini içerebilir ** Tüm ** Öğeler için standart vergi oranı olacaktır burada tanımlayın. Farklı fiyat bilgisi ** ** Ürünleri varsa, bunlar ** Ürün Vergisinde eklenmesi gerekir ** ** ** Ürün ana tablo.
 
- #### Kolonların 
+ #### Kolonların
 
- 1 Açıklaması. Hesaplama Türü: 
+ 1 Açıklaması. Hesaplama Türü:
  - Bu üzerinde olabilir ** Net (yani temel miktarın toplamı) ** Toplam.
  - ** Önceki Satır Toplam / Tutar ** On (kümülatif vergi ya da harç için). Bu seçeneği seçerseniz, vergi miktarı veya toplam (vergi tablosunda) önceki satırın bir yüzdesi olarak uygulanacaktır.
  - ** ** Gerçek (belirtildiği gibi).
- 2. Hesap Başkanı: Bu vergi 
+ 2. Hesap Başkanı: Bu vergi
  3 rezerve edileceği altında Hesap defteri. Maliyet Merkezi: Vergi / şarj (nakliye gibi) bir gelir veya gider ise bir Maliyet Merkezi karşı rezervasyonu gerekmektedir.
  4. Açıklama: Vergi Açıklaması (Bu faturalar / tırnak içinde basılacaktır).
  5. Puan: Vergi oranı.
@@ -1390,7 +1390,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Amortisman kayıt
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,Önce belge türünü seçiniz
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Bu Bakım Ziyaretini iptal etmeden önce Malzeme Ziyareti {0} iptal edin
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 standardı
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 standardı
 DocType: Pricing Rule,Rate or Discount,Oran veya İndirim
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Seri No {0} Ürün {1} e ait değil
 DocType: Purchase Receipt Item Supplied,Required Qty,Gerekli Adet
@@ -3438,7 +3438,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3450,19 +3450,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Tüm Satınalma İşlemleri uygulanabilir standart vergi şablonu. Bu şablon burada tanımlamak 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Tüm Satınalma İşlemleri uygulanabilir standart vergi şablonu. Bu şablon burada tanımlamak
 
- vergi oranı Not #### 
+ vergi oranı Not ####
 
  vb ""Handling"", vergi başkanları ve ""Denizcilik"", ""Sigorta"" gibi diğer gider başkanlarının listesini içerebilir ** Tüm ** Öğeler için standart vergi oranı olacaktır. Farklı fiyat bilgisi ** ** Ürünleri varsa, bunlar ** Ürün Vergisinde eklenmesi gerekir ** ** ** Ürün ana tablo.
 
- #### Kolonların 
+ #### Kolonların
 
- 1 Açıklaması. Hesaplama Türü: 
+ 1 Açıklaması. Hesaplama Türü:
  - Bu üzerinde olabilir ** Net (yani temel miktarın toplamı) ** Toplam.
  - ** Önceki Satır Toplam / Tutar ** On (kümülatif vergi ya da harç için). Bu seçeneği seçerseniz, vergi miktarı veya toplam (vergi tablosunda) önceki satırın bir yüzdesi olarak uygulanacaktır.
  - ** ** Gerçek (belirtildiği gibi).
- 2. Hesap Başkanı: Bu vergi 
+ 2. Hesap Başkanı: Bu vergi
  3 rezerve edileceği altında Hesap defteri. Maliyet Merkezi: Vergi / şarj (nakliye gibi) bir gelir veya gider ise bir Maliyet Merkezi karşı rezervasyonu gerekmektedir.
  4. Açıklama: Vergi Açıklaması (Bu faturalar / tırnak içinde basılacaktır).
  5. Puan: Vergi oranı.
@@ -3772,7 +3772,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Standart Şartlar ve Satış ve Alımlar eklenebilir Koşullar.
 
- Örnekler: 
+ Örnekler:
 
  1. Teklifin geçerliliği.
  1. Ödeme Koşulları (Kredi On Önceden, bölüm avans vb).
@@ -3781,7 +3781,7 @@ Examples:
  1. Garanti alınırlar.
  1. Politikası döndürür.
  1. Nakliye koşulları, varsa.
- 1. Vb adresleme uyuşmazlıkların, tazminat, sorumluluk, 
+ 1. Vb adresleme uyuşmazlıkların, tazminat, sorumluluk,
  1 Yolları. Adres ve Şirket İletişim."
 DocType: Issue,Issue Type,Sorun Tipi
 DocType: Attendance,Leave Type,İzin Tipi
@@ -4468,11 +4468,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Çalışan avansını elde etmek için bir çalışan seçin.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Lütfen geçerli bir tarih seçiniz
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,işinizin doğası seçin.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5391,7 +5391,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +15,Brokerage,Komi
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +15,Brokerage,Komisyonculuk
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +207,Attendance for employee {0} is already marked for this day,çalışan {0} için Seyirci zaten bu gün için işaretlenmiş
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","Dakika 
+Updated via 'Time Log'","Dakika
  'Zaman Log' aracılığıyla Güncelleme"
 DocType: Customer,From Lead,Baştan
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Üretim için verilen emirler.
@@ -5682,7 +5682,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Başvuru sahibinin adı
 DocType: Authorization Rule,Customer / Item Name,Müşteri / Ürün İsmi
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Etkinleştirilirse, öğelerin son satın alma ayrıntıları önceki satın alma siparişinden veya satın alma makbuzundan alınmaz."
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -6212,7 +6212,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start 
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +122,Please mention the Lead Name in Lead {0},Lütfen Kurşun Adını {0} Kurşun&#39;dan belirtin
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},Başlangıç tarihi Ürün {0} için bitiş tarihinden daha az olmalıdır
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Örnek:. Serisi ayarlanır ve Seri No işlemlerinde belirtilen değilse ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Örnek:. Serisi ayarlanır ve Seri No işlemlerinde belirtilen değilse ABCD #####
 , daha sonra otomatik seri numarası bu serisine dayanan oluşturulur. Her zaman açıkça bu öğe için seri No. bahsetmek istiyorum. Bu boş bırakın."
 DocType: Upload Attendance,Upload Attendance,Devamlılığı Güncelle
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,Ürün Ağacı ve Üretim Miktarı gereklidir

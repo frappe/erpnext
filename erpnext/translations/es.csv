@@ -1020,7 +1020,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1210,7 +1210,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Entrada de Depreciación
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,"Por favor, seleccione primero el tipo de documento"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancelar visitas {0} antes de cancelar la visita de mantenimiento
-DocType: Crop Cycle,ISO 8016 standard,Estándar ISO 8016
+DocType: Crop Cycle,ISO 8601 standard,Estándar ISO 8601
 DocType: Pricing Rule,Rate or Discount,Tarifa o Descuento
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Número de serie {0} no pertenece al producto {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Cant. Solicitada
@@ -3034,7 +3034,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3316,7 +3316,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Términos y Condiciones Estándar que se pueden agregar a compras y ventas.
 
- Ejemplos: 
+ Ejemplos:
 
  1. Validez de la oferta.
  1. Condiciones de pago (por adelantado, el crédito, parte antelación etc).
@@ -3325,7 +3325,7 @@ Examples:
  1. Garantía si la hay.
  1. Política de devolución.
  1. Términos de envío, si aplica.
- 1. Formas de abordar disputas, indemnización, responsabilidad, etc. 
+ 1. Formas de abordar disputas, indemnización, responsabilidad, etc.
  1. Dirección y contacto de su empresa."
 DocType: Issue,Issue Type,Tipo de Problema
 DocType: Attendance,Leave Type,Tipo de Licencia
@@ -3948,11 +3948,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,Seleccione un empleado para obtener el adelanto del empleado.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,Por favor seleccione una fecha valida
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Seleccione la naturaleza de su negocio.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5038,7 +5038,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Nombre del Solicitante
 DocType: Authorization Rule,Customer / Item Name,Cliente / Nombre de Artículo
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Si está habilitado, los detalles de la última compra de los artículos no se obtendrán de la orden de compra anterior o recibo de compra"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -5503,7 +5503,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start 
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +122,Please mention the Lead Name in Lead {0},Por favor mencione el nombre principal en la iniciativa {0}
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},La fecha de inicio debe ser menor que la fecha de finalización para el producto {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ejemplo:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ejemplo:. ABCD #####
  Si la serie se establece y el número de serie no se menciona en las transacciones, entonces se creara un número de serie automático sobre la base de esta serie. Si siempre quiere mencionar explícitamente los números de serie para este artículo, déjelo en blanco."
 DocType: Upload Attendance,Upload Attendance,Subir Asistencia
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,Se requiere la lista de materiales (LdM) y cantidad a manufacturar.

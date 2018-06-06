@@ -39,7 +39,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +43,Exchange Rate 
 DocType: Sales Invoice,Customer Name,வாடிக்கையாளர் பெயர்
 DocType: Vehicle,Natural Gas,இயற்கை எரிவாயு
 apps/erpnext/erpnext/setup/setup_wizard/operations/company_setup.py +64,Bank account cannot be named as {0},வங்கி கணக்கு என பெயரிடப்பட்டது {0}
-DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,"தலைவர்கள் (குழுக்களின்) எதிராக, 
+DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,"தலைவர்கள் (குழுக்களின்) எதிராக,
 கணக்கு  பதிவுகள் செய்யப்படுகின்றன மற்றும் சமநிலைகள் பராமரிக்கப்படுகிறது."
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +196,Outstanding for {0} cannot be less than zero ({1}),சிறந்த {0} பூஜ்யம் விட குறைவாக இருக்க முடியாது ( {1} )
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +356,There are no submitted Salary Slips to process.,செயலாற்றுவதற்கு சமர்ப்பிக்கப்படாத எந்த சம்பளமும் இல்லை.
@@ -461,7 +461,7 @@ DocType: Appointment Type,Is Inpatient,உள்நோயாளி
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +55,Guardian1 Name,Guardian1 பெயர்
 DocType: Delivery Note,In Words (Export) will be visible once you save the Delivery Note.,நீங்கள் டெலிவரி குறிப்பு சேமிக்க முறை வேர்ட்ஸ் (ஏற்றுமதி) காண முடியும்.
 DocType: Cheque Print Template,Distance from left edge,இடது ஓரத்தில் இருந்து தூரம்
-apps/erpnext/erpnext/utilities/bot.py +29,{0} units of [{1}](#Form/Item/{1}) found in [{2}](#Form/Warehouse/{2}),"{0} [{1}] 
+apps/erpnext/erpnext/utilities/bot.py +29,{0} units of [{1}](#Form/Item/{1}) found in [{2}](#Form/Warehouse/{2}),"{0} [{1}]
 அலகுகள் (# படிவம் / பொருள் / {1}) [{2}] காணப்படுகிறது (# படிவம் / சேமிப்பு கிடங்கு / {2})"
 DocType: Lead,Industry,தொழில்
 DocType: Employee,Job Profile,வேலை விவரம்
@@ -1032,7 +1032,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1043,19 +1043,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","அனைத்து விற்பனை நடவடிக்கைகள் பயன்படுத்த முடியும் என்று ஸ்டாண்டர்ட் வரி வார்ப்புரு. இந்த டெம்ப்ளேட் 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","அனைத்து விற்பனை நடவடிக்கைகள் பயன்படுத்த முடியும் என்று ஸ்டாண்டர்ட் வரி வார்ப்புரு. இந்த டெம்ப்ளேட்
 
- வரி விகிதம் நீங்கள் குறிப்பு #### 
+ வரி விகிதம் நீங்கள் குறிப்பு ####
 
  முதலியன ""கையாளும்"", வரி தலைவர்கள் மற்றும் ""கப்பல்"", ""காப்பீடு"" போன்ற மற்ற இழப்பில் / வருமான தலைவர்கள் பட்டியலில் கொண்டிருக்க முடியாது ** எல்லா ** பொருட்கள் நிலையான வரி விதிக்கப்படும் இங்கே வரையறுக்க. விகிதங்களைக் கொண்டிருக்கின்றன ** என்று ** பொருட்கள் இருந்தால், அவர்கள் ** பொருள் வரி சேர்க்கப்படும் ** ** பொருள் ** மாஸ்டர் அட்டவணை.
 
- #### பத்திகள் 
+ #### பத்திகள்
 
- 1 விளக்கம். கணக்கீடு வகை: 
+ 1 விளக்கம். கணக்கீடு வகை:
  - இந்த இருக்க முடியும் ** நிகர (என்று அடிப்படை அளவு கூடுதல் ஆகும்) ** மொத்த.
  - ** முந்தைய வரிசை மொத்த / தொகை ** அன்று (ஒட்டுமொத்தமாக வரி அல்லது குற்றச்சாட்டுக்களை பதிவு). நீங்கள் இந்த விருப்பத்தை தேர்வு செய்தால், வரி அளவு அல்லது மொத் (வரி அட்டவணையில்) முந்தைய வரிசையில் ஒரு சதவீதம் என பயன்படுத்தப்படும்.
  - ** ** உண்மையான (குறிப்பிட்டுள்ள).
- 2. கணக்கு தலைமை: இந்த வரி 
+ 2. கணக்கு தலைமை: இந்த வரி
  3 முன்பதிவு கீழ் கணக்கு பேரேட்டில். விலை மையம்: வரி / கட்டணம் (கப்பல் போன்றவை) வருமானம் அல்லது செலவு என்றால் அது ஒரு செலவு மையம் எதிரான பதிவு செய்து கொள்ள வேண்டும்.
  4. விளக்கம்: வரி விளக்கம் (என்று பொருள் / மேற்கோள்கள் ல் அச்சிடப்பட்ட வேண்டும்).
  5. விலை: வரி வீதம்.
@@ -1241,7 +1241,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,தேய்மானம் நுழைவு
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,முதல் ஆவணம் வகையை தேர்ந்தெடுக்கவும்
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,இந்த பராமரிப்பு பணிகள் முன் பொருள் வருகைகள் {0} ரத்து
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 தரநிலை
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 தரநிலை
 DocType: Pricing Rule,Rate or Discount,விகிதம் அல்லது தள்ளுபடி
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},தொடர் இல {0} பொருள் அல்ல {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,தேவையான அளவு
@@ -1249,7 +1249,7 @@ apps/erpnext/erpnext/public/js/hub/hub_listing.js +58,Favourites,பிடித
 DocType: Hub Settings,Custom Data,தனிப்பயன் தரவு
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +126,Warehouses with existing transaction can not be converted to ledger.,தற்போதுள்ள பரிவர்த்தனை கிடங்குகள் பேரேடு மாற்றப்பட முடியாது.
 DocType: Bank Reconciliation,Total Amount,மொத்த தொகை
-apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +32,Internet Publishing,"இணைய 
+apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +32,Internet Publishing,"இணைய
 வெளியிடுதல்"
 DocType: Prescription Duration,Number,எண்
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js +25,Creating {0} Invoice,{0} விலைப்பட்டியல் உருவாக்குதல்
@@ -1773,7 +1773,7 @@ DocType: Asset Settings,This value is used for pro-rata temporis calculation,ச
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +90,You need to enable Shopping Cart,வண்டியில் செயல்படுத்த வேண்டும்
 DocType: Payment Entry,Writeoff,Writeoff
 DocType: Stock Settings,Naming Series Prefix,பெயரிடும் தொடர் முன்னொட்டு
-DocType: Appraisal Template Goal,Appraisal Template Goal,"மதிப்பீட்டு வார்ப்புரு 
+DocType: Appraisal Template Goal,Appraisal Template Goal,"மதிப்பீட்டு வார்ப்புரு
 இலக்கு"
 DocType: Salary Component,Earning,சம்பாதித்து
 DocType: Supplier Scorecard,Scoring Criteria,மதிப்பீட்டு அளவுகோல்
@@ -1957,7 +1957,7 @@ DocType: Maintenance Schedule,Schedules,கால அட்டவணைகள்
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +472,POS Profile is required to use Point-of-Sale,பாயிண்ட்-ன்-விற்பனைக்கு POS விவரம் தேவை
 DocType: Purchase Invoice Item,Net Amount,நிகர விலை
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +141,{0} {1} has not been submitted so the action cannot be completed,{0} {1} ஓர் செயல் முடிவடைந்தால் முடியாது சமர்ப்பிக்க செய்யப்படவில்லை
-DocType: Purchase Order Item Supplied,BOM Detail No,"BOM 
+DocType: Purchase Order Item Supplied,BOM Detail No,"BOM
 விபரம் எண்"
 DocType: Landed Cost Voucher,Additional Charges,கூடுதல் கட்டணங்கள்
 DocType: Purchase Invoice,Additional Discount Amount (Company Currency),கூடுதல் தள்ளுபடி தொகை (நிறுவனத்தின் நாணயம்)
@@ -2845,7 +2845,7 @@ DocType: Fee Schedule,Fee Structure,கட்டணம் அமைப்பு
 DocType: Timesheet Detail,Costing Amount,இதற்கான செலவு தொகை
 DocType: Student Admission Program,Application Fee,விண்ணப்பக் கட்டணம்
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +52,Submit Salary Slip,சம்பளம் ஸ்லிப் &#39;to
-apps/erpnext/erpnext/controllers/selling_controller.py +137,Maxiumm discount for Item {0} is {1}%,"பொருள் {0} {1}% க்கான 
+apps/erpnext/erpnext/controllers/selling_controller.py +137,Maxiumm discount for Item {0} is {1}%,"பொருள் {0} {1}% க்கான
 அதிகபட்ச தள்ளுபடி"
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.js +16,Import in Bulk,மொத்த  இறக்குமதி
 DocType: Sales Partner,Address & Contacts,முகவரி மற்றும் தொடர்புகள்
@@ -3094,7 +3094,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3106,19 +3106,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","அனைத்து கொள்முதல் நடவடிக்கை பயன்படுத்த முடியும் என்று ஸ்டாண்டர்ட் வரி வார்ப்புரு. இந்த டெம்ப்ளேட் நீங்கள் இங்கே வரையறுக்க 
+10. Add or Deduct: Whether you want to add or deduct the tax.","அனைத்து கொள்முதல் நடவடிக்கை பயன்படுத்த முடியும் என்று ஸ்டாண்டர்ட் வரி வார்ப்புரு. இந்த டெம்ப்ளேட் நீங்கள் இங்கே வரையறுக்க
 
- வரி விகிதம் குறிப்பு #### 
+ வரி விகிதம் குறிப்பு ####
 
  முதலியன ""கையாளும்"", வரி தலைவர்கள் மற்றும் ""கப்பல்"", ""காப்பீடு"" போன்ற மற்ற இழப்பில் தலைவர்கள் பட்டியலில் கொண்டிருக்க முடியாது ** எல்லா ** பொருட்கள் நிலையான வரி விதிக்கப்படும். விகிதங்களைக் கொண்டிருக்கின்றன ** என்று ** பொருட்கள் இருந்தால், அவர்கள் ** பொருள் வரி சேர்க்கப்படும் ** ** பொருள் ** மாஸ்டர் அட்டவணை.
 
- #### பத்திகள் 
+ #### பத்திகள்
 
- 1 விளக்கம். கணக்கீடு வகை: 
+ 1 விளக்கம். கணக்கீடு வகை:
  - இந்த இருக்க முடியும் ** நிகர (என்று அடிப்படை அளவு கூடுதல் ஆகும்) ** மொத்த.
  - ** முந்தைய வரிசை மொத்த / தொகை ** அன்று (ஒட்டுமொத்தமாக வரி அல்லது குற்றச்சாட்டுக்களை பதிவு). நீங்கள் இந்த விருப்பத்தை தேர்வு செய்தால், வரி அளவு அல்லது மொத் (வரி அட்டவணையில்) முந்தைய வரிசையில் ஒரு சதவீதம் என பயன்படுத்தப்படும்.
  - ** ** உண்மையான (குறிப்பிட்டுள்ள).
- 2. கணக்கு தலைமை: இந்த வரி 
+ 2. கணக்கு தலைமை: இந்த வரி
  3 முன்பதிவு கீழ் கணக்கு பேரேட்டில். விலை மையம்: வரி / கட்டணம் (கப்பல் போன்றவை) வருமானம் அல்லது செலவு என்றால் அது ஒரு செலவு மையம் எதிரான பதிவு செய்து கொள்ள வேண்டும்.
  4. விளக்கம்: வரி விளக்கம் (என்று பொருள் / மேற்கோள்கள் ல் அச்சிடப்பட்ட வேண்டும்).
  5. விலை: வரி வீதம்.
@@ -3398,7 +3398,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","நிலையான விதிமுறைகள் மற்றும் விற்பனை மற்றும் கொள்முதல் சேர்க்க முடியும் என்று நிபந்தனைகள்.
 
- எடுத்துக்காட்டுகள்: 
+ எடுத்துக்காட்டுகள்:
 
  1. சலுகை செல்லுபடியாகும்.
  1. கட்டணம் விதிமுறைகள் (கடன் அட்வான்ஸ், பகுதியாக முன்கூட்டியே போன்றவை).
@@ -3407,7 +3407,7 @@ Examples:
  1. உத்தரவாதத்தை ஏதேனும்.
  1. கொள்கை திருப்பும்.
  1. கப்பல் விதிமுறைகள், பொருந்தினால்.
- 1. முதலியன உரையாற்றும் மோதல்களில், ஈட்டுறுதி, பொறுப்பு, 
+ 1. முதலியன உரையாற்றும் மோதல்களில், ஈட்டுறுதி, பொறுப்பு,
  1 வழிகள். முகவரி மற்றும் உங்கள் நிறுவனத்தின் தொடர்பு."
 DocType: Issue,Issue Type,வெளியீடு வகை
 DocType: Attendance,Leave Type,வகை விட்டு
@@ -4036,11 +4036,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,ஊழியர் முன்கூட்டியே பெற ஒரு ஊழியரைத் தேர்ந்தெடுக்கவும்.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,சரியான தேதி ஒன்றைத் தேர்ந்தெடுக்கவும்
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,உங்கள் வணிக தன்மை தேர்ந்தெடுக்கவும்.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5140,7 +5140,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,விண்ணப்பதாரர் பெயர்
 DocType: Authorization Rule,Customer / Item Name,வாடிக்கையாளர் / உருப்படி பெயர்
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","இயக்கப்பட்டிருந்தால், முந்தைய கொள்முதல் ஆர்டர் அல்லது கொள்முதல் பெறுதலில் இருந்து உருப்படிகளின் கடைசி கொள்முதல் விவரங்கள் பெறப்படாது"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -5607,7 +5607,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start 
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +122,Please mention the Lead Name in Lead {0},முன்னணி தலைப்பில் குறிப்பிடவும் {0}
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},தொடக்க தேதி பொருள் முடிவு தேதி விட குறைவாக இருக்க வேண்டும் {0}
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","உதாரணம்:. தொடர் அமைக்க மற்றும் சீரியல் பரிமாற்றங்கள் குறிப்பிடப்பட்டுள்ளது இல்லை என்றால் ABCD, ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","உதாரணம்:. தொடர் அமைக்க மற்றும் சீரியல் பரிமாற்றங்கள் குறிப்பிடப்பட்டுள்ளது இல்லை என்றால் ABCD, #####
 , பின்னர் தானாக வரிசை எண் இந்த தொடரை அடிப்படையாக கொண்டு உருவாக்கப்பட்டது. நீங்கள் எப்போதும் வெளிப்படையாக இந்த உருப்படியை தொடர் இல குறிப்பிட வேண்டும் என்றால். இதை நிரப்புவதில்லை."
 DocType: Upload Attendance,Upload Attendance,பங்கேற்கும் பதிவேற்ற
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +616,BOM and Manufacturing Quantity are required,"BOM, மற்றும் தயாரிப்பு தேவையான அளவு"

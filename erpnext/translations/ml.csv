@@ -1030,7 +1030,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1221,7 +1221,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,മൂല്യത്തകർച്ച എൻട്രി
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,ആദ്യം ഡോക്യുമെന്റ് തരം തിരഞ്ഞെടുക്കുക
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,ഈ മെയിൻറനൻസ് സന്ദർശനം റദ്ദാക്കുന്നതിൽ മുമ്പ് മെറ്റീരിയൽ സന്ദർശനങ്ങൾ {0} റദ്ദാക്കുക
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 സ്റ്റാൻഡേർഡ്
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 സ്റ്റാൻഡേർഡ്
 DocType: Pricing Rule,Rate or Discount,നിരക്ക് അല്ലെങ്കിൽ കിഴിവ്
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},സീരിയൽ ഇല്ല {0} ഇനം വരെ {1} സ്വന്തമല്ല
 DocType: Purchase Receipt Item Supplied,Required Qty,ആവശ്യമായ Qty
@@ -3065,7 +3065,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3976,11 +3976,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,ജീവനക്കാരുടെ മുൻകൂറായി ലഭിക്കാൻ ഒരു ജീവനക്കാരനെ തിരഞ്ഞെടുക്കുക.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,സാധുതയുള്ള ഒരു തീയതി തിരഞ്ഞെടുക്കുക
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,നിങ്ങളുടെ ബിസിനസ്സ് സ്വഭാവം തിരഞ്ഞെടുക്കുക.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5079,7 +5079,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,അപേക്ഷകന് പേര്
 DocType: Authorization Rule,Customer / Item Name,കസ്റ്റമർ / ഇനം പേര്
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","പ്രാപ്തമാക്കിയിട്ടുണ്ടെങ്കിൽ, മുമ്പത്തെ വാങ്ങൽ ഓർഡർ അല്ലെങ്കിൽ വാങ്ങൽ രസീതിൽ നിന്നുള്ള ഇനങ്ങളുടെ അവസാന വാങ്ങൽ വിശദാംശങ്ങൾ ലഭ്യമാകില്ല"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
