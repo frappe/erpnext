@@ -10,7 +10,9 @@ called the Chart of Cost Centers.
 ### Cost Center
 
 You can create a tree of Cost Centers to represent your business better. Each
-Income / Expense entry is also tagged against a Cost Center.
+Income / Expense entry is also tagged against a Cost Center. If allow cost center
+in entry of balance sheet account is checked under Account Settings, system will 
+allow user to tag entry in Balance Sheet Account against a Cost Center.
 
 For example, if you have two types of sales:
 

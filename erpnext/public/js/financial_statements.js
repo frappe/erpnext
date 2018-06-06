@@ -71,6 +71,13 @@ function get_filters(){
 			"reqd": 1
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
+		},
+
+		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
