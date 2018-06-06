@@ -1031,7 +1031,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1222,7 +1222,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,ක්ෂය සටහන්
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,කරුණාකර පළමු ලිපි වර්ගය තෝරා
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,මෙම නඩත්තු සංචාරය අවලංගු කර පෙර ද්රව්ය සංචාර {0} අවලංගු කරන්න
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 ප්රමිතිය
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 ප්රමිතිය
 DocType: Pricing Rule,Rate or Discount,අනුපාතිකය හෝ වට්ටම්
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},අනු අංකය {0} අයිතමය අයිති නැත {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,අවශ්ය යවන ලද
@@ -3069,7 +3069,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3982,11 +3982,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,සේවකයා ලබා ගැනීමට සේවකයෙකු තෝරන්න.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,කරුණාකර වලංගු දිනය තෝරන්න
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,ඔබේ ව්යාපාරයේ ස්වභාවය තෝරන්න.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5089,7 +5089,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,අයදුම්කරු නම
 DocType: Authorization Rule,Customer / Item Name,පාරිභෝගික / අයිතම නම
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","සක්රිය කර ඇත්නම්, භාණ්ඩයේ අවසන් මිලදී ගැනීමේ තොරතුරු පූර්ව මිලදී ගැනීමේ ඇණවුමෙන් හෝ කුවිතාන්සිය මිලදී නොගැනේ"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

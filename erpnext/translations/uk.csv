@@ -1031,7 +1031,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1222,7 +1222,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,Операція амортизації
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,"Будь ласка, виберіть тип документа в першу чергу"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Скасування матеріалів переглядів {0} до скасування цього обслуговування візит
-DocType: Crop Cycle,ISO 8016 standard,Стандарт ISO 8016
+DocType: Crop Cycle,ISO 8601 standard,Стандарт ISO 8601
 DocType: Pricing Rule,Rate or Discount,Ставка або знижка
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Серійний номер {0} не належить до номенклатурної позиції {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Необхідна к-сть
@@ -3074,7 +3074,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3986,11 +3986,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,"Виберіть співробітника, щоб заздалегідь отримати працівника."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,"Будь ласка, виберіть дійсну дату"
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Виберіть характер вашого бізнесу.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -4152,7 +4152,7 @@ apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +179,Add more items or op
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +212,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Доставка Примітки {0} має бути скасований до скасування цього замовлення клієнта
 apps/erpnext/erpnext/utilities/user_progress.py +259,Go to Users,Перейти до Користувачів
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +85,Paid amount + Write Off Amount can not be greater than Grand Total,"Оплачена сума + Сума списання не може бути більше, ніж загальний підсумок"
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},"{0} не є допустимим номером партії 
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},"{0} не є допустимим номером партії
 для товару {1}"
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +141,Note: There is not enough leave balance for Leave Type {0},Примітка: Недостатньо днів залишилося для типу відпусток {0}
 apps/erpnext/erpnext/regional/india/utils.py +16,Invalid GSTIN or Enter NA for Unregistered,Invalid GSTIN або Enter NA для Незареєстрований
@@ -5093,7 +5093,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Заявник Ім&#39;я
 DocType: Authorization Rule,Customer / Item Name,Замовник / Назва товару
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Якщо ввімкнено, останні деталі купівлі товарів не будуть отримані з попереднього замовлення на покупку чи квитанцію про покупку"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

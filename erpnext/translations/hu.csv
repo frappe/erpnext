@@ -1020,7 +1020,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1210,7 +1210,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,ÉCS bejegyzés
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,"Kérjük, válassza ki a dokumentum típusát először"
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Törölje az anyag szemlét: {0}mielőtt törölné ezt a karbantartási látogatást
-DocType: Crop Cycle,ISO 8016 standard,ISO 8016 szabvány
+DocType: Crop Cycle,ISO 8601 standard,ISO 8601 szabvány
 DocType: Pricing Rule,Rate or Discount,Árérték vagy kedvezmény
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},Széria sz {0} nem tartozik ehhez a tételhez {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,Kötelező Mennyiség
@@ -2169,7 +2169,7 @@ DocType: Packing Slip,PS-,CSOMJ-
 DocType: Member,Non Profit Member,Nonprofit alapítvány tagja
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +67,{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.,"{0} {1}: Költséghely szükséges az 'Eredménykimutatás' számlához {2}. Kérjük, állítsa be az alapértelmezett Költséghelyet a Vállalkozáshoz."
 DocType: Payment Schedule,Payment Term,Fizetési feltétel
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +160,A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Egy vevő csoport létezik azonos névvel, kérjük változtassa meg a Vevő nevét vagy nevezze át a 
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +160,A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Egy vevő csoport létezik azonos névvel, kérjük változtassa meg a Vevő nevét vagy nevezze át a
 Vevői csoportot"
 DocType: Land Unit,Area,Terület
 apps/erpnext/erpnext/public/js/templates/contact_list.html +37,New Contact,Új kapcsolat
@@ -3034,7 +3034,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3936,11 +3936,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,"Válassza ki a munkavállalót, hogy megkapja a munkavállaló előleget."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,"Kérjük, válasszon egy érvényes dátumot"
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,Válassza ki a vállalkozása fajtáját.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5026,7 +5026,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,Kérelmező neve
 DocType: Authorization Rule,Customer / Item Name,Vevő / Tétel Név
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","Ha engedélyezve van, az elemek utolsó vásárlási adatai nem származnak a korábbi vásárlói rendelésről vagy vásárlási nyugtaról"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

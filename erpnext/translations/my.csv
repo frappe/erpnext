@@ -1033,7 +1033,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1224,7 +1224,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +218,Closi
 DocType: Journal Entry,Depreciation Entry,တန်ဖိုး Entry &#39;
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +32,Please select the document type first,ပထမဦးဆုံး Document အမျိုးအစားကိုရွေးချယ်ပါ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,ဒီ Maintenance ခရီးစဉ်ပယ်ဖျက်မီပစ္စည်းလည်ပတ်သူ {0} Cancel
-DocType: Crop Cycle,ISO 8016 standard,က ISO 8016 စံ
+DocType: Crop Cycle,ISO 8601 standard,က ISO 8601 စံ
 DocType: Pricing Rule,Rate or Discount,rate သို့မဟုတ်လျှော့
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +215,Serial No {0} does not belong to Item {1},serial No {0} Item မှ {1} ပိုင်ပါဘူး
 DocType: Purchase Receipt Item Supplied,Required Qty,မရှိမဖြစ်တဲ့ Qty
@@ -3076,7 +3076,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -3989,11 +3989,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,Atleast o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +308,Select an employee to get the employee advance.,အလုပျသမားကြိုတင်မဲရဖို့တစ်ခုဝန်ထမ်းရွေးချယ်ပါ။
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +56,Please select a valid Date,ခိုင်လုံသောနေ့စွဲကို select ပေးပါ
 apps/erpnext/erpnext/public/js/setup_wizard.js +36,Select the nature of your business.,သင့်ရဲ့စီးပွားရေးလုပ်ငန်း၏သဘောသဘာဝကို Select လုပ်ပါ။
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5097,7 +5097,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Job Applicant,Applicant Name,လျှောက်ထားသူအမည်
 DocType: Authorization Rule,Customer / Item Name,customer / Item အမည်
 DocType: Buying Settings,"If enabled, last purchase details of items will not be fetched from previous purchase order or purchase receipt","enabled လြှငျ, ပစ္စည်းများနောက်ဆုံးဝယ်ယူအသေးစိတ်ကိုယခင်ဝယ်ယူမှုအမိန့်သို့မဟုတ်ဝယ်ယူလက်ခံရရှိမှခေါ်ယူမည်မဟုတ်ပါ"
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
