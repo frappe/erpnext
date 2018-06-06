@@ -20,9 +20,7 @@ class Crop(Document):
 
 		# Verify that the crop period is correct
 		max_crop_period = max([task.end_day for task in self.agriculture_task])
-
-		if max_crop_period > self.period:
-			self.period = max_crop_period
+		self.period = max(self.period, max_crop_period)
 
 		# Sort the crop tasks based on start days,
 		# maintaining the order for same-day tasks
