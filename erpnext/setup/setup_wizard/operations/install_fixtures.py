@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe, os
+import frappe, os, json
 
 from frappe import _
 
@@ -144,19 +144,6 @@ def install(country=None):
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': 1, "parent_sales_person": ""},
 
-		# UOM
-		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': _('Unit'), "must_be_whole_number": 1},
-		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': _('Box'), "must_be_whole_number": 1},
-		{'uom_name': _('Kg'), 'doctype': 'UOM', 'name': _('Kg')},
-		{'uom_name': _('Meter'), 'doctype': 'UOM', 'name': _('Meter')},
-		{'uom_name': _('Litre'), 'doctype': 'UOM', 'name': _('Litre')},
-		{'uom_name': _('Gram'), 'doctype': 'UOM', 'name': _('Gram')},
-		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': _('Nos'), "must_be_whole_number": 1},
-		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': _('Pair'), "must_be_whole_number": 1},
-		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': _('Set'), "must_be_whole_number": 1},
-		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
-		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
-
 		# Mode of Payment
 		{'doctype': 'Mode of Payment',
 			'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),
@@ -244,7 +231,6 @@ def install(country=None):
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
-
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
 
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
@@ -266,6 +252,30 @@ def install(country=None):
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.save()
+
+	add_uom_data()
+
+def add_uom_data():
+	# add UOMs
+	uoms = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
+	for d in uoms:
+		if not frappe.db.exists('UOM', d.get("uom_name")):
+			uom_doc = frappe.new_doc('UOM')
+			uom_doc.update(d)
+			uom_doc.save(ignore_permissions=True)
+
+	# bootstrap uom conversion factors
+	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
+	for d in uom_conversions:
+		if not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({
+				"doctype": "UOM Category",
+				"category_name": d.get("category")
+			}).insert(ignore_permissions=True)
+
+		uom_conversion = frappe.new_doc('UOM Conversion Factor')
+		uom_conversion.update(d)
+		uom_conversion.save(ignore_permissions=True)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub

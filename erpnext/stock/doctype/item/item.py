@@ -119,6 +119,7 @@ class Item(WebsiteGenerator):
 		self.make_thumbnail()
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
+		self.validate_uom_conversion_factor()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -704,6 +705,13 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
                                     .format(self.stock_uom, template_uom))
 
+	def validate_uom_conversion_factor(self):
+		if self.uoms:
+			for d in self.uoms:
+				value = get_uom_conv_factor(d.uom, self.stock_uom)
+				if value:
+					d.conversion_factor = value
+
 	def validate_attributes(self):
 		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
 			attributes = []
@@ -902,3 +910,26 @@ def get_item_defaults(item, company):
 	else:
 		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
 			"is_stock_item", "item_code", "item_group"], as_dict=1)
+
+@frappe.whitelist()
+def get_uom_conv_factor(uom, stock_uom):
+	uoms = [uom, stock_uom]
+	value = ""
+	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
+		where to_uom in ({0})
+		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in uoms])), as_dict=True)
+
+	for d in uom_details:
+		if d.from_uom == stock_uom and d.to_uom == uom:
+			value = d.value
+		elif d.from_uom == uom and d.to_uom == stock_uom:
+			value = 1/flt(d.value)
+		else:
+			uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
+			uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+
+			if uom_stock and uom_row:
+				if uom_stock.from_uom == uom_row.from_uom:
+					value = flt(uom_stock.value) * 1/flt(uom_row.value)
+
+	return value
