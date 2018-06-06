@@ -6,7 +6,7 @@
 import unittest
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, cstr, today, random_string, nowdate, add_days
+from frappe.utils import cint, flt, cstr, today, random_string
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
