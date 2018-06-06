@@ -694,3 +694,23 @@ frappe.ui.form.on("Item", {
 		cur_frm.add_fetch('item_group', 'default_income_account', 'income_account');
 	},
 });
+
+frappe.ui.form.on("UOM Conversion Detail", {
+	uom: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if (row.uom) {
+			frappe.call({
+				method:"erpnext.stock.doctype.item.item.get_uom_conv_factor",
+				args: {
+					"uom": row.uom,
+					"stock_uom": frm.doc.stock_uom
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frappe.model.set_value(cdt, cdn, "conversion_factor", r.message);
+					}
+				}
+			});
+		}
+	}
+})
