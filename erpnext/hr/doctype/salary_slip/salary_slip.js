@@ -64,13 +64,17 @@ frappe.ui.form.on("Salary Slip", {
 		var salary_detail_fields = ['formula', 'abbr', 'statistical_component']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-	},	
+		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
+		fields_read_only.forEach(function(field) {
+			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
+		});
+	},
 
 	salary_slip_based_on_timesheet: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
-	
+
 	payroll_frequency: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		frm.set_value('end_date', '');
@@ -89,7 +93,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
 	}
-	
+
 })
 
 frappe.ui.form.on('Salary Detail', {
