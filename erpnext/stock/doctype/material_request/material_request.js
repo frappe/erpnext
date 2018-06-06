@@ -148,8 +148,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
 				// stop
-				cur_frm.add_custom_button(__('Stop'),
-					cur_frm.cscript['Stop Material Request']);
+				me.frm.add_custom_button(__('Stop'),
+					me.frm.cscript['Stop Material Request']);
 
 			}
 		}
@@ -174,8 +174,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Re-open'),
-				cur_frm.cscript['Unstop Material Request']);
+			me.frm.add_custom_button(__('Re-open'),
+				me.frm.cscript['Unstop Material Request']);
 
 	},
 
@@ -315,14 +315,14 @@ $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur
 
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
-	$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
+	$c('runserverobj', {'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
 		cur_frm.refresh();
 	});
 };
 
 cur_frm.cscript['Unstop Material Request'] = function(){
 	var doc = cur_frm.doc;
-	$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
+	$c('runserverobj', {'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
 		cur_frm.refresh();
 	});
 };
