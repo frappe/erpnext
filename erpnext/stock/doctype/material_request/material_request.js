@@ -313,17 +313,17 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
-me.frm.cscript['Stop Material Request'] = function() {
-	var doc = me.frm.doc;
+cur_frm.cscript['Stop Material Request'] = function() {
+	var doc = cur_frm.doc;
 	$c('runserverobj', {'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
-		me.frm.refresh();
+		cur_frm.refresh();
 	});
 };
 
-me.frm.cscript['Unstop Material Request'] = function(){
-	var doc = me.frm.doc;
+cur_frm.cscript['Unstop Material Request'] = function(){
+	var doc = cur_frm.doc;
 	$c('runserverobj', {'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
-		me.frm.refresh();
+		cur_frm.refresh();
 	});
 };
 
