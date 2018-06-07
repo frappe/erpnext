@@ -325,7 +325,7 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 	}
 
 	setup_side_bar() {
-		this.setup_side_bar();
+		super.setup_side_bar();
 		this.attachFooter();
 		this.attachTimeline();
 		this.attachReviewArea();
