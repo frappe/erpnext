@@ -47,15 +47,16 @@ class TestLeaveApplication(unittest.TestCase):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
+	@classmethod
+	def setUpClass(cls):
+		set_leave_approver()
+
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	def _clear_roles(self):
-		frappe.db.sql("""delete from `tabHas Role` where parent in
-			("test@example.com", "test1@example.com", "test2@example.com")""")
-
 	def _clear_applications(self):
 		frappe.db.sql("""delete from `tabLeave Application`""")
+		frappe.db.sql("""delete from `tabDepartment Approver` where parentfield = 'Leave Approver'""")
 
 	def get_application(self, doc):
 		application = frappe.copy_doc(doc)
@@ -64,11 +65,6 @@ class TestLeaveApplication(unittest.TestCase):
 		return application
 
 	def test_block_list(self):
-		self._clear_roles()
-
-		from frappe.utils.user import add_role
-		add_role("test1@example.com", "HR User")
-		add_role("test1@example.com", "Leave Approver")
 		clear_user_permissions_for_doctype("Employee")
 
 		frappe.db.set_value("Department", "_Test Department - _TC",
@@ -81,7 +77,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
-		frappe.set_user("test1@example.com")
+		frappe.set_user("test@example.com")
 
 		# clear other applications
 		frappe.db.sql("delete from `tabLeave Application`")
@@ -90,12 +86,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertTrue(application.insert())
 
 	def test_overlap(self):
-		self._clear_roles()
 		self._clear_applications()
-
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
 
 		frappe.set_user("test@example.com")
 
@@ -108,12 +99,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_1(self):
-		self._clear_roles()
 		self._clear_applications()
-
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
 
 		frappe.set_user("test@example.com")
 
@@ -143,12 +129,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_2(self):
-		self._clear_roles()
 		self._clear_applications()
-
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
 
 		frappe.set_user("test@example.com")
 
@@ -166,12 +147,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_3(self):
-		self._clear_roles()
 		self._clear_applications()
-
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test2@example.com", "Leave Approver")
 
 		frappe.set_user("test@example.com")
 
@@ -200,61 +176,42 @@ class TestLeaveApplication(unittest.TestCase):
 		application.half_day_date = "2013-01-05"
 		application.insert()
 
-	def test_global_block_list(self):
-		self._clear_roles()
-
-		from frappe.utils.user import add_role
-		add_role("test1@example.com", "Employee")
-		add_role("test@example.com", "Leave Approver")
-
-		make_allocation_record(employee="_T-Employee-00002")
-
-		application = self.get_application(_test_records[1])
-
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 1)
-		frappe.db.set_value("Employee", "_T-Employee-00002", "department",
-			"_Test Department - _TC")
-
-		frappe.set_user("test1@example.com")
-		application.insert()
-		application.status = "Approved"
-		frappe.set_user("test@example.com")
-		self.assertRaises(LeaveDayBlockedError, application.submit)
-
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 0)
 
 	def test_optional_leave(self):
 		leave_period = get_leave_period()
 		today = nowdate()
 		from datetime import date
-		holiday_list = frappe.get_doc(dict(
-			doctype = 'Holiday List',
-			holiday_list_name = 'test holiday list for optional holiday',
-			from_date = date(date.today().year, 1, 1),
-			to_date = date(date.today().year, 12, 31),
-			holidays = [
-				dict(holiday_date = today, description = 'test')
-			]
-		)).insert()
+		holiday_list = 'Test Holiday List for Optional Holiday'
+		if not frappe.db.exists('Holiday List', holiday_list):
+			frappe.get_doc(dict(
+				doctype = 'Holiday List',
+				holiday_list_name = holiday_list,
+				from_date = date(date.today().year, 1, 1),
+				to_date = date(date.today().year, 12, 31),
+				holidays = [
+					dict(holiday_date = today, description = 'Test')
+				]
+			)).insert()
 		employee = get_employee()
 
-		frappe.db.set_value('Leave Period', leave_period.name, 'optional_holiday_list', holiday_list.name)
-		leave_type = frappe.get_doc(dict(
-			leave_type_name = 'Test Optional Type',
-			doctype = 'Leave Type',
-			is_optional_leave = 1
-		)).insert()
+		frappe.db.set_value('Leave Period', leave_period.name, 'optional_holiday_list', holiday_list)
+		leave_type = 'Test Optional Type'
+		if not frappe.db.exists('Leave Type', leave_type):
+			frappe.get_doc(dict(
+				leave_type_name = leave_type,
+				doctype = 'Leave Type',
+				is_optional_leave = 1
+			)).insert()
 
-		allocate_leaves(employee, leave_period, leave_type.name, 10)
+		allocate_leaves(employee, leave_period, leave_type, 10)
 
 		date = add_days(today, - 1)
 
 		leave_application = frappe.get_doc(dict(
 			doctype = 'Leave Application',
 			employee = employee.name,
-			leave_type = leave_type.name,
+			company = '_Test Company',
+			leave_type = leave_type,
 			from_date = date,
 			to_date = date,
 		))
@@ -269,7 +226,7 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_application.submit()
 
 		# check leave balance is reduced
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, today), 9)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, today), 9)
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
@@ -389,29 +346,30 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_earned_leave(self):
 		leave_period = get_leave_period()
 		employee = get_employee()
-
-		leave_type = frappe.get_doc(dict(
-			leave_type_name = 'Test Earned Leave Type',
-			doctype = 'Leave Type',
-			is_earned_leave = 1,
-			earned_leave_frequency = 'Monthly',
-			rounding = 0.5,
-			max_leaves_allowed = 6
-		)).insert()
+		leave_type = 'Test Earned Leave Type'
+		if not frappe.db.exists('Leave Type', leave_type):
+			leave_type = frappe.get_doc(dict(
+				leave_type_name = leave_type,
+				doctype = 'Leave Type',
+				is_earned_leave = 1,
+				earned_leave_frequency = 'Monthly',
+				rounding = 0.5,
+				max_leaves_allowed = 6
+			)).insert()
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",
-			"leave_policy_details": [{"leave_type": leave_type.name, "annual_allocation": 6}]
+			"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}]
 		}).insert()
 		frappe.db.set_value("Employee", employee.name, "leave_policy", leave_policy.name)
 
-		allocate_leaves(employee, leave_period, leave_type.name, 0, eligible_leaves = 12)
+		allocate_leaves(employee, leave_period, leave_type, 0, eligible_leaves = 12)
 
 		from erpnext.hr.utils import allocate_earned_leaves
 		i = 0
 		while(i<14):
 			allocate_earned_leaves()
 			i += 1
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate()), 6)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
 
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -431,6 +389,14 @@ def make_allocation_record(employee=None, leave_type=None):
 def get_employee():
 	return frappe.get_doc("Employee", "_T-Employee-00001")
 
+def set_leave_approver():
+	employee = get_employee()
+	dept_doc = frappe.get_doc("Department", employee.department)
+	dept_doc.append('leave_approver', {
+		'approver': 'test@example.com'
+	})
+	dept_doc.save(ignore_permissions=True)
+
 def get_leave_period():
 	leave_period_name = frappe.db.exists({
 		"doctype": "Leave Period",
@@ -449,7 +415,7 @@ def get_leave_period():
 			)).insert()
 
 def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, eligible_leaves=0):
-	frappe.get_doc({
+	allocate_leave = frappe.get_doc({
 		"doctype": "Leave Allocation",
 		"__islocal": 1,
 		"employee": employee.name,
@@ -460,3 +426,6 @@ def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, el
 		"new_leaves_allocated": new_leaves_allocated,
 		"docstatus": 1
 	}).insert()
+
+	allocate_leave.submit()
+
