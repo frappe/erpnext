@@ -5,7 +5,9 @@ from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
-	if frappe.db.table_exists("Supplier Type") and not frappe.db.table_exists("Supplier Group"):
+	if frappe.db.table_exists("Supplier Group"):
+		frappe.reload_doc('setup', 'doctype', 'supplier_group')
+	elif frappe.db.table_exists("Supplier Type"):
 		rename_doc("DocType", "Supplier Type", "Supplier Group", force=True)
 		frappe.reload_doc('setup', 'doctype', 'supplier_group')
 		frappe.reload_doc("accounts", "doctype", "pricing_rule")
