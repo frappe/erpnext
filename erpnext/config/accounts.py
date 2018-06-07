@@ -13,8 +13,26 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Sales Invoice",
+					"label": _("Credit Note"),
+					"description": _("Bills raised to Customers."),
+					"route_options": {
+						"is_return": 1
+					}
+				},
+				{
+					"type": "doctype",
 					"name": "Purchase Invoice",
 					"description": _("Bills raised by Suppliers.")
+				},
+				{
+					"type": "doctype",
+					"name": "Purchase Invoice",
+					"label": _("Debit Note"),
+					"description": _("Bills raised by Suppliers."),
+					"route_options": {
+						"is_return": 1
+					}
 				},
 				{
 					"type": "doctype",
