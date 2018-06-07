@@ -34,8 +34,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 	def test_incoming(self):
 		# get test mail with message-id as in-reply-to
 		self.setup_and_prepare_test()
-
 		with open(os.path.join(os.path.dirname(__file__), "test_data", "test-reply.raw"), "r") as f:
+			if not self.emails: return
 			test_mails = [f.read().replace('{{ sender }}',
 			self.users[-1].email).replace('{{ message_id }}',
 			self.emails[-1].message_id)]
