@@ -18,8 +18,7 @@ class TestPOSProfile(unittest.TestCase):
 			doc.append('item_groups', {'item_group': '_Test Item Group'})
 			doc.append('customer_groups', {'customer_group': '_Test Customer Group'})
 			doc.save()
-
-			items = get_items_list(doc)
+			items = get_items_list(doc, doc.company)
 			customers = get_customers_list(doc)
 
 			products_count = frappe.db.sql(""" select count(name) from tabItem where item_group = '_Test Item Group'""", as_list=1)

@@ -44,6 +44,12 @@ def create_asset():
 	if not frappe.db.exists("Asset Category", "Equipment"):
 		create_asset_category()
 
+	if not frappe.db.exists("Location", "Test Location"):
+		frappe.get_doc({
+			'doctype': 'Location',
+			'location_name': 'Test Location'
+		}).insert()
+
 	if not frappe.db.exists("Item", "Photocopier"):
 		frappe.get_doc({
 			"doctype": "Item",
@@ -65,6 +71,8 @@ def create_asset():
 			"gross_purchase_amount": 100000,
 			"expected_value_after_useful_life": 10000,
 			"warehouse": "_Test Warehouse - _TC",
+			"location": "Test Location",
+			"available_for_use_date": add_days(nowdate(),3),
 			"company": "_Test Company",
 			"purchase_date": nowdate(),
 			"maintenance_required": 1,
