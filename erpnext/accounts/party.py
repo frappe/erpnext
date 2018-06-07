@@ -414,10 +414,10 @@ def get_timeline_data(doctype, name):
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
 		from `tabActivity Log`
-		where reference_doctype='{doctype}' and reference_name='{name}'
+		where reference_doctype="{doctype}" and reference_name="{name}"
 		and status!='Success' and creation > {after}
 		{group_by} order by creation desc
-		""".format(doctype=doctype, name=name, fields=fields,
+		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,
 			group_by=group_by, after=after), as_dict=False)
 
 	timeline_items = dict(data)
