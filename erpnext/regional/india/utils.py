@@ -83,7 +83,6 @@ def get_place_of_supply(out, doctype):
 		return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 def get_regional_address_details(out, doctype, company):
-
 	out.place_of_supply = get_place_of_supply(out, doctype)
 
 	if not out.place_of_supply: return
@@ -97,8 +96,9 @@ def get_regional_address_details(out, doctype, company):
 		if not (out.supplier_gstin or out.place_of_supply):
 			return
 
-	if doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin[:2] != out.place_of_supply[:2]\
-		or (doctype == "Purchase Invoice" and out.supplier_gstin[:2] != out.place_of_supply[:2]):
+	if ((doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin
+		and out.company_gstin[:2] != out.place_of_supply[:2]) or (doctype == "Purchase Invoice"
+		and out.supplier_gstin and out.supplier_gstin[:2] != out.place_of_supply[:2])):
 		default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0})
 	else:
 		default_tax = frappe.db.get_value(master_doctype, {"company": company, "disabled":0, "is_default": 1})
