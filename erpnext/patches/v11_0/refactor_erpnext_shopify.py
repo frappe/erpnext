@@ -6,6 +6,7 @@ def execute():
 	frappe.reload_doc('erpnext_integrations', 'doctype', 'shopify_settings')
 	frappe.reload_doc('erpnext_integrations', 'doctype', 'shopify_tax_account')
 	frappe.reload_doc('erpnext_integrations', 'doctype', 'shopify_log')
+	frappe.reload_doc('erpnext_integrations', 'doctype', 'shopify_webhook_detail')
 
 	if 'erpnext_shopify' in frappe.get_installed_apps():
 		remove_from_installed_apps('erpnext_shopify')
