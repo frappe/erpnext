@@ -40,7 +40,7 @@ Renaming document affects existing transaction where this record is selected. Co
 17. Account
 18. Territory
 19. Terms and Conditions
-20. Supplier Type	
+20. Supplier Group	
 21. Workstation		
 22. Employee
 23. Sales Taxes and Charges Master

@@ -18,9 +18,9 @@ You can define or select the Naming Series pattern from:
 
 [Click here to know more about defining a Naming Series.](/docs/user/manual/en/setting-up/settings/naming-series.html)
 
-### 2. Default Supplier Type
+### 2. Default Supplier Group
 
-Configure what should be the value of Supplier Type when a new Supplier is created.
+Configure what should be the value of Supplier Group when a new Supplier is created.
 
 ### 3. Default Buying Price List
 
