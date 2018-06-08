@@ -6,12 +6,17 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from frappe.utils import cstr
+from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 
 test_records = frappe.get_test_records('BOM')
 
 class TestBOM(unittest.TestCase):
+	def setUp(self):
+		if not frappe.get_value('Item', '_Test Item'):
+			make_test_records('Item')
+
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		items_dict = get_bom_items_as_dict(bom=get_default_bom(),
