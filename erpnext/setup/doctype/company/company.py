@@ -82,7 +82,7 @@ class Company(NestedSet):
 				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
 
 	def on_update(self):
-		self.update_nsm_model()
+		NestedSet.on_update(self)
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
@@ -284,14 +284,12 @@ class Company(NestedSet):
 	def abbreviate(self):
 		self.abbr = ''.join([c[0].upper() for c in self.company_name.split()])
 
-	def update_nsm_model(self):
-		frappe.utils.nestedset.update_nsm(self)
-
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		self.update_nsm_model()
+		NestedSet.validate_if_child_exists(self)
+		frappe.utils.nestedset.update_nsm(self)
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
