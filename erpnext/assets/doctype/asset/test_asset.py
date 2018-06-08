@@ -22,7 +22,7 @@ class TestAsset(unittest.TestCase):
 
 		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount,
 			asset.company, asset.purchase_date)
-
+		print(pi.name)
 		pi.supplier = "_Test Supplier"
 		pi.insert()
 		pi.submit()
@@ -353,7 +353,6 @@ class TestAsset(unittest.TestCase):
 		''', (asset.name))]
 		if pi:
 			pi_doc = frappe.get_doc("Purchase Invoice", pi[0])
-			print(pi[0])
 			pi_doc.cancel
 		# if pi:
 		# 	frappe.db.set_value("Purchase Invoice", {"name": pi[0]}, "docstatus", 2)
