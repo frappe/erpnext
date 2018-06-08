@@ -24,6 +24,8 @@ class Asset(AccountsController):
 			self.make_depreciation_schedule()
 			self.set_accumulated_depreciation()
 			get_depreciation_accounts(self)
+		else:
+			self.finance_books = []
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
