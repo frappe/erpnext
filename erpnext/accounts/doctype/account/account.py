@@ -232,44 +232,6 @@ def get_account_currency(account):
 
 	return frappe.local_cache("account_currency", account, generator)
 
-def get_account_autoname(account_number, account_name, company):
-	# first validate if company exists
-	company = frappe.db.get_value("Company", company, ["abbr", "name"], as_dict=True)
-	if not company:
-		frappe.throw(_('Company {0} does not exist').format(company))
-
-	parts = [account_name.strip(), company.abbr]
-	if cstr(account_number).strip():
-		parts.insert(0, cstr(account_number).strip())
-	return ' - '.join(parts)
-
-def validate_account_number(name, account_number, company):
-	if account_number:
-		account_with_same_number = frappe.db.get_value("Account",
-			{"account_number": account_number, "company": company, "name": ["!=", name]})
-		if account_with_same_number:
-			frappe.throw(_("Account Number {0} already used in account {1}")
-				.format(account_number, account_with_same_number))
-
-@frappe.whitelist()
-def update_account_number(name, account_number):
-	account = frappe.db.get_value("Account", name, ["account_name", "company"], as_dict=True)
-
-	validate_account_number(name, account_number, account.company)
-
-	frappe.db.set_value("Account", name, "account_number", account_number)
-
-	account_name = account.account_name
-	if account_name[0].isdigit():
-		separator = " - " if " - " in account_name else " "
-		account_name = account_name.split(separator, 1)[1]
-	frappe.db.set_value("Account", name, "account_name", account_name)
-
-	new_name = get_account_autoname(account_number, account_name, account.company)
-	if name != new_name:
-		frappe.rename_doc("Account", name, new_name)
-		return new_name
-
 def get_name_with_number(new_account, account_number):
 	if account_number and not new_account[0].isdigit():
 		new_account = account_number + " - " + new_account
