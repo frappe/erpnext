@@ -7,7 +7,12 @@ frappe.treeview_settings["Location"] = {
 			fieldname: "location",
 			fieldtype:"Link",
 			options: "Location",
-			label: __("Location")
+			label: __("Location"),
+			get_query: function() {
+				return {
+					filters: [["Location", "is_group", "=", 1]]
+				};
+			}
 		},
 	],
 	breadcrumb: "Assets",

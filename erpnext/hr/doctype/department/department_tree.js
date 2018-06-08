@@ -1,6 +1,7 @@
 frappe.treeview_settings["Department"] = {
 	ignore_fields:["parent_department"],
 	get_tree_nodes: 'erpnext.hr.doctype.department.department.get_children',
+	add_tree_node: 'erpnext.hr.doctype.department.department.add_node',
 	filters: [
 		{
 			fieldname: "company",

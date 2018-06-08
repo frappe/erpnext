@@ -13,8 +13,7 @@ class Department(NestedSet):
 	def autoname(self):
 		root = get_root_of("Department")
 		if root and self.department_name != root:
-			abbr = frappe.db.get_value('Company', self.company, 'abbr')
-			self.name = '{0} - {1}'.format(self.department_name, abbr)
+			self.name = get_abbreviated_name(self.department_name, self.company)
 		else:
 			self.name = self.department_name
 
@@ -24,11 +23,15 @@ class Department(NestedSet):
 			if root:
 				self.parent_department = root
 
-	def update_nsm_model(self):
-		frappe.utils.nestedset.update_nsm(self)
+	def before_rename(self, old, new, merge=False):
+		# renaming consistency with abbreviation
+		if not frappe.db.get_value('Company', self.company, 'abbr') in new:
+			new = get_abbreviated_name(new, self.company)
+
+		return new
 
 	def on_update(self):
-		self.update_nsm_model()
+		NestedSet.on_update(self)
 
 	def on_trash(self):
 		super(Department, self).on_trash()
@@ -37,11 +40,16 @@ class Department(NestedSet):
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
 
+def get_abbreviated_name(name, company):
+	abbr = frappe.db.get_value('Company', company, 'abbr')
+	new_name = '{0} - {1}'.format(name, abbr)
+	return new_name
+
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
 	condition = ''
 	if company == parent:
-		condition = "name='%s'".format(get_root_of("Department"))
+		condition = "name='{0}'".format(get_root_of("Department"))
 	elif company:
 		condition = "parent_department='{0}' and company='{1}'".format(parent, company)
 	else:
@@ -55,3 +63,14 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		where
 			{condition}
 		order by name""".format(doctype=doctype, condition=condition), as_dict=1)
+
+@frappe.whitelist()
+def add_node():
+	from frappe.desk.treeview import make_tree_args
+	args = frappe.form_dict
+	args = make_tree_args(**args)
+
+	if args.parent_department == args.company:
+		args.parent_department = None
+
+	frappe.get_doc(args).insert()

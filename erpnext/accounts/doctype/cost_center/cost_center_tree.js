@@ -47,11 +47,6 @@ frappe.treeview_settings["Cost Center"] = {
 			frappe.set_route('query-report', 'Budget Variance Report', {company: get_company()});
 		}, __('Budget'));
 
-	},
-	onrender: function(node) {
-		if(node.is_root){
-			node.hide_add = true;
-		}
 	}
 
 }
