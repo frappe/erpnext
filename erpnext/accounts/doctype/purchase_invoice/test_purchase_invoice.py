@@ -765,6 +765,31 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, pi.insert)
 
+	def test_debit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
+
+		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+
+		outstanding_amount = get_outstanding_amount(pi.doctype,
+			pi.name, "Creditors - _TC", pi.supplier, "Supplier")
+
+		self.assertEqual(pi.outstanding_amount, outstanding_amount)
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = pi.currency
+		pe.paid_to_account_currency = pi.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = pi.grand_total * -1
+		pe.insert()
+		pe.submit()
+
+		pi_doc = frappe.get_doc('Purchase Invoice', pi.name)
+		self.assertEqual(pi_doc.outstanding_amount, 0)
+
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
