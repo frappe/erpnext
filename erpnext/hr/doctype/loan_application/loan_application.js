@@ -46,7 +46,6 @@ frappe.ui.form.on('Loan Application', {
 					}           			
 			},		
 			callback: function(r) {
-				console.log(r)
 				if(r.message.rate_of_interest){
 					frm.set_value('rate_of_interest', r.message.rate_of_interest)
 				}
