@@ -758,3 +758,58 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+@frappe.whitelist()
+def update_number_field(doctype_name, name, field_name, field_value, company):
+	'''
+		doctype_name = Name of the DocType
+		name = Docname being referred
+		field_name = Name of the field thats holding the 'number' attribute
+		field_value = Numeric value entered in field_name
+
+		Stores the number entered in the dialog to the DocType's field.
+
+		Renames the document by adding the number as a prefix to the current name and updates
+		all transaction where it was present.
+	'''
+	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+
+	validate_field_number(doctype_name, name, field_value, company, field_name)
+
+	frappe.db.set_value(doctype_name, name, field_name, field_value)
+
+	if doc_title[0].isdigit():
+		separator = " - " if " - " in doc_title else " "
+		doc_title = doc_title.split(separator, 1)[1]
+
+	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
+
+	new_name = get_doc_name_autoname(field_value, doc_title, name, company)
+
+	if name != new_name:
+		frappe.rename_doc(doctype_name, name, new_name)
+		return new_name
+
+def validate_field_number(doctype_name, name, field_value, company, field_name):
+	''' Validate if the number entered isn't already assigned to some other document. '''
+	if field_value:
+		if company:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "company": company, "name": ["!=", name]})
+		else:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "name": ["!=", name]})
+		if doctype_with_same_number:
+			frappe.throw(_("{0} Number {1} already used in account {2}")
+				.format(doctype_name, field_value, doctype_with_same_number))
+
+def get_doc_name_autoname(field_value, doc_title, name, company):
+	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
+	if company:
+		name_split=name.split("-")
+		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
+	else:
+		parts = [doc_title.strip()]
+	if cstr(field_value).strip():
+		parts.insert(0, cstr(field_value).strip())
+	return ' - '.join(parts)

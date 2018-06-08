@@ -41,7 +41,7 @@ frappe.ui.form.on('Cost Center', {
 					return;
 				}
 				frappe.call({
-					method: "erpnext.accounts.doctype.cost_center.cost_center.update_number_field",
+					method: "erpnext.accounts.utils.update_number_field",
 					args: {
 						doctype_name: frm.doc.doctype,
 						name: frm.doc.name,
@@ -54,7 +54,7 @@ frappe.ui.form.on('Cost Center', {
 							if(r.message) {
 								frappe.set_route("Form", "Cost Center", r.message);
 							} else {
-								me.set_value("cost_center_number", data.cost_center_number);
+								me.frm.set_value("cost_center_number", data.cost_center_number);
 							}
 							d.hide();
 						}
