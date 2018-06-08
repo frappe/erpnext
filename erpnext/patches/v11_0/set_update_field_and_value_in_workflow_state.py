@@ -16,5 +16,3 @@ def execute():
 			status_field = 'approval_status' if doctype=="Expense Claim" else 'status'
 			frappe.set_value('Workflow Document State', state.name, 'update_field', status_field)
 			frappe.set_value('Workflow Document State', state.name, 'update_value', state.state)
-
-	frappe.db.commit()
