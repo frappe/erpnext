@@ -273,6 +273,10 @@ def add_cc(args=None):
 	args.doctype = "Cost Center"
 	args = make_tree_args(**args)
 
+	if args.parent_cost_center == args.company:
+		args.parent_cost_center = "{0} - {1}".format(args.parent_cost_center,
+			frappe.db.get_value('Company', args.company, 'abbr'))
+
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)
 

@@ -8,13 +8,13 @@ from frappe.model.document import Document
 from frappe.utils.nestedset import NestedSet
 
 class Location(NestedSet):
+	nsm_parent_field = 'parent_location'
+
 	def on_update(self):
-		self.update_nsm_model()
+		NestedSet.on_update(self)
 
 	def on_trash(self):
-		self.update_nsm_model()
-
-	def update_nsm_model(self):
+		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
 
 @frappe.whitelist()
