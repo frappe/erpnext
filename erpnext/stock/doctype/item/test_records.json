@@ -169,7 +169,15 @@
   "item_code": "_Test Non Stock Item",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Non Stock Item",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
   "description": "_Test Serialized Item 8",

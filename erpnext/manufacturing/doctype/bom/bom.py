@@ -432,9 +432,9 @@ class BOM(WebsiteGenerator):
 		base_total_sm_cost = 0
 
 		for d in self.get('scrap_items'):
-			d.base_rate = d.rate * self.conversion_rate
+			d.base_rate = flt(d.rate, d.precision("rate")) * flt(self.conversion_rate, self.precision("conversion_rate"))
 			d.amount = flt(d.rate, d.precision("rate")) * flt(d.stock_qty, d.precision("stock_qty"))
-			d.base_amount = d.amount * self.conversion_rate
+			d.base_amount = flt(d.amount, d.precision("amount")) * flt(self.conversion_rate, self.precision("conversion_rate"))
 			total_sm_cost += d.amount
 			base_total_sm_cost += d.base_amount
 
