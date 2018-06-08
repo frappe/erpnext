@@ -142,7 +142,7 @@ class LeaveApplication(Document):
 	def cancel_attendance(self):
 		if self.docstatus == 2:
 			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
-				and (attendance_date between %s and %s) and docstatus < 2""",(self.employee, self.from_date, self.to_date), as_dict=1)
+				and (attendance_date between %s and %s) and docstatus < 2 and status in ('On Leave', 'Half Day')""",(self.employee, self.from_date, self.to_date), as_dict=1)
 			for name in attendance:
 				frappe.db.set_value("Attendance", name, "docstatus", 2)
 
