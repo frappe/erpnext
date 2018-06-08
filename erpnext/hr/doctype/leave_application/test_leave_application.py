@@ -54,9 +54,12 @@ class TestLeaveApplication(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
+	def _clear_roles(self):
+		frappe.db.sql("""delete from `tabHas Role` where parent in
+			("test@example.com", "test1@example.com", "test2@example.com")""")
+
 	def _clear_applications(self):
 		frappe.db.sql("""delete from `tabLeave Application`""")
-		frappe.db.sql("""delete from `tabDepartment Approver` where parentfield = 'Leave Approver'""")
 
 	def get_application(self, doc):
 		application = frappe.copy_doc(doc)
@@ -65,6 +68,10 @@ class TestLeaveApplication(unittest.TestCase):
 		return application
 
 	def test_block_list(self):
+		self._clear_roles()
+
+		from frappe.utils.user import add_role
+		add_role("test@example.com", "HR User")
 		clear_user_permissions_for_doctype("Employee")
 
 		frappe.db.set_value("Department", "_Test Department - _TC",
@@ -86,8 +93,11 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertTrue(application.insert())
 
 	def test_overlap(self):
+		self._clear_roles()
 		self._clear_applications()
 
+		from frappe.utils.user import add_role
+		add_role("test@example.com", "Employee")
 		frappe.set_user("test@example.com")
 
 		make_allocation_record()
@@ -99,8 +109,11 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_1(self):
+		self._clear_roles()
 		self._clear_applications()
 
+		from frappe.utils.user import add_role
+		add_role("test@example.com", "Employee")
 		frappe.set_user("test@example.com")
 
 		make_allocation_record()
@@ -129,7 +142,11 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_2(self):
+		self._clear_roles()
 		self._clear_applications()
+
+		from frappe.utils.user import add_role
+		add_role("test@example.com", "Employee")
 
 		frappe.set_user("test@example.com")
 
@@ -147,7 +164,11 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 
 	def test_overlap_with_half_day_3(self):
+		self._clear_roles()
 		self._clear_applications()
+
+		from frappe.utils.user import add_role
+		add_role("test@example.com", "Employee")
 
 		frappe.set_user("test@example.com")
 
@@ -175,7 +196,6 @@ class TestLeaveApplication(unittest.TestCase):
 		application.half_day = 1
 		application.half_day_date = "2013-01-05"
 		application.insert()
-
 
 	def test_optional_leave(self):
 		leave_period = get_leave_period()
@@ -227,6 +247,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# check leave balance is reduced
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, today), 9)
+
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
@@ -412,7 +433,7 @@ def get_leave_period():
 				to_date = "{0}-12-31".format(now_datetime().year),
 				company = "_Test Company",
 				is_active = 1
-			)).insert()
+			)).insert()		
 
 def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, eligible_leaves=0):
 	allocate_leave = frappe.get_doc({
@@ -428,4 +449,3 @@ def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, el
 	}).insert()
 
 	allocate_leave.submit()
-
