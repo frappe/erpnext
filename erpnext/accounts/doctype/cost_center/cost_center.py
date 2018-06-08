@@ -56,6 +56,9 @@ class CostCenter(NestedSet):
 
 		# Validate properties before merging
 		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")
+		if not merge:
+			from erpnext.accounts.doctype.account.account import get_name_with_number
+			new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
 		return new_cost_center
 
@@ -85,46 +88,3 @@ class CostCenter(NestedSet):
 
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])
-
-def get_doc_name_autoname(field_value, doc_title, name, company):
-	if company:
-		name_split=name.split("-")
-		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
-	else:
-		parts = [doc_title.strip()]
-	if cstr(field_value).strip():
-		parts.insert(0, cstr(field_value).strip())
-	return ' - '.join(parts)
-
-def validate_field_number(doctype_name, name, field_value, company, field_name):
-	if field_value:
-		if company:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: field_value, "company": company, "name": ["!=", name]})
-		else:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: field_value, "name": ["!=", name]})
-		if doctype_with_same_number:
-			frappe.throw(_("{0} Number {1} already used in account {2}")
-				.format(doctype_name, field_value, doctype_with_same_number))
-
-@frappe.whitelist()
-def update_number_field(doctype_name, name, field_name, field_value, company):
-
-	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
-
-	validate_field_number(doctype_name, name, field_value, company, field_name)
-
-	frappe.db.set_value(doctype_name, name, field_name, field_value)
-
-	if doc_title[0].isdigit():
-		separator = " - " if " - " in doc_title else " "
-		doc_title = doc_title.split(separator, 1)[1]
-
-	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
-
-	new_name = get_doc_name_autoname(field_value, doc_title, name, company)
-
-	if name != new_name:
-		frappe.rename_doc(doctype_name, name, new_name)
-		return new_name		
