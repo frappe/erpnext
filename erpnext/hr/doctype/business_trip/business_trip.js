@@ -24,6 +24,8 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 };
 frappe.ui.form.on('Business Trip', {
     refresh: function(frm) {
+
+        // self.user = frappe.session.user
         if(!frm.doc.__islocal){
             frm.disable_save();
         }else{
