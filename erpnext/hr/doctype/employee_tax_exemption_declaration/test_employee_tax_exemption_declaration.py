@@ -8,7 +8,7 @@ import unittest
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 
 class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
-	def setup(self):
+	def setUp(self):
 		make_employee("employee@taxexepmtion.com")
 		make_employee("employee1@taxexepmtion.com")
 		create_payroll_period()
@@ -19,7 +19,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"payroll_period": "Test Payroll Period",
+			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
 							amount = 150000)]
@@ -27,7 +27,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, declaration.save)
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
-			"payroll_period": "Test Payroll Period",
+			"payroll_period": "_Test Payroll Period",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -39,7 +39,8 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"payroll_period": "Test Payroll Period",
+			"company": "_Test Company",
+			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
 							amount = 100000),
@@ -54,7 +55,8 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"payroll_period": "Test Payroll Period",
+			"company": "_Test Company",
+			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
 							amount = 100000),
@@ -62,17 +64,18 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 							exemption_category = "_Test Category",
 							amount = 50000),
 							]
-		})
+		}).insert()
 		self.assertTrue(declaration.submit)
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"payroll_period": "Test Payroll Period",
+			"company": "_Test Company",
+			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
 							amount = 100000)
 							]
-		})
+		}).insert()
 		self.assertRaises(frappe.DocstatusTransitionError, duplicate_declaration.submit)
 		duplicate_declaration.employee = frappe.get_value("Employee", {"user_id":"employee1@taxexepmtion.com"}, "name")
 		self.assertTrue(duplicate_declaration.submit)
@@ -93,20 +96,22 @@ def create_exemption_category():
 		category = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Category",
 			"name": "_Test Category",
-			"deduction_component": "_Test Tax",
+			"deduction_component": "Income Tax",
 			"max_amount": 100000
 		}).insert()
-	if not frappe.db.exists("Employee Tax Exemption Sub Category", "_Test Category"):
+	if not frappe.db.exists("Employee Tax Exemption Sub Category", "_Test Sub Category"):
 		frappe.get_doc({
 			"doctype": "Employee Tax Exemption Sub Category",
 			"name": "_Test Sub Category",
 			"exemption_category": "_Test Category",
-			"max_amount": 100000
+			"max_amount": 100000,
+			"is_active": 1
 		}).insert()
-	if not frappe.db.exists("Employee Tax Exemption Sub Category", "_Test Category"):
+	if not frappe.db.exists("Employee Tax Exemption Sub Category", "_Test1 Sub Category"):
 		frappe.get_doc({
 			"doctype": "Employee Tax Exemption Sub Category",
 			"name": "_Test1 Sub Category",
 			"exemption_category": "_Test Category",
-			"max_amount": 50000
+			"max_amount": 50000,
+			"is_active": 1
 		}).insert()
