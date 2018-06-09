@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import cstr, nowdate, getdate, flt, add_days
+from frappe.utils import cstr, nowdate, getdate, flt
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 
@@ -22,7 +22,6 @@ class TestAsset(unittest.TestCase):
 
 		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount,
 			asset.company, asset.purchase_date)
-		print(pi.name)
 		pi.supplier = "_Test Supplier"
 		pi.insert()
 		pi.submit()
