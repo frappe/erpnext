@@ -499,6 +499,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 	def update_payment_schedule(source, target):
 		target.payment_schedule = []
 		payment_schedule = source.get("payment_schedule")
+		retention_portion = 0 
+		advance_portion = 0 
+		
 		if payment_schedule:
 			target.payment_terms_template = source.payment_terms_template
 			target.payment_term = payment_term
@@ -518,6 +521,14 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, p
 				child.is_advance = payment.is_advance
 				child.apply_tax = payment.apply_tax
 				child.is_retention = payment.is_retention
+				
+				if payment.is_advance ==1 :
+					advance_portion += payment.invoice_portion
+				elif payment.is_retention ==1 :
+					retention_portion += payment.invoice_portion
+		target.retention_portion = retention_portion
+		target.advance_portion = advance_portion
+					
 	
 	def update_items(source, target):
 		payment_schedule = source.get("payment_schedule")
