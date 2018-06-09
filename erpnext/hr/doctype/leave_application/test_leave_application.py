@@ -433,7 +433,7 @@ def get_leave_period():
 				to_date = "{0}-12-31".format(now_datetime().year),
 				company = "_Test Company",
 				is_active = 1
-			)).insert()		
+			)).insert()
 
 def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, eligible_leaves=0):
 	allocate_leave = frappe.get_doc({
