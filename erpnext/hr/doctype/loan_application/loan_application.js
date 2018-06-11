@@ -11,13 +11,13 @@ frappe.ui.form.on('Loan Application', {
 	repayment_method: function(frm) {
 		frm.doc.repayment_amount = frm.doc.repayment_periods = ""
 		frm.trigger("toggle_fields")
-		frm.trigger("toogle_required")
+		frm.trigger("toggle_required")
 	},
 	toggle_fields: function(frm) {
 		frm.toggle_enable("repayment_amount", frm.doc.repayment_method=="Repay Fixed Amount per Period")
 		frm.toggle_enable("repayment_periods", frm.doc.repayment_method=="Repay Over Number of Periods")
 	},
-	toogle_required: function(frm){
+	toggle_required: function(frm){
 		frm.toggle_reqd("repayment_amount", cint(frm.doc.repayment_method=='Repay Fixed Amount per Period'))
 		frm.toggle_reqd("repayment_periods", cint(frm.doc.repayment_method=='Repay Over Number of Periods'))
 	},
