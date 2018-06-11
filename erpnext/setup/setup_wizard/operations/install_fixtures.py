@@ -11,6 +11,9 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
 	"Customer's Vendor", "Campaign", "Walk In"]
 
+default_sales_partner_type = ["Channel Partner", "Distributor", "Dealer", "Agent",
+	"Retailer", "Implementation Partner", "Reseller"]
+
 def install(country=None):
 	records = [
 		# domains
@@ -232,6 +235,8 @@ def install(country=None):
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
+
+	records += [{'doctype': 'Sales Partner Type', 'sales_partner_type': _(d)} for d in default_sales_partner_type]
 
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
