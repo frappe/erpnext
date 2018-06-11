@@ -216,7 +216,7 @@ def get_supplier(shopify_item):
 				"doctype": "Supplier",
 				"supplier_name": shopify_item.get("vendor"),
 				"shopify_supplier_id": shopify_item.get("vendor").lower(),
-				"supplier_type": get_supplier_type()
+				"supplier_group": get_supplier_group()
 			}).insert()
 			return supplier.name
 		else:
@@ -224,15 +224,15 @@ def get_supplier(shopify_item):
 	else:
 		return ""
 
-def get_supplier_type():
-	supplier_type = frappe.db.get_value("Supplier Type", _("Shopify Supplier"))
-	if not supplier_type:
-		supplier_type = frappe.get_doc({
-			"doctype": "Supplier Type",
-			"supplier_type": _("Shopify Supplier")
+def get_supplier_group():
+	supplier_group = frappe.db.get_value("Supplier Group", _("Shopify Supplier"))
+	if not supplier_group:
+		supplier_group = frappe.get_doc({
+			"doctype": "Supplier Group",
+			"supplier_group_name": _("Shopify Supplier")
 		}).insert()
-		return supplier_type.name
-	return supplier_type
+		return supplier_group.name
+	return supplier_group
 
 def get_item_details(shopify_item):
 	item_details = {}
