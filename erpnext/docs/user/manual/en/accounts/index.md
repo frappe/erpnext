@@ -10,7 +10,7 @@ In ERPNext, your accounting operations consists of 3 main transactions:
   * Purchase Invoice: Bills that your Suppliers give you for their products or services.
   * Journal Entries: For accounting entries, like payments, credit and other types.
 
-<div class="embed-containers">
+<div class="embed-container">
   <iframe src="https://www.youtube.com/embed/5wjollWN0OA?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
   </iframe>
 </div>  
