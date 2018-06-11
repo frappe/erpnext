@@ -832,7 +832,7 @@ class StockEntry(StockController):
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql("""
 			select
-				item_name, item_code, sum(qty) as qty, sed.t_warehouse as warehouse,
+				item_name, original_item, item_code, sum(qty) as qty, sed.t_warehouse as warehouse,
 				description, stock_uom, expense_account, cost_center
 			from `tabStock Entry` se,`tabStock Entry Detail` sed
 			where
@@ -866,8 +866,9 @@ class StockEntry(StockController):
 
 		for item in transferred_materials:
 			qty= item.qty
+			item_code = item.original_item or item.item_code
 			req_items = frappe.get_all('Work Order Item',
-				filters={'parent': self.work_order, 'item_code': item.item_code},
+				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
 			req_qty = flt(req_items[0].required_qty)
@@ -912,6 +913,7 @@ class StockEntry(StockController):
 						"stock_uom": item.stock_uom,
 						"expense_account": item.expense_account,
 						"cost_center": item.buying_cost_center,
+						"original_item": item.original_item
 					}
 				})
 
@@ -986,6 +988,7 @@ class StockEntry(StockController):
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
+			se_child.original_item = item_dict[d].get("original_item")
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")
