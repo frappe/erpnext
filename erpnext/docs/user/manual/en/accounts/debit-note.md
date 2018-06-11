@@ -7,10 +7,11 @@ A debit note is issued for the value of the goods returned. In some cases, selle
 ##### How to make debit note in ERPNext
 
 The user can make a debit note against the purchase invoice or they can directly make debit note from the purchase invoice without reference
-Goto module Accounts > Purchase Invoice > New > Enabled Is Return
+Goto module Accounts > Purchase Invoice > New > Manually enabled Is Return checkbox
 
 <img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/accounts/debit-note.png">
 
+Note: For debit note set the negative quantity while adding the item
 
 #### Example
 Debit note with payment entry in ERPNext

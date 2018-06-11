@@ -7,10 +7,10 @@ A credit note is issued for the value of goods returned by the customer, it may 
 ##### How to make credit note in ERPNext
 
 The user can make a credit note against the sales invoice or they can directly make credit note from the sales invoice without reference
-Goto module Accounts > Sales Invoice > New > Enabled Is Return
+Goto module Accounts > Sales Invoice > New > Manually enabled Is Return checkbox
 
 <img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/accounts/credit-note.png">
-
+Note: For credit note set the negative quantity while adding the item
 
 #### Example
 
