@@ -187,93 +187,21 @@ def create_healthcare_item_groups():
 def create_lab_test_items():
 	records = [
 		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1,
-		    "item_defaults": [{
-		      "company": "_Test Company",
-		      "default_warehouse": "_Test Warehouse - _TC",
-		      "expense_account": "_Test Account Cost for Goods Sold - _TC",
-		      "buying_cost_center": "_Test Cost Center - _TC",
-		      "selling_cost_center": "_Test Cost Center - _TC",
-		      "income_account": "Sales - _TC"
-		    }]
-		}
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
 	]
 	insert_record(records)
 
