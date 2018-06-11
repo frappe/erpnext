@@ -13,6 +13,8 @@ from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment 
 class EmployeeBenefitClaim(Document):
 	def validate(self):
 		max_benefits = get_max_benefits(self.employee, self.claim_date)
+		if not max_benefits or max_benefits <= 0:
+			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		payroll_period = get_payroll_period(self.claim_date, self.claim_date, frappe.db.get_value("Employee", self.employee, "company"))
 		self.validate_max_benefit_for_component(payroll_period)
 		self.validate_max_benefit_for_sal_struct(max_benefits)

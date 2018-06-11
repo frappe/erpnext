@@ -9,6 +9,7 @@ from frappe.utils import date_diff, getdate
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
+from erpnext.hr.utils import get_sal_slip_total_benefit_given
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -87,10 +88,17 @@ def get_max_benefits(employee, on_date):
 		max_benefits = frappe.db.get_value("Salary Structure", sal_struct, "max_benefits")
 		if max_benefits > 0:
 			return max_benefits
-		else:
-			frappe.throw(_("Employee {0} has no max benefits in salary structure {1}").format(employee, sal_struct[0][0]))
-	else:
-		frappe.throw(_("Employee {0} has no salary structure assigned").format(employee))
+	return False
+
+@frappe.whitelist()
+def get_max_benefits_remaining(employee, on_date, payroll_period):
+	max_benefits = get_max_benefits(employee, on_date)
+	if max_benefits and max_benefits > 0:
+		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
+		# Get all salary slip flexi amount in the payroll period
+		prev_sal_slip_flexi_total = get_sal_slip_total_benefit_given(employee, payroll_period_obj)
+		return max_benefits - prev_sal_slip_flexi_total
+	return max_benefits
 
 def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct):
 	# Considering there is only one application for an year
