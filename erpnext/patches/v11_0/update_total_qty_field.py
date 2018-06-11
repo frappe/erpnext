@@ -28,7 +28,8 @@ def execute():
 				when dt.name = '{0}' then {1}
 			""".format(frappe.db.escape(d.get("parent")), d.get("qty")))
 
-		frappe.db.sql('''
-			UPDATE
-				`tab%s` dt SET dt.total_qty = CASE %s END
-		''' % (doctype, " ".join(when_then)))
+		if when_then:
+			frappe.db.sql('''
+				UPDATE
+					`tab%s` dt SET dt.total_qty = CASE %s END
+			''' % (doctype, " ".join(when_then)))
