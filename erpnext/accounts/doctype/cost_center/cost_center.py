@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import NestedSet
+from erpnext.accounts.utils import validate_field_number
+
 
 class CostCenter(NestedSet):
 	nsm_parent_field = 'parent_cost_center'
