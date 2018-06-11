@@ -20,14 +20,16 @@ class Account(NestedSet):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		self.name = get_account_autoname(self.account_number, self.account_name, self.company)
+		from erpnext.accounts.utils import get_doc_name_autoname
+		self.name = get_doc_name_autoname(self.account_number, self.account_name, None, self.company)
 
 	def validate(self):
+		from erpnext.accounts.utils import validate_field_number
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_root_details()
-		validate_account_number(self.name, self.account_number, self.company)
+		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
