@@ -3,6 +3,7 @@ dist: trusty
 
 python:
   - "2.7"
+  - "3.6"
 
 services:
   - mysql
@@ -13,6 +14,7 @@ install:
   - pip install flake8==3.3.0
   - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
   - sudo rm /etc/apt/sources.list.d/docker.list
+  - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
   - nvm install v7.10.0
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
@@ -34,6 +36,7 @@ before_script:
   - bench reinstall --yes
   - bench build
   - bench scheduler disable
+  - sed -i 's/9000/9001/g' sites/common_site_config.json
   - bench start &
   - sleep 10
 
@@ -50,3 +53,5 @@ jobs:
         - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
         - bench migrate
       env: Patch Testing
+  allow_failures:
+    - python: "3.6"

@@ -12,10 +12,12 @@
 				<div>&nbsp</div>
 				<div style='font-size: small; margin-bottom: 10px;'>&nbsp</div>
 			{% endif %}
-			{% if in_stock or not is_stock_item %}
-				<div style='color: green'> <i class='fa fa-check'></i> {{ _("In stock") }}</div>
-			{% else %}
-				<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>
+			{% if show_stock_qty %}
+				{% if in_stock %}
+					<div style='color: green'> <i class='fa fa-check'></i> {{ _("In stock") }}</div>
+				{% else %}
+					<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>
+				{% endif %}
 			{% endif %}
 		</div>
 	</div>

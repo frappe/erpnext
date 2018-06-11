@@ -343,6 +343,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	billing_rate = billing_amount / hours
 
+	target.company = timesheet.company
 	if customer:
 		target.customer = customer
 
@@ -380,6 +381,11 @@ def set_missing_values(time_sheet, target):
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
 	target.posting_date = doc.modified
+	target.total_working_hours = doc.total_hours
+	target.append('timesheets', {
+		'time_sheet': doc.name,
+		'working_hours': doc.total_hours
+	})
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):

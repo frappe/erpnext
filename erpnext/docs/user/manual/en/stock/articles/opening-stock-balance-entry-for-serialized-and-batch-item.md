@@ -62,6 +62,6 @@ On submission of Stock Entry, stock ledger posting will be posted, and opening b
         <iframe src="https://www.youtube.com/embed/nlHX0ZZ84Lw?start=120" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
         </iframe>
     </div>
-<div>
+</div>
 
 <!-- markdown -->

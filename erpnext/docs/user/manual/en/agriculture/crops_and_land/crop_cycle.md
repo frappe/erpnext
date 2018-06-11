@@ -12,7 +12,7 @@ On the top right, click on New to create the first Crop Cycle. A new Crop Cycle 
 * Land Unit: Add a row, and select, Carrot Field 1
 * Crop: Carrot from carrot-top
 * Start Date: Today
-* Leave the ISO 8016 Standard (week count) box unchecked
+* Leave the ISO 8601 Standard (week count) box unchecked
 * Skip the next four fields for Crop Spacing
 
 Save the new Crop Cycle

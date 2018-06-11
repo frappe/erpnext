@@ -23,7 +23,7 @@ class Gstr1Report(object):
 			posting_date,
 			base_grand_total,
 			base_rounded_total,
-			customer_gstin,
+			COALESCE(NULLIF(customer_gstin,''), NULLIF(billing_address_gstin, '')) as customer_gstin,
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
@@ -102,7 +102,8 @@ class Gstr1Report(object):
 
 		for opts in (("company", " and company=%(company)s"),
 			("from_date", " and posting_date>=%(from_date)s"),
-			("to_date", " and posting_date<=%(to_date)s")):
+			("to_date", " and posting_date<=%(to_date)s"),
+			("company_address", " and company_address=%(company_address)s")):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
@@ -143,7 +144,17 @@ class Gstr1Report(object):
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
 		for d in items:
-			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, d.base_net_amount)
+			item_details = {}
+			item_details[d.item_code] = d.base_net_amount
+
+			if d.parent in self.invoice_items:
+				parent_dict = self.invoice_items[d.parent]
+				if d.item_code in parent_dict:
+					item_details[d.item_code] += parent_dict[d.item_code]
+				else:
+					item_details.update(parent_dict)
+
+			self.invoice_items[d.parent] = item_details
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""

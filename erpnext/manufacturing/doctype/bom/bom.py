@@ -305,7 +305,7 @@ class BOM(WebsiteGenerator):
 		if self.currency == self.company_currency():
 			self.conversion_rate = 1
 		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0:
-			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
+			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency(), args="for_buying")
 
 	def validate_materials(self):
 		""" Validate raw material entries """
@@ -434,9 +434,9 @@ class BOM(WebsiteGenerator):
 		base_total_sm_cost = 0
 
 		for d in self.get('scrap_items'):
-			d.base_rate = d.rate * self.conversion_rate
+			d.base_rate = flt(d.rate, d.precision("rate")) * flt(self.conversion_rate, self.precision("conversion_rate"))
 			d.amount = flt(d.rate, d.precision("rate")) * flt(d.stock_qty, d.precision("stock_qty"))
-			d.base_amount = d.amount * self.conversion_rate
+			d.base_amount = flt(d.amount, d.precision("amount")) * flt(self.conversion_rate, self.precision("conversion_rate"))
 			total_sm_cost += d.amount
 			base_total_sm_cost += d.base_amount
 
@@ -546,17 +546,19 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				item.stock_uom,
 				item.allow_alternative_item,
-				item.default_warehouse,
-				item.expense_account as expense_account,
-				item.buying_cost_center as cost_center
+				item_default.default_warehouse,
+				item_default.expense_account as expense_account,
+				item_default.buying_cost_center as cost_center
 				{select_columns}
 			from
-				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
+				`tab{table}` bom_item
+				JOIN `tabBOM` bom ON bom_item.parent = bom.name
+				JOIN `tabItem` item ON item.name = bom_item.item_code
+				LEFT JOIN `tabItem Default` item_default
+					ON item_default.parent = item.name and item_default.company = %(company)s
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and bom_item.parent = bom.name
-				and item.name = bom_item.item_code
 				and is_stock_item = 1
 				{where_conditions}
 				group by item_code, stock_uom
@@ -566,14 +568,14 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			select_columns = ", bom_item.source_warehouse, (Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx")
-		items = frappe.db.sql(query, { "parent": bom, "qty": qty,	"bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
 		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="",
 			select_columns = ", bom_item.source_warehouse, bom_item.idx")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
 		if item.item_code in item_dict:
@@ -597,6 +599,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
+	items = list(items)
 	items.sort(key = functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
 
@@ -629,18 +632,28 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		return
 
 	if frappe.form_dict.parent:
-		return frappe.db.sql("""select
-			bom_item.item_code,
-			bom_item.bom_no as value,
-			bom_item.stock_qty,
-			if(ifnull(bom_item.bom_no, "")!="", 1, 0) as expandable,
-			item.image,
-			item.description
-			from `tabBOM Item` bom_item, tabItem item
-			where bom_item.parent=%s
-			and bom_item.item_code = item.name
-			order by bom_item.idx
-			""", frappe.form_dict.parent, as_dict=True)
+		bom_items = frappe.get_list('BOM Item',
+			fields=['item_code', 'bom_no as value', 'stock_qty'],
+			filters=[['parent', '=', frappe.form_dict.parent]],
+			order_by='idx')
+
+		item_names = tuple(d.get('item_code') for d in bom_items)
+
+		items = frappe.get_list('Item',
+			fields=['image', 'description', 'name'],
+			filters=[['name', 'in', item_names]]) # to get only required item dicts
+
+		for bom_item in bom_items:
+			# extend bom_item dict with respective item dict
+			bom_item.update(
+				# returns an item dict from items list which matches with item_code
+				(item for item in items if item.get('name')
+					== bom_item.get('item_code')).next()
+			)
+			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
+
+		return bom_items
+
 
 def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):

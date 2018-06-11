@@ -43,3 +43,9 @@ services
 distributors
 manufacturing-make-to-order
 manufacturing-enigneer-to-order
+opening-invoice-creation-tool
+pricing-rule
+discounts
+email-inbox
+subscription
+employee-advance

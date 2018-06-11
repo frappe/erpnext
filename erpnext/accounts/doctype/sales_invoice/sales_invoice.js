@@ -48,6 +48,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.update_stock) this.show_stock_ledger();
 
+		if (doc.docstatus == 1 && doc.outstanding_amount!=0
+			&& !(cint(doc.is_return) && doc.return_against)) {
+			cur_frm.add_custom_button(__('Payment'),
+				this.make_payment_entry, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+
 		if(doc.docstatus==1 && !doc.is_return) {
 
 			var is_delivered_by_supplier = false;
@@ -76,11 +83,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment'),
-					this.make_payment_entry, __("Make"));
-			}
-
 			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment Request'),
 					this.make_payment_request, __("Make"));
@@ -101,6 +103,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
+		var me = this;
+		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
+				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
+				var internal = customer.is_internal_customer;
+				var disabled = customer.disabled;
+				if (internal == 1 && disabled == 0) {
+					me.frm.add_custom_button("Inter Company Invoice", function() {
+						me.make_inter_company_invoice();
+					}, __("Make"));
+				}
+			});
+		}
 	},
 
 	on_submit: function(doc, dt, dn) {
@@ -113,18 +128,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		$.each(doc["items"], function(i, row) {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 		})
-
-		if(this.frm.doc.is_pos) {
-			this.frm.msgbox = frappe.msgprint(
-				`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
-					${__('Print')}</a>
-				<a class="btn btn-default" href="javascript:frappe.new_doc(cur_frm.doctype);">
-					${__('New')}</a>`
-				);
-
-		} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
-			this.frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
-		}
 	},
 
 	set_default_print_format: function() {
@@ -213,11 +216,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	tc_name: function() {
 		this.get_terms();
 	},
-
 	customer: function() {
 		var me = this;
 		if(this.frm.updating_party_details) return;
-
 		erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
@@ -228,6 +229,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}, function() {
 				me.apply_pricing_rule();
 			})
+	},
+
+	make_inter_company_invoice: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
+			frm: me.frm
+		});
 	},
 
 	debit_to: function() {
@@ -319,6 +327,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	pos_profile: function() {
+		this.frm.doc.taxes = []
 		this.set_pos_data();
 	},
 
@@ -632,4 +641,3 @@ var calculate_total_billing_amount =  function(frm) {
 
 	refresh_field('total_billing_amount')
 }
-

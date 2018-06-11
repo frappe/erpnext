@@ -1,23 +1,28 @@
-# Non Profit
+# ERPNext for Non-Profit Organizations
 
+People who change the world need the tools to do it! The Non Profit Modules of ERPNext is designed for an non-profit organization, so that they can deliver well on their noble cause of a better world.
 
-The Non Profit Modules in ERPNext is designed to meet requirements of NGO and Non Profit Organization. This is a centralized system, which maintains and updates all the activities related to an Organization.
+<img class="screenshot" alt="Non Profit" src="{{docs_base_url}}/assets/img/non_profit/non-profit-hero-linus.png">
 
-This will track all activity related to Memberships, Chapters, Volunteer Management,
-Donor Management, Event and Grant etc
+### Manager Members, Donors, Voluteers and More
 
+This is a centralized system, which maintains and updates all the activities related to an Organization.
 
-### Desk Page
-<img class="screenshot" >
+This will track all activity related to Memberships, Chapters, Volunteer Management, Donor Management, Event and Grant etc.
 
-<div class="section" style="padding-top: 0px; margin-top: -30px;">
-	<div class="fake-browser-frame">
-		<img class="img-responsive browser-image feature-image" alt="Non Profit Domain"
-			src="{{docs_base_url}}/assets/img/non_profit/non_profit_domain.png">
-	</div>
+<img class="screenshot" alt="Non Profit" src="{{docs_base_url}}/assets/img/non_profit/chapter.png">
+
+### Demonstration of ERPNext Non-Profit Domain
+
+Check the following video to educate yourself on each feature in the non-profit module.
+
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed/p3l0Kq-TU5Y' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
 </div>
 
-### Non Profit Domain
-<img class="screenshot" alt="Non Profit" src="{{docs_base_url}}/assets/img/non_profit/module.png">
+### User Manual
 
 {index}

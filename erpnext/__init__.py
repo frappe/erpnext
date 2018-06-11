@@ -5,7 +5,7 @@ import frappe
 from erpnext.hooks import regional_overrides
 from frappe.utils import getdate
 
-__version__ = '10.1.23'
+__version__ = '10.1.37'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -78,6 +78,29 @@ def is_perpetual_inventory_enabled(company):
 			company, "enable_perpetual_inventory") or 0
 
 	return frappe.local.enable_perpetual_inventory[company]
+
+def get_default_finance_book(company=None):
+	if not company:
+		company = get_default_company()
+
+	if not hasattr(frappe.local, 'default_finance_book'):
+		frappe.local.default_finance_book = {}
+
+	if not company in frappe.local.default_finance_book:
+		frappe.local.default_finance_book[company] = frappe.db.get_value("Company",
+			company, "default_finance_book")
+
+	return frappe.local.default_finance_book[company]
+
+def get_party_account_type(party_type):
+	if not hasattr(frappe.local, 'party_account_types'):
+		frappe.local.party_account_types = {}
+
+	if not party_type in frappe.local.party_account_types:
+		frappe.local.party_account_types[party_type] = frappe.db.get_value("Party Type",
+			party_type, "account_type") or ''
+
+	return frappe.local.party_account_types[party_type]
 
 def get_region(company=None):
 	'''Return the default country based on flag, company or global settings

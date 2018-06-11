@@ -186,27 +186,25 @@ def set_tasks_as_overdue():
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
-	conditions = ''
+
+	filters = [['docstatus', '<', '2']]
 
 	if task:
-		# via filters
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(task))
+		filters.append(['parent_task', '=', task])
 	elif parent and not is_root:
 		# via expand child
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(parent))
+		filters.append(['parent_task', '=', parent])
 	else:
-		conditions += ' and ifnull(parent_task, "")=""'
+		filters.append(['ifnull(`parent_task`, "")', '=', ''])
 
 	if project:
-		conditions += ' and project = "{0}"'.format(frappe.db.escape(project))
+		filters.append(['project', '=', project])
 
-	tasks = frappe.db.sql("""select name as value,
-		subject as title,
-		is_group as expandable
-		from `tabTask`
-		where docstatus < 2
-		{conditions}
-		order by name""".format(conditions=conditions), as_dict=1)
+	tasks = frappe.get_list(doctype, fields=[
+		'name as value',
+		'subject as title',
+		'is_group as expandable'
+	], filters=filters, order_by='name')
 
 	# return tasks
 	return tasks

@@ -25,6 +25,11 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Woocommerce Settings"
+				},
+				{
+					"type": "doctype",
+					"name": "Shopify Settings",
+					"description": _("Connect Shopify with ERPNext"),
 				}
 			]
 		}

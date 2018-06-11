@@ -42,6 +42,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 1, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -72,6 +73,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -104,6 +106,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -134,6 +137,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -164,6 +168,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -193,6 +198,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -224,6 +230,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -255,6 +262,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -287,6 +295,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -319,6 +328,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -350,6 +360,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -379,6 +390,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -409,6 +421,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -440,6 +453,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -470,6 +484,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -500,6 +515,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -531,6 +547,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -539,6 +556,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "payment_gateway_account.payment_gateway",
    "fieldname": "payment_gateway", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -551,7 +569,7 @@
    "label": "Payment Gateway", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "payment_gateway_account.payment_gateway", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -562,6 +580,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -570,6 +589,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "payment_gateway_account.payment_account",
    "fieldname": "payment_account", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -582,7 +602,7 @@
    "label": "Payment Account", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "payment_gateway_account.payment_account", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -593,6 +613,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -623,6 +644,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -654,6 +676,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -685,6 +708,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -715,6 +739,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -728,7 +753,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-02 15:50:41.775006", 
+ "modified": "2018-05-16 22:43:28.136835",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Request", 
@@ -737,7 +762,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -757,7 +781,6 @@
   }, 
   {
    "amend": 1, 
-   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

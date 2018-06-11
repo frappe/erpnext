@@ -82,36 +82,39 @@ frappe.ui.form.on("Student Group", {
 					max_roll_no = d.group_roll_number;
 				}
 			});
-			frappe.call({
-				method: "erpnext.education.doctype.student_group.student_group.get_students",
-				args: {
-					"academic_year": frm.doc.academic_year,
-					"academic_term": frm.doc.academic_term,
-					"group_based_on": frm.doc.group_based_on,
-					"program": frm.doc.program,
-					"batch" : frm.doc.batch,
-					"course": frm.doc.course	
-				},
-				callback: function(r) {
-					if(r.message) {
-						$.each(r.message, function(i, d) {
-							if(!in_list(student_list, d.student)) {
-								var s = frm.add_child("students");
-								s.student = d.student;
-								s.student_name = d.student_name;
-								if (d.active === 0) {
-									s.active = 0;
+
+			if(frm.doc.academic_year) {
+				frappe.call({
+					method: "erpnext.education.doctype.student_group.student_group.get_students",
+					args: {
+						"academic_year": frm.doc.academic_year,
+						"academic_term": frm.doc.academic_term,
+						"group_based_on": frm.doc.group_based_on,
+						"program": frm.doc.program,
+						"batch" : frm.doc.batch,
+						"course": frm.doc.course
+					},
+					callback: function(r) {
+						if(r.message) {
+							$.each(r.message, function(i, d) {
+								if(!in_list(student_list, d.student)) {
+									var s = frm.add_child("students");
+									s.student = d.student;
+									s.student_name = d.student_name;
+									if (d.active === 0) {
+										s.active = 0;
+									}
+									s.group_roll_number = ++max_roll_no;
 								}
-								s.group_roll_number = ++max_roll_no;
-							}
-						});
-						refresh_field("students");
-						frm.save();
-					} else {
-						frappe.msgprint(__("Student Group is already updated."))
+							});
+							refresh_field("students");
+							frm.save();
+						} else {
+							frappe.msgprint(__("Student Group is already updated."))
+						}
 					}
-				}
-			})	
+				})
+			}
 		} else {
 			frappe.msgprint(__("Select students manually for the Activity based Group"));
 		}

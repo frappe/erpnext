@@ -41,6 +41,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -73,6 +74,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -104,6 +106,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -135,6 +138,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -166,6 +170,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -198,6 +203,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -227,6 +233,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -235,6 +242,7 @@
    "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -247,7 +255,7 @@
    "label": "Supplier Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "supplier.supplier_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -258,6 +266,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -266,6 +275,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 3, 
+   "fetch_from": "contact.email_id",
    "fieldname": "email_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -278,7 +288,7 @@
    "label": "Email Id", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "contact.email_id", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -289,6 +299,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -319,6 +330,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -332,7 +344,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-07-26 22:25:58.096584", 
+ "modified": "2018-05-16 22:43:30.212408",
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Request for Quotation Supplier", 

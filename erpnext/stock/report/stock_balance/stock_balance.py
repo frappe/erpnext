@@ -171,7 +171,7 @@ def filter_items_with_no_transactions(iwb_map):
 		
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
-		for key, val in qty_dict.items():
+		for key, val in iteritems(qty_dict):
 			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
@@ -202,26 +202,30 @@ def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
 		items = list(set([d.item_code for d in sle]))
-
-	for item in frappe.db.sql("""
-		select name, item_name, description, item_group, brand, stock_uom
-		from `tabItem`
-		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
-			item_details.setdefault(item.name, item)
+		
+	if items:
+		for item in frappe.db.sql("""
+			select name, item_name, description, item_group, brand, stock_uom
+			from `tabItem`
+			where name in ({0})
+			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
+				item_details.setdefault(item.name, item)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		variant_values = get_variant_values_for(item_details.keys())
+		variant_values = get_variant_values_for(list(item_details))
 		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details
 
 def get_item_reorder_details(items):
-	item_reorder_details = frappe.db.sql("""
-		select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
-		from `tabItem Reorder`
-		where parent in ({0})
-	""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
+	item_reorder_details = frappe._dict()
+
+	if items:
+		item_reorder_details = frappe.db.sql("""
+			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
+			from `tabItem Reorder`
+			where parent in ({0})
+		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

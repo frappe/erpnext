@@ -69,7 +69,7 @@ $.extend(erpnext, {
 						"get_query": function () {
 							return {
 								filters: {
-									item_code:grid_row.doc.item_code ,
+									item_code:grid_row.doc.item_code,
 									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
 								}
 							}

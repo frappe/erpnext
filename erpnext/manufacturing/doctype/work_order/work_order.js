@@ -158,15 +158,15 @@ frappe.ui.form.on("Work Order", {
 			added_min = 0.5;
 		}
 		message = title;
-
 		// pending qty
 		if(!frm.doc.skip_transfer){
 			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
 			if(pending_complete) {
 				var title = __('{0} items in progress', [pending_complete]);
+				var width = ((pending_complete / frm.doc.qty * 100) - added_min);
 				bars.push({
 					'title': title,
-					'width': ((pending_complete / frm.doc.qty * 100) - added_min)  + '%',
+					'width': (width > 100 ? "99.5" : width)  + '%',
 					'progress_class': 'progress-bar-warning'
 				})
 				message = message + '. ' + title;
@@ -402,7 +402,7 @@ erpnext.work_order = {
 		if (doc.docstatus === 1) {
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), function() {
-					erpnext.wokr_order.stop_work_order(frm, "Stopped");
+					erpnext.work_order.stop_work_order(frm, "Stopped");
 				}, __("Status"));
 			} else if (doc.status == 'Stopped') {
 				frm.add_custom_button(__('Re-open'), function() {
@@ -450,7 +450,7 @@ erpnext.work_order = {
 							erpnext.work_order.make_se(frm, 'Manufacture');
 						});
 
-						if(doc.material_transferred_for_manufacturing==doc.qty) {
+						if(doc.material_transferred_for_manufacturing>=doc.qty) {
 							// all materials transferred for manufacturing, make this primary
 							finish_btn.addClass('btn-primary');
 						}

@@ -11,9 +11,9 @@ Following are the few cases which can be addressed using Pricing Rule.
 
 3. Items categorized under specific Item Group has same selling or buying price.
 
-4. Customers balonging to specific Customer Group should get ### selling price, ot % of Discount on Items.
+4. Customers balonging to specific Customer Group should get ### selling price, or % of Discount on Items.
 
-5. Supplier's categorized under specific Supplier Type should have ### buying rate applied.
+5. Supplier categorized under specific Supplier Group should have ### buying rate applied.
 
 To have %Discount and Price List Rate for an Item auto-applied, you should create Pricing Rules for it.
 

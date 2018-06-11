@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
@@ -43,12 +43,12 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party = frappe.get_doc(party_type, party)
 	currency = party.default_currency if party.default_currency else get_company_currency(company)
 
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
+	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 	set_address_details(out, party, party_type, doctype, company)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
-	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -83,6 +83,18 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 		out.update(get_company_address(company))
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
+		get_regional_address_details(out, doctype, company)
+
+	elif doctype and doctype == "Purchase Invoice":
+		out.update(get_company_address(company))
+		if out.company_address:
+			out["shipping_address"] = out["company_address"]
+			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
+		get_regional_address_details(out, doctype, company)
+
+@erpnext.allow_regional
+def get_regional_address_details(out, doctype, company):
+	pass
 
 def set_contact_details(out, party, party_type):
 	out.contact_person = get_default_contact(party_type, party.name)
@@ -105,7 +117,7 @@ def set_other_values(out, party, party_type):
 	if party_type=="Customer":
 		to_copy = ["customer_name", "customer_group", "territory", "language"]
 	else:
-		to_copy = ["supplier_name", "supplier_type", "language"]
+		to_copy = ["supplier_name", "supplier_group", "language"]
 	for f in to_copy:
 		out[f] = party.get(f)
 
@@ -130,15 +142,15 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions().get("Price List", []))
-	if isinstance(price_list, list):
-		price_list = price_list[0] if len(price_list)==1 else None
+	price_list = filter(None, get_user_permissions()
+		.get("Price List", {})
+		.get("docs", []))
+	price_list = list(price_list)
 
-	if not price_list:
-		price_list = get_default_price_list(party)
-
-	if not price_list:
-		price_list = given_price_list
+	if price_list:
+		price_list = price_list[0]
+	else:
+		price_list = get_default_price_list(party) or given_price_list
 
 	if price_list:
 		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency")
@@ -169,7 +181,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 def get_party_account(party_type, party, company):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
-		will search in group (Customer Group / Supplier Type),
+		will search in group (Customer Group / Supplier Group),
 		finally will return default."""
 	if not company:
 		frappe.throw(_("Please select a Company"))
@@ -181,7 +193,7 @@ def get_party_account(party_type, party, company):
 		{"parenttype": party_type, "parent": party, "company": company}, "account")
 
 	if not account and party_type in ['Customer', 'Supplier']:
-		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Group"
 		group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 		account = frappe.db.get_value("Party Account",
 			{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
@@ -274,8 +286,8 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
 		else:
 			if party_type == "Supplier":
-				supplier_type = frappe.db.get_value(party_type, party, fieldname="supplier_type")
-				template_name = frappe.db.get_value("Supplier Type", supplier_type, fieldname="payment_terms")
+				supplier_group = frappe.db.get_value(party_type, party, fieldname="supplier_group")
+				template_name = frappe.db.get_value("Supplier Group", supplier_group, fieldname="payment_terms")
 				if template_name:
 					due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
 	# If due date is calculated from bill_date, check this condition
@@ -321,7 +333,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 					.format(formatdate(default_due_date)))
 
 @frappe.whitelist()
-def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None,
+def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
@@ -332,8 +344,8 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	if customer_group:
 		args['customer_group'] = customer_group
 
-	if supplier_type:
-		args['supplier_type'] = supplier_type
+	if supplier_group:
+		args['supplier_group'] = supplier_group
 
 	if billing_address or shipping_address:
 		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
@@ -371,10 +383,10 @@ def get_pyt_term_template(party_name, party_type, company=None):
 				customer.customer_group, fieldname='payment_terms')
 	else:
 		supplier = frappe.db.get_value("Supplier", party_name,
-			fieldname=['payment_terms', "supplier_type"], as_dict=1)
+			fieldname=['payment_terms', "supplier_group"], as_dict=1)
 		template = supplier.payment_terms
-		if not template and supplier.supplier_type:
-			template = frappe.db.get_value("Supplier Type", supplier.supplier_type, fieldname='payment_terms')
+		if not template and supplier.supplier_group:
+			template = frappe.db.get_value("Supplier Group", supplier.supplier_group, fieldname='payment_terms')
 
 	if not template and company:
 		template = frappe.db.get_value("Company", company, fieldname='payment_terms')
@@ -400,10 +412,21 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
+	fields = 'date(creation), count(name)'
+	after = add_years(None, -1).strftime('%Y-%m-%d')
+	group_by='group by date(creation)'
+
 	data = get_communication_data(doctype, name,
-		fields = 'date(creation), count(name)',
-		after = add_years(None, -1).strftime('%Y-%m-%d'),
-		group_by='group by date(creation)', as_dict=False)
+		fields=fields, after=after, group_by=group_by, as_dict=False)
+
+	# fetch and append data from Activity Log
+	data += frappe.db.sql("""select {fields}
+		from `tabActivity Log`
+		where reference_doctype='{doctype}' and reference_name='{name}'
+		and status!='Success' and creation > {after}
+		{group_by} order by creation desc
+		""".format(doctype=doctype, name=name, fields=fields,
+			group_by=group_by, after=after), as_dict=False)
 
 	timeline_items = dict(data)
 
@@ -448,7 +471,6 @@ def get_dashboard_info(party_type, party):
 
 	return info
 
-
 def get_party_shipping_address(doctype, name):
 	"""
 	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
@@ -476,3 +498,59 @@ def get_party_shipping_address(doctype, name):
 		return out[0][0]
 	else:
 		return ''
+
+def get_patry_tax_withholding_details(ref_doc):
+	supplier = frappe.get_doc("Supplier", ref_doc.supplier)
+	tax_withholding_details = []
+	for tax in supplier.tax_withholding_config:
+		tax_mapper = get_tax_mapper()
+
+		set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=tax.tax_withholding_category)
+
+		if tax.valid_till and date_diff(tax.valid_till, ref_doc.posting_date) > 0:
+			tax_mapper.update({
+				"rate": tax.applicable_percent
+			})
+
+		prepare_tax_withholding_details(tax_mapper, tax_withholding_details)
+
+	return tax_withholding_details
+
+def prepare_tax_withholding_details(tax_mapper, tax_withholding_details):
+	if tax_mapper.get('account_head'):
+		
+		tax_withholding_details.append({
+			"threshold": tax_mapper['threshold'],
+			"tax": tax_mapper
+		})
+
+		del tax_mapper['threshold']
+
+def set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=None, use_default=0):
+	if tax_withholding_category:
+		tax_withholding = frappe.get_doc("Tax Withholding Category", tax_withholding_category)
+	else:
+		tax_withholding = frappe.get_doc("Tax Withholding Category", {'is_default': 1, 'enabled': 1})
+
+	if tax_withholding.book_on_invoice and ref_doc.doctype=='Purchase Invoice' \
+		or tax_withholding.book_on_advance and ref_doc.doctype in ('Payment Entry', 'Journal Entry'):
+
+		for account_detail in tax_withholding.accounts:
+			if ref_doc.company == account_detail.company:
+				tax_mapper.update({
+					"account_head": account_detail.account,
+					"rate": tax_withholding.percent_of_tax_withheld,
+					"threshold": tax_withholding.threshold,
+					"description": tax_withholding.name
+				})
+
+def get_tax_mapper():
+	return {
+		"category": "Total",
+		"add_deduct_tax": "Deduct",
+		"charge_type": "On Net Total",
+		"rate": 0,
+		"description": '',
+		"account_head": '',
+		"threshold": 0.0
+	}

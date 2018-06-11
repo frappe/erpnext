@@ -40,7 +40,7 @@ frappe.ui.form.on('Patient', {
 	},
 	onload: function (frm) {
 		if(!frm.doc.dob){
-			$(frm.fields_dict['age_html'].wrapper).html("Age not specified");
+			$(frm.fields_dict['age_html'].wrapper).html("");
 		}
 		if(frm.doc.dob){
 			$(frm.fields_dict['age_html'].wrapper).html("AGE : " + get_age(frm.doc.dob));
@@ -49,7 +49,7 @@ frappe.ui.form.on('Patient', {
 });
 
 frappe.ui.form.on("Patient", "dob", function(frm) {
-	if(frm.doc.dob){
+	if(frm.doc.dob) {
 		var today = new Date();
 		var birthDate = new Date(frm.doc.dob);
 		if(today < birthDate){
@@ -60,6 +60,9 @@ frappe.ui.form.on("Patient", "dob", function(frm) {
 			var age_str = get_age(frm.doc.dob);
 			$(frm.fields_dict['age_html'].wrapper).html("AGE : " + age_str);
 		}
+	}
+	else {
+		$(frm.fields_dict['age_html'].wrapper).html("");
 	}
 });
 

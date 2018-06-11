@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe.model.document import Document
 from erpnext.education.api import get_grade
 from frappe.utils.pdf import get_pdf
@@ -16,8 +16,8 @@ class StudentReportGenerationTool(Document):
 
 
 @frappe.whitelist()
-def preview_report_card(**kwargs):
-	doc = frappe._dict(**kwargs)
+def preview_report_card(doc):
+	doc = frappe._dict(json.loads(doc))
 	doc.students = [doc.student]
 	if not (doc.student_name and doc.student_batch):
 		program_enrollment = frappe.get_all("Program Enrollment", fields=["student_batch_name", "student_name"],
@@ -33,7 +33,7 @@ def preview_report_card(**kwargs):
 	course_criteria = get_courses_criteria(courses)
 
 	# get the assessment group as per the user selection
-	if int(doc.include_all_assessment):
+	if doc.include_all_assessment:
 		assessment_groups = get_child_assessment_groups(doc.assessment_group)
 	else:
 		assessment_groups = [doc.assessment_group]
@@ -55,7 +55,7 @@ def preview_report_card(**kwargs):
 			"assessment_groups": assessment_groups,
 			"course_criteria": course_criteria,
 			"letterhead": letterhead.content,
-			"add_letterhead": int(doc.add_letterhead) if int(doc.add_letterhead) else 0
+			"add_letterhead": doc.add_letterhead if doc.add_letterhead else 0
 		})
 	final_template = frappe.render_template(base_template_path, {"body": html, "title": "Report Card"})
 

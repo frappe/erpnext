@@ -13,8 +13,10 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.accounts.doctype.subscription.subscription import get_next_schedule_date
+from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.stock.doctype.item.item import get_item_defaults
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -369,16 +371,16 @@ class SalesOrder(SellingController):
 						))
 		return items
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
-			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+														 auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
 			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
-				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+														  auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -493,11 +495,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, source_parent.company)
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-				or item.selling_cost_center \
+				or item.get("selling_cost_center") \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
@@ -557,8 +559,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if not target.cost_center and target.item_code:
-			item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-			target.cost_center = item.selling_cost_center \
+			item = get_item_defaults(target.item_code, target.company)
+			target.cost_center = item.get("selling_cost_center") \
 				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
@@ -586,10 +588,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		},
 		"Sales Team": {
 			"doctype": "Sales Team",
-			"add_if_empty": True
-		},
-		"Payment Schedule": {
-			"doctype": "Payment Schedule",
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
@@ -755,9 +753,9 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_type"]
+		fields = ["name", "supplier_group"]
 	else:
-		fields = ["name", "supplier_name", "supplier_type"]
+		fields = ["name", "supplier_name", "supplier_group"]
 	fields = ", ".join(fields)
 
 	return frappe.db.sql("""select {field} from `tabSupplier`

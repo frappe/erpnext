@@ -16,7 +16,7 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-
+from six import iteritems
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -277,7 +277,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for k, v in expected_values[i].items():
+			for k, v in iteritems(expected_values[i]):
 				self.assertEqual(d.get(k), v)
 
 		# check net total
@@ -523,7 +523,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for key, val in expected_values[i].items():
+			for key, val in iteritems(expected_values[i]):
 				self.assertEqual(d.get(key), val)
 
 		# check net total
@@ -1414,6 +1414,29 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, si.insert)
 
+	def test_credit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+
+		outstanding_amount = get_outstanding_amount(si.doctype,
+			si.name, "Debtors - _TC", si.customer, "Customer")
+
+		self.assertEqual(si.outstanding_amount, outstanding_amount)
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = si.currency
+		pe.paid_to_account_currency = si.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = si.grand_total * -1
+		pe.insert()
+		pe.submit()
+
+		si_doc = frappe.get_doc('Sales Invoice', si.name)
+		self.assertEqual(si_doc.outstanding_amount, 0)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1456,3 +1479,16 @@ def create_sales_invoice(**args):
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')
+
+def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):
+	bal = flt(frappe.db.sql("""
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+		from `tabGL Entry`
+		where against_voucher_type=%s and against_voucher=%s
+		and account = %s and party = %s and party_type = %s""",
+		(against_voucher_type, against_voucher, account, party, party_type))[0][0] or 0.0)
+
+	if against_voucher_type == 'Purchase Invoice':
+		bal = bal * -1
+
+	return bal

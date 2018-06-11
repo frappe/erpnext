@@ -29,6 +29,7 @@ class calculate_taxes_and_totals(object):
 			self.set_item_wise_tax_breakup()
 
 	def _calculate(self):
+		self.validate_conversion_rate()
 		self.calculate_item_values()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
@@ -37,6 +38,7 @@ class calculate_taxes_and_totals(object):
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
+		self.calculate_total_net_weight()
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -163,9 +165,10 @@ class calculate_taxes_and_totals(object):
 			return tax.rate
 
 	def calculate_net_total(self):
-		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
+		self.doc.total_qty = self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
 		for item in self.doc.get("items"):
 			self.doc.total += item.amount
+			self.doc.total_qty += item.qty
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
@@ -327,6 +330,13 @@ class calculate_taxes_and_totals(object):
 
 		self.set_rounded_total()
 
+	def calculate_total_net_weight(self):
+		if self.doc.meta.get_field('total_net_weight'):
+			self.doc.total_net_weight = 0.0
+			for d in self.doc.items:
+				if d.total_weight:
+					self.doc.total_net_weight += d.total_weight
+
 	def set_rounded_total(self):
 		if self.doc.meta.get_field("rounded_total"):
 			if self.doc.is_rounded_total_disabled():
@@ -440,7 +450,7 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return: return
+		if self.doc.is_return and self.doc.return_against: return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -517,10 +527,8 @@ class calculate_taxes_and_totals(object):
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
 
-				if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency:
-					item.margin_type = pricing_rule.margin_type
-					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-				elif pricing_rule.margin_type == 'Percentage':
+				if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
+						or (pricing_rule.margin_type == 'Percentage'):
 					item.margin_type = pricing_rule.margin_type
 					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 				else:
@@ -566,7 +574,8 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
-			company_currency=erpnext.get_company_currency(doc.company)
+			conversion_rate=doc.conversion_rate,
+			currency=doc.currency
 		)
 	)
 

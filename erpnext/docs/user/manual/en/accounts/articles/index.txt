@@ -15,3 +15,6 @@ adjust-withhold-amount-payment-entry
 common-receivable-account.md
 types-in-tax-template
 freeze-account
+round-off-account-validation
+exchange-rate-field-frozen
+bulk-payment-entry

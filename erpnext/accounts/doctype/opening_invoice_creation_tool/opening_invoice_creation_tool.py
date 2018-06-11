@@ -120,12 +120,12 @@ class OpeningInvoiceCreationTool(Document):
 		if party_type == "Customer":
 			party_doc.customer_name = party
 		else:
-			supplier_type = frappe.db.get_single_value("Buying Settings", "supplier_type")
-			if not supplier_type:
-				frappe.throw(_("Please Set Supplier Type in Buying Settings."))
+			supplier_group = frappe.db.get_single_value("Buying Settings", "supplier_group")
+			if not supplier_group:
+				frappe.throw(_("Please Set Supplier Group in Buying Settings."))
 
 			party_doc.supplier_name = party
-			party_doc.supplier_type = supplier_type
+			party_doc.supplier_group = supplier_group
 
 		party_doc.flags.ignore_mandatory = True
 		party_doc.save(ignore_permissions=True)		
@@ -161,7 +161,8 @@ class OpeningInvoiceCreationTool(Document):
 			income_expense_account_field = "expense_account"
 
 		item = get_item_dict()
-		return frappe._dict({
+
+		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
 			"set_posting_time": 1,
@@ -172,6 +173,11 @@ class OpeningInvoiceCreationTool(Document):
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
+
+		if self.invoice_type == "Sales":
+			args["is_pos"] = 0
+
+		return args
 
 @frappe.whitelist()
 def get_temporary_opening_account(company=None):

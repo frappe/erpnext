@@ -82,6 +82,8 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
+		super(DeliveryNote, self).before_print()
+
 	def set_actual_qty(self):
 		for d in self.get('items'):
 			if d.item_code and d.warehouse:

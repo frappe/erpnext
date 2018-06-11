@@ -11,6 +11,12 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"supplier",
 			"label": __("Supplier"),
 			"fieldtype": "Link",
@@ -32,7 +38,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
-			"options": 'Posting Date\nDue Date',
+			"options": 'Posting Date\nDue Date\nSupplier Invoice Date',
 			"default": "Posting Date"
 		},
 		{

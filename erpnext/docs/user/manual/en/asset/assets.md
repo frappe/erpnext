@@ -52,6 +52,8 @@ In the depreciation entry, the "Accumulated Depreciation Account" is credited an
 
 If you are required to calculate the depreciation based on your Fiscal Year and prorated by the number of days left, select the corresponding option in "Account Settings".
 
+<img class="screenshot" alt="Asset" src="{{docs_base_url}}/assets/img/asset/book-asset-depreciation-accounting-automatically.png">
+
 The system will automatically set the fiscal year end date as the next depreciation date and calculate the depreciation amount prorata temporis based on the Available-for-use Date (IFRS16)
 
 <img class="screenshot" alt="Asset" src="/docs/assets/img/asset/asset-prorated-depreciation.png">

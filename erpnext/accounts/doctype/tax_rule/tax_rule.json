@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0,
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "TR.####", 
@@ -12,6 +13,7 @@
  "editable_grid": 0, 
  "fields": [
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -40,9 +42,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -69,9 +73,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -97,9 +103,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -128,9 +136,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -159,9 +169,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -188,9 +200,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -219,9 +233,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -250,9 +266,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -279,9 +297,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -308,9 +328,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -337,9 +359,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -367,9 +391,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -395,9 +421,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -426,15 +454,17 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:doc.tax_type==\"Purchase\"", 
-   "fieldname": "supplier_type", 
+   "fieldname": "supplier_group",
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -443,10 +473,10 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Supplier Type", 
+   "label": "Supplier Group",
    "length": 0, 
    "no_copy": 0, 
-   "options": "Supplier Type", 
+   "options": "Supplier Group",
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -457,9 +487,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -486,9 +518,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -515,9 +549,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -544,9 +580,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -574,9 +612,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -603,9 +643,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -632,9 +674,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -660,9 +704,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -689,9 +735,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -717,9 +765,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -747,9 +797,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -775,9 +827,11 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -805,20 +859,21 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-02-17 16:22:42.501765", 
+ "modified": "2018-04-19 07:53:43.020808",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Tax Rule", 
@@ -827,7 +882,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

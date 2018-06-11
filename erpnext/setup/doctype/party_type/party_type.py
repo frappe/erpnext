@@ -11,10 +11,15 @@ class PartyType(Document):
 
 @frappe.whitelist()
 def get_party_type(doctype, txt, searchfield, start, page_len, filters):
+	cond = ''
+	if filters and filters.get('account'):
+		account_type = frappe.db.get_value('Account', filters.get('account'), 'account_type')
+		cond = "and account_type = '%s'" % account_type
+
 	return frappe.db.sql("""select name from `tabParty Type`
-			where `{key}` LIKE %(txt)s
+			where `{key}` LIKE %(txt)s {cond}
 			order by name limit %(start)s, %(page_len)s"""
-			.format(key=searchfield), {
+			.format(key=searchfield, cond=cond), {
 				'txt': "%%%s%%" % frappe.db.escape(txt),
 				'start': start, 'page_len': page_len
 			})

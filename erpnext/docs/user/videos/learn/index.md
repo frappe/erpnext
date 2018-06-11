@@ -79,9 +79,17 @@
             Opening Account Balances</a>
             <span class="text-muted pull-right">4:40</span>
         </li>
+        <li><a href="/docs/user/videos/learn/opening-invoice-creation-tool.html">
+            Opening Invoices Creation Tool</a>
+            <span class="text-muted pull-right">2:30</span>
+        </li>
         <li><a href="/docs/user/videos/learn/email-account.html">
             Email Account</a>
-            <span class="text-muted pull-right">2:27</span>
+            <span class="text-muted pull-right">4:00</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/email-inbox.html">
+            Email Inbox</a>
+            <span class="text-muted pull-right">2:51</span>
         </li>
         <li><a href="/docs/user/videos/learn/file-manager.html">
             File Manager</a>
@@ -119,6 +127,14 @@
 			Drop Ship</a>
             <span class="text-muted pull-right">2:26</span>
         </li>
+        <li><a href="/docs/user/videos/learn/pricing-rule.html">
+			Pricing Rule</a>
+            <span class="text-muted pull-right">3:56</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/discounts.html">
+			Discounts</a>
+            <span class="text-muted pull-right">2:23</span>
+        </li>
     </ul>
     <br>
     <h3>Buying</h3>
@@ -142,6 +158,14 @@
         <li><a href="/docs/user/videos/learn/taxes.html">
             Taxes</a>
             <span class="text-muted pull-right">5:13</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/pricing-rule.html">
+			Pricing Rule</a>
+            <span class="text-muted pull-right">3:56</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/discounts.html">
+			Discounts</a>
+            <span class="text-muted pull-right">2:23</span>
         </li>
     </ul>
     <br>
@@ -201,11 +225,15 @@
         </li>
         <li><a href="/docs/user/videos/learn/advance-payments.html">
             Advance Payments</a>
-              <span class="text-muted pull-right">2:52</span>
+              <span class="text-muted pull-right">3:11</span>
         </li>
         <li><a href="/docs/user/videos/learn/budgeting.html">
               Budgeting</a>
             <span class="text-muted pull-right">3:26</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/subscription.html">
+              Subscription Management</a>
+            <span class="text-muted pull-right">2:09</span>
         </li>
     </ul>
     <br>
@@ -214,10 +242,6 @@
         <li><a href="/docs/user/videos/learn/bill-of-materials.html">
             Bill of Materials</a>
             <span class="text-muted pull-right">3:27</span>
-        </li>
-        <li><a href="/docs/user/videos/learn/production-planning.html">
-            Production Planning Tool</a>
-              <span class="text-muted pull-right">1:41</span>
         </li>
         <li><a href="/docs/user/videos/learn/work-order.html">
             Work Order</a>
@@ -248,6 +272,10 @@
         <li><a href="/docs/user/videos/learn/expense-claim.html">
             Expense Claims</a>
             <span class="text-muted pull-right">2:52</span>
+        </li>
+        <li><a href="/docs/user/videos/learn/employee-advance.html">
+            Employee Advance</a>
+            <span class="text-muted pull-right">3:46</span>
         </li>
     </ul>
     <br>

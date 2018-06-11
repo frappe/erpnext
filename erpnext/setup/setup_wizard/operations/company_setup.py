@@ -113,8 +113,7 @@ def create_logo(args):
 				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")	))
 
 def create_website(args):
-	if args.get('setup_website'):
-		website_maker(args)
+	website_maker(args)
 
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year

@@ -490,14 +490,12 @@ erpnext.patches.v10_0.fichier_des_ecritures_comptables_for_france
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
 erpnext.patches.v10_0.added_extra_gst_custom_field
-erpnext.patches.v10_0.workflow_leave_application #2018-01-24 #2018-02-02 #2018-02-08
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
 erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
 erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2 #2018-02-13
 erpnext.patches.v10_0.item_barcode_childtable_migrate
 erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
-erpnext.patches.v10_0.workflow_expense_claim
 erpnext.patches.v10_0.set_b2c_limit
 erpnext.patches.v10_0.update_translatable_fields
 erpnext.patches.v10_0.rename_offer_letter_to_job_offer
@@ -517,4 +515,35 @@ erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
+erpnext.patches.v11_0.rename_employee_loan_to_loan
+erpnext.patches.v11_0.move_leave_approvers_from_employee
 erpnext.patches.v11_0.update_department_lft_rgt
+erpnext.patches.v11_0.add_default_email_template_for_leave
+erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
+erpnext.patches.v11_0.uom_conversion_data
+erpnext.patches.v10_0.taxes_issue_with_pos
+erpnext.patches.v11_0.update_account_type_in_party_type
+erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
+erpnext.patches.v10_1.drop_old_subscription_records
+erpnext.patches.v11_0.update_brand_in_item_price
+erpnext.patches.v11_0.create_default_success_action
+erpnext.patches.v11_0.add_healthcare_service_unit_tree_root
+erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
+erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
+erpnext.patches.v11_0.rename_field_max_days_allowed
+erpnext.patches.v11_0.create_salary_structure_assignments
+erpnext.patches.v11_0.rename_health_insurance
+erpnext.patches.v11_0.rebuild_tree_for_company
+erpnext.patches.v11_0.rename_supplier_type_to_supplier_group
+erpnext.patches.v11_0.create_department_records_for_each_company
+erpnext.patches.v11_0.make_location_from_warehouse
+erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
+erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
+erpnext.patches.v11_0.refactor_erpnext_shopify
+erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany
+erpnext.patches.v11_0.rename_overproduction_percent_field
+erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
+erpnext.patches.v10_0.update_status_in_purchase_receipt
+erpnext.patches.v11_0.inter_state_field_for_gst
+erpnext.patches.v11_0.rename_members_with_naming_series #04-06-2018
+erpnext.patches.v11_0.set_update_field_and_value_in_workflow_state

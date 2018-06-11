@@ -445,11 +445,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				frappe.ui.form.is_saving = false;
 			}
 		});
-	},
-	on_submit: function(doc, cdt, cdn) {
-		if(cint(frappe.boot.notification_settings.sales_order)) {
-			this.frm.email_doc(frappe.boot.notification_settings.sales_order_message);
-		}
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));

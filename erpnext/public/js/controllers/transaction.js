@@ -106,7 +106,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(
-			this.frm.docstatus < 2 
+			this.frm.docstatus < 2
 			&& this.frm.fields_dict["payment_terms_template"]
 			&& this.frm.fields_dict["payment_schedule"]
 			&& this.frm.doc.payment_terms_template
@@ -296,7 +296,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
-
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -305,7 +304,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
@@ -403,7 +401,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				item.serial_no = valid_serial_nos.join('\n');
 
 				refresh_field("serial_no", item.name, item.parentfield);
-				if(!doc.is_return) {
+				if(!doc.is_return && cint(user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
 					frappe.model.set_value(item.doctype, item.name,
 						"qty", valid_serial_nos.length / item.conversion_factor);
 					frappe.model.set_value(item.doctype, item.name, "stock_qty", valid_serial_nos.length);
@@ -602,14 +600,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
 		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
 		/* end manqala */
-
 		var me = this;
 		this.set_dynamic_labels();
-
 		var company_currency = this.get_company_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
+
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
@@ -671,13 +668,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		var args;
+		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].includes(this.frm.doctype)) {
+			args = "for_selling";
+		}
+		else if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
+			args = "for_buying";
+		}
+
 		if (!transaction_date || !from_currency || !to_currency) return;
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
 				transaction_date: transaction_date,
 				from_currency: from_currency,
-				to_currency: to_currency
+				to_currency: to_currency,
+				args: args
 			},
 			callback: function(r) {
 				callback(flt(r.message));
@@ -736,7 +742,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if(doc.doctype != 'Material Request' && frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
@@ -983,7 +989,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,
-			"supplier_type": me.frm.doc.supplier_type,
+			"supplier_group": me.frm.doc.supplier_group,
 			"currency": me.frm.doc.currency,
 			"conversion_rate": me.frm.doc.conversion_rate,
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
@@ -1103,6 +1109,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.in_apply_price_list = false;
 				}
 			}
+		}).always(() => {
+			me.in_apply_price_list = false;
 		});
 	},
 

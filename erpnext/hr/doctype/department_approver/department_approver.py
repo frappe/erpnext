@@ -17,7 +17,7 @@ def get_approver_list(name):
 	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
 		tabUser user where
 		user.enabled and
-		user.name != %s 
+		user.name != %s
 		""", name or "")
 
 @frappe.whitelist()

@@ -118,29 +118,20 @@ class TestTimesheet(unittest.TestCase):
 
 
 def make_salary_structure(employee):
-	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
+	name = frappe.db.get_value('Salary Structure Assignment', {'employee': employee}, 'salary_structure')
 	if name:
 		salary_structure = frappe.get_doc('Salary Structure', name)
 	else:
 		salary_structure = frappe.new_doc("Salary Structure")
 		salary_structure.name = "Timesheet Salary Structure Test"
 		salary_structure.salary_slip_based_on_timesheet = 1
-		salary_structure.from_date = add_days(nowdate(), -30)
 		salary_structure.salary_component = "Basic"
 		salary_structure.hour_rate = 50.0
 		salary_structure.company = "_Test Company"
 		salary_structure.payment_account = get_random("Account")
 
-		salary_structure.set('employees', [])
 		salary_structure.set('earnings', [])
 		salary_structure.set('deductions', [])
-
-		es = salary_structure.append('employees', {
-			"employee": employee,
-			"base": 1200,
-			"from_date": add_months(nowdate(),-1)
-		})
-
 
 		es = salary_structure.append('earnings', {
 			"salary_component": "_Test Allowance",
@@ -154,12 +145,21 @@ def make_salary_structure(employee):
 
 		salary_structure.save(ignore_permissions=True)
 
+		salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
+		salary_structure_assignment.employee = employee
+		salary_structure_assignment.base = 1200
+		salary_structure_assignment.from_date = add_months(nowdate(), -1)
+		salary_structure_assignment.salary_structure = salary_structure.name
+		salary_structure_assignment.company = "_Test Company"
+		salary_structure_assignment.save(ignore_permissions=True)
+
 	return salary_structure
 
 def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test Activity Type", project=None, task=None, company=None):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
+	timesheet.company = company or '_Test Company'
 	timesheet_detail = timesheet.append('time_logs', {})
 	timesheet_detail.billable = billable
 	timesheet_detail.activity_type = activity_type
@@ -168,7 +168,6 @@ def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test 
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours= timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
-	timesheet_detail.company = company or '_Test Company'
 
 	for data in timesheet.get('time_logs'):
 		if simulate:

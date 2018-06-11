@@ -422,12 +422,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 	}
 }
 
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_order)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
-	}
-}
-
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){
 		erpnext.utils.copy_value_in_all_row(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");

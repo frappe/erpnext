@@ -13,12 +13,6 @@ from six import string_types
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
-	def load_notification_message(self):
-		dt = self.doctype.lower().replace(" ", "_")
-		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.set("__notification_message",
-				frappe.db.get_value("Notification Control", None, dt + "_message"))
-
 	def validate_posting_time(self):
 		# set Edit Posting Date and Time to 1 while data import
 		if frappe.flags.in_import and self.posting_date:

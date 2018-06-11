@@ -29,9 +29,10 @@ frappe.ui.form.on("Salary Slip", {
 		})
 	},
 
-	start_date: function(frm){
+	start_date: function(frm, dt, dn){
 		if(frm.doc.start_date){
 			frm.trigger("set_end_date");
+			get_emp_and_leave_details(frm.doc, dt, dn);
 		}
 	},
 
@@ -63,20 +64,26 @@ frappe.ui.form.on("Salary Slip", {
 		var salary_detail_fields = ['formula', 'abbr', 'statistical_component']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-	},	
-
-	salary_slip_based_on_timesheet: function(frm) {
-		frm.trigger("toggle_fields");
-		frm.set_value('start_date', '');
-	},
-	
-	payroll_frequency: function(frm) {
-		frm.trigger("toggle_fields");
-		frm.set_value('start_date', '');
+		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
+		fields_read_only.forEach(function(field) {
+			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
+		});
 	},
 
-	employee: function(frm){
+	salary_slip_based_on_timesheet: function(frm, dt, dn) {
+		frm.trigger("toggle_fields");
+		get_emp_and_leave_details(frm.doc, dt, dn);
+	},
+
+	payroll_frequency: function(frm, dt, dn) {
+		frm.trigger("toggle_fields");
+		frm.set_value('end_date', '');
 		frm.set_value('start_date', '');
+		get_emp_and_leave_details(frm.doc, dt, dn);
+	},
+
+	employee: function(frm, dt, dn) {
+		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
 
 	toggle_fields: function(frm) {
@@ -86,7 +93,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
 	}
-	
+
 })
 
 frappe.ui.form.on('Salary Detail', {
@@ -109,7 +116,7 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 
 // Get leave details
 //---------------------------------------------------------------------
-cur_frm.cscript.start_date = function(doc, dt, dn){
+var get_emp_and_leave_details = function(doc, dt, dn) {
 	if(!doc.start_date){
 		return frappe.call({
 			method: 'get_emp_and_leave_details',
@@ -122,11 +129,9 @@ cur_frm.cscript.start_date = function(doc, dt, dn){
 	}
 }
 
-cur_frm.cscript.payroll_frequency = cur_frm.cscript.salary_slip_based_on_timesheet = cur_frm.cscript.start_date;
-
 cur_frm.cscript.employee = function(doc,dt,dn){
 	doc.salary_structure = ''
-	cur_frm.cscript.start_date(doc, dt, dn)
+	get_emp_and_leave_details(doc, dt, dn);
 }
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){

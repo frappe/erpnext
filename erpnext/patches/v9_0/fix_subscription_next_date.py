@@ -4,15 +4,20 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate
-from erpnext.accounts.doctype.subscription.subscription import get_next_schedule_date
+from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 
 def execute():
-	frappe.reload_doctype('Subscription')
+	frappe.reload_doc('accounts', 'doctype', 'subscription')
+	fields = ["name", "reference_doctype", "reference_document",
+			"start_date", "frequency", "repeat_on_day"]
+
+	for d in fields:
+		if not frappe.db.has_column('Subscription', d):
+			return
 
 	doctypes = ('Purchase Order', 'Sales Order', 'Purchase Invoice', 'Sales Invoice')
 	for data in frappe.get_all('Subscription',
-		fields = ["name", "reference_doctype", "reference_document",
-			"start_date", "frequency", "repeat_on_day"],
+		fields = fields,
 		filters = {'reference_doctype': ('in', doctypes), 'docstatus': 1}):
 
 		recurring_id = frappe.db.get_value(data.reference_doctype, data.reference_document, "recurring_id")

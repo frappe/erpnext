@@ -2,9 +2,14 @@ chart-of-accounts
 opening-accounts
 sales-invoice
 point-of-sale-pos-invoice
+point-of-sales
+credit-note
 purchase-invoice
+debit-note
+inter-company-invoices
 payments
 journal-entry
+inter-company-journal-entry
 payment-entry
 subscription
 multi-currency-accounting

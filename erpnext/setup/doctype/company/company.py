@@ -2,8 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os
+import frappe, os, json
 from frappe import _
+from frappe.utils import get_timestamp
 
 from frappe.utils import cint, today, formatdate
 import frappe.defaults
@@ -11,8 +12,11 @@ from frappe.cache_manager import clear_defaults_cache
 
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils.nestedset import NestedSet
 
-class Company(Document):
+class Company(NestedSet):
+	nsm_parent_field = 'parent_company'
+
 	def onload(self):
 		load_address_and_contact(self, "company")
 		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
@@ -42,8 +46,8 @@ class Company(Document):
 
 		self.abbr = self.abbr.strip()
 
-		if self.get('__islocal') and len(self.abbr) > 5:
-			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
+		# if self.get('__islocal') and len(self.abbr) > 5:
+		# 	frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
@@ -78,6 +82,7 @@ class Company(Document):
 				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
 
 	def on_update(self):
+		NestedSet.on_update(self)
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
@@ -122,6 +127,7 @@ class Company(Document):
 						if not wh_detail["is_group"] else ""
 				})
 				warehouse.flags.ignore_permissions = True
+				warehouse.flags.ignore_mandatory = True
 				warehouse.insert()
 
 	def create_default_accounts(self):
@@ -164,6 +170,9 @@ class Company(Document):
 		self._set_default_account("round_off_account", "Round Off")
 		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
 		self._set_default_account("depreciation_expense_account", "Depreciation")
+		self._set_default_account("capital_work_in_progress_account", "Capital Work in Progress")
+		self._set_default_account("asset_received_but_not_billed", "Asset Received But Not Billed")
+		self._set_default_account("expenses_included_in_asset_valuation", "Expenses Included In Asset Valuation")
 
 		if self.enable_perpetual_inventory:
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
@@ -184,6 +193,36 @@ class Company(Document):
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
+
+		if not self.default_payroll_payable_account:
+			payroll_payable_account = frappe.db.get_value("Account",
+				{"account_name": _("Payroll Payable"), "company": self.name, "is_group": 0})
+
+			self.db_set("default_payroll_payable_account", payroll_payable_account)
+
+		if not self.default_employee_advance_account:
+			employe_advance_account = frappe.db.get_value("Account",
+				{"account_name": _("Employee Advances"), "company": self.name, "is_group": 0})
+
+			self.db_set("default_employee_advance_account", employe_advance_account)
+
+		if not self.write_off_account:
+			write_off_acct = frappe.db.get_value("Account",
+				{"account_name": _("Write Off"), "company": self.name, "is_group": 0})
+
+			self.db_set("write_off_account", write_off_acct)
+
+		if not self.exchange_gain_loss_account:
+			exchange_gain_loss_acct = frappe.db.get_value("Account",
+				{"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0})
+
+			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.disposal_account:
+			disposal_acct = frappe.db.get_value("Account",
+				{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0})
+
+			self.db_set("disposal_account", disposal_acct)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):
@@ -249,9 +288,8 @@ class Company(Document):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
-		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
-		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
+		NestedSet.validate_if_child_exists(self)
+		frappe.utils.nestedset.update_nsm(self)
 
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
@@ -266,33 +304,19 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
-		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
+		for doctype in ["Mode of Payment Account", "Item Default"]:
+			frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 
 		# clear default accounts, warehouses from item
+		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
 		if warehouses:
-			for f in ["default_warehouse", "website_warehouse"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
-
 			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
-
-		if accounts:
-			for f in ["income_account", "expense_account"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
-
-		if cost_centers:
-			for f in ["selling_cost_center", "buying_cost_center"]:
-				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-					% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
 		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
-		# delete mode of payment account
-		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
@@ -382,8 +406,115 @@ def update_company_monthly_sales(company):
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
 
+def update_transactions_annual_history(company, commit=False):
+	transactions_history = get_all_transactions_annual_history(company)
+	frappe.db.set_value("Company", company, "transactions_annual_history", json.dumps(transactions_history))
+
+	if commit:
+		frappe.db.commit()
+
 def cache_companies_monthly_sales_history():
 	companies = [d['name'] for d in frappe.get_list("Company")]
 	for company in companies:
 		update_company_monthly_sales(company)
+		update_transactions_annual_history(company)
 	frappe.db.commit()
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False):
+	if parent == None or parent == "All Companies":
+		parent = ""
+
+	return frappe.db.sql("""
+		select
+			name as value,
+			is_group as expandable
+		from
+			`tab{doctype}` comp
+		where
+			ifnull(parent_company, "")="{parent}"
+		""".format(
+			doctype = frappe.db.escape(doctype),
+			parent=frappe.db.escape(parent)
+		), as_dict=1)
+
+@frappe.whitelist()
+def add_node():
+	from frappe.desk.treeview import make_tree_args
+	args = frappe.form_dict
+	args = make_tree_args(**args)
+
+	if args.parent_company == 'All Companies':
+		args.parent_company = None
+
+	frappe.get_doc(args).insert()
+
+def get_all_transactions_annual_history(company):
+	out = {}
+
+	items = frappe.db.sql('''
+		select transaction_date, count(*) as count
+
+		from (
+			select name, transaction_date, company
+			from `tabQuotation`
+
+			UNION ALL
+
+			select name, transaction_date, company
+			from `tabSales Order`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabDelivery Note`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabSales Invoice`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabIssue`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabProject`
+		) t
+
+		where
+			company=%s
+			and
+			transaction_date > date_sub(curdate(), interval 1 year)
+
+		group by
+			transaction_date
+			''', (company), as_dict=True)
+
+	for d in items:
+		timestamp = get_timestamp(d["transaction_date"])
+		out.update({ timestamp: d["count"] })
+
+	return out
+
+def get_timeline_data(doctype, name):
+	'''returns timeline data based on linked records in dashboard'''
+	out = {}
+	date_to_value_dict = {}
+
+	history = frappe.db.get_value("Company", name, "transactions_annual_history")
+
+	try:
+		date_to_value_dict = json.loads(history) if history and '{' in history else None
+	except ValueError:
+		date_to_value_dict = None
+
+	if date_to_value_dict is None:
+		update_transactions_annual_history(name, True)
+		history = frappe.db.get_value("Company", name, "transactions_annual_history")
+		return json.loads(history) if history and '{' in history else {}
+
+	return date_to_value_dict

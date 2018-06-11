@@ -42,7 +42,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -74,7 +74,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -106,7 +106,7 @@
    "reqd": 1, 
    "search_index": 1, 
    "set_only_once": 1, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -115,6 +115,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "patient.patient_name",
    "fieldname": "patient_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -127,7 +128,7 @@
    "label": "Patient Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "patient.patient_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -138,7 +139,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -169,7 +170,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -201,7 +202,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 1, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -233,7 +234,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -264,7 +265,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -295,7 +296,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -327,7 +328,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -357,7 +358,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -389,7 +390,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -421,7 +422,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -452,7 +453,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -483,7 +484,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -515,7 +516,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -547,7 +548,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -580,7 +581,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -589,6 +590,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -601,7 +603,7 @@
    "label": "Technician Name", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "employee.employee_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -612,7 +614,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -621,6 +623,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "employee.designation",
    "fieldname": "employee_designation", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -633,7 +636,7 @@
    "label": "Designation", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "employee.designation", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -644,7 +647,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -676,7 +679,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -707,7 +710,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -737,7 +740,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -768,7 +771,7 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -798,7 +801,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -830,7 +833,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 1, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -862,7 +865,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -892,7 +895,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -923,7 +926,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -953,7 +956,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -984,7 +987,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1014,7 +1017,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1045,7 +1048,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1075,7 +1078,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1106,7 +1109,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1137,7 +1140,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1168,7 +1171,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1199,7 +1202,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1231,7 +1234,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1262,7 +1265,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1293,7 +1296,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1324,7 +1327,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1355,7 +1358,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1386,7 +1389,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -1418,7 +1421,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -1433,7 +1436,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-05 12:20:25.061368", 
+ "modified": "2018-05-16 22:43:40.341869",
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Lab Test", 

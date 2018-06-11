@@ -18,7 +18,7 @@ class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def validate(self):
@@ -41,8 +41,9 @@ class ExpenseClaim(AccountsController):
 		}[cstr(self.docstatus or 0)]
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
+		precision = self.precision("total_sanctioned_amount")
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.total_sanctioned_amount) ==  paid_amount)) \
+			and flt(self.total_sanctioned_amount, precision) ==  flt(paid_amount, precision))) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
 				self.status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
@@ -102,7 +103,7 @@ class ExpenseClaim(AccountsController):
 		self.validate_account_details()
 
 		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance_amount)
-		
+
 		# payable entry
 		if payable_amount:
 			gl_entry.append(
@@ -231,7 +232,7 @@ class ExpenseClaim(AccountsController):
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 
@@ -286,7 +287,7 @@ def get_expense_claim_account(expense_claim_type, company):
 	if not account:
 		frappe.throw(_("Please set default account in Expense Claim Type {0}")
 			.format(expense_claim_type))
-	
+
 	return {
 		"account": account
 	}
@@ -299,9 +300,9 @@ def get_advances(employee, advance_id=None):
 		condition = 'name="{0}"'.format(frappe.db.escape(advance_id))
 
 	return frappe.db.sql("""
-		select 
+		select
 			name, posting_date, paid_amount, claimed_amount, advance_account
-		from 
+		from
 			`tabEmployee Advance`
 		where {0}
 	""".format(condition), as_dict=1)

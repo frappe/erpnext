@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe
+
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate, get_number_format_info
-
+from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
@@ -272,6 +273,10 @@ def add_cc(args=None):
 	args.doctype = "Cost Center"
 	args = make_tree_args(**args)
 
+	if args.parent_cost_center == args.company:
+		args.parent_cost_center = "{0} - {1}".format(args.parent_cost_center,
+			frappe.db.get_value('Company', args.company, 'abbr'))
+
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)
 
@@ -322,7 +327,9 @@ def check_if_advance_entry_modified(args):
 			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 			and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 	else:
-		party_account_field = "paid_from" if args.party_type == "Customer" else "paid_to"
+		party_account_field = ("paid_from"
+			if erpnext.get_party_account_type(args.party_type) == 'Receivable' else "paid_to")
+
 		if args.voucher_detail_no:
 			ret = frappe.db.sql("""select t1.name
 				from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
@@ -421,7 +428,7 @@ def update_reference_in_payment_entry(d, payment_entry):
 		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
 			new_row.docstatus = 1
-			for field in reference_details.keys():
+			for field in list(reference_details):
 				new_row.set(field, original_row[field])
 
 			new_row.allocated_amount = original_row.allocated_amount - d.allocated_amount
@@ -495,7 +502,7 @@ def get_company_default(company, fieldname):
 
 	if not value:
 		throw(_("Please set default {0} in Company {1}")
-		      .format(frappe.get_meta("Company").get_label(fieldname), company))
+			.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 
@@ -524,7 +531,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	difference = {}
 	warehouse_account = get_warehouse_account_map()
 
-	for warehouse, account_data in warehouse_account.items():
+	for warehouse, account_data in iteritems(warehouse_account):
 		if account_data.get('account') in account_list:
 			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
 			stock_value = get_stock_value_on(warehouse, posting_date)
@@ -548,16 +555,16 @@ def get_stock_rbnb_difference(posting_date, company):
 	pr_valuation_amount = frappe.db.sql("""
 		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+		where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
 		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+		('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
 
 	pi_valuation_amount = frappe.db.sql("""
 		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
 		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
-	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+		where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
 		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+		('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
 
 	# Balance should be
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
@@ -570,18 +577,36 @@ def get_stock_rbnb_difference(posting_date, company):
 	return flt(stock_rbnb) + flt(sys_bal)
 
 
+def get_held_invoices(party_type, party):
+	"""
+	Returns a list of names Purchase Invoices for the given party that are on hold
+	"""
+	held_invoices = None
+
+	if party_type == 'Supplier':
+		held_invoices = frappe.db.sql(
+			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
+			as_dict=1
+		)
+		held_invoices = [d['name'] for d in held_invoices]
+
+	return held_invoices
+
+
 def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	if party_type in ("Customer", "Student"):
+	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
+	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
+	held_invoices = get_held_invoices(party_type, party)
+
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
@@ -620,20 +645,21 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		}, as_dict=True)
 
 	for d in invoice_list:
-		due_date = frappe.db.get_value(d.voucher_type, d.voucher_no,
-			"posting_date" if party_type == "Employee" else "due_date")
+		if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
+			due_date = frappe.db.get_value(
+				d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
 
-		outstanding_invoices.append(
-			frappe._dict({
-				'voucher_no': d.voucher_no,
-				'voucher_type': d.voucher_type,
-				'posting_date': d.posting_date,
-				'invoice_amount': flt(d.invoice_amount),
-				'payment_amount': flt(d.payment_amount),
-				'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-				'due_date': due_date
-			})
-		)
+			outstanding_invoices.append(
+				frappe._dict({
+					'voucher_no': d.voucher_no,
+					'voucher_type': d.voucher_type,
+					'posting_date': d.posting_date,
+					'invoice_amount': flt(d.invoice_amount),
+					'payment_amount': flt(d.payment_amount),
+					'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
+					'due_date': due_date
+				})
+			)
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 
@@ -660,29 +686,24 @@ def get_companies():
 def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
-	doctype = frappe.db.escape(doctype)
+	parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
+	fields = [
+		'name as value',
+		'is_group as expandable'
+	]
+	filters = [['docstatus', '<', 2]]
 
-	# root
+	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
+
 	if is_root:
-		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql(""" select
-			name as value, is_group as expandable {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = ''
-			and `company` = %s	and docstatus<2
-			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
-				company, as_dict=1)
+		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
+		filters.append(['company', '=', company])
+
 	else:
-		# other
-		fields = ", account_currency" if doctype=="Account" else ""
-		acc = frappe.db.sql("""select
-			name as value, is_group as expandable, parent_{fieldname} as parent {fields}
-			from `tab{doctype}`
-			where ifnull(`parent_{fieldname}`,'') = %s
-			and docstatus<2
-			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				parent, as_dict=1)
+		fields += ['account_currency'] if doctype == 'Account' else []
+		fields += [parent_fieldname + ' as parent']
+
+	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
 	if doctype == 'Account':
 		sort_accounts(acc, is_root, key="value")
@@ -737,3 +758,59 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+@frappe.whitelist()
+def update_number_field(doctype_name, name, field_name, field_value, company):
+	'''
+		doctype_name = Name of the DocType
+		name = Docname being referred
+		field_name = Name of the field thats holding the 'number' attribute
+		field_value = Numeric value entered in field_name
+
+		Stores the number entered in the dialog to the DocType's field.
+
+		Renames the document by adding the number as a prefix to the current name and updates
+		all transaction where it was present.
+	'''
+	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+
+	validate_field_number(doctype_name, name, field_value, company, field_name)
+
+	frappe.db.set_value(doctype_name, name, field_name, field_value)
+
+	if doc_title[0].isdigit():
+		separator = " - " if " - " in doc_title else " "
+		doc_title = doc_title.split(separator, 1)[1]
+
+	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
+
+	new_name = get_doc_name_autoname(field_value, doc_title, name, company)
+
+	if name != new_name:
+		frappe.rename_doc(doctype_name, name, new_name)
+		return new_name
+
+def validate_field_number(doctype_name, name, field_value, company, field_name):
+	''' Validate if the number entered isn't already assigned to some other document. '''
+	if field_value:
+		if company:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "company": company, "name": ["!=", name]})
+		else:
+			doctype_with_same_number = frappe.db.get_value(doctype_name,
+				{field_name: field_value, "name": ["!=", name]})
+		if doctype_with_same_number:
+			frappe.throw(_("{0} Number {1} already used in account {2}")
+				.format(doctype_name, field_value, doctype_with_same_number))
+
+def get_doc_name_autoname(field_value, doc_title, name, company):
+	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
+	if name:
+		name_split=name.split("-")
+		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
+	else:
+		abbr = frappe.db.get_value("Company", company, ["abbr"], as_dict=True)
+		parts = [doc_title.strip(), abbr.abbr]
+	if cstr(field_value).strip():
+		parts.insert(0, cstr(field_value).strip())
+	return ' - '.join(parts)

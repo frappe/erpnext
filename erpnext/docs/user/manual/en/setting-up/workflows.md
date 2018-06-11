@@ -42,6 +42,14 @@ submit button / option if you have not specified it in the workflow.
 > Note 4: If you wish to give the option to cancel, you will have to write a
 workflow transition step that says from submitted you can cancel.
 
+
+#### Enable/Disable Self approval
+
+> New in Version 11
+
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-6.png">
+
+
 #### Conditions
 
 > New in Version 11
@@ -71,9 +79,30 @@ When the Leave Approver opens the Leave Application page, he can finally "Approv
 
 <img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-5.png">
 
-<div class-"embed-container">
-    <iframe src="https://www.youtube.com/embed/yObJUg9FxFs?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-    </iframe>
+#### Workflow Actions
+
+> New in Version 11
+
+Workflow Actions is a single place to manage all the pending actions you can take on Workflows.
+
+If a User is eligible to take action on some workflows, emails will be sent to the user, with the relevant document as attachment, from where the user can `Approve` or `Reject` the Workflow.
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-email.png">
+
+Also the users will see entries in their Workflow Action list.
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-actions-list.png">
+
+**Note:** You can set email template for Workflow Actions on each state.
+The template might consist message for users to proceed with the next Workflow Actions
+
+
+### Video Tutorial:
+
+<div>
+    <div class="embed-container">
+        <iframe src="https://www.youtube.com/embed/yObJUg9FxFs?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+        </iframe>
+    </div>
 </div>
 
 {next}
+

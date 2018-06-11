@@ -5,13 +5,12 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, cint
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
 	if not frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically"):
 		return
-		
 	if not date:
 		date = today()
 	for asset in get_depreciable_assets(date):
@@ -28,7 +27,7 @@ def get_depreciable_assets(date):
 @frappe.whitelist()
 def make_depreciation_entry(asset_name, date=None):
 	frappe.has_permission('Journal Entry', throw=True)
-	
+
 	if not date:
 		date = today()
 
@@ -38,7 +37,6 @@ def make_depreciation_entry(asset_name, date=None):
 
 	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
 		["depreciation_cost_center", "series_for_depreciation_entry"])
-	
 
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
@@ -47,6 +45,7 @@ def make_depreciation_entry(asset_name, date=None):
 			je.naming_series = depreciation_series
 			je.posting_date = d.schedule_date
 			je.company = asset.company
+			je.finance_book = d.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
 			je.append("accounts", {
@@ -68,16 +67,19 @@ def make_depreciation_entry(asset_name, date=None):
 			je.submit()
 
 			d.db_set("journal_entry", je.name)
-			asset.value_after_depreciation -= d.depreciation_amount
+			
+			idx = cint(d.finance_book_id)
+			finance_books = asset.get('finance_books')[idx - 1]
+			finance_books.value_after_depreciation -= d.depreciation_amount
+			finance_books.db_update()
 
-	asset.db_set("value_after_depreciation", asset.value_after_depreciation)
 	asset.set_status()
 
 	return asset
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None
-	
+
 	accounts = frappe.db.get_value("Asset Category Account",
 		filters={'parent': asset.asset_category, 'company_name': asset.company},
 		fieldname = ['fixed_asset_account', 'accumulated_depreciation_account',

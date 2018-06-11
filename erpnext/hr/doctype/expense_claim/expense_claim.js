@@ -120,12 +120,6 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 };
 
-cur_frm.cscript.on_submit = function() {
-	if(cint(frappe.boot.notification_settings && frappe.boot.notification_settings.expense_claim)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.expense_claim_message);
-	}
-};
-
 erpnext.expense_claim = {
 	set_title :function(frm) {
 		if (!frm.doc.task) {
@@ -153,6 +147,31 @@ frappe.ui.form.on("Expense Claim", {
 				]
 			};
 		});
+		frm.set_query("expense_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: frm.doc.employee,
+					doctype: frm.doc.doctype
+				}
+			};
+		});
+	},
+
+	onload: function(frm) {
+		if (frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						frm.toggle_reqd("expense_approver", true);
+					}
+				}
+			});
+		}
 	},
 
 	onload: function(frm) {
@@ -211,7 +230,7 @@ frappe.ui.form.on("Expense Claim", {
 			}
 		});
 	},
-	
+
 	set_query_for_cost_center: function(frm) {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
@@ -262,7 +281,7 @@ frappe.ui.form.on("Expense Claim", {
 					employee: frm.doc.employee
 				},
 				callback: function(r, rt) {
-				
+
 					if(r.message) {
 						$.each(r.message, function(i, d) {
 							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
