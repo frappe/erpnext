@@ -345,17 +345,6 @@ class TestAsset(unittest.TestCase):
 
 	def tearDown(self):
 		asset = frappe.get_doc("Asset", {"asset_name": "Macbook Pro 1"})
-		pi = [d[0] for d in frappe.db.sql('''
-			select p.name from `tabPurchase Invoice` p, `tabPurchase Invoice Item` pi
-			where p.name = pi.parent
-			and pi.asset = %s
-		''', (asset.name))]
-		if pi:
-			pi_doc = frappe.get_doc("Purchase Invoice", pi[0])
-			pi_doc.cancel
-		# if pi:
-		# 	frappe.db.set_value("Purchase Invoice", {"name": pi[0]}, "docstatus", 2)
-
 		if asset.docstatus == 1 and asset.status not in ("Scrapped", "Sold", "Draft", "Cancelled"):
 			asset.cancel()
 
