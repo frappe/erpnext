@@ -48,6 +48,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.update_stock) this.show_stock_ledger();
 
+		if (doc.docstatus == 1 && doc.outstanding_amount!=0
+			&& !(cint(doc.is_return) && doc.return_against)) {
+			cur_frm.add_custom_button(__('Payment'),
+				this.make_payment_entry, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+
 		if(doc.docstatus==1 && !doc.is_return) {
 
 			var is_delivered_by_supplier = false;
@@ -74,11 +81,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					cur_frm.add_custom_button(__('Delivery'),
 						cur_frm.cscript['Make Delivery Note'], __("Make"));
 				}
-			}
-
-			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment'),
-					this.make_payment_entry, __("Make"));
 			}
 
 			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
