@@ -19,6 +19,9 @@ frappe.ui.form.on("Sales Order", {
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 	},
 	onload: function(frm) {
+		if (!frm.doc.transaction_date){
+			frm.set_value('transaction_date', frappe.datetime.get_today())
+		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});

@@ -1,0 +1,23 @@
+<table class="table table-bordered table-hover">
+  <thead class="grid-heading-row">
+    <tr style="text-align: center">
+		{% for (var i = 0; i < header_columns.length; i++) { %}
+			 <th style="text-align: center" >{{ header_columns[i] }}</th>
+		{% } %}
+    </tr>
+  </thead>
+  <tbody>
+	  {% if (data.length)  %}
+		  {% for (var i = 0; i < data.length; i++) { %}
+			  <tr style="text-align: center" id="data-list-{{i}}">
+				<td>{{ data[i].alt_item }}</td>
+				<td>
+                    <button id="data-list-{{i}}" onclick="cur_frm.remove_row({{ i }})" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></button>
+                </td>
+			  </tr>
+		  {% } %}
+	  {% }  else { %}
+	  	     <td style="text-align:center"  colspan="6" style="text-align:center;"> <br><b class="text-muted">{% __("No Alternative Item")%} </b> </td>
+	  {% } %}
+  </tbody>
+</table>

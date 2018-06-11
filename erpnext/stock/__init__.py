@@ -33,7 +33,10 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
-			account = warehouse_account.get(warehouse.parent_warehouse).account
+		    try:
+                        account = warehouse_account.get(warehouse.parent_warehouse).account
+                    except:
+                        pass
 		else:
 			account = frappe.db.sql("""
 				select

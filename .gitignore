@@ -9,9 +9,6 @@ latest_updates.json
 dist/
 erpnext/docs/current
 *.swp
-<<<<<<< HEAD
 *.swo
 __pycache__
 *~
-=======
->>>>>>> master

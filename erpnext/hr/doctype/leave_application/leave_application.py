@@ -72,6 +72,15 @@ class LeaveApplication(Document):
 					if number_of_days < leave_type.applicable_after:
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
+		# notify leave applier about approval
+		self.notify_employee()
+		self.reload()
+
+	def on_cancel(self):
+		self.status = "Cancelled"
+		# notify leave applier about cancellation
+		self.notify_employee()
+
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
@@ -299,6 +308,26 @@ class LeaveApplication(Document):
 			# for email
 			"subject": email_template.subject,
 			"notify": "employee"
+		})
+
+	def notify_leave_approver(self):
+
+		parent_doc = frappe.get_doc('Leave Application', self.name)
+		args = parent_doc.as_dict()
+
+		template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
+		if not template:
+			frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
+			return
+		email_template = frappe.get_doc("Email Template", template)
+		message = frappe.render_template(email_template.response, args)
+
+		self.notify({
+			# for post in messages
+			"message": message,
+			"message_to": self.leave_approver,
+			# for email
+			"subject": email_template.subject
 		})
 
 	def notify_leave_approver(self):

@@ -2,7 +2,7 @@ import frappe, os
 from frappe import _
 
 def execute():
-	frappe.reload_doc("email", "doctype", "email_template")
+	frappe.reload_doc("setup", "doctype", "email_template")
 
 	if not frappe.db.exists("Email Template", _('Leave Approval Notification')):
 		base_path = frappe.get_app_path("erpnext", "hr", "doctype")
@@ -26,4 +26,3 @@ def execute():
 			'subject': _("Leave Status Notification"),
 			'owner': frappe.session.user,
 		}).insert(ignore_permissions=True)
-

@@ -38,3 +38,25 @@ def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
 			"item_code": frappe.db.escape(filters.get('item_code')),
 			"txt": "%%%s%%" % frappe.db.escape(txt)
 		})
+
+def get_bom_alternative_items(doctype, txt, searchfield, start, page_len, filters):
+	exclude = ''
+	if filters.get("exclude", []):
+		# TODO: Optimize query conditions
+		exclude = ''.join(["and alternative_item_code != '{}'".format(i)
+						   for i in filters.get("exclude", []) ])
+	return frappe.db.sql(
+		"""
+			select alternative_item_code from `tabItem Alternative`
+			where item_code = %(item_code)s
+			and alternative_item_code like %(txt)s
+			{exclude}
+			limit {start}, {page_len}
+		""".format(
+				**{'start':start, 'page_len': page_len, 'exclude': exclude}
+			),
+			{
+				"item_code": frappe.db.escape(filters.get('item_code')),
+			 	"txt": "%%%s%%" % frappe.db.escape(txt)
+			}
+		)
