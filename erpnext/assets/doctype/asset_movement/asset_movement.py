@@ -31,7 +31,7 @@ class AssetMovement(Document):
 		if self.purpose in ['Transfer', 'Issue']:
 			self.source_location = frappe.db.get_value("Asset", self.asset, "location")
 
-		if self.source_location == self.target_location:
+		if self.source_location == self.target_location and self.purpose == 'Transfer':
 			frappe.throw(_("Source and Target Location cannot be same"))
 
 	def on_submit(self):
