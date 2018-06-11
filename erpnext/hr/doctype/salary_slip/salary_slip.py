@@ -447,7 +447,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
-			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
+			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
@@ -466,7 +466,10 @@ class SalarySlip(TransactionBase):
 				"reference_doctype": self.doctype,
 				"reference_name": self.name
 				}
-			enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+			if not frappe.flags.in_test:
+				enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+			else:
+				frappe.sendmail(**email_args)
 		else:
 			msgprint(_("{0}: Employee email not found, hence email not sent").format(self.employee_name))
 
