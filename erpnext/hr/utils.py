@@ -351,7 +351,7 @@ def get_annual_component_pay(frequency, amount):
 	elif frequency == "Bimonthly":
 		return amount * 6
 
-def get_sal_slip_total_benefit_given(employee, payroll_period):
+def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 	total_given_benefit_amount = 0
 	query = """
 	select sum(sd.amount) as 'total_amount'
@@ -364,11 +364,17 @@ def get_sal_slip_total_benefit_given(employee, payroll_period):
 		or ss.end_date between %(start_date)s and %(end_date)s
 		or (ss.start_date < %(start_date)s and ss.end_date > %(end_date)s))
 	"""
+
+	if component:
+		query += "and sd.salary_component = %(component)s"
+		
 	sum_of_given_benefit = frappe.db.sql(query, {
 		'employee': employee,
 		'start_date': payroll_period.start_date,
-		'end_date': payroll_period.end_date
+		'end_date': payroll_period.end_date,
+		'component': component
 	}, as_dict=True)
+
 	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount

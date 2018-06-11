@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate
+from frappe.utils import date_diff, getdate, rounded
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
@@ -42,9 +42,10 @@ class EmployeeBenefitApplication(Document):
 							pro_rata_amount += max_benefit_amount
 						else:
 							non_pro_rata_amount += max_benefit_amount
+
 			if pro_rata_amount == 0  and non_pro_rata_amount == 0:
 				frappe.throw(_("Please add the remainig benefits {0} to any of the existing component").format(self.remainig_benefits))
-			elif non_pro_rata_amount > 0 and non_pro_rata_amount < self.remainig_benefits:
+			elif non_pro_rata_amount > 0 and non_pro_rata_amount < rounded(self.remainig_benefits):
 				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application \
 				as pro-rata component").format(non_pro_rata_amount, self.remainig_benefits - non_pro_rata_amount))
 			elif non_pro_rata_amount == 0:
@@ -66,7 +67,9 @@ class EmployeeBenefitApplication(Document):
 		for employee_benefit in self.employee_benefits:
 			if employee_benefit.earning_component == earning_component_name:
 				benefit_amount += employee_benefit.amount
-		if benefit_amount > max_benefit_amount:
+		prev_sal_slip_flexi_amount = get_sal_slip_total_benefit_given(self.employee, frappe.get_doc("Payroll Period", self.payroll_period), earning_component_name)
+		benefit_amount += prev_sal_slip_flexi_amount
+		if rounded(benefit_amount, 2) > max_benefit_amount:
 			frappe.throw(_("Maximum benefit amount of component {0} exceeds {1}").format(earning_component_name, max_benefit_amount))
 
 	def validate_duplicate_on_payroll_period(self):
