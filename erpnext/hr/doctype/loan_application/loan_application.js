@@ -34,5 +34,22 @@ frappe.ui.form.on('Loan Application', {
 				});
 			})
 		}
+	},
+	loan_type: function(frm){
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Loan Type",
+				fieldname: "rate_of_interest",
+				filters: {
+					name:["=", frm.doc.loan_type]
+					}           			
+			},		
+			callback: function(r) {
+				if(r.message.rate_of_interest){
+					frm.set_value('rate_of_interest', r.message.rate_of_interest)
+				}
+			}
+		});
 	}
 });
