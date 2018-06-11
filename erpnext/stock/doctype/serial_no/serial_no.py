@@ -306,6 +306,7 @@ def auto_make_serial_nos(args):
 			sr.via_stock_ledger = True
 			sr.item_code = args.get('item_code')
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
+			sr.location = args.get('location')
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
 			make_serial_no(serial_no, args)
@@ -330,6 +331,7 @@ def make_serial_no(serial_no, args):
 	sr.company = args.get('company')
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
+	sr.location = args.get('location')
 
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
