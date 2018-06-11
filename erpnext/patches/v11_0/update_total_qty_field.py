@@ -14,23 +14,21 @@ def execute():
 		"Purchase Order", "Purchase Invoice", "Purchase Receipt", "Quotation", "Supplier Quotation"]
 
 	for doctype in doctypes:
-		total_qty =
-			frappe.db.sql('''
-				SELECT
-					parent, SUM(qty)
-				FROM
-					`tab%s Item`
-				GROUP BY parent
-			''' % (doctype), as_dict = True)
+		total_qty =	frappe.db.sql('''
+			SELECT
+				parent, SUM(qty) as qty
+			FROM
+				`tab%s Item`
+			GROUP BY parent
+		''' % (doctype), as_dict = True)
+
+		when_then = []
+		for d in total_qty:
+			when_then.append("""
+				when dt.name = '{0}' then {1}
+			""".format(frappe.db.escape(d.get("parent")), d.get("qty")))
 
 		frappe.db.sql('''
 			UPDATE
-				`tab%s` dt SET dt.total_qty =
-			(
-				SELECT SUM(dt_item.qty)
-				FROM
-					`tab%s Item` dt_item
-				WHERE
-					dt_item.parent=dt.name
-			)
-		''' % (doctype, doctype))
+				`tab%s` dt SET dt.total_qty = CASE %s END
+		''' % (doctype, " ".join(when_then)))
