@@ -16,6 +16,7 @@ class BlanketOrder(Document):
 @frappe.whitelist()
 def make_sales_order(source_name):
 	def update_item(source, target, source_parent):
+		target.qty = source.get("qty") - source.get("ordered_quantity")
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
@@ -40,6 +41,7 @@ def make_sales_order(source_name):
 @frappe.whitelist()
 def make_purchase_order(source_name):
 	def update_item(source, target, source_parent):
+		target.qty = source.get("qty") - source.get("ordered_quantity")
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
