@@ -44,7 +44,7 @@ jobs:
     - stage: test
       script:
         - set -e
-        - bench run-tests
+        - bench run-tests --app erpnext
       env: Server Side Test
     - # stage
       script:
