@@ -21,10 +21,10 @@ class EmployeePromotion(Document):
 
 	def on_submit(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		employee = update_employee(employee, self.promotion_details)
+		employee = update_employee(employee, self.promotion_details, date=self.promotion_date)
 		employee.save()
 
 	def on_cancel(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		employee = update_employee(employee, self.promotion_details, True)
+		employee = update_employee(employee, self.promotion_details, cancel=True)
 		employee.save()

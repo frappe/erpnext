@@ -88,7 +88,8 @@ def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
 		doc.employee_name = frappe.db.get_value("Employee", doc.employee, "employee_name")
 
-def update_employee(employee, details, cancel=False):
+def update_employee(employee, details, date=None, cancel=False):
+	internal_work_history = {}
 	for item in details:
 		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
 		new_data = item.new if not cancel else item.current
@@ -97,6 +98,11 @@ def update_employee(employee, details, cancel=False):
 		elif fieldtype =="Datetime" and new_data:
 			new_data = get_datetime(new_data)
 		setattr(employee, item.fieldname, new_data)
+		if item.fieldname in ["department", "designation", "branch"]:
+			internal_work_history[item.fieldname] = item.new
+	if internal_work_history and not cancel:
+		internal_work_history["from_date"] = date
+		employee.append("internal_work_history", internal_work_history)
 	return employee
 
 @frappe.whitelist()
