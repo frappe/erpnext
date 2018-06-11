@@ -1,6 +1,6 @@
 {% if doc.published %}
 	<div style="margin-bottom: 30px; max-width: 600px" class="with-border clickable">
-		<a href={{ route }}>
+		<a href={{ doc.route }}>
 			<h3>{{ doc.name }}</h3>
 			<p>
 				<span class="label"> Chapter Head : {{ frappe.db.get_value('User', chapter_head, 'full_name') }} </span>

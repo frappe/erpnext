@@ -166,11 +166,11 @@ def import_email_alert():
 		email_alert.insert()
 
 	# trigger the first message!
-	from frappe.email.doctype.email_alert.email_alert import trigger_daily_alerts
+	from frappe.email.doctype.notification.notification import trigger_daily_alerts
 	trigger_daily_alerts()
 
 def test_sample():
-	frappe.db.sql('delete from `tabEmail Alert`')
+	frappe.db.sql('delete from `tabNotification`')
 	frappe.db.sql('delete from tabProject')
 	frappe.db.sql('delete from tabTask')
 	make_projects('Education')
