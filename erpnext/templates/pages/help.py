@@ -19,7 +19,10 @@ def get_context(context):
 	context.topics = topics_data[:3]
 
 	# Issues
-	context.issues = frappe.get_list("Issue", fields=["name", "status", "subject", "modified"])[:3]
+	if frappe.session.user != "Guest":
+		context.issues = frappe.get_list("Issue", fields=["name", "status", "subject", "modified"])[:3]
+	else:
+		context.issues = []
 
 def get_forum_posts(s):
 	response = requests.get(s.forum_url + '/' + s.get_latest_query)
