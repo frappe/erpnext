@@ -369,7 +369,7 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
 		if not frappe.db.exists('Leave Type', leave_type):
-			leave_type = frappe.get_doc(dict(
+			leave_type_doc = frappe.get_doc(dict(
 				leave_type_name = leave_type,
 				doctype = 'Leave Type',
 				is_earned_leave = 1,
