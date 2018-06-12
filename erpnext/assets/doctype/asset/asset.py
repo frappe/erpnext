@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -24,6 +24,8 @@ class Asset(AccountsController):
 			self.make_depreciation_schedule()
 			self.set_accumulated_depreciation()
 			get_depreciation_accounts(self)
+		else:
+			self.finance_books = []
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
@@ -31,11 +33,15 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
+		if not self.booked_fixed_asset:
+			self.make_gl_entries()
 
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
+		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
+		self.db_set('booked_fixed_asset', 0)
 
 	def validate_item(self):
 		item = frappe.db.get_value("Item", self.item_code,
@@ -323,12 +329,14 @@ class Asset(AccountsController):
 			doc.submit()
 
 	def make_gl_entries(self):
-		if self.purchase_receipt and self.purchase_receipt_amount:
+		if self.purchase_receipt and self.purchase_receipt_amount and self.available_for_use_date <= nowdate():
 			from erpnext.accounts.general_ledger import make_gl_entries
 
 			gl_entries = []
 
-			cwip_account = get_cwip_account(self.name, self.asset_category, self.company)
+			cwip_account = get_asset_account("capital_work_in_progress_account",
+				self.name, self.asset_category, self.company)
+
 			fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
 					asset_category = self.asset_category, company = self.company)
 
@@ -469,15 +477,17 @@ def get_item_details(item_code, asset_category=None):
 
 	return books
 
-def get_cwip_account(asset, asset_category=None, company=None):
-	cwip_account = get_asset_category_account(asset, 'capital_work_in_progress_account',
-					asset_category = asset_category, company = company)
+def get_asset_account(account_name, asset=None, asset_category=None, company=None):
+	account = None
+	if asset:
+		account = get_asset_category_account(asset, account_name,
+				asset_category = asset_category, company = company)
 
-	if not cwip_account:
-		cwip_account = frappe.db.get_value('Company', company, 'capital_work_in_progress_account')
+	if not account:
+		account = frappe.db.get_value('Company', company, account_name)
 
-	if not cwip_account:
-		frappe.throw(_("Set Capital Work In Progress Account in asset category {0} or company {1}")
-			.format(asset_category, company))
+	if not account:
+		frappe.throw(_("Set {0} in asset category {1} or company {2}")
+			.format(account_name.replace('_', ' ').title(), asset_category, company))
 
-	return cwip_account
+	return account

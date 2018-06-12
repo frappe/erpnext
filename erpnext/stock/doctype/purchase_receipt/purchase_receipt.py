@@ -13,8 +13,8 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.assets.doctype.asset.asset import get_asset_account
 from six import iteritems
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -314,12 +314,11 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				asset_accounts = self.get_company_default(["capital_work_in_progress_account",
-					"asset_received_but_not_billed"])
+				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
 				# CWIP entry
-				cwip_account = get_asset_category_account(d.asset,
-					'capital_work_in_progress_account') or asset_accounts[0]
+				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
+					company = self.company)
 
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
@@ -327,7 +326,7 @@ class PurchaseReceipt(BuyingController):
 				cwip_account_currency = get_account_currency(cwip_account)
 				gl_entries.append(self.get_gl_dict({
 					"account": cwip_account,
-					"against": asset_accounts[1],
+					"against": arbnb_account,
 					"cost_center": d.cost_center,
 					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 					"debit": base_asset_amount,
@@ -336,10 +335,10 @@ class PurchaseReceipt(BuyingController):
 				}))
 
 				# Asset received but not billed
-				asset_rbnb_currency = get_account_currency(asset_accounts[1])
+				asset_rbnb_currency = get_account_currency(arbnb_account)
 				gl_entries.append(self.get_gl_dict({
-					"account": asset_accounts[1],
-					"against": asset_accounts[0],
+					"account": arbnb_account,
+					"against": cwip_account,
 					"cost_center": d.cost_center,
 					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 					"credit": base_asset_amount,
