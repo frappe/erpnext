@@ -3,7 +3,7 @@
 To setup Stripe,
 `Explore > Integrations > Stripe Settings`
 
-#### Setup  Stripe 
+#### Setup  Stripe
 
 To enable Stripe payment service, you need to configure parameters like Publishable Key, Secret Key
 <img class="screenshot" alt="Razorpay Settings" src="{{docs_base_url}}/assets/img/setup/integrations/stripe_setting.png">
@@ -17,6 +17,21 @@ Also it will create Payment Gateway Account entry. Payment Gateway Account is co
 <img class="screenshot" alt="Payment Gateway Account" src="{{docs_base_url}}/assets/img/setup/integrations/payment_gateway_account_stripe.png">
 
 After configuring Payment Gateway Account your system is able to accept online payments.
+
+### Setup subscriptions plans
+
+If you need to bill a recurring amount instead of a one-time charge, you can use Stripe's subscription system.
+
+Once you have created your billing plans in Stripe, add one or several new "Payment Plan" in Frappe.
+
+<img class="screenshot" alt="Payment Plan" src="{{docs_base_url}}/assets/img/setup/integrations/payment_plan.png">
+
+
+Afterwards, when you create your payment request, click the check field "Is a subscription" and choose the appropriate Payment Plan.
+
+<img class="screenshot" alt="Payment Request" src="{{docs_base_url}}/assets/img/setup/integrations/subscription_payment_request.png">
+
+ERPNext will automatically create a new subscription for this customer in Stripe.
 
 ####Supporting transaction currencies
 	"AED", "ALL", "ANG", "ARS", "AUD", "AWG", "BBD", "BDT", "BIF", "BMD", "BND",
