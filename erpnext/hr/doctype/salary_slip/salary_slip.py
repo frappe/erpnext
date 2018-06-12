@@ -75,7 +75,10 @@ class SalarySlip(TransactionBase):
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
 				amount = additional_component.amount + self.get_amount_from_exisiting_component(frappe._dict(additional_component.struct_row).salary_component)
-				self.update_component_row(frappe._dict(additional_component.struct_row), amount, "earnings")
+				key = "earnings"
+				if additional_component.type == "Deduction":
+					key = "deductions"
+				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key)
 
 	def add_employee_flexi_benefits(self, struct_row):
 		if frappe.db.get_value("Salary Component", struct_row.salary_component, "is_pro_rata_applicable") == 1:
