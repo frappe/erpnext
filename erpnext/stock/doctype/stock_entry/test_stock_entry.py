@@ -685,7 +685,7 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.manufacturing.doctype.work_order.work_order \
 			import make_stock_entry as _make_stock_entry
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
-			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
+			"is_default": 1, "docstatus": 1})
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({

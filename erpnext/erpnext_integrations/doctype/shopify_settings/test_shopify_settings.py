@@ -6,15 +6,20 @@ import frappe
 
 import unittest, os, json
 from frappe.utils import cstr
-from frappe.utils.fixtures import sync_fixtures
 from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
+from frappe.core.doctype.data_import.data_import import import_doc
+
 
 class ShopifySettings(unittest.TestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
-		sync_fixtures("erpnext_shopify")
+
+		# use the fixture data
+		import_doc(path=frappe.get_app_path("erpnext", "erpnext_integrations/doctype/shopify_settings/test_data/custom_field.json"),
+			ignore_links=True, overwrite=True)
+
 		frappe.reload_doctype("Customer")
 		frappe.reload_doctype("Sales Order")
 		frappe.reload_doctype("Delivery Note")
