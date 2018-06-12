@@ -152,8 +152,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
 		var me = this;
 
-		this.setup_quality_inspection();
-
 		if(this.frm.doc.__islocal) {
 			var currency = frappe.defaults.get_user_default("currency");
 
@@ -230,6 +228,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
+		this.setup_quality_inspection();
 	},
 
 	apply_default_taxes: function() {
