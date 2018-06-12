@@ -7,7 +7,8 @@ import frappe
 from frappe.utils import getdate, validate_email_add, today, add_years
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
-import frappe.permissions
+from frappe.permissions import add_user_permission, remove_user_permission, \
+	set_user_permission_if_allowed, has_permission
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
@@ -51,7 +52,7 @@ class Employee(NestedSet):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
-				frappe.permissions.remove_user_permission(
+				remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
 	def update_nsm_model(self):
@@ -65,8 +66,8 @@ class Employee(NestedSet):
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
-		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
-		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
+		add_user_permission("Employee", self.name, self.user_id)
+		set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
@@ -206,6 +207,9 @@ def validate_employee_role(doc, method):
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
+		employee_name = frappe.get_value('Employee', {'user_id': doc.name}, 'name')
+		if has_user_permission_for_employee(doc.name, employee_name): return
+		if not has_permission('User Permission', ptype='write'): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
@@ -342,3 +346,11 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 def on_doctype_update():
 	frappe.db.add_index("Employee", ["lft", "rgt"])
+
+def has_user_permission_for_employee(user_name, employee_name):
+	return frappe.db.exists({
+		'doctype': 'User Permission',
+		'user': user_name,
+		'allow': 'Employee',
+		'for_value': employee_name
+	})
