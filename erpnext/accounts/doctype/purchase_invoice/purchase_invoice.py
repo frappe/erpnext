@@ -16,11 +16,11 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.assets.doctype.asset.asset import get_asset_account
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -334,7 +334,7 @@ class PurchaseInvoice(BuyingController):
 
 			if update_outstanding == "No":
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
-					self.doctype, self.return_against if cint(self.is_return) else self.name)
+					self.doctype, self.return_against if cint(self.is_return and self.return_against) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -379,7 +379,7 @@ class PurchaseInvoice(BuyingController):
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -474,17 +474,16 @@ class PurchaseInvoice(BuyingController):
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
-				asset_accounts = self.get_company_default(["asset_received_but_not_billed",
-					"expenses_included_in_asset_valuation", "capital_work_in_progress_account"])
+				eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
 
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
-				item.expense_account = item.expense_account or asset_accounts[0]
+				item.expense_account = item.expense_account
 
 				if (not item.expense_account or frappe.db.get_value('Account',
 					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):
-					frappe.throw(_("Row {0}: Expense account must be of type Asset Received But Not Billed").
-						format(item.idx))
+					arbnb_account = self.get_company_default("asset_received_but_not_billed")
+					item.expense_account = arbnb_account
 
 				if not self.update_stock:
 					asset_rbnb_currency = get_account_currency(item.expense_account)
@@ -498,9 +497,9 @@ class PurchaseInvoice(BuyingController):
 					}))
 
 					if item.item_tax_amount:
-						asset_eiiav_currency = get_account_currency(asset_accounts[0])
+						asset_eiiav_currency = get_account_currency(eiiav_account)
 						gl_entries.append(self.get_gl_dict({
-							"account": asset_accounts[1],
+							"account": eiiav_account,
 							"against": self.supplier,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 							"cost_center": item.cost_center,
@@ -510,8 +509,8 @@ class PurchaseInvoice(BuyingController):
 									item.item_tax_amount / self.conversion_rate)
 						}))
 				else:
-					cwip_account = get_asset_category_account(item.asset,
-						'capital_work_in_progress_account') or asset_accounts[2]
+					cwip_account = get_asset_account("capital_work_in_progress_account",
+						item.asset, company = self.company)
 
 					cwip_account_currency = get_account_currency(cwip_account)
 					gl_entries.append(self.get_gl_dict({
@@ -524,9 +523,9 @@ class PurchaseInvoice(BuyingController):
 					}))
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-						asset_eiiav_currency = get_account_currency(asset_accounts[1])
+						asset_eiiav_currency = get_account_currency(eiiav_account)
 						gl_entries.append(self.get_gl_dict({
-							"account": asset_accounts[1],
+							"account": eiiav_account,
 							"against": self.supplier,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 							"cost_center": item.cost_center,
@@ -618,7 +617,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_paid_amount,
 					"debit_in_account_currency": self.base_paid_amount \
 						if self.party_account_currency==self.company_currency else self.paid_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -648,7 +647,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)

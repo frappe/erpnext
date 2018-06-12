@@ -33,8 +33,8 @@ class ClinicalProcedureTemplate(Document):
 				frappe.throw("""Not permitted. Please disable the Procedure Template""")
 
 	def get_item_details(self, args=None):
-		item = frappe.db.sql("""select stock_uom, description, image, item_name,
-			expense_account, buying_cost_center, item_group from `tabItem`
+		item = frappe.db.sql("""select stock_uom, item_name
+			from `tabItem`
 			where name = %s
 				and disabled=0
 				and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)""",

@@ -408,6 +408,10 @@ def validate_conversion_rate(args, meta):
 		get_field_precision(meta.get_field("conversion_rate"),
 			frappe._dict({"fields": args})))
 
+	if (not args.plc_conversion_rate
+		and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency")):
+		args.plc_conversion_rate = 1.0
+
 	# validate price list currency conversion rate
 	if not args.get("price_list_currency"):
 		throw(_("Price List Currency not selected"))

@@ -88,7 +88,8 @@ def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
 		doc.employee_name = frappe.db.get_value("Employee", doc.employee, "employee_name")
 
-def update_employee(employee, details, cancel=False):
+def update_employee(employee, details, date=None, cancel=False):
+	internal_work_history = {}
 	for item in details:
 		fieldtype = frappe.get_meta("Employee").get_field(item.fieldname).fieldtype
 		new_data = item.new if not cancel else item.current
@@ -97,6 +98,11 @@ def update_employee(employee, details, cancel=False):
 		elif fieldtype =="Datetime" and new_data:
 			new_data = get_datetime(new_data)
 		setattr(employee, item.fieldname, new_data)
+		if item.fieldname in ["department", "designation", "branch"]:
+			internal_work_history[item.fieldname] = item.new
+	if internal_work_history and not cancel:
+		internal_work_history["from_date"] = date
+		employee.append("internal_work_history", internal_work_history)
 	return employee
 
 @frappe.whitelist()
@@ -344,3 +350,31 @@ def get_annual_component_pay(frequency, amount):
 		return amount * 12
 	elif frequency == "Bimonthly":
 		return amount * 6
+
+def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
+	total_given_benefit_amount = 0
+	query = """
+	select sum(sd.amount) as 'total_amount'
+	from `tabSalary Slip` ss, `tabSalary Detail` sd
+	where ss.employee=%(employee)s
+	and ss.docstatus = 1 and ss.name = sd.parent
+	and sd.is_flexible_benefit = 1 and sd.parentfield = "earnings"
+	and sd.parenttype = "Salary Slip"
+	and (ss.start_date between %(start_date)s and %(end_date)s
+		or ss.end_date between %(start_date)s and %(end_date)s
+		or (ss.start_date < %(start_date)s and ss.end_date > %(end_date)s))
+	"""
+
+	if component:
+		query += "and sd.salary_component = %(component)s"
+
+	sum_of_given_benefit = frappe.db.sql(query, {
+		'employee': employee,
+		'start_date': payroll_period.start_date,
+		'end_date': payroll_period.end_date,
+		'component': component
+	}, as_dict=True)
+
+	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
+		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
+	return total_given_benefit_amount

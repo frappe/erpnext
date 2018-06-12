@@ -805,11 +805,12 @@ def validate_field_number(doctype_name, name, field_value, company, field_name):
 
 def get_doc_name_autoname(field_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
-	if company:
+	if name:
 		name_split=name.split("-")
 		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
 	else:
-		parts = [doc_title.strip()]
+		abbr = frappe.db.get_value("Company", company, ["abbr"], as_dict=True)
+		parts = [doc_title.strip(), abbr.abbr]
 	if cstr(field_value).strip():
 		parts.insert(0, cstr(field_value).strip())
 	return ' - '.join(parts)

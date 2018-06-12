@@ -558,7 +558,8 @@ class BuyingController(StockController):
 						'actual_qty': d.qty,
 						'purchase_document_type': self.doctype,
 						'purchase_document_no': self.name,
-						'asset': d.asset
+						'asset': d.asset,
+						'location': d.asset_location
 					})
 					d.db_set('serial_no', serial_nos)
 
