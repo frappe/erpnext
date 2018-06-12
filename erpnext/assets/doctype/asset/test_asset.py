@@ -31,7 +31,7 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.purchase_invoice, pi.name)
 
 		expected_gle = (
-			("_Test Fixed Asset - _TC", 100000.0, 0.0),
+			("Asset Received But Not Billed - _TC", 100000.0, 0.0),
 			("Creditors - _TC", 0.0, 100000.0)
 		)
 
