@@ -3,6 +3,6 @@
 
 frappe.ui.form.on('Asset Movement', {
 	onload: function(frm) {
-
+		//
 	}
 });
