@@ -503,14 +503,13 @@ class SalarySlip(TransactionBase):
 	def calculate_variable_based_on_taxable_salary(self, tax_component):
 		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
 		if not payroll_period:
-			frappe.msgprint(_("Start and end dates not in a valid Payroll Period, \
-			cannot calculate {0}.").format(tax_component))
+			frappe.msgprint(_("Start and end dates not in a valid Payroll Period, cannot calculate {0}.")
+				.format(tax_component))
 			return False, False
 		if payroll_period.end_date <= getdate(self.end_date):
 			if not self.deduct_tax_for_unsubmitted_tax_exemption_proof \
 				or not self.deduct_tax_for_unclaimed_employee_benefits:
-				frappe.throw(_("You have to Deduct Tax for Unsubmitted Tax Exemption Proof \
-				and Unclaimed Employee Benefits in the last Salary Slip of Payroll Period"))
+				frappe.throw(_("You have to Deduct Tax for Unsubmitted Tax Exemption Proof and Unclaimed Employee Benefits in the last Salary Slip of Payroll Period"))
 			else:
 				return self.calculate_tax_for_payroll_period(tax_component, payroll_period)
 

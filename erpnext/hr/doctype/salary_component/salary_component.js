@@ -30,9 +30,11 @@ frappe.ui.form.on('Salary Component', {
 	},
 	type: function(frm) {
 		if(frm.doc.type=="Earning"){
+			frm.set_value("is_tax_applicable", 1);
 			frm.set_value("variable_based_on_taxable_salary", 0);
 		}
 		if(frm.doc.type=="Deduction"){
+			frm.set_value("is_tax_applicable", 0);
 			frm.set_value("is_flexible_benefit", 0);
 		}
 	},
