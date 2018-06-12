@@ -367,7 +367,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 	if component:
 		query += "and sd.salary_component = %(component)s"
-		
+
 	sum_of_given_benefit = frappe.db.sql(query, {
 		'employee': employee,
 		'start_date': payroll_period.start_date,

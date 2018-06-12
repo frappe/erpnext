@@ -13,32 +13,32 @@ frappe.ui.form.on('Employee Benefit Application', {
 	employee: function(frm) {
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
-			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining"
+			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
 			args = {
 				employee: frm.doc.employee,
 				on_date: frm.doc.date,
 				payroll_period: frm.doc.payroll_period
-			}
+			};
 			get_max_benefits(frm, method, args);
 		}
 		else if(frm.doc.employee && frm.doc.date){
-			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits"
+			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits";
 			args = {
 				employee: frm.doc.employee,
 				on_date: frm.doc.date
-			}
+			};
 			get_max_benefits(frm, method, args);
 		}
 	},
 	payroll_period: function(frm) {
-		var method, args, payroll_period;
+		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
-			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining"
+			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
 			args = {
 				employee: frm.doc.employee,
 				on_date: frm.doc.date,
 				payroll_period: frm.doc.payroll_period
-			}
+			};
 			get_max_benefits(frm, method, args);
 		}
 	}
@@ -55,8 +55,8 @@ var get_max_benefits=function(frm, method, args) {
 				}
 			}
 		}
-	})
-}
+	});
+};
 
 frappe.ui.form.on("Employee Benefit Application Detail",{
 	amount:  function(frm) {
