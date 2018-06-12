@@ -8,8 +8,9 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip \
-	import make_earning_salary_component, make_deduction_salary_component
+from erpnext.hr.doctype.salary_slip.test_salary_slip import get_earnings_component, get_deductions_component
+from erpnext.hr.doctype.employee.test_employee import make_employee
+
 
 test_dependencies = ["Fiscal Year"]
 
@@ -63,36 +64,6 @@ class TestSalaryStructure(unittest.TestCase):
 		for row in salary_structure.deductions:
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
-def make_employee(user):
-	if not frappe.db.get_value("User", user):
-		frappe.get_doc({
-			"doctype": "User",
-			"email": user,
-			"first_name": user,
-			"new_password": "password",
-			"roles": [{"doctype": "Has Role", "role": "Employee"}]
-		}).insert()
-
-	if not frappe.db.get_value("Employee", {"user_id": user}):
-		emp = frappe.get_doc({
-			"doctype": "Employee",
-			"naming_series": "EMP-",
-			"employee_name": user,
-			"company": erpnext.get_default_company(),
-			"user_id": user,
-			"date_of_birth": "1990-05-08",
-			"date_of_joining": "2013-01-01",
-			"relieving_date": "",
-			"department": frappe.get_all("Department", fields="name")[0].name,
-			"gender": "Female",
-			"company_email": user,
-			"status": "Active",
-			"employment_type": "Intern"
-		}).insert()
-		return emp.name
-	else:
-		return frappe.get_value("Employee", {"employee_name":user}, "name")			
-
 def make_salary_slip_from_salary_structure(employee):
 	sal_struct = make_salary_structure('Salary Structure Sample')
 	sal_slip = make_salary_slip(sal_struct, employee = employee)
@@ -111,12 +82,12 @@ def make_salary_structure(sal_struct, employees=None):
 			"name": sal_struct,
 			"company": erpnext.get_default_company(),
 			"employees": employees or get_employee_details(),
-			"earnings": get_earnings_component(),
-			"deductions": get_deductions_component(),
+			"earnings": get_earnings_component(setup=True),
+			"deductions": get_deductions_component(setup=True),
 			"payroll_frequency": "Monthly",
 			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		}).insert()
-	return sal_struct	
+	return sal_struct
 
 def get_employee_details():
 	return [{"employee": frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"),
@@ -132,62 +103,3 @@ def get_employee_details():
 			 "idx": 2
 			}
 		]
-
-def get_earnings_component():
-	make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
-	make_deduction_salary_component(["Professional Tax", "TDS"])
-
-	return [
-				{
-					"salary_component": 'Basic Salary',
-					"abbr":'BS',
-					"condition": 'base > 10000',
-					"formula": 'base*.2',
-					"idx": 1
-				},
-				{
-					"salary_component": 'Basic Salary',
-					"abbr":'BS',
-					"condition": 'base < 10000',
-					"formula": 'base*.1',
-					"idx": 2
-				},
-				{
-					"salary_component": 'HRA',
-					"abbr":'H',
-					"amount": 10000,
-					"idx": 3
-				},
-				{
-					"salary_component": 'Special Allowance',
-					"abbr":'SA',
-					"condition": 'H < 10000',
-					"formula": 'BS*.5',
-					"idx": 4
-				},
-			]
-
-def get_deductions_component():	
-	return [
-				{
-					"salary_component": 'Professional Tax',
-					"abbr":'PT',
-					"condition": 'base > 10000',
-					"formula": 'base*.2',
-					"idx": 1
-				},
-				{
-					"salary_component": 'TDS',
-					"abbr":'T',
-					"condition": 'employment_type!="Intern"',
-					"formula": 'base*.5',
-					"idx": 2
-				},
-				{
-					"salary_component": 'TDS',
-					"abbr":'T',
-					"condition": 'employment_type=="Intern"',
-					"formula": 'base*.1',
-					"idx": 3
-				}
-			]		
