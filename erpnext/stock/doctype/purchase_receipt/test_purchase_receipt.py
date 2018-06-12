@@ -92,6 +92,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
+		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
@@ -314,9 +315,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 				asset_category = doc.name
 
-			asset_item = make_item(asset_item, {'is_stock_item':0,
+			item_data = make_item(asset_item, {'is_stock_item':0,
 				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
 				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+			asset_item = item_data.item_code
 
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
@@ -334,7 +336,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
 		self.assertEquals(len(serial_nos), 0)
 		frappe.db.sql("delete from `tabLocation")
-		frappe.db.sql("delete from `tabAsset Category`")
 		frappe.db.sql("delete from `tabAsset`")
 
 def get_gl_entries(voucher_type, voucher_no):
