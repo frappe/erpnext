@@ -11,7 +11,7 @@
 		value='{{ frappe.form_dict.q or ''}}'
 		{% if not frappe.form_dict.q%}placeholder="{{ _("What do you need help with?") }}"{% endif %}>
 	<input type='submit'
-		class='btn btn-sm btn-primary btn-search' value="{{ _("Search") }}">
+		class='btn btn-sm btn-default btn-search' value="{{ _("Search") }}">
 	</form>
 </div>
 
@@ -47,6 +47,7 @@
 	<hr>
 </div>
 
+{% if issues | len > 0 -%}
 <div style="margin-bottom: 20px;">
 	<h2>{{ _("Your tickets") }}</h2>
 		{% for doc in issues %}
@@ -55,8 +56,9 @@
 	<p><a href="/issues">{{ _("See all open tickets") }}</a></p>
 </div>
 
-<a href="/issues?new=1" class="btn btn-default btn-new btn-sm">
+<a href="/issues?new=1" class="btn btn-primary btn-new btn-sm">
 	{{ _("Open a new ticket") }}
 </a>
+{%- endif %}
 
 {% endblock %}
