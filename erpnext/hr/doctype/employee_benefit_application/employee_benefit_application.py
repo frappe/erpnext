@@ -103,7 +103,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 		return max_benefits - prev_sal_slip_flexi_total
 	return max_benefits
 
-def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct):
+def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, payment_days, working_days):
 	# Considering there is only one application for an year
 	benefit_application_name = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
@@ -116,22 +116,26 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 		'end_date': end_date
 	})
 
-	payroll_period_days = get_payroll_period_days(start_date, end_date, frappe.db.get_value("Employee", employee, "company"))
+	payroll_period_days = get_payroll_period_days(start_date, end_date, employee)
 	if payroll_period_days:
-		# If there is application for benefit claim then fetch the amount from it.
+		depends_on_lwp = frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp")
+		if depends_on_lwp != 1:
+			payment_days = working_days
+
+		# If there is application for benefit then fetch the amount from the application.
+		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
 		if benefit_application_name:
 			benefit_application = frappe.get_doc("Employee Benefit Application", benefit_application_name[0][0])
-			return get_benefit_amount(benefit_application, start_date, end_date, struct_row, payroll_period_days)
+			return get_benefit_amount(benefit_application, struct_row, payroll_period_days, payment_days)
 
 		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount (Late Benefit Application)
-		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
 		else:
 			component_max = frappe.db.get_value("Salary Component", struct_row.salary_component, "max_benefit_amount")
 			if component_max > 0:
-				return get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, start_date, end_date)
+				return get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, payment_days)
 	return False
 
-def get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, start_date, end_date):
+def get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_days, payment_days):
 	total_pro_rata_max = 0
 	for sal_struct_row in sal_struct.get("earnings"):
 		is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
@@ -141,20 +145,19 @@ def get_benefit_pro_rata_ratio_amount(sal_struct, component_max, payroll_period_
 		benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max
 		if benefit_amount > component_max:
 			benefit_amount = component_max
-		return get_amount(payroll_period_days, start_date, end_date, benefit_amount)
+		return get_amount(payroll_period_days, benefit_amount, payment_days)
 	return False
 
-def get_benefit_amount(application, start_date, end_date, struct_row, payroll_period_days):
+def get_benefit_amount(application, struct_row, payroll_period_days, payment_days):
 	amount = 0
 	for employee_benefit in application.employee_benefits:
 		if employee_benefit.earning_component == struct_row.salary_component:
-			amount += get_amount(payroll_period_days, start_date, end_date, employee_benefit.amount)
+			amount += get_amount(payroll_period_days, employee_benefit.amount, payment_days)
 	return amount if amount > 0 else False
 
-def get_amount(payroll_period_days, start_date, end_date, amount):
-	salary_slip_days = date_diff(getdate(end_date), getdate(start_date)) + 1
+def get_amount(payroll_period_days, amount, payment_days):
 	amount_per_day = amount / payroll_period_days
-	total_amount = amount_per_day * salary_slip_days
+	total_amount = amount_per_day * payment_days
 	return total_amount
 
 def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
