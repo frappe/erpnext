@@ -7,9 +7,9 @@ frappe.treeview_settings["Account"] = {
 	filters: [{
 		fieldname: "company",
 		fieldtype:"Select",
-		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
+		options: erpnext.utils.get_tree_options("company"),
 		label: __("Company"),
-		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+		default: erpnext.utils.get_tree_default("company")
 	}],
 	root_label: "Accounts",
 	get_tree_nodes: 'erpnext.accounts.utils.get_children',
@@ -42,6 +42,8 @@ frappe.treeview_settings["Account"] = {
 	],
 	ignore_fields:["parent_account"],
 	onload: function(treeview) {
+		frappe.treeview_settings['Account'].page = {};
+		$.extend(frappe.treeview_settings['Account'].page, treeview.page);
 		function get_company() {
 			return treeview.page.fields_dict.company.get_value();
 		}
@@ -101,7 +103,7 @@ frappe.treeview_settings["Account"] = {
 					"account": node.label,
 					"from_date": frappe.sys_defaults.year_start_date,
 					"to_date": frappe.sys_defaults.year_end_date,
-					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+					"company": frappe.treeview_settings['Account'].page.fields_dict.company.get_value()
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},
