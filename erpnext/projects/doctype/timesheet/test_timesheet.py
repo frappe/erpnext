@@ -12,9 +12,18 @@ from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
+
 class TestTimesheet(unittest.TestCase):
+	def setUp(self):
+		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
+			frappe.db.sql("delete from `tab%s`" % dt)
+		
+		from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component
+		make_earning_salary_component(["Timesheet Component"])
+		
+
 	def test_timesheet_billing_amount(self):
-		make_salary_structure("_T-Employee-00001")
+		make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -24,7 +33,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 100)
 
 	def test_timesheet_billing_amount_not_billable(self):
-		make_salary_structure("_T-Employee-00001")
+		make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -34,14 +43,15 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
-		salary_structure = make_salary_structure("_T-Employee-00001")
+		salary_structure = make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate = True, billable=1)
 		salary_slip = make_salary_slip(timesheet.name)
 		salary_slip.submit()
 
 		self.assertEqual(salary_slip.total_working_hours, 2)
 		self.assertEqual(salary_slip.hour_rate, 50)
-		self.assertEqual(salary_slip.net_pay, 150)
+		self.assertEqual(salary_slip.earnings[0].salary_component, "Timesheet Component")
+		self.assertEqual(salary_slip.earnings[0].amount, 100)
 		self.assertEqual(salary_slip.timesheets[0].time_sheet, timesheet.name)
 		self.assertEqual(salary_slip.timesheets[0].working_hours, 2)
 
@@ -117,43 +127,20 @@ class TestTimesheet(unittest.TestCase):
 		settings.save()
 
 
-def make_salary_structure(employee):
-	name = frappe.db.get_value('Salary Structure Assignment', {'employee': employee}, 'salary_structure')
-	if name:
-		salary_structure = frappe.get_doc('Salary Structure', name)
-	else:
-		salary_structure = frappe.new_doc("Salary Structure")
-		salary_structure.name = "Timesheet Salary Structure Test"
-		salary_structure.salary_slip_based_on_timesheet = 1
-		salary_structure.salary_component = "Basic"
-		salary_structure.hour_rate = 50.0
-		salary_structure.company = "_Test Company"
-		salary_structure.payment_account = get_random("Account")
+def make_salary_structure_for_timesheet(employee):
+	salary_structure_name = "Timesheet Salary Structure Test"
+	frequency = "Monthly"
 
-		salary_structure.set('earnings', [])
-		salary_structure.set('deductions', [])
-
-		es = salary_structure.append('earnings', {
-			"salary_component": "_Test Allowance",
-			"amount": 100
-		})
-
-		ds = salary_structure.append('deductions', {
-			"salary_component": "_Test Professional Tax",
-			"amount": 50
-		})
-
-		salary_structure.save(ignore_permissions=True)
-
-		salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
-		salary_structure_assignment.employee = employee
-		salary_structure_assignment.base = 1200
-		salary_structure_assignment.from_date = add_months(nowdate(), -1)
-		salary_structure_assignment.salary_structure = salary_structure.name
-		salary_structure_assignment.company = "_Test Company"
-		salary_structure_assignment.save(ignore_permissions=True)
+	from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
+	salary_structure = make_salary_structure(salary_structure_name, frequency, employee)
+	salary_structure = frappe.get_doc("Salary Structure", salary_structure)
+	salary_structure.salary_component = "Timesheet Component"
+	salary_structure.salary_slip_based_on_timesheet = 1
+	salary_structure.hour_rate = 50.0
+	salary_structure.save()
 
 	return salary_structure
+
 
 def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test Activity Type", project=None, task=None, company=None):
 	update_activity_type(activity_type)
