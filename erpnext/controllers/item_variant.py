@@ -272,8 +272,8 @@ def copy_attributes_to_variant(item, variant):
 				else:
 					variant.set(field.fieldname, item.get(field.fieldname))
 
+	variant.variant_of = item.name
 	if 'description' in allow_fields:
-		variant.variant_of = item.name
 		variant.has_variants = 0
 		if not variant.description:
 			variant.description = ""
