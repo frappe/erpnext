@@ -8,6 +8,7 @@ from frappe.utils import formatdate, format_datetime, getdate, get_datetime, now
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class EmployeeBoardingController(Document):
 	'''
@@ -378,3 +379,19 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
+
+def get_holidays_for_employee(employee, start_date, end_date):
+	holiday_list = get_holiday_list_for_employee(employee)
+	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
+		where
+			parent=%(holiday_list)s
+			and holiday_date >= %(start_date)s
+			and holiday_date <= %(end_date)s''', {
+				"holiday_list": holiday_list,
+				"start_date": start_date,
+				"end_date": end_date
+			})
+
+	holidays = [cstr(i) for i in holidays]
+
+	return holidays

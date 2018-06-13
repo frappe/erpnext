@@ -5,8 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate, formatdate
+from frappe.utils import date_diff, getdate, formatdate, cint
 from frappe.model.document import Document
+from erpnext.hr.utils import get_holidays_for_employee
 
 class PayrollPeriod(Document):
 	def validate(self):
@@ -44,7 +45,8 @@ class PayrollPeriod(Document):
 				+ _(") for {0}").format(self.company)
 			frappe.throw(msg)
 
-def get_payroll_period_days(start_date, end_date, company):
+def get_payroll_period_days(start_date, end_date, employee):
+	company = frappe.db.get_value("Employee", employee, "company")
 	payroll_period_dates = frappe.db.sql("""
 	select start_date, end_date from `tabPayroll Period`
 	where company=%(company)s
@@ -59,4 +61,9 @@ def get_payroll_period_days(start_date, end_date, company):
 	})
 
 	if len(payroll_period_dates) > 0:
-		return date_diff(getdate(payroll_period_dates[0][1]), getdate(payroll_period_dates[0][0])) + 1
+		working_days = date_diff(getdate(payroll_period_dates[0][1]), getdate(payroll_period_dates[0][0])) + 1
+		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
+			holidays = get_holidays_for_employee(employee, getdate(payroll_period_dates[0][0]), getdate(payroll_period_dates[0][1]))
+			working_days -= len(holidays)
+		return working_days
+	return False
