@@ -13,6 +13,7 @@ tools
 setup
 sales-return
 purchase-return
+blanket-order
 articles
 opening-stock
 stock-how-to

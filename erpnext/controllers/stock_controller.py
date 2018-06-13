@@ -342,6 +342,18 @@ class StockController(AccountsController):
 				if self.docstatus==1:
 					raise frappe.ValidationError
 
+	def update_blanket_order(self, cancel=False):
+		for item in self.items:
+			if item.blanket_order:
+				ordered_quantity, doc_name = frappe.db.get_value("Blanket Order Item", {"parent": item.blanket_order}, ["ordered_quantity", "name"])
+				if not cancel:
+					ordered_quantity = ordered_quantity + item.qty
+				else:
+					ordered_quantity = ordered_quantity - item.qty
+				ordered_quantity = flt(ordered_quantity, item.precision("qty"))
+				frappe.db.set_value("Blanket Order Item", doc_name, "ordered_quantity", ordered_quantity)
+
+
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
