@@ -192,38 +192,6 @@ class PayrollEntry(Document):
 				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
 
-	def get_salary_slip_details(self):
-		cond = self.get_filter_condition()
-		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
-
-		if salary_slip_name_list and len(salary_slip_name_list) > 0:
-			salary_slip_total = 0
-			sal_comp_amount = {}
-			for salary_slip_name in salary_slip_name_list:
-				salary_slip = frappe.get_doc("Salary Slip", salary_slip_name[0])
-				for sal_detail in salary_slip.earnings:
-					is_flexible_benefit, only_tax_impact = frappe.db.get_value("Salary Component", sal_detail.salary_component, ['is_flexible_benefit', 'only_tax_impact'])
-					amount = sal_detail.amount
-					if is_flexible_benefit == 1 and only_tax_impact == 1:
-						amount = 0
-					if amount > 0 and is_flexible_benefit == 1:
-						if sal_detail.salary_component in sal_comp_amount:
-							sal_comp_amount[sal_detail.salary_component] += int(amount)
-						else:
-							sal_comp_amount[sal_detail.salary_component] = int(amount)
-					salary_slip_total += amount
-			if len(sal_comp_amount) > 0 and salary_slip_total > 0:
-				flexi_total = 0
-				for comp in sal_comp_amount:
-					flexi_total += sal_comp_amount[comp]
-				salary_slip_total -= flexi_total
-
-			return salary_slip_total, sal_comp_amount
-
-		return False
-
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
 			{"parent": salary_component, "company": self.company}, "default_account")
@@ -353,62 +321,53 @@ class PayrollEntry(Document):
 
 	def make_payment_entry(self):
 		self.check_permission('write')
-		salary_slip_total, sal_comp_amount = self.get_salary_slip_details()
+
+		cond = self.get_filter_condition()
+		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
+			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
+			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
+
+		if salary_slip_name_list and len(salary_slip_name_list) > 0:
+			for salary_slip_name in salary_slip_name_list:
+				salary_slip_total = 0
+				salary_slip = frappe.get_doc("Salary Slip", salary_slip_name[0])
+				for sal_detail in salary_slip.earnings:
+					is_flexible_benefit, only_tax_impact, creat_separate_je = frappe.db.get_value("Salary Component", \
+					sal_detail.salary_component, ['is_flexible_benefit', 'only_tax_impact', 'create_separate_payment_entry_against_benefit_claim'])
+					if only_tax_impact != 1:
+						if is_flexible_benefit == 1 and creat_separate_je == 1:
+							self.create_journal_entry(sal_detail.amount, sal_detail.salary_component)
+						else:
+							salary_slip_total += sal_detail.amount
+				if salary_slip_total > 0:
+					self.create_journal_entry(salary_slip_total, "salary")
+
+	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
-		if sal_comp_amount:
-			for comp in sal_comp_amount:
-				journal_entry = frappe.new_doc('Journal Entry')
-				journal_entry.voucher_type = 'Bank Entry'
-				journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
-					.format(comp, self.start_date, self.end_date)
-				journal_entry.company = self.company
-				journal_entry.posting_date = self.posting_date
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
+			.format(user_remark, self.start_date, self.end_date)
+		journal_entry.company = self.company
+		journal_entry.posting_date = self.posting_date
 
-				payment_amount = flt(sal_comp_amount[comp], precision)
+		payment_amount = flt(je_payment_amount, precision)
 
-				journal_entry.set("accounts", [
-					{
-						"account": self.payment_account,
-						"credit_in_account_currency": payment_amount
-					},
-					{
-						"account": default_payroll_payable_account,
-						"debit_in_account_currency": payment_amount,
-						"reference_type": self.doctype,
-						"reference_name": self.name
-					}
-				])
-			# return journal_entry.as_dict()
-		if salary_slip_total:
-			journal_entry = frappe.new_doc('Journal Entry')
-			journal_entry.voucher_type = 'Bank Entry'
-			journal_entry.user_remark = _('Payment of salary from {0} to {1}')\
-				.format(self.start_date, self.end_date)
-			journal_entry.company = self.company
-			journal_entry.posting_date = self.posting_date
-
-			payment_amount = flt(salary_slip_total, precision)
-
-			journal_entry.set("accounts", [
-				{
-					"account": self.payment_account,
-					"credit_in_account_currency": payment_amount
-				},
-				{
-					"account": default_payroll_payable_account,
-					"debit_in_account_currency": payment_amount,
-					"reference_type": self.doctype,
-					"reference_name": self.name
-				}
-			])
-			return journal_entry.as_dict()
-		else:
-			frappe.msgprint(
-				_("There are no submitted Salary Slips to process."),
-				title="Error", indicator="red"
-			)
+		journal_entry.set("accounts", [
+			{
+				"account": self.payment_account,
+				"credit_in_account_currency": payment_amount
+			},
+			{
+				"account": default_payroll_payable_account,
+				"debit_in_account_currency": payment_amount,
+				"reference_type": self.doctype,
+				"reference_name": self.name
+			}
+		])
+		journal_entry.save(ignore_permissions = True)
 
 	def update_salary_slip_status(self, jv_name = None):
 		ss_list = self.get_sal_slip_list(ss_status=1)
