@@ -145,7 +145,9 @@ class Gstr1Report(object):
 
 		for d in items:
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, sum(i.get('base_net_amount', 0) for i in items if i.item_code == d.item_code and i.parent == d.parent))
+				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
+					sum(i.get('base_net_amount', 0) for i in items
+					    if i.item_code == d.item_code and i.parent == d.parent))
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
