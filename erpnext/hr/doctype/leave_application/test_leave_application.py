@@ -413,7 +413,7 @@ def get_employee():
 def set_leave_approver():
 	employee = get_employee()
 	dept_doc = frappe.get_doc("Department", employee.department)
-	dept_doc.append('leave_approver', {
+	dept_doc.append('leave_approvers', {
 		'approver': 'test@example.com'
 	})
 	dept_doc.save(ignore_permissions=True)

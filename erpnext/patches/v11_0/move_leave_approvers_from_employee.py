@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "department_approver")
@@ -26,4 +27,4 @@ def execute():
 			if not len(department.leave_approvers):
 				department.append("leave_approvers",{
 					"approver": record.leave_approver
-				}).insert()
+				}).db_insert()

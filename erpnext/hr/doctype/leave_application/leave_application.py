@@ -617,4 +617,4 @@ def get_leave_approver(employee, department=None):
 
 	if department:
 		return frappe.db.get_value('Department Approver', {'parent': department,
-			'parentfield': 'leave_approver', 'idx': 1}, 'approver')
+			'parentfield': 'leave_approvers', 'idx': 1}, 'approver')
