@@ -72,6 +72,6 @@ def get_approvers(department):
 	# retrieve approvers list from current department and from its subsequent child departments
 	for d in department_list:
 		approvers.extend([l.leave_approver for l in frappe.db.sql("""select approver from `tabDepartment Approver` \
-			where parent = %s and parentfield = 'leave_approver'""", (d), as_dict=True)])
+			where parent = %s and parentfield = 'leave_approvers'""", (d), as_dict=True)])
 
 	return approvers
