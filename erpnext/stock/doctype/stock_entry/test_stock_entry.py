@@ -710,10 +710,15 @@ class TestStockEntry(unittest.TestCase):
 		make_stock_entry(item_code="_Test Serialized Item With Series", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
 
-		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
-		self.assertEqual(stock_entry.get("items")[0].qty, 10)
-		self.assertEqual(stock_entry.get("items")[1].qty, 6)
+		item_quantity = {
+			'_Test Item': 2.0,
+			'_Test Item 2': 12.0,
+			'_Test Serialized Item With Series': 6.0
+		}
 
+		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
+		for d in stock_entry.get('items'):
+			self.assertEqual(item_quantity.get(d.item_code), d.qty)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
