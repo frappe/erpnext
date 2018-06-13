@@ -9,14 +9,11 @@ class TestWoocommerce(unittest.TestCase):
 		company.abbr = "W"
 		company.default_currency = "INR"
 		company.save()
-		frappe.db.commit()
 
 		default = frappe.get_doc("Global Defaults")
 		self.old_default_company = default.default_company
 		default.default_company = "Woocommerce"
 		default.save()
-
-		frappe.db.commit()
 
 		time.sleep(5)
 
@@ -30,7 +27,6 @@ class TestWoocommerce(unittest.TestCase):
 		woo_settings.f_n_f_account = "Expenses - W"
 		woo_settings.save(ignore_permissions=True)
 
-		frappe.db.commit()
 
 	def test_woocommerce_request(self):
 		r = emulate_request()
@@ -51,7 +47,6 @@ class TestWoocommerce(unittest.TestCase):
 		default = frappe.get_doc("Global Defaults")
 		default.default_company = self.old_default_company
 		default.save()
-		frappe.db.commit()
 
 
 
@@ -86,6 +81,5 @@ def cancel_and_delete_order():
 		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
 			so.cancel()
 			so.delete()
-		frappe.db.commit()
 	except frappe.DoesNotExistError:
 		pass

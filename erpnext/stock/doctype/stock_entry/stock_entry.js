@@ -59,7 +59,6 @@ frappe.ui.form.on('Stock Entry', {
 		});
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
-		frm.trigger("setup_quality_inspection");
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -189,6 +188,8 @@ frappe.ui.form.on('Stock Entry', {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
+
+		frm.trigger("setup_quality_inspection");
 	},
 
 	purpose: function(frm) {

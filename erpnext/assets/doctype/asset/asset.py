@@ -40,7 +40,7 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
-		delete_gl_entries()
+		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
 
 	def validate_item(self):
