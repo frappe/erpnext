@@ -1,6 +1,0 @@
-#Attendance
-
-
-### Topics
-
-{index}

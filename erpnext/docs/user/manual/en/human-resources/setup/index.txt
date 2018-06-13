@@ -1,8 +1,0 @@
-hr-settings
-employment-type
-branch
-department
-designation
-earning-type
-deduction-type
-holiday-list
