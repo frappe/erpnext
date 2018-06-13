@@ -30,6 +30,8 @@ class TestWoocommerce(unittest.TestCase):
 
 	def test_woocommerce_request(self):
 		r = emulate_request()
+		print ("=======")
+		print (r)
 		self.assertTrue(r.status_code == 200)
 		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}))
 		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 56}))
@@ -71,7 +73,7 @@ def emulate_request():
 
 	r = requests.post(url=url, headers=headers, data=data)
 
-	time.sleep(2)
+	time.sleep(5)
 	return r
 
 def cancel_and_delete_order():
