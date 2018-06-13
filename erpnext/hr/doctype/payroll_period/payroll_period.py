@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, formatdate, cint
 from frappe.model.document import Document
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.utils import get_holidays_for_employee
 
 class PayrollPeriod(Document):
 	def validate(self):
@@ -67,19 +67,3 @@ def get_payroll_period_days(start_date, end_date, employee):
 			working_days -= len(holidays)
 		return working_days
 	return False
-
-def get_holidays_for_employee(employee, start_date, end_date):
-	holiday_list = get_holiday_list_for_employee(employee)
-	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
-		where
-			parent=%(holiday_list)s
-			and holiday_date >= %(start_date)s
-			and holiday_date <= %(end_date)s''', {
-				"holiday_list": holiday_list,
-				"start_date": start_date,
-				"end_date": end_date
-			})
-
-	holidays = [cstr(i) for i in holidays]
-
-	return holidays
