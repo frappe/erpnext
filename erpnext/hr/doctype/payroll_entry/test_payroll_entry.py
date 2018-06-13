@@ -7,8 +7,21 @@ import frappe
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
+from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
+		make_earning_salary_component, make_deduction_salary_component
+from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
+from erpnext.hr.doctype.loan.test_loan import create_loan
+
 
 class TestPayrollEntry(unittest.TestCase):
+	def setUp(self):
+		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Loan"]:
+			frappe.db.sql("delete from `tab%s`" % dt)
+
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
+		make_deduction_salary_component(["Professional Tax", "TDS"])
+
 	def test_payroll_entry(self): # pylint: disable=no-self-use
 
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
@@ -16,8 +29,9 @@ class TestPayrollEntry(unittest.TestCase):
 				{'parent': data.name, 'company': erpnext.get_default_company()}, 'name'):
 				get_salary_component_account(data.name)
 
-		if not frappe.db.get_value("Salary Slip", {"start_date": "2016-11-01", "end_date": "2016-11-30"}):
-			make_payroll_entry()
+		dates = get_start_end_dates('Monthly', nowdate())
+		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
+			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date)
 
 	def test_get_end_date(self):
 		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})
@@ -30,35 +44,11 @@ class TestPayrollEntry(unittest.TestCase):
 		self.assertEqual(get_end_date('2017-02-15', 'daily'), {'end_date': '2017-02-15'})
 
 	def test_loan(self):
-		from erpnext.hr.doctype.salary_structure.test_salary_structure import (make_employee,
-			make_salary_structure)
-		from erpnext.hr.doctype.loan.test_loan import create_loan
 
 		branch = "Test Employee Branch"
 		applicant = make_employee("test_employee@loan.com")
 		company = erpnext.get_default_company()
 		holiday_list = make_holiday("test holiday for loan")
-
-		if not frappe.db.exists('Salary Component', 'Basic Salary'):
-			frappe.get_doc({
-				'doctype': 'Salary Component',
-				'salary_component': 'Basic Salary',
-				'salary_component_abbr': 'BS',
-				'type': 'Earning',
-				'accounts': [{
-					'company': company,
-					'default_account': frappe.db.get_value('Account',
-						{'company': company, 'root_type': 'Expense', 'account_type': ''}, 'name')
-				}]
-			}).insert()
-
-		if not frappe.db.get_value('Salary Component Account',
-			{'parent': 'Basic Salary', 'company': company}):
-			salary_component = frappe.get_doc('Salary Component', 'Basic Salary')
-			salary_component.append('accounts', {
-				'company': company,
-				'default_account': "Salary - " + frappe.db.get_value('Company', company, 'abbr')
-			})
 
 		company_doc = frappe.get_doc('Company', company)
 		if not company_doc.default_payroll_payable_account:
@@ -81,23 +71,8 @@ class TestPayrollEntry(unittest.TestCase):
 			"Personal Loan", 280000, "Repay Over Number of Periods", 20)
 		loan.repay_from_salary = 1
 		loan.submit()
-
-		salary_strcture = "Test Salary Structure for Loan"
-		if not frappe.db.exists('Salary Structure', salary_strcture):
-			salary_strcture = make_salary_structure(salary_strcture, [{
-				'employee': applicant,
-				'from_date': '2017-01-01',
-				'base': 30000
-			}])
-
-			salary_strcture = frappe.get_doc('Salary Structure', salary_strcture)
-			salary_strcture.set('earnings', [{
-				'salary_component': 'Basic Salary',
-				'abbr': 'BS',
-				'amount_based_on_formula':1,
-				'formula': 'base*.5'
-			}])
-			salary_strcture.save()
+		salary_structure = "Test Salary Structure for Loan"
+		salary_structure = make_salary_structure(salary_structure, "Monthly", employee_doc.name)
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		make_payroll_entry(start_date=dates.start_date,
@@ -119,26 +94,6 @@ class TestPayrollEntry(unittest.TestCase):
 		if salary_slip.docstatus == 0:
 			frappe.delete_doc('Salary Slip', name)
 
-		loan.cancel()
-		frappe.delete_doc('Loan', loan.name)
-
-def get_salary_component_account(sal_comp):
-	company = erpnext.get_default_company()
-	sal_comp = frappe.get_doc("Salary Component", sal_comp)
-	sc = sal_comp.append("accounts")
-	sc.company = company
-	sc.default_account = create_account(company)
-
-def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
-	if not salary_account:
-		frappe.get_doc({
-		"doctype": "Account",
-		"account_name": "Salary",
-		"parent_account": "Indirect Expenses - " + frappe.db.get_value('Company', company, 'abbr'),
-		"company": company
-		}).insert()
-	return salary_account
 
 def make_payroll_entry(**args):
 	args = frappe._dict(args)
