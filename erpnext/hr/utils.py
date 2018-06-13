@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt
+from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
