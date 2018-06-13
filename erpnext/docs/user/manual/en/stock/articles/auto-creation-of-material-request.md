@@ -16,7 +16,7 @@ When item's stock reaches reorder level, Material Request is auto-created automa
 
 <img alt="active auto-material request" class="screenshot" src="{{docs_base_url}}/assets/img/articles/reorder-request-3.png">
 
-A separate Material Request will be created for each item. User with Purchase Manager's role will receive email alert about these Material Requests.
+A separate Material Request will be created for each item. User with Purchase Manager's role will receive notification about these Material Requests.
 
 If auto creation of Material Request is failed, User with Purchase Manager role will be informed about error message. One of the most encountered error message is:
 

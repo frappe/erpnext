@@ -1,6 +1,6 @@
 email-account
 email-inbox
-email-alerts
+notifications
 email-digest
 email-reports
 sending-email

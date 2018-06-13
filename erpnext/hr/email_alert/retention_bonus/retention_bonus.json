@@ -5,7 +5,7 @@
  "date_changed": "bonus_payment_date", 
  "days_in_advance": 14, 
  "docstatus": 0, 
- "doctype": "Email Alert", 
+ "doctype": "Notification", 
  "document_type": "Retention Bonus", 
  "enabled": 1, 
  "event": "Days Before", 

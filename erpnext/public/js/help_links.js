@@ -69,12 +69,12 @@ frappe.help.help_links['List/Email Account'] = [
 	{ label: 'Email Account', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-account' },
 ]
 
-frappe.help.help_links['List/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['List/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
-frappe.help.help_links['Form/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['Form/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
 frappe.help.help_links['List/Email Digest'] = [
@@ -318,24 +318,24 @@ frappe.help.help_links['Tree/Cost Center'] = [
 
 frappe.help.help_links['List/Item'] = [
 	{ label: 'Item', url: 'http://frappe.github.io/erpnext/user/manual/en/stock/item' },
-	{ label: 'Item Price', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-price' },	
+	{ label: 'Item Price', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-price' },
 	{ label: 'Barcode', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/articles/track-items-using-barcode' },
 	{ label: 'Item Wise Taxation', url: 'https://frappe.github.io/erpnext/user/manual/en/accounts/item-wise-taxation' },
 	{ label: 'Managing Fixed Assets', url: 'https://frappe.github.io/erpnext/user/manual/en/accounts/managing-fixed-assets' },
 	{ label: 'Item Codification', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-codification' },
-	{ label: 'Item Variants', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants' },	
-	{ label: 'Item Valuation', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },				
+	{ label: 'Item Variants', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants' },
+	{ label: 'Item Valuation', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },
 ]
 
 frappe.help.help_links['Form/Item'] = [
 	{ label: 'Item', url: 'http://frappe.github.io/erpnext/user/manual/en/stock/item' },
-	{ label: 'Item Price', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-price' },	
+	{ label: 'Item Price', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-price' },
 	{ label: 'Barcode', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/articles/track-items-using-barcode' },
 	{ label: 'Item Wise Taxation', url: 'https://frappe.github.io/erpnext/user/manual/en/accounts/item-wise-taxation' },
 	{ label: 'Managing Fixed Assets', url: 'https://frappe.github.io/erpnext/user/manual/en/accounts/managing-fixed-assets' },
 	{ label: 'Item Codification', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-codification' },
-	{ label: 'Item Variants', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants' },	
-	{ label: 'Item Valuation', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },				
+	{ label: 'Item Variants', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants' },
+	{ label: 'Item Valuation', url: 'https://frappe.github.io/erpnext/user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },
 ]
 
 frappe.help.help_links['List/Purchase Receipt'] = [

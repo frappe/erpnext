@@ -1,6 +1,6 @@
-# Email Alerts
+# Notifications
 
-You can configure various email alerts in your system to remind you of important activities such as:
+You can configure various notifications in your system to remind you of important activities such as:
 
 1. Completion date of a Task.
 2. Expected Delivery Date of a Sales Order.
@@ -10,13 +10,13 @@ You can configure various email alerts in your system to remind you of important
 6. Expiry notification for a Contract.
 7. Completion / Status change of a Task.
 
-For this, you need to setup an Email Alert.
+For this, you need to setup an Notification.
 
-> Setup > Email > Email Alert
+> Setup > Email > Notification
 
 ### Setting Up An Alert
 
-To setup an Email Alert:
+To setup an Notification:
 
 1. Select which Document Type you want watch changes on
 2. Define what events you want to watch. Events are:
@@ -36,11 +36,11 @@ You can retrieve the data for a particular field by using `doc.[field_name]`. To
 
 ### Setting Conditions
 
-Email alerts allow you to set conditions according to the field data in your documents. For example, if you want to recieve an Email if a Lead has been saved as "Interested" as it's status, you put `doc.status == "Interested"` in the conditions textbox. You can also set more complex conditions by combining them.
+Notifications allow you to set conditions according to the field data in your documents. For example, if you want to recieve an Email if a Lead has been saved as "Interested" as it's status, you put `doc.status == "Interested"` in the conditions textbox. You can also set more complex conditions by combining them.
 
 <img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/email/email-alert-condition.png">
 
-The above example will send an Email Alert when a Task is saved with the status "Open" and the Expected End Date for the Task is the date on or before the date on which it was saved on.
+The above example will send an Notification when a Task is saved with the status "Open" and the Expected End Date for the Task is the date on or before the date on which it was saved on.
 
 
 ### Setting a Message
@@ -67,14 +67,14 @@ You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and 
 
 ### Setting a Value after the Alert is Set
 
-Sometimes to make sure that the email alert is not sent multiple times, you can
-define a custom property (via Customize Form) like "Email Alert Sent" and then
+Sometimes to make sure that the notification is not sent multiple times, you can
+define a custom property (via Customize Form) like "Notification Sent" and then
 set this property after the alert is sent by setting the **Set Property After Alert**
 field.
 
 Then you can use that as a condition in the **Condition** rules to ensure emails are not sent multiple times
 
-<img class="screenshot" alt="Setting Property in Email Alert" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
+<img class="screenshot" alt="Setting Property in Notification" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
 
 ### Example
 
@@ -83,5 +83,56 @@ Then you can use that as a condition in the **Condition** rules to ensure emails
 
 1. Setting the Recipients and Message
     <img class="screenshot" alt="Set Message" src="{{docs_base_url}}/assets/img/setup/email/email-alert-2.png">
+
+---
+
+# Slack Notifications
+
+If you prefer to have your notifications sent to a dedicated Slack channel, you can also choose the option "Slack" in the channel options and select the appropriate Slack Webhook URL.
+
+### Slack Webhook url
+
+A Slack webhook URL is an URL pointing directly to a Slack channel.
+
+In order to generate webhook URLs, you need to create a new Slack App:
+
+1. Go to https://api.slack.com/slack-apps
+2. Click on "Create a Slack App"
+<img class="screenshot" alt="New Slack App" src="{{docs_base_url}}/assets/img/setup/email/new-slack-app.png">
+
+3. Give your App a name and choose the right workspace
+<img class="screenshot" alt="Slack Incoming Webhooks" src="{{docs_base_url}}/assets/img/setup/email/slack-webhooks.png">
+
+Once your app is created, go to the "Incoming Webhooks" section and add a new Webhook to Workspace.
+<img class="screenshot" alt="Slack Webhook URL in ERPNext" src="{{docs_base_url}}/assets/img/setup/email/slack-webhook-url.png">
+
+Just select the channel you want to post to and you're done.
+
+Copy the created link, go back to ERPNext and use it to create a new Slack Webhook URL in Integrations > Slack Webhook URL.
+
+### Message Format
+
+Unlike Email messages, Slack doesn't allow HTML formatting.
+
+Instead you can use markdown formatting: [Slack Documentation](https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages)
+
+Example:
+	{% raw %}
+	*Order Overdue*
+
+	Transaction {{ doc.name }} has exceeded Due Date. Please take necessary action.
+
+
+	{% if comments %}
+	Last comment: {{ comments[-1].comment }} by {{ comments[-1].by }}
+	{% endif %}
+
+	*Details*
+
+	• Customer: {{ doc.customer }}
+	• Amount: {{ doc.grand_total }}
+	{% endraw %}
+
+<img class="screenshot" alt="Slack Notification" src="{{docs_base_url}}/assets/img/setup/email/slack-message.png">
 
 {next}
