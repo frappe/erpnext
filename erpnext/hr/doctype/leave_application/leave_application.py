@@ -406,7 +406,7 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
 		select employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
-			and status = %(status)s
+			and status = %(status)s and docstatus != 2
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
@@ -617,4 +617,4 @@ def get_leave_approver(employee, department=None):
 
 	if department:
 		return frappe.db.get_value('Department Approver', {'parent': department,
-			'parentfield': 'leave_approver', 'idx': 1}, 'approver')
+			'parentfield': 'leave_approvers', 'idx': 1}, 'approver')

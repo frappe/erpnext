@@ -28,9 +28,9 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 			order by lft desc""", (department_details.lft, department_details.rgt), as_list = True)
 
 	if filters.get("doctype") == "Leave Application":
-		parentfield = "leave_approver"
+		parentfield = "leave_approvers"
 	else:
-		parentfield = "expense_approver"
+		parentfield = "expense_approvers"
 	if department_list:
 		for d in department_list:
 			approvers += frappe.db.sql("""select user.name, user.first_name, user.last_name from
