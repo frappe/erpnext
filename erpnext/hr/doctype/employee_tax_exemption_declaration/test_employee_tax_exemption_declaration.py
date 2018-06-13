@@ -65,7 +65,8 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 							amount = 50000),
 							]
 		}).insert()
-		self.assertTrue(declaration.submit)
+		declaration.submit()
+		self.assertEquals(declaration.docstatus, 1)
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
