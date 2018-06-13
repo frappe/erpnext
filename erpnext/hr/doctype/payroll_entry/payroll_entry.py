@@ -32,7 +32,7 @@ class PayrollEntry(Document):
 				select
 					name from `tabSalary Structure`
 				where
-					docstatus != 2 and
+					docstatus = 1 and
 					is_active = 'Yes'
 					and company = %(company)s and
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
@@ -47,8 +47,7 @@ class PayrollEntry(Document):
 				from
 					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
-					t1.docstatus!=2
-					and t1.name = t2.employee
+					t1.name = t2.employee
 					and t2.docstatus = 1
 			%s """% cond, {"sal_struct": sal_struct, "from_date": self.start_date, "to_date": self.end_date}, as_dict=True)
 			return emp_list
