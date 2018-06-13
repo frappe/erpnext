@@ -41,6 +41,9 @@ frappe.ui.form.on('Employee Benefit Application', {
 			};
 			get_max_benefits(frm, method, args);
 		}
+	},
+	max_benefits: function(frm) {
+		calculate_all(frm.doc);
 	}
 });
 
