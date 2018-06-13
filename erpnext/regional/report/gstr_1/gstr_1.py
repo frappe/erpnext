@@ -143,7 +143,6 @@ class Gstr1Report(object):
 			where parent in (%s)
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
-		item_details = {}
 		for d in items:
 			if not self.invoice_items or d.item_code not in self.invoice_items.values():
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, sum(i.get('base_net_amount', 0) for i in items if i.item_code == d.item_code and i.parent == d.parent))
