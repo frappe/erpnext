@@ -288,7 +288,7 @@ class ReceivablePayableReport(object):
 			for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
 				from `tabPurchase Invoice` where docstatus = 1
 				union
-				select name, null as due_date, bill_no, bill_date from `tabJournal Entry`
+				select name, ifnull(due_date, ''), bill_no, bill_date from `tabJournal Entry`
 				where docstatus = 1""", as_dict=1):
 					voucher_details.setdefault(pi.name, pi)
 
