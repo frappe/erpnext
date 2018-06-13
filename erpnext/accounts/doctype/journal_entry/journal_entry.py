@@ -26,7 +26,6 @@ class JournalEntry(AccountsController):
 		self.clearance_date = None
 
 		self.validate_party()
-		self.validate_cheque_info()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
@@ -45,6 +44,7 @@ class JournalEntry(AccountsController):
 			self.title = self.get_title()
 
 	def on_submit(self):
+		self.validate_cheque_info()
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
