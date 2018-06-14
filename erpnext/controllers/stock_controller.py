@@ -343,7 +343,7 @@ class StockController(AccountsController):
 					raise frappe.ValidationError
 
 	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items]))
+		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
