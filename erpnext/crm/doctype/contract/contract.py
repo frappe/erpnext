@@ -28,16 +28,14 @@ class Contract(Document):
 		self.validate_dates()
 		self.update_contract_status()
 		self.update_fulfilment_status()
-		self.set_contract_display()
 
 	def before_update_after_submit(self):
 		self.update_contract_status()
 		self.update_fulfilment_status()
-		self.set_contract_display()
 
 	def validate_dates(self):
 		if self.end_date and self.end_date < self.start_date:
-			frappe.throw(_("End Date cannot be before Start Date!"))
+			frappe.throw(_("End Date cannot be before Start Date."))
 
 	def update_contract_status(self):
 		if self.is_signed:
@@ -66,9 +64,6 @@ class Contract(Document):
 					fulfilment_status = "Lapsed"
 
 		self.fulfilment_status = fulfilment_status
-
-	def set_contract_display(self):
-		self.contract_display = frappe.render_template(self.contract_terms, {"doc": self})
 
 	def get_fulfilment_progress(self):
 		return len([term for term in self.fulfilment_terms if term.fulfilled])
