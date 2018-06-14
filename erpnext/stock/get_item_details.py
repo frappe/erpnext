@@ -749,19 +749,23 @@ def get_blanket_order_details(args):
 		args = frappe._dict(json.loads(args))
 
 	blanket_order_details = None
-	condition1, condition2 = ' ', ' '
+	condition = ''
 	if args.item_code:
 		if args.customer and args.doctype == "Sales Order":
-			condition1 = ' and bo.customer=%(customer)s '
+			condition = ' and bo.customer=%(customer)s'
 		elif args.supplier and args.doctype == "Purchase Order":
-			condition1 = ' and bo.supplier=%(supplier)s '
+			condition = ' and bo.supplier=%(supplier)s'
 		if args.blanket_order:
-			condition2 = ' and bo.name =%(blanket_order)s '
+			condition += ' and bo.name =%(blanket_order)s'
+		if args.transaction_date:
+			condition += ' and bo.to_date>=%(transaction_date)s'
+
 		blanket_order_details = frappe.db.sql('''
 				select boi.rate as blanket_order_rate, bo.name as blanket_order
 				from `tabBlanket Order` bo, `tabBlanket Order Item` boi
-				where bo.to_date>=%(transaction_date)s and bo.company=%(company)s and boi.item_code=%(item_code)s
-					and bo.docstatus=1 and bo.name = boi.parent {0} {1}
-			'''.format(condition1, condition2), args, as_dict=True)
+				where bo.company=%(company)s and boi.item_code=%(item_code)s
+					and bo.docstatus=1 and bo.name = boi.parent {0}
+			'''.format(condition), args, as_dict=True)
+
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ''
 	return blanket_order_details
