@@ -1,3 +1,0 @@
-loan-management
-leave-calculation-in-salary-slip
-working-days-in-salary-slip
