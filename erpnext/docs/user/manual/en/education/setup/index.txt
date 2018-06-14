@@ -1,9 +1,0 @@
-course
-program
-instructor
-room
-student-category
-student-batch-name
-academic-term
-academic-year
-education-settings

@@ -1,3 +1,0 @@
-maintaining-suppliers-part-no-in-item
-purchasing-in-different-unit
-pull-items-in-purchase-order-based-on-supplier
