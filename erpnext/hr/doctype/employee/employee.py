@@ -66,6 +66,10 @@ class Employee(NestedSet):
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
+		if has_user_permission_for_employee(self.user_id, self.name) \
+			or not has_permission('User Permission', ptype='write'):
+				return
+
 		add_user_permission("Employee", self.name, self.user_id)
 		set_user_permission_if_allowed("Company", self.company, self.user_id)
 
@@ -207,8 +211,6 @@ def validate_employee_role(doc, method):
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
-		employee_name = frappe.get_value('Employee', {'user_id': doc.name}, 'name')
-		if has_user_permission_for_employee(doc.name, employee_name): return
 		if not has_permission('User Permission', ptype='write'): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()

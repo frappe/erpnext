@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import add_months, today
+from erpnext import get_company_currency
 from .blanket_order import make_sales_order, make_purchase_order
 
 class TestBlanketOrder(unittest.TestCase):
@@ -13,6 +14,7 @@ class TestBlanketOrder(unittest.TestCase):
 		bo = make_blanket_order(blanket_order_type="Selling")
 
 		so = make_sales_order(bo.name)
+		so.currency = get_company_currency(so.company)
 		so.delivery_date = today()
 		so.items[0].qty = 10
 		so.submit()
@@ -24,17 +26,19 @@ class TestBlanketOrder(unittest.TestCase):
 		self.assertEqual(so.items[0].rate, bo.items[0].rate)
 
 		bo = frappe.get_doc("Blanket Order", bo.name)
-		self.assertEqual(so.items[0].qty, bo.items[0].ordered_quantity)
+		self.assertEqual(so.items[0].qty, bo.items[0].ordered_qty)
 
 		# test the quantity
 		so1 = make_sales_order(bo.name)
-		self.assertEqual(so1.items[0].qty, (bo.items[0].qty-bo.items[0].ordered_quantity))
+		so1.currency = get_company_currency(so1.company)
+		self.assertEqual(so1.items[0].qty, (bo.items[0].qty-bo.items[0].ordered_qty))
 
 
 	def test_purchase_order_creation(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing")
 
 		po = make_purchase_order(bo.name)
+		po.currency = get_company_currency(po.company)
 		po.schedule_date = today()
 		po.items[0].qty = 10
 		po.submit()
@@ -46,11 +50,12 @@ class TestBlanketOrder(unittest.TestCase):
 		self.assertEqual(po.items[0].rate, po.items[0].rate)
 
 		bo = frappe.get_doc("Blanket Order", bo.name)
-		self.assertEqual(po.items[0].qty, bo.items[0].ordered_quantity)
+		self.assertEqual(po.items[0].qty, bo.items[0].ordered_qty)
 
 		# test the quantity
 		po1 = make_sales_order(bo.name)
-		self.assertEqual(po1.items[0].qty, (bo.items[0].qty-bo.items[0].ordered_quantity))
+		po1.currency = get_company_currency(po1.company)
+		self.assertEqual(po1.items[0].qty, (bo.items[0].qty-bo.items[0].ordered_qty))
 
 
 

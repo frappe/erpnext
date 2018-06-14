@@ -244,7 +244,7 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 
-		self.update_blanket_order(cancel=True)
+		self.update_blanket_order()
 
 
 	def on_update(self):
@@ -323,6 +323,7 @@ def close_or_unclose_purchase_orders(names, status):
 			else:
 				if po.status == "Closed":
 					po.update_status("Draft")
+			po.update_blanket_order()
 
 	frappe.local.message_log = []
 

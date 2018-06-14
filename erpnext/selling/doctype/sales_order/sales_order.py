@@ -190,7 +190,7 @@ class SalesOrder(SellingController):
 
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		self.update_blanket_order(cancel=True)
+		self.update_blanket_order()
 
 	def update_project(self):
 		project_list = []
@@ -414,6 +414,7 @@ def close_or_unclose_sales_orders(names, status):
 			else:
 				if so.status == "Closed":
 					so.update_status('Draft')
+			so.update_blanket_order()
 
 	frappe.local.message_log = []
 
