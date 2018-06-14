@@ -13,6 +13,9 @@ def execute():
 	if frappe.db.has_column('Department', 'expense_approver'):
 		rename_field('Department', "expense_approver", "expense_approvers")
 
+	if not frappe.db.table_exists("Employee Leave Approver"):
+		return
+
 	approvers = frappe.db.sql("""select distinct app.leave_approver, emp.department from
 	`tabEmployee Leave Approver` app, `tabEmployee` emp
 		where app.parenttype = 'Employee'
