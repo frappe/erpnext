@@ -728,7 +728,7 @@ class Item(WebsiteGenerator):
 		if self.variant_of and self.variant_based_on == 'Item Attribute':
 			args = {}
 			for d in self.attributes:
-				if not d.attribute_value:
+				if cstr(d.attribute_value).strip() == '':
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
