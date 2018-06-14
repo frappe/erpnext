@@ -6,9 +6,9 @@ frappe.treeview_settings['Warehouse'] = {
 	filters: [{
 		fieldname: "company",
 		fieldtype:"Select",
-		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
+		options: erpnext.utils.get_tree_options("company"),
 		label: __("Company"),
-		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+		default: erpnext.utils.get_tree_default("company")
 	}],
 	fields:[
 		{fieldtype:'Data', fieldname: 'warehouse_name',
