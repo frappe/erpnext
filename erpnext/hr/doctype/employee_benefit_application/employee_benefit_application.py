@@ -105,29 +105,30 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 		# Get all salary slip flexi amount in the payroll period
 		prev_sal_slip_flexi_total = get_sal_slip_total_benefit_given(employee, payroll_period_obj)
 
-		# Check salary structure hold depends_on_lwp component
-		# If yes then find the amount per day of each component and find the sum
-		sal_struct_name = get_assigned_salary_structure(employee, on_date)
-		if sal_struct_name:
-			sal_struct = frappe.get_doc("Salary Structure", sal_struct_name)
-			for sal_struct_row in sal_struct.get("earnings"):
-				salary_component = frappe.get_doc("Salary Component", sal_struct_row.salary_component)
-				if salary_component.depends_on_lwp == 1 and salary_component.is_pro_rata_applicable == 1:
-					have_depends_on_lwp = True
-					benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, salary_component.max_benefit_amount)
-					amount_per_day = benefit_amount / payroll_period_days
-					per_day_amount_total += amount_per_day
+		if prev_sal_slip_flexi_total > 0:
+			# Check salary structure hold depends_on_lwp component
+			# If yes then find the amount per day of each component and find the sum
+			sal_struct_name = get_assigned_salary_structure(employee, on_date)
+			if sal_struct_name:
+				sal_struct = frappe.get_doc("Salary Structure", sal_struct_name)
+				for sal_struct_row in sal_struct.get("earnings"):
+					salary_component = frappe.get_doc("Salary Component", sal_struct_row.salary_component)
+					if salary_component.depends_on_lwp == 1 and salary_component.is_pro_rata_applicable == 1:
+						have_depends_on_lwp = True
+						benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, salary_component.max_benefit_amount)
+						amount_per_day = benefit_amount / payroll_period_days
+						per_day_amount_total += amount_per_day
 
-		# Then the sum multiply with the no of lwp in that period
-		# Include that amount to the prev_sal_slip_flexi_total to get the actual
-		if have_depends_on_lwp and per_day_amount_total > 0:
-			holidays = get_holidays_for_employee(employee, payroll_period_obj.start_date, on_date)
-			working_days = date_diff(on_date, payroll_period_obj.start_date) + 1
-			leave_days = calculate_lwp(employee, payroll_period_obj.start_date, holidays, working_days)
-			leave_days_amount = leave_days * per_day_amount_total
-			prev_sal_slip_flexi_total += leave_days_amount
+			# Then the sum multiply with the no of lwp in that period
+			# Include that amount to the prev_sal_slip_flexi_total to get the actual
+			if have_depends_on_lwp and per_day_amount_total > 0:
+				holidays = get_holidays_for_employee(employee, payroll_period_obj.start_date, on_date)
+				working_days = date_diff(on_date, payroll_period_obj.start_date) + 1
+				leave_days = calculate_lwp(employee, payroll_period_obj.start_date, holidays, working_days)
+				leave_days_amount = leave_days * per_day_amount_total
+				prev_sal_slip_flexi_total += leave_days_amount
 
-		return max_benefits - prev_sal_slip_flexi_total
+			return max_benefits - prev_sal_slip_flexi_total
 	return max_benefits
 
 def calculate_lwp(employee, start_date, holidays, working_days):
