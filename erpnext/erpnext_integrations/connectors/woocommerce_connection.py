@@ -22,16 +22,21 @@ def verify_request():
 	frappe.set_user(woocommerce_settings.modified_by)
 
 @frappe.whitelist(allow_guest=True)
-def order():
+def order(data=None):
+	if not data:
+		verify_request()
 
-	verify_request()
-
-	if frappe.request.data:
+	if frappe.request and frappe.request.data:
 		fd = json.loads(frappe.request.data)
+	elif data:
+		fd = data
 	else:
 		return "success"
 
-	event = frappe.get_request_header("X-Wc-Webhook-Event")
+	if not data:
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+	else:
+		event = "created"
 
 	if event == "created":
 
@@ -77,17 +82,18 @@ def order():
 		order_delivery_date = str(order_delivery_date_str)
 
 		new_sales_order.delivery_date = order_delivery_date
+		default_set_company = frappe.get_doc("Global Defaults")
+		company = raw_billing_data.get("company") or default_set_company.default_company
+		found_company = frappe.get_doc("Company",{"name":company})
+		company_abbr = found_company.abbr
+
+		new_sales_order.company = company
 
 		for item in items_list:
 			woocomm_item_id = item.get("product_id")
 			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
 
 			ordered_items_tax = item.get("total_tax")
-
-			default_set_company = frappe.get_doc("Global Defaults")
-			company = default_set_company.default_company
-			found_company = frappe.get_doc("Company",{"name":company})
-			company_abbr = found_company.abbr
 
 			new_sales_order.append("items",{
 				"item_code": found_item.item_code,
