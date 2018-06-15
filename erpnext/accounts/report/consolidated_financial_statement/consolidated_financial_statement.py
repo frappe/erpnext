@@ -193,6 +193,8 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	accounts, accounts_by_name = get_account_heads(root_type,
 		companies, filters)
 
+	if not accounts: return []
+
 	company_currency = get_company_currency(filters)
 
 	gl_entries_by_account = {}
@@ -246,7 +248,7 @@ def get_account_heads(root_type, companies, filters):
 	accounts = get_accounts(root_type, filters)
 
 	if not accounts:
-		return None
+		return None, None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
