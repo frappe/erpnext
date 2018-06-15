@@ -600,16 +600,19 @@ def get_itemised_tax(taxes):
 			for item_code, tax_data in item_tax_map.items():
 				itemised_tax.setdefault(item_code, frappe._dict())
 
+				tax_rate = 0.0
+				tax_amount = 0.0
+
 				if isinstance(tax_data, list):
-					itemised_tax[item_code][tax.description] = frappe._dict(dict(
-						tax_rate=flt(tax_data[0]),
-						tax_amount=flt(tax_data[1])
-					))
+					tax_rate = flt(tax_data[0])
+					tax_amount = flt(tax_data[1])
 				else:
-					itemised_tax[item_code][tax.description] = frappe._dict(dict(
-						tax_rate=flt(tax_data),
-						tax_amount=0.0
-					))
+					tax_rate = flt(tax_data)
+
+				itemised_tax[item_code][tax.description] = frappe._dict(dict(
+					tax_rate = tax_rate,
+					tax_amount = tax_amount
+				))
 
 	return itemised_tax
 
