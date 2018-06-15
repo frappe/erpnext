@@ -531,7 +531,7 @@ class SalarySlip(TransactionBase):
 
 	def calculate_variable_tax(self, tax_component, payroll_period, benefit_amount_to_tax=0):
 		total_taxable_earning = self.get_taxable_earnings()
-		period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date, self.start_date, self.end_date)
+		period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date)
 		annual_earning = total_taxable_earning * period_factor
 
 		# Calculate total exemption declaration
@@ -707,13 +707,15 @@ class SalarySlip(TransactionBase):
 		return taxable_amount
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
-		# TODO make this configurable? - use hard coded period length to keep tax calc consistent
-		frequency_days = {"Daily": 1, "Weekly": 7, "Fortnightly": 15, "Monthly": 30, "Bimonthly": 60}
 		payroll_days = date_diff(period_end, period_start) + 1
 		if start_date and end_date:
-			salary_days = date_diff(end_date, start_date) +1
+			salary_days = date_diff(end_date, start_date) + 1
 			return flt(payroll_days)/flt(salary_days)
-		return flt(payroll_days)/frequency_days[self.payroll_frequency]
+		# if period configured for a year and monthly frequency return 12 to make tax calc consistent
+		if 360 <= payroll_days <= 370 and self.payroll_frequency == "Monthly":
+			return 12
+		salary_days = date_diff(self.end_date, self.start_date) + 1
+		return flt(payroll_days)/flt(salary_days)
 
 	def get_tax_detail_till_date(self, payroll_period, tax_component):
 		# find total taxable income, total tax paid by employee in payroll period
