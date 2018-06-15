@@ -45,7 +45,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Asset Adjustment",
+					"name": "Asset Value Adjustment",
 				},
 				{
 					"type": "doctype",

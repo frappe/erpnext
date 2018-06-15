@@ -126,7 +126,7 @@ class JournalEntry(AccountsController):
 				"inter_company_journal_entry_reference", "")
 
 	def unlink_asset_adjustment_entry(self):
-		frappe.db.sql(""" update `tabAsset Adjustment`
+		frappe.db.sql(""" update `tabAsset Value Adjustment`
 			set journal_entry = null where journal_entry = %s""", self.name)
 
 	def validate_party(self):
