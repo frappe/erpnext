@@ -3,10 +3,9 @@
 
 from __future__ import unicode_literals
 import unittest, frappe
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
-
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -174,6 +173,37 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv.submit()
 
+	def test_inter_company_jv(self):
+		frappe.db.set_value("Account", "Sales Expenses - _TC", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Buildings - _TC", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Sales Expenses - _TC1", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Buildings - _TC1", "inter_company_account", 1)
+		jv = make_journal_entry("Sales Expenses - _TC", "Buildings - _TC", 100, posting_date=nowdate(), cost_center = "Main - _TC", save=False)
+		jv.voucher_type = "Inter Company Journal Entry"
+		jv.multi_currency = 0
+		jv.insert()
+		jv.submit()
+
+		jv1 = make_journal_entry("Sales Expenses - _TC1", "Buildings - _TC1", 100, posting_date=nowdate(), cost_center = "Main - _TC1", save=False)
+		jv1.inter_company_journal_entry_reference = jv.name
+		jv1.company = "_Test Company 1"
+		jv1.voucher_type = "Inter Company Journal Entry"
+		jv1.multi_currency = 0
+		jv1.insert()
+		jv1.submit()
+
+		jv.reload()
+
+		self.assertEqual(jv.inter_company_journal_entry_reference, jv1.name)
+		self.assertEqual(jv1.inter_company_journal_entry_reference, jv.name)
+
+		jv.cancel()
+		jv1.reload()
+		jv.reload()
+
+		self.assertEqual(jv.inter_company_journal_entry_reference, "")
+		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
+
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
@@ -207,6 +237,5 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 			jv.submit()
 
 	return jv
-
 
 test_records = frappe.get_test_records('Journal Entry')
