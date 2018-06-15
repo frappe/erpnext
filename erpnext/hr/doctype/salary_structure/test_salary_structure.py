@@ -53,8 +53,7 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertEqual(sal_slip.get("net_pay"), 30500)
 
 	def test_whitespaces_in_formula_conditions_fields(self):
-		make_salary_structure("Salary Structure Sample", "Monthly")
-		salary_structure = frappe.get_doc("Salary Structure", "Salary Structure Sample")
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
 
 		for row in salary_structure.earnings:
 			row.formula = "\n%s\n\n"%row.formula
@@ -73,7 +72,7 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False):
 	if not frappe.db.exists('Salary Structure', salary_structure):
 		salary_structure_doc = frappe.get_doc({
 			"doctype": "Salary Structure",
@@ -84,12 +83,16 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None):
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}).insert()
-		salary_structure_doc.submit()
+		if not dont_submit:
+			salary_structure_doc.submit()
+	else:
+		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
 
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
-		{'employee':employee, 'docstatus': 1}):
+		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
 			create_salary_structure_assignment(employee, salary_structure)
-	return salary_structure
+
+	return salary_structure_doc
 
 def create_salary_structure_assignment(employee, salary_structure):
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
