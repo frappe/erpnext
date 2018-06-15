@@ -56,6 +56,7 @@ class LeaveApplication(Document):
 		self.status = "Cancelled"
 		# notify leave applier about cancellation
 		self.notify_employee()
+		self.cancel_attendance()
 
 	def validate_applicable_after(self):
 		if self.leave_type:
@@ -148,6 +149,13 @@ class LeaveApplication(Document):
 						doc.leave_type = self.leave_type
 						doc.insert(ignore_permissions=True)
 						doc.submit()
+
+	def cancel_attendance(self):
+		if self.docstatus == 2:
+			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
+				and (attendance_date between %s and %s) and docstatus < 2 and status in ('On Leave', 'Half Day')""",(self.employee, self.from_date, self.to_date), as_dict=1)
+			for name in attendance:
+				frappe.db.set_value("Attendance", name, "docstatus", 2)
 
 	def validate_salary_processed_days(self):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
