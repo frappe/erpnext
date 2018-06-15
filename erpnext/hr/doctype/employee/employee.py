@@ -68,9 +68,9 @@ class Employee(NestedSet):
 		if not self.create_user_permission: return
 		if not has_permission('User Permission', ptype='write'): return
 
-		if has_user_permission_for_employee(self.user_id, self.name):
+		if not has_user_permission_for_employee(self.user_id, self.name):
 			add_user_permission("Employee", self.name, self.user_id)
-		if has_user_permission_for_employee(self.user_id, self.company):
+		if not has_user_permission_for_employee(self.user_id, self.company):
 			set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_user(self):
