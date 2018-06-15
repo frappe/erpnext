@@ -84,11 +84,11 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None):
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}).insert()
-		if employee:
-			create_salary_structure_assignment(employee, salary_structure)
+		salary_structure_doc.submit()
 
-	elif employee and not frappe.db.get_value("Salary Structure Assignment",{'salary_structure':salary_structure, 'employee':employee},'name'):
-		create_salary_structure_assignment(employee, salary_structure)
+	if employee and not frappe.db.get_value("Salary Structure Assignment",
+		{'employee':employee, 'docstatus': 1}):
+			create_salary_structure_assignment(employee, salary_structure)
 	return salary_structure
 
 def create_salary_structure_assignment(employee, salary_structure):
