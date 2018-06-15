@@ -117,7 +117,7 @@ class LeaveApplication(Document):
 					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
 						where name = %s""",(status, self.leave_type, d.name))
 
-			elif self.to_date <= nowdate():
+			elif getdate(self.to_date) <= getdate(nowdate()):
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
 					if not date == self.half_day_date:
