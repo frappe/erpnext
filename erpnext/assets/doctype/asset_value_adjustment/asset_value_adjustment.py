@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate, cint, date_diff
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from frappe.model.document import Document
 
-class AssetAdjustment(Document):
+class AssetValueAdjustment(Document):
 	def validate(self):
 		self.set_difference_amount()
 		self.set_current_asset_value()

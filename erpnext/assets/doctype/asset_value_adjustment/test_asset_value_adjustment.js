@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Asset Adjustment", function (assert) {
+QUnit.test("test: Asset Value Adjustment", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Asset Adjustment
-		() => frappe.tests.make('Asset Adjustment', [
+		// insert a new Asset Value Adjustment
+		() => frappe.tests.make('Asset Value Adjustment', [
 			// values to be set
 			{key: 'value'}
 		]),

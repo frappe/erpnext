@@ -434,7 +434,7 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 
 @frappe.whitelist()
 def create_asset_adjustment(asset, asset_category, company):
-	asset_maintenance = frappe.new_doc("Asset Adjustment")
+	asset_maintenance = frappe.new_doc("Asset Value Adjustment")
 	asset_maintenance.update({
 		"asset": asset,
 		"company": company,
