@@ -73,7 +73,7 @@ class TestPayrollEntry(unittest.TestCase):
 		loan.repay_from_salary = 1
 		loan.submit()
 		salary_structure = "Test Salary Structure for Loan"
-		salary_structure = make_salary_structure(salary_structure, "Monthly", employee_doc.name)
+		make_salary_structure(salary_structure, "Monthly", employee_doc.name)
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		make_payroll_entry(start_date=dates.start_date,
