@@ -460,10 +460,7 @@ def transfer_asset(args):
 	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>".format(movement_entry.name)))
 
 @frappe.whitelist()
-def get_item_details(item_code, asset_category=None):
-	if not asset_category:
-		frappe.throw(_("Please enter Asset Category in Item {0}").format(item_code))
-
+def get_item_details(item_code, asset_category):
 	asset_category_doc = frappe.get_doc('Asset Category', asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
