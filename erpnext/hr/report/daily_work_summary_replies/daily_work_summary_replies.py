@@ -19,7 +19,7 @@ def get_columns(filters=None):
 			"fieldname": "user",
 			"fieldtype": "Link",
 			"options": "User",
-			"width": 250
+			"width": 800
 		},
 		{
 			"label": _("Count"),
@@ -44,7 +44,7 @@ def get_data(filters):
 			order_by='creation asc')
 	data = []
 	for user in get_user_emails_from_group(filters.group):
-		print('replies', replies, user)
+		userName = frappe.get_value('User', user, 'full_name')
 		count = len([d for d in replies if d.sender == user])
-		data.append([user, count])
+		data.append([userName, count])
 	return data
