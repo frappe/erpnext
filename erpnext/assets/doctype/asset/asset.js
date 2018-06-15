@@ -146,7 +146,8 @@ frappe.ui.form.on('Asset', {
 			frappe.call({
 				method: "erpnext.assets.doctype.asset.asset.get_item_details",
 				args: {
-					item_code: frm.doc.item_code
+					item_code: frm.doc.item_code,
+					asset_category: frm.doc.asset_category
 				},
 				callback: function(r, rt) {
 					if(r.message) {
