@@ -18,8 +18,12 @@ from erpnext.hr.doctype.employee_benefit_application.employee_benefit_applicatio
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount
 
 class SalarySlip(TransactionBase):
+	def __init__(self, *args, **kwargs):
+		super(SalarySlip, self).__init__(*args, **kwargs)
+		self.series = 'Sal Slip/{0}/.#####'.format(self.employee)
+
 	def autoname(self):
-		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
+		self.name = make_autoname(self.series)
 
 	def validate(self):
 		self.status = self.get_status()
@@ -459,6 +463,10 @@ class SalarySlip(TransactionBase):
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
+
+	def on_trash(self):
+		from frappe.model.naming import revert_series_if_last
+		revert_series_if_last(self.series, self.name)
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
