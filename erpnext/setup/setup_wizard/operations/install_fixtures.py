@@ -186,6 +186,12 @@ def install(country=None):
 			{"attribute_value": _("Extra Large"), "abbr": "XL"}
 		]},
 
+		#Job Applicant Source
+		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Walk In')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Employee Referral')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Campaign')}
+
 		{'doctype': "Item Attribute", "attribute_name": _("Colour"), "item_attribute_values": [
 			{"attribute_value": _("Red"), "abbr": "RED"},
 			{"attribute_value": _("Green"), "abbr": "GRE"},
