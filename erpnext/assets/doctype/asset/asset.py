@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff
 from frappe.model.document import Document
@@ -74,6 +74,8 @@ class Asset(AccountsController):
 
 		if not self.calculate_depreciation:
 			return
+		elif not self.finance_books:
+			frappe.throw(_("Enter depreciation details"))
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(nowdate()):
 			frappe.throw(_("Available-for-use Date is entered as past date"))
@@ -304,22 +306,31 @@ class Asset(AccountsController):
 			status = "Draft"
 		elif self.docstatus == 1:
 			status = "Submitted"
-			expected_value_after_useful_life = flt(sum([d.expected_value_after_useful_life
-				for d in self.get('finance_books')]))
 
-			value_after_depreciation = flt(sum([d.value_after_depreciation
-				for d in self.get('finance_books')]))
+			idx = self.get_default_finance_book_idx() or 0
+
+			expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
+			value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
 			elif self.finance_books:
 				if flt(value_after_depreciation) <= expected_value_after_useful_life:
 					status = "Fully Depreciated"
-				elif flt(self.value_after_depreciation) < flt(self.gross_purchase_amount):
+				elif flt(value_after_depreciation) < flt(self.gross_purchase_amount):
 					status = 'Partially Depreciated'
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+	def get_default_finance_book_idx(self):
+		if not self.get('default_finance_book') and self.company:
+			self.default_finance_book = erpnext.get_default_finance_book(self.company)
+
+		if self.get('default_finance_book'):
+			for d in self.get('finance_books'):
+				if d.finance_books == self.default_finance_book:
+					return cint(d.idx) - 1
 
 	def update_stock_movement(self):
 		asset_movement = frappe.db.get_value('Asset Movement',
@@ -330,16 +341,13 @@ class Asset(AccountsController):
 			doc.submit()
 
 	def make_gl_entries(self):
+		gl_entries = []
+		fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
+				asset_category = self.asset_category, company = self.company)
+
 		if self.purchase_receipt and self.purchase_receipt_amount and self.available_for_use_date <= nowdate():
-			from erpnext.accounts.general_ledger import make_gl_entries
-
-			gl_entries = []
-
 			cwip_account = get_asset_account("capital_work_in_progress_account",
 				self.name, self.asset_category, self.company)
-
-			fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
-					asset_category = self.asset_category, company = self.company)
 
 			gl_entries.append(self.get_gl_dict({
 				"account": cwip_account,
@@ -358,6 +366,30 @@ class Asset(AccountsController):
 				"debit": self.purchase_receipt_amount,
 				"debit_in_account_currency": self.purchase_receipt_amount
 			}))
+
+		elif not self.is_existing_asset:
+			arbnb_account = self.get_company_default("asset_received_but_not_billed")
+
+			gl_entries.append(self.get_gl_dict({
+				"account": fixed_aseet_account,
+				"against": arbnb_account,
+				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+				"posting_date": self.available_for_use_date,
+				"debit": self.gross_purchase_amount,
+				"debit_in_account_currency": self.gross_purchase_amount
+			}))
+
+			gl_entries.append(self.get_gl_dict({
+				"account": arbnb_account,
+				"against": fixed_aseet_account,
+				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+				"posting_date": self.available_for_use_date,
+				"credit": self.gross_purchase_amount,
+				"credit_in_account_currency": self.gross_purchase_amount
+			}))
+
+		if gl_entries:
+			from erpnext.accounts.general_ledger import make_gl_entries
 
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)

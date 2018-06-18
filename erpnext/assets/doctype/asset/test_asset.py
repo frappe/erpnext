@@ -18,6 +18,15 @@ class TestAsset(unittest.TestCase):
 
 	def test_purchase_asset(self):
 		asset = frappe.get_doc("Asset", {"asset_name": "Macbook Pro 1"})
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 10000,
+			"next_depreciation_date": "2020-12-31",
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": "2020-06-06"
+		})
 		asset.submit()
 
 		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount,
@@ -201,7 +210,7 @@ class TestAsset(unittest.TestCase):
 		asset.insert()
 		asset.submit()
 		asset.load_from_db()
-		self.assertEqual(asset.status, "Partially Depreciated")
+		self.assertEqual(asset.status, "Submitted")
 
 		frappe.db.set_value("Company", "_Test Company", "series_for_depreciation_entry", "DEPR-")
 		post_depreciation_entries(date="2021-01-01")
@@ -434,6 +443,33 @@ class TestAsset(unittest.TestCase):
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Asset' and voucher_no = %s
 			order by account""", asset_doc.name)
+
+		self.assertEqual(gle, expected_gle)
+
+	def test_asset_accounting_for_manual(self):
+		asset = frappe.get_doc("Asset", {"asset_name": "Macbook Pro 1"})
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 10000,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": "2020-06-06"
+		})
+		asset.insert()
+		asset.submit()
+
+		self.assertFalse(asset.purchase_receipt)
+		self.assertFalse(asset.purchase_invoice)
+
+		expected_gle = (
+			("_Test Fixed Asset - _TC", 100000.0, 0.0),
+			("Asset Received But Not Billed - _TC", 0.0, 100000.0)
+		)
+
+		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Asset' and voucher_no = %s
+			order by account""", asset.name)
 
 		self.assertEqual(gle, expected_gle)
 
