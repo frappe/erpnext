@@ -16,7 +16,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 class Asset(AccountsController):
 	def validate(self):
-		self.status = self.get_status()
 		self.validate_item()
 		self.set_missing_values()
 		self.validate_asset_values()
@@ -28,6 +27,8 @@ class Asset(AccountsController):
 			self.finance_books = []
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
+
+		self.status = self.get_status()
 
 	def on_submit(self):
 		self.validate_in_use_date()
