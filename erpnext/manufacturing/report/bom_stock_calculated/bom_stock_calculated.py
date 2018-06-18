@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
+from frappe import _
 
 def execute(filters=None):
 #	if not filters: filters = {}
@@ -15,10 +15,8 @@ def execute(filters=None):
 
 	for rows in data:
 	        item_map = get_item_details(rows[0])
-		reqd_qty = qty_to_make * rows[3]
-					
+		reqd_qty = qty_to_make * rows[3]				
 		last_pur_price = frappe.db.get_value("Item", rows[0], "last_purchase_rate")
-
 		if rows[4] > 0:
 			diff_qty = rows[4] - reqd_qty
 	        	summ_data.append([
@@ -26,11 +24,8 @@ def execute(filters=None):
 		else:
 			diff_qty = 0 - reqd_qty
 			summ_data.append([
-                        rows[0], rows[1], item_map[rows[0]]["manufacturer"],  item_map[rows[0]]["manufacturer_part_no"], rows[3], "0.000", reqd_qty, diff_qty, last_pur_price
-
-                        
+                        rows[0], rows[1], item_map[rows[0]]["manufacturer"],  item_map[rows[0]]["manufacturer_part_no"], rows[3], "0.000", reqd_qty, diff_qty, last_pur_price                        
                     ])
-
 
 	return columns, summ_data
 
@@ -94,9 +89,6 @@ def get_bom_stock(filters):
 			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom))
 
 def get_item_details(item_code):
-        condition = ''
-        value = ()
-
         items = frappe.db.sql("""select it.item_group, it.item_name, it.stock_uom, it.name, it.brand, it.description, it.manufacturer_part_no, it.manufacturer
                 from tabItem it where it.item_code = %s""", item_code, as_dict=1)
 
