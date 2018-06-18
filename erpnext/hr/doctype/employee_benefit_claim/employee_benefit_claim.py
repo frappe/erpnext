@@ -21,7 +21,7 @@ class EmployeeBenefitClaim(Document):
 		self.validate_max_benefit_for_component(payroll_period)
 		self.validate_max_benefit_for_sal_struct(max_benefits)
 		self.validate_benefit_claim_amount(max_benefits, payroll_period)
-		if not self.is_pro_rata_applicable:
+		if self.pay_against_benefit_claim:
 			self.validate_non_pro_rata_benefit_claim(max_benefits, payroll_period)
 
 	def validate_benefit_claim_amount(self, max_benefits, payroll_period):
@@ -37,7 +37,7 @@ class EmployeeBenefitClaim(Document):
 
 	def validate_max_benefit_for_component(self, payroll_period):
 		claimed_amount = self.claimed_amount
-		claimed_amount += self.get_previous_claimed_amount(payroll_period, self.earning_component)
+		claimed_amount += self.get_previous_claimed_amount(payroll_period, component = self.earning_component)
 		if claimed_amount > self.max_amount_eligible:
 			frappe.throw(_("Maximum amount eligible for the component {0} exceeds {1}").format(self.earning_component, self.max_amount_eligible))
 
@@ -51,7 +51,7 @@ class EmployeeBenefitClaim(Document):
 		if not pro_rata_amount:
 			pro_rata_amount = 0
 
-		claimed_amount += self.get_previous_claimed_amount(payroll_period, True)
+		claimed_amount += self.get_previous_claimed_amount(payroll_period, non_pro_rata = True)
 		if max_benefits < pro_rata_amount + claimed_amount:
 			frappe.throw(_("Maximum benefit of employee {0} exceeds {1} by the sum {2} of benefit application pro-rata component\
 			amount and previous claimed amount").format(self.employee, max_benefits, pro_rata_amount+claimed_amount-max_benefits))
@@ -63,13 +63,13 @@ class EmployeeBenefitClaim(Document):
 			total_pro_rata_max = 0
 			benefit_amount_total = 0
 			for sal_struct_row in sal_struct.get("earnings"):
-				is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
-				if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+				pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+				if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 					total_pro_rata_max += max_benefit_amount
 			if total_pro_rata_max > 0:
 				for sal_struct_row in sal_struct.get("earnings"):
-					is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
-					if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+					pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+					if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 						component_max = max_benefit_amount
 						benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max
 						if benefit_amount > component_max:
@@ -101,7 +101,7 @@ class EmployeeBenefitClaim(Document):
 		and (claim_date between %(start_date)s and %(end_date)s)
 		"""
 		if non_pro_rata:
-			query += "and is_pro_rata_applicable = 0"
+			query += "and pay_against_benefit_claim = 1"
 		if component:
 			query += "and earning_component = %(component)s"
 
@@ -119,7 +119,7 @@ def get_benefit_claim_amount(employee, start_date, end_date, struct_row):
 	benefit_claim_details = frappe.db.sql("""
 	select claimed_amount from `tabEmployee Benefit Claim`
 	where employee=%(employee)s
-	and docstatus = 1 and is_pro_rata_applicable = 0
+	and docstatus = 1 and pay_against_benefit_claim = 1
 	and earning_component = %(earning_component)s
 	and (claim_date between %(start_date)s and %(end_date)s)
 	""", {

@@ -37,8 +37,8 @@ class EmployeeBenefitApplication(Document):
 			if salary_structure.earnings:
 				for earnings in salary_structure.earnings:
 					if earnings.is_flexible_benefit == 1 and earnings.salary_component not in benefit_components:
-						is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", earnings.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
-						if is_pro_rata_applicable == 1:
+						pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", earnings.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+						if pay_against_benefit_claim != 1:
 							pro_rata_amount += max_benefit_amount
 						else:
 							non_pro_rata_amount += max_benefit_amount
@@ -113,7 +113,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 				sal_struct = frappe.get_doc("Salary Structure", sal_struct_name)
 				for sal_struct_row in sal_struct.get("earnings"):
 					salary_component = frappe.get_doc("Salary Component", sal_struct_row.salary_component)
-					if salary_component.depends_on_lwp == 1 and salary_component.is_pro_rata_applicable == 1:
+					if salary_component.depends_on_lwp == 1 and salary_component.pay_against_benefit_claim != 1:
 						have_depends_on_lwp = True
 						benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, salary_component.max_benefit_amount)
 						amount_per_day = benefit_amount / payroll_period_days
@@ -188,8 +188,8 @@ def get_benefit_pro_rata_ratio_amount(sal_struct, component_max):
 	total_pro_rata_max = 0
 	benefit_amount = 0
 	for sal_struct_row in sal_struct.get("earnings"):
-		is_pro_rata_applicable, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["is_pro_rata_applicable", "max_benefit_amount"])
-		if sal_struct_row.is_flexible_benefit == 1 and is_pro_rata_applicable == 1:
+		pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+		if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 			total_pro_rata_max += max_benefit_amount
 	if total_pro_rata_max > 0:
 		benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max
