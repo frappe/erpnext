@@ -339,11 +339,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
 		// store tax breakup for each item
 		let tax_detail = tax.item_wise_tax_detail;
-
-		let key = item.item_code;
-		if(item.item_name && !Object.keys(tax_detail).includes(item.item_name)) {
-			key = item.item_name;
-		}
+		let key = item.item_code || item.item_name;
 
 		let item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
 		if (tax_detail && tax_detail[key])
