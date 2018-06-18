@@ -68,8 +68,10 @@ class Employee(NestedSet):
 		if not self.create_user_permission: return
 		if not has_permission('User Permission', ptype='write'): return
 
-		add_user_permission("Employee", self.name, self.user_id)
-		set_user_permission_if_allowed("Company", self.company, self.user_id)
+		if not frappe.db.exists({'doctype':'User Permission','user':self.user_id, 'allow':'Company', 'for_value': self.company}):
+			set_user_permission_if_allowed("Company", self.company, self.user_id)
+		if not frappe.db.exists({'doctype':'User Permission','user':self.user_id, 'allow':'Employee', 'for_value': self.name}):
+			add_user_permission("Employee", self.name, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
