@@ -27,6 +27,14 @@ class ShiftRequest(Document):
 			assignment_doc.insert()
 			assignment_doc.submit()
 
+	def on_cancel(self):
+		shift_assignment_list = frappe.get_list("Shift Assignment", {'employee': self.employee, 'shift_request': self.name})
+		if shift_assignment_list:
+			for shift in shift_assignment_list:
+				shift_assignment_doc = frappe.get_doc("Shift Assignment", shift['name'])
+				shift_assignment_doc.cancel()
+
+
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
