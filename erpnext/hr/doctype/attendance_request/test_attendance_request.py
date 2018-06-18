@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import add_days, nowdate
+from frappe.utils import nowdate
 from datetime import date
 
 class TestAttendanceRequest(unittest.TestCase):
