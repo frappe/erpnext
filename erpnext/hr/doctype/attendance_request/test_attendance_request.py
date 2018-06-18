@@ -10,8 +10,8 @@ from datetime import date
 
 class TestAttendanceRequest(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Attendance Request", "Attendance"]:
-			frappe.db.sql("delete from `tab%s`" % dt)
+		for doctype in ["Attendance Request", "Attendance"]:
+			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 
 	def test_attendance_request(self):
 		today = nowdate()
@@ -26,9 +26,13 @@ class TestAttendanceRequest(unittest.TestCase):
 		attendance_request.submit()
 		attendance = frappe.get_doc('Attendance', {
 			'employee': employee.name,
-			'attendance_date': date(date.today().year, 1, 1)
+			'attendance_date': date(date.today().year, 1, 1),
+			'docstatus': 1
 		})
 		self.assertEqual(attendance.status, 'Present')
+		attendance_request.cancel()
+		attendance.reload()
+		self.assertEqual(attendance.docstatus, 2)
 
 def get_employee():
 	return frappe.get_doc("Employee", "_T-Employee-00001")
