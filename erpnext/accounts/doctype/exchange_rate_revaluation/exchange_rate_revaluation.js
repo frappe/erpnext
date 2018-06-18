@@ -2,6 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Exchange Rate Revaluation', {
+	setup: function(frm) {
+		frm.set_query("party_type", "accounts", function() {
+			return {
+				"filters": {
+					"name": ["in", Object.keys(frappe.boot.party_account_types)],
+				}
+			};
+		});
+		frm.set_query("account", "accounts", function(doc) {
+			return {
+				"filters": {
+					"company": doc.company
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Make Journal Entry'), function() {
@@ -45,9 +62,10 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 			method: "make_jv_entry",
 			doc: frm.doc,
 			callback: function(r){
-				if (r.message)
+				if (r.message) {
 					var doc = frappe.model.sync(r.message)[0];
-				frappe.set_route("Form", doc.doctype, doc.name);
+					frappe.set_route("Form", doc.doctype, doc.name);
+				}
 			}
 		});
 	}
@@ -64,11 +82,17 @@ frappe.ui.form.on("Exchange Rate Revaluation Account", {
 	},
 
 	account: function(frm, cdt, cdn) {
-		get_account_details(frm, cdt, cdn);
+		var row = locals[cdt][cdn];
+		if (row.account) {
+			get_account_details(frm, cdt, cdn);
+		}
 	},
 
 	party: function(frm, cdt, cdn) {
-		get_account_details(frm, cdt, cdn);
+		var row = locals[cdt][cdn];
+		if (row.party && row.account) {
+			get_account_details(frm, cdt, cdn);
+		}
 	},
 
 	accounts_remove: function(frm) {

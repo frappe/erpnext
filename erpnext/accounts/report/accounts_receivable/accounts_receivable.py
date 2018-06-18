@@ -60,6 +60,7 @@ class ReceivablePayableReport(object):
 		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
 				"label": label,
+				"fieldname": frappe.scrub(label),
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
@@ -297,7 +298,10 @@ class ReceivablePayableReport(object):
 
 		if party_type == "Supplier":
 			for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
-				from `tabPurchase Invoice` where docstatus=1""", as_dict=1):
+				from `tabPurchase Invoice` where docstatus = 1
+				union
+				select name, due_date, bill_no, bill_date from `tabJournal Entry`
+				where docstatus = 1 and bill_no is not NULL""", as_dict=1):
 					voucher_details.setdefault(pi.name, pi)
 
 		return voucher_details
