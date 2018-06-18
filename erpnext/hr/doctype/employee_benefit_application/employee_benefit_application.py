@@ -9,7 +9,7 @@ from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee
+from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, get_previous_claimed_amount
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -17,8 +17,21 @@ class EmployeeBenefitApplication(Document):
 		if self.max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		self.validate_max_benefit_for_component()
+		self.validate_prev_benefit_claim()
 		if self.remainig_benefits > 0:
 			self.validate_remaining_benefit_amount()
+
+	def validate_prev_benefit_claim(self):
+		if self.employee_benefits:
+			for benefit in self.employee_benefits:
+				if benefit.pay_against_benefit_claim == 1:
+					payroll_period = frappe.get_doc("Payroll Period", self.payroll_period)
+					benefit_claimed = get_previous_claimed_amount(self.employee, payroll_period, component = benefit.earning_component)
+					benefit_given = get_sal_slip_total_benefit_given(self.employee, payroll_period, component = benefit.earning_component)
+					benefit_claim_remining = benefit_claimed - benefit_given
+					if benefit_claimed > 0 and benefit_claim_remining > benefit.amount:
+						frappe.throw(_("An amount of {0} already claimed for the component {1},\
+						 set the amount equal or greater than {2}").format(benefit_claimed, benefit.earning_component, benefit_claim_remining))
 
 	def validate_remaining_benefit_amount(self):
 		# check salary structure earnings have flexi component (sum of max_benefit_amount)
