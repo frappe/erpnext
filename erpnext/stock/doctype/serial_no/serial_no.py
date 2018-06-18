@@ -306,6 +306,7 @@ def auto_make_serial_nos(args):
 			sr.via_stock_ledger = True
 			sr.item_code = args.get('item_code')
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
+			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
@@ -325,10 +326,10 @@ def make_serial_no(serial_no, args):
 	sr.warehouse = None
 	sr.dont_update_if_missing.append("warehouse")
 	sr.flags.ignore_permissions = True
-
 	sr.serial_no = serial_no
 	sr.item_code = args.get('item_code')
 	sr.company = args.get('company')
+	sr.batch_no = args.get('batch_no')
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
 	sr.location = args.get('location')
