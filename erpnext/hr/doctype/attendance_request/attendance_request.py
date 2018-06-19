@@ -49,6 +49,7 @@ class AttendanceRequest(Document):
 	def validate_if_attendance_not_applicable(self, attendance_date):
 		# Check if attendance_date is a Holiday
 		if is_holiday(self.employee, attendance_date):
+			frappe.msgprint(_("Attendance not submitted for {0} as it is a Holiday.").format(attendance_date), alert=1)
 			return True
 
 		# Check if employee on Leave
@@ -56,6 +57,7 @@ class AttendanceRequest(Document):
 			where employee = %s and %s between from_date and to_date
 			and docstatus = 1""", (self.employee, attendance_date), as_dict=True)
 		if leave_record:
+			frappe.msgprint(_("Attendance not submitted for {0} as {1} on leave.").format(attendance_date, self.employee), alert=1)
 			return True
 
 		return False
