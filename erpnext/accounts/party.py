@@ -531,7 +531,7 @@ def set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=No
 		tax_withholding = frappe.get_doc("Tax Withholding Category", tax_withholding_category)
 
 	if tax_withholding.book_on_invoice and ref_doc.doctype=='Purchase Invoice' \
-		or tax_withholding.book_on_advance and ref_doc.doctype in ('Payment Entry', 'Journal Entry'):
+		or ref_doc.doctype in ('Payment Entry', 'Journal Entry'):
 
 		for account_detail in tax_withholding.accounts:
 			if ref_doc.company == account_detail.company:
