@@ -63,16 +63,11 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount and struct_row.statistical_component == 0:
+				if amount and struct_row.statistical_component == 0 and struct_row.variable_based_on_taxable_salary != 1:
 					self.update_component_row(struct_row, amount, key)
 
 				if key=="earnings" and struct_row.is_flexible_benefit == 1:
 					self.add_employee_flexi_benefits(struct_row)
-
-				if key=="deductions" and struct_row.variable_based_on_taxable_salary:
-					tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
-					if tax_row and amount:
-						self.update_component_row(frappe._dict(tax_row), amount, key)
 
 		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
 		if additional_components:
@@ -83,6 +78,13 @@ class SalarySlip(TransactionBase):
 				if additional_component.type == "Deduction":
 					key = "deductions"
 				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key)
+
+		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
+		for struct_row in self._salary_structure_doc.get("deductions"):
+			if struct_row.variable_based_on_taxable_salary == 1:
+				tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
+				if tax_row and amount:
+					self.update_component_row(frappe._dict(tax_row), amount, "deductions")
 
 	def add_employee_flexi_benefits(self, struct_row):
 		if frappe.db.get_value("Salary Component", struct_row.salary_component, "is_pro_rata_applicable") == 1:
