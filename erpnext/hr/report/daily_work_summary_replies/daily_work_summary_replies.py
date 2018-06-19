@@ -16,15 +16,15 @@ def get_columns(filters=None):
 		{
 			"label": _("User"),
 			"fieldname": "user",
-			"fieldtype": "Link",
-			"options": "User",
+			"fieldtype": "Data",
 			"width": 800
 		},
 		{
-			"label": _("Count"),
+			"label": _("Reply Count"),
 			"fieldname": "count",
-			"fieldtype": "Int",
-			"width": 150
+			"fieldtype": "data",
+			"width": 150,
+			"align": 'right',
 		}
 	]
 	return columns
@@ -45,5 +45,5 @@ def get_data(filters):
 	for user in get_user_emails_from_group(filters.group):
 		userName = frappe.get_value('User', user, 'full_name')
 		count = len([d for d in replies if d.sender == user])
-		data.append([userName, count])
+		data.append([userName, "{0} / {1}".format(count, len(daily_summary_emails))])
 	return data
