@@ -23,7 +23,7 @@ class TestShiftRequest(unittest.TestCase):
 			"end_date": nowdate()
 		})
 		shift_request.insert()
-		shift_request.submit() 
+		shift_request.submit()
 		shift_assignments = frappe.db.sql('''
 				SELECT shift_request, employee
 				FROM `tabShift Assignment`

@@ -22,6 +22,6 @@ class TestShiftAssignment(unittest.TestCase):
 			"employee": "_T-Employee-00001",
 			"date": nowdate()
 		}).insert()
-		shift_assignment.submit() 
+		shift_assignment.submit()
 
 		self.assertEqual(shift_assignment.docstatus, 1)
