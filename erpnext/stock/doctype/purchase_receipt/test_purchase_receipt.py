@@ -378,7 +378,7 @@ def make_purchase_receipt(**args):
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": args.uom or "_Test UOM",
 		"cost_center": args.cost_center or frappe.db.get_value('Company', pr.company, 'cost_center'),
-		"asset_location": "Test Location" if args.item_code == "Test Serialized Asset Item" else args.location
+		"asset_location": args.location or "Test Location"
 	})
 
 	if not args.do_not_save:
