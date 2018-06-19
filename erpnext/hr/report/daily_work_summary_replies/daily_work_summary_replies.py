@@ -9,7 +9,6 @@ from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_user_em
 def execute(filters=None):
 	if not filters.group: return [], []
 	columns, data = get_columns(), get_data(filters)
-	print(columns, data)
 	return columns, data
 
 def get_columns(filters=None):
