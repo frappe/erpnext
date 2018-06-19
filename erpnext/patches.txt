@@ -550,3 +550,4 @@ erpnext.patches.v11_0.set_update_field_and_value_in_workflow_state
 erpnext.patches.v11_0.update_total_qty_field
 erpnext.patches.v11_0.update_sales_partner_type
 erpnext.patches.v11_0.rename_asset_adjustment_doctype
+execute:frappe.db.sql("update `tabDesktop Icon` set type = 'module' where module_name = 'Restaurant'")
