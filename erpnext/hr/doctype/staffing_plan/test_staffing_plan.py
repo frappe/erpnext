@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.hr.doctype.staffing_plan.staffing_plan import SubsidiaryCompanyError
-from erpnext.hr.doctype.staffing_plan.staffing_plan import ParentCompanyError 
+from erpnext.hr.doctype.staffing_plan.staffing_plan import ParentCompanyError
 from frappe.utils import nowdate, add_days
 
 test_dependencies = ["Designation"]
