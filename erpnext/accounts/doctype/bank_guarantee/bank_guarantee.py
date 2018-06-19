@@ -17,7 +17,7 @@ class BankGuarantee(Document):
 			frappe.throw(_("Enter the Bank Guarantee Number before submittting."))
 		if not self.name_of_beneficiary:
 			frappe.throw(_("Enter the name of the Beneficiary before submittting."))
-		if not self.name_of_bank:
+		if not self.bank:
 			frappe.throw(_("Enter the name of the bank or lending institution before submittting."))
 
 @frappe.whitelist()
