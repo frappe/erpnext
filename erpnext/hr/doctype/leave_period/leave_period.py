@@ -32,7 +32,7 @@ class LeavePeriod(Document):
 		if self.employee:
 			leave_allocation = self.grant_leave_alloc(self.employee)
 			if leave_allocation:
-				self.print_message(leave_allocation)
+				self.print_message([leave_allocation])
 		else:
 			self.grant_leave_alloc_for_employees()
 
