@@ -12,7 +12,7 @@ class OverlapError(frappe.ValidationError): pass
 
 class ShiftAssignment(Document):
 	def validate(self):
-		self.validate_overlapping_dates();
+		self.validate_overlapping_dates()
 
 	def validate_overlapping_dates(self):
 			if not self.name:
