@@ -73,7 +73,7 @@ class SalarySlip(TransactionBase):
 		if additional_components:
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
-				amount = additional_component.amount + self.get_amount_from_exisiting_component(frappe._dict(additional_component.struct_row).salary_component)
+				amount = additional_component.amount
 				key = "earnings"
 				if additional_component.type == "Deduction":
 					key = "deductions"
@@ -95,13 +95,6 @@ class SalarySlip(TransactionBase):
 			benefit_claim_amount = get_benefit_claim_amount(self.employee, self.start_date, self.end_date, struct_row)
 			if benefit_claim_amount:
 				self.update_component_row(struct_row, benefit_claim_amount, "earnings")
-
-	def get_amount_from_exisiting_component(self, salary_component):
-		amount = 0
-		for d in self.get("earnings"):
-			if d.salary_component == salary_component:
-				amount = d.amount
-		return amount
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
