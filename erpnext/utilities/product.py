@@ -19,14 +19,16 @@ def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 		warehouse = frappe.db.get_value("Item", template_item_code, item_warehouse_field)
 
 	if warehouse:
-		stock_qty = frappe.db.sql("""select GREATEST(actual_qty - reserved_qty, 0) from tabBin where
-			item_code=%s and warehouse=%s""", (item_code, warehouse))
+		stock_qty = frappe.db.sql("""
+			select GREATEST(S.actual_qty - S.reserved_qty - S.reserved_qty_for_production - S.reserved_qty_for_sub_contract, 0) / IFNULL(C.conversion_factor, 1) 
+			from tabBin S
+			inner join `tabItem` I on S.item_code = I.Item_code
+			left join `tabUOM Conversion Detail` C on I.sales_uom = C.uom and C.parent = I.Item_code 
+			where S.item_code=%s and S.warehouse=%s""", (item_code, warehouse))
 
-	if stock_qty:
-		stock_qty = adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
-
-	if stock_qty:
-		in_stock = stock_qty[0][0] > 0 and 1 or 0
+		if stock_qty:
+			stock_qty = adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
+			in_stock = stock_qty[0][0] > 0 and 1 or 0
 
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty, "is_stock_item": is_stock_item})
 
@@ -102,6 +104,14 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				price_obj["currency_symbol"] = not cint(frappe.db.get_default("hide_currency_symbol")) \
 					and (frappe.db.get_value("Currency", price_obj.currency, "symbol") or price_obj.currency) \
 					or ""
+
+				uom_conversion_factor = frappe.db.sql("""select	C.conversion_factor
+					from `tabUOM Conversion Detail` C
+					inner join `tabItem` I on C.uom = I.sales_uom
+					where C.parent = %s""", item_code)
+
+				uom_conversion_factor = uom_conversion_factor[0][0] if uom_conversion_factor else 1
+				price_obj["formatted_price_sales_uom"] = fmt_money(price_obj["price_list_rate"] * uom_conversion_factor, currency=price_obj["currency"])
 
 				if not price_obj["price_list_rate"]:
 					price_obj["price_list_rate"] = 0

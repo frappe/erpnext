@@ -135,6 +135,10 @@ def get_data():
 					"name": "Assessment Plan Status",
 					"doctype": "Assessment Plan"
 				},
+				{
+					"type": "doctype",
+					"name": "Student Report Generation Tool"
+				}
 			]
 		},
 		{

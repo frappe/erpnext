@@ -225,7 +225,7 @@
  "icon": "fa fa-cog", 
  "idx": 1, 
  "in_create": 1, 
- "in_dialog": 0, 
+
  "is_submittable": 0, 
  "is_transaction_doc": 0, 
  "issingle": 1, 

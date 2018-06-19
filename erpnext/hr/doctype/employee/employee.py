@@ -7,7 +7,8 @@ import frappe
 from frappe.utils import getdate, validate_email_add, today, add_years
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
-import frappe.permissions
+from frappe.permissions import add_user_permission, remove_user_permission, \
+	set_user_permission_if_allowed, has_permission
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
@@ -34,15 +35,16 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Left"])
+		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
 
 		self.employee = self.name
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
-		self.validate_employee_leave_approver()
 		self.validate_reports_to()
-		self.validate_prefered_email()
+		self.validate_preferred_email()
+		if self.job_applicant:
+			self.validate_onboarding_process()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -50,7 +52,7 @@ class Employee(NestedSet):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
-				frappe.permissions.remove_user_permission(
+				remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
 	def update_nsm_model(self):
@@ -63,8 +65,11 @@ class Employee(NestedSet):
 			self.update_user_permissions()
 
 	def update_user_permissions(self):
-		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
-		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
+		if not self.create_user_permission: return
+		if not has_permission('User Permission', ptype='write'): return
+
+		add_user_permission("Employee", self.name, self.user_id)
+		set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
@@ -72,7 +77,7 @@ class Employee(NestedSet):
 		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
-			user.add_roles("Employee")
+			user.append_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name and not (user.first_name and user.last_name):
@@ -149,11 +154,6 @@ class Employee(NestedSet):
 			throw(_("User {0} is already assigned to Employee {1}").format(
 				self.user_id, employee[0]), frappe.DuplicateEntryError)
 
-	def validate_employee_leave_approver(self):
-		for l in self.get("leave_approvers")[:]:
-			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
-
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
@@ -161,10 +161,21 @@ class Employee(NestedSet):
 	def on_trash(self):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
+		if frappe.db.exists("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1}):
+			emp_transfer = frappe.get_doc("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1})
+			emp_transfer.db_set("new_employee_id", '')
 
-	def validate_prefered_email(self):
+	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+
+	def validate_onboarding_process(self):
+		employee_onboarding = frappe.get_all("Employee Onboarding",
+			filters={"job_applicant": self.job_applicant, "docstatus": 1, "boarding_status": ("!=", "Completed")})
+		if employee_onboarding:
+			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
+			doc.validate_employee_creation()
+			doc.db_set("employee", self.name)
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
@@ -198,6 +209,7 @@ def validate_employee_role(doc, method):
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
+		if not has_permission('User Permission', ptype='write'): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
@@ -310,23 +322,35 @@ def get_employee_emails(employee_list):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
-	condition = ''
+	filters = [['company', '=', company]]
+	fields = ['name as value', 'employee_name as title']
 
 	if is_root:
-		parent = ""
+		parent = ''
 	if parent and company and parent!=company:
-		condition = ' and reports_to = "{0}"'.format(frappe.db.escape(parent))
+		filters.append(['reports_to', '=', parent])
 	else:
-		condition = ' and ifnull(reports_to, "")=""'
+		filters.append(['reports_to', '=', ''])
 
-	employee = frappe.db.sql("""
-		select
-			name as value, employee_name as title,
-			exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
-		from
-			`tabEmployee` emp
-		where company='{company}' {condition} order by name"""
-		.format(company=company, condition=condition),  as_dict=1)
+	employees = frappe.get_list(doctype, fields=fields,
+		filters=filters, order_by='name')
 
-	# return employee
-	return employee
+	for employee in employees:
+		is_expandable = frappe.get_all(doctype, filters=[
+			['reports_to', '=', employee.get('value')]
+		])
+		employee.expandable = 1 if is_expandable else 0
+
+	return employees
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])
+
+def has_user_permission_for_employee(user_name, employee_name):
+	return frappe.db.exists({
+		'doctype': 'User Permission',
+		'user': user_name,
+		'allow': 'Employee',
+		'for_value': employee_name
+	})

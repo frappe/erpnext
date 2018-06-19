@@ -9,7 +9,7 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"reqd": 1,
-			"default": frappe.sys_defaults.year_start_date,
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 		},
 		{
 			"fieldname":"to_date",
@@ -31,7 +31,12 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("Item"),
 			"fieldtype": "Link",
 			"width": "80",
-			"options": "Item"
+			"options": "Item",
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.item_query"
+				}
+			}
 		},
 		{
 			"fieldname": "warehouse",

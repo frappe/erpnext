@@ -19,7 +19,12 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item"
+			"options": "Item",
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.item_query"
+				}
+			}
 		},
 		{
 			"fieldname":"brand",

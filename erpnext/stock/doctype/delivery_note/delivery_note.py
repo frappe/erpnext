@@ -82,6 +82,8 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
+		super(DeliveryNote, self).before_print()
+
 	def set_actual_qty(self):
 		for d in self.get('items'):
 			if d.item_code and d.warehouse:
@@ -309,7 +311,8 @@ class DeliveryNote(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
-			dn_doc.update_billing_percentage(update_modified=update_modified)
+			if dn_doc.net_total > 0:
+				dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
 

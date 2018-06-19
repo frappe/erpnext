@@ -84,7 +84,7 @@ class Gstr2Report(Gstr1Report):
 					conditions += opts[1]
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "and invoice_type != 'Export' and is_return != 1 "
+			conditions += "and ifnull(invoice_type, '') != 'Export' and is_return != 1 "
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """

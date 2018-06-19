@@ -1,6 +1,0 @@
-selling-settings
-sales-partner
-shipping-rule
-product-bundle
-item-price
-sales-person-target-allocation

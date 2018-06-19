@@ -1,6 +1,0 @@
-
-email-account
-email-alerts
-email-digest
-sending-email
-setting-up-email

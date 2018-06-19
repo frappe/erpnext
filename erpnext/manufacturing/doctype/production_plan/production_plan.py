@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from six import string_types
 
 class ProductionPlan(Document):
@@ -28,42 +28,12 @@ class ProductionPlan(Document):
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
-		so_filter = item_filter = ""
-		if self.from_date:
-			so_filter += " and so.transaction_date >= %(from_date)s"
-		if self.to_date:
-			so_filter += " and so.transaction_date <= %(to_date)s"
-		if self.customer:
-			so_filter += " and so.customer = %(customer)s"
-		if self.project:
-			so_filter += " and so.project = %(project)s"
+		open_so = get_sales_orders(self)
 
-		if self.item_code:
-			item_filter += " and so_item.item_code = %(item)s"
-
-		open_so = frappe.db.sql("""
-			select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
-			from `tabSales Order` so, `tabSales Order Item` so_item
-			where so_item.parent = so.name
-				and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
-				and so.company = %(company)s
-				and so_item.qty > so_item.delivered_qty {0} {1}
-				and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
-						and bom.is_active = 1)
-					or exists (select name from `tabPacked Item` pi
-						where pi.parent = so.name and pi.parent_item = so_item.item_code
-							and exists (select name from `tabBOM` bom where bom.item=pi.item_code
-								and bom.is_active = 1)))
-			""".format(so_filter, item_filter), {
-				"from_date": self.from_date,
-				"to_date": self.to_date,
-				"customer": self.customer,
-				"project": self.project,
-				"item": self.item_code,
-				"company": self.company
-			}, as_dict=1)
-
-		self.add_so_in_table(open_so)
+		if open_so:
+			self.add_so_in_table(open_so)
+		else:
+			frappe.msgprint(_("Sales orders are not available for production"))
 
 	def add_so_in_table(self, open_so):
 		""" Add sales orders in the table"""
@@ -136,23 +106,23 @@ class ProductionPlan(Document):
 			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - delivered_qty)*conversion_factor as pending_qty
+			(qty - work_order_qty) * conversion_factor as pending_qty, name
 			from `tabSales Order Item` so_item
-			where parent in (%s) and docstatus = 1 and qty > delivered_qty
+			where parent in (%s) and docstatus = 1 and qty > work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
 					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and pi.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
-			(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
-				as pending_qty
+			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
+				as pending_qty, pi.parent_item, so_item.name
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
-			and so_item.parent in (%s) and so_item.qty > so_item.delivered_qty
+			and so_item.parent in (%s) and so_item.qty > so_item.work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=pi.item_code
 					and bom.is_active = 1) %s""" % \
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
@@ -194,7 +164,8 @@ class ProductionPlan(Document):
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
 				'pending_qty': data.pending_qty,
-				'planned_start_date': now_datetime()
+				'planned_start_date': now_datetime(),
+				'product_bundle_item': data.parent_item
 			})
 
 			if self.get_items_from == "Sales Order":
@@ -229,12 +200,12 @@ class ProductionPlan(Document):
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
-		self.delete_draft_production_order()
+		self.delete_draft_work_order()
 
-	def delete_draft_production_order(self):
-		for d in frappe.get_all('Production Order', fields = ["name"],
+	def delete_draft_work_order(self):
+		for d in frappe.get_all('Work Order', fields = ["name"],
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
-			frappe.delete_doc('Production Order', d.name)
+			frappe.delete_doc('Work Order', d.name)
 
 	def set_status(self):
 		self.status = {
@@ -261,6 +232,9 @@ class ProductionPlan(Document):
 			self.status = 'In Process'
 
 	def update_requested_status(self):
+		if not self.mr_items:
+			return
+
 		update_status = True
 		for d in self.mr_items:
 			if d.quantity != d.requested_qty:
@@ -276,6 +250,7 @@ class ProductionPlan(Document):
 				"production_item"		: d.item_code,
 				"use_multi_level_bom"   : d.include_exploded_items,
 				"sales_order"			: d.sales_order,
+				"sales_order_item"		: d.sales_order_item,
 				"material_request"		: d.material_request,
 				"material_request_item"	: d.material_request_item,
 				"bom_no"				: d.bom_no,
@@ -284,7 +259,8 @@ class ProductionPlan(Document):
 				"company"				: self.company,
 				"fg_warehouse"			: d.warehouse,
 				"production_plan"       : self.name,
-				"production_plan_item"  : d.name
+				"production_plan_item"  : d.name,
+				"product_bundle_item"	: d.product_bundle_item
 			}
 
 			item_details.update({
@@ -317,14 +293,18 @@ class ProductionPlan(Document):
 				for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
 						ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
 						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
-						item.default_material_request_type, item.min_order_qty, item.default_warehouse
+						item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
 					from
-						`tabBOM Explosion Item` bei, `tabBOM` bom, `tabItem` item
+						`tabBOM Explosion Item` bei 
+						JOIN `tabBOM` bom ON bom.name = bei.parent
+						JOIN `tabItem` item ON item.name = bei.item_code
+						LEFT JOIN `tabItem Default` item_default
+							ON item_default.parent = item.name and item_default.company=%s
 					where
-						bom.name = bei.parent and item.name = bei.item_code 
-						and bei.docstatus < 2 and bom.name=%s and item.is_stock_item in (1, {0})
+						bei.docstatus < 2 
+						and bom.name=%s and item.is_stock_item in (1, {0})
 					group by bei.item_code, bei.stock_uom""".format(self.include_non_stock_items),
-					data.bom_no, as_dict=1):
+					(self.company, data.bom_no), as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				bom_wise_item_details = self.get_subitems(data, bom_wise_item_details, data.bom_no, 1)
@@ -341,16 +321,21 @@ class ProductionPlan(Document):
 				item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
 				item.default_bom as default_bom, bom_item.description as description,
 				bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty,
-				item.default_warehouse
+				item_default.default_warehouse
 			FROM
-				`tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+				`tabBOM Item` bom_item
+				JOIN `tabBOM` bom ON bom.name = bom_item.parent
+				JOIN tabItem item ON bom_item.item_code = item.name
+				LEFT JOIN `tabItem Default` item_default
+					ON item.name = item_default.parent and item_default.company = %(company)s
 			where
-				bom.name = bom_item.parent and bom.name = %(bom)s
-				and bom_item.docstatus < 2 and bom_item.item_code = item.name
+				bom.name = %(bom)s
+				and bom_item.docstatus < 2
 				and item.is_stock_item in (1, {0})
 			group by bom_item.item_code""".format(self.include_non_stock_items),{
 				'bom': bom_no,
-				'parent_qty': parent_qty
+				'parent_qty': parent_qty,
+				'company': self.company
 			}, as_dict=1)
 
 		for d in items:
@@ -375,10 +360,10 @@ class ProductionPlan(Document):
 		requested_qty = 0
 		if self.ignore_existing_ordered_qty:
 			requested_qty = total_qty
-		elif total_qty > projected_qty:
+		else:
 			requested_qty = total_qty - projected_qty
 
-		if requested_qty and requested_qty < row.min_order_qty:
+		if requested_qty > 0 and requested_qty < row.min_order_qty:
 			requested_qty = row.min_order_qty
 
 		if requested_qty > 0:
@@ -392,37 +377,37 @@ class ProductionPlan(Document):
 				'sales_order': data.sales_order
 			})
 
-	def make_production_order(self):
-		pro_list = []
+	def make_work_order(self):
+		wo_list = []
 		self.validate_data()
 		items_data = self.get_production_items()
 
 		for key, item in items_data.items():
-			production_order = self.create_production_order(item)
-			if production_order:
-				pro_list.append(production_order)
+			work_order = self.create_work_order(item)
+			if work_order:
+				wo_list.append(work_order)
 
 		frappe.flags.mute_messages = False
 
-		if pro_list:
-			pro_list = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in pro_list]
-			msgprint(_("{0} created").format(comma_and(pro_list)))
+		if wo_list:
+			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+				(p, p) for p in wo_list]
+			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
-			msgprint(_("No Production Orders created"))
+			msgprint(_("No Work Orders created"))
 
-	def create_production_order(self, item):
-		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError, get_default_warehouse
+	def create_work_order(self, item):
+		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
 		warehouse = get_default_warehouse()
-		pro = frappe.new_doc("Production Order")
-		pro.update(item)
-		pro.set_production_order_operations()
+		wo = frappe.new_doc("Work Order")
+		wo.update(item)
+		wo.set_work_order_operations()
 
-		if not pro.fg_warehouse:
-			pro.fg_warehouse = warehouse.get('fg_warehouse')
+		if not wo.fg_warehouse:
+			wo.fg_warehouse = warehouse.get('fg_warehouse')
 		try:
-			pro.insert()
-			return pro.name
+			wo.insert()
+			return wo.name
 		except OverProductionError:
 			pass
 
@@ -481,6 +466,44 @@ class ProductionPlan(Document):
 				item_details.setdefault(data.item_code, [data.idx])
 
 		return item_details
+
+def get_sales_orders(self):
+	so_filter = item_filter = ""
+	if self.from_date:
+		so_filter += " and so.transaction_date >= %(from_date)s"
+	if self.to_date:
+		so_filter += " and so.transaction_date <= %(to_date)s"
+	if self.customer:
+		so_filter += " and so.customer = %(customer)s"
+	if self.project:
+		so_filter += " and so.project = %(project)s"
+
+	if self.item_code:
+		item_filter += " and so_item.item_code = %(item)s"
+
+	open_so = frappe.db.sql("""
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		from `tabSales Order` so, `tabSales Order Item` so_item
+		where so_item.parent = so.name
+			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
+			and so.company = %(company)s
+			and so_item.qty > so_item.work_order_qty {0} {1}
+			and (exists (select name from `tabBOM` bom where bom.item=so_item.item_code
+					and bom.is_active = 1)
+				or exists (select name from `tabPacked Item` pi
+					where pi.parent = so.name and pi.parent_item = so_item.item_code
+						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
+							and bom.is_active = 1)))
+		""".format(so_filter, item_filter), {
+			"from_date": self.from_date,
+			"to_date": self.to_date,
+			"customer": self.customer,
+			"project": self.project,
+			"item": self.item_code,
+			"company": self.company
+		}, as_dict=1)
+
+	return open_so
 
 @frappe.whitelist()
 def get_bin_details(row):

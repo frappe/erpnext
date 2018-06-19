@@ -1,18 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 
 import re
 from past.builtins import cmp
 import functools
 
-import frappe
+import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate)
 
+from six import itervalues
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
@@ -166,7 +167,7 @@ def get_appropriate_currency(company, filters=None):
 
 def calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
-	for entries in gl_entries_by_account.values():
+	for entries in itervalues(gl_entries_by_account):
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:
@@ -297,8 +298,7 @@ def filter_accounts(accounts, depth=10):
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
-			if parent == None:
-				sort_root_accounts(children)
+			sort_accounts(children, is_root=True if parent==None else False)
 
 			for child in children:
 				child.indent = level
@@ -310,25 +310,26 @@ def filter_accounts(accounts, depth=10):
 	return filtered_accounts, accounts_by_name, parent_children_map
 
 
-def sort_root_accounts(roots):
+def sort_accounts(accounts, is_root=False, key="name"):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
-	def compare_roots(a, b):
-		if a.value and re.split('\W+', a.value)[0].isdigit():
-			# if chart of accounts is numbered, then sort by number
-			return cmp(a.value, b.value)
-		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
-			return -1
-		if a.root_type != b.root_type and a.root_type == "Asset":
-			return -1
-		if a.root_type == "Liability" and b.root_type == "Equity":
-			return -1
-		if a.root_type == "Income" and b.root_type == "Expense":
-			return -1
+	def compare_accounts(a, b):
+		if is_root:
+			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+				return -1
+			if a.root_type != b.root_type and a.root_type == "Asset":
+				return -1
+			if a.root_type == "Liability" and b.root_type == "Equity":
+				return -1
+			if a.root_type == "Income" and b.root_type == "Expense":
+				return -1
+		else:
+			if re.split('\W+', a[key])[0].isdigit():
+				# if chart of accounts is numbered, then sort by number
+				return cmp(a[key], b[key])
 		return 1
 
-	roots.sort(key = functools.cmp_to_key(compare_roots))
-
+	accounts.sort(key = functools.cmp_to_key(compare_accounts))
 
 def set_gl_entries_by_account(
 		company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account, ignore_closing_entries=False):
@@ -375,6 +376,15 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("project = '%s'" % (frappe.db.escape(filters.get("project"))))
 		if filters.get("cost_center"):
 			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
+
+		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+
+		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
+			additional_conditions.append("ifnull(finance_book, '') in ('%s', '')" %
+				frappe.db.escape(company_finance_book))
+		elif filters.get("finance_book"):
+			additional_conditions.append("ifnull(finance_book, '') = '%s' " %
+				frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

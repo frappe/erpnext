@@ -63,7 +63,7 @@ def create_suppliers(args_data):
 				doc = frappe.get_doc({
 					"doctype":"Supplier",
 					"supplier_name": supplier,
-					"supplier_type": _("Local"),
+					"supplier_group": _("Local"),
 					"company": defaults.get("company")
 				}).insert()
 
@@ -108,9 +108,12 @@ def create_items(args_data):
 					"is_sales_item": 1,
 					"is_purchase_item": 1,
 					"is_stock_item": 1,
-					"item_group": "Products",
+					"item_group": _("Products"),
 					"stock_uom": _(args.get("item_uom_" + str(i))),
-					"default_warehouse": default_warehouse
+					"item_defaults": [{
+						"default_warehouse": default_warehouse,
+						"company": defaults.get("company_name")
+					}]
 				}).insert()
 
 			except frappe.NameError:

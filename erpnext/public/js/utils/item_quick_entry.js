@@ -319,7 +319,8 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 						["parent", "=", $(e.target).attr("data-fieldname")],
 						["attribute_value", "like", e.target.value + "%"]
 					],
-					fields: ["attribute_value"]
+					fields: ["attribute_value"],
+					parent: "Item"
 				},
 				callback: function(r) {
 					if (r.message) {

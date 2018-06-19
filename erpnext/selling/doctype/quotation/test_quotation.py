@@ -150,12 +150,10 @@ class TestQuotation(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		first_item = make_item("_Test Laptop",
-							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-							 "cost_center": "_Test Cost Center - _TC"})
+							{"is_stock_item": 1})
 
 		second_item = make_item("_Test CPU",
-							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-							 "cost_center": "_Test Cost Center - _TC"})
+							{"is_stock_item": 1})
 
 		qo_item1 = [
 			{

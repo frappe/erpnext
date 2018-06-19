@@ -16,6 +16,12 @@ frappe.ui.form.on("Program Enrollment Tool", {
 		});
 	},
 
+	get_students_from: function(frm) {
+		if (frm.doc.get_students_from == "Student Applicant") {
+			frm.dashboard.add_comment(__('Only the Student Applicant with the status "Approved" will be selected in the table below.'));
+		}
+	},
+
 	"get_students": function(frm) {
 		frm.set_value("students",[]);
 		frappe.call({

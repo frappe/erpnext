@@ -45,12 +45,12 @@
 				<button class="btn btn-default btn-xs btn-move"
 					data-warehouse="{{ d.warehouse }}"
 					data-actual_qty="{{ d.actual_qty }}"
-					data-item="{{ d.item_code }}">{{ __("Move") }}</a>
+					data-item="{{ escape(d.item_code) }}">{{ __("Move") }}</a>
 				{% endif %}
 				<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add"
 					data-warehouse="{{ d.warehouse }}"
 					data-actual_qty="{{ d.actual_qty }}"
-					data-item="{{ d.item_code }}"
+					data-item="{{ escape(d.item_code) }}"
 					data-rate="{{ d.valuation_rate }}">{{ __("Add") }}</a>
 			</div>
 			{% endif %}

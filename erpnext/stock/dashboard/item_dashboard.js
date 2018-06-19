@@ -18,12 +18,12 @@ erpnext.stock.ItemDashboard = Class.extend({
 
 		// move
 		this.content.on('click', '.btn-move', function() {
-			erpnext.stock.move_item($(this).attr('data-item'), $(this).attr('data-warehouse'),
+			erpnext.stock.move_item(unescape($(this).attr('data-item')), $(this).attr('data-warehouse'),
 				null, $(this).attr('data-actual_qty'), null, function() { me.refresh(); });
 		});
 
 		this.content.on('click', '.btn-add', function() {
-			erpnext.stock.move_item($(this).attr('data-item'), null, $(this).attr('data-warehouse'),
+			erpnext.stock.move_item(unescape($(this).attr('data-item')), null, $(this).attr('data-warehouse'),
 				$(this).attr('data-actual_qty'), $(this).attr('data-rate'),
 				function() { me.refresh(); });
 		});
@@ -88,7 +88,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		if(!data) data = [];
 
 		data.forEach(function(d) {
-			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
+			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			d.pending_qty = 0;
 			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			if(d.actual_or_pending > d.actual_qty) {

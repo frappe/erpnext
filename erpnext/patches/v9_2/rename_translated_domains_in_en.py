@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 
 def execute():
+	frappe.reload_doc('stock', 'doctype', 'item')
 	language = frappe.get_single("System Settings").language
 
 	if language and language.startswith('en'): return

@@ -23,7 +23,7 @@ class Gstr1Report(object):
 			posting_date,
 			base_grand_total,
 			base_rounded_total,
-			customer_gstin,
+			COALESCE(NULLIF(customer_gstin,''), NULLIF(billing_address_gstin, '')) as customer_gstin,
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
@@ -102,15 +102,16 @@ class Gstr1Report(object):
 
 		for opts in (("company", " and company=%(company)s"),
 			("from_date", " and posting_date>=%(from_date)s"),
-			("to_date", " and posting_date<=%(to_date)s")):
+			("to_date", " and posting_date<=%(to_date)s"),
+			("company_address", " and company_address=%(company_address)s")):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
 		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += " and invoice_type != 'Export' and is_return != 1 and customer in ('{0}')".\
-				format("', '".join([frappe.db.escape(c.name) for c in customers]))
+			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
+				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
@@ -143,7 +144,10 @@ class Gstr1Report(object):
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
 		for d in items:
-			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, d.base_net_amount)
+			if d.item_code not in self.invoice_items.get(d.parent, {}):
+				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
+					sum(i.get('base_net_amount', 0) for i in items
+					    if i.item_code == d.item_code and i.parent == d.parent))
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
@@ -155,7 +159,7 @@ class Gstr1Report(object):
 				and parent in (%s)
 			order by account_head
 		""" % (self.tax_doctype, '%s', ', '.join(['%s']*len(self.invoices.keys()))),
-			tuple([self.doctype] + self.invoices.keys()))
+			tuple([self.doctype] + list(self.invoices.keys())))
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()

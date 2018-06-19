@@ -18,5 +18,19 @@ def get_data():
 					"description": _("GoCardless SEPA Mandate"),
 				}
 			]
+		},
+		{
+			"label": _("Settings"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Woocommerce Settings"
+				},
+				{
+					"type": "doctype",
+					"name": "Shopify Settings",
+					"description": _("Connect Shopify with ERPNext"),
+				}
+			]
 		}
 	]

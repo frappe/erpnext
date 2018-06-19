@@ -41,13 +41,15 @@ class ExpenseClaim(AccountsController):
 		}[cstr(self.docstatus or 0)]
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
-
+		precision = self.precision("total_sanctioned_amount")
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.total_sanctioned_amount) ==  paid_amount)) \
-			and self.docstatus == 1:
+			and flt(self.total_sanctioned_amount, precision) ==  flt(paid_amount, precision))) \
+			and self.docstatus == 1 and self.approval_status == 'Approved':
 				self.status = "Paid"
-		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1:
+		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
+		elif self.docstatus == 1 and self.approval_status == 'Rejected':
+			self.status = 'Rejected'
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
@@ -58,6 +60,8 @@ class ExpenseClaim(AccountsController):
 			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
+		if self.approval_status=="Draft":
+			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
 		self.update_task_and_project()
 		self.make_gl_entries()
@@ -183,6 +187,9 @@ class ExpenseClaim(AccountsController):
 		self.total_claimed_amount = 0
 		self.total_sanctioned_amount = 0
 		for d in self.get('expenses'):
+			if self.approval_status == 'Rejected':
+				d.sanctioned_amount = 0.0
+
 			self.total_claimed_amount += flt(d.claim_amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
@@ -277,7 +284,6 @@ def make_bank_entry(dt, dn):
 def get_expense_claim_account(expense_claim_type, company):
 	account = frappe.db.get_value("Expense Claim Account",
 		{"parent": expense_claim_type, "company": company}, "default_account")
-	
 	if not account:
 		frappe.throw(_("Please set default account in Expense Claim Type {0}")
 			.format(expense_claim_type))

@@ -1,1 +1,0 @@
-User authorized to approve Leave Application for an Employee.

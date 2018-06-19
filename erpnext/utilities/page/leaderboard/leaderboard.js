@@ -24,7 +24,7 @@ frappe.Leaderboard = Class.extend({
 			"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
 				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
 			"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
-			"Sales Partner": ["total_sales_amount", "total_commision"],
+			"Sales Partner": ["total_sales_amount", "total_commission"],
 			"Sales Person": ["total_sales_amount"],
 		};
 
@@ -85,7 +85,7 @@ frappe.Leaderboard = Class.extend({
 
 		this.$sidebar_list.on('click', 'li', function(e) {
 			let $li = $(this);
-			let doctype = $li.find('span').html();
+			let doctype = $li.find('span').attr("doctype-value");
 
 			me.options.selected_company = frappe.defaults.get_default('company');
 			me.options.selected_doctype = doctype;
@@ -172,7 +172,7 @@ frappe.Leaderboard = Class.extend({
 			$container.find(".leaderboard-list").html(me.render_list_view(res.message));
 		} else {
 			me.$graph_area.hide();
-			me.message = "No items found.";
+			me.message = __("No items found.");
 			$container.find(".leaderboard-list").html(me.render_list_view());
 		}
 	},
@@ -301,7 +301,7 @@ frappe.Leaderboard = Class.extend({
 	get_sidebar_item: function(item) {
 		return $(`<li class="strong module-sidebar-item">
 			<a class="module-link">
-			<span>${ item }</span></a>
+			<span doctype-value="${item}">${ __(item) }</span></a>
 		</li>`);
 	}
 });

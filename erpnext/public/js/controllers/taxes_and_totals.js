@@ -4,12 +4,15 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
-
+		let effective_item_rate = item.price_list_rate;
+		if (item.parenttype === "Sales Order" && item.blanket_order_rate) {
+			effective_item_rate = item.blanket_order_rate;
+		}
 		if(item.margin_type == "Percentage"){
-			item.rate_with_margin = flt(item.price_list_rate)
-				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
+			item.rate_with_margin = flt(effective_item_rate)
+				+ flt(effective_item_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
-			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
+			item.rate_with_margin = flt(effective_item_rate) + flt(item.margin_rate_or_amount);
 			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 		}
 
@@ -84,7 +87,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_item_values: function() {
 		var me = this;
-
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
@@ -200,15 +202,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_net_total: function() {
 		var me = this;
-		this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
+		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total += item.amount;
+			me.frm.doc.total_qty += item.qty;
 			me.frm.doc.base_total += item.base_amount;
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
-
 
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	},
@@ -338,12 +340,18 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
 		// store tax breakup for each item
-		var key = item.item_code || item.item_name;
-		var item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
-		if (tax.item_wise_tax_detail && tax.item_wise_tax_detail[key])
-			item_wise_tax_amount += tax.item_wise_tax_detail[key][1];
+		let tax_detail = tax.item_wise_tax_detail;
 
-		tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount, precision("base_tax_amount", tax))];
+		let key = item.item_code;
+		if(item.item_name && !Object.keys(tax_detail).includes(item.item_name)) {
+			key = item.item_name;
+		}
+
+		let item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
+		if (tax_detail && tax_detail[key])
+			item_wise_tax_amount += tax_detail[key][1];
+
+		tax_detail[key] = [tax_rate, flt(item_wise_tax_amount, precision("base_tax_amount", tax))];
 	},
 
 	round_off_totals: function(tax) {
