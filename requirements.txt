@@ -6,4 +6,3 @@ python-stdnum
 braintree
 gocardless_pro
 woocommerce
-stripe
