@@ -12,8 +12,8 @@ class OverlapError(frappe.ValidationError): pass
 
 class ShiftRequest(Document):
 	def validate(self):
-		self.validate_dates();
-		self.validate_shift_request_overlap_dates();
+		self.validate_dates()
+		self.validate_shift_request_overlap_dates()
 
 	def on_submit(self):
 		date_list = self.get_working_days(self.from_date, self.to_date)
@@ -26,6 +26,14 @@ class ShiftRequest(Document):
 			assignment_doc.shift_request = self.name
 			assignment_doc.insert()
 			assignment_doc.submit()
+
+	def on_cancel(self):
+		shift_assignment_list = frappe.get_list("Shift Assignment", {'employee': self.employee, 'shift_request': self.name})
+		if shift_assignment_list:
+			for shift in shift_assignment_list:
+				shift_assignment_doc = frappe.get_doc("Shift Assignment", shift['name'])
+				shift_assignment_doc.cancel()
+
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):

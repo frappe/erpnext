@@ -346,7 +346,7 @@ def get_data():
 			"color": "#EA81E8",
 			"icon": "🍔",
 			"_doctype": "Restaurant",
-			"type": "list",
+			"type": "module",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
 			"hidden": 1

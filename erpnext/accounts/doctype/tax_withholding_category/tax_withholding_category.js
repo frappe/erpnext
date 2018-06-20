@@ -2,7 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Tax Withholding Category', {
-	refresh: function(frm) {
-
+	setup: function(frm) {
+		frm.set_query("account", "accounts", function(doc, cdt, cdn) {
+			var child = locals[cdt][cdn];
+			if (child.company) {
+				return {
+					filters: {
+						'company': child.company
+					}
+				};
+			}
+		});
 	}
 });
