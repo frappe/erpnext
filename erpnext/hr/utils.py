@@ -35,6 +35,7 @@ class EmployeeBoardingController(Document):
 				"company": self.company
 			}).insert(ignore_permissions=True)
 		self.db_set("project", project.name)
+		self.db_set("boarding_status", "Pending")
 
 		# create the task for the given project and assign to the concerned person
 		for activity in self.activities:
@@ -83,6 +84,17 @@ def get_onboarding_details(parent, parenttype):
 		fields=["activity_name", "role", "user", "required_for_employee_creation", "description"],
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")
+
+@frappe.whitelist()
+def get_boarding_status(project):
+	status = 'Pending'
+	if project:
+		doc = frappe.get_doc('Project', project)
+		if flt(doc.percent_complete) > 0.0 and flt(doc.percent_complete) < 100.0:
+			status = 'In Process'
+		elif flt(doc.percent_complete) == 100.0:
+			status = 'Completed'
+		return status
 
 def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
