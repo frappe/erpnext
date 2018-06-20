@@ -160,6 +160,10 @@ class Project(Document):
 				for row in weighted_progress:
 					pct_complete += row["progress"] * row["task_weight"]
 				self.percent_complete = flt(flt(pct_complete), 2)
+		if self.percent_complete == 100:
+			self.status = "Completed"
+		elif not self.status == "Cancelled":
+			self.status = "Open"
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
