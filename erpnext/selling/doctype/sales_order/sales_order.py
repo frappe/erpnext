@@ -833,7 +833,7 @@ def update_child_qty_rate(name, rate, qty):
 		if field.fieldname:
 			poi_field = soitem.meta.get_field(field.fieldname)
 			if poi_field:
-	soi_field.allow_on_submit = True
+				soi_field.allow_on_submit = True
 	soitem.qty = float(qty)
 	soitem.rate = float(rate)
 	soitem.save()
@@ -854,6 +854,7 @@ def update_so(so):
 	so.reload()
 	for a in so.payment_schedule:
 		a.payment_amount = float(a.invoice_portion/100) * float(so.grand_total)
+	so.flags.ignore_validate_update_after_submit = True
 	so.save()
 	return {
 		'so': so

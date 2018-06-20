@@ -393,25 +393,14 @@ erpnext.utils.update_child_items = function(opts) {
 					frappe.call({
 						method: 'erpnext.buying.doctype.purchase_order.purchase_order.update_child_qty_rate',
 						args: {
-							'name': d.docname,
+							'child_name': d.docname,
 							'rate': d.rate,
-							'qty': d.qty
+							'qty': d.qty,
+							'po_name': frm.doc.name
 						},
 						callback: function(r) {
-							frappe.call({
-								method: 'erpnext.buying.doctype.purchase_order.purchase_order.purchase_order.update_po',
-								freeze: true,
-								freeze_message: "Updating Purchace Order",
-								args: {
-									po: cur_frm.doc.name,
-								},
-								callback: function(r){
-										frappe.model.set_value(cdt, cdn, 'qty', values.qty);
-										frappe.model.set_value(cdt, cdn, 'rate', values.rate);
-										refresh_field('items');
-										cur_frm.reload_doc()
-								}
-							})
+								refresh_field('items');
+								frm.reload_doc()
 						}
 					});
 				} else {
@@ -422,40 +411,20 @@ erpnext.utils.update_child_items = function(opts) {
 							'rate': d.rate,
 							'qty': d.qty
 						},
-						callback: function(r) {
-							frappe.call({
-								method: 'erpnext.selling.doctype.sales_order.sales_order.update_po',
-								freeze: true,
-								freeze_message: "Updating Sales Order",
-								args: {
-									so: cur_frm.doc.name,
-								},
-								callback: function(r){
-										frappe.model.set_value(cdt, cdn, 'qty', values.qty);
-										frappe.model.set_value(cdt, cdn, 'rate', values.rate);
-										refresh_field('items');
-										cur_frm.reload_doc()
-								}
-							})
-						}
 					});
 				}
 			});
 			this.hide();
-			frm.reload_doc()
 			refresh_field("items");
+			frm.reload_doc()
 			},
 		primary_action_label: __('Update')
 	});
 
 	frm.doc[opts.child_docname].forEach(d => {
-		console.log(opts.child_doctype)
-		console.log("Im here")
 		if (opts.child_doctype == 'Purchase Order Detail') {
-			console.log("Im here in Purchase Order")
 			if (d.qty > d.received_qty) {
 				var po_qty = d.qty - d.received_qty
-				console.log(po_qty)
 				dialog.fields_dict.trans_items.df.data.push({
 					"docname": d.name,
 					"item_code": d.item_code,
@@ -466,7 +435,6 @@ erpnext.utils.update_child_items = function(opts) {
 		} else {
 			if (d.qty > d.delivered_qty) {
 				var dn_qty = d.qty - d.delivered_qty
-				console.log(dn_qty)
 				dialog.fields_dict.trans_items.df.data.push({
 					"docname": d.name,
 					"item_code": d.item_code,

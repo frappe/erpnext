@@ -8,6 +8,8 @@ from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
@@ -480,35 +482,17 @@ def update_status(status, name):
 	po.update_delivered_qty_in_sales_order()
 
 @frappe.whitelist()
-def update_child_qty_rate(name, rate, qty):
-	# po = frappe.get_doc("Purchase Order", parent)
-	poitem = frappe.get_doc("Purchase Order Item", name)
-	for field in poitem.meta.fields:
-		if field.fieldname:
-			poi_field = poitem.meta.get_field(field.fieldname)
-			if poi_field:
-	poi_field.allow_on_submit = True
-	poitem.qty = float(qty)
-	poitem.rate = float(rate)
-	poitem.save()
-	poitem.reload()
-	return {
-		'poitem': poitem
-	}
+def update_child_qty_rate(child_name, rate, qty, po_name):
 
-@frappe.whitelist()
-def update_po(po):
-	po = frappe.get_doc('Purchase Order', po)
-	for field in po.meta.fields:
-		if field.fieldname:
-			po_field = po.meta.get_field(field.fieldname)
-			if po_field:
-				po_field.allow_on_submit = True
-
-	po.reload()
-	for a in po.payment_schedule:
-		a.payment_amount = float(a.invoice_portion/100) * float(po.grand_total)
-	po.save()
-	return {
-		'po': po
-	}
+	po = frappe.get_doc('Purchase Order', po_name)
+	for p in po.items:
+		if p.name == child_name:
+			p.qty = float(qty)
+			p.rate = float(rate)
+			p.flags.ignore_validate_update_after_submit = True
+			p.save()
+			po.set_qty_as_per_stock_uom()
+			po.update_ordered_and_reserved_qty()
+			po.calculate_taxes_and_totals()
+			po.flags.ignore_validate_update_after_submit = True
+			po.save()
