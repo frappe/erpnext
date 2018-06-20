@@ -53,6 +53,18 @@ class CompensatoryLeaveRequest(Document):
 		else:
 			frappe.throw(_("There is no leave period in between {0} and {1}").format(self.work_from_date, self.work_end_date))
 
+	def on_cancel(self):
+		if self.leave_allocation:
+			date_difference = date_diff(self.work_end_date, self.work_from_date) + 1
+			leave_allocation = frappe.get_doc("Leave Allocation", self.leave_allocation)
+			if leave_allocation:
+				leave_allocation.new_leaves_allocated -= date_difference
+				if leave_allocation.total_leaves_allocated - date_difference <= 0:
+					leave_allocation.total_leaves_allocated = 0
+					leave_allocation.cancel()
+				else:
+					leave_allocation.submit()
+
 	def exists_allocation_for_period(self, leave_period):
 		leave_allocation = frappe.db.sql("""
 			select name
