@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, cstr, getdate
+from frappe.utils import date_diff, add_days, getdate
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, get_holidays_for_employee
 
