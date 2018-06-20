@@ -43,7 +43,7 @@ class EmployeeTransfer(Document):
 			employee = update_employee(employee, self.transfer_details, date=self.transfer_date)
 			if self.company != self.new_company:
 				employee.company = self.new_company
-				new_employee.date_of_joining = self.transfer_date
+				employee.date_of_joining = self.transfer_date
 			employee.save()
 
 	def on_cancel(self):
