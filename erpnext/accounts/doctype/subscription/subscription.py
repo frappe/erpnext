@@ -290,7 +290,7 @@ class Subscription(Document):
 		"""
 		Returns the `Customer` linked to the `Subscriber`
 		"""
-		return frappe.get_value('Subscriber', subscriber_name)
+		return frappe.get_value('Subscriber', subscriber_name, 'customer')
 
 	def get_items_from_plans(self, plans, prorate=0):
 		"""
