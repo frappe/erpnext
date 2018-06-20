@@ -13,14 +13,6 @@ frappe.ui.form.on("Payment Request", "onload", function(frm, dt, dn){
 			}
 		})
 	}
-
-	frm.set_query("payment_plan", function() {
-		return {
-			"filters": {
-				"payment_gateway": ["=", frm.doc.payment_gateway_account]
-			}
-		};
-	});
 })
 
 frappe.ui.form.on("Payment Request", "refresh", function(frm) {
