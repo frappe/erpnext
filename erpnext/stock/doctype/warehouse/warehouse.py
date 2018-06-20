@@ -139,7 +139,7 @@ class Warehouse(NestedSet):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	from erpnext.stock.utils import get_stock_value
+	from erpnext.stock.utils import get_stock_value_from_bin
 
 	if is_root:
 		parent = ""
