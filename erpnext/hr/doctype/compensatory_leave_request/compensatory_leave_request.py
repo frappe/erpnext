@@ -70,9 +70,7 @@ class CompensatoryLeaveRequest(Document):
 				leave_allocation.new_leaves_allocated -= date_difference
 				if leave_allocation.total_leaves_allocated - date_difference <= 0:
 					leave_allocation.total_leaves_allocated = 0
-					leave_allocation.cancel()
-				else:
-					leave_allocation.submit()
+				leave_allocation.submit()
 
 	def exists_allocation_for_period(self, leave_period):
 		leave_allocation = frappe.db.sql("""
