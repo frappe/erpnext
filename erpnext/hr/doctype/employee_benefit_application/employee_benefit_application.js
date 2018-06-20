@@ -78,7 +78,7 @@ var calculate_all = function(doc) {
 		if(cint(tbl[i].amount) > 0) {
 			total_amount += flt(tbl[i].amount);
 		}
-		if(tbl[i].is_pro_rata_applicable == 1){
+		if(tbl[i].pay_against_benefit_claim != 1){
 			pro_rata_dispensed_amount += flt(tbl[i].amount);
 		}
 	}
