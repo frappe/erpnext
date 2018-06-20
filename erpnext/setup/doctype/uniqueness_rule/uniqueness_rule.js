@@ -5,7 +5,7 @@ frappe.ui.form.on('Uniqueness Rule', {
 	refresh: function(frm) {
 		if (frm.doc.doctype_name) {
 			frm.events.table_field(frm);
-		}	
+		}
 	},
 	doctype_name: function(frm) {
 		frm.events.table_field(frm);
