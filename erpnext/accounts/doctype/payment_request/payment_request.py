@@ -14,7 +14,7 @@ from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 
-class PaymentRequest(Document):	
+class PaymentRequest(Document):
 	def validate(self):
 		self.validate_reference_document()
 		self.validate_payment_request()
@@ -47,9 +47,9 @@ class PaymentRequest(Document):
 
 				rate = plan.get_plan_rate()
 				frappe.log_error(rate)
-				
+
 				amount += rate
-			
+
 			if amount != self.grand_total:
 				frappe.msgprint(_("The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.".format(self.grand_total, amount)))
 
