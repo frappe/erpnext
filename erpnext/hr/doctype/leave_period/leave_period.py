@@ -30,15 +30,22 @@ class LeavePeriod(Document):
 
 	def grant_leave_allocation(self):
 		if self.employee:
-			self.grant_leave_alloc(self.employee)
+			leave_allocation = self.grant_leave_alloc(self.employee)
+			if leave_allocation:
+				self.print_message([leave_allocation])
 		else:
 			self.grant_leave_alloc_for_employees()
 
 	def grant_leave_alloc_for_employees(self):
 		employees = self.get_employees()
 		if employees:
+			leave_allocations = []
 			for employee in employees:
-				self.grant_leave_alloc(cstr(employee[0]))
+				leave_allocation = self.grant_leave_alloc(cstr(employee[0]))
+				if leave_allocation:
+					leave_allocations.append(leave_allocation)
+			if leave_allocations:
+				self.print_message(leave_allocations)
 		else:
 			frappe.msgprint(_("No employee found"))
 
@@ -48,7 +55,11 @@ class LeavePeriod(Document):
 		if leave_policy:
 			for leave_policy_detail in leave_policy.leave_policy_details:
 				if not frappe.db.get_value("Leave Type", leave_policy_detail.leave_type, "is_lwp"):
-					self.create_leave_allocation(employee, leave_policy_detail.leave_type, leave_policy_detail.annual_allocation)
+					return self.create_leave_allocation(employee, leave_policy_detail.leave_type, leave_policy_detail.annual_allocation)
+				else:
+					return None
+		else:
+			return None
 
 	def validate_allocation_exists(self, employee):
 		leave_alloc = frappe.db.exists({
@@ -79,4 +90,10 @@ class LeavePeriod(Document):
 				allocation.carry_forward = self.carry_forward_leaves
 		allocation.save(ignore_permissions = True)
 		allocation.submit()
-		frappe.msgprint(_("Leave Allocation {0} created").format(allocation.name))
+		return allocation.name
+
+
+	def print_message(self, leave_allocations):
+		if leave_allocations:
+			frappe.msgprint(_("Leave Allocations {0} created").format(", "
+				.join(map(lambda x: """ <b><a href="#Form/Leave Allocation/{0}">{0}</a></b>""".format(x), leave_allocations))))
