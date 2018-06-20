@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
+import datetime
 
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
@@ -699,15 +700,40 @@ class SalarySlip(TransactionBase):
 		return struct_row, tax_amount
 
 	def calculate_tax_by_tax_slab(self, payroll_period, annual_earning):
-		# TODO consider condition in tax slab
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
+		data = self.get_data_for_eval()
 		taxable_amount = 0
 		for slab in payroll_period_obj.taxable_salary_slabs:
+			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
+				continue
+			if not slab.to_amount and annual_earning > slab.from_amount:
+				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
+				continue
 			if annual_earning > slab.from_amount and annual_earning < slab.to_amount:
 				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
 			elif annual_earning > slab.from_amount and annual_earning > slab.to_amount:
 				taxable_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
 		return taxable_amount
+
+	def eval_tax_slab_condition(self, condition, data):
+		whitelisted_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date
+		}
+		try:
+			condition = condition.strip()
+			if condition:
+				return frappe.safe_eval(condition, whitelisted_globals, data)
+		except NameError as err:
+			frappe.throw(_("Name error: {0}".format(err)))
+		except SyntaxError as err:
+			frappe.throw(_("Syntax error in condition: {0}".format(err)))
+		except Exception as e:
+			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			raise
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
 		payroll_days = date_diff(period_end, period_start) + 1
