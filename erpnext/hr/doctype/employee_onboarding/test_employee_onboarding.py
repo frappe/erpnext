@@ -20,7 +20,6 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.employee_name = 'Test Applicant'
 		onboarding.company = '_Test Company'
 		onboarding.designation = 'Researcher'
-		onboarding.department = 'Research & Development - _TC'
 		onboarding.append('activities', {
 			'activity_name': 'Assign ID Card',
 			'role': 'HR User',
@@ -62,5 +61,5 @@ def get_job_applicant():
 	return applicant
 
 def _set_up():
-	for doctype in ["Job Applicant", "Employee Onboarding", "Project", "Task"]:
+	for doctype in ["Employee Onboarding"]:
 		frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
