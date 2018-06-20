@@ -8,6 +8,7 @@ from frappe import _
 from erpnext.hr.utils import EmployeeBoardingController
 from frappe.model.mapper import get_mapped_doc
 
+class IncompleteTaskError(frappe.ValidationError): pass
 
 class EmployeeOnboarding(EmployeeBoardingController):
 	def validate(self):
@@ -23,7 +24,7 @@ class EmployeeOnboarding(EmployeeBoardingController):
 				else:
 					task_status = frappe.db.get_value("Task", activity.task, "status")
 					if task_status not in ["Closed", "Cancelled"]:
-						frappe.throw(_("All the mandatory Task for employee creation hasn't been done yet."))
+						frappe.throw(_("All the mandatory Task for employee creation hasn't been done yet."), IncompleteTaskError)
 
 	def on_submit(self):
 		super(EmployeeOnboarding, self).on_submit()
