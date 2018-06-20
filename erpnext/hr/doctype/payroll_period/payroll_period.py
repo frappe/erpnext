@@ -61,9 +61,10 @@ def get_payroll_period_days(start_date, end_date, employee):
 	})
 
 	if len(payroll_period_dates) > 0:
-		working_days = date_diff(getdate(payroll_period_dates[0][1]), getdate(payroll_period_dates[0][0])) + 1
+		actual_no_of_days = date_diff(getdate(payroll_period_dates[0][1]), getdate(payroll_period_dates[0][0])) + 1
+		working_days = actual_no_of_days
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			holidays = get_holidays_for_employee(employee, getdate(payroll_period_dates[0][0]), getdate(payroll_period_dates[0][1]))
 			working_days -= len(holidays)
-		return working_days
+		return working_days, actual_no_of_days
 	return False
