@@ -53,7 +53,7 @@ class StaffingPlan(Document):
 			return # No parent, nothing to validate
 
 		# Get staffing plan applicable for the company (Parent Company)
-		parent_plan_details = get_active_staffing_plan_details(self.company, staffing_plan_detail.designation)
+		parent_plan_details = get_active_staffing_plan_details(self.company, staffing_plan_detail.designation, self.from_date, self.to_date)
 		if not parent_plan_details:
 			return #no staffing plan for any parent Company in herarchy
 
@@ -135,28 +135,21 @@ def get_designation_counts(designation, company):
 	return employee_counts_dict
 
 @frappe.whitelist()
-def get_active_staffing_plan_details(company, designation, department=None, date=getdate(nowdate())):
+def get_active_staffing_plan_details(company, designation, from_date=getdate(nowdate()), to_date=getdate(nowdate())):
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
-
-	conditions = ""
-	if(department): #Department is an optional field
-		conditions += " and sp.department='{0}'".format(frappe.db.escape(department))
-
-	if(date): #ToDo: Date should be mandatory?
-		conditions += " and '{0}' between sp.from_date and sp.to_date".format(date)
 
 	staffing_plan = frappe.db.sql("""
 		select sp.name, spd.vacancies, spd.total_estimated_cost
 		from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name
-		where company=%s and spd.designation=%s and sp.docstatus=1 {0}
-	""".format(conditions), (company, designation), as_dict = 1)
+		where company=%s and spd.designation=%s and sp.docstatus=1
+		and to_date >= %s and from_date <= %s """, (company, designation, from_date, to_date), as_dict = 1)
 
 	if not staffing_plan:
 		parent_company = frappe.db.get_value("Company", company, "parent_company")
 		if parent_company:
 			staffing_plan = get_active_staffing_plan_details(parent_company,
-				designation, department, date)
+				designation, from_date, to_date)
 
 	# Only a single staffing plan can be active for a designation on given date
 	return staffing_plan if staffing_plan else None
