@@ -109,8 +109,9 @@ def update_employee(employee, details, date=None, cancel=False):
 def get_employee_fields_label():
 	fields = []
 	for df in frappe.get_meta("Employee").get("fields"):
-		if df.fieldtype in ["Data", "Date", "Datetime", "Float", "Int",
-		"Link", "Percent", "Select", "Small Text"] and df.fieldname not in ["lft", "rgt", "old_parent"]:
+		if df.fieldname in ["salutation", "user_id", "employee_number", "employment_type",
+		"holiday_list", "branch", "department", "designation", "grade",
+		"notice_number_of_days", "reports_to", "leave_policy", "company_email"]:
 			fields.append({"value": df.fieldname, "label": df.label})
 	return fields
 
