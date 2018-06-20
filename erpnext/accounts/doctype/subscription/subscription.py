@@ -13,9 +13,9 @@ from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_l
 class Subscription(Document):
 	def before_insert(self):
 		# update start just before the subscription doc is created
-		self.update_subscription_period(self.start, init=True)
+		self.update_subscription_period(self.start)
 
-	def update_subscription_period(self, date=None, init=False):
+	def update_subscription_period(self, date=None):
 		"""
 		Subscription period is the period to be billed. This method updates the
 		beginning of the billing period and end of the billing period.
@@ -25,7 +25,7 @@ class Subscription(Document):
 		as `current_invoice_end`.
 		"""
 		self.set_current_invoice_start(date)
-		self.set_current_invoice_end(init=False)
+		self.set_current_invoice_end()
 
 	def set_current_invoice_start(self, date=None):
 		"""
@@ -40,7 +40,7 @@ class Subscription(Document):
 		else:
 			self.current_invoice_start = nowdate()
 
-	def set_current_invoice_end(self, init=False):
+	def set_current_invoice_end(self):
 		"""
 		This sets the date of the end of the current billing period.
 
@@ -51,9 +51,7 @@ class Subscription(Document):
 		current billing period where `x` is the billing interval from the
 		`Subscription Plan` in the `Subscription`.
 		"""
-		if init==True:
-			return
-		elif self.is_trialling():
+		if self.is_trialling():
 			self.current_invoice_end = self.trial_period_end
 		else:
 			billing_cycle_info = self.get_billing_cycle_data()
