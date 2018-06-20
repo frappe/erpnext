@@ -339,14 +339,15 @@ class PaymentEntry(AccountsController):
 			total_negative_outstanding = sum([abs(flt(d.outstanding_amount))
 				for d in self.get("references") if flt(d.outstanding_amount) < 0])
 
-			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
+			paid_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
+			additional_charges = sum([flt(d.amount) for d in self.deductions])
 
 			if not total_negative_outstanding:
 				frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
 					.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"),
 						self.party_type), InvalidPaymentEntry)
 
-			elif party_amount > total_negative_outstanding:
+			elif paid_amount - additional_charges > total_negative_outstanding:
 				frappe.throw(_("Paid Amount cannot be greater than total negative outstanding amount {0}")
 					.format(total_negative_outstanding), InvalidPaymentEntry)
 
