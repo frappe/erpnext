@@ -59,5 +59,18 @@ frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 
 frappe.ui.form.on("Payment Request", "is_a_subscription", function(frm) {
 		frm.toggle_reqd("payment_gateway_account", frm.doc.is_a_subscription);
-		frm.toggle_reqd("payment_plan", frm.doc.is_a_subscription);
+		frm.toggle_reqd("subscription_plans", frm.doc.is_a_subscription);
+
+		if (frm.doc.is_a_subscription) {
+			frappe.call({
+				method: "get_subscription_details",
+				doc: frm.doc,
+				freeze: true,
+				callback: function(r){
+					if(!r.exc) {
+						frm.refresh_field("subscription_plans");
+					}
+				}
+			});
+		}
 });
