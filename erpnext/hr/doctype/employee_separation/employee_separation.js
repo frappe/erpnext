@@ -31,7 +31,7 @@ frappe.ui.form.on('Employee Separation', {
 				},
 				callback: function(r) {
 					if (r.message) {
-						frm.set_value('boarding_status', r.message)
+						frm.set_value('boarding_status', r.message);
 					}
 					refresh_field("boarding_status");
 				}

@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
 from erpnext.hr.utils import EmployeeBoardingController
 from frappe.model.mapper import get_mapped_doc
 
