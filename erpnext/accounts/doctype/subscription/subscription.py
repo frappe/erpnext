@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_last_day, add_to_date, flt
-from erpnext.utilities.product import get_price
 
 
 class Subscription(Document):
@@ -300,21 +299,13 @@ class Subscription(Document):
 			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 		items = []
+		customer = self.get_customer(self.subscriber)
 		for plan in plans:
 			subscription_plan = frappe.get_doc("Subscription Plan", plan.plan)
-			if subscription_plan.price_determination == "Fixed rate":
-				if not prorate:
-					items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': subscription_plan.cost})
-				else:
-					items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': (subscription_plan.cost * prorate_factor)})
-			elif subscription_plan.price_determination == "Based on price list":
-				customer = self.get_customer(self.subscriber)
-				customer_group = frappe.db.get_value("Customer", customer, "customer_group")
-				rate = get_price(item_code=subscription_plan.item, price_list=subscription_plan.price_list, customer_group=customer_group, company=None, qty=plan.qty)
-				if not prorate:
-					items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': rate})
-				else:
-					items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': (rate * prorate_factor)})
+			if not prorate:
+				items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': subscription_plan.get_plan_rate(customer)})
+			else:
+				items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': (subscription_plan.get_plan_rate(customer) * prorate_factor)})
 
 		return items
 
