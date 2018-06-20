@@ -9,10 +9,6 @@ from frappe import _
 from frappe.integrations.utils import create_request_log
 import stripe
 
-class PaymentPlan(Document):
-	pass
-
-
 def create_stripe_subscription(gateway_controller, data):
 	stripe_settings = frappe.get_doc("Stripe Settings", gateway_controller)
 	stripe_settings.data = frappe._dict(data)
@@ -22,7 +18,7 @@ def create_stripe_subscription(gateway_controller, data):
 
 	try:
 			stripe_settings.integration_request = create_request_log(stripe_settings.data, "Host", "Stripe")
-			stripe_settings.payment_plan = frappe.db.get_value("Payment Request", stripe_settings.data.reference_docname, 'payment_plan')
+			stripe_settings.payment_plans = frappe.get_doc("Payment Request", stripe_settings.data.reference_docname).subscription_plans
 			return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
@@ -34,11 +30,13 @@ def create_stripe_subscription(gateway_controller, data):
 
 
 def create_subscription_on_stripe(stripe_settings):
-		items = [
-				{
-				"plan": stripe_settings.payment_plan
-				}
-			]
+		items = []
+		for payment_plan in stripe_settings.payment_plans:
+			plan = frappe.db.get_value("Subscription Plan", payment_plan.plan, "payment_plan_id")
+			items.append({"plan": plan, "quantity": payment_plan.qty})
+
+		frappe.log_error(items, 'Items')
+
 
 		try:
 			customer = stripe.Customer.create(description=stripe_settings.data.payer_name, email=stripe_settings.data.payer_email, source=stripe_settings.data.stripe_token_id)
