@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, cstr
+from frappe.utils import date_diff, add_days, cstr, getdate
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, get_holidays_for_employee
 
@@ -13,6 +13,11 @@ class CompensatoryLeaveRequest(Document):
 
 	def validate(self):
 		validate_dates(self, self.work_from_date, self.work_end_date)
+		if self.half_day:
+			if not self.half_day_date:
+				frappe.throw(_("Half Day Date is mandatory"))
+			if not getdate(self.work_from_date)<=getdate(self.half_day_date)<=getdate(self.work_end_date):
+				frappe.throw(_("Half Day Date should be in between Work From Date and Work End Date"))
 		validate_overlap(self, self.work_from_date, self.work_end_date)
 		self.validate_holidays()
 		self.validate_attendance()
@@ -41,6 +46,8 @@ class CompensatoryLeaveRequest(Document):
 	def on_submit(self):
 		company = frappe.db.get_value("Employee", self.employee, "company")
 		date_difference = date_diff(self.work_end_date, self.work_from_date) + 1
+		if self.half_day:
+			date_difference -= 0.5
 		leave_period = get_leave_period(self.work_from_date, self.work_end_date, company)
 		if leave_period:
 			leave_allocation = self.exists_allocation_for_period(leave_period)
@@ -56,6 +63,8 @@ class CompensatoryLeaveRequest(Document):
 	def on_cancel(self):
 		if self.leave_allocation:
 			date_difference = date_diff(self.work_end_date, self.work_from_date) + 1
+			if self.half_day:
+				date_difference -= 0.5
 			leave_allocation = frappe.get_doc("Leave Allocation", self.leave_allocation)
 			if leave_allocation:
 				leave_allocation.new_leaves_allocated -= date_difference
