@@ -11,7 +11,7 @@ from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
-def get_stock_value (warehouse=None, item_code=None):
+def get_stock_value_from_bin (warehouse=None, item_code=None):
 
 	values = {}
 	conditions = ""
