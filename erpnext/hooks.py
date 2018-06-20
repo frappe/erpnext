@@ -210,6 +210,10 @@ doc_events = {
 	},
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
+	},
+	"*": {
+		"before_insert": 'erpnext.setup.doctype.uniqueness_rule.uniqueness_rule.check_uniqueness',
+		"on_update": 'erpnext.setup.doctype.uniqueness_rule.uniqueness_rule.check_uniqueness'
 	}
 }
 
