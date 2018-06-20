@@ -164,7 +164,7 @@ def calculate_lwp(employee, start_date, holidays, working_days):
 			lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 	return lwp
 
-def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, payment_days, working_days):
+def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, payment_days, working_days, frequency):
 	# Considering there is only one application for an year
 	benefit_application_name = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
@@ -177,12 +177,16 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 		'end_date': end_date
 	})
 
-	payroll_period_days = get_payroll_period_days(start_date, end_date, employee)
-	if payroll_period_days:
-		depends_on_lwp = frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp")
-		if depends_on_lwp != 1:
-			payment_days = working_days
+	payroll_period_days, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
 
+	depends_on_lwp = frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp")
+	if depends_on_lwp != 1:
+		payment_days = working_days
+		if frequency == "Monthly" and actual_payroll_days in range(360, 370):
+			payment_days = 1
+			payroll_period_days = 12
+
+	if payroll_period_days:
 		# If there is application for benefit then fetch the amount from the application.
 		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
 		if benefit_application_name:

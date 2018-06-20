@@ -89,7 +89,8 @@ class SalarySlip(TransactionBase):
 
 	def add_employee_flexi_benefits(self, struct_row):
 		if frappe.db.get_value("Salary Component", struct_row.salary_component, "pay_against_benefit_claim") != 1:
-			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, struct_row, self._salary_structure_doc, self.payment_days, self.total_working_days)
+			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, \
+			struct_row, self._salary_structure_doc, self.payment_days, self.total_working_days, self.payroll_frequency)
 			if benefit_component_amount:
 				self.update_component_row(struct_row, benefit_component_amount, "earnings")
 		else:
