@@ -353,3 +353,27 @@ def calculate_hra_exemption_for_period(doc):
 	# Don't delete this method, used for localization
 	# Indian HRA Exemption Calculation
 	return {}
+
+def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, component=False):
+	total_claimed_amount = 0
+	query = """
+	select sum(claimed_amount) as 'total_amount'
+	from `tabEmployee Benefit Claim`
+	where employee=%(employee)s
+	and docstatus = 1
+	and (claim_date between %(start_date)s and %(end_date)s)
+	"""
+	if non_pro_rata:
+		query += "and pay_against_benefit_claim = 1"
+	if component:
+		query += "and earning_component = %(component)s"
+
+	sum_of_claimed_amount = frappe.db.sql(query, {
+		'employee': employee,
+		'start_date': payroll_period.start_date,
+		'end_date': payroll_period.end_date,
+		'component': component
+	}, as_dict=True)
+	if sum_of_claimed_amount and sum_of_claimed_amount[0].total_amount > 0:
+		total_claimed_amount = sum_of_claimed_amount[0].total_amount
+	return total_claimed_amount
