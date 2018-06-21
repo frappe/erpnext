@@ -26,7 +26,7 @@ class EmployeeTransfer(Document):
 			new_employee.name = None
 			new_employee.employee_number = None
 			new_employee = update_employee(new_employee, self.transfer_details, date=self.transfer_date)
-			if self.company != self.new_company:
+			if self.new_company and self.company != self.new_company:
 				new_employee.internal_work_history = []
 				new_employee.date_of_joining = self.transfer_date
 				new_employee.company = self.new_company
@@ -41,7 +41,7 @@ class EmployeeTransfer(Document):
 			employee.db_set("status", "Left")
 		else:
 			employee = update_employee(employee, self.transfer_details, date=self.transfer_date)
-			if self.company != self.new_company:
+			if self.new_company and self.company != self.new_company:
 				employee.company = self.new_company
 				employee.date_of_joining = self.transfer_date
 			employee.save()
