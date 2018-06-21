@@ -69,12 +69,12 @@ frappe.help.help_links['List/Email Account'] = [
 	{ label: 'Email Account', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-account' },
 ]
 
-frappe.help.help_links['List/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['List/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
-frappe.help.help_links['Form/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['Form/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
 frappe.help.help_links['List/Email Digest'] = [
