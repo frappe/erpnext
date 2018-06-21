@@ -167,7 +167,6 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
 
-		# Lead Source
 		{'doctype': "Item Attribute", "attribute_name": _("Size"), "item_attribute_values": [
 			{"attribute_value": _("Extra Small"), "abbr": "XS"},
 			{"attribute_value": _("Small"), "abbr": "S"},
@@ -183,6 +182,12 @@ def install(country=None):
 			{"attribute_value": _("Black"), "abbr": "BLA"},
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
+
+		#Job Applicant Source
+		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Walk In')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Employee Referral')},
+		{'doctype': 'Job Applicant Source', 'source_name': _('Campaign')},
 
 		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
