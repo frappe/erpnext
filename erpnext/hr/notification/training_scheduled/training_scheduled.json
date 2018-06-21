@@ -1,0 +1,24 @@
+{
+ "attach_print": 0,
+ "creation": "2017-08-11 03:13:40.519614",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Training Event",
+ "enabled": 1,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "<h3>{{_(\"Training Event\")}}</h3>\n\n<p>{{ doc.introduction }}</p>\n\n<h4>{{_(\"Details\")}}</h4>\n{{_(\"Event Name\")}}: {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}\n<br>{{_(\"Event Location\")}}: {{ doc.location }}\n<br>{{_(\"Start Time\")}}: {{ doc.start_time }}\n<br>{{_(\"End Time\")}}: {{ doc.end_time }}\n",
+ "modified": "2017-08-13 22:49:42.338881",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Training Scheduled",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "email_by_document_field": "employee_emails"
+  }
+ ],
+ "subject": "Training Scheduled: {{ doc.name }}"
+}

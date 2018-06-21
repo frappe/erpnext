@@ -4,6 +4,7 @@ import random, json
 import frappe
 from frappe.utils import nowdate, add_days
 from erpnext.demo.setup.setup_data import import_json
+from erpnext.demo.domains import data
 
 from six import iteritems
 
@@ -57,6 +58,7 @@ def setup_asset():
 		asset.set_missing_values()
 		asset.make_depreciation_schedule()
 		asset.flags.ignore_validate = True
+		asset.flags.ignore_mandatory = True
 		asset.save()
 		asset.submit()
 
@@ -65,10 +67,11 @@ def setup_item():
 	for i in items:
 		item = frappe.new_doc('Item')
 		item.update(i)
-		if item.default_warehouse:
-			warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.default_warehouse}, limit=1)
+		if hasattr(item, 'item_defaults') and item.item_defaults[0].default_warehouse:
+			item.item_defaults[0].company = data.get("Manufacturing").get('company_name')
+			warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.item_defaults[0].default_warehouse}, limit=1)
 			if warehouse:
-				item.default_warehouse = warehouse[0].name
+				item.item_defaults[0].default_warehouse = warehouse[0].name
 		item.insert()
 
 def setup_product_bundle():

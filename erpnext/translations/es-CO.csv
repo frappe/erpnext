@@ -1,1 +1,1 @@
-b'apps/erpnext/erpnext/stock/doctype/item/item.py +498',b'Barcode {0} is not a valid {1} code',b'El c\xc3\xb3digo de barras {0} no es un c\xc3\xb3digo v\xc3\xa1lido {1}'
+apps/erpnext/erpnext/stock/doctype/item/item.py +513,Barcode {0} is not a valid {1} code,El código de barras {0} no es un código válido {1}

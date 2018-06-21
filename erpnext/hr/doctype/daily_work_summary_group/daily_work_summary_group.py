@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 import frappe.utils
 from frappe import _
-
+from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_user_emails_from_group
 
 class DailyWorkSummaryGroup(Document):
 	def validate(self):
@@ -25,7 +25,7 @@ def trigger_emails():
 		if (is_current_hour(group_doc.send_emails_at)
 			and not is_holiday_today(group_doc.holiday_list)
 			and group_doc.enabled):
-			emails = [d.email for d in group_doc.users]
+			emails = get_user_emails_from_group(group_doc)
 			# find emails relating to a company
 			if emails:
 				daily_work_summary = frappe.get_doc(

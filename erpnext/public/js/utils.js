@@ -15,7 +15,8 @@ $.extend(erpnext, {
 
 	get_presentation_currency_list: () => {
 		const docs = frappe.boot.docs;
-		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		let currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		currency_list.unshift("");
 		return currency_list;
 	},
 
@@ -69,7 +70,7 @@ $.extend(erpnext, {
 						"get_query": function () {
 							return {
 								filters: {
-									item_code:grid_row.doc.item_code ,
+									item_code:grid_row.doc.item_code,
 									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
 								}
 							}
@@ -182,6 +183,25 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	get_tree_options: function(option) {
+		// get valid options for tree based on user permission & locals dict
+		let unscrub_option = frappe.model.unscrub(option);
+		let user_permission = frappe.defaults.get_user_permissions();
+		if(user_permission && user_permission[unscrub_option]) {
+			return user_permission[unscrub_option]["docs"];
+		} else {
+			return $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
+		}
+	},
+	get_tree_default: function(option) {
+		// set default for a field based on user permission
+		let options = this.get_tree_options(option);
+		if(options.includes(frappe.defaults.get_default(option))) {
+			return frappe.defaults.get_default(option);
+		} else {
+			return options[0];
+		}
+	}
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
@@ -287,9 +307,13 @@ erpnext.utils.select_alternate_items = function(opts) {
 
 			alternative_items.forEach(d => {
 				let row = frappe.get_doc(opts.child_doctype, d.docname);
-				let qty = row.qty;
+				let qty = null;
+				if (row.doctype === 'Work Order Item') {
+					qty = row.required_qty;
+				} else {
+					qty = row.qty;
+				}
 				row[item_field] = d.alternate_item;
-
 				frm.script_manager.trigger(item_field, row.doctype, row.name)
 					.then(() => {
 						frappe.model.set_value(row.doctype, row.name, 'qty', qty);

@@ -1,32 +1,72 @@
-b'DocType: Timesheet',b'Total Costing Amount',b'Monto Total Calculado'
-b'DocType: Student Group Student',b'Student Group Student',b'Alumno de Grupo de Estudiantes'
-b'DocType: Delivery Note',b'% Installed',b'% Instalado'
-b'DocType: Company',b'Gain/Loss Account on Asset Disposal',b'Cuenta de ganancia/p\xc3\xa9rdida en la disposici\xc3\xb3n de activos'
-b'apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478',b'Please enter Account for Change Amount',"b'Por favor, introduzca la Vuenta para el Cambio Monto'"
-b'DocType: Sales Order',b'SO-',b'OV-'
-b'apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +246',b'Please set the Item Code first',"b'Por favor, primero define el C\xc3\xb3digo del Art\xc3\xadculo'"
-b'apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60',"b""Show unclosed fiscal year's P&L balances""",b'Mostrar saldos de Ganancias y Perdidas de a\xc3\xb1o fiscal sin cerrar'
-,b'Support Hour Distribution',b'Distribuci\xc3\xb3n de Hora de Soporte'
-b'apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batch_wise_attendance.py +42',b'Student Group Strength',b'Fortaleza de Grupo Estudiante'
-b'apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +191',"b""Please set 'Gain/Loss Account on Asset Disposal' in Company {0}""","b""Por favor defina la 'Cuenta de Ganacia/P\xc3\xa9rdida  por Ventas de Activos' en la empresa {0}"""
-b'apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +44',b'Leave Type {0} cannot be allocated since it is leave without pay',b'Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga'
-b'apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +463',b'Show Salary Slip',b'Mostrar Recibo de N\xc3\xb3mina'
-b'apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +246',b'Leave Without Pay does not match with approved Leave Application records',b'Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas'
-b'DocType: Purchase Taxes and Charges Template',"b'Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.\n10. Add or Deduct: Whether you want to add or deduct the tax.'","b'Plantilla de impuestos que puede aplicarse a todas las operaciones de compra. Esta plantilla puede contener un listado de cuentas de impuestos as\xc3\xad como tambi\xc3\xa9n de otras cuentas de gastos como ""Env\xc3\xado"", ""Seguros"", ""Manejo"", etc. \n\n #### Nota \n\nLa tasa impositiva que se defina aqu\xc3\xad ser\xc3\xa1 la tasa de gravamen predeterminada para todos los **Productos**. Si existen **Productos** con diferentes tasas, estas deben ser a\xc3\xb1adidas a la tabla de **Impuestos del Producto ** dentro del maestro del **Producto**.\n\n #### Descripci\xc3\xb3n de las Columnas \n\n 1. Tipo de C\xc3\xa1lculo: \n - Este puede ser **Sobre el total neto** (que es la suma de la cantidad b\xc3\xa1sica).\n - **Sobre la l\xc3\xadnea anterior total / importe** (para impuestos o cargos acumulados). Si selecciona esta opci\xc3\xb3n, el impuesto se aplica como un porcentaje de la cantidad o total de la fila anterior (de la tabla de impuestos).\n - **Actual** (como se haya capturado).\n 2. Encabezado de cuenta: La cuenta mayor sobre la que se registrara este gravamen. \n 3. Centro de Costo: Si el impuesto / cargo es un ingreso (como en un env\xc3\xado) o un gasto, debe ser registrado contra un centro de costos.\n 4. Descripci\xc3\xb3n: Descripci\xc3\xb3n del impuesto (que se imprimir\xc3\xa1n en facturas / cotizaciones).\n 5. Rate: Tasa de impuesto.\n 6. Monto: Monto de impuesto.\n 7. Total: Total acumulado hasta este punto.\n 8. L\xc3\xadnea de referencia: Si se basa en ""L\xc3\xadnea anterior al total"" se puede seleccionar el n\xc3\xbamero de la fila que ser\xc3\xa1 tomado como base para este c\xc3\xa1lculo (por defecto es la fila anterior).\n 9. Considerar impuesto o cargo para: En esta secci\xc3\xb3n se puede especificar si el impuesto / cargo es s\xc3\xb3lo para la valoraci\xc3\xb3n (no una parte del total) o s\xc3\xb3lo para el total (no agrega valor al elemento) o para ambos.\n 10. A\xc3\xb1adir o deducir: Si usted quiere a\xc3\xb1adir o deducir el impuesto.'"
-b'apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123',b'Leave Type {0} cannot be carry-forwarded',b'Tipo de Permiso {0} no se puede arrastar o trasladar'
-b'apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252',b'Accural Journal Entry for salaries from {0} to {1}',b'Entrada de Diario de Cuentas por Pagar para salarios de {0} a {1}'
-b'apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +123',b'Gain/Loss on Asset Disposal',b'Ganancia/P\xc3\xa9rdida por la venta de activos'
-b'DocType: Currency Exchange',b'Specify Exchange Rate to convert one currency into another',b'Especificar el Tipo de Cambio para convertir de una divisa a otra'
-b'apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +163',b'Source and target warehouse must be different',b'El almac\xc3\xa9n de origen y el de destino deben ser diferentes'
-b'apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +20',"b'Service Item,Type,frequency and expense amount are required'","b'El Art\xc3\xadculo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos'"
-b'apps/erpnext/erpnext/assets/doctype/asset/asset.py +59',b'Gross Purchase Amount is mandatory',b'El Importe Bruto de Compra es obligatorio'
-b'DocType: Stock Entry',b'Customer or Supplier Details',b'Detalle de cliente o proveedor'
-b'DocType: Lab Test Template',b'Standard Selling Rate',b'Tarifa de Venta Est\xc3\xa1ndar'
-b'DocType: Program Enrollment',b'School House',b'Casa Escuela'
-b'apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +282',b'Please set default account in Expense Claim Type {0}',"b'Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}'"
-b'apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +54',b'Score cannot be greater than Maximum Score',b'Los resultados no puede ser mayor que la Puntuaci\xc3\xb3n M\xc3\xa1xima'
-b'apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60',"b""Please set Company filter blank if Group By is 'Company'""","b""Por favor, establezca el filtro de Compa\xc3\xb1\xc3\xada en blanco si Agrupar Por es 'Compa\xc3\xb1\xc3\xada'"""
-b'DocType: Education Settings',"b'For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.'","b'Para Grupo de Estudiantes por Curso, el Curso ser\xc3\xa1 validado para cada Estudiante de los Cursos inscritos en la Inscripci\xc3\xb3n del Programa.'"
-b'DocType: Education Settings',"b'For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.'","b'Para grupo de estudiantes por lotes, el lote de estudiantes se validar\xc3\xa1 para cada estudiante de la inscripci\xc3\xb3n del programa.'"
-b'apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +75',b'Leave Encashment',b'Cobro de Permiso'
-b'apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1052',b'Select Items based on Delivery Date',b'Seleccionar Art\xc3\xadculos seg\xc3\xban la fecha de entrega'
+DocType: Timesheet,Total Costing Amount,Monto Total Calculado
+DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudiantes
+DocType: Delivery Note,% Installed,% Instalado
+DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +483,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+DocType: Sales Order,SO-,OV-
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +264,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
+,Support Hour Distribution,Distribución de Hora de Soporte
+apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batch_wise_attendance.py +42,Student Group Strength,Fortaleza de Grupo Estudiante
+apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +193,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
+apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +58,Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +438,Show Salary Slip,Mostrar Recibo de Nómina
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +290,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
+DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.","Plantilla de impuestos que puede aplicarse a todas las operaciones de compra. Esta plantilla puede contener un listado de cuentas de impuestos así como también de otras cuentas de gastos como ""Envío"", ""Seguros"", ""Manejo"", etc. 
+
+ #### Nota 
+
+La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada para todos los **Productos**. Si existen **Productos** con diferentes tasas, estas deben ser añadidas a la tabla de **Impuestos del Producto ** dentro del maestro del **Producto**.
+
+ #### Descripción de las Columnas 
+
+ 1. Tipo de Cálculo: 
+ - Este puede ser **Sobre el total neto** (que es la suma de la cantidad básica).
+ - **Sobre la línea anterior total / importe** (para impuestos o cargos acumulados). Si selecciona esta opción, el impuesto se aplica como un porcentaje de la cantidad o total de la fila anterior (de la tabla de impuestos).
+ - **Actual** (como se haya capturado).
+ 2. Encabezado de cuenta: La cuenta mayor sobre la que se registrara este gravamen. 
+ 3. Centro de Costo: Si el impuesto / cargo es un ingreso (como en un envío) o un gasto, debe ser registrado contra un centro de costos.
+ 4. Descripción: Descripción del impuesto (que se imprimirán en facturas / cotizaciones).
+ 5. Rate: Tasa de impuesto.
+ 6. Monto: Monto de impuesto.
+ 7. Total: Total acumulado hasta este punto.
+ 8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
+ 9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
+ 10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
+apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +160,Leave Type {0} cannot be carry-forwarded,Tipo de Permiso {0} no se puede arrastar o trasladar
+apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +130,Gain/Loss on Asset Disposal,Ganancia/Pérdida por la venta de activos
+DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el Tipo de Cambio para convertir de una divisa a otra
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +46,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,"Sólo Solicitudes de Permiso con estado ""Aprobado"" y ""Rechazado"" puede ser presentado"
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +163,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
+apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +20,"Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio
+DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
+DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
+DocType: Program Enrollment,School House,Casa Escuela
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +288,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
+apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +54,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
+apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
+DocType: Education Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
+DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
+DocType: Leave Encashment,Leave Encashment,Cobro de Permiso
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1072,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega

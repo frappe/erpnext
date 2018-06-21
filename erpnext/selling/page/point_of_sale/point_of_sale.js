@@ -95,7 +95,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
 			events: {
-				on_customer_change: (customer) => this.frm.set_value('customer', customer),
+				on_customer_change: (customer) => {
+					this.frm.set_value('customer', customer);
+				},
 				on_field_change: (item_code, field, value, batch_no) => {
 					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
@@ -119,6 +121,46 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				},
 				get_item_details: (item_code) => {
 					return this.items.get(item_code);
+				},
+				get_loyalty_details: () => {
+					var me = this;
+					if (this.frm.doc.customer) {
+						frappe.call({
+							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+							args: {
+								"customer": me.frm.doc.customer,
+								"till_date": me.frm.doc.posting_date,
+								"company": me.frm.doc.company,
+								"silent": true
+							},
+							callback: function(r) {
+								if (r.message.loyalty_program && r.message.loyalty_points) {
+									me.cart.events.set_loyalty_details(r.message, true);
+								}
+								if (!r.message.loyalty_program) {
+									var loyalty_details = {
+										loyalty_points: 0,
+										loyalty_program: '',
+										expense_account: '',
+										cost_center: ''
+									}
+									me.cart.events.set_loyalty_details(loyalty_details, false);
+								}
+							}
+						});
+					}
+				},
+				set_loyalty_details: (details, view_status) => {
+					if (view_status) {
+						this.cart.available_loyalty_points.$wrapper.removeClass("hide");
+					} else {
+						this.cart.available_loyalty_points.$wrapper.addClass("hide");
+					}
+					this.cart.available_loyalty_points.set_value(details.loyalty_points);
+					this.cart.available_loyalty_points.refresh_input();
+					this.frm.set_value("loyalty_program", details.loyalty_program);
+					this.frm.set_value("loyalty_redemption_account", details.expense_account);
+					this.frm.set_value("loyalty_redemption_cost_center", details.cost_center);
 				}
 			}
 		});
@@ -512,6 +554,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
+		this.page.add_menu_item(__('Close the POS'), function() {
+			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
+			voucher.pos_profile = me.frm.doc.pos_profile;
+			voucher.user = frappe.session.user;
+			voucher.company = me.frm.doc.company;
+			voucher.period_start_date = me.frm.doc.posting_date;
+			voucher.period_end_date = me.frm.doc.posting_date;
+			voucher.posting_date = me.frm.doc.posting_date;
+			frappe.set_route('Form', 'POS Closing Voucher', voucher.name);
+		});
 	}
 
 	set_form_action() {
@@ -551,8 +603,7 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
-		this.make_loyalty_program();
-		this.make_redeem_loyalty_checkbox();
+		this.make_loyalty_points();
 		this.make_numpad();
 	}
 
@@ -592,7 +643,6 @@ class POSCart {
 					<div class="number-pad-container col-sm-6"></div>
 					<div class="col-sm-6 loyalty-program-section">
 						<div class="loyalty-program-field"> </div>
-						<div class="redeem-loyalty-points-field"> </div>
 					</div>
 				</div>
 			</div>
@@ -766,11 +816,8 @@ class POSCart {
 					}
 				},
 				onchange: () => {
-					console.log("customer on change, this->", this);
 					this.events.on_customer_change(this.customer_field.get_value());
-					// if (this.frm.doc.loyalty_program) {
-					// 	this.wrapper.find('.loyalty-program-section').removeClass('hide')
-					// }
+					this.events.get_loyalty_details();
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -781,38 +828,17 @@ class POSCart {
 	}
 
 
-	make_loyalty_program() {
-		this.loyalty_program_field = frappe.ui.form.make_control({
+	make_loyalty_points() {
+		this.available_loyalty_points = frappe.ui.form.make_control({
 			df: {
-				fieldtype: 'Link',
-				label: 'Loyalty Program',
-				fieldname: 'loyalty_program',
-				options: 'Loyalty Program',
-				read_only: 1
+				fieldtype: 'Int',
+				label: 'Available Loyalty Points',
+				read_only: 1,
+				fieldname: 'available_loyalty_points'
 			},
 			parent: this.wrapper.find('.loyalty-program-field')
 		});
-
-		this.loyalty_program_field.set_value(this.frm.doc.loyalty_program);
-	}
-
-
-	make_redeem_loyalty_checkbox() {
-		this.redeem_loyalty_points = frappe.ui.form.make_control({
-			df: {
-				fieldtype: 'Check',
-				label: 'Redeem Loyalty Points',
-				fieldname: 'redeem_loyalty_points',
-				onchange: () => {
-					console.log("redeem points checkbox, this-> ", this);
-					this.frm.set_value("redeem_loyalty_points", this.redeem_loyalty_points.get_value());
-				}
-			},
-			parent: this.wrapper.find('.redeem-loyalty-points-field'),
-			render_input: true
-		});
-		console.log("this is the redeem checkbox", this);
-		this.redeem_loyalty_points.set_value(this.frm.doc.redeem_loyalty_points);
+		this.available_loyalty_points.set_value(this.frm.doc.loyalty_points);
 	}
 
 
@@ -870,7 +896,7 @@ class POSCart {
 						});
 						this.numpad.reset_value();
 					} else {
-						const item_code = this.selected_item.attr('data-item-code');
+						const item_code = unescape(this.selected_item.attr('data-item-code'));
 						const batch_no = this.selected_item.attr('data-batch-no');
 						const field = this.selected_item.active_field;
 						const value = this.numpad.get_value();
@@ -917,7 +943,7 @@ class POSCart {
 
 	update_item(item) {
 		const item_selector = item.batch_no ?
-			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${item.item_code}"]`;
+			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
 
 		const $item = this.$cart_items.find(item_selector);
 
@@ -940,9 +966,11 @@ class POSCart {
 		const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
+		const batch_no = item.batch_no || '';
+
 		return `
-			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}"
-				data-batch-no="${item.batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
+			<div class="list-item indicator ${indicator_class}" data-item-code="${escape(item.item_code)}"
+				data-batch-no="${batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
@@ -985,20 +1013,21 @@ class POSCart {
 
 	exists(item_code, batch_no) {
 		const is_exists = batch_no ?
-			`[data-batch-no="${batch_no}"]` : `[data-item-code="${item_code}"]`;
+			`[data-batch-no="${batch_no}"]` : `[data-item-code="${escape(item_code)}"]`;
 
 		let $item = this.$cart_items.find(is_exists);
+
 		return $item.length > 0;
 	}
 
 	highlight_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		const $item = this.$cart_items.find(`[data-item-code="${escape(item_code)}"]`);
 		$item.addClass('highlight');
 		setTimeout(() => $item.removeClass('highlight'), 1000);
 	}
 
 	scroll_to_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		const $item = this.$cart_items.find(`[data-item-code="${escape(item_code)}"]`);
 		if ($item.length === 0) return;
 		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
 		this.$cart_items.animate({ scrollTop });
@@ -1013,7 +1042,7 @@ class POSCart {
 			'[data-action="increment"], [data-action="decrement"]', function() {
 				const $btn = $(this);
 				const $item = $btn.closest('.list-item[data-item-code]');
-				const item_code = $item.attr('data-item-code');
+				const item_code = unescape($item.attr('data-item-code'));
 				const action = $btn.attr('data-action');
 
 				if(action === 'increment') {
@@ -1036,7 +1065,7 @@ class POSCart {
 		this.$cart_items.on('change', '.quantity input', function() {
 			const $input = $(this);
 			const $item = $input.closest('.list-item[data-item-code]');
-			const item_code = $item.attr('data-item-code');
+			const item_code = unescape($item.attr('data-item-code'));
 			events.on_field_change(item_code, 'qty', flt($input.val()));
 		});
 
@@ -1304,7 +1333,7 @@ class POSItems {
 		var me = this;
 		this.wrapper.on('click', '.pos-item-wrapper', function() {
 			const $item = $(this);
-			const item_code = $item.attr('data-item-code');
+			const item_code = unescape($item.attr('data-item-code'));
 			me.events.update_cart(item_code, 'qty', '+1');
 		});
 	}
@@ -1330,7 +1359,7 @@ class POSItems {
 		const item_title = item_name || item_code;
 
 		const template = `
-			<div class="pos-item-wrapper image-view-item" data-item-code="${item_code}">
+			<div class="pos-item-wrapper image-view-item" data-item-code="${escape(item_code)}">
 				<div class="image-view-header">
 					<div>
 						<a class="grey list-id" data-name="${item_code}" title="${item_title}">
@@ -1514,7 +1543,8 @@ class Payment {
 		this.set_flag();
 		this.dialog = new frappe.ui.Dialog({
 			fields: this.get_fields(),
-			width: 800
+			width: 800,
+			invoice_frm: this.frm
 		});
 
 		this.set_title();
@@ -1551,7 +1581,7 @@ class Payment {
 			me.numpad.reset_value();
 			me.fieldname = $(this).prop('dataset').fieldname;
 			if (me.frm.doc.outstanding_amount > 0 &&
-				!in_list(['write_off_amount', 'change_amount', 'loyalty_points', 'loyalty_amount'], me.fieldname)) {
+				!in_list(['write_off_amount', 'change_amount'], me.fieldname)) {
 				me.frm.doc.payments.forEach((data) => {
 					if (data.mode_of_payment == me.fieldname && !data.amount) {
 						me.dialog.set_value(me.fieldname,
@@ -1599,16 +1629,15 @@ class Payment {
 			},
 			{
 				fieldtype: 'Section Break',
+				depends_on: 'eval: this.invoice_frm.doc.loyalty_program'
 			},
 			{
-				fieldtype: 'Int',
-				fieldname: "loyalty_points",
-				label: __("Loyalty Points"),
-				default: me.frm.doc.loyalty_points,
+				fieldtype: 'Check',
+				label: 'Redeem Loyalty Points',
+				fieldname: 'redeem_loyalty_points',
 				onchange: () => {
-					debugger;
-					me.update_cur_frm_value('loyalty_points', () => {
-						frappe.flags.loyalty_points = false;
+					me.update_cur_frm_value("redeem_loyalty_points", () => {
+						frappe.flags.redeem_loyalty_points = false;
 						me.update_loyalty_points();
 					});
 				}
@@ -1617,12 +1646,24 @@ class Payment {
 				fieldtype: 'Column Break',
 			},
 			{
+				fieldtype: 'Int',
+				fieldname: "loyalty_points",
+				label: __("Loyalty Points"),
+				depends_on: "redeem_loyalty_points",
+				onchange: () => {
+					me.update_cur_frm_value("loyalty_points", () => {
+						frappe.flags.loyalty_points = false;
+						me.update_loyalty_points();
+					});
+				}
+			},
+			{
 				fieldtype: 'Currency',
 				label: __("Loyalty Amount"),
 				fieldname: "loyalty_amount",
 				options: me.frm.doc.currency,
-				default: me.frm.doc.loyalty_amount,
-				read_only: 1
+				read_only: 1,
+				depends_on: "redeem_loyalty_points"
 			},
 			{
 				fieldtype: 'Section Break',
@@ -1687,6 +1728,8 @@ class Payment {
 		frappe.flags.write_off_amount = true;
 		frappe.flags.change_amount = true;
 		frappe.flags.loyalty_points = true;
+		frappe.flags.redeem_loyalty_points = true;
+		frappe.flags.payment_method = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -1703,15 +1746,15 @@ class Payment {
 
 	update_payment_value(fieldname, value) {
 		var me = this;
-		$.each(this.frm.doc.payments, function(i, data) {
-			if (__(data.mode_of_payment) == __(fieldname)) {
-				frappe.model.set_value('Sales Invoice Payment', data.name, 'amount', value)
-					.then(() => {
-						me.update_change_amount();
-						me.update_write_off_amount();
-					});
-			}
-		});
+			$.each(this.frm.doc.payments, function(i, data) {
+				if (__(data.mode_of_payment) == __(fieldname)) {
+					frappe.model.set_value('Sales Invoice Payment', data.name, 'amount', value)
+						.then(() => {
+							me.update_change_amount();
+							me.update_write_off_amount();
+						});
+				}
+			});
 	}
 
 	update_change_amount() {
@@ -1728,11 +1771,21 @@ class Payment {
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 
+	update_payment_amount() {
+		var me = this;
+		$.each(this.frm.doc.payments, function(i, data) {
+			console.log("setting the ", data.mode_of_payment, " for the value", data.amount);
+			me.dialog.set_value(data.mode_of_payment, data.amount);
+		});
+	}
+
 	update_loyalty_points() {
-		this.update_payment_value();
-		this.dialog.set_value("loyalty_points", this.frm.doc.loyalty_points);
-		this.dialog.set_value("loyalty_amount", this.frm.doc.loyalty_amount);
-		// this.show_paid_amount();
+		if (this.dialog.get_value("redeem_loyalty_points")) {
+			this.dialog.set_value("loyalty_points", this.frm.doc.loyalty_points);
+			this.dialog.set_value("loyalty_amount", this.frm.doc.loyalty_amount);
+			this.update_payment_amount();
+			this.show_paid_amount();
+		}
 	}
 
 }

@@ -12,7 +12,7 @@ class website_maker(object):
 		self.args = args
 		self.company = args.company_name
 		self.tagline = args.company_tagline
-		self.user = args.name
+		self.user = args.get('email')
 		self.make_web_page()
 		self.make_website_settings()
 		self.make_blog()
@@ -50,6 +50,17 @@ class website_maker(object):
 		website_settings.save()
 
 	def make_blog(self):
+		blog_category = frappe.get_doc({
+			"doctype": "Blog Category",
+			"category_name": "general",
+			"published": 1,
+			"title": _("General")
+		}).insert()
+
+		if not self.user:
+			# Admin setup
+			return
+
 		blogger = frappe.new_doc("Blogger")
 		user = frappe.get_doc("User", self.user)
 		blogger.user = self.user
@@ -57,13 +68,6 @@ class website_maker(object):
 		blogger.short_name = user.first_name.lower()
 		blogger.avatar = user.user_image
 		blogger.insert()
-
-		blog_category = frappe.get_doc({
-			"doctype": "Blog Category",
-			"category_name": "general",
-			"published": 1,
-			"title": _("General")
-		}).insert()
 
 		frappe.get_doc({
 			"doctype": "Blog Post",

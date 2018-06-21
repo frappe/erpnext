@@ -1,29 +1,29 @@
-b'apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +117',"b""'Opening'""","b""'\xc3\x85bning'"""
-b'DocType: Lead',b'Lead',b'Bly'
-b'apps/erpnext/erpnext/config/selling.py +153',b'Default settings for selling transactions.',b'Standardindstillinger for at s\xc3\xa6lge transaktioner.'
-b'DocType: Timesheet',b'% Amount Billed',b'% Bel\xc3\xb8b Billed'
-b'DocType: Purchase Order',b'% Billed',b'% Billed'
-,b'Lead Id',b'Bly Id'
-b'apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +197',"b""'Total'""","b""'Total'"""
-b'DocType: Selling Settings',b'Selling Settings',b'Salg af indstillinger'
-b'apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71',b'Selling Amount',b'Selling Bel\xc3\xb8b'
-b'apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192',b'Lead must be set if Opportunity is made from Lead',"b'Bly skal indstilles, hvis Opportunity er lavet af Lead'"
-b'DocType: Item',b'Default Selling Cost Center',b'Standard Selling Cost center'
-b'apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64',b'90-Above',b'90-Above'
-b'DocType: Pricing Rule',b'Selling',b'Selling'
-b'apps/erpnext/erpnext/accounts/page/pos/pos.js +76',b' to ',b'Ultima Actualizaci\xc3\xb3n : Fecha inv\xc3\xa1lida'
-b'DocType: Sales Order',b'%  Delivered',b'% Leveres'
-b'DocType: Lead',b'Lead Owner',b'Bly Owner'
-b'apps/erpnext/erpnext/controllers/stock_controller.py +236',b'{0} {1}: Cost Center is mandatory for Item {2}',b'{0} {1}: Udgiftomr\xc3\xa5de er obligatorisk for varen {2}'
-b'apps/erpnext/erpnext/config/selling.py +169',b'Tax template for selling transactions.',b'Skat skabelon til at s\xc3\xa6lge transaktioner.'
-b'apps/erpnext/erpnext/controllers/accounts_controller.py +313',b' or ',b'o'
-b'DocType: Sales Order',b'% of materials billed against this Sales Order',b'% Af materialer faktureret mod denne Sales Order'
-b'DocType: SMS Center',b'All Lead (Open)',b'Alle Bly (Open)'
-b'apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7',b'Get Updates',b'Hent opdateringer'
-b'apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48',"b""'Update Stock' can not be checked because items are not delivered via {0}""","b""'Opdater lager' kan ikke markeres, varerne ikke leveres via {0}"""
-b'apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21',b'Standard Selling',b'Standard Selling'
-,b'Lead Details',b'Bly Detaljer'
-b'DocType: Selling Settings',b'Settings for Selling Module',b'Indstillinger for Selling modul'
-,b'Lead Name',b'Bly navn'
-b'DocType: Vehicle Service',b'Half Yearly',b'Halvdelen \xc3\x85rlig'
-b'DocType: Rename Tool',"b'Attach .csv file with two columns, one for the old name and one for the new name'","b'Vedh\xc3\xa6fte .csv fil med to kolonner, en for det gamle navn og et til det nye navn'"
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +135,'Opening','Åbning'
+DocType: Lead,Lead,Bly
+apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
+DocType: Timesheet,% Amount Billed,% Beløb Billed
+DocType: Purchase Order,% Billed,% Billed
+,Lead Id,Bly Id
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +215,'Total','Total'
+DocType: Selling Settings,Selling Settings,Salg af indstillinger
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Selling Amount,Selling Beløb
+apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,"Bly skal indstilles, hvis Opportunity er lavet af Lead"
+DocType: Item Default,Default Selling Cost Center,Standard Selling Cost center
+apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-Above
+DocType: Pricing Rule,Selling,Selling
+apps/erpnext/erpnext/accounts/page/pos/pos.js +79, to ,Ultima Actualización : Fecha inválida
+DocType: Sales Order,%  Delivered,% Leveres
+DocType: Lead,Lead Owner,Bly Owner
+apps/erpnext/erpnext/controllers/stock_controller.py +240,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
+apps/erpnext/erpnext/config/selling.py +169,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
+apps/erpnext/erpnext/controllers/accounts_controller.py +346, or ,o
+DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order
+DocType: SMS Center,All Lead (Open),Alle Bly (Open)
+apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,Hent opdateringer
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +46,'Update Stock' can not be checked because items are not delivered via {0},"'Opdater lager' kan ikke markeres, varerne ikke leveres via {0}"
+apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,Standard Selling
+,Lead Details,Bly Detaljer
+DocType: Selling Settings,Settings for Selling Module,Indstillinger for Selling modul
+,Lead Name,Bly navn
+DocType: Vehicle Service,Half Yearly,Halvdelen Årlig
+DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Vedhæfte .csv fil med to kolonner, en for det gamle navn og et til det nye navn"

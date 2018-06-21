@@ -49,9 +49,9 @@ def create_driver():
 		driver.insert()
 
 def create_delivery_notfication():
-	if not frappe.db.exists("Standard Reply", "Delivery Notification"):
+	if not frappe.db.exists("Email Template", "Delivery Notification"):
 		frappe.get_doc({
-			'doctype': 'Standard Reply',
+			'doctype': 'Email Template',
 			'name': 'Delivery Notification',
 			'response': 'Test Delivery Trip',
 			'subject': 'Test Subject',

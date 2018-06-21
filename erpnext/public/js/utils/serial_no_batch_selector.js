@@ -55,11 +55,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				},
 				get_query: function() {
 					return {
-						filters: {
-							is_group: 0,
-							company: me.frm.doc.company
-						}
-					};
+						query: "erpnext.controllers.queries.warehouse_query",
+						filters: [
+							["Bin", "item_code", "=", me.item_code],
+							["Warehouse", "is_group", "=", 0],
+							["Warehouse", "company", "=", me.frm.doc.company]
+						]
+					}
 				}
 			},
 			{fieldtype:'Column Break'},

@@ -1,3 +1,0 @@
-# Artículos
-
-{index}

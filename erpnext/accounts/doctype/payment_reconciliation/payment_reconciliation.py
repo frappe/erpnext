@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt
 from frappe import msgprint, _
 from frappe.model.document import Document
@@ -30,8 +30,8 @@ class PaymentReconciliation(Document):
 		return payment_entries
 
 	def get_jv_entries(self):
-		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
-			else "debit_in_account_currency"
+		dr_or_cr = ("credit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+			else "debit_in_account_currency")
 
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
@@ -104,8 +104,8 @@ class PaymentReconciliation(Document):
 
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit_in_account_currency" \
-			if self.party_type == "Customer" else "debit_in_account_currency"
+		dr_or_cr = ("credit_in_account_currency"
+			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
 			
 		lst = []
 		for e in self.get('payments'):
@@ -173,11 +173,8 @@ class PaymentReconciliation(Document):
 	def check_condition(self):
 		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
 		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
-
-		if self.party_type == "Customer":
-			dr_or_cr = "debit_in_account_currency"
-		else:
-			dr_or_cr = "credit_in_account_currency"
+		dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+			else "credit_in_account_currency")
 
 		if self.minimum_amount:
 			cond += " and `{0}` >= {1}".format(dr_or_cr, flt(self.minimum_amount))

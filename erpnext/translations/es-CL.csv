@@ -1,32 +1,32 @@
-b'DocType: Assessment Plan',b'Grading Scale',b'Escala de Calificaci\xc3\xb3n'
-b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +57',b'Guardian1 Mobile No',b'N\xc3\xbamero de M\xc3\xb3vil de Guardi\xc3\xa1n 1'
-b'apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152',b'Gross Profit / Loss',b'Ganancia / P\xc3\xa9rdida Bruta'
-b'apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42',b'Cheques and Deposits incorrectly cleared',b'Los cheques y dep\xc3\xb3sitos resueltos de forma incorrecta'
-b'DocType: Assessment Group',b'Parent Assessment Group',b'Grupo de Evaluaci\xc3\xb3n Padre'
-b'DocType: Student',b'Guardians',b'Guardianes'
-b'DocType: Fee Schedule',b'Fee Schedule',b'Programa de Tarifas'
-b'apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +686',b'Get Items from Product Bundle',b'Obtener \xc3\x8dtems de Paquete de Productos'
-b'apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +930',b'BOM does not contain any stock item',b'BOM no contiene ning\xc3\xban \xc3\xadtem de stock'
-b'DocType: Homepage',b'Company Tagline for website homepage',b'Lema de la empresa para la p\xc3\xa1gina de inicio del sitio web'
-b'DocType: Delivery Note',b'% Installed',b'% Instalado'
-b'DocType: Student',b'Guardian Details',b'Detalles del Guardi\xc3\xa1n'
-b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +55',b'Guardian1 Name',b'Nombre de Guardi\xc3\xa1n 1'
-b'DocType: Grading Scale Interval',b'Grade Code',b'Grado de C\xc3\xb3digo'
-b'DocType: Fee Schedule',b'Fee Structure',b'Estructura de Tarifas'
-b'DocType: Purchase Order',b'Get Items from Open Material Requests',b'Obtener \xc3\x8dtems de Solicitudes Abiertas de Materiales'
-,b'Batch Item Expiry Status',b'Estatus de Expiraci\xc3\xb3n de Lote de \xc3\x8dtems'
-b'DocType: Guardian',b'Guardian Interests',b'Intereses del Guardi\xc3\xa1n'
-b'DocType: Guardian',b'Guardian Name',b'Nombre del Guardi\xc3\xa1n'
-b'apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +29',b'Child Item should not be a Product Bundle. Please remove item `{0}` and save',b'Art\xc3\xadculo hijo no debe ser un paquete de productos. Por favor remover el art\xc3\xadculo `` {0} y guardar'
-b'DocType: BOM Scrap Item',b'Basic Amount (Company Currency)',b'Monto Base (Divisa de Compa\xc3\xb1\xc3\xada)'
-b'DocType: Grading Scale',b'Grading Scale Name',b'Nombre de Escala de Calificaci\xc3\xb3n'
-b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +61',b'Guardian2 Mobile No',b'N\xc3\xbamero de M\xc3\xb3vil de Guardi\xc3\xa1n 2'
-b'apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +59',b'Guardian2 Name',b'Nombre de Guardi\xc3\xa1n 2'
-b'DocType: Stock Entry',b'Customer or Supplier Details',b'Detalle de cliente o proveedor'
-b'DocType: Course Scheduling Tool',b'Course Scheduling Tool',b'Herramienta de Programaci\xc3\xb3n de cursos'
-b'DocType: Shopping Cart Settings',b'Checkout Settings',b'Ajustes de Finalizaci\xc3\xb3n de Pedido'
-b'DocType: Guardian Interest',b'Guardian Interest',b'Inter\xc3\xa9s del Guardi\xc3\xa1n'
-b'apps/erpnext/erpnext/utilities/user_progress.py +230',b'Classrooms/ Laboratories etc where lectures can be scheduled.',"b'Aulas / laboratorios, etc., donde las lecturas se pueden programar.'"
-b'apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +6',b'Checkout',b'Finalizando pedido'
-b'DocType: Guardian Student',b'Guardian Student',b'Guardi\xc3\xa1n del Estudiante'
-b'DocType: BOM Operation',b'Base Hour Rate(Company Currency)',b'Tarifa Base por Hora (Divisa de Compa\xc3\xb1\xc3\xada)'
+DocType: Assessment Plan,Grading Scale,Escala de Calificación
+apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +57,Guardian1 Mobile No,Número de Móvil de Guardián 1
+apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Ganancia / Pérdida Bruta
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,Los cheques y depósitos resueltos de forma incorrecta
+DocType: Assessment Group,Parent Assessment Group,Grupo de Evaluación Padre
+DocType: Student,Guardians,Guardianes
+DocType: Fee Schedule,Fee Schedule,Programa de Tarifas
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +691,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +979,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
+DocType: Homepage,Company Tagline for website homepage,Lema de la empresa para la página de inicio del sitio web
+DocType: Delivery Note,% Installed,% Instalado
+DocType: Student,Guardian Details,Detalles del Guardián
+apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +55,Guardian1 Name,Nombre de Guardián 1
+DocType: Grading Scale Interval,Grade Code,Grado de Código
+DocType: Fee Schedule,Fee Structure,Estructura de Tarifas
+DocType: Purchase Order,Get Items from Open Material Requests,Obtener Ítems de Solicitudes Abiertas de Materiales
+,Batch Item Expiry Status,Estatus de Expiración de Lote de Ítems
+DocType: Guardian,Guardian Interests,Intereses del Guardián
+DocType: Guardian,Guardian Name,Nombre del Guardián
+apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +29,Child Item should not be a Product Bundle. Please remove item `{0}` and save,Artículo hijo no debe ser un paquete de productos. Por favor remover el artículo `` {0} y guardar
+DocType: BOM Scrap Item,Basic Amount (Company Currency),Monto Base (Divisa de Compañía)
+DocType: Grading Scale,Grading Scale Name,Nombre de Escala de Calificación
+apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +61,Guardian2 Mobile No,Número de Móvil de Guardián 2
+apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +59,Guardian2 Name,Nombre de Guardián 2
+DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
+DocType: Course Scheduling Tool,Course Scheduling Tool,Herramienta de Programación de cursos
+DocType: Shopping Cart Settings,Checkout Settings,Ajustes de Finalización de Pedido
+DocType: Guardian Interest,Guardian Interest,Interés del Guardián
+apps/erpnext/erpnext/utilities/user_progress.py +230,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
+apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +6,Checkout,Finalizando pedido
+DocType: Guardian Student,Guardian Student,Guardián del Estudiante
+DocType: BOM Operation,Base Hour Rate(Company Currency),Tarifa Base por Hora (Divisa de Compañía)

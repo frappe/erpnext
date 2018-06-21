@@ -91,17 +91,22 @@ def get_achieved_details(filters, sales_person, all_sales_persons, target_item_g
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
 	item_details = frappe.db.sql("""
-		select
-			sum(soi.stock_qty * (st.allocated_percentage/100)) as qty,
-			sum(soi.base_net_amount * (st.allocated_percentage/100)) as amount,
-			st.sales_person, MONTHNAME(so.transaction_date) as month_name
+		SELECT st.sales_person, MONTHNAME(so.transaction_date) as month_name,
+		CASE
+			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * (st.allocated_percentage/100))
+			ELSE sum(soi.stock_qty * (st.allocated_percentage/100))
+		END as qty,
+		CASE
+			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * soi.base_net_rate * (st.allocated_percentage/100))
+			ELSE sum(soi.base_net_amount * (st.allocated_percentage/100))
+		END as amount
 		from
 			`tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st
 		where
 			soi.parent=so.name and so.docstatus=1 and st.parent=so.name
 			and so.transaction_date>=%s and so.transaction_date<=%s
-			and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)
-			and exists(select name from `tabItem Group` where lft >= %s and rgt <= %s and name=soi.item_group)
+			and exists(SELECT name from `tabSales Person` where lft >= %s and rgt <= %s and name=st.sales_person)
+			and exists(SELECT name from `tabItem Group` where lft >= %s and rgt <= %s and name=soi.item_group)
 		group by
 			sales_person, month_name
 			""",

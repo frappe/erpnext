@@ -211,6 +211,7 @@ def make_budget(budget_against=None, cost_center=None):
 	budget.fiscal_year = "_Test Fiscal Year 2013"
 	budget.monthly_distribution = "_Test Distribution"
 	budget.company = "_Test Company"
+	budget.applicable_on_booking_actual_expenses = 1
 	budget.action_if_annual_budget_exceeded = "Stop"
 	budget.action_if_accumulated_monthly_budget_exceeded = "Ignore"
 	budget.budget_against = budget_against

@@ -12,7 +12,7 @@ frappe.ui.form.on('Loyalty Program', {
 					</h4>
 					<ul>
 						<li>
-							${__("Loyalty Points will be calculted only from the spent done (via the Sales Invoice), based on collection factor mentioned.")}
+							${__("Loyalty Points will be calculated from the spent done (via the Sales Invoice), based on collection factor mentioned.")}
 						</li>
 						<li>
 							${__("There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier.")}

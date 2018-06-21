@@ -1,7 +1,7 @@
-b'DocType: Fee Structure',b'Components',b'Componentes'
-b'apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +29',b'Employee {0} on Half day on {1}',"b'Empleado {0}, media jornada el d\xc3\xada {1}'"
-b'DocType: Purchase Invoice Item',b'Item',b'Producto'
-b'DocType: Payment Entry',b'Deductions or Loss',b'Deducciones o P\xc3\xa9rdidas'
-b'DocType: Cheque Print Template',b'Cheque Size',b'Tama\xc3\xb1o de Cheque'
-b'apps/erpnext/erpnext/utilities/activation.py +128',b'Make Student Batch',b'Hacer lotes de Estudiante'
-b'apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +33',b'Employee {0} on Leave on {1}',"b'Empleado {0}, la jornada del d\xc3\xada {1}'"
+DocType: Fee Structure,Components,Componentes
+apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +31,Employee {0} on Half day on {1},"Empleado {0}, media jornada el día {1}"
+DocType: Purchase Invoice Item,Item,Producto
+DocType: Payment Entry,Deductions or Loss,Deducciones o Pérdidas
+DocType: Cheque Print Template,Cheque Size,Tamaño de Cheque
+apps/erpnext/erpnext/utilities/activation.py +128,Make Student Batch,Hacer lotes de Estudiante
+apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +35,Employee {0} on Leave on {1},"Empleado {0}, la jornada del día {1}"

@@ -1,16 +1,16 @@
-b'DocType: Tax Rule',b'Tax Rule',b'Regla Fiscal'
-b'DocType: POS Profile',b'Account for Change Amount',b'Cuenta para el Cambio de Monto'
-b'apps/erpnext/erpnext/config/learn.py +217',b'Bill of Materials',b'Lista de Materiales'
-b'apps/erpnext/erpnext/controllers/accounts_controller.py +627',"b""'Update Stock' cannot be checked for fixed asset sale""","b'""Actualizaci\xc3\xb3n de Existencia\' no puede ser escogida para venta de activo fijo'"
-b'DocType: Purchase Invoice',b'Tax ID',b'RUC'
-b'DocType: BOM Item',b'Basic Rate (Company Currency)',b'Taza Base (Divisa de la Empresa)'
-b'DocType: Timesheet Detail',b'Bill',b'Factura'
-b'DocType: Activity Cost',b'Billing Rate',b'Monto de Facturaci\xc3\xb3n'
-b'apps/erpnext/erpnext/config/learn.py +87',b'Opening Accounting Balance',b'Apertura de Saldos Contables'
-b'apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +91',b'Tax Rule Conflicts with {0}',b'Regla Fiscal en conflicto con {0}'
-b'DocType: Tax Rule',b'Billing County',b'Municipio de Facturaci\xc3\xb3n'
-b'DocType: Sales Invoice Timesheet',b'Billing Hours',b'Horas de Facturaci\xc3\xb3n'
-b'DocType: Timesheet',b'Billing Details',b'Detalles de Facturaci\xc3\xb3n'
-b'DocType: Tax Rule',b'Billing State',b'Regi\xc3\xb3n de Facturaci\xc3\xb3n'
-b'DocType: Purchase Order Item',b'Billed Amt',b'Monto Facturado'
-b'DocType: Item Tax',b'Tax Rate',b'Tasa de Impuesto'
+DocType: Tax Rule,Tax Rule,Regla Fiscal
+DocType: POS Profile,Account for Change Amount,Cuenta para el Cambio de Monto
+apps/erpnext/erpnext/config/learn.py +217,Bill of Materials,Lista de Materiales
+apps/erpnext/erpnext/controllers/accounts_controller.py +656,'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no puede ser escogida para venta de activo fijo"
+DocType: Purchase Invoice,Tax ID,RUC
+DocType: BOM Item,Basic Rate (Company Currency),Taza Base (Divisa de la Empresa)
+DocType: Timesheet Detail,Bill,Factura
+DocType: Activity Cost,Billing Rate,Monto de Facturación
+apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Apertura de Saldos Contables
+apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +91,Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0}
+DocType: Tax Rule,Billing County,Municipio de Facturación
+DocType: Sales Invoice Timesheet,Billing Hours,Horas de Facturación
+DocType: Timesheet,Billing Details,Detalles de Facturación
+DocType: Tax Rule,Billing State,Región de Facturación
+DocType: Purchase Order Item,Billed Amt,Monto Facturado
+DocType: Item Tax,Tax Rate,Tasa de Impuesto

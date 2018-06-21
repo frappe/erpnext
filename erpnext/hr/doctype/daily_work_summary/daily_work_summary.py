@@ -105,10 +105,13 @@ class DailyWorkSummary(Document):
 
 
 def get_user_emails_from_group(group):
-	'''Returns list of email of users from the given group
+	'''Returns list of email of enabled users from the given group
 
 	:param group: Daily Work Summary Group `name`'''
-	group_doc = frappe.get_doc('Daily Work Summary Group', group)
-	emails = [d.email for d in group_doc.users]
+	group_doc = group
+	if isinstance(group_doc, str):
+		group_doc = frappe.get_doc('Daily Work Summary Group', group)
+
+	emails = [d.email for d in group_doc.users if frappe.db.get_value("User", d.user, "enabled")]
 
 	return emails

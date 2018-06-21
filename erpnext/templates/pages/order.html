@@ -94,69 +94,50 @@
 	</div>
 </div>
 
-
-
-
-<div class="form-group">
-	<div class="clearfix">
-		<label class="control-label" style="padding-right: 0px;">Loyalty Point</label>
-	</div>
-	<div class="control-input-wrapper">
-		<div class="control-input" style="display: none;"></div>
-		<div class="control-value like-disabled-input bold" style="">07-21-2017, 12:00 am EDT</div>
-		<p class="help-box small text-muted hidden-xs">America/New_York</p>
-	</div>
-</div>
-
-
+{% if enabled_checkout and ((doc.doctype=="Sales Order" and doc.per_billed <= 0)
+	or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0)) %}
 
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<div class="row">
-			<div class="col-sm-10 address-title">
-				<strong>Payment</strong></div>
+			<div class="form-column col-sm-6 address-title">
+				<strong>Payment</strong>
+			</div>
 		</div>
 	</div>
 	<div class="panel-collapse">
 		<div class="panel-body text-muted small">
-			<div class="row"><div class="col-sm-6"> Available Points: {{ available_loyalty_points }}</div></div>
-			{% if enabled_checkout %}
-				{% if (doc.doctype=="Sales Order" and doc.per_billed <= 0)
-					or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0) %}
-				<div class="cart-taxes row small">
-					<div class="col-sm-8">
-						{% if available_loyalty_points %}
-						<div class="page-header-actions-block col-sm-6" data-html-block="header-actions">
-							<p>
-							<div class="input-group input-group-sm pull-left">
-								
-								<input class="form-control" type="number" min="0" max="{{ available_loyalty_points }}"
-									placeholder="Enter Loyalty Points" id="loyalty-point-to-redeem">
-								<span class="input-group-btn">
-									<button class="btn btn-default" type="button" id="loyalty-apply-button">Apply</button>
-								</span>
-								<p class="help-box small text-muted">This is help text</p>
+			<div class="row">
+				<div class="form-column col-sm-6">
+					{% if available_loyalty_points %}
+					<div class="form-group">
+						<div class="h6">Enter Loyalty Points</div>
+						<div class="control-input-wrapper">
+							<div class="control-input">
+								<input class="form-control" type="number" min="0" max="{{ available_loyalty_points }}" id="loyalty-point-to-redeem">
 							</div>
-							</p>
+							<p class="help-box small text-muted hidden-xs"> Available Points: {{ available_loyalty_points }} </p>
 						</div>
-						{% endif %}
-						<div class="col-sm-6"><!-- empty --></div>
 					</div>
-					<div class="col-sm-4">
-						<div class="page-header-actions-block" data-html-block="header-actions">
-							<p>
-								<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
-									class="btn btn-primary btn-sm" id="pay-for-order">{{ _("Pay") }} {{ doc.get_formatted("grand_total") }} </a>
-							</p>
-						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-column col-sm-6">
+					<div id="loyalty-points-status" style="text-align: right"></div>
+					<div class="page-header-actions-block" data-html-block="header-actions">
+						<p>
+							<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+								class="btn btn-primary btn-sm" id="pay-for-order">{{ _("Pay") }} {{ doc.get_formatted("grand_total") }} </a>
+						</p>
 					</div>
 				</div>
-				{% endif %}
-			{% endif %}
+
+			</div>
+
 		</div>
 	</div>
 </div>
-
+{% endif %}
 
 
 {% if attachments %}

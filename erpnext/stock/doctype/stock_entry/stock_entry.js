@@ -59,7 +59,6 @@ frappe.ui.form.on('Stock Entry', {
 		});
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
-		frm.trigger("setup_quality_inspection");
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -95,6 +94,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
+			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Make Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
 					var mr = frappe.model.get_new_doc('Material Request');
@@ -155,6 +155,29 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			}, __("Get items from"));
 		}
+		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
+			frm.add_custom_button(__('Expired Batches'), function() {
+				frappe.call({
+					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
+					callback: function(r) {
+						if (!r.exc && r.message) {
+							frm.set_value("items", []);
+							r.message.forEach(function(element) {
+								let d = frm.add_child("items");
+								d.item_code = element.item;
+								d.s_warehouse = element.warehouse;
+								d.qty = element.qty;
+								d.uom = element.stock_uom;
+								d.conversion_factor = 1;
+								d.batch_no = element.batch_no;
+								d.transfer_qty = element.qty;
+								frm.refresh_fields();
+							});
+						}
+					}
+				});
+			}, __("Get items from"));
+		}
 
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
@@ -165,11 +188,23 @@ frappe.ui.form.on('Stock Entry', {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
+
+		frm.trigger("setup_quality_inspection");
 	},
 
 	purpose: function(frm) {
+		frm.trigger('validate_purpose_consumption');
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
+	},
+
+	validate_purpose_consumption: function(frm) {
+		frappe.model.get_value('Manufacturing Settings', {'name': 'Manufacturing Settings'}, 'material_consumption', function(d) {
+			if (d.material_consumption==0 && frm.doc.purpose=="Material Consumption for Manufacture") {
+				frm.set_value("purpose", 'Manufacture');
+				frappe.throw(__('Material Consumption is not set in Manufacturing Settings.'));
+			}
+		})
 	},
 
 	company: function(frm) {
@@ -339,7 +374,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
-	},
+	}
 })
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -519,11 +554,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 
 		this.frm.set_indicator_formatter('item_code',
-			function(doc) { 
+			function(doc) {
 				if (!doc.s_warehouse) {
 					return 'blue';
 				} else {
-					return (doc.qty<=doc.actual_qty) ? "green" : "orange" 
+					return (doc.qty<=doc.actual_qty) ? "green" : "orange"
 				}
 			})
 
@@ -592,7 +627,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	clean_up: function() {
 		// Clear Work Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.work_order &&
-				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
+			in_list(["Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"],
+				this.frm.doc.purpose)) {
 			frappe.model.remove_from_locals("Work Order",
 				this.frm.doc.work_order);
 		}
@@ -637,16 +673,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
 
 
-					if (me.frm.doc.purpose == "Manufacture") {
-						if(r.message["additional_costs"].length) {
-							$.each(r.message["additional_costs"], function(i, row) {
-								me.frm.add_child("additional_costs", row);
-							})
-							refresh_field("additional_costs");
+					if (me.frm.doc.purpose == "Manufacture" || me.frm.doc.purpose == "Material Consumption for Manufacture" ) {
+						if (me.frm.doc.purpose == "Manufacture") {
+							if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
+							if (r.message["additional_costs"].length) {
+								$.each(r.message["additional_costs"], function(i, row) {
+									me.frm.add_child("additional_costs", row);
+								})
+								refresh_field("additional_costs");
+							}
 						}
-
 						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
-						if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
 					}
 					me.get_items()
 				}

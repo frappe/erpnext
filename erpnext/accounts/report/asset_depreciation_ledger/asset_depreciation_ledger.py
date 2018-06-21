@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 
 def execute(filters=None):
@@ -13,7 +13,7 @@ def get_data(filters):
 	data = frappe.db.sql("""
 		select 
 			a.name as asset, a.asset_category, a.status, 
-			a.depreciation_method, a.purchase_date, a.gross_purchase_amount,
+			ds.depreciation_method, a.purchase_date, a.gross_purchase_amount,
 			ds.schedule_date as depreciation_date, ds.depreciation_amount, 
 			ds.accumulated_depreciation_amount, 
 			(a.gross_purchase_amount - ds.accumulated_depreciation_amount) as amount_after_depreciation,
@@ -30,9 +30,9 @@ def get_data(filters):
 		order by
 			a.name asc, ds.schedule_date asc
 	""".format(conditions=get_filter_conditions(filters)), filters, as_dict=1)
-		
+
 	return data
-	
+
 def get_filter_conditions(filters):
 	conditions = ""
 	
@@ -42,6 +42,14 @@ def get_filter_conditions(filters):
 	if filters.get("asset_category"):
 		conditions += " and a.asset_category = %(asset_category)s"
 		
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+
+	if (not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book)):
+		filters['finance_book'] = company_finance_book
+		conditions += " and ifnull(ds.finance_book, '') in (%(finance_book)s, '') "
+	elif filters.get("finance_book"):
+		conditions += " and ifnull(ds.finance_book, '') = %(finance_book)s"
+
 	return conditions
 	
 def get_columns():
