@@ -58,7 +58,7 @@ def	create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 				"repayment_method": repayment_method,
 				"repayment_periods": repayment_periods,
 				"disbursement_date": nowdate(),
-				"repayment_start_date": add_days(nowdate(), 10),
+				"repayment_start_date": nowdate(),
 				"status": "Disbursed",
 				"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),

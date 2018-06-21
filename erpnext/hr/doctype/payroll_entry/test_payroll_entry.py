@@ -13,6 +13,8 @@ from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.hr.doctype.loan.test_loan import create_loan
 
+test_dependencies = ["Salary Component"]
+
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Loan"]:
