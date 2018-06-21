@@ -20,8 +20,7 @@ frappe.ui.form.on('Salary Structure', {
 			return {
 				filters: {
 					type: "earning",
-					is_additional_component: 0,
-					is_group: 0
+					is_additional_component: 0
 				}
 			}
 		});

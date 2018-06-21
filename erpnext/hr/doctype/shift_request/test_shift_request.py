@@ -8,6 +8,10 @@ import unittest
 from frappe.utils import nowdate
 
 class TestShiftRequest(unittest.TestCase):
+	def setUp(self):
+		for doctype in ["Shift Request", "Shift Assignment"]:
+			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
+
 	def test_make_shift_request(self):
 		shift_request = frappe.get_doc({
 			"doctype": "Shift Request",
@@ -20,9 +24,14 @@ class TestShiftRequest(unittest.TestCase):
 		})
 		shift_request.insert()
 		shift_request.submit()
-		shift_assignment = frappe.db.sql("""select employee
-											from `tabShift Assignment`
-											where shift_request = %s""", shift_request.name)
-		if shift_assignment:
-			employee = shift_assignment[0][0]
-		self.assertEqual(shift_request.employee, employee)
+		shift_assignments = frappe.db.sql('''
+				SELECT shift_request, employee
+				FROM `tabShift Assignment`
+				WHERE shift_request = '{0}'
+			'''.format(shift_request.name), as_dict=1)
+		for d in shift_assignments:
+			employee = d.get('employee')
+			self.assertEqual(shift_request.employee, employee)
+			shift_request.cancel()
+			shift_assignment_doc = frappe.get_doc("Shift Assignment", {"shift_request": d.get('shift_request')})
+			self.assertEqual(shift_assignment_doc.docstatus, 2)

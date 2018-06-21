@@ -25,10 +25,10 @@ class EmployeeTransfer(Document):
 			new_employee = frappe.copy_doc(employee)
 			new_employee.name = None
 			new_employee.employee_number = None
-			if self.company != self.new_company:
-				new_employee.internal_work_history = []
 			new_employee = update_employee(new_employee, self.transfer_details, date=self.transfer_date)
-			if self.new_company:
+			if self.new_company and self.company != self.new_company:
+				new_employee.internal_work_history = []
+				new_employee.date_of_joining = self.transfer_date
 				new_employee.company = self.new_company
 			#move user_id to new employee before insert
 			if employee.user_id and not self.validate_user_in_details():
@@ -41,8 +41,9 @@ class EmployeeTransfer(Document):
 			employee.db_set("status", "Left")
 		else:
 			employee = update_employee(employee, self.transfer_details, date=self.transfer_date)
-			if self.new_company:
+			if self.new_company and self.company != self.new_company:
 				employee.company = self.new_company
+				employee.date_of_joining = self.transfer_date
 			employee.save()
 
 	def on_cancel(self):

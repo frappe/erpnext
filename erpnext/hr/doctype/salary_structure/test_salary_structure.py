@@ -72,9 +72,9 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None):
 	if not frappe.db.exists('Salary Structure', salary_structure):
-		salary_structure_doc = frappe.get_doc({
+		details = {
 			"doctype": "Salary Structure",
 			"name": salary_structure,
 			"company": erpnext.get_default_company(),
@@ -82,7 +82,10 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 			"deductions": get_deductions_component(),
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
-		}).insert()
+		}
+		if other_details and isinstance(other_details, dict):
+			details.update(other_details)
+		salary_structure_doc = frappe.get_doc(details).insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
 	else:

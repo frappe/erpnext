@@ -88,7 +88,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					this.make_payment_request, __("Make"));
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
@@ -544,6 +544,16 @@ frappe.ui.form.on('Sales Invoice', {
 						'company': doc.company,
 						"is_group": 0
 					}
+				}
+			}
+		}
+
+		frm.fields_dict['items'].grid.get_field('deferred_revenue_account').get_query = function(doc) {
+			return {
+				filters: {
+					'root_type': 'Liability',
+					'company': doc.company,
+					"is_group": 0
 				}
 			}
 		}

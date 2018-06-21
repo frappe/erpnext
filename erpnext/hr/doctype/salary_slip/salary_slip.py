@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
+import datetime
 
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
@@ -63,43 +64,39 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount and struct_row.statistical_component == 0:
+				if amount and struct_row.statistical_component == 0 and struct_row.variable_based_on_taxable_salary != 1:
 					self.update_component_row(struct_row, amount, key)
 
 				if key=="earnings" and struct_row.is_flexible_benefit == 1:
 					self.add_employee_flexi_benefits(struct_row)
 
-				if key=="deductions" and struct_row.variable_based_on_taxable_salary:
-					tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
-					if tax_row and amount:
-						self.update_component_row(frappe._dict(tax_row), amount, key)
-
 		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
 		if additional_components:
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
-				amount = additional_component.amount + self.get_amount_from_exisiting_component(frappe._dict(additional_component.struct_row).salary_component)
+				amount = additional_component.amount
 				key = "earnings"
 				if additional_component.type == "Deduction":
 					key = "deductions"
 				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key)
 
+		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
+		for struct_row in self._salary_structure_doc.get("deductions"):
+			if struct_row.variable_based_on_taxable_salary == 1:
+				tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
+				if tax_row and amount:
+					self.update_component_row(frappe._dict(tax_row), amount, "deductions")
+
 	def add_employee_flexi_benefits(self, struct_row):
-		if frappe.db.get_value("Salary Component", struct_row.salary_component, "is_pro_rata_applicable") == 1:
-			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, struct_row, self._salary_structure_doc, self.payment_days, self.total_working_days)
+		if frappe.db.get_value("Salary Component", struct_row.salary_component, "pay_against_benefit_claim") != 1:
+			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, \
+			struct_row, self._salary_structure_doc, self.payment_days, self.total_working_days, self.payroll_frequency)
 			if benefit_component_amount:
 				self.update_component_row(struct_row, benefit_component_amount, "earnings")
 		else:
 			benefit_claim_amount = get_benefit_claim_amount(self.employee, self.start_date, self.end_date, struct_row)
 			if benefit_claim_amount:
 				self.update_component_row(struct_row, benefit_claim_amount, "earnings")
-
-	def get_amount_from_exisiting_component(self, salary_component):
-		amount = 0
-		for d in self.get("earnings"):
-			if d.salary_component == salary_component:
-				amount = d.amount
-		return amount
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
@@ -704,15 +701,40 @@ class SalarySlip(TransactionBase):
 		return struct_row, tax_amount
 
 	def calculate_tax_by_tax_slab(self, payroll_period, annual_earning):
-		# TODO consider condition in tax slab
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
+		data = self.get_data_for_eval()
 		taxable_amount = 0
 		for slab in payroll_period_obj.taxable_salary_slabs:
+			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
+				continue
+			if not slab.to_amount and annual_earning > slab.from_amount:
+				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
+				continue
 			if annual_earning > slab.from_amount and annual_earning < slab.to_amount:
 				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
 			elif annual_earning > slab.from_amount and annual_earning > slab.to_amount:
 				taxable_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
 		return taxable_amount
+
+	def eval_tax_slab_condition(self, condition, data):
+		whitelisted_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date
+		}
+		try:
+			condition = condition.strip()
+			if condition:
+				return frappe.safe_eval(condition, whitelisted_globals, data)
+		except NameError as err:
+			frappe.throw(_("Name error: {0}".format(err)))
+		except SyntaxError as err:
+			frappe.throw(_("Syntax error in condition: {0}".format(err)))
+		except Exception as e:
+			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			raise
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
 		payroll_days = date_diff(period_end, period_start) + 1

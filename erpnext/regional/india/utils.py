@@ -192,6 +192,6 @@ def calculate_hra_exemption_for_period(doc):
 		if exemptions["monthly_exemption"]:
 			# calc total exemption amount
 			eligible_hra = exemptions["monthly_exemption"] * factor
-	exemptions["monthly_house_rent"] = monthly_rent
-	exemptions["total_eligible_hra_exemption"] = eligible_hra
-	return exemptions
+		exemptions["monthly_house_rent"] = monthly_rent
+		exemptions["total_eligible_hra_exemption"] = eligible_hra
+		return exemptions

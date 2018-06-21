@@ -15,7 +15,8 @@ $.extend(erpnext, {
 
 	get_presentation_currency_list: () => {
 		const docs = frappe.boot.docs;
-		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		let currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		currency_list.unshift("");
 		return currency_list;
 	},
 
@@ -145,7 +146,7 @@ $.extend(erpnext.utils, {
 
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.subscription.subscription.make_subscription",
+			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
 			args: {
 				doctype: doctype,
 				docname: docname

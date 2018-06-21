@@ -428,9 +428,10 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 	# find customer name from contact.
 	customer = frappe.db.sql('''SELECT dl.link_name FROM `tabContact` AS c inner join \
 		`tabDynamic Link` AS dl ON c.first_name=dl.link_name WHERE c.email_id=%s''',user)
-	# find list of Sales Invoice for made for customer.
-	sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
+
 	if customer:
+		# find list of Sales Invoice for made for customer.
+		sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
 		# Return timesheet related data to web portal.
 		return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, \
 			tsd.sales_invoice, tsd.project  FROM `tabTimesheet` AS ts inner join `tabTimesheet Detail` \
