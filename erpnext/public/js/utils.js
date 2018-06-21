@@ -15,7 +15,8 @@ $.extend(erpnext, {
 
 	get_presentation_currency_list: () => {
 		const docs = frappe.boot.docs;
-		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		let currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		currency_list.unshift("");
 		return currency_list;
 	},
 
