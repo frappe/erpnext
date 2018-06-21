@@ -31,7 +31,6 @@ class EmployeeOnboarding(EmployeeBoardingController):
 	def on_cancel(self):
 		super(EmployeeOnboarding, self).on_cancel()
 
-
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
 	doc = frappe.get_doc("Employee Onboarding", source_name)
