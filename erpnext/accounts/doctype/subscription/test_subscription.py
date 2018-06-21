@@ -15,6 +15,7 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name'
 		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Fixed rate"
 		plan.cost = 900
 		plan.billing_interval = 'Month'
 		plan.billing_interval_count = 1
@@ -24,6 +25,7 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name 2'
 		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Fixed rate"
 		plan.cost = 1999
 		plan.billing_interval = 'Month'
 		plan.billing_interval_count = 1
@@ -33,6 +35,7 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name 3'
 		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Fixed rate"
 		plan.cost = 1999
 		plan.billing_interval = 'Day'
 		plan.billing_interval_count = 14
