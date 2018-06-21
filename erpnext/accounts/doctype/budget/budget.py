@@ -81,6 +81,8 @@ def validate_expense_against_budget(args):
 
 	if args.get('company') and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(nowdate(), company=args.get('company'))[0]
+		frappe.flags.exception_approver_role = frappe.db.get_value('Company',
+			args.get('company'), 'exception_budget_approver_role')
 
 	if not args.account:
 		args.account = args.get("expense_account")
@@ -159,6 +161,10 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 				frappe.bold(budget_against),
 				frappe.bold(fmt_money(budget_amount, currency=currency)), 
 				frappe.bold(fmt_money(diff, currency=currency)))
+
+		if (frappe.flags.exception_approver_role
+			and frappe.flags.exception_approver_role in frappe.get_roles(frappe.session.user)):
+			action = "Warn"
 
 		if action=="Stop":
 			frappe.throw(msg, BudgetError)
