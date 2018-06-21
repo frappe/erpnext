@@ -7,19 +7,26 @@ import frappe
 import unittest
 from erpnext.stock.doctype.item.test_item import make_item
 from frappe.utils import now, nowdate, get_last_day, add_days
-from erpnext.assets.doctype.asset.test_asset import create_asset
+from erpnext.assets.doctype.asset.test_asset import create_asset_data
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class TestAssetMovement(unittest.TestCase):
 	def setUp(self):
+		create_asset_data()
 		make_location()
 		make_serialized_item()
 
 	def test_movement(self):
-		asset = create_asset()
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
+		asset.available_for_use_date = '2020-06-06'
+		asset.purchase_date = '2020-06-06'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
 			"next_depreciation_date": "2020-12-31",
@@ -50,10 +57,6 @@ class TestAssetMovement(unittest.TestCase):
 
 		movement2.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
-
-		asset.load_from_db()
-		asset.cancel()
-		frappe.delete_doc("Asset", asset.name)
 
 	def test_movement_for_serialized_asset(self):
 		asset_item = "Test Serialized Asset Item"

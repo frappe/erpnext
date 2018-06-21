@@ -16,13 +16,12 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 class Asset(AccountsController):
 	def validate(self):
+		self.validate_asset_values()
 		self.validate_item()
 		self.set_missing_values()
-		self.validate_asset_values()
 		if self.calculate_depreciation:
 			self.make_depreciation_schedule()
 			self.set_accumulated_depreciation()
-			get_depreciation_accounts(self)
 		else:
 			self.finance_books = []
 		if self.get("schedules"):
@@ -71,6 +70,15 @@ class Asset(AccountsController):
 	def validate_asset_values(self):
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
+
+		if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
+			frappe.throw(_("Please create purchase receipt or purchase invoice for the item {0}").
+				format(self.item_code))
+
+		if (not self.purchase_receipt and self.purchase_invoice
+			and not frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')):
+			frappe.throw(_("Update stock must be enable for the purchase invoice {0}").
+				format(self.purchase_invoice))
 
 		if not self.calculate_depreciation:
 			return
@@ -342,10 +350,13 @@ class Asset(AccountsController):
 
 	def make_gl_entries(self):
 		gl_entries = []
-		fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
-				asset_category = self.asset_category, company = self.company)
 
-		if self.purchase_receipt and self.purchase_receipt_amount and self.available_for_use_date <= nowdate():
+		if ((self.purchase_receipt or (self.purchase_invoice and
+			frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
+			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
+			fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
+					asset_category = self.asset_category, company = self.company)
+
 			cwip_account = get_asset_account("capital_work_in_progress_account",
 				self.name, self.asset_category, self.company)
 
@@ -365,27 +376,6 @@ class Asset(AccountsController):
 				"posting_date": self.available_for_use_date,
 				"debit": self.purchase_receipt_amount,
 				"debit_in_account_currency": self.purchase_receipt_amount
-			}))
-
-		elif not self.is_existing_asset:
-			arbnb_account = self.get_company_default("asset_received_but_not_billed")
-
-			gl_entries.append(self.get_gl_dict({
-				"account": fixed_aseet_account,
-				"against": arbnb_account,
-				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-				"posting_date": self.available_for_use_date,
-				"debit": self.gross_purchase_amount,
-				"debit_in_account_currency": self.gross_purchase_amount
-			}))
-
-			gl_entries.append(self.get_gl_dict({
-				"account": arbnb_account,
-				"against": fixed_aseet_account,
-				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-				"posting_date": self.available_for_use_date,
-				"credit": self.gross_purchase_amount,
-				"credit_in_account_currency": self.gross_purchase_amount
 			}))
 
 		if gl_entries:

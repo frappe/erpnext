@@ -6,15 +6,26 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate, get_last_day, add_days
-from erpnext.assets.doctype.asset.test_asset import create_asset
+from erpnext.assets.doctype.asset.test_asset import create_asset_data
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import get_current_asset_value
 
 class TestAssetValueAdjustment(unittest.TestCase):
+	def setUp(self):
+		create_asset_data()
+
 	def test_current_asset_value(self):
-		asset_doc = create_asset()
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset_doc = frappe.get_doc('Asset', asset_name)
 
 		month_end_date = get_last_day(nowdate())
-		asset_doc.available_for_use_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+
+		asset_doc.available_for_use_date = purchase_date
+		asset_doc.purchase_date = purchase_date
 		asset_doc.calculate_depreciation = 1
 		asset_doc.append("finance_books", {
 			"expected_value_after_useful_life": 200,
@@ -29,10 +40,18 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(current_value, 100000.0)
 
 	def test_asset_depreciation_value_adjustment(self):
-		asset_doc = create_asset()
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset_doc = frappe.get_doc('Asset', asset_name)
+		asset_doc.calculate_depreciation = 1
 
 		month_end_date = get_last_day(nowdate())
-		asset_doc.available_for_use_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+
+		asset_doc.available_for_use_date = purchase_date
+		asset_doc.purchase_date = purchase_date
 		asset_doc.calculate_depreciation = 1
 		asset_doc.append("finance_books", {
 			"expected_value_after_useful_life": 200,
