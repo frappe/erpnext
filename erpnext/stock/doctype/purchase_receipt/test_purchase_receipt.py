@@ -332,6 +332,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name')
 
 		self.assertEquals(len(serial_nos), 3)
+
+		location = frappe.db.get_value('Serial No', serial_nos[0].name, 'location')
+		self.assertEquals(location, "Test Location")
+
 		pr.cancel()
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
 		self.assertEquals(len(serial_nos), 0)
@@ -373,7 +377,8 @@ def make_purchase_receipt(**args):
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": args.uom or "_Test UOM",
-		"asset_location": "Test Location" if args.item_code == "Test Serialized Asset Item" else ""
+		"cost_center": args.cost_center or frappe.db.get_value('Company', pr.company, 'cost_center'),
+		"asset_location": args.location or "Test Location"
 	})
 
 	if not args.do_not_save:

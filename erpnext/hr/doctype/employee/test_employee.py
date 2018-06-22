@@ -33,8 +33,6 @@ class TestEmployee(unittest.TestCase):
 		self.assertTrue("Subject: Birthday Reminder for {0}".format(employee.employee_name) \
 			in email_queue[0].message)
 
-
-
 def make_employee(user):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
