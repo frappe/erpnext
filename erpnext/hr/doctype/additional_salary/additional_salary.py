@@ -66,6 +66,7 @@ def get_additional_salary_component(employee, start_date, end_date):
 			struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
 			struct_row['is_tax_applicable'] = salary_component.is_tax_applicable
 			struct_row['variable_based_on_taxable_salary'] = salary_component.variable_based_on_taxable_salary
+			struct_row['is_additional_component'] = salary_component.is_additional_component
 			additional_components_dict['amount'] = amount
 			additional_components_dict['struct_row'] = struct_row
 			additional_components_dict['type'] = salary_component.type
