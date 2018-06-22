@@ -53,10 +53,25 @@
 				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
 					<div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-						<h4 class="item-price" itemprop="price"></h4>
-						<div class="item-stock" itemprop="availability"></div>
+						<h4 class="item-price hide" itemprop="price"></h4>
+						<div class="item-stock hide" itemprop="availability"></div>
 					</div>
 					<div class="item-cart hide">
+						<div id="item-spinner">
+							<span style="display: inline-block">
+								<div class="input-group number-spinner">
+									<span class="input-group-btn">
+										<button class="btn btn-default cart-btn" data-dir="dwn">
+											–</button>
+									</span>
+									<input class="form-control text-right cart-qty"	value="1">
+									<span class="input-group-btn">
+										<button class="btn btn-default cart-btn" data-dir="up" style="margin-left:-2px;">
+											+</button>
+									</span>
+								</div>
+							</span>
+						</div>
 						<div id="item-add-to-cart">
 							<button class="btn btn-primary btn-sm">
 								{{ _("Add to Cart") }}</button>

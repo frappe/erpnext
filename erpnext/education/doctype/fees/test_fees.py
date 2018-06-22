@@ -42,12 +42,12 @@ class TestFees(unittest.TestCase):
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", ("Fees", fee.name), as_dict=True)
 
 		if gl_entries[0].account == "_Test Receivable - _TC":
-			self.assertEquals(gl_entries[0].debit, 50000)
-			self.assertEquals(gl_entries[0].credit, 0)
-			self.assertEquals(gl_entries[1].debit, 0)
-			self.assertEquals(gl_entries[1].credit, 50000)
+			self.assertEqual(gl_entries[0].debit, 50000)
+			self.assertEqual(gl_entries[0].credit, 0)
+			self.assertEqual(gl_entries[1].debit, 0)
+			self.assertEqual(gl_entries[1].credit, 50000)
 		else:
-			self.assertEquals(gl_entries[0].credit, 50000)
-			self.assertEquals(gl_entries[0].debit, 0)
-			self.assertEquals(gl_entries[1].credit, 0)
-			self.assertEquals(gl_entries[1].debit, 50000)
+			self.assertEqual(gl_entries[0].credit, 50000)
+			self.assertEqual(gl_entries[0].debit, 0)
+			self.assertEqual(gl_entries[1].credit, 0)
+			self.assertEqual(gl_entries[1].debit, 50000)

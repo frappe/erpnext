@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -17,7 +18,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 
 		pr = create_pr_against_po(po.name)
-		self.assertEquals(len(pr.get("items")), 1)
+		self.assertEqual(len(pr.get("items")), 1)
 
 	def test_ordered_qty(self):
 		existing_ordered_qty = get_ordered_qty()
@@ -32,7 +33,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 4)
+		self.assertEqual(po.get("items")[0].received_qty, 4)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 
@@ -40,13 +41,13 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 12)
+		self.assertEqual(po.get("items")[0].received_qty, 12)
 
 		pr.cancel()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 4)
+		self.assertEqual(po.get("items")[0].received_qty, 4)
 		
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
@@ -66,13 +67,13 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 12)
+		self.assertEqual(po.get("items")[0].received_qty, 12)
 
 		pi.cancel()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 0)
+		self.assertEqual(po.get("items")[0].received_qty, 0)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -82,8 +83,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 		pi = make_purchase_invoice(po.name)
 
-		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items", [])), 1)
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.get("items", [])), 1)
 
 	def test_make_purchase_invoice_with_terms(self):
 		po = create_purchase_order(do_not_save=True)
@@ -104,8 +105,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi = make_purchase_invoice(po.name)
 		pi.save()
 
-		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items", [])), 1)
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.get("items", [])), 1)
 
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
 		self.assertEqual(pi.payment_schedule[0].due_date, po.transaction_date)
@@ -114,7 +115,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
-		self.assertEquals(len(po.get("supplied_items")), 2)
+		self.assertEqual(len(po.get("supplied_items")), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -134,11 +135,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po = create_purchase_order(item_code= "_Test Item", qty=1)
 
-		self.assertEquals(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
+		self.assertEqual(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
 
 		po.update_status("Closed")
 
-		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
+		self.assertEqual(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
 		
 	def test_group_same_items(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -162,6 +163,77 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.insert()
 
 		self.assertTrue(po.get('payment_schedule'))
+
+	def test_po_for_blocked_supplier_all(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.save()
+
+		self.assertEqual(supplier.hold_type, 'All')
+		self.assertRaises(frappe.ValidationError, create_purchase_order)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_invoices(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, create_purchase_order)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		po = create_purchase_order()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Order', dn=po.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments_with_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.release_date = nowdate()
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		po = create_purchase_order()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Order', dn=po.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments_past_date(self):
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
+
+				po = create_purchase_order()
+				get_payment_entry('Purchase Order', po.name, bank_account='_Test Bank - _TC')
+
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
 
 	def test_terms_does_not_copy(self):
 		po = create_purchase_order()
@@ -199,6 +271,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		bin2 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty"], as_dict=1)
+
 		self.assertEquals(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 		self.assertEquals(bin2.projected_qty, bin1.projected_qty - 10)
 
@@ -278,6 +351,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		bin10 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
+
 		self.assertEquals(bin10.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 
 		# Cancel PO
@@ -319,6 +393,7 @@ def create_purchase_order(**args):
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.db.get_value("Company", po.company, "default_currency")
 	po.conversion_factor = args.conversion_factor or 1
+	po.supplier_warehouse = args.supplier_warehouse or None
 
 	po.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

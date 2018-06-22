@@ -24,7 +24,7 @@ class TestOpportunity(unittest.TestCase):
 		quotation.submit()
 
 		doc = frappe.get_doc('Opportunity', doc.name)
-		self.assertEquals(doc.status, "Quotation")
+		self.assertEqual(doc.status, "Quotation")
 
 	def test_make_new_lead_if_required(self):
 		args = {
@@ -38,8 +38,8 @@ class TestOpportunity(unittest.TestCase):
 		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
 
 		self.assertTrue(opp_doc.lead)
-		self.assertEquals(opp_doc.enquiry_from, "Lead")
-		self.assertEquals(frappe.db.get_value("Lead", opp_doc.lead, "email_id"),
+		self.assertEqual(opp_doc.enquiry_from, "Lead")
+		self.assertEqual(frappe.db.get_value("Lead", opp_doc.lead, "email_id"),
 			'new.opportunity@example.com')
 
 		# create new customer and create new contact against 'new.opportunity@example.com'
@@ -56,14 +56,15 @@ class TestOpportunity(unittest.TestCase):
 
 		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
 		self.assertTrue(opp_doc.customer)
-		self.assertEquals(opp_doc.enquiry_from, "Customer")
-		self.assertEquals(opp_doc.customer, customer.name)
+		self.assertEqual(opp_doc.enquiry_from, "Customer")
+		self.assertEqual(opp_doc.customer, customer.name)
 
 def make_opportunity(**args):
 	args = frappe._dict(args)
 
 	opp_doc = frappe.get_doc({
 		"doctype": "Opportunity",
+		"company": args.company or "_Test Company",
 		"enquiry_from": args.enquiry_from or "Customer",
 		"opportunity_type": "Sales",
 		"with_items": args.with_items or 0,

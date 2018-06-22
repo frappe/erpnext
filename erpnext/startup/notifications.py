@@ -29,8 +29,8 @@ def get_notification_config():
 				"docstatus": ("<", 2)
 			},
 			"Payment Entry": {"docstatus": 0},
-			"Leave Application": {"status": "Open"},
-			"Expense Claim": {"approval_status": "Draft"},
+			"Leave Application": {"docstatus": 0},
+			"Expense Claim": {"docstatus": 0},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),
@@ -52,7 +52,7 @@ def get_notification_config():
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
-			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
+			"Work Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
 
 			"Timesheet": {"status": "Draft"},

@@ -13,6 +13,8 @@ from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
+from six import string_types
+from erpnext.stock.doctype.item.item import get_item_defaults
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -209,11 +211,16 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		self.validate_budget()
+
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
+
+		self.update_blanket_order()
+
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -237,6 +244,9 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 
+		self.update_blanket_order()
+
+
 	def on_update(self):
 		pass
 
@@ -248,7 +258,6 @@ class PurchaseOrder(BuyingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': '',
 			'join_field': 'sales_order_item',
-			'source_dt': 'Purchase Order Item',
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty'
 		})
@@ -314,6 +323,7 @@ def close_or_unclose_purchase_orders(names, status):
 			else:
 				if po.status == "Closed":
 					po.update_status("Draft")
+			po.update_blanket_order()
 
 	frappe.local.message_log = []
 
@@ -335,7 +345,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 		"Purchase Order": {
 			"doctype": "Purchase Receipt",
 			"field_map": {
-				"per_billed": "per_billed"
+				"per_billed": "per_billed",
+				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -371,16 +382,17 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, source_parent.company)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
-			or item.buying_cost_center \
+			or item.get("buying_cost_center") \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
-				"party_account_currency": "party_account_currency"
+				"party_account_currency": "party_account_currency",
+				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -405,7 +417,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
-	if isinstance(rm_items, basestring):
+	if isinstance(rm_items, string_types):
 		rm_items_list = json.loads(rm_items)
 	else:
 		frappe.throw(_("No Items available for transfer"))
@@ -420,10 +432,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 
 	if fg_items:
 		items = tuple(set(d["rm_item_code"] for d in rm_items_list))
-		item_wh = frappe._dict(frappe.db.sql("""
-			select item_code, description
-			from `tabItem` where name in ({0})
-		""".format(", ".join(["%s"] * len(items))), items))
+		item_wh = get_item_details(items)
 
 		stock_entry = frappe.new_doc("Stock Entry")
 		stock_entry.purpose = "Subcontract"
@@ -433,16 +442,21 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		stock_entry.supplier_address = purchase_order.supplier_address
 		stock_entry.address_display = purchase_order.address_display
 		stock_entry.company = purchase_order.company
+		stock_entry.to_warehouse = purchase_order.supplier_warehouse
+
 		for item_code in fg_items:
 			for rm_item_data in rm_items_list:
 				if rm_item_data["item_code"] == item_code:
+					rm_item_code = rm_item_data["rm_item_code"]
 					items_dict = {
-						rm_item_data["rm_item_code"]: {
-							"item_name":rm_item_data["item_name"],
-							"description":item_wh.get(rm_item_data["rm_item_code"]),
-							'qty':rm_item_data["qty"],
-							'from_warehouse':rm_item_data["warehouse"],
-							'stock_uom':rm_item_data["stock_uom"]
+						rm_item_code: {
+							"item_name": rm_item_data["item_name"],
+							"description": item_wh[rm_item_code].get('description'),
+							'qty': rm_item_data["qty"],
+							'from_warehouse': rm_item_data["warehouse"],
+							'stock_uom': rm_item_data["stock_uom"],
+							'main_item_code': rm_item_data["item_code"],
+							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
 						}
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
@@ -450,6 +464,14 @@ def make_rm_stock_entry(purchase_order, rm_items):
 	else:
 		frappe.throw(_("No Items selected for transfer"))
 	return purchase_order.name
+
+def get_item_details(items):
+	item_details = {}
+	for d in frappe.db.sql("""select item_code, description, allow_alternative_item from `tabItem`
+		where name in ({0})""".format(", ".join(["%s"] * len(items))), items, as_dict=1):
+		item_details[d.item_code] = d
+
+	return item_details
 
 @frappe.whitelist()
 def update_status(status, name):

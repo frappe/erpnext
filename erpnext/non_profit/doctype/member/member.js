@@ -38,7 +38,10 @@ frappe.ui.form.on('Member', {
 				]
 			},
 			callback: function (data) {
-				frappe.model.set_value(frm.doctype,frm.docname, "membership_expiry_date", data.message.to_date);
+				if(data.message) {
+					frappe.model.set_value(frm.doctype,frm.docname,
+						"membership_expiry_date", data.message.to_date);
+				}
 			}
 		});
 	}

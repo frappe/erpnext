@@ -188,7 +188,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 			%s
 		order by description
 	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
-		tuple([doctype] + invoice_item_row.keys()))
+		tuple([doctype] + list(invoice_item_row)))
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		description = handle_html(description)

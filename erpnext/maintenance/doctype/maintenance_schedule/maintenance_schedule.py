@@ -112,7 +112,7 @@ class MaintenanceSchedule(TransactionBase):
 		if not validated and holidays:
 
 			# max iterations = len(holidays)
-			for i in xrange(len(holidays)):
+			for i in range(len(holidays)):
 				if schedule_date in holidays:
 					schedule_date = add_days(schedule_date, -1)
 				else:

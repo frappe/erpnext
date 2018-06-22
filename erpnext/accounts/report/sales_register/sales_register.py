@@ -189,7 +189,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in income_accounts:
-			if invoice_income_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_income_map[d.parent]:
 				invoice_income_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_income_map[d.parent][d.account_head] = flt(d.tax_amount)

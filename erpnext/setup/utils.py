@@ -52,20 +52,36 @@ def before_tests():
 	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
 
+	if not frappe.db.exists('Company', 'Woocommerce'):
+		company = frappe.new_doc("Company")
+		company.company_name = "Woocommerce"
+		company.abbr = "W"
+		company.default_currency = "INR"
+		company.save()
+
+	woo_settings = frappe.get_doc("Woocommerce Settings")
+	if not woo_settings.secret:
+		woo_settings.secret = "ec434676aa1de0e502389f515c38f89f653119ab35e9117c7a79e576"
+		woo_settings.woocommerce_server_url = "https://woocommerce.mntechnique.com/"
+		woo_settings.api_consumer_key = "ck_fd43ff5756a6abafd95fadb6677100ce95a758a1"
+		woo_settings.api_consumer_secret = "cs_94360a1ad7bef7fa420a40cf284f7b3e0788454e"
+		woo_settings.enable_sync = 1
+		woo_settings.tax_account = "Sales Expenses - W"
+		woo_settings.f_n_f_account = "Expenses - W"
+		woo_settings.save(ignore_permissions=True)
+
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_exchange_rate(from_currency, to_currency, transaction_date=None):
+def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=None):
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
-
 	if from_currency == to_currency:
 		return 1
 
 	if not transaction_date:
 		transaction_date = nowdate()
-
 	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
 	allow_stale_rates = currency_settings.get("allow_stale")
 
@@ -74,6 +90,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 		["from_currency", "=", from_currency],
 		["to_currency", "=", to_currency]
 	]
+
+	if args == "for_buying":
+		filters.append(["for_buying", "=", "1"])
+	elif args == "for_selling":
+		filters.append(["for_selling", "=", "1"])
 
 	if not allow_stale_rates:
 		stale_days = currency_settings.get("stale_days")
@@ -84,7 +105,6 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 	entries = frappe.get_all(
 		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc",
 		limit=1)
-
 	if entries:
 		return flt(entries[0].exchange_rate)
 
@@ -128,7 +148,7 @@ def insert_record(records):
 		doc.update(r)
 		try:
 			doc.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError, e:
+		except frappe.DuplicateEntryError as e:
 			# pass DuplicateEntryError and continue
 			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
 				# make sure DuplicateEntryError is for the exact same doc and not a related doc

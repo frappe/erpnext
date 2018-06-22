@@ -12,8 +12,10 @@ from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
+
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -30,10 +32,10 @@ class MaterialRequest(BuyingController):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get('items'):
 			if d.sales_order:
-				if not so_items.has_key(d.sales_order):
+				if not d.sales_order in so_items:
 					so_items[d.sales_order] = {d.item_code: flt(d.qty)}
 				else:
-					if not so_items[d.sales_order].has_key(d.item_code):
+					if not d.item_code in so_items[d.sales_order]:
 						so_items[d.sales_order][d.item_code] = flt(d.qty)
 					else:
 						so_items[d.sales_order][d.item_code] += flt(d.qty)
@@ -90,6 +92,9 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
+		if self.material_request_type == 'Purchase':
+			self.validate_budget()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -142,6 +147,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -164,7 +170,7 @@ class MaterialRequest(BuyingController):
 
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
-						from `tabProduction Order` where material_request = %s
+						from `tabWork Order` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
 
@@ -192,6 +198,22 @@ class MaterialRequest(BuyingController):
 			update_bin_qty(item_code, warehouse, {
 				"indented_qty": get_indented_qty(item_code, warehouse)
 			})
+
+	def update_requested_qty_in_production_plan(self):
+		production_plans = []
+		for d in self.get('items'):
+			if d.production_plan and d.material_request_plan_item:
+				qty = d.qty if self.docstatus == 1 else 0
+				frappe.db.set_value('Material Request Plan Item',
+					d.material_request_plan_item, 'requested_qty', qty)
+
+				if d.production_plan not in production_plans:
+					production_plans.append(d.production_plan)
+
+		for production_plan in production_plans:
+			doc = frappe.get_doc('Production Plan', production_plan)
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
@@ -276,7 +298,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 	if target_doc:
-		if isinstance(target_doc, basestring):
+		if isinstance(target_doc, string_types):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
 		target_doc.set("items", [])
@@ -395,37 +417,36 @@ def make_stock_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def raise_production_orders(material_request):
+def raise_work_orders(material_request):
 	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
-	production_orders = []
+	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
 			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
-				prod_order = frappe.new_doc("Production Order")
-				prod_order.production_item = d.item_code
-				prod_order.qty = d.qty - d.ordered_qty
-				prod_order.fg_warehouse = d.warehouse
-				prod_order.wip_warehouse = default_wip_warehouse
-				prod_order.description = d.description
-				prod_order.stock_uom = d.stock_uom
-				prod_order.expected_delivery_date = d.schedule_date
-				prod_order.sales_order = d.sales_order
-				prod_order.bom_no = get_item_details(d.item_code).bom_no
-				prod_order.material_request = mr.name
-				prod_order.material_request_item = d.name
-				prod_order.planned_start_date = mr.transaction_date
-				prod_order.company = mr.company
-				prod_order.set_production_order_operations()
-				prod_order.save()
-				production_orders.append(prod_order.name)
+				wo_order = frappe.new_doc("Work Order")
+				wo_order.production_item = d.item_code
+				wo_order.qty = d.qty - d.ordered_qty
+				wo_order.fg_warehouse = d.warehouse
+				wo_order.wip_warehouse = default_wip_warehouse
+				wo_order.description = d.description
+				wo_order.stock_uom = d.stock_uom
+				wo_order.expected_delivery_date = d.schedule_date
+				wo_order.sales_order = d.sales_order
+				wo_order.bom_no = get_item_details(d.item_code).bom_no
+				wo_order.material_request = mr.name
+				wo_order.material_request_item = d.name
+				wo_order.planned_start_date = mr.transaction_date
+				wo_order.company = mr.company
+				wo_order.save()
+				work_orders.append(wo_order.name)
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
-	if production_orders:
-		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
-			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created:") + '\n' + new_line_sep(message))
+	if work_orders:
+		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+			(p, p) for p in work_orders]
+		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 	if errors:
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
-	return production_orders
+	return work_orders

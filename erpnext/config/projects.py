@@ -14,6 +14,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Project Update",
+					"description": _("Project Update."),
+				},
+				{
+					"type": "doctype",
 					"name": "Task",
 					"route": "List/Task",
 					"description": _("Project activity / task."),

@@ -77,7 +77,7 @@ QUnit.test('Test: Student Attendace Tool', function(assert){
 		() => frappe.set_route('List', 'Student Attendance/List'),
 		() => frappe.timeout(1),
 		() => {
-			assert.equal(($('div.list-item').size() - 1), count, "Attendance list created");
+			assert.equal(cur_list.data.length, count, "Attendance list created");
 		},
 
 		() => done()

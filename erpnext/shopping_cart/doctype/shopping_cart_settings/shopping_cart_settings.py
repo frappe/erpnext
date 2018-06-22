@@ -90,6 +90,4 @@ def check_shopping_cart_enabled():
 		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
 
 def show_attachments():
-        return get_shopping_cart_settings().show_attachments
-
-
+	return get_shopping_cart_settings().show_attachments

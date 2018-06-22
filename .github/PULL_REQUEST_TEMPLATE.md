@@ -24,5 +24,5 @@ What type of a PR is this?
 - Related Issue: 
 - Screenshots (if applicable, remember, a picture tells a thousand words): 
 
-**Please don't be intimidated by the long list of options you've fill. Try to fill out as much as you can. Remember, the more the information the easier it is for us to test and get your pull request merged** :grin: 
+**Please don't be intimidated by the long list of options you've to fill. Try to fill out as much as you can. Remember, the more the information the easier it is for us to test and get your pull request merged** :grin: 
 

@@ -53,6 +53,7 @@ class EmployeeAdvance(Document):
 		self.set_status()
 		frappe.db.set_value("Employee Advance", self.name , "status", self.status)
 
+
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
 			select sum(ifnull(allocated_amount, 0))
@@ -60,7 +61,14 @@ class EmployeeAdvance(Document):
 			where employee_advance = %s and docstatus=1 and allocated_amount > 0
 		""", self.name)[0][0]
 
-		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", claimed_amount)
+		frappe.db.set_value("Employee Advance", self.name, "claimed_ amount", claimed_amount)
+
+@frappe.whitelist()
+def get_due_advance_amount(employee, posting_date):
+	employee_due_amount = frappe.get_all("Employee Advance", \
+		filters = {"employee":employee, "docstatus":1, "posting_date":("<=", posting_date)}, \
+		fields = ["advance_amount", "paid_amount"])
+	return sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):

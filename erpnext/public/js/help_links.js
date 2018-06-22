@@ -69,12 +69,12 @@ frappe.help.help_links['List/Email Account'] = [
 	{ label: 'Email Account', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-account' },
 ]
 
-frappe.help.help_links['List/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['List/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
-frappe.help.help_links['Form/Email Alert'] = [
-	{ label: 'Email Alert', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/email-alerts' },
+frappe.help.help_links['Form/Notification'] = [
+	{ label: 'Notification', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/email/notifications' },
 ]
 
 frappe.help.help_links['List/Email Digest'] = [
@@ -492,8 +492,8 @@ frappe.help.help_links['Form/BOM'] = [
 	{ label: 'Nested BOM Structure', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/articles/nested-bom-structure' },
 ]
 
-frappe.help.help_links['Form/Production Order'] = [
-	{ label: 'Production Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/production-order' },
+frappe.help.help_links['Form/Work Order'] = [
+	{ label: 'Work Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/work-order' },
 ]
 
 frappe.help.help_links['Form/Workstation'] = [
@@ -502,10 +502,6 @@ frappe.help.help_links['Form/Workstation'] = [
 
 frappe.help.help_links['Form/Operation'] = [
 	{ label: 'Operation', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/operation' },
-]
-
-frappe.help.help_links['Form/Production Planning Tool'] = [
-	{ label: 'Production Planning Tool', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/tools/production-planning-tool' },
 ]
 
 frappe.help.help_links['Form/BOM Update Tool'] = [

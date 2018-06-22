@@ -102,7 +102,8 @@ class Gstr1Report(object):
 
 		for opts in (("company", " and company=%(company)s"),
 			("from_date", " and posting_date>=%(from_date)s"),
-			("to_date", " and posting_date<=%(to_date)s")):
+			("to_date", " and posting_date<=%(to_date)s"),
+			("company_address", " and company_address=%(company_address)s")):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
@@ -120,8 +121,7 @@ class Gstr1Report(object):
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
 				and grand_total > {0} and is_return != 1 and customer in ('{1}')""".\
-					format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers])	)
-					
+					format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
@@ -159,7 +159,7 @@ class Gstr1Report(object):
 				and parent in (%s)
 			order by account_head
 		""" % (self.tax_doctype, '%s', ', '.join(['%s']*len(self.invoices.keys()))),
-			tuple([self.doctype] + self.invoices.keys()))
+			tuple([self.doctype] + list(self.invoices.keys())))
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()

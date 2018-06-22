@@ -7,7 +7,7 @@ from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 def execute():
 	for item_code, warehouse in frappe.db.sql("""select distinct production_item, fg_warehouse
-		from `tabProduction Order`"""):
+		from `tabWork Order`"""):
 			if frappe.db.exists("Item", item_code) and frappe.db.exists("Warehouse", warehouse):
 				update_bin_qty(item_code, warehouse, {
 					"planned_qty": get_planned_qty(item_code, warehouse)

@@ -94,7 +94,7 @@ frappe.query_reports["Quoted Item Comparison"] = {
 					},
 					freeze: true,
 					callback: (r) => {
-						frappe.msgprint("Successfully Set Supplier");
+						frappe.msgprint(__("Successfully Set Supplier"));
 						dialog.hide();
 					}
 				});

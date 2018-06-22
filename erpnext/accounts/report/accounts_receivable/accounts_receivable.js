@@ -11,6 +11,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
@@ -34,6 +40,24 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Payment Terms Template"),
 			"fieldtype": "Link",
 			"options": "Payment Terms Template"
+		},
+		{
+			"fieldname":"territory",
+			"label": __("Territory"),
+			"fieldtype": "Link",
+			"options": "Territory"
+		},
+		{
+			"fieldname":"sales_partner",
+			"label": __("Sales Partner"),
+			"fieldtype": "Link",
+			"options": "Sales Partner"
+		},
+		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person"
 		},
 		{
 			"fieldtype": "Break",

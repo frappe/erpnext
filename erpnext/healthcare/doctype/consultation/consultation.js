@@ -15,19 +15,7 @@ frappe.ui.form.on('Consultation', {
 			{fieldname: 'test_comment', columns: 4}
 		];
 	},
-	onload: function(frm){
-		if(frm.doc.patient){
-			frappe.call({
-				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-				args: {
-					patient: frm.doc.patient
-				},
-				callback: function (data) {
-					show_details(data.message);
-				}
-			});
-		}
-	},
+
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
@@ -37,7 +25,7 @@ frappe.ui.form.on('Consultation', {
 				frappe.route_options = {"patient": frm.doc.patient};
 				frappe.set_route("medical_record");
 			} else {
-				frappe.msgprint("Please select Patient");
+				frappe.msgprint(__("Please select Patient"));
 			}
 		},"View");
 		frm.add_custom_button(__('Vital Signs'), function() {
@@ -45,6 +33,10 @@ frappe.ui.form.on('Consultation', {
 		},"Create");
 		frm.add_custom_button(__('Medical Record'), function() {
 			create_medical_record(frm);
+		},"Create");
+
+		frm.add_custom_button(__("Procedure"),function(){
+			btn_create_procedure(frm);
 		},"Create");
 
 		frm.set_query("patient", function () {
@@ -117,7 +109,7 @@ var btn_invoice_consultation = function(frm){
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -130,7 +122,7 @@ var create_medical_record = function (frm) {
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -139,56 +131,15 @@ var btn_create_vital_signs = function (frm) {
 	frappe.new_doc("Vital Signs");
 };
 
-var show_details = function(data){
-	var personal_details = "";
-	var age = null;
-	if(data.dob){
-		age = calculate_age(data.dob);
-		personal_details += "<br><b>Age :</b> " + age;
+var btn_create_procedure = function (frm) {
+	if(!frm.doc.patient){
+		frappe.throw("Please select patient");
 	}
-	if(data.sex) personal_details += "<br><b>Gender :</b> " + data.sex;
-	if(data.blood_group) personal_details += "<br><b>Blood group : </b> " + data.blood_group;
-	if(data.occupation) personal_details += "<br><b>Occupation :</b> " + data.occupation;
-	if(data.email) personal_details += "<br><b>Email :</b> " + data.email;
-	if(data.mobile) personal_details += "<br><b>Mobile :</b> " + data.mobile;
-
-	if(personal_details){
-		personal_details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Personal Details</b>" + personal_details + "</div>";
-	}
-
-	var details = "";
-	if(data.allergies) details +=  "<br><br><b>Allergies : </b> "+  data.allergies;
-	if(data.medication) details +=  "<br><b>Medication : </b> "+  data.medication;
-	if(data.alcohol_current_use) details +=  "<br><br><b>Alcohol use : </b> "+  data.alcohol_current_use;
-	if(data.alcohol_past_use) details +=  "<br><b>Alcohol past use : </b> "+  data.alcohol_past_use;
-	if(data.tobacco_current_use) details +=  "<br><b>Tobacco use : </b> "+  data.tobacco_current_use;
-	if(data.tobacco_past_use) details +=  "<br><b>Tobacco past use : </b> "+  data.tobacco_past_use;
-	if(data.medical_history) details +=  "<br><br><b>Medical history : </b> "+  data.medical_history;
-	if(data.surgical_history) details +=  "<br><b>Surgical history : </b> "+  data.surgical_history;
-	if(data.surrounding_factors) details +=  "<br><br><b>Occupational hazards : </b> "+  data.surrounding_factors;
-	if(data.other_risk_factors) details += "<br><b>Other risk factors : </b> " + data.other_risk_factors;
-	if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details;
-
-	if(details){
-		details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Patient Details</b>" + details + "</div>";
-	}
-
-	var vitals = "";
-	if(data.temperature) vitals += "<br><b>Temperature :</b> " + data.temperature;
-	if(data.pulse) vitals += ", <b>Pulse :</b> " + data.pulse;
-	if(data.respiratory_rate) vitals += ", <b>Respiratory Rate :</b> " + data.respiratory_rate;
-	if(data.bp) vitals += ", <b>BP :</b> " + data.bp;
-	if(data.bmi) vitals += "<br><b>BMI :</b> " + data.bmi;
-	if(data.nutrition_note) vitals += " (" + data.nutrition_note + ")";
-	if(data.height) vitals += ", <b>Height :</b> " + data.height;
-	if(data.weight) vitals += ", <b>Weight :</b> " + data.weight;
-	if(data.signs_date) vitals += "<br><b>Date :</b> " + data.signs_date;
-
-	if(vitals){
-		vitals = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>";
-	}
-	details = personal_details + vitals + details;
-	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
+	frappe.route_options = {
+		"patient": frm.doc.patient,
+		"medical_department": frm.doc.visit_department
+	};
+	frappe.new_doc("Clinical Procedure");
 };
 
 frappe.ui.form.on("Consultation", "appointment", function(frm){
@@ -261,7 +212,6 @@ frappe.ui.form.on("Consultation", "patient", function(frm) {
 				}
 				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
 				frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex);
-				if(frm.doc.__islocal) show_details(data.message);
 			}
 		});
 	}
@@ -299,6 +249,25 @@ frappe.ui.form.on("Drug Prescription", {
 		var child = locals[cdt][cdn];
 		if(child.in_every == "Hour"){
 			frappe.model.set_value(cdt, cdn, 'dosage', null);
+		}
+	}
+});
+
+frappe.ui.form.on("Procedure Prescription", {
+	procedure:  function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.procedure){
+			frappe.call({
+				"method": "frappe.client.get_value",
+				args: {
+					doctype: "Clinical Procedure Template",
+					fieldname: "medical_department",
+					filters: {name: child.procedure}
+				},
+				callback: function (data) {
+					frappe.model.set_value(cdt, cdn, 'department',data.message.medical_department);
+				}
+			});
 		}
 	}
 });

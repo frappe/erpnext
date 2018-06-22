@@ -93,10 +93,10 @@ class TestItem(unittest.TestCase):
 		new_lft, new_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 
 		# lft should reduce
-		self.assertEquals(old_lft - new_lft, rgt - lft + 1)
+		self.assertEqual(old_lft - new_lft, rgt - lft + 1)
 
 		# adjacent siblings, hence rgt diff will be 0
-		self.assertEquals(new_rgt - old_rgt, 0)
+		self.assertEqual(new_rgt - old_rgt, 0)
 
 		self.move_it_back()
 
@@ -129,10 +129,10 @@ class TestItem(unittest.TestCase):
 		new_lft, new_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 
 		# lft should remain the same
-		self.assertEquals(old_lft - new_lft, 0)
+		self.assertEqual(old_lft - new_lft, 0)
 
 		# rgt should increase
-		self.assertEquals(new_rgt - old_rgt, rgt - lft + 1)
+		self.assertEqual(new_rgt - old_rgt, rgt - lft + 1)
 
 		# move it back
 		group_b_3 = frappe.get_doc("Item Group", "_Test Item Group B - 3")
@@ -157,7 +157,7 @@ class TestItem(unittest.TestCase):
 		# rgt of each ancestor would reduce by 2
 		for item_group in ancestors:
 			new_lft, new_rgt = frappe.db.get_value("Item Group", item_group.name, ["lft", "rgt"])
-			self.assertEquals(new_rgt, item_group.rgt - 2)
+			self.assertEqual(new_rgt, item_group.rgt - 2)
 
 		# insert it back
 		frappe.copy_doc(test_records[6]).insert()

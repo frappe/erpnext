@@ -12,7 +12,7 @@
 frappe.ready(function() {
 	$("#footer-subscribe-button").click(function() {
 
-		if($("#footer-subscribe-email").val() && valid_email($("#footer-subscribe-email").val())) {
+		if($("#footer-subscribe-email").val() && validate_email($("#footer-subscribe-email").val())) {
 			$("#footer-subscribe-email").attr('disabled', true);
 			$("#footer-subscribe-button").html("Sending...")
 				.attr("disabled", true);

@@ -27,8 +27,14 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 	
 		this.dialog.set_primary_action(__("Submit"), function() {
-			me.dialog.hide()
-			me.submit_invoice()
+			// Allow no ZERO payment
+			$.each(me.frm.doc.payments, function (index, data) {
+				if (data.amount != 0) {
+					me.dialog.hide();
+					me.submit_invoice();
+					return;
+				}
+			});
 		})
 	},
 

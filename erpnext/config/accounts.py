@@ -34,8 +34,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Subscription",
-					"label": _("Subscription"),
+					"name": "Auto Repeat",
+					"label": _("Auto Repeat"),
 					"description": _("To make recurring documents")
 				},
 				{
@@ -125,6 +125,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Profit and Loss Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Consolidated Financial Statement",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
@@ -453,6 +459,40 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sales Payment Summary",
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Address And Contacts",
+					"doctype": "Address"
+				}
+			]
+		},
+		{
+			"label": _("Share Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Shareholder",
+					"description": _("List of available Shareholders with folio numbers")
+				},
+				{
+					"type": "doctype",
+					"name":"Share Transfer",
+					"description": _("List of all share transactions"),
+				},
+				{
+					"type": "report",
+					"name": "Share Ledger",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Share Balance",
+					"doctype": "Share Transfer",
+					"is_query_report": True
 				}
 			]
 		},

@@ -133,7 +133,7 @@ var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.account_head){
-		frappe.msgprint("Please select Charge Type first");
+		frappe.msgprint(__("Please select Charge Type first"));
 		frappe.model.set_value(cdt, cdn, "account_head", "");
 	} else if(d.account_head && d.charge_type!=="Actual") {
 		frappe.call({
@@ -145,6 +145,8 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
 			}
 		})
+	} else if (d.charge_type == 'Actual' && d.account_head) {
+		frappe.model.set_value(cdt, cdn, "description", d.account_head.split(' - ')[0]);
 	}
 }
 

@@ -71,6 +71,12 @@ function get_filters(){
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"from_fiscal_year",
 			"label": __("Start Year"),
 			"fieldtype": "Link",
@@ -98,6 +104,16 @@ function get_filters(){
 			],
 			"default": "Monthly",
 			"reqd": 1
+		},
+		// Note:
+		// If you are modifying this array such that the presentation_currency object
+		// is no longer the last object, please make adjustments in cash_flow.js
+		// accordingly.
+		{
+			"fieldname": "presentation_currency",
+			"label": __("Currency"),
+			"fieldtype": "Select",
+			"options": erpnext.get_presentation_currency_list()
 		}
 	]
 }

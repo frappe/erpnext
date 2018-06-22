@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from past.builtins import cmp
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -10,6 +11,8 @@ from frappe.utils import cstr, cint
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.utils.nestedset import get_root_of
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+
+from six import iteritems
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
@@ -27,7 +30,7 @@ class TaxRule(Document):
 
 	def validate_tax_template(self):
 		if self.tax_type== "Sales":
-			self.purchase_tax_template = self.supplier = self.supplier_type = None
+			self.purchase_tax_template = self.supplier = self.supplier_group = None
 			if self.customer:
 				self.customer_group = None
 
@@ -35,7 +38,7 @@ class TaxRule(Document):
 			self.sales_tax_template = self.customer = self.customer_group = None
 
 			if self.supplier:
-				self.supplier_type = None
+				self.supplier_group = None
 
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
@@ -50,7 +53,7 @@ class TaxRule(Document):
 			"customer": 		self.customer,
 			"customer_group": 	self.customer_group,
 			"supplier":			self.supplier,
-			"supplier_type":	self.supplier_type,
+			"supplier_group":	self.supplier_group,
 			"billing_city":		self.billing_city,
 			"billing_county":	self.billing_county,
 			"billing_state": 	self.billing_state,
@@ -133,7 +136,7 @@ def get_tax_template(posting_date, args):
 	conditions = ["""(from_date is null or from_date <= '{0}')
 		and (to_date is null or to_date >= '{0}')""".format(posting_date)]
 
-	for key, value in args.iteritems():
+	for key, value in iteritems(args):
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
 		if key == 'customer_group':

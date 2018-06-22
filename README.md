@@ -1,4 +1,10 @@
-# ERPNext - ERP made simple
+<div align="center">
+    <img src="https://github.com/frappe/design/blob/master/logos/erpnext-logo.svg" height="128">
+    <h2>ERPNext</h2>
+    <p align="center">
+        <p>ERP made simple</p>
+    </p>
+</div>
 
 [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -40,6 +46,7 @@ The ERPNext code is licensed as GNU General Public License (v3) and the Document
 ## Contributing
 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
+1. [Report Security Vulnerabilities](https://erpnext.com/reporting-security-vulnerabilities)
 1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
 1. [Translations](https://translate.erpnext.com)
 1. [Chart of Accounts](https://charts.erpnext.com)

@@ -231,6 +231,7 @@ def insert_lab_test_to_medical_record(doc):
 	subject = cstr(doc.test_name)
 	if(doc.test_comment):
 		subject += ", \n"+ cstr(doc.test_comment)
+
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject

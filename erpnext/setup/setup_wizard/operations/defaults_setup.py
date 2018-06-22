@@ -27,7 +27,6 @@ def set_default_settings(args):
 
 	domain_settings = frappe.get_single('Domain Settings')
 	domain_settings.set_active_domains(args.get('domains'))
-	domain_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
@@ -55,14 +54,10 @@ def set_default_settings(args):
 	buying_settings.allow_multiple_items = 1
 	buying_settings.save()
 
-	notification_control = frappe.get_doc("Notification Control")
-	notification_control.quotation = 1
-	notification_control.sales_invoice = 1
-	notification_control.purchase_order = 1
-	notification_control.save()
-
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
+	hr_settings.leave_approval_notification_template = "Leave Approval Notification"
+	hr_settings.leave_status_notification_template = "Leave Status Notification"
 	hr_settings.save()
 
 def set_no_copy_fields_in_variant_settings():

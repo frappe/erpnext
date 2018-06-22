@@ -108,8 +108,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		let item_rate = item.price_list_rate;
+		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
+			item_rate = item.blanket_order_rate;
+		}
+		item.rate = flt(item_rate * (1 - item.discount_percentage / 100.0), precision("rate", item));
 
 		this.calculate_taxes_and_totals();
 	},
@@ -236,7 +239,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				items: my_items
 			},
 			callback: function(r) {
-				if(r.exc) return;
+				if(r.exc || !r.message) return;
 
 				var i = 0;
 				var item_length = cur_frm.doc.items.length;
@@ -252,10 +255,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							d.qty = d.qty  - my_qty;
 							cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 							cur_frm.doc.items[i].qty = my_qty;
-
-							frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
+							
+							frappe.msgprint(__("Assigning {0} to {1} (row {2})", 
+								[d.mr_name, d.item_code, cur_frm.doc.items[i].idx]));
+							
 							if (qty > 0) {
-								frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+								frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 								var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 								item_length++;
 

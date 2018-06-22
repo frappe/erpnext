@@ -110,8 +110,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
-					this.frm.add_custom_button(__('Production Order'),
-						function() { me.make_production_order() }, __("Make"));
+					this.frm.add_custom_button(__('Work Order'),
+						function() { me.make_work_order() }, __("Make"));
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
@@ -158,7 +158,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_project() }, __("Make"));
 				}
 
-				if(!doc.subscription) {
+				if(!doc.auto_repeat) {
 					this.frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(doc.doctype, doc.name)
 					}, __("Make"))
@@ -196,15 +196,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.order_type(doc);
 	},
 
-	make_production_order() {
+	make_work_order() {
 		var me = this;
 		this.frm.call({
 			doc: this.frm.doc,
-			method: 'get_production_order_items',
+			method: 'get_work_order_items',
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
+						title: __('Work Order not created'),
 						message: __('No Items with Bill of Materials to Manufacture'),
 						indicator: 'orange'
 					});
@@ -212,8 +212,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 				else if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
-						message: __('Production Order already created for all items with BOM'),
+						title: __('Work Order not created'),
+						message: __('Work Order already created for all items with BOM'),
 						indicator: 'orange'
 					});
 					return;
@@ -245,7 +245,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						primary_action: function() {
 							var data = d.get_values();
 							me.frm.call({
-								method: 'make_production_orders',
+								method: 'make_work_orders',
 								args: {
 									items: data,
 									company: me.frm.doc.company,
@@ -256,9 +256,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								callback: function(r) {
 									if(r.message) {
 										frappe.msgprint({
-											message: __('Production Orders Created: {0}',
+											message: __('Work Orders Created: {0}',
 												[r.message.map(function(d) {
-													return repl('<a href="#Form/Production Order/%(name)s">%(name)s</a>', {name:d})
+													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})
@@ -442,11 +442,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				frappe.ui.form.is_saving = false;
 			}
 		});
-	},
-	on_submit: function(doc, cdt, cdn) {
-		if(cint(frappe.boot.notification_settings.sales_order)) {
-			this.frm.email_doc(frappe.boot.notification_settings.sales_order_message);
-		}
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));

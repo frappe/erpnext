@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
+
 import unittest
 import frappe, erpnext
 import frappe.defaults
@@ -12,7 +12,7 @@ from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
-
+from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -24,8 +24,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pi = make_purchase_invoice(pr.name)
 
-		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items")), len(pr.get("items")))
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.get("items")), len(pr.get("items")))
 
 		# modify rate
 		pi.get("items")[0].rate = 200
@@ -81,8 +81,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			}
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.debit)
-			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		pr.cancel()
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
@@ -92,19 +92,19 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
+		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC",
 			qty=100, basic_rate=100)
-
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
-		self.assertEquals(len(pr.get("supplied_items")), 2)
+		self.assertEqual(len(pr.get("supplied_items")), 2)
 
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
-		self.assertEquals(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
-		self.assertEquals(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "supplier"),
+		self.assertEqual(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no, "supplier"),
 			pr.supplier)
 
 		pr.cancel()
@@ -121,15 +121,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.submit()
 
 		accepted_serial_nos = pr.get("items")[0].serial_no.split("\n")
-		self.assertEquals(len(accepted_serial_nos), 3)
+		self.assertEqual(len(accepted_serial_nos), 3)
 		for serial_no in accepted_serial_nos:
-			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "warehouse"),
 				pr.get("items")[0].warehouse)
 
 		rejected_serial_nos = pr.get("items")[0].rejected_serial_no.split("\n")
-		self.assertEquals(len(rejected_serial_nos), 2)
+		self.assertEqual(len(rejected_serial_nos), 2)
 		for serial_no in rejected_serial_nos:
-			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "warehouse"),
 				pr.get("items")[0].rejected_warehouse)
 
 	def test_purchase_return(self):
@@ -158,8 +158,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		}
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.debit)
-			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -180,8 +180,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_return_for_serialized_items(self):
 		def _check_serial_no_values(serial_no, field_values):
 			serial_no = frappe.get_doc("Serial No", serial_no)
-			for field, value in field_values.items():
-				self.assertEquals(cstr(serial_no.get(field)), value)
+			for field, value in iteritems(field_values):
+				self.assertEqual(cstr(serial_no.get(field)), value)
 
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -217,7 +217,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		return_pr = make_purchase_receipt(item_code=item_code, qty=-10, uom="Unit",
 			stock_uom="Box", conversion_factor=0.1, is_return=1, return_against=pr.name)
 
-		self.assertEquals(abs(return_pr.items[0].stock_qty), 1.0)
+		self.assertEqual(abs(return_pr.items[0].stock_qty), 1.0)
 
 	def test_closed_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
@@ -226,7 +226,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.submit()
 
 		update_purchase_receipt_status(pr.name, "Closed")
-		self.assertEquals(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
 
 	def test_pr_billing_status(self):
 		# PO -> PR1 -> PI and PO -> PI and PO -> PR2
@@ -273,7 +273,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		item_code = frappe.db.get_value('Item', {'has_serial_no': 1})
+		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0})
 		if not item_code:
 			item = make_item("Test Serial Item 1", dict(has_serial_no=1))
 			item_code = item.name
@@ -289,12 +289,59 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
+	def test_serialized_asset_item(self):
+		asset_item = "Test Serialized Asset Item"
+
+		if not frappe.db.exists('Item', asset_item):
+			asset_category = frappe.get_all('Asset Category')
+
+			if asset_category:
+				asset_category = asset_category[0].name
+
+			if not asset_category:
+				doc = frappe.get_doc({
+					'doctype': 'Asset Category',
+					'asset_category_name': 'Test Asset Category',
+					'depreciation_method': 'Straight Line',
+					'total_number_of_depreciations': 12,
+					'frequency_of_depreciation': 1,
+					'accounts': [{
+						'company_name': '_Test Company',
+						'fixed_asset_account': '_Test Fixed Asset - _TC',
+						'accumulated_depreciation_account': 'Depreciation - _TC',
+						'depreciation_expense_account': 'Depreciation - _TC'
+					}]
+				}).insert()
+
+				asset_category = doc.name
+
+			item_data = make_item(asset_item, {'is_stock_item':0,
+				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
+				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+			asset_item = item_data.item_code
+
+		if not frappe.db.exists('Location', 'Test Location'):
+			frappe.get_doc({
+				'doctype': 'Location',
+				'location_name': 'Test Location'
+			}).insert()
+
+		pr = make_purchase_receipt(item_code=asset_item, qty=3)
+		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
+		asset_movement = frappe.db.get_value('Asset Movement', {'reference_name': pr.name}, 'name')
+		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name')
+
+		self.assertEquals(len(serial_nos), 3)
+		pr.cancel()
+		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
+		self.assertEquals(len(serial_nos), 0)
+		frappe.db.sql("delete from `tabLocation")
+		frappe.db.sql("delete from `tabAsset`")
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
-
 
 def make_purchase_receipt(**args):
 	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -325,7 +372,8 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
-		"uom": args.uom or "_Test UOM"
+		"uom": args.uom or "_Test UOM",
+		"asset_location": "Test Location" if args.item_code == "Test Serialized Asset Item" else ""
 	})
 
 	if not args.do_not_save:

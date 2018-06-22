@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt, cint, cstr
-from frappe.desk.reportview import build_match_conditions
+from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
@@ -31,10 +31,7 @@ class Customer(TransactionBase):
 		if cust_master_name == 'Customer Name':
 			self.name = self.get_customer_name()
 		else:
-			if not self.naming_series:
-				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-
-			self.name = make_autoname(self.naming_series+'.#####')
+			set_name_by_naming_series(self)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
@@ -182,7 +179,7 @@ class Customer(TransactionBase):
 			frappe.db.set(self, "customer_name", newdn)
 
 
-def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
+def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
 	else:
@@ -190,6 +187,10 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 
 	match_conditions = build_match_conditions("Customer")
 	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
+
+	if filters:
+		filter_conditions = get_filters_cond(doctype, filters, [])
+		match_conditions += "{}".format(filter_conditions)
 
 	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
 		and (%s like %s or customer_name like %s)
@@ -322,6 +323,18 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
 			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
 			and `tabContact`.name like %(txt)s
+		""", {
+			'customer': customer,
+			'txt': '%%%s%%' % txt
+		})
+
+def get_customer_primary_address(doctype, txt, searchfield, start, page_len, filters):
+	customer = frappe.db.escape(filters.get('customer'))
+	return frappe.db.sql("""
+		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
+			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
+			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,
 			'txt': '%%%s%%' % txt
