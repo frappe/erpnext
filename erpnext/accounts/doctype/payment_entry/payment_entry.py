@@ -748,8 +748,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
+		elif reference_doctype == "Expense Claim":
+			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
+				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
 		elif reference_doctype == "Employee Advance":
 			outstanding_amount = ref_doc.advance_amount - flt(ref_doc.paid_amount)
 		else:
