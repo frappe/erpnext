@@ -828,6 +828,11 @@ frappe.ui.form.on('Payment Entry Reference', {
 					$.each(r.message, function(field, value) {
 						frappe.model.set_value(cdt, cdn, field, value);
 					})
+
+					let allocated_amount = frm.doc.unallocated_amount > row.outstanding_amount ?
+						row.outstanding_amount : frm.doc.unallocated_amount;
+
+					frappe.model.set_value(cdt, cdn, 'allocated_amount', allocated_amount);
 					frm.refresh_fields();
 				}
 			}
