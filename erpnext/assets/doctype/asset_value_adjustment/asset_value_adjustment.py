@@ -28,7 +28,7 @@ class AssetValueAdjustment(Document):
 		self.difference_amount = flt(self.current_asset_value - self.new_asset_value)
 
 	def set_current_asset_value(self):
-		if not self.current_asset_value and self.asset and self.finance_book:
+		if not self.current_asset_value and self.asset:
 			self.current_asset_value = get_current_asset_value(self.asset, self.finance_book)
 
 	def make_depreciation_entry(self):
@@ -101,6 +101,9 @@ class AssetValueAdjustment(Document):
 				asset_data.db_update()
 
 @frappe.whitelist()
-def get_current_asset_value(asset, finance_book):
-	return frappe.db.get_value('Asset Finance Book',
-		{'parent': asset, 'parenttype': 'Asset', 'finance_book': finance_book}, 'value_after_depreciation', debug=1)
+def get_current_asset_value(asset, finance_book=None):
+	cond = {'parent': asset, 'parenttype': 'Asset'}
+	if finance_book:
+		cond.update({'finance_book': finance_book})
+
+	return frappe.db.get_value('Asset Finance Book', cond, 'value_after_depreciation')

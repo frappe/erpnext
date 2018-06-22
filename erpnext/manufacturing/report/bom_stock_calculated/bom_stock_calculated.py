@@ -14,7 +14,7 @@ def execute(filters=None):
 	qty_to_make = filters.get("qty_to_make")
 
 	for rows in data:
-	        item_map = get_item_details(rows[0])
+		item_map = get_item_details(rows[0])
 		reqd_qty = qty_to_make * rows[3]
 		last_pur_price = frappe.db.get_value("Item", rows[0], "last_purchase_rate")
 		if rows[4] > 0:
@@ -79,7 +79,7 @@ def get_bom_stock(filters):
 				LEFT JOIN `tabBin` AS ledger
 				ON bom_item.item_code = ledger.item_code
 				{conditions}
-				
+
 			WHERE
 				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
 
@@ -89,5 +89,3 @@ def get_item_details(item_code):
         items = frappe.db.sql("""select it.item_group, it.item_name, it.stock_uom, it.name, it.brand, it.description, it.manufacturer_part_no, it.manufacturer from tabItem it where it.item_code = %s""", item_code, as_dict=1)
 
         return dict((d.name, d) for d in items)
-
-

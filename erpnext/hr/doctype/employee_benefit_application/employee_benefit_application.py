@@ -164,7 +164,7 @@ def calculate_lwp(employee, start_date, holidays, working_days):
 			lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 	return lwp
 
-def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, payment_days, working_days, frequency):
+def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, period_length, frequency):
 	# Considering there is only one application for an year
 	benefit_application_name = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
@@ -177,28 +177,26 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 		'end_date': end_date
 	})
 
-	payroll_period_days, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
+	period_factor, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
 
-	depends_on_lwp = frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp")
-	if depends_on_lwp != 1:
-		payment_days = working_days
+	if frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp") != 1:
 		if frequency == "Monthly" and actual_payroll_days in range(360, 370):
-			payment_days = 1
-			payroll_period_days = 12
+			period_length = 1
+			period_factor = 12
 
-	if payroll_period_days:
+	if period_factor:
 		# If there is application for benefit then fetch the amount from the application.
 		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
 		if benefit_application_name:
 			benefit_application = frappe.get_doc("Employee Benefit Application", benefit_application_name[0][0])
-			return get_benefit_amount(benefit_application, struct_row, payroll_period_days, payment_days)
+			return get_benefit_amount(benefit_application, struct_row, period_factor, period_length)
 
 		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount (Late Benefit Application)
 		else:
 			component_max = frappe.db.get_value("Salary Component", struct_row.salary_component, "max_benefit_amount")
 			if component_max > 0:
 				benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, component_max)
-				return get_amount(payroll_period_days, benefit_amount, payment_days)
+				return get_amount(period_factor, benefit_amount, period_length)
 	return False
 
 def get_benefit_pro_rata_ratio_amount(sal_struct, component_max):
@@ -214,16 +212,16 @@ def get_benefit_pro_rata_ratio_amount(sal_struct, component_max):
 			benefit_amount = component_max
 	return benefit_amount
 
-def get_benefit_amount(application, struct_row, payroll_period_days, payment_days):
+def get_benefit_amount(application, struct_row, period_factor, period_length):
 	amount = 0
 	for employee_benefit in application.employee_benefits:
 		if employee_benefit.earning_component == struct_row.salary_component:
-			amount += get_amount(payroll_period_days, employee_benefit.amount, payment_days)
+			amount += get_amount(period_factor, employee_benefit.amount, period_length)
 	return amount if amount > 0 else False
 
-def get_amount(payroll_period_days, amount, payment_days):
-	amount_per_day = amount / payroll_period_days
-	total_amount = amount_per_day * payment_days
+def get_amount(period_factor, amount, period_length):
+	amount_per_day = amount / period_factor
+	total_amount = amount_per_day * period_length
 	return total_amount
 
 def get_earning_components(doctype, txt, searchfield, start, page_len, filters):

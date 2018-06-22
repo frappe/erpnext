@@ -12,7 +12,7 @@ frappe.ui.form.on("Salary Slip", {
 				{fieldname: 'amount', columns: 4}
 			];
 		})
-		
+
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
 			return {
 				filters: {
@@ -69,7 +69,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.trigger("toggle_fields")
 		frm.trigger("toggle_reqd_fields")
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "is_tax_applicable",
-			"is_flexible_benefit", "variable_based_on_taxable_salary"]
+			"is_flexible_benefit", "variable_based_on_taxable_salary", "is_additional_component"]
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
 	},
