@@ -29,8 +29,9 @@ class POSClosingVoucher(Document):
 		sales_summary = get_sales_summary(invoice_list)
 		self.set_sales_summary_values(sales_summary)
 
-		mop = get_mode_of_payment_details(invoice_list)
-		self.set_mode_of_payments(mop)
+		if not self.get('payment_reconciliation'):
+			mop = get_mode_of_payment_details(invoice_list)
+			self.set_mode_of_payments(mop)
 
 		taxes = get_tax_details(invoice_list)
 		self.set_taxes(taxes)
