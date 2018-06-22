@@ -225,6 +225,11 @@ let make_bank_entry = function (frm) {
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
+			callback: function() {
+				frappe.set_route(
+					'List', 'Journal Entry', {posting_date: frm.doc.posting_date}
+				);
+			},
 			freeze: true,
 			freeze_message: __("Creating Bank Entries......")
 		});
