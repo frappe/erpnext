@@ -114,9 +114,3 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
 		.format(condition = cond, start=start, page_len= page_len),
 			{'txt': '%%%s%%' % txt})
-@frappe.whitelist()
-def get_pos_data():
-	print "pos data----============================="
-	pos_value = frappe.db.sql("""select outstanding_amount_has_to_be_0,write_off_amount_can_not_be_more_than_positive_or_negative,write_off__amount  from `tabPOS Profile`""",as_dict=1)
-	print "pos_value----******************************",pos_value
-	return pos_value
