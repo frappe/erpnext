@@ -11,6 +11,7 @@ from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 
 class TestItemPrice(unittest.TestCase):
 	def setUp(self):
+		frappe.db.sql("delete from `tabItem Price`")		
 		make_test_records_for_doctype("Item Price", force=True)
 
 	def test_duplicate_item(self):
@@ -141,9 +142,5 @@ class TestItemPrice(unittest.TestCase):
 		doc.price_list = "This is not a price list"
 		# Valid price list must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
-
-	def tearDown(self):
-		frappe.db.sql("delete from `tabItem Price`")
-
 
 test_records = frappe.get_test_records('Item Price')
