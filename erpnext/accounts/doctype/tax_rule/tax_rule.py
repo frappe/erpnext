@@ -54,13 +54,17 @@ class TaxRule(Document):
 			"customer_group": 	self.customer_group,
 			"supplier":			self.supplier,
 			"supplier_group":	self.supplier_group,
+			"item":				self.item,
+			"item_group":		self.item_group,
 			"billing_city":		self.billing_city,
 			"billing_county":	self.billing_county,
 			"billing_state": 	self.billing_state,
+			"billing_zipcode":	self.billing_zipcode,
 			"billing_country":	self.billing_country,
 			"shipping_city":	self.shipping_city,
 			"shipping_county":	self.shipping_county,
 			"shipping_state":	self.shipping_state,
+			"shipping_zipcode":	self.shipping_zipcode,
 			"shipping_country":	self.shipping_country,
 			"company":			self.company
 		}
@@ -120,12 +124,14 @@ def get_party_details(party, party_type, args=None):
 		out["billing_city"]= billing_address.city
 		out["billing_county"]= billing_address.county
 		out["billing_state"]= billing_address.state
+		out["billing_zipcode"]= billing_address.pincode
 		out["billing_country"]= billing_address.country
 
 	if shipping_address:
 		out["shipping_city"]= shipping_address.city
 		out["shipping_county"]= shipping_address.county
 		out["shipping_state"]= shipping_address.state
+		out["shipping_zipcode"]= shipping_address.pincode
 		out["shipping_country"]= shipping_address.country
 
 	return out
