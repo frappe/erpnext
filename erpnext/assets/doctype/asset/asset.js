@@ -58,7 +58,7 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 
-			if (frm.doc.purchase_receipt) {
+			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
 				frm.add_custom_button("General Ledger", function() {
 					frappe.route_options = {
 						"voucher_no": frm.doc.name,
@@ -88,6 +88,10 @@ frappe.ui.form.on('Asset', {
 
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 			frm.trigger("setup_chart");
+		}
+
+		if (frm.doc.docstatus == 0) {
+			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
 	},
 
@@ -261,6 +265,8 @@ frappe.ui.form.on('Asset', {
 				})
 			}
 		})
+
+		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 	}
 });
 
