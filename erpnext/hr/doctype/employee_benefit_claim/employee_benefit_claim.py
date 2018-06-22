@@ -115,7 +115,7 @@ def get_benefit_claim_amount(employee, start_date, end_date, salary_component):
 		return claimed_amount
 	return False
 
-def get_total_benefit_despensed(employee, sal_struct, sal_slip_start_date, payroll_period):
+def get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period):
 	pro_rata_amount = 0
 	claimed_amount = 0
 	application = frappe.db.exists(
@@ -140,7 +140,7 @@ def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end
 	max_benefits = get_max_benefits(employee, payroll_period.end_date)
 	if not max_benefits:
 		max_benefits = 0
-	remainig_benefits = max_benefits - get_total_benefit_despensed(employee, sal_struct, sal_slip_start_date, payroll_period)
+	remainig_benefits = max_benefits - get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period)
 	if remainig_benefits > 0:
 		have_remaining = True
 		# Set the remainig benefits to flexi non pro-rata component in the salary structure
