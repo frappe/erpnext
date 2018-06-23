@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -162,6 +163,77 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.insert()
 
 		self.assertTrue(po.get('payment_schedule'))
+
+	def test_po_for_blocked_supplier_all(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.save()
+
+		self.assertEqual(supplier.hold_type, 'All')
+		self.assertRaises(frappe.ValidationError, create_purchase_order)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_invoices(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, create_purchase_order)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		po = create_purchase_order()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Order', dn=po.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments_with_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.release_date = nowdate()
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		po = create_purchase_order()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Order', dn=po.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_po_for_blocked_supplier_payments_past_date(self):
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
+
+				po = create_purchase_order()
+				get_payment_entry('Purchase Order', po.name, bank_account='_Test Bank - _TC')
+
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
 
 	def test_terms_does_not_copy(self):
 		po = create_purchase_order()

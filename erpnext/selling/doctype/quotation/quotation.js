@@ -60,7 +60,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 					cur_frm.cscript['Declare Order Lost']);
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
@@ -204,11 +204,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	});
 	dialog.show();
 
-}
-
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.quotation))
-		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {

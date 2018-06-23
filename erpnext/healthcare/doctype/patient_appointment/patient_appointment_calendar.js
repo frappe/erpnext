@@ -1,8 +1,8 @@
 
 frappe.views.calendar["Patient Appointment"] = {
 	field_map: {
-		"start": "appointment_date",
-		"end": "appointment_datetime",
+		"start": "start",
+		"end": "end",
 		"id": "name",
 		"title": "patient",
 		"allDay": "allDay",

@@ -343,6 +343,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	billing_rate = billing_amount / hours
 
+	target.company = timesheet.company
 	if customer:
 		target.customer = customer
 
@@ -380,6 +381,11 @@ def set_missing_values(time_sheet, target):
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
 	target.posting_date = doc.modified
+	target.total_working_hours = doc.total_hours
+	target.append('timesheets', {
+		'time_sheet': doc.name,
+		'working_hours': doc.total_hours
+	})
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
@@ -422,9 +428,10 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 	# find customer name from contact.
 	customer = frappe.db.sql('''SELECT dl.link_name FROM `tabContact` AS c inner join \
 		`tabDynamic Link` AS dl ON c.first_name=dl.link_name WHERE c.email_id=%s''',user)
-	# find list of Sales Invoice for made for customer.
-	sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
+
 	if customer:
+		# find list of Sales Invoice for made for customer.
+		sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
 		# Return timesheet related data to web portal.
 		return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, \
 			tsd.sales_invoice, tsd.project  FROM `tabTimesheet` AS ts inner join `tabTimesheet Detail` \

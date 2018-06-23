@@ -5,7 +5,7 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		super.setup_defaults();
 		this.method = 'erpnext.hub_node.get_details';
 		const route = frappe.get_route();
-		this.page_name = route[2];
+		// this.page_name = route[2];
 	}
 
 	setup_fields() {
@@ -325,7 +325,7 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 	}
 
 	setup_side_bar() {
-		this.setup_side_bar();
+		super.setup_side_bar();
 		this.attachFooter();
 		this.attachTimeline();
 		this.attachReviewArea();
@@ -357,6 +357,11 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 					console.log(e); //eslint-disable-line
 				});
 		}, 'octicon octicon-plus');
+	}
+
+	prepare_data(r) {
+		super.prepare_data(r);
+		this.page.set_title(this.data["item_name"]);
 	}
 
 	make_rfq(item, supplier, btn) {
@@ -444,8 +449,8 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 				{ label: __('Supplier Name'), fieldtype: 'Data', fieldname: 'supplier_name', default: item.company_name },
 				{ label: __('Supplier Email'), fieldtype: 'Data', fieldname: 'supplier_email', default: item.seller },
 				{ fieldtype: 'Column Break' },
-				{ label: __('Supplier Type'), fieldname: 'supplier_type',
-					fieldtype: 'Link', options: 'Supplier Type' }
+				{ label: __('Supplier Group'), fieldname: 'supplier_group',
+					fieldtype: 'Link', options: 'Supplier Group' }
 			];
 			fields = fields.map(f => { f.reqd = 1; return f; });
 
@@ -467,7 +472,6 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
 	constructor(opts) {
 		super(opts);
-
 		this.show();
 	}
 
@@ -475,6 +479,11 @@ erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
 		super.setup_defaults();
 		this.doctype = 'Company';
 		this.image_field_name = 'company_logo';
+	}
+
+	prepare_data(r) {
+		super.prepare_data(r);
+		this.page.set_title(this.data["company_name"]);
 	}
 
 	getFormFields() {

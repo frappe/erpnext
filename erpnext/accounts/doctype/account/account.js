@@ -111,10 +111,13 @@ frappe.ui.form.on('Account', {
 				}
 
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.account.update_account_number",
+					method: "erpnext.accounts.utils.update_number_field",
 					args: {
-						account_number: data.account_number,
-						name: frm.doc.name
+						doctype_name: frm.doc.doctype,
+						name: frm.doc.name,
+						field_name: d.fields[0].fieldname,
+						field_value: data.account_number,
+						company: frm.doc.company,
 					},
 					callback: function(r) {
 						if(!r.exc) {

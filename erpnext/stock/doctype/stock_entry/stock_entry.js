@@ -59,7 +59,6 @@ frappe.ui.form.on('Stock Entry', {
 		});
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
-		frm.trigger("setup_quality_inspection");
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -156,6 +155,29 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			}, __("Get items from"));
 		}
+		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
+			frm.add_custom_button(__('Expired Batches'), function() {
+				frappe.call({
+					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
+					callback: function(r) {
+						if (!r.exc && r.message) {
+							frm.set_value("items", []);
+							r.message.forEach(function(element) {
+								let d = frm.add_child("items");
+								d.item_code = element.item;
+								d.s_warehouse = element.warehouse;
+								d.qty = element.qty;
+								d.uom = element.stock_uom;
+								d.conversion_factor = 1;
+								d.batch_no = element.batch_no;
+								d.transfer_qty = element.qty;
+								frm.refresh_fields();
+							});
+						}
+					}
+				});
+			}, __("Get items from"));
+		}
 
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
@@ -166,6 +188,8 @@ frappe.ui.form.on('Stock Entry', {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
+
+		frm.trigger("setup_quality_inspection");
 	},
 
 	purpose: function(frm) {
@@ -350,7 +374,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
-	},
+	}
 })
 
 frappe.ui.form.on('Stock Entry Detail', {

@@ -7,6 +7,9 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
+from six import iteritems
+from six.moves import zip
+
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
@@ -35,7 +38,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				_("Customer Group") + ":Link/Customer Group:120"
 			]
 		if args.get("party_type") == "Supplier":
-			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
+			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
 			
 		columns.append({
 			"fieldname": "currency",
@@ -52,7 +55,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
 
-		for party, party_dict in partywise_total.items():
+		for party, party_dict in iteritems(partywise_total):
 			row = [party]
 
 			if party_naming_by == "Naming Series":
@@ -66,7 +69,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			if args.get("party_type") == "Customer":
 				row += [self.get_territory(party), self.get_customer_group(party)]
 			if args.get("party_type") == "Supplier":
-				row += [self.get_supplier_type(party)]
+				row += [self.get_supplier_group(party)]
 				
 			row.append(party_dict.currency)
 			data.append(row)
@@ -88,7 +91,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range4": 0
 				})
 			)
-			for k in party_total[d.party].keys():
+			for k in list(party_total[d.party]):
 				if k != "currency":
 					party_total[d.party][k] += flt(d.get(k, 0))
 				
@@ -113,7 +116,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
 
 		if args.get("party_type") == "Supplier":
-			cols += ["supplier_type", "remarks"]
+			cols += ["supplier_group", "remarks"]
 		if args.get("party_type") == "Customer":
 			cols += ["territory", "customer_group", "remarks"]
 

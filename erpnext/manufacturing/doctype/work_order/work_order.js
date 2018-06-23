@@ -121,6 +121,24 @@ frappe.ui.form.on("Work Order", {
 				})
 			})
 		}
+
+		if(frm.doc.required_items && frm.doc.allow_alternative_item) {
+			const has_alternative = frm.doc.required_items.find(i => i.allow_alternative_item === 1);
+			if (frm.doc.docstatus == 0 && has_alternative) {
+				frm.add_custom_button(__('Alternate Item'), () => {
+					erpnext.utils.select_alternate_items({
+						frm: frm,
+						child_docname: "required_items",
+						warehouse_field: "source_warehouse",
+						child_doctype: "Work Order Item",
+						original_item_field: "original_item",
+						condition: (d) => {
+							if (d.allow_alternative_item) {return true;}
+						}
+					})
+				});
+			}
+		}
 	},
 
 	show_progress: function(frm) {
@@ -140,15 +158,15 @@ frappe.ui.form.on("Work Order", {
 			added_min = 0.5;
 		}
 		message = title;
-
 		// pending qty
 		if(!frm.doc.skip_transfer){
 			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
 			if(pending_complete) {
 				var title = __('{0} items in progress', [pending_complete]);
+				var width = ((pending_complete / frm.doc.qty * 100) - added_min);
 				bars.push({
 					'title': title,
-					'width': ((pending_complete / frm.doc.qty * 100) - added_min)  + '%',
+					'width': (width > 100 ? "99.5" : width)  + '%',
 					'progress_class': 'progress-bar-warning'
 				})
 				message = message + '. ' + title;
@@ -338,7 +356,7 @@ erpnext.work_order = {
 							erpnext.work_order.make_se(frm, 'Manufacture');
 						});
 
-						if(doc.material_transferred_for_manufacturing==doc.qty) {
+						if(doc.material_transferred_for_manufacturing>=doc.qty) {
 							// all materials transferred for manufacturing, make this primary
 							finish_btn.addClass('btn-primary');
 						}

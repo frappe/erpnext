@@ -20,14 +20,16 @@ class Account(NestedSet):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		self.name = get_account_autoname(self.account_number, self.account_name, self.company)
+		from erpnext.accounts.utils import get_doc_name_autoname
+		self.name = get_doc_name_autoname(self.account_number, self.account_name, None, self.company)
 
 	def validate(self):
+		from erpnext.accounts.utils import validate_field_number
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_root_details()
-		validate_account_number(self.name, self.account_number, self.company)
+		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -231,44 +233,6 @@ def get_account_currency(account):
 		return account_currency
 
 	return frappe.local_cache("account_currency", account, generator)
-
-def get_account_autoname(account_number, account_name, company):
-	# first validate if company exists
-	company = frappe.db.get_value("Company", company, ["abbr", "name"], as_dict=True)
-	if not company:
-		frappe.throw(_('Company {0} does not exist').format(company))
-
-	parts = [account_name.strip(), company.abbr]
-	if cstr(account_number).strip():
-		parts.insert(0, cstr(account_number).strip())
-	return ' - '.join(parts)
-
-def validate_account_number(name, account_number, company):
-	if account_number:
-		account_with_same_number = frappe.db.get_value("Account",
-			{"account_number": account_number, "company": company, "name": ["!=", name]})
-		if account_with_same_number:
-			frappe.throw(_("Account Number {0} already used in account {1}")
-				.format(account_number, account_with_same_number))
-
-@frappe.whitelist()
-def update_account_number(name, account_number):
-	account = frappe.db.get_value("Account", name, ["account_name", "company"], as_dict=True)
-
-	validate_account_number(name, account_number, account.company)
-
-	frappe.db.set_value("Account", name, "account_number", account_number)
-
-	account_name = account.account_name
-	if account_name[0].isdigit():
-		separator = " - " if " - " in account_name else " "
-		account_name = account_name.split(separator, 1)[1]
-	frappe.db.set_value("Account", name, "account_name", account_name)
-
-	new_name = get_account_autoname(account_number, account_name, account.company)
-	if name != new_name:
-		frappe.rename_doc("Account", name, new_name)
-		return new_name
 
 def get_name_with_number(new_account, account_number):
 	if account_number and not new_account[0].isdigit():

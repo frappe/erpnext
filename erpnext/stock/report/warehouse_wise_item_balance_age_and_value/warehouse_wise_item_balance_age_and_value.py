@@ -10,7 +10,7 @@ from frappe import _
 from frappe.utils import flt, cint, getdate
 from erpnext.stock.report.stock_balance.stock_balance import get_item_details, get_item_reorder_details, get_item_warehouse_map
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
-
+from six import iteritems
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -39,9 +39,9 @@ def execute(filters=None):
 		item_value.setdefault((item, item_map[item]["item_group"]),[])
 		item_value[(item, item_map[item]["item_group"])].append(total_stock_value)
 
-	
+
 	# sum bal_qty by item
-	for (item, item_group), wh_balance in item_balance.items():
+	for (item, item_group), wh_balance in iteritems(item_balance):
 		total_stock_value = sum(item_value[(item, item_group)])
 		row = [item, item_group, total_stock_value]
 
@@ -87,7 +87,9 @@ def validate_filters(filters):
 def get_warehouse_list(filters):
 	from frappe.defaults import get_user_permissions
 	condition = ''
-	user_permitted_warehouse = filter(None, get_user_permissions().get("Warehouse", []))
+	user_permitted_warehouse = filter(None, get_user_permissions()
+		.get("Warehouse", {})
+		.get("docs", []))
 	value = ()
 	if user_permitted_warehouse:
 		condition = "and name in %s"
@@ -96,7 +98,7 @@ def get_warehouse_list(filters):
 		condition = "and name = %s"
 		value = filters.get("warehouse")
 
-	return frappe.db.sql("""select name  
+	return frappe.db.sql("""select name
 		from `tabWarehouse` where is_group = 0
 		{condition}""".format(condition=condition), value, as_dict=1)
 

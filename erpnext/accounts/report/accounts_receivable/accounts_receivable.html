@@ -19,7 +19,13 @@
 
 
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
+<h4 class="text-center">
+	{% if (filters.customer_name) { %}
+		{%= filters.customer_name %}
+	{% } else { %}
+		{%= filters.customer || filters.supplier %}
+	{% } %}
+</h4>
 <h6 class="text-center">
 		{% if (filters.tax_id) { %}
 		{%= __("Tax Id: ")%}	{%= filters.tax_id %}

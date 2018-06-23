@@ -512,6 +512,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
+		this.page.add_menu_item(__('Close the POS'), function() {
+			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
+			voucher.pos_profile = me.frm.doc.pos_profile;
+			voucher.user = frappe.session.user;
+			voucher.company = me.frm.doc.company;
+			voucher.period_start_date = me.frm.doc.posting_date;
+			voucher.period_end_date = me.frm.doc.posting_date;
+			voucher.posting_date = me.frm.doc.posting_date;
+			frappe.set_route('Form', 'POS Closing Voucher', voucher.name);
+		});
 	}
 
 	set_form_action() {
@@ -727,7 +737,7 @@ class POSCart {
 		);
 	}
 
-	update_qty_total() {		
+	update_qty_total() {
 		var total_item_qty = 0;
 		$.each(this.frm.doc["items"] || [], function (i, d) {
 				if (d.qty > 0) {

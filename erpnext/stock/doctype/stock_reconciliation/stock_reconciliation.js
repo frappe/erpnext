@@ -49,7 +49,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					args: {
 						warehouse: data.warehouse,
 						posting_date: frm.doc.posting_date,
-						posting_time: frm.doc.posting_time
+						posting_time: frm.doc.posting_time,
+						company:frm.doc.company
 					},
 					callback: function(r) {
 						var items = [];

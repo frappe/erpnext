@@ -1,8 +1,0 @@
-custom-field
-custom-doctype
-custom-scripts
-customize-form
-document-title
-hiding-modules-and-features
-print-format
-custom-scripts

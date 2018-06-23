@@ -105,10 +105,9 @@ def get_timesheet_based_salary_slip_employee():
 			and docstatus != 2""")
 	if sal_struct:
 		employees = frappe.db.sql("""
-				select employee from `tabSalary Structure Employee`
-				where parent IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
+				select employee from `tabSalary Structure Assignment`
+				where salary_structure IN %(sal_struct)s""", {"sal_struct": sal_struct}, as_dict=True)
 		return employees
-
 	else:
 		return []
 

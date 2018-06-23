@@ -7,7 +7,7 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt, cint, cstr
-from frappe.desk.reportview import build_match_conditions
+from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
@@ -76,7 +76,7 @@ class Customer(TransactionBase):
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
 		if frappe.flags.customer_group_changed:
-			update_linked_doctypes('Customer', self.name, 'Customer Group',
+			update_linked_doctypes('Customer', frappe.db.escape(self.name), 'Customer Group',
 				self.customer_group, ignore_doctypes)
 
 	def create_primary_contact(self):
@@ -179,7 +179,7 @@ class Customer(TransactionBase):
 			frappe.db.set(self, "customer_name", newdn)
 
 
-def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
+def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
 	else:
@@ -187,6 +187,10 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 
 	match_conditions = build_match_conditions("Customer")
 	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
+
+	if filters:
+		filter_conditions = get_filters_cond(doctype, filters, [])
+		match_conditions += "{}".format(filter_conditions)
 
 	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
 		and (%s like %s or customer_name like %s)
@@ -313,7 +317,7 @@ def make_address(args, is_primary_address=1):
 	return address
 
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
-	customer = frappe.db.escape(filters.get('customer'))
+	customer = filters.get('customer')
 	return frappe.db.sql("""
 		select `tabContact`.name from `tabContact`, `tabDynamic Link`
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s

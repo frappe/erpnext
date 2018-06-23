@@ -9,6 +9,14 @@ frappe.ui.form.on('Payroll Entry', {
 			frm.doc.posting_date = frappe.datetime.nowdate();
 		}
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
+
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -213,17 +221,14 @@ cur_frm.cscript.get_employee_details = function (doc) {
 
 let make_bank_entry = function (frm) {
 	var doc = frm.doc;
-	if (doc.company && doc.start_date && doc.end_date) {
+	if (doc.company && doc.start_date && doc.end_date && doc.payment_account) {
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
-			callback: function (r) {
-				if (r.message)
-					var doc = frappe.model.sync(r.message)[0];
-				frappe.set_route("Form", doc.doctype, doc.name);
-			}
+			freeze: true,
+			freeze_message: __("Creating Bank Entries......")
 		});
 	} else {
-		frappe.msgprint(__("Company, From Date and To Date is mandatory"));
+		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));
 	}
 };

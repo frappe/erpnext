@@ -34,7 +34,7 @@ frappe.ui.form.on("Delivery Note", {
 
 		frm.set_query('transporter_name', function(doc) {
 			return {
-				filters: { 'supplier_type': "transporter" }
+				filters: { 'supplier_group': "transporter" }
 			}
 		});
 
@@ -66,11 +66,6 @@ frappe.ui.form.on("Delivery Note", {
 	},
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
-	},
-	on_submit: function(frm) {
-		if(cint(frappe.boot.notification_settings.delivery_note)) {
-			frm.email_doc(frappe.boot.notification_settings.delivery_note_message);
-		}
 	}
 });
 
@@ -172,7 +167,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
-		if(doc.docstatus==1 && !doc.subscription) {
+		if(doc.docstatus==1 && !doc.auto_repeat) {
 			cur_frm.add_custom_button(__('Subscription'), function() {
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __("Make"))

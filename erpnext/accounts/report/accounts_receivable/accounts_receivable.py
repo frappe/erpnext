@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint
 
@@ -60,6 +60,7 @@ class ReceivablePayableReport(object):
 		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
 				"label": label,
+				"fieldname": frappe.scrub(label),
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
@@ -112,7 +113,7 @@ class ReceivablePayableReport(object):
 				_("Customer Group") + ":Link/Customer Group:120"
 			]
 		if args.get("party_type") == "Supplier":
-			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
+			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
 
 		columns.append(_("Remarks") + "::200")
 
@@ -205,11 +206,11 @@ class ReceivablePayableReport(object):
 						# Delivery Note
 						row += [voucher_details.get(gle.voucher_no, {}).get("delivery_note")]
 
-					# customer territory / supplier type
+					# customer territory / supplier group
 					if args.get("party_type") == "Customer":
 						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
 					if args.get("party_type") == "Supplier":
-						row += [self.get_supplier_type(gle.party)]
+						row += [self.get_supplier_group(gle.party)]
 
 					row.append(gle.remarks)
 					data.append(row)
@@ -271,15 +272,15 @@ class ReceivablePayableReport(object):
 	def get_customer_group(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("customer_group") or ""
 
-	def get_supplier_type(self, party_name):
-		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_type") or ""
+	def get_supplier_group(self, party_name):
+		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_group") or ""
 
 	def get_party_map(self, party_type):
 		if not hasattr(self, "party_map"):
 			if party_type == "Customer":
 				select_fields = "name, customer_name, territory, customer_group"
 			elif party_type == "Supplier":
-				select_fields = "name, supplier_name, supplier_type"
+				select_fields = "name, supplier_name, supplier_group"
 
 			self.party_map = dict(((r.name, r) for r in frappe.db.sql("select {0} from `tab{1}`"
 				.format(select_fields, party_type), as_dict=True)))
@@ -297,7 +298,10 @@ class ReceivablePayableReport(object):
 
 		if party_type == "Supplier":
 			for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
-				from `tabPurchase Invoice` where docstatus=1""", as_dict=1):
+				from `tabPurchase Invoice` where docstatus = 1
+				union
+				select name, due_date, bill_no, bill_date from `tabJournal Entry`
+				where docstatus = 1 and bill_no is not NULL""", as_dict=1):
 					voucher_details.setdefault(pi.name, pi)
 
 		return voucher_details
@@ -331,6 +335,15 @@ class ReceivablePayableReport(object):
 		if self.filters.company:
 			conditions.append("company=%s")
 			values.append(self.filters.company)
+
+		company_finance_book = erpnext.get_default_finance_book(self.filters.company)
+
+		if not self.filters.finance_book or (self.filters.finance_book == company_finance_book):
+			conditions.append("ifnull(finance_book,'') in (%s, '')")
+			values.append(company_finance_book)
+		elif self.filters.finance_book:
+			conditions.append("ifnull(finance_book,'') = %s")
+			values.append(self.filters.finance_book)
 
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")

@@ -14,6 +14,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
 from six import string_types
+from erpnext.stock.doctype.item.item import get_item_defaults
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -210,11 +211,16 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		self.validate_budget()
+
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
+
+		self.update_blanket_order()
+
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -237,6 +243,9 @@ class PurchaseOrder(BuyingController):
 		# Must be called after updating ordered qty in Material Request
 		self.update_requested_qty()
 		self.update_ordered_qty()
+
+		self.update_blanket_order()
+
 
 	def on_update(self):
 		pass
@@ -314,6 +323,7 @@ def close_or_unclose_purchase_orders(names, status):
 			else:
 				if po.status == "Closed":
 					po.update_status("Draft")
+			po.update_blanket_order()
 
 	frappe.local.message_log = []
 
@@ -372,9 +382,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, source_parent.company)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
-			or item.buying_cost_center \
+			or item.get("buying_cost_center") \
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
@@ -445,6 +455,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
+							'main_item_code': rm_item_data["item_code"],
 							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
 						}
 					}

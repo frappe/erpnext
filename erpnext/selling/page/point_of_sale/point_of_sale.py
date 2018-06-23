@@ -50,7 +50,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		ON
 			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
-			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1 and ifnull(i.is_fixed_asset, 0) = 0
 			and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
 			and ifnull(i.end_of_life, curdate()) >= curdate()
 			and {condition}

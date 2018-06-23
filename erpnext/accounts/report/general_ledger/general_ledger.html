@@ -2,7 +2,7 @@
 <h4 class="text-center">
 	{% if (filters.party_name) { %}
 		{%= filters.party_name %}
-	{% } else if (filters.party) { %}
+	{% } else if (filters.party && filters.show_name) { %}
 		{%= filters.party %}
 	{% } else if (filters.account) { %}
 		{%= filters.account %}

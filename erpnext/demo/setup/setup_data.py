@@ -138,20 +138,8 @@ def setup_employee():
 	import_json('Employee')
 
 def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
-	f = frappe.get_doc('Fiscal Year', frappe.defaults.get_global_default('fiscal_year'))
-
 	ss = frappe.new_doc('Salary Structure')
 	ss.name = "Sample Salary Structure - " + random_string(5)
-	for e in employees:
-		ss.append('employees', {
-			'employee': e.name,
-			'from_date': "2015-01-01",
-			'base': random.random() * 10000
-		})
-
-	ss.from_date = e.date_of_joining if (e.date_of_joining
-		and e.date_of_joining > f.year_start_date) else f.year_start_date
-	ss.to_date = f.year_end_date
 	ss.salary_slip_based_on_timesheet = salary_slip_based_on_timesheet
 
 	if salary_slip_based_on_timesheet:
@@ -178,6 +166,12 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		"idx": 1
 	})
 	ss.insert()
+
+	for e in employees:
+		sa  = frappe.new_doc("Salary Structure Assignment")
+		sa.employee = e.name
+		sa.from_date = "2015-01-01"
+		sa.base = random.random() * 10000
 
 	return ss
 
@@ -241,10 +235,10 @@ def setup_user_roles():
 def setup_leave_allocation():
 	year = now_datetime().year
 	for employee in frappe.get_all('Employee', fields=['name']):
-		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_days_allowed'])
+		leave_types = frappe.get_all("Leave Type", fields=['name', 'max_continuous_days_allowed'])
 		for leave_type in leave_types:
-			if not leave_type.max_days_allowed:
-				leave_type.max_days_allowed = 10
+			if not leave_type.max_continuous_days_allowed:
+				leave_type.max_continuous_days_allowed = 10
 
 		leave_allocation = frappe.get_doc({
 			"doctype": "Leave Allocation",
@@ -252,7 +246,7 @@ def setup_leave_allocation():
 			"from_date": "{0}-01-01".format(year),
 			"to_date": "{0}-12-31".format(year),
 			"leave_type": leave_type.name,
-			"new_leaves_allocated": random.randint(1, int(leave_type.max_days_allowed))
+			"new_leaves_allocated": random.randint(1, int(leave_type.max_continuous_days_allowed))
 		})
 		leave_allocation.insert()
 		leave_allocation.submit()
@@ -275,7 +269,7 @@ def setup_supplier():
 		frappe.get_doc({
 			"doctype": "Supplier",
 			"supplier_name": s,
-			"supplier_type": random.choice(["Services", "Raw Material"]),
+			"supplier_group": random.choice(["Services", "Raw Material"]),
 		}).insert()
 
 def setup_warehouse():

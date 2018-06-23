@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.model
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import cint, flt, today, nowdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
@@ -90,6 +91,106 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
+
+	def test_purchase_invoice_for_blocked_supplier(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_invoice(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_payment(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_payment_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = nowdate()
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_payment_past_date(self):
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
+
+				pi = make_purchase_invoice()
+
+				get_payment_entry('Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
+
+	def test_purchase_invoice_blocked_invoice_must_be_in_future(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.release_date = nowdate()
+
+		self.assertRaises(frappe.ValidationError, pi.save)
+		pi.release_date = ''
+		pi.save()
+
+	def test_purchase_invoice_temporary_blocked(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.release_date = add_days(nowdate(), 10)
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry('Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+
+		self.assertRaises(frappe.ValidationError, pe.save)
+
+	def test_purchase_invoice_explicit_block(self):
+		pi = make_purchase_invoice()
+		pi.block_invoice()
+
+		self.assertEqual(pi.on_hold, 1)
+
+		pi.unblock_invoice()
+
+		self.assertEqual(pi.on_hold, 0)
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
@@ -663,6 +764,31 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
 
 		self.assertRaises(frappe.ValidationError, pi.insert)
+
+	def test_debit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
+
+		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+
+		outstanding_amount = get_outstanding_amount(pi.doctype,
+			pi.name, "Creditors - _TC", pi.supplier, "Supplier")
+
+		self.assertEqual(pi.outstanding_amount, outstanding_amount)
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = pi.currency
+		pe.paid_to_account_currency = pi.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = pi.grand_total * -1
+		pe.insert()
+		pe.submit()
+
+		pi_doc = frappe.get_doc('Purchase Invoice', pi.name)
+		self.assertEqual(pi_doc.outstanding_amount, 0)
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
