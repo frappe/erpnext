@@ -26,7 +26,7 @@ frappe.query_reports["Sales Person-wise Transaction Summary"] = {
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: get_today()
+			default: frappe.datetime.get_today()
 		},
 		{
 			fieldname:"company",

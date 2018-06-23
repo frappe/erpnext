@@ -1,0 +1,22 @@
+<div class="pos-selected-item-action" data-item-code="{%= item_code %}" data-idx="{%= idx %}">
+	<div class="pos-list-row">
+		<div class="cell">{{ __("Quantity") }}:</div>
+		<input type="tel" class="form-control cell pos-item-qty" value="{%= qty %}"/>
+	</div>
+	<div class="pos-list-row">
+		<div class="cell">{{ __("Price List Rate") }}:</div>
+		<input type="tel" class="form-control cell" disabled value="{%= price_list_rate %}"/>
+	</div>
+	<div class="pos-list-row">
+		<div class="cell">{{ __("Discount") }}: %</div>
+		<input type="tel" class="form-control cell pos-item-disc" {% if !allow_user_to_edit_discount %} disabled {% endif %} value="{%= discount_percentage %}">
+	</div>
+	<div class="pos-list-row">
+		<div class="cell">{{ __("Price") }}:</div>
+		<input type="tel" class="form-control cell pos-item-price" {% if !allow_user_to_edit_rate %} disabled {% endif %} value="{%= rate %}"/>
+	</div> 
+	<div class="pos-list-row">
+		<div class="cell">{{ __("Amount") }}:</div>
+		<input type="tel" class="form-control cell pos-amount" disabled value="{%= amount %}"/>
+	</div>
+</div>

@@ -66,8 +66,7 @@ class MaintenanceSchedule(TransactionBase):
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				description = frappe._("Reference: %s, Item Code: %s and Customer: %s") % \
-					(self.name, d.item_code, self.customer)
+				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)	
 				frappe.get_doc({
 					"doctype": "Event",
 					"owner": email_map.get(d.sales_person, self.owner),
@@ -113,7 +112,7 @@ class MaintenanceSchedule(TransactionBase):
 		if not validated and holidays:
 
 			# max iterations = len(holidays)
-			for i in xrange(len(holidays)):
+			for i in range(len(holidays)):
 				if schedule_date in holidays:
 					schedule_date = add_days(schedule_date, -1)
 				else:
@@ -163,7 +162,7 @@ class MaintenanceSchedule(TransactionBase):
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
 					msi.sales_order=%s and ms.docstatus=1""", d.sales_order)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.sales_order))
+					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
 	def validate(self):
 		self.validate_maintenance_detail()

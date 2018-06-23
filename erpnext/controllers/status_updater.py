@@ -3,10 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or
+from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.accounts.party_status import notify_status
 
 def validate_status(status, options):
 	if status not in options:
@@ -14,15 +13,17 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
-		["Converted", "has_customer"],
+		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
+		["Quotation", "has_quotation"],
+		["Converted", "has_customer"],
 	],
 	"Opportunity": [
-		["Quotation", "has_quotation"],
-		["Converted", "has_ordered_quotation"],
 		["Lost", "eval:self.status=='Lost'"],
+		["Lost", "has_lost_quotation"],
+		["Quotation", "has_active_quotation"],
+		["Converted", "has_ordered_quotation"],
 		["Closed", "eval:self.status=='Closed'"]
-
 	],
 	"Quotation": [
 		["Draft", None],
@@ -40,6 +41,26 @@ status_map = {
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
+	],
+	"Sales Invoice": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Return", "eval:self.is_return==1 and self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Purchase Invoice": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Return", "eval:self.is_return==1 and self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Purchase Order": [
 		["Draft", None],
@@ -64,6 +85,16 @@ status_map = {
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
+	],
+	"Material Request": [
+		["Draft", None],
+		["Stopped", "eval:self.status == 'Stopped'"],
+		["Cancelled", "eval:self.docstatus == 2"],
+		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
+		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
+		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
+		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
 	]
 }
 
@@ -81,6 +112,8 @@ class StatusUpdater(Document):
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
 			return
 
 		if self.doctype in status_map:
@@ -96,14 +129,16 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if eval(s[1][5:]):
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
 				elif getattr(self, s[1])():
 					self.status = s[0]
 					break
 
-			if self.status != _status and self.status not in ("Submitted", "Cancelled"):
+			if self.status != _status and self.status not in ("Cancelled", "Partially Ordered",
+																"Ordered", "Issued", "Transferred"):
 				self.add_comment("Label", _(self.status))
 
 			if update:
@@ -121,6 +156,12 @@ class StatusUpdater(Document):
 
 			# get unique transactions to update
 			for d in self.get_all_children():
+				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
+
+				if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
@@ -215,7 +256,7 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
-
+				
 				frappe.db.sql("""update `tab%(target_dt)s`
 					set %(target_field)s = (
 						(select ifnull(sum(%(source_field)s), 0)
@@ -240,30 +281,29 @@ class StatusUpdater(Document):
 		"""Update percent field in parent transaction"""
 
 		self._update_modified(args, update_modified)
-
+		
 		if args.get('target_parent_field'):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
 					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
-						/ sum(%(target_ref_field)s) * 100
-					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
+						/ sum(abs(%(target_ref_field)s)) * 100
+					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
-		# update field
-		if args.get('status_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(status_field)s = if(%(target_parent_field)s<0.001,
-					'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
-					'Fully %(keyword)s', 'Partly %(keyword)s'))
-				where name='%(name)s'""" % args)
+			# update field
+			if args.get('status_field'):
+				frappe.db.sql("""update `tab%(target_parent_dt)s`
+					set %(status_field)s = if(%(target_parent_field)s<0.001,
+						'Not %(keyword)s', if(%(target_parent_field)s>=99.999999,
+						'Fully %(keyword)s', 'Partly %(keyword)s'))
+					where name='%(name)s'""" % args)
 
-		if update_modified:
-			target = frappe.get_doc(args["target_parent_dt"], args["name"])
-			target.set_status(update=True)
-			target.notify_update()
-			notify_status(target)
+			if update_modified:
+				target = frappe.get_doc(args["target_parent_dt"], args["name"])
+				target.set_status(update=True)
+				target.notify_update()
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
@@ -301,12 +341,7 @@ class StatusUpdater(Document):
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
 			ref_doc.db_set("per_billed", per_billed)
-
-			if frappe.get_meta(ref_dt).get_field("billing_status"):
-				if per_billed < 0.001: billing_status = "Not Billed"
-				elif per_billed >= 99.99: billing_status = "Fully Billed"
-				else: billing_status = "Partly Billed"
-				ref_doc.db_set('billing_status', billing_status)
+			ref_doc.set_status(update=True)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""

@@ -44,27 +44,27 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block title %}
-{{ _("Login") }}
+{{ _("ERPNext Demo") }}
 {% endblock %}
 
 {% block page_content %}
+<div class='page-card'>
 
-<!-- no-header -->
-<div class="page-hero text-center">
-	<img src="/assets/erpnext/images/erp-icon.svg" style="max-width: 100px; max-height: 100px;">
-	<h1>ERPNext Demo</h1>
-	<p style="margin-top: 60px;">
-		<input id="lead-email" type="email"
-			class="form-control" placeholder="Your Email Id (optional)"
-			style="width: 75%; max-width: 400px; margin: auto;">
-	</p>
-
-	<button type="submit" id="login_btn" class="btn btn-default">Launch Demo</button>
-
-	<hr style="margin: 60px 0px;">
-	<p class="text-muted small">Some functionality is disabled for the demo app. The demo data will be cleared regulary.
-		<br class="hidden-xs">
-		To start your free ERPNext account, <a href="https://erpnext.com/signup?plan=Free-Solo">click here</a></p>
+	<div class='page-card-head'>
+		<span class='indicator blue'>
+			{{ _("ERPNext Demo") }}</span>
+	</div>
+	<!-- <img src="/assets/erpnext/images/erp-icon.svg" style="max-width: 40px; max-height: 40px;"> -->
+	<p>Some functionality is disabled for the demo and the data will be cleared regulary.</p>
+	<div><button type="submit" id="login_btn" class="btn btn-primary btn-sm">Launch Demo</button></div>
 </div>
 
+
+<p class='text-muted text-center small' style='margin-top: -20px;'><a href="https://erpnext.com/pricing">Start a free 30-day trial </a>
+</p>
+<style>
+html, body {
+	background-color: #f5f7fa;
+}
+</style>
 {% endblock %}

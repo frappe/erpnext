@@ -1,0 +1,2398 @@
+[
+ {
+  "description": "Construction services", 
+  "sac_code": "9954"
+ }, 
+ {
+  "description": "Construction services of single dwelling or multi dewlling or multi-storied residential buildings", 
+  "sac_code": "995411"
+ }, 
+ {
+  "description": "Construction services of other residential buildings such as old age homes, homeless shelters, hostels etc", 
+  "sac_code": "995412"
+ }, 
+ {
+  "description": "Construction services of industrial buildings such as buildings used for production activities (used for assembly line activities), workshops, storage buildings and other similar industrial buildings", 
+  "sac_code": "995413"
+ }, 
+ {
+  "description": "Construction services of commercial buildings such as office buildings, exhibition & marriage halls, malls, hotels, restaurants, airports, rail or road terminals, parking garages, petrol and service stations, theatres and other similar buildings.", 
+  "sac_code": "995414"
+ }, 
+ {
+  "description": "Construction services of other non-residential buildings such as educational institutions, hospitals, clinics including vertinary clinics, religious establishments, courts, prisons, museums and other similar buildings", 
+  "sac_code": "995415"
+ }, 
+ {
+  "description": "Construction Services of other buildings n.e.c", 
+  "sac_code": "995416"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, renovation, maintenance or remodelling of the buildings covered above.", 
+  "sac_code": "995419"
+ }, 
+ {
+  "description": "General construction services of highways, streets, roads, railways and airfield runways, bridges and tunnels", 
+  "sac_code": "995421"
+ }, 
+ {
+  "description": "General construction services of harbours, waterways, dams, water mains and lines, irrigation and other waterworks", 
+  "sac_code": "995422"
+ }, 
+ {
+  "description": "General construction services of long-distance underground/overland/submarine pipelines, communication and electric power lines (cables); pumping stations and related works; transformer stations and related works.", 
+  "sac_code": "995423"
+ }, 
+ {
+  "description": "General construction services of local water & sewage pipelines, electricity and communication cables & related works", 
+  "sac_code": "995424"
+ }, 
+ {
+  "description": "General construction services of mines and industrial plants", 
+  "sac_code": "995425"
+ }, 
+ {
+  "description": "General Construction services of Power Plants and its related infrastructure", 
+  "sac_code": "995426"
+ }, 
+ {
+  "description": "General construction services of outdoor sport and recreation facilities", 
+  "sac_code": "995427"
+ }, 
+ {
+  "description": "General construction services of other civil engineering works n.e.c.", 
+  "sac_code": "995428"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, renovation, maintenance or remodelling of the constructions covered above.", 
+  "sac_code": "995429"
+ }, 
+ {
+  "description": "Demolition services", 
+  "sac_code": "995431"
+ }, 
+ {
+  "description": "Site formation and clearance services including preparation services to make sites ready for subsequent construction work, test drilling & boring & core extraction, digging of trenches.", 
+  "sac_code": "995432"
+ }, 
+ {
+  "description": "Excavating and earthmoving services", 
+  "sac_code": "995433"
+ }, 
+ {
+  "description": "Water well drilling services and septic system installation services", 
+  "sac_code": "995434"
+ }, 
+ {
+  "description": "Other site preparation services n.e.c", 
+  "sac_code": "995435"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, maintenance of the constructions covered above.", 
+  "sac_code": "995439"
+ }, 
+ {
+  "description": "Installation, assembly and erection services of prefabricated buildings", 
+  "sac_code": "995441"
+ }, 
+ {
+  "description": "Installation, assembly and erection services of other prefabricated structures and constructions", 
+  "sac_code": "995442"
+ }, 
+ {
+  "description": "Installation services of all types of street furniture (e.g., bus shelters, benches, telephone booths, public toilets, etc.)", 
+  "sac_code": "995443"
+ }, 
+ {
+  "description": "Other assembly and erection services n.e.c.", 
+  "sac_code": "995444"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, maintenance of the constructions covered above.", 
+  "sac_code": "995449"
+ }, 
+ {
+  "description": "Pile driving and foundation services", 
+  "sac_code": "995451"
+ }, 
+ {
+  "description": "Building framing & Roof Framing services", 
+  "sac_code": "995452"
+ }, 
+ {
+  "description": "Roofing and waterproofing services", 
+  "sac_code": "995453"
+ }, 
+ {
+  "description": "Concrete services", 
+  "sac_code": "995454"
+ }, 
+ {
+  "description": "Structural steel erection services", 
+  "sac_code": "995455"
+ }, 
+ {
+  "description": "Masonry services", 
+  "sac_code": "995456"
+ }, 
+ {
+  "description": "Scaffolding services", 
+  "sac_code": "995457"
+ }, 
+ {
+  "description": "Other special trade construction services n.e.c.", 
+  "sac_code": "995458"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, maintenance of the constructions covered above.", 
+  "sac_code": "995459"
+ }, 
+ {
+  "description": "Electrical installation services including Electrical wiring & fitting services, fire alarm installation services, burglar alarm system installation services.", 
+  "sac_code": "995461"
+ }, 
+ {
+  "description": "Water plumbing and drain laying services", 
+  "sac_code": "995462"
+ }, 
+ {
+  "description": "Heating, ventilation and air conditioning equipment installation services", 
+  "sac_code": "995463"
+ }, 
+ {
+  "description": "Gas fitting installation services", 
+  "sac_code": "995464"
+ }, 
+ {
+  "description": "Insulation services", 
+  "sac_code": "995465"
+ }, 
+ {
+  "description": "Lift and escalator installation services", 
+  "sac_code": "995466"
+ }, 
+ {
+  "description": "Other installation services n.e.c.", 
+  "sac_code": "995468"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, maintenance of the installations covered above.", 
+  "sac_code": "995469"
+ }, 
+ {
+  "description": "Glazing services", 
+  "sac_code": "995471"
+ }, 
+ {
+  "description": "Plastering services", 
+  "sac_code": "995472"
+ }, 
+ {
+  "description": "Painting services", 
+  "sac_code": "995473"
+ }, 
+ {
+  "description": "Floor and wall tiling services", 
+  "sac_code": "995474"
+ }, 
+ {
+  "description": "Other floor laying, wall covering and wall papering services", 
+  "sac_code": "995475"
+ }, 
+ {
+  "description": "Joinery and carpentry services", 
+  "sac_code": "995476"
+ }, 
+ {
+  "description": "Fencing and railing services", 
+  "sac_code": "995477"
+ }, 
+ {
+  "description": "Other building completion and finishing services n.e.c.", 
+  "sac_code": "995478"
+ }, 
+ {
+  "description": "Services involving Repair, alterations, additions, replacements, maintenance of the completion/finishing works covered above.", 
+  "sac_code": "995479"
+ }, 
+ {
+  "description": "Services in wholesale trade", 
+  "sac_code": "9961"
+ }, 
+ {
+  "description": "Services provided for a fee/commission or contract basis on wholesale trade", 
+  "sac_code": "996111"
+ }, 
+ {
+  "description": "Services in retail trade", 
+  "sac_code": "9962"
+ }, 
+ {
+  "description": "Services provided for a fee/commission or contract basis on retail trade", 
+  "sac_code": "996211"
+ }, 
+ {
+  "description": "Accommodation, Food and beverage services", 
+  "sac_code": "9963"
+ }, 
+ {
+  "description": "Room or unit accommodation services provided by Hotels, INN, Guest House, Club etc", 
+  "sac_code": "996311"
+ }, 
+ {
+  "description": "Camp site services", 
+  "sac_code": "996312"
+ }, 
+ {
+  "description": "Recreational and vacation camp services", 
+  "sac_code": "996313"
+ }, 
+ {
+  "description": "Room or unit accommodation services for students in student residences", 
+  "sac_code": "996321"
+ }, 
+ {
+  "description": "Room or unit accommodation services provided by Hostels, Camps, Paying Guest etc", 
+  "sac_code": "996322"
+ }, 
+ {
+  "description": "Other room or unit accommodation services n.e.c.", 
+  "sac_code": "996329"
+ }, 
+ {
+  "description": "Services provided by Restaurants, Cafes and similar eating facilities including takeaway services, Room services and door delivery of food.", 
+  "sac_code": "996331"
+ }, 
+ {
+  "description": "Services provided by Hotels, INN, Guest House, Club etc including Room services, takeaway services and door delivery of food.", 
+  "sac_code": "996332"
+ }, 
+ {
+  "description": "Services provided in Canteen and other similar establishments", 
+  "sac_code": "996333"
+ }, 
+ {
+  "description": "Catering Services in Exhibition halls, Events, Marriage Halls and other outdoor/indoor functions.", 
+  "sac_code": "996334"
+ }, 
+ {
+  "description": "Catering services in trains, flights etc.", 
+  "sac_code": "996335"
+ }, 
+ {
+  "description": "Preparation and/or supply services of food, edible preparations, alchoholic & non-alchocholic beverages to airlines and other transportation operators", 
+  "sac_code": "996336"
+ }, 
+ {
+  "description": "Other contract food services", 
+  "sac_code": "996337"
+ }, 
+ {
+  "description": "Other food, edible preparations, alchoholic & non-alchocholic beverages serving services n.e.c.", 
+  "sac_code": "996339"
+ }, 
+ {
+  "description": "Passenger transport services", 
+  "sac_code": "9964"
+ }, 
+ {
+  "description": "Local land transport services of passengers by railways, metro, monorail, bus, tramway, autos, three wheelers, scooters and other motor vehicles", 
+  "sac_code": "996411"
+ }, 
+ {
+  "description": "Taxi services including radio taxi & other similar services; ", 
+  "sac_code": "996412"
+ }, 
+ {
+  "description": "Non-scheduled local bus and coach charter services", 
+  "sac_code": "996413"
+ }, 
+ {
+  "description": "Other land transportation services of passengers.", 
+  "sac_code": "996414"
+ }, 
+ {
+  "description": "Local water transport services of passengers by ferries, cruises etc", 
+  "sac_code": "996415"
+ }, 
+ {
+  "description": "Sightseeing transportation services by rail, land, water & air", 
+  "sac_code": "996416"
+ }, 
+ {
+  "description": "Other local transportation services of passengers n.e.c.", 
+  "sac_code": "996419"
+ }, 
+ {
+  "description": "Long-distance transport services of passengers through Rail network by Railways, Metro etc", 
+  "sac_code": "996421"
+ }, 
+ {
+  "description": "Long-distance transport services of passengers through Road by Bus, Car, non-scheduled long distance bus and coach services, stage carriage etc", 
+  "sac_code": "996422"
+ }, 
+ {
+  "description": "Taxi services including radio taxi & other similar services", 
+  "sac_code": "996423"
+ }, 
+ {
+  "description": "Coastal and transoceanic (overseas) water transport services of passengers by Ferries, Cruise Ships etc", 
+  "sac_code": "996424"
+ }, 
+ {
+  "description": "Domestic/International Scheduled Air transport services of passengers", 
+  "sac_code": "996425"
+ }, 
+ {
+  "description": "Domestic/international non-scheduled air transport services of Passengers", 
+  "sac_code": "996426"
+ }, 
+ {
+  "description": "Space transport services of passengers", 
+  "sac_code": "996427"
+ }, 
+ {
+  "description": "Other long-distance transportation services of passengers n.e.c.", 
+  "sac_code": "996429"
+ }, 
+ {
+  "description": "Goods Transport Services", 
+  "sac_code": "9965"
+ }, 
+ {
+  "description": "Road transport services of Goods including letters, parcels, live animals, household & office furniture, containers etc by refrigerator vehicles, trucks, trailers, man or animal drawn vehicles or any other vehicles.", 
+  "sac_code": "996511"
+ }, 
+ {
+  "description": "Railway transport services of Goods including letters, parcels, live animals, household & office furniture, intermodal containers, bulk cargo etc", 
+  "sac_code": "996512"
+ }, 
+ {
+  "description": "Transport services of petroleum & natural gas, water, sewerage and other goods via pipeline", 
+  "sac_code": "996513"
+ }, 
+ {
+  "description": "Other land transport services of goods n.e.c.", 
+  "sac_code": "996519"
+ }, 
+ {
+  "description": "Coastal and transoceanic (overseas) water transport services of goods by refrigerator vessels, tankers, bulk cargo vessels, container ships etc", 
+  "sac_code": "996521"
+ }, 
+ {
+  "description": "Inland water transport services of goods by refrigerator vessels, tankers and other vessels.", 
+  "sac_code": "996522"
+ }, 
+ {
+  "description": "Air transport services of letters & parcels and other goods", 
+  "sac_code": "996531"
+ }, 
+ {
+  "description": "Space transport services of freight", 
+  "sac_code": "996532"
+ }, 
+ {
+  "description": "Rental services of transport vehicles with or without operators", 
+  "sac_code": "9966"
+ }, 
+ {
+  "description": "Rental services of road vehicles including buses, coaches, cars, trucks and other motor vehicles, with or without operator", 
+  "sac_code": "996601"
+ }, 
+ {
+  "description": "Rental services of water vessels including passenger vessels, freight vessels etc with or without operator", 
+  "sac_code": "996602"
+ }, 
+ {
+  "description": "Rental services of aircraft including passenger aircrafts, freight aircrafts etc with or without operator", 
+  "sac_code": "996603"
+ }, 
+ {
+  "description": "Rental services of other transport vehicles n.e.c. with or without operator", 
+  "sac_code": "996609"
+ }, 
+ {
+  "description": "Supporting services in transport", 
+  "sac_code": "9967"
+ }, 
+ {
+  "description": "Container handling services", 
+  "sac_code": "996711"
+ }, 
+ {
+  "description": "Customs House Agent services", 
+  "sac_code": "996712"
+ }, 
+ {
+  "description": "Clearing and forwarding services", 
+  "sac_code": "996713"
+ }, 
+ {
+  "description": "Other cargo and baggage handling services", 
+  "sac_code": "996719"
+ }, 
+ {
+  "description": "Refrigerated storage services", 
+  "sac_code": "996721"
+ }, 
+ {
+  "description": "Bulk liquid or gas storage services", 
+  "sac_code": "996722"
+ }, 
+ {
+  "description": "Other storage and warehousing services", 
+  "sac_code": "996729"
+ }, 
+ {
+  "description": "Railway pushing or towing services", 
+  "sac_code": "996731"
+ }, 
+ {
+  "description": "Other supporting services for railway transport n.e.c.", 
+  "sac_code": "996739"
+ }, 
+ {
+  "description": "Bus station services", 
+  "sac_code": "996741"
+ }, 
+ {
+  "description": "Operation services of National Highways, State Highways, Expressways, Roads & streets; bridges and tunnel operation services.", 
+  "sac_code": "996742"
+ }, 
+ {
+  "description": "Parking lot services", 
+  "sac_code": "996743"
+ }, 
+ {
+  "description": "Towing services for commercial and private vehicles", 
+  "sac_code": "996744"
+ }, 
+ {
+  "description": "Other supporting services for road transport n.e.c.", 
+  "sac_code": "996749"
+ }, 
+ {
+  "description": "Port and waterway operation services (excl. cargo handling) such as operation services of ports, docks, light houses, light ships etc", 
+  "sac_code": "996751"
+ }, 
+ {
+  "description": "Pilotage and berthing services", 
+  "sac_code": "996752"
+ }, 
+ {
+  "description": "Vessel salvage and refloating services", 
+  "sac_code": "996753"
+ }, 
+ {
+  "description": "Other supporting services for water transport n.e.c.", 
+  "sac_code": "996759"
+ }, 
+ {
+  "description": "Airport operation services (excl. cargo handling)", 
+  "sac_code": "996761"
+ }, 
+ {
+  "description": "Air traffic control services", 
+  "sac_code": "996762"
+ }, 
+ {
+  "description": "Other supporting services for air transport", 
+  "sac_code": "996763"
+ }, 
+ {
+  "description": "Supporting services for space transport", 
+  "sac_code": "996764"
+ }, 
+ {
+  "description": "Goods transport agency services for road transport", 
+  "sac_code": "996791"
+ }, 
+ {
+  "description": "Goods transport agency services for other modes of transport", 
+  "sac_code": "996792"
+ }, 
+ {
+  "description": "Other goods transport services ", 
+  "sac_code": "996793"
+ }, 
+ {
+  "description": "Other supporting transport services n.e.c", 
+  "sac_code": "996799"
+ }, 
+ {
+  "description": "Postal and courier services", 
+  "sac_code": "9968"
+ }, 
+ {
+  "description": "Postal services including post office counter services, mail box rental services.", 
+  "sac_code": "996811"
+ }, 
+ {
+  "description": "Courier services", 
+  "sac_code": "996812"
+ }, 
+ {
+  "description": "Local delivery services", 
+  "sac_code": "996813"
+ }, 
+ {
+  "description": "Other Delivery Services n.e.c", 
+  "sac_code": "996819"
+ }, 
+ {
+  "description": "Electricity, gas, water and other distribution services", 
+  "sac_code": "9969"
+ }, 
+ {
+  "description": "Electricity transmission services", 
+  "sac_code": "996911"
+ }, 
+ {
+  "description": "Electricity distribution services", 
+  "sac_code": "996912"
+ }, 
+ {
+  "description": "Gas distribution services", 
+  "sac_code": "996913"
+ }, 
+ {
+  "description": "Water distribution services", 
+  "sac_code": "996921"
+ }, 
+ {
+  "description": "Services involving distribution of steam, hot water and air conditioning supply etc.", 
+  "sac_code": "996922"
+ }, 
+ {
+  "description": "Other similar services.", 
+  "sac_code": "996929"
+ }, 
+ {
+  "description": "Financial and related services", 
+  "sac_code": "9971"
+ }, 
+ {
+  "description": "Central banking services", 
+  "sac_code": "997111"
+ }, 
+ {
+  "description": "Deposit services", 
+  "sac_code": "997112"
+ }, 
+ {
+  "description": "Credit-granting services including stand-by commitment, guarantees & securities", 
+  "sac_code": "997113"
+ }, 
+ {
+  "description": "Financial leasing services", 
+  "sac_code": "997114"
+ }, 
+ {
+  "description": "Other financial services (except investment banking, insurance services and pension services)", 
+  "sac_code": "997119"
+ }, 
+ {
+  "description": "Investment banking services ", 
+  "sac_code": "997120"
+ }, 
+ {
+  "description": "pension services", 
+  "sac_code": "997131"
+ }, 
+ {
+  "description": "Life insurance services  (excluding reinsurance services)", 
+  "sac_code": "997132"
+ }, 
+ {
+  "description": "Accident and health insurance services", 
+  "sac_code": "997133"
+ }, 
+ {
+  "description": "Motor vehicle insurance services", 
+  "sac_code": "997134"
+ }, 
+ {
+  "description": "Marine, aviation, and other transport insurance services", 
+  "sac_code": "997135"
+ }, 
+ {
+  "description": "Freight insurance services & Travel insurance services", 
+  "sac_code": "997136"
+ }, 
+ {
+  "description": "Other property insurance services", 
+  "sac_code": "997137"
+ }, 
+ {
+  "description": "Other non-life insurance services (excluding reinsurance services)", 
+  "sac_code": "997139"
+ }, 
+ {
+  "description": "Life reinsurance services", 
+  "sac_code": "997141"
+ }, 
+ {
+  "description": "Accident and health reinsurance services", 
+  "sac_code": "997142"
+ }, 
+ {
+  "description": "Motor vehicle reinsurance services", 
+  "sac_code": "997143"
+ }, 
+ {
+  "description": "Marine, aviation and other transport reinsurance ser", 
+  "sac_code": "997144"
+ }, 
+ {
+  "description": "services", 
+  "sac_code": "997145"
+ }, 
+ {
+  "description": "Freight reinsurance services", 
+  "sac_code": "997146"
+ }, 
+ {
+  "description": "Other property reinsurance services", 
+  "sac_code": "997147"
+ }, 
+ {
+  "description": "Other non-life reinsurance services ", 
+  "sac_code": "997149"
+ }, 
+ {
+  "description": "Services related to investment banking such as mergers & acquisition services, corporate finance & venture capital services", 
+  "sac_code": "997151"
+ }, 
+ {
+  "description": "Brokerage and related securities and commodities services including commodity exchange services", 
+  "sac_code": "997152"
+ }, 
+ {
+  "description": "Portfolio management services except pension funds", 
+  "sac_code": "997153"
+ }, 
+ {
+  "description": "Trust and custody services", 
+  "sac_code": "997154"
+ }, 
+ {
+  "description": "Services related to the administration of financial markets", 
+  "sac_code": "997155"
+ }, 
+ {
+  "description": "Financial consultancy services", 
+  "sac_code": "997156"
+ }, 
+ {
+  "description": "Foreign exchange services", 
+  "sac_code": "997157"
+ }, 
+ {
+  "description": "Financial transactions processing and clearing house services", 
+  "sac_code": "997158"
+ }, 
+ {
+  "description": "Other services auxiliary to financial services", 
+  "sac_code": "997159"
+ }, 
+ {
+  "description": "Insurance brokerage and agency services", 
+  "sac_code": "997161"
+ }, 
+ {
+  "description": "Insurance claims adjustment services", 
+  "sac_code": "997162"
+ }, 
+ {
+  "description": "Actuarial services", 
+  "sac_code": "997163"
+ }, 
+ {
+  "description": "Pension fund management services", 
+  "sac_code": "997164"
+ }, 
+ {
+  "description": "Other services auxiliary to insurance and pensions ", 
+  "sac_code": "997169"
+ }, 
+ {
+  "description": "Services of holding equity of subsidiary companies", 
+  "sac_code": "997171"
+ }, 
+ {
+  "description": "Services of holding securities and other assets of trusts and funds and similar financial entities", 
+  "sac_code": "997172"
+ }, 
+ {
+  "description": "Real estate services", 
+  "sac_code": "9972"
+ }, 
+ {
+  "description": "Rental or leasing services involving own or leased residential property", 
+  "sac_code": "997211"
+ }, 
+ {
+  "description": "Rental or leasing services involving own or leased non-residential property", 
+  "sac_code": "997212"
+ }, 
+ {
+  "description": "Trade services of buildings", 
+  "sac_code": "997213"
+ }, 
+ {
+  "description": "Trade services of time-share properties", 
+  "sac_code": "997214"
+ }, 
+ {
+  "description": "Trade services of vacant and subdivided land", 
+  "sac_code": "997215"
+ }, 
+ {
+  "description": "Property management services on a fee/commission basis or contract basis", 
+  "sac_code": "997221"
+ }, 
+ {
+  "description": "Building sales on a fee/commission basis or contract basis", 
+  "sac_code": "997222"
+ }, 
+ {
+  "description": "Land sales on a fee/commission basis or contract basis", 
+  "sac_code": "997223"
+ }, 
+ {
+  "description": "Real estate appraisal services on a fee/commission basis or contract basis", 
+  "sac_code": "997224"
+ }, 
+ {
+  "description": "Leasing or rental services with or without operator", 
+  "sac_code": "9973"
+ }, 
+ {
+  "description": "Leasing or rental services concerning transport equipments including containers, with or without operator", 
+  "sac_code": "997311"
+ }, 
+ {
+  "description": "Leasing or rental services concerning agricultural machinery and equipment with or without operator", 
+  "sac_code": "997312"
+ }, 
+ {
+  "description": "Leasing or rental services concerning construction machinery and equipment with or without operator", 
+  "sac_code": "997313"
+ }, 
+ {
+  "description": "Leasing or rental services concerning office machinery and equipment (except computers) with or without operator", 
+  "sac_code": "997314"
+ }, 
+ {
+  "description": "Leasing or rental services concerning computers with or without operators", 
+  "sac_code": "997315"
+ }, 
+ {
+  "description": "Leasing or rental services concerning telecommunications equipment with or without operator", 
+  "sac_code": "997316"
+ }, 
+ {
+  "description": "Leasing or rental services concerning other machinery and equipments with or without operator", 
+  "sac_code": "997319"
+ }, 
+ {
+  "description": "Leasing or rental services concerning televisions, radios, video cassette recorders, projectors, audio systems and related equipment and accessories (Home entertainment equipment )", 
+  "sac_code": "997321"
+ }, 
+ {
+  "description": "Leasing or rental services concerning video tapes and disks (Home entertainment equipment )", 
+  "sac_code": "997322"
+ }, 
+ {
+  "description": "Leasing or rental services concerning furniture and other household appliances", 
+  "sac_code": "997323"
+ }, 
+ {
+  "description": "Leasing or rental services concerning pleasure and leisure equipment.", 
+  "sac_code": "997324"
+ }, 
+ {
+  "description": "Leasing or rental services concerning household linen.", 
+  "sac_code": "997325"
+ }, 
+ {
+  "description": "Leasing or rental services concerning textiles, clothing and footwear.", 
+  "sac_code": "997326"
+ }, 
+ {
+  "description": "Leasing or rental services concerning do-it-yourself machinery and equipment", 
+  "sac_code": "997327"
+ }, 
+ {
+  "description": "Leasing or rental services concerning other goods", 
+  "sac_code": "997329"
+ }, 
+ {
+  "description": "Licensing services for the right to use computer software and databases.", 
+  "sac_code": "997331"
+ }, 
+ {
+  "description": "Licensing services for the right to broadcast and show original films, sound recordings, radio and television programme etc.", 
+  "sac_code": "997332"
+ }, 
+ {
+  "description": "Licensing services for the right to reproduce original art works", 
+  "sac_code": "997333"
+ }, 
+ {
+  "description": "Licensing services for the right to reprint and copy manuscripts, books, journals and periodicals.", 
+  "sac_code": "997334"
+ }, 
+ {
+  "description": "Licensing services for the right to use R&D products", 
+  "sac_code": "997335"
+ }, 
+ {
+  "description": "Licensing services for the right to use trademarks and franchises", 
+  "sac_code": "997336"
+ }, 
+ {
+  "description": "Licensing services for the right to use minerals including its exploration and evaluation", 
+  "sac_code": "997337"
+ }, 
+ {
+  "description": "Licensing services for right to use other natural resources including telecommunication spectrum", 
+  "sac_code": "997338"
+ }, 
+ {
+  "description": "Licensing services for the right to use other intellectual property products and other rescources n.e.c", 
+  "sac_code": "997339"
+ }, 
+ {
+  "description": "Research and development services", 
+  "sac_code": "9981"
+ }, 
+ {
+  "description": "Research and experimental development services in natural sciences", 
+  "sac_code": "998111"
+ }, 
+ {
+  "description": "Research and experimental development services in engineering and technology", 
+  "sac_code": "998112"
+ }, 
+ {
+  "description": "Research and experimental development services in medical sciences and pharmacy.", 
+  "sac_code": "998113"
+ }, 
+ {
+  "description": "Research and experimental development services in agricultural sciences.", 
+  "sac_code": "998114"
+ }, 
+ {
+  "description": "Research and experimental development services in social sciences.", 
+  "sac_code": "998121"
+ }, 
+ {
+  "description": "Research and experimental development services in humanities", 
+  "sac_code": "998122"
+ }, 
+ {
+  "description": "Interdisciplinary research and experimental development services.", 
+  "sac_code": "998130"
+ }, 
+ {
+  "description": "Research and development originals in pharmaceuticals", 
+  "sac_code": "998141"
+ }, 
+ {
+  "description": "Research and development originals in agriculture", 
+  "sac_code": "998142"
+ }, 
+ {
+  "description": "Research and development originals in biotechnology", 
+  "sac_code": "998143"
+ }, 
+ {
+  "description": "Research and development originals in computer related sciences", 
+  "sac_code": "998144"
+ }, 
+ {
+  "description": "Research and development originals in other fields n.e.c.", 
+  "sac_code": "998145"
+ }, 
+ {
+  "description": "Legal and accounting services", 
+  "sac_code": "9982"
+ }, 
+ {
+  "description": "Legal advisory and representation services concerning criminal law.", 
+  "sac_code": "998211"
+ }, 
+ {
+  "description": "Legal advisory and representation services concerning other fields of law.", 
+  "sac_code": "998212"
+ }, 
+ {
+  "description": "Legal documentation and certification services concerning patents, copyrights and other intellectual property rights.", 
+  "sac_code": "998213"
+ }, 
+ {
+  "description": "Legal documentation and certification services concerning other documents.", 
+  "sac_code": "998214"
+ }, 
+ {
+  "description": "Arbitration and conciliation services", 
+  "sac_code": "998215"
+ }, 
+ {
+  "description": "Other legal services n.e.c.", 
+  "sac_code": "998216"
+ }, 
+ {
+  "description": "Financial auditing services", 
+  "sac_code": "998221"
+ }, 
+ {
+  "description": "Accounting and bookkeeping services", 
+  "sac_code": "998222"
+ }, 
+ {
+  "description": "Payroll services", 
+  "sac_code": "998223"
+ }, 
+ {
+  "description": "Other similar services n.e.c", 
+  "sac_code": "998224"
+ }, 
+ {
+  "description": "Corporate tax consulting and preparation services", 
+  "sac_code": "998231"
+ }, 
+ {
+  "description": "Individual tax preparation and planning services", 
+  "sac_code": "998232"
+ }, 
+ {
+  "description": "Insolvency and receivership services", 
+  "sac_code": "998240"
+ }, 
+ {
+  "description": "Other professional, technical and business services", 
+  "sac_code": "9983"
+ }, 
+ {
+  "description": "Management consulting and management services including financial, strategic, human resources, marketing, operations and supply chain management.", 
+  "sac_code": "998311"
+ }, 
+ {
+  "description": "Business consulting services including pubic relations services", 
+  "sac_code": "998312"
+ }, 
+ {
+  "description": "Information technology (IT) consulting and support services", 
+  "sac_code": "998313"
+ }, 
+ {
+  "description": "Information technology (IT) design and development services", 
+  "sac_code": "998314"
+ }, 
+ {
+  "description": "Hosting and information technology (IT) infrastructure provisioning services", 
+  "sac_code": "998315"
+ }, 
+ {
+  "description": "IT infrastructure and network management services", 
+  "sac_code": "998316"
+ }, 
+ {
+  "description": "Other information technology services n.e.c", 
+  "sac_code": "998319"
+ }, 
+ {
+  "description": "Architectural advisory services", 
+  "sac_code": "998321"
+ }, 
+ {
+  "description": "Architectural services for residential building projects", 
+  "sac_code": "998322"
+ }, 
+ {
+  "description": "Architectural services for non-residential building projects", 
+  "sac_code": "998323"
+ }, 
+ {
+  "description": "Historical restoration architectural services", 
+  "sac_code": "998324"
+ }, 
+ {
+  "description": "Urban planning services", 
+  "sac_code": "998325"
+ }, 
+ {
+  "description": "Rural land planning services", 
+  "sac_code": "998326"
+ }, 
+ {
+  "description": "Project site master planning services", 
+  "sac_code": "998327"
+ }, 
+ {
+  "description": "Landscape architectural services and advisory services", 
+  "sac_code": "998328"
+ }, 
+ {
+  "description": "Engineering advisory services", 
+  "sac_code": "998331"
+ }, 
+ {
+  "description": "Engineering services for building projects", 
+  "sac_code": "998332"
+ }, 
+ {
+  "description": "Engineering services for industrial and manufacturing projects", 
+  "sac_code": "998333"
+ }, 
+ {
+  "description": "Engineering services for transportation projects", 
+  "sac_code": "998334"
+ }, 
+ {
+  "description": "Engineering services for power projects", 
+  "sac_code": "998335"
+ }, 
+ {
+  "description": "Engineering services for telecommunications and broadcasting projects", 
+  "sac_code": "998336"
+ }, 
+ {
+  "description": "Engineering services for waste management projects (hazardous and non-hazardous), for water, sewerage and drainage projects.", 
+  "sac_code": "998337"
+ }, 
+ {
+  "description": "Engineering services for other projects n.e.c.", 
+  "sac_code": "998338"
+ }, 
+ {
+  "description": "Project management services for construction projects", 
+  "sac_code": "998339"
+ }, 
+ {
+  "description": "Geological and geophysical consulting services", 
+  "sac_code": "998341"
+ }, 
+ {
+  "description": "Subsurface surveying services", 
+  "sac_code": "998342"
+ }, 
+ {
+  "description": "Mineral exploration and evaluation", 
+  "sac_code": "998343"
+ }, 
+ {
+  "description": "Surface surveying and map-making services", 
+  "sac_code": "998344"
+ }, 
+ {
+  "description": "Weather forecasting and meteorological services", 
+  "sac_code": "998345"
+ }, 
+ {
+  "description": "Technical testing and analysis services", 
+  "sac_code": "998346"
+ }, 
+ {
+  "description": "Certification of ships, aircraft, dams, etc.", 
+  "sac_code": "998347"
+ }, 
+ {
+  "description": "Certification and authentication of works of art", 
+  "sac_code": "998348"
+ }, 
+ {
+  "description": "Other technical and scientific services n.e.c.", 
+  "sac_code": "998349"
+ }, 
+ {
+  "description": "Veterinary services for pet animals", 
+  "sac_code": "998351"
+ }, 
+ {
+  "description": "Veterinary services for livestock", 
+  "sac_code": "998352"
+ }, 
+ {
+  "description": "Other veterinary services n.e.c.", 
+  "sac_code": "998359"
+ }, 
+ {
+  "description": "Advertising Services", 
+  "sac_code": "998361"
+ }, 
+ {
+  "description": "Purchase or sale of advertising space or time, on commission", 
+  "sac_code": "998362"
+ }, 
+ {
+  "description": "Sale of advertising space in print media (except on commission)", 
+  "sac_code": "998363"
+ }, 
+ {
+  "description": "Sale of TV and radio advertising time", 
+  "sac_code": "998364"
+ }, 
+ {
+  "description": "Sale of Internet advertising space", 
+  "sac_code": "998365"
+ }, 
+ {
+  "description": "Sale of other advertising space or time (except on commission)", 
+  "sac_code": "998366"
+ }, 
+ {
+  "description": "Market research services", 
+  "sac_code": "998371"
+ }, 
+ {
+  "description": "Public opinion polling services", 
+  "sac_code": "998372"
+ }, 
+ {
+  "description": "Portrait photography services", 
+  "sac_code": "998381"
+ }, 
+ {
+  "description": "Advertising and related photography services", 
+  "sac_code": "998382"
+ }, 
+ {
+  "description": "Event photography and event videography services", 
+  "sac_code": "998383"
+ }, 
+ {
+  "description": "Specialty photography services", 
+  "sac_code": "998384"
+ }, 
+ {
+  "description": "Restoration and retouching services of photography", 
+  "sac_code": "998385"
+ }, 
+ {
+  "description": "Photographic & videographic processing services", 
+  "sac_code": "998386"
+ }, 
+ {
+  "description": "Other Photography & Videography and their processing services n.e.c.", 
+  "sac_code": "998387"
+ }, 
+ {
+  "description": "Specialty design services including interior design, fashion design, industrial design and other specialty design services", 
+  "sac_code": "998391"
+ }, 
+ {
+  "description": "Design originals", 
+  "sac_code": "998392"
+ }, 
+ {
+  "description": "Scientific and technical consulting services", 
+  "sac_code": "998393"
+ }, 
+ {
+  "description": "Original compilations of facts/information", 
+  "sac_code": "998394"
+ }, 
+ {
+  "description": "Translation and interpretation services", 
+  "sac_code": "998395"
+ }, 
+ {
+  "description": "Trademarks and franchises", 
+  "sac_code": "998396"
+ }, 
+ {
+  "description": "Sponsorship Services & Brand Promotion Services", 
+  "sac_code": "998397"
+ }, 
+ {
+  "description": "Other professional, technical and business services n.e.c.", 
+  "sac_code": "998399"
+ }, 
+ {
+  "description": "Telecommunications, broadcasting and information supply services", 
+  "sac_code": "9984"
+ }, 
+ {
+  "description": "Carrier services", 
+  "sac_code": "998411"
+ }, 
+ {
+  "description": "Fixed telephony services", 
+  "sac_code": "998412"
+ }, 
+ {
+  "description": "Mobile telecommunications services", 
+  "sac_code": "998413"
+ }, 
+ {
+  "description": "Private network services", 
+  "sac_code": "998414"
+ }, 
+ {
+  "description": "Data transmission services", 
+  "sac_code": "998415"
+ }, 
+ {
+  "description": "Other telecommunications services including Fax services, Telex services n.e.c.", 
+  "sac_code": "998419"
+ }, 
+ {
+  "description": "Internet backbone services", 
+  "sac_code": "998421"
+ }, 
+ {
+  "description": "Internet access services in wired and wireless mode.", 
+  "sac_code": "998422"
+ }, 
+ {
+  "description": "Fax, telephony over the Internet", 
+  "sac_code": "998423"
+ }, 
+ {
+  "description": "Audio conferencing and video conferencing over the Internet", 
+  "sac_code": "998424"
+ }, 
+ {
+  "description": "Other Internet telecommunications services n.e.c.", 
+  "sac_code": "998429"
+ }, 
+ {
+  "description": "On-line text based information such as online books, newpapers, periodicals, directories etc", 
+  "sac_code": "998431"
+ }, 
+ {
+  "description": "On-line audio content", 
+  "sac_code": "998432"
+ }, 
+ {
+  "description": "On-line video content", 
+  "sac_code": "998433"
+ }, 
+ {
+  "description": "Software downloads", 
+  "sac_code": "998434"
+ }, 
+ {
+  "description": "Other on-line contents n.e.c.", 
+  "sac_code": "998439"
+ }, 
+ {
+  "description": "News agency services to newspapers and periodicals", 
+  "sac_code": "998441"
+ }, 
+ {
+  "description": "Services of independent journalists and press photographers", 
+  "sac_code": "998442"
+ }, 
+ {
+  "description": "News agency services to audiovisual media", 
+  "sac_code": "998443"
+ }, 
+ {
+  "description": "Library services", 
+  "sac_code": "998451"
+ }, 
+ {
+  "description": "Operation services of public archives including digital archives", 
+  "sac_code": "998452"
+ }, 
+ {
+  "description": "Operation services of historical archives including digital archives", 
+  "sac_code": "998453"
+ }, 
+ {
+  "description": "Radio broadcast originals", 
+  "sac_code": "998461"
+ }, 
+ {
+  "description": "Television broadcast originals", 
+  "sac_code": "998462"
+ }, 
+ {
+  "description": "Radio channel programmes", 
+  "sac_code": "998463"
+ }, 
+ {
+  "description": "Television channel programmes", 
+  "sac_code": "998464"
+ }, 
+ {
+  "description": "Broadcasting services", 
+  "sac_code": "998465"
+ }, 
+ {
+  "description": "Home programme distribution services", 
+  "sac_code": "998466"
+ }, 
+ {
+  "description": "Support services", 
+  "sac_code": "9985"
+ }, 
+ {
+  "description": "Executive/retained personnel search services", 
+  "sac_code": "998511"
+ }, 
+ {
+  "description": "Permanent placement services, other than executive search services", 
+  "sac_code": "998512"
+ }, 
+ {
+  "description": "Contract staffing services", 
+  "sac_code": "998513"
+ }, 
+ {
+  "description": "Temporary staffing services", 
+  "sac_code": "998514"
+ }, 
+ {
+  "description": "Long-term staffing (pay rolling) services", 
+  "sac_code": "998515"
+ }, 
+ {
+  "description": "Temporary staffing-to-permanent placement services", 
+  "sac_code": "998516"
+ }, 
+ {
+  "description": "Co-employment staffing services", 
+  "sac_code": "998517"
+ }, 
+ {
+  "description": "Other employment & labour supply services n.e.c", 
+  "sac_code": "998519"
+ }, 
+ {
+  "description": "Investigation services", 
+  "sac_code": "998521"
+ }, 
+ {
+  "description": "Security consulting services", 
+  "sac_code": "998522"
+ }, 
+ {
+  "description": "Security systems services", 
+  "sac_code": "998523"
+ }, 
+ {
+  "description": "Armoured car services", 
+  "sac_code": "998524"
+ }, 
+ {
+  "description": "Guard services", 
+  "sac_code": "998525"
+ }, 
+ {
+  "description": "Training of guard dogs", 
+  "sac_code": "998526"
+ }, 
+ {
+  "description": "Polygraph services", 
+  "sac_code": "998527"
+ }, 
+ {
+  "description": "Fingerprinting services", 
+  "sac_code": "998528"
+ }, 
+ {
+  "description": "Other security services n.e.c.", 
+  "sac_code": "998529"
+ }, 
+ {
+  "description": "Disinfecting and exterminating services", 
+  "sac_code": "998531"
+ }, 
+ {
+  "description": "Window cleaning services", 
+  "sac_code": "998532"
+ }, 
+ {
+  "description": "General cleaning services", 
+  "sac_code": "998533"
+ }, 
+ {
+  "description": "Specialized cleaning services for reservoirs and tanks", 
+  "sac_code": "998534"
+ }, 
+ {
+  "description": "Sterilization of objects or premises (operating rooms)", 
+  "sac_code": "998535"
+ }, 
+ {
+  "description": "Furnace and chimney cleaning services", 
+  "sac_code": "998536"
+ }, 
+ {
+  "description": "Exterior cleaning of buildings of all types", 
+  "sac_code": "998537"
+ }, 
+ {
+  "description": "Cleaning of transportation equipment", 
+  "sac_code": "998538"
+ }, 
+ {
+  "description": "Other cleaning services n.e.c.", 
+  "sac_code": "998539"
+ }, 
+ {
+  "description": "Packaging services of goods for others", 
+  "sac_code": "998540"
+ }, 
+ {
+  "description": "Parcel packing and gift wrapping", 
+  "sac_code": "998541"
+ }, 
+ {
+  "description": "Coin and currency packing services", 
+  "sac_code": "998542"
+ }, 
+ {
+  "description": "Other packaging services n.e.c", 
+  "sac_code": "998549"
+ }, 
+ {
+  "description": "Reservation services for transportation", 
+  "sac_code": "998551"
+ }, 
+ {
+  "description": "Reservation services for accommodation, cruises and package tours", 
+  "sac_code": "998552"
+ }, 
+ {
+  "description": "Reservation services for convention centres, congress centres and exhibition halls", 
+  "sac_code": "998553"
+ }, 
+ {
+  "description": "Reservation services for event tickets, cinema halls, entertainment and recreational services and other reservation services", 
+  "sac_code": "998554"
+ }, 
+ {
+  "description": "Tour operator services", 
+  "sac_code": "998555"
+ }, 
+ {
+  "description": "Tourist guide services", 
+  "sac_code": "998556"
+ }, 
+ {
+  "description": "Tourism promotion and visitor information services", 
+  "sac_code": "998557"
+ }, 
+ {
+  "description": "Other travel arrangement and related services n.e.c", 
+  "sac_code": "998559"
+ }, 
+ {
+  "description": "Credit reporting & rating services", 
+  "sac_code": "998591"
+ }, 
+ {
+  "description": "Collection agency services", 
+  "sac_code": "998592"
+ }, 
+ {
+  "description": "Telephone-based support services", 
+  "sac_code": "998593"
+ }, 
+ {
+  "description": "Combined office administrative services", 
+  "sac_code": "998594"
+ }, 
+ {
+  "description": "Specialized office support services such as duplicating services, mailing services, document preparation etc", 
+  "sac_code": "998595"
+ }, 
+ {
+  "description": "Events, Exhibitions, Conventions and trade shows organisation and assistance services", 
+  "sac_code": "998596"
+ }, 
+ {
+  "description": "Landscape care and maintenance services", 
+  "sac_code": "998597"
+ }, 
+ {
+  "description": "Other information services n.e.c.", 
+  "sac_code": "998598"
+ }, 
+ {
+  "description": "Other support services n.e.c.", 
+  "sac_code": "998599"
+ }, 
+ {
+  "description": "Support services to agriculture, hunting, forestry, fishing, mining and utilities.", 
+  "sac_code": "9986"
+ }, 
+ {
+  "description": "Support services to crop production", 
+  "sac_code": "998611"
+ }, 
+ {
+  "description": "Animal husbandry services", 
+  "sac_code": "998612"
+ }, 
+ {
+  "description": "Support services to hunting", 
+  "sac_code": "998613"
+ }, 
+ {
+  "description": "Support services to forestry and logging", 
+  "sac_code": "998614"
+ }, 
+ {
+  "description": "Support services to fishing", 
+  "sac_code": "998615"
+ }, 
+ {
+  "description": "Other support services to agriculture, hunting, forestry and fishing", 
+  "sac_code": "998619"
+ }, 
+ {
+  "description": "Support services to oil and gas extraction", 
+  "sac_code": "998621"
+ }, 
+ {
+  "description": "Support services to other mining n.e.c.", 
+  "sac_code": "998622"
+ }, 
+ {
+  "description": "Support services to electricity transmission and distribution", 
+  "sac_code": "998631"
+ }, 
+ {
+  "description": "Support services to gas distribution", 
+  "sac_code": "998632"
+ }, 
+ {
+  "description": "Support services to water distribution", 
+  "sac_code": "998633"
+ }, 
+ {
+  "description": "Support services to Distribution services of steam, hot water and air-conditioning supply", 
+  "sac_code": "998634"
+ }, 
+ {
+  "description": "Maintenance, repair and installation (except construction) services", 
+  "sac_code": "9987"
+ }, 
+ {
+  "description": "Maintenance and repair services of fabricated metal products, except machinery and equipment.", 
+  "sac_code": "998711"
+ }, 
+ {
+  "description": "Maintenance and repair services of office and accounting machinery", 
+  "sac_code": "998712"
+ }, 
+ {
+  "description": "Maintenance and repair services of computers and peripheral equipment", 
+  "sac_code": "998713"
+ }, 
+ {
+  "description": "Maintenance and repair services of transport machinery and equipment", 
+  "sac_code": "998714"
+ }, 
+ {
+  "description": "Maintenance and repair services of electrical household appliances", 
+  "sac_code": "998715"
+ }, 
+ {
+  "description": "Maintenance and repair services of telecommunication equipments and apparatus", 
+  "sac_code": "998716"
+ }, 
+ {
+  "description": "Maintenance and repair services of commercial and industrial machinery.", 
+  "sac_code": "998717"
+ }, 
+ {
+  "description": "Maintenance and repair services of elevators and escalators", 
+  "sac_code": "998718"
+ }, 
+ {
+  "description": "Maintenance and repair services of other machinery and equipments", 
+  "sac_code": "998719"
+ }, 
+ {
+  "description": "Repair services of footwear and leather goods", 
+  "sac_code": "998721"
+ }, 
+ {
+  "description": "Repair services of watches, clocks and jewellery", 
+  "sac_code": "998722"
+ }, 
+ {
+  "description": "Repair services of garments and household textiles", 
+  "sac_code": "998723"
+ }, 
+ {
+  "description": "Repair services of furniture", 
+  "sac_code": "998724"
+ }, 
+ {
+  "description": "Repair services of bicycles", 
+  "sac_code": "998725"
+ }, 
+ {
+  "description": "Maintenance and repair services of musical instruments", 
+  "sac_code": "998726"
+ }, 
+ {
+  "description": "Repair services for photographic equipment and cameras", 
+  "sac_code": "998727"
+ }, 
+ {
+  "description": "Maintenance and repair services of other goods n.e.c.", 
+  "sac_code": "998729"
+ }, 
+ {
+  "description": "Installation services of fabricated metal products, except machinery and equipment.", 
+  "sac_code": "998731"
+ }, 
+ {
+  "description": "Installation services of industrial, manufacturing and service industry machinery and equipment.", 
+  "sac_code": "998732"
+ }, 
+ {
+  "description": "Installation services of office and accounting machinery and computers", 
+  "sac_code": "998733"
+ }, 
+ {
+  "description": "Installation services of radio, television and communications equipment and apparatus.", 
+  "sac_code": "998734"
+ }, 
+ {
+  "description": "Installation services of professional medical machinery and equipment, and precision and optical instruments.", 
+  "sac_code": "998735"
+ }, 
+ {
+  "description": "Installation services of electrical machinery and apparatus n.e.c.", 
+  "sac_code": "998736"
+ }, 
+ {
+  "description": "Installation services of other goods n.e.c.", 
+  "sac_code": "998739"
+ }, 
+ {
+  "description": "Manufacturing services on physical inputs (goods) owned by others", 
+  "sac_code": "9988"
+ }, 
+ {
+  "description": "Meat processing services", 
+  "sac_code": "998811"
+ }, 
+ {
+  "description": "Fish processing services", 
+  "sac_code": "998812"
+ }, 
+ {
+  "description": "Fruit and vegetables processing services", 
+  "sac_code": "998813"
+ }, 
+ {
+  "description": "Vegetable and animal oil and fat manufacturing services", 
+  "sac_code": "998814"
+ }, 
+ {
+  "description": "Dairy product manufacturing services", 
+  "sac_code": "998815"
+ }, 
+ {
+  "description": "Other food product manufacturing services", 
+  "sac_code": "998816"
+ }, 
+ {
+  "description": "Prepared animal feeds manufacturing services", 
+  "sac_code": "998817"
+ }, 
+ {
+  "description": "Beverage manufacturing services", 
+  "sac_code": "998818"
+ }, 
+ {
+  "description": "Tobacco manufacturing services n.e.c.", 
+  "sac_code": "998819"
+ }, 
+ {
+  "description": "Textile manufacturing services", 
+  "sac_code": "998821"
+ }, 
+ {
+  "description": "Wearing apparel manufacturing services", 
+  "sac_code": "998822"
+ }, 
+ {
+  "description": "Leather and leather product manufacturing services", 
+  "sac_code": "998823"
+ }, 
+ {
+  "description": "Wood and wood product manufacturing services", 
+  "sac_code": "998831"
+ }, 
+ {
+  "description": "Paper and paper product manufacturing services", 
+  "sac_code": "998832"
+ }, 
+ {
+  "description": "Coke and refined petroleum product manufacturing services", 
+  "sac_code": "998841"
+ }, 
+ {
+  "description": "Chemical product manufacturing services", 
+  "sac_code": "998842"
+ }, 
+ {
+  "description": "Pharmaceutical product manufacturing services", 
+  "sac_code": "998843"
+ }, 
+ {
+  "description": "Rubber and plastic product manufacturing services", 
+  "sac_code": "998851"
+ }, 
+ {
+  "description": "Plastic product manufacturing services", 
+  "sac_code": "998852"
+ }, 
+ {
+  "description": "Other non-metallic mineral product manufacturing services", 
+  "sac_code": "998853"
+ }, 
+ {
+  "description": "Basic metal manufacturing services", 
+  "sac_code": "998860"
+ }, 
+ {
+  "description": "Structural metal product, tank, reservoir and steam generator manufacturing services", 
+  "sac_code": "998871"
+ }, 
+ {
+  "description": "Weapon and ammunition manufacturing services", 
+  "sac_code": "998872"
+ }, 
+ {
+  "description": "Other fabricated metal product manufacturing and metal treatment services", 
+  "sac_code": "998873"
+ }, 
+ {
+  "description": "Computer, electronic and optical product manufacturing services", 
+  "sac_code": "998874"
+ }, 
+ {
+  "description": "Electrical equipment manufacturing services", 
+  "sac_code": "998875"
+ }, 
+ {
+  "description": "General-purpose machinery manufacturing services n.e.c.", 
+  "sac_code": "998876"
+ }, 
+ {
+  "description": "Special-purpose machinery manufacturing services", 
+  "sac_code": "998877"
+ }, 
+ {
+  "description": "Motor vehicle and trailer manufacturing services", 
+  "sac_code": "998881"
+ }, 
+ {
+  "description": "Other transport equipment manufacturing services", 
+  "sac_code": "998882"
+ }, 
+ {
+  "description": "Furniture manufacturing services", 
+  "sac_code": "998891"
+ }, 
+ {
+  "description": "Jewellery manufacturing services", 
+  "sac_code": "998892"
+ }, 
+ {
+  "description": "Imitation jewellery manufacturing services", 
+  "sac_code": "998893"
+ }, 
+ {
+  "description": "Musical instrument manufacturing services", 
+  "sac_code": "998894"
+ }, 
+ {
+  "description": "Sports goods manufacturing services", 
+  "sac_code": "998895"
+ }, 
+ {
+  "description": "Game and toy manufacturing services", 
+  "sac_code": "998896"
+ }, 
+ {
+  "description": "Medical and dental instrument and supply manufacturing services", 
+  "sac_code": "998897"
+ }, 
+ {
+  "description": "Other manufacturing services n.e.c.", 
+  "sac_code": "998898"
+ }, 
+ {
+  "description": "Other manufacturing services; publishing, printing and reproduction services; materials recovery services", 
+  "sac_code": "9989"
+ }, 
+ {
+  "description": "Publishing, on a fee or contract basis", 
+  "sac_code": "998911"
+ }, 
+ {
+  "description": "Printing and reproduction services of recorded media, on a fee or contract basis", 
+  "sac_code": "998912"
+ }, 
+ {
+  "description": "Moulding, pressing, stamping, extruding and similar plastic manufacturing services", 
+  "sac_code": "998920"
+ }, 
+ {
+  "description": "Iron and steel casting services", 
+  "sac_code": "998931"
+ }, 
+ {
+  "description": "Non-ferrous metal casting services", 
+  "sac_code": "998932"
+ }, 
+ {
+  "description": "Metal forging, pressing, stamping, roll forming and powder metallurgy services", 
+  "sac_code": "998933"
+ }, 
+ {
+  "description": "Metal waste and scrap recovery (recycling) services, on a fee or contract basis", 
+  "sac_code": "998941"
+ }, 
+ {
+  "description": "Non-metal waste and scrap recovery (recycling) services, on a fee or contract basis", 
+  "sac_code": "998942"
+ }, 
+ {
+  "description": "Public administration and other services provided to the community as a whole; compulsory social security services", 
+  "sac_code": "9991"
+ }, 
+ {
+  "description": "Overall Government public services", 
+  "sac_code": "999111"
+ }, 
+ {
+  "description": "Public administrative services related to the provision of educational, health care, cultural and other social services, excluding social security service.", 
+  "sac_code": "999112"
+ }, 
+ {
+  "description": "Public administrative services related to the more efficient operation of business.", 
+  "sac_code": "999113"
+ }, 
+ {
+  "description": "Other administrative services of the government n.e.c.", 
+  "sac_code": "999119"
+ }, 
+ {
+  "description": "Public administrative services related to external affairs, diplomatic and consular services abroad.", 
+  "sac_code": "999121"
+ }, 
+ {
+  "description": "Services related to foreign economic aid", 
+  "sac_code": "999122"
+ }, 
+ {
+  "description": "Services related to foreign military aid", 
+  "sac_code": "999123"
+ }, 
+ {
+  "description": "Military defence services", 
+  "sac_code": "999124"
+ }, 
+ {
+  "description": "Civil defence services", 
+  "sac_code": "999125"
+ }, 
+ {
+  "description": "Police and fire protection services", 
+  "sac_code": "999126"
+ }, 
+ {
+  "description": "Public administrative services related to law courts", 
+  "sac_code": "999127"
+ }, 
+ {
+  "description": "Administrative services related to the detention or rehabilitation of criminals.", 
+  "sac_code": "999128"
+ }, 
+ {
+  "description": "Public administrative services related to other public order and safety affairs n.e.c.", 
+  "sac_code": "999129"
+ }, 
+ {
+  "description": "Administrative services related to sickness, maternity or temporary disablement benefit schemes.", 
+  "sac_code": "999131"
+ }, 
+ {
+  "description": "Administrative services related to government employee pension schemes; old-age disability or survivors' benefit schemes, other than for government employees", 
+  "sac_code": "999132"
+ }, 
+ {
+  "description": "Administrative services related to unemployment compensation benefit schemes", 
+  "sac_code": "999133"
+ }, 
+ {
+  "description": "Administrative services related to family and child allowance programmes", 
+  "sac_code": "999134"
+ }, 
+ {
+  "description": "Education services", 
+  "sac_code": "9992"
+ }, 
+ {
+  "description": "Pre-primary education services", 
+  "sac_code": "999210"
+ }, 
+ {
+  "description": "Primary education services", 
+  "sac_code": "999220"
+ }, 
+ {
+  "description": "Secondary education services, general", 
+  "sac_code": "999231"
+ }, 
+ {
+  "description": "Secondary education services, technical and vocational.", 
+  "sac_code": "999232"
+ }, 
+ {
+  "description": "Higher education services, general", 
+  "sac_code": "999241"
+ }, 
+ {
+  "description": "Higher education services, technical", 
+  "sac_code": "999242"
+ }, 
+ {
+  "description": "Higher education services, vocational", 
+  "sac_code": "999243"
+ }, 
+ {
+  "description": "Other higher education services", 
+  "sac_code": "999249"
+ }, 
+ {
+  "description": "Specialised education services ", 
+  "sac_code": "999259"
+ }, 
+ {
+  "description": "Cultural education services", 
+  "sac_code": "999291"
+ }, 
+ {
+  "description": "Sports and recreation education services", 
+  "sac_code": "999292"
+ }, 
+ {
+  "description": "Commercial training and coaching services", 
+  "sac_code": "999293"
+ }, 
+ {
+  "description": "Other education and training services n.e.c.", 
+  "sac_code": "999294"
+ }, 
+ {
+  "description": "services involving conduct of examination for admission to educational institutions", 
+  "sac_code": "999295"
+ }, 
+ {
+  "description": "Other Educational support services", 
+  "sac_code": "999299"
+ }, 
+ {
+  "description": "Human health and social care services", 
+  "sac_code": "9993"
+ }, 
+ {
+  "description": "Inpatient services", 
+  "sac_code": "999311"
+ }, 
+ {
+  "description": "Medical and dental services", 
+  "sac_code": "999312"
+ }, 
+ {
+  "description": "Childbirth and related services", 
+  "sac_code": "999313"
+ }, 
+ {
+  "description": "Nursing and Physiotherapeutic services", 
+  "sac_code": "999314"
+ }, 
+ {
+  "description": "Ambulance services", 
+  "sac_code": "999315"
+ }, 
+ {
+  "description": "Medical Laboratory and Diagnostic-imaging services", 
+  "sac_code": "999316"
+ }, 
+ {
+  "description": "Blood, sperm and organ bank services", 
+  "sac_code": "999317"
+ }, 
+ {
+  "description": "Other human health services including homeopathy, unani, ayurveda, naturopathy, acupuncture etc.", 
+  "sac_code": "999319"
+ }, 
+ {
+  "description": "Residential health-care services other than by hospitals", 
+  "sac_code": "999321"
+ }, 
+ {
+  "description": "Residential care services for the elderly and persons with disabilities", 
+  "sac_code": "999322"
+ }, 
+ {
+  "description": "Residential care services for children suffering from mental retardation, mental health illnesses or substance abuse", 
+  "sac_code": "999331"
+ }, 
+ {
+  "description": "Other social services with accommodation for children", 
+  "sac_code": "999332"
+ }, 
+ {
+  "description": "Residential care services for adults suffering from mental retardation, mental health illnesses or substance abuse", 
+  "sac_code": "999333"
+ }, 
+ {
+  "description": "Other social services with accommodation for adults", 
+  "sac_code": "999334"
+ }, 
+ {
+  "description": "Vocational rehabilitation services", 
+  "sac_code": "999341"
+ }, 
+ {
+  "description": "Other social services without accommodation for the elderly and disabled n.e.c.", 
+  "sac_code": "999349"
+ }, 
+ {
+  "description": "Child day-care services", 
+  "sac_code": "999351"
+ }, 
+ {
+  "description": "Guidance and counseling services n.e.c. related to children", 
+  "sac_code": "999352"
+ }, 
+ {
+  "description": "Welfare services without accommodation", 
+  "sac_code": "999353"
+ }, 
+ {
+  "description": "Other social services without accommodation n.e.c.", 
+  "sac_code": "999359"
+ }, 
+ {
+  "description": "Sewage and waste collection, treatment and disposal and other environmental protection services", 
+  "sac_code": "9994"
+ }, 
+ {
+  "description": "Sewerage and sewage treatment services", 
+  "sac_code": "999411"
+ }, 
+ {
+  "description": "Septic tank emptying and cleaning services", 
+  "sac_code": "999412"
+ }, 
+ {
+  "description": "Collection services of hazardous waste", 
+  "sac_code": "999421"
+ }, 
+ {
+  "description": "Collection services of non-hazardous recyclable materials", 
+  "sac_code": "999422"
+ }, 
+ {
+  "description": "General waste collection services, residential", 
+  "sac_code": "999423"
+ }, 
+ {
+  "description": "General waste collection services, other n.e.c.", 
+  "sac_code": "999424"
+ }, 
+ {
+  "description": "Waste preparation, consolidation and storage services", 
+  "sac_code": "999431"
+ }, 
+ {
+  "description": "Hazardous waste treatment and disposal services", 
+  "sac_code": "999432"
+ }, 
+ {
+  "description": "Non-hazardous waste treatment and disposal services", 
+  "sac_code": "999433"
+ }, 
+ {
+  "description": "Site remediation and clean-up services", 
+  "sac_code": "999441"
+ }, 
+ {
+  "description": "Containment, control and monitoring services and other site remediation services", 
+  "sac_code": "999442"
+ }, 
+ {
+  "description": "Building remediation services", 
+  "sac_code": "999443"
+ }, 
+ {
+  "description": "Other remediation services n.e.c.", 
+  "sac_code": "999449"
+ }, 
+ {
+  "description": "Sweeping and snow removal services", 
+  "sac_code": "999451"
+ }, 
+ {
+  "description": "Other sanitation services n.e.c.", 
+  "sac_code": "999459"
+ }, 
+ {
+  "description": "Other environmental protection services n.e.c.", 
+  "sac_code": "999490"
+ }, 
+ {
+  "description": "Services of membership organizations", 
+  "sac_code": "9995"
+ }, 
+ {
+  "description": "Services furnished by business and employers organizations", 
+  "sac_code": "999511"
+ }, 
+ {
+  "description": "Services furnished by professional organizations", 
+  "sac_code": "999512"
+ }, 
+ {
+  "description": "Services furnished by trade unions", 
+  "sac_code": "999520"
+ }, 
+ {
+  "description": "Religious services", 
+  "sac_code": "999591"
+ }, 
+ {
+  "description": "Services furnished by political organizations", 
+  "sac_code": "999592"
+ }, 
+ {
+  "description": "Services furnished by human rights organizations", 
+  "sac_code": "999593"
+ }, 
+ {
+  "description": "Cultural and recreational associations", 
+  "sac_code": "999594"
+ }, 
+ {
+  "description": "Services furnished by environmental advocacy groups", 
+  "sac_code": "999595"
+ }, 
+ {
+  "description": "Services provided by youth associations", 
+  "sac_code": "999596"
+ }, 
+ {
+  "description": "Other civic and social organizations", 
+  "sac_code": "999597"
+ }, 
+ {
+  "description": "Home owners associations", 
+  "sac_code": "999598"
+ }, 
+ {
+  "description": "Services provided by other membership organizations n.e.c.", 
+  "sac_code": "999599"
+ }, 
+ {
+  "description": "Recreational, cultural and sporting services", 
+  "sac_code": "9996"
+ }, 
+ {
+  "description": "Sound recording services", 
+  "sac_code": "999611"
+ }, 
+ {
+  "description": "Motion picture, videotape, television and radio programme production services", 
+  "sac_code": "999612"
+ }, 
+ {
+  "description": "Audiovisual post-production services", 
+  "sac_code": "999613"
+ }, 
+ {
+  "description": "Motion picture, videotape and television programme distribution services", 
+  "sac_code": "999614"
+ }, 
+ {
+  "description": "Motion picture projection services", 
+  "sac_code": "999615"
+ }, 
+ {
+  "description": "Performing arts event promotion and organization services", 
+  "sac_code": "999621"
+ }, 
+ {
+  "description": "Performing arts event production and presentation services", 
+  "sac_code": "999622"
+ }, 
+ {
+  "description": "Performing arts facility operation services", 
+  "sac_code": "999623"
+ }, 
+ {
+  "description": "Other performing arts and live entertainment services n.e.c.", 
+  "sac_code": "999629"
+ }, 
+ {
+  "description": "Services of performing artists including actors, readers, musicians, singers, dancers, TV personalities, independent models etc", 
+  "sac_code": "999631"
+ }, 
+ {
+  "description": "Services of authors, composers, sculptors and other artists, except performing artists", 
+  "sac_code": "999632"
+ }, 
+ {
+  "description": "Original works of authors, composers and other artists except performing artists, painters and sculptors", 
+  "sac_code": "999633"
+ }, 
+ {
+  "description": "Museum and preservation services of historical sites and buildings", 
+  "sac_code": "999641"
+ }, 
+ {
+  "description": "Botanical, zoological and nature reserve services", 
+  "sac_code": "999642"
+ }, 
+ {
+  "description": "Sports and recreational sports event promotion and organization services", 
+  "sac_code": "999651"
+ }, 
+ {
+  "description": "Sports and recreational sports facility operation services", 
+  "sac_code": "999652"
+ }, 
+ {
+  "description": "Other sports and recreational sports services n.e.c.", 
+  "sac_code": "999659"
+ }, 
+ {
+  "description": "Services of athletes", 
+  "sac_code": "999661"
+ }, 
+ {
+  "description": "Support services related to sports and recreation", 
+  "sac_code": "999662"
+ }, 
+ {
+  "description": "Amusement park and similar attraction services", 
+  "sac_code": "999691"
+ }, 
+ {
+  "description": "Gambling and betting services including similar online services", 
+  "sac_code": "999692"
+ }, 
+ {
+  "description": "Coin-operated amusement machine services", 
+  "sac_code": "999693"
+ }, 
+ {
+  "description": "Lottery services", 
+  "sac_code": "999694"
+ }, 
+ {
+  "description": "Other recreation and amusement services n.e.c.", 
+  "sac_code": "999699"
+ }, 
+ {
+  "description": "Other services", 
+  "sac_code": "9997"
+ }, 
+ {
+  "description": "Coin-operated laundry services", 
+  "sac_code": "999711"
+ }, 
+ {
+  "description": "Dry-cleaning services (including fur product cleaning services)", 
+  "sac_code": "999712"
+ }, 
+ {
+  "description": "Other textile cleaning services", 
+  "sac_code": "999713"
+ }, 
+ {
+  "description": "Pressing services", 
+  "sac_code": "999714"
+ }, 
+ {
+  "description": "Dyeing and colouring services", 
+  "sac_code": "999715"
+ }, 
+ {
+  "description": "Other washing, cleaning and dyeing services n.e.c", 
+  "sac_code": "999719"
+ }, 
+ {
+  "description": "Hairdressing and barbers services", 
+  "sac_code": "999721"
+ }, 
+ {
+  "description": "Cosmetic treatment (including cosmetic/plastic surgery), manicuring and pedicuring services", 
+  "sac_code": "999722"
+ }, 
+ {
+  "description": "Physical well-being services including health club & fitness centre", 
+  "sac_code": "999723"
+ }, 
+ {
+  "description": "Other beauty treatment services n.e.c.", 
+  "sac_code": "999729"
+ }, 
+ {
+  "description": "Cemeteries and cremation services", 
+  "sac_code": "999731"
+ }, 
+ {
+  "description": "Undertaking services", 
+  "sac_code": "999732"
+ }, 
+ {
+  "description": "Services involving commercial use or exploitation of any event", 
+  "sac_code": "999791"
+ }, 
+ {
+  "description": "Agreeing to do an act", 
+  "sac_code": "999792"
+ }, 
+ {
+  "description": "Agreeing to refrain from doing an act", 
+  "sac_code": "999793"
+ }, 
+ {
+  "description": "Agreeing to tolerate an act", 
+  "sac_code": "999794"
+ }, 
+ {
+  "description": "Conduct of religious ceremonies/rituals by persons", 
+  "sac_code": "999795"
+ }, 
+ {
+  "description": "Other services n.e.c.", 
+  "sac_code": "999799"
+ }, 
+ {
+  "description": "Domestic services", 
+  "sac_code": "9998"
+ }, 
+ {
+  "description": "Domestic services both part time & full time", 
+  "sac_code": "999800"
+ }, 
+ {
+  "description": "Services provided by extraterritorial organizations and bodies.", 
+  "sac_code": "9999"
+ }, 
+ {
+  "description": "Services provided by extraterritorial organizations and bodies", 
+  "sac_code": "999900"
+ }
+]

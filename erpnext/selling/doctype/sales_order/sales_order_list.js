@@ -1,20 +1,20 @@
 frappe.listview_settings['Sales Order'] = {
-	add_fields: ["base_grand_total", "customer_name", "currency", "delivery_date", "per_delivered", "per_billed",
-		"status", "order_type"],
+	add_fields: ["base_grand_total", "customer_name", "currency", "delivery_date",
+		"per_delivered", "per_billed", "status", "order_type", "name"],
 	get_indicator: function(doc) {
-        if(doc.status==="Closed"){
-        	return [__("Closed"), "green", "status,=,Closed"];
+		if(doc.status==="Closed"){
+			return [__("Closed"), "green", "status,=,Closed"];
 
-        } else if (doc.order_type !== "Maintenance"
-			&& flt(doc.per_delivered, 2) < 100 && frappe.datetime.get_diff(doc.delivery_date) < 0) {
+		} else if (doc.order_type !== "Maintenance"
+			&& flt(doc.per_delivered, 6) < 100 && frappe.datetime.get_diff(doc.delivery_date) < 0) {
 			// to bill & overdue
 			return [__("Overdue"), "red", "per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
 
 		} else if (doc.order_type !== "Maintenance"
-			&& flt(doc.per_delivered, 2) < 100 && doc.status!=="Closed") {
+			&& flt(doc.per_delivered, 6) < 100 && doc.status!=="Closed") {
 			// not delivered
 
-			if(flt(doc.per_billed, 2) < 100) {
+			if(flt(doc.per_billed, 6) < 100) {
 				// not delivered & not billed
 
 				return [__("To Deliver and Bill"), "orange",
@@ -26,14 +26,14 @@ frappe.listview_settings['Sales Order'] = {
 					"per_delivered,<,100|per_billed,=,100|status,!=,Closed"];
 			}
 
-		} else if ((doc.order_type === "Maintenance" || flt(doc.per_delivered, 2) == 100)
-			&& flt(doc.per_billed, 2) < 100 && doc.status!=="Closed") {
+		} else if ((doc.order_type === "Maintenance" || flt(doc.per_delivered, 6) == 100)
+			&& flt(doc.per_billed, 6) < 100 && doc.status!=="Closed") {
 
 			// to bill
 			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Closed"];
 
-		} else if((doc.order_type === "Maintenance" || flt(doc.per_delivered, 2) == 100)
-			&& flt(doc.per_billed, 2) == 100 && doc.status!=="Closed") {
+		} else if((doc.order_type === "Maintenance" || flt(doc.per_delivered, 6) == 100)
+			&& flt(doc.per_billed, 6) == 100 && doc.status!=="Closed") {
 
 			return [__("Completed"), "green", "per_delivered,=,100|per_billed,=,100|status,!=,Closed"];
 		}

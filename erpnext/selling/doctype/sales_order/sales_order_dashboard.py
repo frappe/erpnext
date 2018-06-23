@@ -1,33 +1,42 @@
 from frappe import _
 
-data = {
-	'fieldname': 'sales_order',
-	'non_standard_fieldnames': {
-		'Delivery Note': 'against_sales_order',
-	},
-	'internal_links': {
-		'Quotation': ['items', 'prevdoc_docname']
-	},
-	'transactions': [
-		{
-			'label': _('Fulfillment'),
-			'items': ['Sales Invoice', 'Delivery Note']
+def get_data():
+	return {
+		'fieldname': 'sales_order',
+		'non_standard_fieldnames': {
+			'Delivery Note': 'against_sales_order',
+			'Journal Entry': 'reference_name',
+			'Payment Entry': 'reference_name',
+			'Payment Request': 'reference_name',
+			'Auto Repeat': 'reference_document',
 		},
-		{
-			'label': _('Purchasing'),
-			'items': ['Material Request', 'Purchase Order']
+		'internal_links': {
+			'Quotation': ['items', 'prevdoc_docname']
 		},
-		{
-			'label': _('Projects'),
-			'items': ['Project']
-		},
-		{
-			'label': _('Manufacturing'),
-			'items': ['Production Order']
-		},
-		{
-			'label': _('Reference'),
-			'items': ['Quotation']
-		},
-	]
-}
+		'transactions': [
+			{
+				'label': _('Fulfillment'),
+				'items': ['Sales Invoice', 'Delivery Note']
+			},
+			{
+				'label': _('Purchasing'),
+				'items': ['Material Request', 'Purchase Order']
+			},
+			{
+				'label': _('Projects'),
+				'items': ['Project']
+			},
+			{
+				'label': _('Manufacturing'),
+				'items': ['Work Order']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Quotation', 'Auto Repeat']
+			},
+			{
+				'label': _('Payment'),
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
+			},
+		]
+	}

@@ -2,6 +2,14 @@ erpnext.ItemSelector = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 
+		if (!this.item_field) {
+			this.item_field = 'item_code';
+		}
+
+		if (!this.item_query) {
+			this.item_query = erpnext.queries.item().query;
+		}
+
 		this.grid = this.frm.get_field("items").grid;
 		this.setup();
 	},
@@ -32,8 +40,8 @@ erpnext.ItemSelector = Class.extend({
 		this.dialog.results = body.find('.results');
 
 		var me = this;
-		this.dialog.results.on('click', '.pos-item', function() {
-			me.add_item($(this).attr('data-name'))
+		this.dialog.results.on('click', '.image-view-item', function() {
+			me.add_item($(this).attr('data-name'));
 		});
 
 		this.dialog.input.on('keyup', function() {
@@ -52,34 +60,41 @@ erpnext.ItemSelector = Class.extend({
 		var added = false;
 
 		// find row with item if exists
-		$.each(this.frm.doc.items || [], function(i, d) {
-			if(d.item_code===item_code) {
+		$.each(this.frm.doc.items || [], (i, d) => {
+			if(d[this.item_field]===item_code) {
 				frappe.model.set_value(d.doctype, d.name, 'qty', d.qty + 1);
-				show_alert(__("Added {0} ({1})", [item_code, d.qty]));
+				frappe.show_alert({message: __("Added {0} ({1})", [item_code, d.qty]), indicator: 'green'});
 				added = true;
 				return false;
 			}
 		});
 
 		if(!added) {
-			var d = this.grid.add_new_row();
-			frappe.model.set_value(d.doctype, d.name, 'item_code', item_code);
-
-			// after item fetch
-			frappe.after_ajax(function() {
-				setTimeout(function() {
+			var d = null;
+			frappe.run_serially([
+				() => { d = this.grid.add_new_row(); },
+				() => frappe.model.set_value(d.doctype, d.name, this.item_field, item_code),
+				() => frappe.timeout(0.1),
+				() => {
 					frappe.model.set_value(d.doctype, d.name, 'qty', 1);
-					show_alert(__("Added {0} ({1})", [item_code, 1]));
-				}, 100);
-			});
+					frappe.show_alert({message: __("Added {0} ({1})", [item_code, 1]), indicator: 'green'});
+				}
+			]);
 		}
 
 	},
 
 	render_items: function() {
-		var args = erpnext.queries.item();
+		let args = {
+			query: this.item_query,
+			filters: {}
+		};
 		args.txt = this.dialog.input.val();
 		args.as_dict = 1;
+
+		if (this.get_filters) {
+			$.extend(args.filters, this.get_filters() || {});
+		}
 
 		var me = this;
 		frappe.link_search("Item", args, function(r) {
@@ -92,4 +107,4 @@ erpnext.ItemSelector = Class.extend({
 			me.dialog.results.html(frappe.render_template('item_selector', {'data':r.values}));
 		});
 	}
-})
+});

@@ -1,0 +1,84 @@
+<div class="clearfix"></div>
+<div class="box">
+		<div class="grid-body">
+			<div class="rows text-center">
+
+				<!-- Sales summary section -->
+				<div>
+						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Sales Summary") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="text-left">{{ _('Grand Total') }}</td>
+										<td class='text-right'>{{ data.grand_total or '' }} {{ currency.symbol }}</td>
+									</tr>
+									<tr>
+										<td class="text-left">{{ _('Net Total') }}</td>
+										<td class='text-right'>{{ data.net_total or '' }} {{ currency.symbol }}</td>
+									</tr>
+									<tr>
+										<td class="text-left">{{ _('Total Quantity') }}</td>
+										<td class='text-right'>{{ data.total_quantity or '' }}</td>
+									</tr>
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Section end -->
+
+				<!-- Mode of payment section -->
+				<div>
+						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Mode of Payments") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th class="text-left">{{ _("Mode of Payment") }}</th>
+										<th class="text-right">{{ _("Amount") }}</th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for d in data.payment_reconciliation %}
+									<tr>
+										<td class="text-left">{{ d.mode_of_payment }}</td>
+										<td class='text-right'>{{ d.expected_amount }} {{ currency.symbol }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Section end -->
+
+				<!-- Taxes section -->
+				<div>
+						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Taxes") }}</h6>
+						<div class="tax-break-up" style="overflow-x: auto;">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th class="text-left">{{ _("Rate") }}</th>
+										<th class="text-right">{{ _("Amount") }}</th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for d in data.taxes %}
+									<tr>
+										<td class="text-left">{{ d.rate }} %</td>
+										<td class='text-right'>{{ d.amount }} {{ currency.symbol }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Section end -->
+
+			</div>
+		</div>
+	</div>
+</div>

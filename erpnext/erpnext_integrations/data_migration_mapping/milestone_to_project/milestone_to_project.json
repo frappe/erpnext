@@ -1,0 +1,36 @@
+{
+ "condition": "{\"repo\": \"frappe/erpnext\"}", 
+ "creation": "2017-10-13 11:16:49.664925", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "project_name", 
+   "remote_fieldname": "title"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "notes", 
+   "remote_fieldname": "description"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "status", 
+   "remote_fieldname": "state"
+  }
+ ], 
+ "idx": 0, 
+ "local_doctype": "Project", 
+ "local_primary_key": "project_name", 
+ "mapping_name": "Milestone to Project", 
+ "mapping_type": "Pull", 
+ "migration_id_field": "github_sync_id", 
+ "modified": "2017-10-20 11:48:54.552305", 
+ "modified_by": "Administrator", 
+ "name": "Milestone to Project", 
+ "owner": "Administrator", 
+ "page_length": 10, 
+ "remote_objectname": "Milestone", 
+ "remote_primary_key": "id"
+}

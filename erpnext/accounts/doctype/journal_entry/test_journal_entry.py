@@ -3,9 +3,9 @@
 
 from __future__ import unicode_literals
 import unittest, frappe
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
-
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -83,7 +83,8 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.get("accounts")[0].update({
-			"account": "_Test Warehouse - _TC",
+			"account": get_inventory_account('_Test Company'),
+			"company": "_Test Company",
 			"party_type": None,
 			"party": None
 		})
@@ -128,7 +129,7 @@ class TestJournalEntry(unittest.TestCase):
 
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
-				self.assertEquals(expected_values[gle.account][field], gle[field])
+				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 		# cancel
 		jv.cancel()
@@ -172,7 +173,41 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv.submit()
 
-def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False):
+	def test_inter_company_jv(self):
+		frappe.db.set_value("Account", "Sales Expenses - _TC", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Buildings - _TC", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Sales Expenses - _TC1", "inter_company_account", 1)
+		frappe.db.set_value("Account", "Buildings - _TC1", "inter_company_account", 1)
+		jv = make_journal_entry("Sales Expenses - _TC", "Buildings - _TC", 100, posting_date=nowdate(), cost_center = "Main - _TC", save=False)
+		jv.voucher_type = "Inter Company Journal Entry"
+		jv.multi_currency = 0
+		jv.insert()
+		jv.submit()
+
+		jv1 = make_journal_entry("Sales Expenses - _TC1", "Buildings - _TC1", 100, posting_date=nowdate(), cost_center = "Main - _TC1", save=False)
+		jv1.inter_company_journal_entry_reference = jv.name
+		jv1.company = "_Test Company 1"
+		jv1.voucher_type = "Inter Company Journal Entry"
+		jv1.multi_currency = 0
+		jv1.insert()
+		jv1.submit()
+
+		jv.reload()
+
+		self.assertEqual(jv.inter_company_journal_entry_reference, jv1.name)
+		self.assertEqual(jv1.inter_company_journal_entry_reference, jv.name)
+
+		jv.cancel()
+		jv1.reload()
+		jv.reload()
+
+		self.assertEqual(jv.inter_company_journal_entry_reference, "")
+		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
+
+def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
+	if not cost_center:
+		cost_center = "_Test Cost Center - _TC"
+
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or "2013-02-14"
 	jv.company = "_Test Company"
@@ -182,12 +217,14 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 		{
 			"account": account1,
 			"cost_center": cost_center,
+			"project": project,
 			"debit_in_account_currency": amount if amount > 0 else 0,
 			"credit_in_account_currency": abs(amount) if amount < 0 else 0,
 			"exchange_rate": exchange_rate
 		}, {
 			"account": account2,
 			"cost_center": cost_center,
+			"project": project,
 			"credit_in_account_currency": amount if amount > 0 else 0,
 			"debit_in_account_currency": abs(amount) if amount < 0 else 0,
 			"exchange_rate": exchange_rate
@@ -200,6 +237,5 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 			jv.submit()
 
 	return jv
-
 
 test_records = frappe.get_test_records('Journal Entry')

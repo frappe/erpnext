@@ -4,7 +4,7 @@ def get_data():
 	return [
 		{
 			"label": _("Sales Pipeline"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -30,13 +30,25 @@ def get_data():
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Details",
+					"doctype": "Lead"
+				},
 				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"name": "Prospects Engaged But Not Converted",
+					"doctype": "Lead",
+					"is_query_report": True
 				},
 				{
 					"type": "report",
@@ -47,13 +59,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Lead Details",
-					"doctype": "Lead"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Addresses and Contacts",
+					"name": "Customer Addresses And Contacts",
 					"doctype": "Contact"
 				},
 				{
@@ -62,11 +68,23 @@ def get_data():
 					"name": "Inactive Customers",
 					"doctype": "Sales Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Campaign Efficiency",
+					"doctype": "Lead"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Owner Efficiency",
+					"doctype": "Lead"
+				}
 			]
 		},
 		{
 			"label": _("Communication"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -77,7 +95,7 @@ def get_data():
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
@@ -88,7 +106,7 @@ def get_data():
 					"type": "doctype",
 					"label": _("Customer Group"),
 					"name": "Customer Group",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Customer Group",
 					"description": _("Manage Customer Group Tree."),
 				},
@@ -96,7 +114,7 @@ def get_data():
 					"type": "doctype",
 					"label": _("Territory"),
 					"name": "Territory",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Territory",
 					"description": _("Manage Territory Tree."),
 				},
@@ -104,15 +122,20 @@ def get_data():
 					"type": "doctype",
 					"label": _("Sales Person"),
 					"name": "Sales Person",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Sales Person",
 					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "doctype",
+					"name": "Lead Source",
+					"description": _("Track Leads by Lead Source.")
 				},
 			]
 		},
 		{
 			"label": _("SMS"),
-			"icon": "icon-wrench",
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",

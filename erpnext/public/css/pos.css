@@ -1,0 +1,179 @@
+[data-route="point-of-sale"] .layout-main-section-wrapper {
+  margin-bottom: 0;
+}
+[data-route="point-of-sale"] .pos-items-wrapper {
+  max-height: calc(100vh - 210px);
+}
+.pos {
+  padding: 15px;
+}
+.list-item {
+  min-height: 40px;
+  height: auto;
+}
+.cart-container {
+  padding: 0 15px;
+  display: inline-block;
+  width: 39%;
+  vertical-align: top;
+}
+.item-container {
+  padding: 0 15px;
+  display: inline-block;
+  width: 60%;
+  vertical-align: top;
+}
+.search-field {
+  width: 60%;
+}
+.search-field input::placeholder {
+  font-size: 12px;
+}
+.item-group-field {
+  width: 40%;
+  margin-left: 15px;
+}
+.cart-wrapper {
+  margin-bottom: 12px;
+}
+.cart-wrapper .list-item__content:not(:first-child) {
+  justify-content: flex-end;
+}
+.cart-wrapper .list-item--head .list-item__content:nth-child(2) {
+  flex: 1.5;
+}
+.cart-items {
+  height: 150px;
+  overflow: auto;
+}
+.cart-items .list-item.current-item {
+  background-color: #fffce7;
+}
+.cart-items .list-item.current-item.qty input {
+  border: 1px solid #5E64FF;
+  font-weight: bold;
+}
+.cart-items .list-item.current-item.disc .discount {
+  font-weight: bold;
+}
+.cart-items .list-item.current-item.rate .rate {
+  font-weight: bold;
+}
+.cart-items .list-item .quantity {
+  flex: 1.5;
+}
+.cart-items input {
+  text-align: right;
+  height: 22px;
+  font-size: 12px;
+}
+.fields {
+  display: flex;
+}
+.pos-items-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+}
+.pos-items {
+  overflow: hidden;
+}
+.pos-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 25%;
+}
+.image-view-container {
+  display: block;
+}
+.image-view-container .image-field {
+  height: auto;
+}
+.empty-state {
+  height: 100%;
+  position: relative;
+}
+.empty-state span {
+  position: absolute;
+  color: #8D99A6;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+@keyframes yellow-fade {
+  0% {
+    background-color: #fffce7;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.highlight {
+  animation: yellow-fade 1s ease-in 1;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.number-pad {
+  border-collapse: collapse;
+  cursor: pointer;
+  display: table;
+}
+.num-row {
+  display: table-row;
+}
+.num-col {
+  display: table-cell;
+  border: 1px solid #d1d8dd;
+}
+.num-col > div {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+}
+.num-col.active {
+  background-color: #fffce7;
+}
+.num-col.brand-primary {
+  background-color: #5E64FF;
+  color: #ffffff;
+}
+.discount-amount .discount-inputs {
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0;
+}
+.discount-amount input:first-child {
+  margin-bottom: 10px;
+}
+.taxes-and-totals {
+  border-top: 1px solid #d1d8dd;
+}
+.taxes-and-totals .taxes {
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0;
+  align-items: flex-end;
+}
+.taxes-and-totals .taxes > div:first-child {
+  margin-bottom: 10px;
+}
+.grand-total {
+  border-top: 1px solid #d1d8dd;
+}
+.grand-total .list-item {
+  height: 60px;
+}
+.grand-total .grand-total-value {
+  font-size: 18px;
+}
+.rounded-total-value {
+  font-size: 18px;
+}
+.quantity-total {
+  font-size: 18px;
+}

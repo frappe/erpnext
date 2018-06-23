@@ -7,42 +7,48 @@ python:
 services:
   - mysql
 
-before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-
 install:
+  # fix mongodb travis error
+  - sudo rm /etc/apt/sources.list.d/mongodb*.list
+  - pip install flake8==3.3.0
+  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
+  - sudo rm /etc/apt/sources.list.d/docker.list
+  - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
-  # - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
-  # - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis --bench-branch develop
+  - nvm install v7.10.0
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
   - sudo python install.py --develop --user travis --without-bench-setup
   - sudo pip install -e ~/bench
 
-  # - sudo pip install --upgrade pip
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
-
-script:
-  - cd ~/frappe-bench
-  - bench get-app erpnext $TRAVIS_BUILD_DIR
-  - bench use test_site
-  - bench reinstall --yes
-  - bench build
-  - bench start &
-  - sleep 10
-  - bench --verbose run-tests --driver Firefox
 
 before_script:
   - mysql -u root -ptravis -e 'create database test_frappe'
   - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
   - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
 
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/92b3bea86d8c5397beef
-    on_success: always
-    on_failure: always
-    on_start: never
+  - cd ~/frappe-bench
+  - bench get-app erpnext $TRAVIS_BUILD_DIR
+  - bench use test_site
+  - bench reinstall --yes
+  - bench build
+  - bench scheduler disable
+  - sed -i 's/9000/9001/g' sites/common_site_config.json
+  - bench start &
+  - sleep 10
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - set -e
+        - bench run-tests --app erpnext
+      env: Server Side Test
+    - # stage
+      script:
+        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
+        - bench migrate
+      env: Patch Testing

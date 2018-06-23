@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt, cint
-from frappe import _
 
+import frappe
+from frappe import _
+from frappe.model import no_value_fields
 from frappe.model.document import Document
+from frappe.utils import cint, flt
+
 
 class PackingSlip(Document):
 
@@ -84,11 +86,12 @@ class PackingSlip(Document):
 			* No. of Cases of this packing slip
 		"""
 
-		# also pick custom fields from delivery note
 		rows = [d.item_code for d in self.get("items")]
 
-		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname) for d in \
-			frappe.get_meta("Delivery Note Item").get_custom_fields()])
+		# also pick custom fields from delivery note
+		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname)
+			for d in frappe.get_meta("Delivery Note Item").get_custom_fields()
+			if d.fieldtype not in no_value_fields])
 
 		if custom_fields:
 			custom_fields = ', ' + custom_fields
@@ -134,10 +137,10 @@ class PackingSlip(Document):
 
 		for d in self.get("items"):
 			res = frappe.db.get_value("Item", d.item_code,
-				["net_weight", "weight_uom"], as_dict=True)
+				["weight_per_unit", "weight_uom"], as_dict=True)
 
 			if res and len(res)>0:
-				d.net_weight = res["net_weight"]
+				d.net_weight = res["weight_per_unit"]
 				d.weight_uom = res["weight_uom"]
 
 	def get_recommended_case_no(self):

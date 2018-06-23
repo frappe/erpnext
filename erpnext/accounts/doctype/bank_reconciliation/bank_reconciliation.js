@@ -3,19 +3,19 @@
 
 frappe.ui.form.on("Bank Reconciliation", {
 	setup: function(frm) {
-		frm.get_docfield("payment_entries").allow_bulk_edit = 1;
 		frm.add_fetch("bank_account", "account_currency", "account_currency");
 	},
 
 	onload: function(frm) {
-		var default_bank_account =  locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"];
 
+		let default_bank_account =  frappe.defaults.get_user_default("Company")? 
+			locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]: "";
 		frm.set_value("bank_account", default_bank_account);
 
 		frm.set_query("bank_account", function() {
 			return {
 				"filters": {
-					"account_type": "Bank",
+					"account_type": ["in",["Bank","Cash"]],
 					"is_group": 0
 				}
 			};
@@ -46,6 +46,12 @@ frappe.ui.form.on("Bank Reconciliation", {
 			callback: function(r, rt) {
 				frm.refresh_field("payment_entries");
 				frm.refresh_fields();
+
+				$(frm.fields_dict.payment_entries.wrapper).find("[data-fieldname=amount]").each(function(i,v){
+					if (i !=0){
+						$(v).addClass("text-right")
+					}
+				})
 			}
 		});
 	}

@@ -36,17 +36,56 @@ $.extend(erpnext.queries, {
 
 	customer_filter: function(doc) {
 		if(!doc.customer) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "customer", doc.name)));
+			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "customer", doc.name))]));
 		}
 
 		return { filters: { customer: doc.customer } };
 	},
 
+	contact_query: function(doc) {
+		if(frappe.dynamic_link) {
+			if(!doc[frappe.dynamic_link.fieldname]) {
+				frappe.throw(__("Please set {0}",
+					[__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name))]));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.contact.contact.contact_query',
+				filters: {
+					link_doctype: frappe.dynamic_link.doctype,
+					link_name: doc[frappe.dynamic_link.fieldname]
+				}
+			};
+		}
+	},
+
+	address_query: function(doc) {
+		if(frappe.dynamic_link) {
+			if(!doc[frappe.dynamic_link.fieldname]) {
+				frappe.throw(__("Please set {0}",
+					[__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name))]));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: frappe.dynamic_link.doctype,
+					link_name: doc[frappe.dynamic_link.fieldname]
+				}
+			};
+		}
+	},
+
+	company_address_query: function(doc) {
+		return {
+			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: { is_your_company_address: 1, link_doctype: 'Company', link_name: doc.company || '' }
+		};
+	},
+
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "supplier", doc.name)));
+			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "supplier", doc.name))]));
 		}
 
 		return { filters: { supplier: doc.supplier } };
@@ -54,8 +93,8 @@ $.extend(erpnext.queries, {
 
 	lead_filter: function(doc) {
 		if(!doc.lead) {
-			frappe.throw(__("Please specify a") + " " +
-				__(frappe.meta.get_label(doc.doctype, "lead", doc.name)));
+			frappe.throw(__("Please specify a {0}",
+				[__(frappe.meta.get_label(doc.doctype, "lead", doc.name))]));
 		}
 
 		return { filters: { lead: doc.lead } };
@@ -74,7 +113,7 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=",0]
-				
+
 			]
 		}
 	}
@@ -101,4 +140,20 @@ erpnext.queries.setup_queries = function(frm, options, query_fn) {
 		function(i, df) {
 			set_query(df.options, df.fieldname);
 		});
+}
+
+/* 	if item code is selected in child table
+	then list down warehouses with its quantity
+	else apply default filters.
+*/
+erpnext.queries.setup_warehouse_query = function(frm){
+	frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
+		var row  = locals[cdt][cdn];
+		var filters = erpnext.queries.warehouse(frm.doc);
+		if(row.item_code){
+			$.extend(filters, {"query":"erpnext.controllers.queries.warehouse_query"});
+			filters["filters"].push(["Bin", "item_code", "=", row.item_code]);
+		}
+		return filters
+	});
 }

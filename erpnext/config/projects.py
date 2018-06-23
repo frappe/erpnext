@@ -5,7 +5,7 @@ def get_data():
 	return [
 		{
 			"label": _("Projects"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -14,12 +14,23 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Project Update",
+					"description": _("Project Update."),
+				},
+				{
+					"type": "doctype",
 					"name": "Task",
+					"route": "List/Task",
 					"description": _("Project activity / task."),
 				},
 				{
+					"type": "doctype",
+					"name": "Project Type",
+					"description": _("Define Project type."),
+				},
+				{
 					"type": "report",
-					"route": "Gantt/Task",
+					"route": "List/Task/Gantt",
 					"doctype": "Task",
 					"name": "Gantt Chart",
 					"description": _("Gantt chart of all tasks.")
@@ -48,7 +59,7 @@ def get_data():
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -66,7 +77,7 @@ def get_data():
 		},
 		{
 			"label": _("Help"),
-			"icon": "icon-facetime-video",
+			"icon": "fa fa-facetime-video",
 			"items": [
 				{
 					"type": "help",

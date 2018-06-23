@@ -3,13 +3,14 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint
+from frappe.utils import cint, cstr
 from frappe import throw, _
-from frappe.model.document import Document
+from frappe.utils.nestedset import NestedSet
 
 class RootNotEditable(frappe.ValidationError): pass
+class BalanceMismatchError(frappe.ValidationError): pass
 
-class Account(Document):
+class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
 
 	def onload(self):
@@ -19,22 +20,19 @@ class Account(Document):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		# first validate if company exists
-		company = frappe.db.get_value("Company", self.company, ["abbr", "name"], as_dict=True)
-		if not company:
-			frappe.throw(_('Company {0} does not exist').format(self.company))
-
-		self.name = self.account_name.strip() + ' - ' + company.abbr
+		from erpnext.accounts.utils import get_doc_name_autoname
+		self.name = get_doc_name_autoname(self.account_number, self.account_name, None, self.company)
 
 	def validate(self):
+		from erpnext.accounts.utils import validate_field_number
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_root_details()
+		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
-		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
@@ -56,7 +54,8 @@ class Account(Document):
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
-			par = frappe.db.get_value("Account", self.parent_account, ["report_type", "root_type"], as_dict=1)
+			par = frappe.db.get_value("Account", self.parent_account,
+				["report_type", "root_type"], as_dict=1)
 
 			if par.report_type:
 				self.report_type = par.report_type
@@ -161,59 +160,21 @@ class Account(Document):
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
 
-	def validate_warehouse_account(self):
-		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			return
-			
-		if self.account_type == "Stock" and not cint(self.is_group):
-			if not self.warehouse:
-				throw(_("Warehouse is mandatory"))
-				
-			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
-			if old_warehouse != cstr(self.warehouse):
-				if old_warehouse:
-					self.validate_warehouse(old_warehouse)
-				if self.warehouse:
-					self.validate_warehouse(self.warehouse)
-					
-		elif self.warehouse:
-			self.warehouse = None
-	
-	def validate_warehouse(self, warehouse):
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-
-		if lft and rgt:
-			if frappe.db.sql_list("""select sle.name from `tabStock Ledger Entry` sle where exists (select wh.name from
-				tabWarehouse wh where lft >= %s and rgt <= %s and sle.warehouse = wh.name)""", (lft, rgt)):
-				throw(_("Stock entries exist against Warehouse {0}, hence you cannot re-assign or modify it").format(warehouse))
-
-	def update_nsm_model(self):
-		"""update lft, rgt indices for nested set model"""
-		import frappe
-		import frappe.utils.nestedset
-		frappe.utils.nestedset.update_nsm(self)
-
-	def on_update(self):
-		self.update_nsm_model()
-
-	def validate_trash(self):
-		"""checks gl entries and if child exists"""
+	def on_trash(self):
+		# checks gl entries and if child exists
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be deleted"))
-		if self.check_if_child_exists():
-			throw(_("Child account exists for this account. You can not delete this account."))
 
-	def on_trash(self):
-		self.validate_trash()
-		self.update_nsm_model()
+		super(Account, self).on_trash(True)
 
 	def before_rename(self, old, new, merge=False):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.company)
-
-		# Validate properties before merging
-		if merge:
+		if not merge:
+			new_account = get_name_with_number(new_account, self.account_number)
+		else:
+			# Validate properties before merging
 			if not frappe.db.exists("Account", new):
 				throw(_("Account {0} does not exist").format(new))
 
@@ -230,12 +191,28 @@ class Account(Document):
 		return new_account
 
 	def after_rename(self, old, new, merge=False):
+		super(Account, self).after_rename(old, new, merge)
+
 		if not merge:
-			frappe.db.set_value("Account", new, "account_name",
-				" - ".join(new.split(" - ")[:-1]))
-		else:
-			from frappe.utils.nestedset import rebuild_tree
-			rebuild_tree("Account", "parent_account")
+			new_acc = frappe.db.get_value("Account", new, ["account_name", "account_number"], as_dict=1)
+
+			# exclude company abbr
+			new_parts = new.split(" - ")[:-1]
+			# update account number and remove from parts
+			if new_parts[0][0].isdigit():
+				# if account number is separate by space, split using space
+				if len(new_parts) == 1:
+					new_parts = new.split(" ")
+				if new_acc.account_number != new_parts[0]:
+					self.account_number = new_parts[0]
+					self.db_set("account_number", new_parts[0])
+				new_parts = new_parts[1:]
+
+			# update account name
+			account_name = " - ".join(new_parts)
+			if new_acc.account_name != account_name:
+				self.account_name = account_name
+				self.db_set("account_name", account_name)
 
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
@@ -256,3 +233,12 @@ def get_account_currency(account):
 		return account_currency
 
 	return frappe.local_cache("account_currency", account, generator)
+
+def get_name_with_number(new_account, account_number):
+	if account_number and not new_account[0].isdigit():
+		new_account = account_number + " - " + new_account
+	return new_account
+
+
+def on_doctype_update():
+	frappe.db.add_index("Account", ["lft", "rgt"])

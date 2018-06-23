@@ -49,10 +49,10 @@ def get_data(filters, conditions):
 		posting_date = 't1.posting_date'
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
-		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
+		cond = ' and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
 	
 	if conditions.get('trans') in ['Sales Order', 'Purchase Order']:
-		cond += "and t1.status != 'Closed'"
+		cond += " and t1.status != 'Closed'"
 
 	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year",
 		filters.get('fiscal_year'), ["year_start_date", "year_end_date"])
@@ -147,9 +147,9 @@ def period_wise_columns_query(filters, trans):
 	else:
 		pwc = [_(filters.get("fiscal_year")) + " ("+_("Qty") + "):Float:120",
 			_(filters.get("fiscal_year")) + " ("+ _("Amt") + "):Currency:120"]
-		query_details = " SUM(t2.qty), SUM(t2.base_net_amount),"
+		query_details = " SUM(t2.stock_qty), SUM(t2.base_net_amount),"
 
-	query_details += 'SUM(t2.qty), SUM(t2.base_net_amount)'
+	query_details += 'SUM(t2.stock_qty), SUM(t2.base_net_amount)'
 	return pwc, query_details
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -161,7 +161,7 @@ def get_period_wise_columns(bet_dates, period, pwc):
 			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Amt") + "):Currency:120"]
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)),
+	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.stock_qty, NULL)),
 					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_net_amount, NULL)),
 				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
@@ -182,7 +182,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	}.get(period)
 
 	period_date_ranges = []
-	for i in xrange(1, 13, increment):
+	for i in range(1, 13, increment):
 		period_end_date = getdate(year_start_date) + relativedelta(months=increment, days=-1)
 		if period_end_date > getdate(year_end_date):
 			period_end_date = year_end_date
@@ -235,16 +235,16 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ''
 
 	elif based_on == 'Supplier':
-		based_on_details["based_on_cols"] = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:140"]
-		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_type,"
+		based_on_details["based_on_cols"] = ["Supplier:Link/Supplier:120", "Supplier Group:Link/Supplier Group:140"]
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
 		based_on_details["based_on_group_by"] = 't1.supplier'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
-	elif based_on == 'Supplier Type':
-		based_on_details["based_on_cols"] = ["Supplier Type:Link/Supplier Type:140"]
-		based_on_details["based_on_select"] = "t3.supplier_type,"
-		based_on_details["based_on_group_by"] = 't3.supplier_type'
+	elif based_on == 'Supplier Group':
+		based_on_details["based_on_cols"] = ["Supplier Group:Link/Supplier Group:140"]
+		based_on_details["based_on_select"] = "t3.supplier_group,"
+		based_on_details["based_on_group_by"] = 't3.supplier_group'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 

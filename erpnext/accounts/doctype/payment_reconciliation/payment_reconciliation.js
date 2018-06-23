@@ -3,26 +3,43 @@
 
 frappe.provide("erpnext.accounts");
 
+frappe.ui.form.on("Payment Reconciliation Payment", {
+	invoice_number: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.invoice_number) {
+			var parts = row.invoice_number.split(' | ');
+			var invoice_type = parts[0];
+			var invoice_number = parts[1];
+
+			var invoice_amount = frm.doc.invoices.filter(function(d) {
+				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
+			})[0].outstanding_amount;
+
+			frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
+		}
+	}
+});
+
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
-		var me = this
-		this.frm.set_query('party_type', function() {
+		var me = this;
+		this.frm.set_query("party_type", function() {
 			return {
-				filters: {
-					"name": ["in", ["Customer", "Supplier"]]
+				"filters": {
+					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
-			};
+			}
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
 			if(!me.frm.doc.company || !me.frm.doc.party_type) {
-				msgprint(__("Please select Company and Party Type first"));
+				frappe.msgprint(__("Please select Company and Party Type first"));
 			} else {
 				return{
 					filters: {
 						"company": me.frm.doc.company,
 						"is_group": 0,
-						"account_type": (me.frm.doc.party_type == "Customer" ? "Receivable" : "Payable")
+						"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
 					}
 				};
 			}
@@ -31,7 +48,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 		this.frm.set_query('bank_cash_account', function() {
 			if(!me.frm.doc.company) {
-				msgprint(__("Please select Company first"));
+				frappe.msgprint(__("Please select Company first"));
 			} else {
 				return{
 					filters:[
@@ -98,10 +115,11 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	},
 
 	set_invoice_options: function() {
+		var me = this;
 		var invoices = [];
 
 		$.each(me.frm.doc.invoices || [], function(i, row) {
-			if (row.invoice_number && !inList(invoices, row.invoice_number))
+			if (row.invoice_number && !in_list(invoices, row.invoice_number))
 				invoices.push(row.invoice_type + " | " + row.invoice_number);
 		});
 
@@ -110,7 +128,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				me.frm.doc.name).options = "\n" + invoices.join("\n");
 
 			$.each(me.frm.doc.payments || [], function(i, p) {
-				if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
+				if(!in_list(invoices, cstr(p.invoice_number))) p.invoice_number = null;
 			});
 		}
 

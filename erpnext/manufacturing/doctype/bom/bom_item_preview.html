@@ -1,0 +1,23 @@
+<div style="padding: 15px;">
+	{% if data.image %}
+	<img class="responsive" src={{ data.image }}>
+	<hr style="margin: 15px -15px;">
+	{% endif %}
+	<h4>
+		{{ __("Description") }}
+	</h4>
+	<div style="padding-top: 10px;">
+		{{ data.description }}
+	</div>
+	<hr style="margin: 15px -15px;">
+	<p>
+		{% if data.value %}
+		<a style="margin-right: 7px; margin-bottom: 7px" class="btn btn-default btn-xs" href="#Form/BOM/{{ data.value }}">
+			{{ __("Open BOM {0}", [data.value.bold()]) }}</a>
+		{% endif %}
+		{% if data.item_code %}
+		<a class="btn btn-default btn-xs" href="#Form/Item/{{ data.item_code }}">
+			{{ __("Open Item {0}", [data.item_code.bold()]) }}</a>
+		{% endif %}
+	</p>
+</div>

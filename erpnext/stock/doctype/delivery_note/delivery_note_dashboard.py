@@ -1,26 +1,32 @@
 from frappe import _
 
-data = {
-	'fieldname': 'delivery_note_no',
-	'non_standard_fieldnames': {
-		'Sales Invoice': 'delivery_note',
-		'Packing Slip': 'delivery_note',
-	},
-	'internal_links': {
-		'Sales Order': ['items', 'against_sales_order'],
-	},
-	'transactions': [
-		{
-			'label': _('Related'),
-			'items': ['Sales Invoice', 'Packing Slip']
+def get_data():
+	return {
+		'fieldname': 'delivery_note',
+		'non_standard_fieldnames': {
+			'Stock Entry': 'delivery_note_no',
+			'Quality Inspection': 'reference_name',
+			'Auto Repeat': 'reference_document',
 		},
-		{
-			'label': _('Reference'),
-			'items': ['Sales Order', 'Quality Inspection']
+		'internal_links': {
+			'Sales Order': ['items', 'against_sales_order'],
 		},
-		{
-			'label': _('Returns'),
-			'items': ['Stock Entry']
-		},
-	]
-}
+		'transactions': [
+			{
+				'label': _('Related'),
+				'items': ['Sales Invoice', 'Packing Slip']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Sales Order', 'Quality Inspection']
+			},
+			{
+				'label': _('Returns'),
+				'items': ['Stock Entry']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Auto Repeat']
+			},
+		]
+	}

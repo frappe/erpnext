@@ -10,6 +10,7 @@ def execute():
 	frappe.reload_doctype("Purchase Receipt")
 	frappe.reload_doctype("Sales Order Item")
 	frappe.reload_doctype("Purchase Order Item")
+	frappe.reload_doctype("Purchase Order Item Supplied")
 
 	# sales return
 	return_entries = list(frappe.db.sql("""
@@ -86,6 +87,6 @@ def execute():
 			""", (order_details[0].purchase_order, order_details[0].po_detail, d.row_id))
 
 			pr = frappe.get_doc("Purchase Receipt", d.name)
-			pr.update_ordered_qty()
+			pr.update_ordered_and_reserved_qty()
 			pr.update_prevdoc_status()
 

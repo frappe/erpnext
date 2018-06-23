@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-var get_filters = function(){
+erpnext.get_purchase_trends_filters = function() {
 	return [
 		{
 			"fieldname":"period",
@@ -23,7 +23,7 @@ var get_filters = function(){
 				{ "value": "Item", "label": __("Item") },
 				{ "value": "Item Group", "label": __("Item Group") },
 				{ "value": "Supplier", "label": __("Supplier") },
-				{ "value": "Supplier Type", "label": __("Supplier Type") },
+				{ "value": "Supplier Group", "label": __("Supplier Group") },
 				{ "value": "Project", "label": __("Project") }
 			],
 			"default": "Item"
@@ -44,7 +44,7 @@ var get_filters = function(){
 			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options":'Fiscal Year',
-			"default": sys_defaults.fiscal_year
+			"default": frappe.sys_defaults.fiscal_year
 		},
 		{
 			"fieldname":"company",

@@ -19,5 +19,5 @@ class TestFiscalYear(unittest.TestCase):
 			"year_start_date": "2000-04-01"
 		})
 		fy.insert()
-		self.assertEquals(fy.year_end_date, '2001-03-31')
+		self.assertEqual(fy.year_end_date, '2001-03-31')
 

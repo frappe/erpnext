@@ -1,8 +1,8 @@
 frappe.listview_settings['Supplier'] = {
-	add_fields: ["supplier_name", "supplier_type", 'status'],
+	add_fields: ["supplier_name", "supplier_group", "image", "on_hold"],
 	get_indicator: function(doc) {
-		if(doc.status==="Open") {
-			return [doc.status, "red", "status,=," + doc.status];
+		if(cint(doc.on_hold)) {
+			return [__("On Hold"), "red"];
 		}
 	}
 };

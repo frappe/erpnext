@@ -1,0 +1,1442 @@
+{
+	"Albania": {
+		"Albania VAT": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+	"Algeria": {
+		"Algeria VAT 17%": {
+			"account_name": "VAT 17%",
+			"tax_rate": 17.00,
+			"default": 1
+		},
+		"Algeria VAT 7%": {
+			"account_name": "VAT 7%",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Andorra": {
+		"Andorra VAT": {
+			"account_name": "VAT",
+			"tax_rate": 4.50
+		}
+	},
+
+	"Angola": {
+		"Angola VAT": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Antigua And Barbuda": {
+		"Antigua & Barbuda Sales Tax": {
+			"account_name": "ABST",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Argentina": {
+		"Argentina Tax": {
+			"account_name": "VAT",
+			"tax_rate": 21.00
+		}
+	},
+
+	"Armenia": {
+		"Armenia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Aruba": {
+		"Aruba Tax": {
+			"account_name": "VAT",
+			"tax_rate": 1.50
+		}
+	},
+
+	"Australia": {
+		"Australia GST1": {
+			"account_name": "GST 10%",
+			"tax_rate": 10.00,
+			"default": 1
+		},
+		"Australia GST 2%": {
+			"account_name": "GST 2%",
+			"tax_rate": 2
+		}
+	},
+
+	"Austria": {
+		"Austria Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Azerbaijan": {
+		"Azerbaijan Tax": {
+			"account_name": "GST",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Bahamas": {
+		"Bahamas Tax": {
+			"account_name": "VAT",
+			"tax_rate": 7.50
+		}
+	},
+
+	"Bangladesh": {
+		"Bangladesh Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Barbados": {
+		"Barbados Tax": {
+			"account_name": "VAT",
+			"tax_rate": 17.50
+		}
+	},
+
+	"Belarus": {
+		"Belarus Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Belgium": {
+		"Belgium VAT 21%": {
+			"account_name": "VAT 21%",
+			"tax_rate": 21.00,
+			"default": 1
+		},
+		"Belgium VAT 12%": {
+			"account_name": "VAT 12%",
+			"tax_rate": 12
+		}
+	},
+
+	"Belize": {
+		"Belize Tax": {
+			"account_name": "GST",
+			"tax_rate": 12.50
+		}
+	},
+
+	"Benin": {
+		"Benin Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Bhutan": {
+		"Bhutan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 50.00
+		}
+	},
+
+	"Bolivia": {
+		"Bolivia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 13.00
+		}
+	},
+
+	"Bosnia and Herzegovina": {
+		"Bosnia & Herzegovina Tax": {
+			"account_name": "VAT",
+			"tax_rate": 17.00
+		}
+	},
+
+	"Botswana": {
+		"Botswana Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Brazil": {
+		"Brazil ICMS 19%": {
+			"account_name": "ICMS 19%",
+			"tax_rate": 19.00,
+			"default": 1
+		},
+		"Brazil ICMS 17%": {
+			"account_name": "ICMS 17%",
+			"tax_rate": 17.00
+		},
+		"Brazil PIS 1.65%": {
+			"account_name": "PIS 1.65%",
+			"tax_rate": 1.65
+		},
+		"Brazil COFINS 7.6%": {
+			"account_name": "COFINS 7.6%",
+			"tax_rate": 7.6
+		},
+		"Brazil COFINS 5.0%": {
+			"account_name": "ISS 5%",
+			"tax_rate": 5.0
+		}
+	},
+
+	"Bulgaria": {
+		"Bulgaria VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20.00,
+			"default": 1
+		},
+		"Bulgaria VAT 7%": {
+			"account_name": "VAT 7%",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Burkina Faso": {
+		"Burkina Faso Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Burundi": {
+		"Burundi Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Cambodia": {
+		"Cambodia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Cameroon": {
+		"Cameroon Tax": {
+			"account_name": "VAT",
+			"tax_rate": 19.25
+		}
+	},
+
+	"Canada": {
+		"Canada GST 5%": {
+			"account_name": "GST",
+			"tax_rate": 5.00,
+			"default": 1
+		},
+		"Canada HST 15%": {
+			"account_name": "HST",
+			"tax_rate": 15.00
+		},
+		"Canada PST 8%": {
+			"account_name": "PST 8%",
+			"tax_rate": 8.00
+		},
+		"Canada PST 7%": {
+			"account_name": "PST 7%",
+			"tax_rate": 7.00
+		},
+		"Canada PST 5%": {
+			"account_name": "PST 5%",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Cape Verde": {
+		"Cape Verde Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Central African Republic": {
+		"Central African Republic Tax": {
+			"account_name": "VAT",
+			"tax_rate": 19.00
+		}
+	},
+
+	"Chad": {
+		"Chad Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Chile": {
+		"Chile Tax": {
+			"account_name": "VAT",
+			"tax_rate": 19.00
+		}
+	},
+
+	"China": {
+		"China Tax": {
+			"account_name": "VAT",
+			"tax_rate": 17.00
+		}
+	},
+
+	"Colombia": {
+		"Colombia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Comoros": {
+		"Comoros Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Congo": {
+		"Congo Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Costa Rica": {
+		"Costa Rica": {
+			"account_name": "VAT",
+			"tax_rate": 13.00
+		}
+	},
+
+	"Croatia": {
+		"Croatia VAT 25%": {
+			"account_name": "VAT 25%",
+			"tax_rate": 25.00,
+			"default": 1
+		},
+		"Croatia VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Cuba": {
+		"Cuba Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Cyprus": {
+		"Cyprus Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Czech Republic": {
+		"Czech Republic VAT 21%": {
+			"account_name": "VAT 21%",
+			"tax_rate": 21.00,
+			"default": 1
+		},
+		"Czech Republic VAT 15%": {
+			"account_name": "VAT 15%",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Denmark": {
+		"Denmark Tax": {
+			"account_name": "VAT",
+			"tax_rate": 25.00
+		}
+	},
+
+	"Djibouti": {
+		"Dijbouti Tax": {
+			"account_name": "VAT",
+			"tax_rate": 33.00
+		}
+	},
+
+	"Dominica": {
+		"Dominica Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Dominican Republic": {
+		"Dominican Republic Tax": {
+			"account_name": "ITBIS",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Ecuador": {
+		"Ecuador Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Egypt": {
+		"Egypt Tax": {
+			"account_name": "GST",
+			"tax_rate": 10.00
+		}
+	},
+
+	"El Salvador": {
+		"El Salvador Tax": {
+			"account_name": "VAT",
+			"tax_rate": 13.00
+		}
+	},
+
+	"Equatorial Guinea": {
+		"Equatorial Guinea": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Eritrea": {
+		"Eritrea Tax": {
+			"account_name": "VAT",
+			"tax_rate": 4.00
+		}
+	},
+
+	"Estonia": {
+		"Estonia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Ethiopia": {
+		"Ethiopia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Fiji": {
+		"Fiji Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Finland": {
+		"Finland Tax": {
+			"account_name": "VAT",
+			"tax_rate": 24.00
+		}
+	},
+
+	"France": {
+		"France VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20,
+			"default": 1
+		},
+		"France VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10
+		},
+		"France VAT 5.5%": {
+			"account_name": "VAT 5.5%",
+			"tax_rate": 5.5
+		}
+	},
+
+	"Gabon": {
+		"Gabon Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Gambia": {
+		"Gambia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Georgia": {
+		"Georgia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Germany": {
+		"Germany VAT 19%": {
+			"account_name": "VAT 19%",
+			"tax_rate": 19.00,
+			"default": 1
+		},
+		"Germany VAT 7%": {
+			"account_name": "VAT 7%",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Ghana": {
+		"Ghana Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Greece": {
+		"Greece VAT 23%": {
+			"account_name": "VAT 23%",
+			"tax_rate": 23.00,
+			"default": 1
+		},
+		"Greece VAT 9%": {
+			"account_name": "VAT 9%",
+			"tax_rate": 9.00
+		}
+	},
+
+	"Grenada": {
+		"Grenada Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Guam": {
+		"Guam Tax": {
+			"account_name": "VAT",
+			"tax_rate": 4.00
+		}
+	},
+
+	"Guatemala": {
+		"Guatemala Tax": {
+			"account_name": "IVA",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Guinea": {
+		"Guinea Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Guyana": {
+		"Guyana Tax": {
+			"account_name": "GST",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Haiti": {
+		"Haiti Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Honduras": {
+		"Honduras Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Hungary": {
+		"Hungary Tax": {
+			"account_name": "VAT",
+			"tax_rate": 27.00
+		}
+	},
+
+	"Iceland": {
+		"Iceland VAT 25.5%": {
+			"account_name": "VAT 25.5%",
+			"tax_rate": 25.5,
+			"default": 1
+		},
+		"Iceland VAT 7.5%": {
+			"account_name": "VAT 7.5%",
+			"tax_rate": 7.5
+		}
+	},
+
+	"India": {
+		"In State GST": {
+			"account_name": ["SGST", "CGST"],
+			"tax_rate": [9.00, 9.00],
+			"default": 1
+		},
+		"Out of State GST": {
+			"account_name": "IGST",
+			"tax_rate": 18.00
+		},
+		"VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00
+		},
+		"VAT 4%": {
+			"account_name": "VAT 4%",
+			"tax_rate": 4.00
+		},
+		"VAT 14%": {
+			"account_name": "VAT 14%",
+			"tax_rate": 14.00
+		}
+	},
+
+	"Indonesia": {
+		"Indonesia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Iran": {
+		"Iran Tax": {
+			"account_name": "VAT",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Ireland": {
+		"Ireland Tax": {
+			"account_name": "VAT",
+			"tax_rate": 23.00
+		}
+	},
+
+	"Isle Of Man": {
+		"Isle of Man VAT 20%": {
+			"account_name": "VAT",
+			"tax_rate": 20.00,
+			"default": 1
+		},
+		"Isle of Man VAT 5%": {
+			"account_name": "VAT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Israel": {
+		"Israel Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Italy": {
+		"Italy Tax": {
+			"account_name": "VAT",
+			"tax_rate": 22.00
+		}
+	},
+
+	"Ivory Coast": {
+		"Ivory Coast": {
+			"account_name": "Metric",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Jamaica": {
+		"Jamaica Tax": {
+			"account_name": "GCT",
+			"tax_rate": 16.50
+		}
+	},
+
+	"Japan": {
+		"Japan Tax": {
+			"account_name": "CT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Jordan": {
+		"Jordan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Kazakhstan": {
+		"Kazakhstan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Kenya": {
+		"Kenya Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Kosovo": {
+		"Kosovo Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Kyrgyzstan": {
+		"Kyrgyztan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Lao People's Democratic Republic": {
+		"Lao Republic Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Latvia": {
+		"Latvia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Lebanon": {
+		"Lebanon Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Liechtenstein": {
+		"Liechtenstein Tax": {
+			"account_name": "VAT",
+			"tax_rate": 8.00
+		}
+	},
+
+	"Lithuania": {
+		"Lithunia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 21.00
+		}
+	},
+
+	"Luxembourg": {
+		"Luxembourg VAT 15%": {
+			"account_name": "VAT 15%",
+			"tax_rate": 15.00,
+			"default": 1
+		},
+		"Luxembourg VAT 3%": {
+			"account_name": "VAT 3%",
+			"tax_rate": 3.00
+		}
+	},
+
+	"Macedonia": {
+		"Macedonia VAT 18%": {
+			"account_name": "VAT",
+			"tax_rate": 18.00,
+			"default": 1
+		},
+		"Macedonia VAT 5%": {
+			"account_name": "VAT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Madagascar": {
+		"Madagascar Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Malawi": {
+		"Malawi Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.50
+		}
+	},
+
+	"Malaysia": {
+		"Malaysia GST 6%": {
+			"account_name": "GST",
+			"tax_rate": 6.00,
+			"default": 1
+		},
+		"Malaysia GST 5%": {
+			"account_name": "GST",
+			"tax_rate": 5.00
+		},
+		"Malaysia GST 10%": {
+			"account_name": "GST",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Mali": {
+		"Mali Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Malta": {
+		"Malta Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Mauritania": {
+		"Mauritania Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Mauritius": {
+		"Mauritius Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Mexico": {
+		"Mexico Tax": {
+			"account_name": "IVA",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Micronesia": {
+		"Micronesia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Moldova": {
+		"Moldova VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20.00,
+			"default": 1
+		},
+		"Moldova VAT 8%": {
+			"account_name": "VAT 8%",
+			"tax_rate": 8.00
+		}
+	},
+
+	"Monaco": {
+		"Monaco Tax 19.6%": {
+			"account_name": "VAT 19.6%",
+			"tax_rate": 19.6,
+			"default": 1
+		},
+		"Monaco Tax 5.5%": {
+			"account_name": "VAT 5,5%",
+			"tax_rate": 5.5
+		}
+	},
+
+	"Mongolia": {
+		"Mongolia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Montenegro": {
+		"Montenegro Tax 17%": {
+			"account_name": "VAT 17%",
+			"tax_rate": 17.00,
+			"default": 1
+		},
+		"Montenegro Tax 7%": {
+			"account_name": "VAT 7%",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Morocco": {
+		"Morroco VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20.00,
+			"default": 1
+		},
+		"Morroco VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Mozambique": {
+		"Mozambique Tax": {
+			"account_name": "VAT",
+			"tax_rate": 17.00
+		}
+	},
+
+	"Myanmar": {
+		"Myanamar Tax": {
+			"account_name": "VAT",
+			"tax_rate": 30.00
+		}
+	},
+
+	"Namibia": {
+		"Namibia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Nepal": {
+		"Nepal Tax": {
+			"account_name": "VAT",
+			"tax_rate": 13.00
+		}
+	},
+
+	"Netherlands": {
+		"Netherlands VAT 21%": {
+			"account_name": "VAT 21%",
+			"tax_rate": 21.00,
+			"default": 1
+		},
+		"Netherlands VAT 6%": {
+			"account_name": "VAT 6%",
+			"tax_rate": 6.00
+		}
+	},
+
+	"New Zealand": {
+		"New Zealand": {
+			"account_name": "GST",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Nicaragua": {
+		"Nicaragua Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Nigeria": {
+		"Nigeria Tax": {
+			"account_name": "VAT",
+			"tax_rate": 5
+		}
+	},
+
+	"North Korea": {
+		"North Korea": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Norway": {
+		"Norway VAT 25%": {
+			"account_name": "VAT 25%",
+			"tax_rate": 25.00,
+			"default": 1
+		},
+		"Norway VAT 12%": {
+			"account_name": "VAT 12%",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Pakistan": {
+		"Pakistan Tax": {
+			"account_name": "GST",
+			"tax_rate": 17.00
+		}
+	},
+
+	"Panama": {
+		"Panama Tax": {
+			"account_name": "VAT",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Papua New Guinea": {
+		"Papua New Guinea Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Paraguay": {
+		"Paraguay Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Peru": {
+		"Peru Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Philippines": {
+		"Philippines Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Poland": {
+		"Poland VAT 23%": {
+			"account_name": "VAT 23%",
+			"tax_rate": 23.00,
+			"default": 1
+		},
+		"Poland VAT 7%": {
+			"account_name": "VAT 7%",
+			"tax_rate": 7
+		}
+	},
+
+	"Portugal": {
+		"Portugal Tax": {
+			"account_name": "VAT",
+			"tax_rate": 23.00
+		}
+	},
+
+	"Republic Of The Congo": {
+		"Congo Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Romania": {
+		"Romania Tax": {
+			"account_name": "VAT",
+			"tax_rate": 24.00
+		}
+	},
+
+	"Russian Federation": {
+		"Russia VAT 18%": {
+			"account_name": "VAT 18%",
+			"tax_rate": 18.00,
+			"default": 1
+		},
+		"Russia VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Rwanda": {
+		"Rwanda Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Senegal": {
+		"Senegal Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Saudi Arabia": {
+		"KSA VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00
+		},
+		"KSA VAT Zero": {
+			"account_name": "VAT Zero",
+			"tax_rate": 0.00
+		},
+		"KSA VAT Exempted": {
+			"account_name": "VAT Exempted",
+			"tax_rate": 0.00
+		},
+		"KSA Excise 50%": {
+			"account_name": "Excise 50%",
+			"tax_rate": 50.00
+		},
+		"KSA Excise 100%": {
+			"account_name": "Excise 100%",
+			"tax_rate": 100.00
+		}
+	},
+
+	"Serbia": {
+		"Serbia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Seychelles": {
+		"Seychelles Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Sierra Leone": {
+		"Sierra Leone Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Singapore": {
+		"Singapore Tax": {
+			"account_name": "GST",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Slovakia": {
+		"Slovakia VAT 20%": {
+			"account_name": "VAT 20%",
+			"tax_rate": 20.00,
+			"default": 1
+		},
+		"Slovakia VAT 10%": {
+			"account_name": "VAT 10%",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Slovenia": {
+		"Slovenia VAT 22%": {
+			"account_name": "VAT 22%",
+			"tax_rate": 22.00,
+			"default": 1
+		},
+		"Slovenia VAT 8.5%": {
+			"account_name": "VAT 8.5%",
+			"tax_rate": 8.50
+		}
+	},
+
+	"Solomon Islands": {
+		"Solomon Islands Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Somalia": {
+		"Somalia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"South Africa": {
+		"South Africa Tax": {
+			"account_name": "VAT",
+			"tax_rate": 14.00
+		}
+	},
+
+	"South Korea": {
+		"South Korea Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Spain": {
+		"Spain Tax": {
+			"account_name": "VAT",
+			"tax_rate": 21.00
+		}
+	},
+
+	"Sri Lanka": {
+		"Sri Lanka Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"St Lucia": {
+		"St Lucia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Sudan": {
+		"Sudan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Suriname": {
+		"Suriname Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Swaziland": {
+		"Swaziland tax": {
+			"account_name": "VAT",
+			"tax_rate": 14.00
+		}
+	},
+
+	"Sweden": {
+		"Sweden Tax": {
+			"account_name": "VAT",
+			"tax_rate": 25.00
+		}
+	},
+
+	"Switzerland": {
+		"Switzerland normal VAT": {
+			"account_name": "VAT 7.7%",
+			"tax_rate": 7.70,
+			"default": 1
+		},
+		"Switzerland reduced VAT": {
+			"account_name": "VAT 2.5%",
+			"tax_rate": 2.50
+		},
+		"Switzerland lodging VAT": {
+			"account_name": "VAT 3.7%",
+			"tax_rate": 3.70
+		}
+	},
+
+	"Taiwan": {
+		"Taiwan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Tajikistan": {
+		"Tajikistan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20
+		}
+	},
+
+	"Tanzania": {
+		"Tanzania Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Thailand": {
+		"Thailand Tax": {
+			"account_name": "VAT",
+			"tax_rate": 7.00
+		}
+	},
+
+	"Togo": {
+		"Togo Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Tonga": {
+		"Tonga Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Trinidad And Tobago": {
+		"Trinidad & Tobago Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	},
+
+	"Tunisia": {
+		"Tunisia VAT 18%": {
+			"account_name": "VAT 18%",
+			"tax_rate": 18.00,
+			"default": 1
+		},
+		"Tunisia VAT 12%": {
+			"account_name": "VAT 12%",
+			"tax_rate": 12.00
+		},
+		"Tunisia VAT 6%": {
+			"account_name": "VAT 6%",
+			"tax_rate": 6.00
+		}
+	},
+
+	"Turkey": {
+		"Turkey Tax": {
+			"account_name": "VAT 18%",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Turkmenistan": {
+		"Turkmenistan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Uganda": {
+		"Uganda Tax": {
+			"account_name": "VAT",
+			"tax_rate": 18.00
+		}
+	},
+
+	"Ukraine": {
+		"Ukraine Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"United Arab Emirates": {
+		"UAE VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00
+		},
+		"UAE VAT Zero": {
+			"account_name": "VAT Zero",
+			"tax_rate": 0.00
+		},
+		"UAE VAT Exempted": {
+			"account_name": "VAT Exempted",
+			"tax_rate": 0.00
+		},
+		"UAE Excise 50%": {
+			"account_name": "Excise 50%",
+			"tax_rate": 50.00
+		},
+		"UAE Excise 100%": {
+			"account_name": "Excise 100%",
+			"tax_rate": 100.00
+		}
+	},
+
+	"United Kingdom": {
+		"United Kingdom Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"United States": {
+		"US ST 6%": {
+			"account_name": "ST 6%",
+			"tax_rate": 6.00,
+			"default": 1
+		},
+		"US ST 4%": {
+			"account_name": "ST 4%",
+			"tax_rate": 4.00
+		},
+		"US ST 6.25%": {
+			"account_name": "ST 6.25%",
+			"tax_rate": 6.25
+		}
+	},
+
+	"Uruguay": {
+		"Uruguay Tax": {
+			"account_name": "VAT",
+			"tax_rate": 22.00
+		}
+	},
+
+	"Uzbekistan": {
+		"Uzbekistan Tax": {
+			"account_name": "VAT",
+			"tax_rate": 20.00
+		}
+	},
+
+	"Vanuatu": {
+		"Vanuatu Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.50
+		}
+	},
+
+	"Venezuela": {
+		"Venezuela Tax": {
+			"account_name": "VAT",
+			"tax_rate": 12.00
+		}
+	},
+
+	"Vietnam": {
+		"Vietnam Tax": {
+			"account_name": "VAT",
+			"tax_rate": 10.00
+		}
+	},
+
+	"Yemen": {
+		"Yemen Tax": {
+			"account_name": "VAT",
+			"tax_rate": 5.00
+		}
+	},
+
+	"Zambia": {
+		"Zambia Tax": {
+			"account_name": "VAT",
+			"tax_rate": 16.00
+		}
+	},
+
+	"Zimbabwe": {
+		"Zimbabwe Tax": {
+			"account_name": "VAT",
+			"tax_rate": 15.00
+		}
+	}
+}

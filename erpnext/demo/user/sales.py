@@ -13,27 +13,27 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 def work():
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
 	if random.random() < 0.5:
-		for i in xrange(random.randint(1,7)):
+		for i in range(random.randint(1,7)):
 			make_opportunity()
 
 	if random.random() < 0.5:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			make_quotation()
 
 	# lost quotations / inquiries
 	if random.random() < 0.3:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			quotation = get_random('Quotation', doc=True)
 			if quotation and quotation.status == 'Submitted':
 				quotation.declare_order_lost('Did not ask')
 
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			opportunity = get_random('Opportunity', doc=True)
 			if opportunity and opportunity.status in ('Open', 'Replied'):
 				opportunity.declare_enquiry_lost('Did not ask')
 
 	if random.random() < 0.3:
-		for i in xrange(random.randint(1,3)):
+		for i in range(random.randint(1,3)):
 			make_sales_order()
 
 	if random.random() < 0.1:
@@ -54,13 +54,14 @@ def make_opportunity():
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
 		"customer": get_random("Customer"),
-		"enquiry_type": "Sales",
+		"opportunity_type": "Sales",
+		"with_items": 1,
 		"transaction_date": frappe.flags.current_date,
 	})
 
 	add_random_children(b, "items", rows=4, randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"has_variants": "0", "is_fixed_asset": 0})
+		"item_code": ("Item", {"has_variants": 0, "is_fixed_asset": 0})
 	}, unique="item_code")
 
 	b.insert()
@@ -68,7 +69,7 @@ def make_opportunity():
 
 def make_quotation():
 	# get open opportunites
-	opportunity = get_random("Opportunity", {"status": "Open"})
+	opportunity = get_random("Opportunity", {"status": "Open", "with_items": 1})
 
 	if opportunity:
 		from erpnext.crm.doctype.opportunity.opportunity import make_quotation
@@ -88,7 +89,7 @@ def make_quotation():
 		if company_currency == party_account_currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency, args="for_selling")
 
 		qtn = frappe.get_doc({
 			"creation": frappe.flags.current_date,

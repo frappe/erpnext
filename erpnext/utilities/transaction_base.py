@@ -5,25 +5,33 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt
+from frappe.utils import cstr, now_datetime, cint, flt, get_time
 from erpnext.controllers.status_updater import StatusUpdater
+
+from six import string_types
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
-	def load_notification_message(self):
-		dt = self.doctype.lower().replace(" ", "_")
-		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.set("__notification_message",
-				frappe.db.get_value("Notification Control", None, dt + "_message"))
-
 	def validate_posting_time(self):
-		if not self.posting_time:
-			self.posting_time = now_datetime().strftime('%H:%M:%S')
+		# set Edit Posting Date and Time to 1 while data import
+		if frappe.flags.in_import and self.posting_date:
+			self.set_posting_time = 1
+
+		if not getattr(self, 'set_posting_time', None):
+			now = now_datetime()
+			self.posting_date = now.strftime('%Y-%m-%d')
+			self.posting_time = now.strftime('%H:%M:%S.%f')
+		elif self.posting_time:
+			try:
+				get_time(self.posting_time)
+			except ValueError:
+				frappe.throw(_('Invalid Posting Time'))
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
-				cstr(self.contact_date) != cstr(self._prev.contact_date) or force:
+				cstr(self.contact_date) != cstr(self._prev.contact_date) or force or \
+				(hasattr(self, "ends_on") and cstr(self.ends_on) != cstr(self._prev.ends_on)):
 
 			self.delete_events()
 			self._add_calendar_event(opts)
@@ -32,10 +40,7 @@ class TransactionBase(StatusUpdater):
 		events = frappe.db.sql_list("""select name from `tabEvent`
 			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
 		if events:
-			frappe.db.sql("delete from `tabEvent` where name in (%s)"
-				.format(", ".join(['%s']*len(events))), tuple(events))
-
-			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
+			frappe.db.sql("delete from `tabEvent` where name in ({0})"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
@@ -48,6 +53,7 @@ class TransactionBase(StatusUpdater):
 				"subject": opts.subject,
 				"description": opts.description,
 				"starts_on":  self.contact_date,
+				"ends_on": opts.ends_on,
 				"event_type": "Private",
 				"ref_type": self.doctype,
 				"ref_name": self.name
@@ -63,6 +69,8 @@ class TransactionBase(StatusUpdater):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
 	def validate_with_previous_doc(self, ref):
+		self.exclude_fields = ["conversion_factor", "uom"] if self.get('is_return') else []
+
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
@@ -93,7 +101,7 @@ class TransactionBase(StatusUpdater):
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
 				for field, condition in fields:
-					if prevdoc_values[field] is not None:
+					if prevdoc_values[field] is not None and field not in self.exclude_fields:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 
@@ -110,7 +118,7 @@ class TransactionBase(StatusUpdater):
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
-			
+
 			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
 
 			if values:
@@ -123,7 +131,7 @@ class TransactionBase(StatusUpdater):
 				ret = None
 		else:
 			ret = None
-		
+
 		return ret
 
 def delete_events(ref_type, ref_name):
@@ -131,7 +139,7 @@ def delete_events(ref_type, ref_name):
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, basestring):
+	if isinstance(qty_fields, string_types):
 		qty_fields = [qty_fields]
 
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
@@ -144,6 +152,7 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	for d in doc.get_all_children(parenttype=child_dt):
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
-				if d.get(f):
-					if cint(d.get(f))!=d.get(f):
-						frappe.throw(_("Quantity cannot be a fraction in row {0}").format(d.idx), UOMMustBeIntegerError)
+				qty = d.get(f)
+				if qty:
+					if abs(cint(qty) - flt(qty)) > 0.0000001:
+						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)

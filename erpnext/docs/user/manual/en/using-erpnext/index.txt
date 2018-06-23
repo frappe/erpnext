@@ -1,9 +1,0 @@
-to-do
-collaborating-around-forms
-chat
-notes
-calendar
-assignment
-tags
-articles
-pos-view

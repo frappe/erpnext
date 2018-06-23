@@ -13,7 +13,6 @@ window.get_product_list = function() {
 	$.ajax({
 		method: "GET",
 		url: "/",
-		dataType: "json",
 		data: {
 			cmd: "erpnext.templates.pages.product_search.get_product_list",
 			start: window.start,
@@ -40,10 +39,10 @@ window.render_product_list = function(data) {
 	if(data.length < 10) {
 		if(!table) {
 			$(".more-btn")
-				.replaceWith("<div class='alert alert-warning'>No products found.</div>");
+				.replaceWith("<div class='alert alert-warning'>{{ _("No products found.") }}</div>");
 		} else {
 			$(".more-btn")
-				.replaceWith("<div class='text-muted'>Nothing more to show.</div>");
+				.replaceWith("<div class='text-muted'>{{ _("Nothing more to show.") }}</div>");
 		}
 	} else {
 		$(".more-btn").toggle(true)

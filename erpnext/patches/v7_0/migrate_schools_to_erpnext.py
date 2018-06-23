@@ -13,13 +13,20 @@ def execute():
 		frappe.db.sql("""delete from `tabDesktop Icon`""")
 		
 		if not frappe.db.exists('Module Def', 'Schools') and frappe.db.exists('Module Def', 'Academics'):
-			frappe.rename_doc("Module Def", "Academics", "Schools")
+			
+			# 'Schools' module changed to the 'Education'
+			# frappe.rename_doc("Module Def", "Academics", "Schools")
+			
+			frappe.rename_doc("Module Def", "Academics", "Education")
 			
 		remove_from_installed_apps("schools")
 
 def reload_doctypes_for_schools_icons():
-	base_path = frappe.get_app_path('erpnext', 'schools', 'doctype')
+	# 'Schools' module changed to the 'Education'
+	# base_path = frappe.get_app_path('erpnext', 'schools', 'doctype')
+	
+	base_path = frappe.get_app_path('erpnext', 'education', 'doctype')
 	for doctype in os.listdir(base_path):
 		if os.path.exists(os.path.join(base_path, doctype, doctype + '.json')) \
 			and doctype not in ("fee_component", "assessment", "assessment_result"):
-			frappe.reload_doc('schools', 'doctype', doctype)
+			frappe.reload_doc('education', 'doctype', doctype)

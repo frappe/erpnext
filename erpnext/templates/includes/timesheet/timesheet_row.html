@@ -1,0 +1,13 @@
+<div class="web-list-item">
+	<a href="/timesheets?name={{ doc.name | urlencode }}" class="no-decoration">
+		<div class="row">
+			<div class="col-xs-3">
+				<span class="indicator {{ "red" if doc.status=="Cancelled" else "green" if doc.status=="Billed" else "blue" if doc.status=="Submitted" else "darkgrey" }}">{{ doc.name }}</span>
+			</div>
+			<div class="col-xs-3"> Billable Hours: {{ doc.total_billable_hours}} </div>
+			<div class="col-xs-2"> {{ _(doc.sales_invoice) }} </div>
+			<div class="col-xs-2"> {{ _(doc.project) }} </div>
+			<div class="col-xs-2"> {{ _(doc.activity_type) }} </div>
+		</div>
+	</a>
+</div>

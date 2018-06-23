@@ -20,7 +20,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				if(frm.cscript.tax_table == "Sales Taxes and Charges") {
 					var account_type = ["Tax", "Chargeable", "Expense Account"];
 				} else {
-					var account_type = ["Tax", "Chargeable", "Income Account"];
+					var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
 				}
 
 				return {
@@ -62,15 +62,32 @@ frappe.ui.form.on('Sales Invoice Payment', {
 			frappe.model.set_value(cdt, cdn, 'account', account)
 		})
 	}
-})
+});
+
+frappe.ui.form.on("Sales Invoice", {
+	payment_terms_template: function() {
+		cur_frm.trigger("disable_due_date");
+	}
+});
 
 frappe.ui.form.on('Purchase Invoice', {
 	mode_of_payment: function(frm) {
 		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
 			frm.set_value('cash_bank_account', account);
 		})
+	},
+
+	payment_terms_template: function() {
+		cur_frm.trigger("disable_due_date");
 	}
-})
+});
+
+frappe.ui.form.on("Payment Schedule", {
+	payment_schedule_remove: function() {
+		cur_frm.trigger("disable_due_date");
+	},
+
+});
 
 frappe.ui.form.on('Payment Entry', {
 	mode_of_payment: function(frm) {
@@ -81,7 +98,23 @@ frappe.ui.form.on('Payment Entry', {
 	}
 })
 
-get_payment_mode_account = function(frm, mode_of_payment, callback){
+frappe.ui.form.on('Salary Structure', {
+	mode_of_payment: function(frm) {
+		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
+			frm.set_value("payment_account", account);
+		})
+	}
+})
+
+var get_payment_mode_account = function(frm, mode_of_payment, callback) {
+	if(!frm.doc.company) {
+		frappe.throw(__("Please select the Company first"));
+	}
+
+	if(!mode_of_payment) {
+		return;
+	}
+
 	return  frappe.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 		args: {
@@ -100,7 +133,7 @@ get_payment_mode_account = function(frm, mode_of_payment, callback){
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.account_head){
-		msgprint("Please select Charge Type first");
+		frappe.msgprint(__("Please select Charge Type first"));
 		frappe.model.set_value(cdt, cdn, "account_head", "");
 	} else if(d.account_head && d.charge_type!=="Actual") {
 		frappe.call({
@@ -112,6 +145,8 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
 			}
 		})
+	} else if (d.charge_type == 'Actual' && d.account_head) {
+		frappe.model.set_value(cdt, cdn, "description", d.account_head.split(' - ')[0]);
 	}
 }
 
@@ -144,7 +179,7 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 		}
 	}
 	if(msg) {
-		validated = false;
+		frappe.validated = false;
 		refresh_field("taxes");
 		frappe.throw(msg);
 	}
@@ -168,9 +203,10 @@ cur_frm.cscript.validate_inclusive_tax = function(tax) {
 			// inclusive tax cannot be of type Actual
 			actual_type_error();
 		} else if(tax.charge_type == "On Previous Row Amount" &&
-			!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)) {
-				// referred row should also be an inclusive tax
-				on_previous_row_error(tax.row_id);
+			!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)
+		) {
+			// referred row should also be an inclusive tax
+			on_previous_row_error(tax.row_id);
 		} else if(tax.charge_type == "On Previous Row Total") {
 			var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
 				function(t) { return cint(t.included_in_print_rate) ? null : t; });
@@ -206,7 +242,7 @@ if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
 			erpnext.taxes.set_conditional_mandatory_rate_or_amount(open_form);
 		} else {
 			// apply in current row
-			erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.get_field('taxes').grid.get_grid_row(cdn));
+			erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.get_field('taxes').grid.get_row(cdn));
 		}
 	});
 

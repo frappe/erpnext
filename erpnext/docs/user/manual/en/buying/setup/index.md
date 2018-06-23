@@ -1,4 +1,0 @@
-
-### Topics
-
-{index}

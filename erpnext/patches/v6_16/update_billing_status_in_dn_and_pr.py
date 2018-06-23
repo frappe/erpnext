@@ -22,7 +22,7 @@ def execute():
 
 	# Update billed_amt in DN and PR which are not against any order
 	for d in frappe.db.sql("""select name from `tabPurchase Receipt Item` item
-		where (prevdoc_detail_docname is null or prevdoc_detail_docname = '') and docstatus=1""", as_dict=1):
+		where (purchase_order_item is null or purchase_order_item = '') and docstatus=1""", as_dict=1):
 
 		billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
 			where pr_detail=%s and docstatus=1""", d.name)

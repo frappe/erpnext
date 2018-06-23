@@ -6,7 +6,6 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper, opts) {
 		var args = {
 			title: __("Stock Analytics"),
-			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
@@ -35,10 +34,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
-			{id: "name", name: __("Item"), field: "name", width: 300,
-				formatter: this.tree_formatter},
+			{id: "name", name: __("Item"), field: "name", width: 300},
 			{id: "brand", name: __("Brand"), field: "brand", width: 100},
 			{id: "stock_uom", name: __("UOM"), field: "stock_uom", width: 100},
 			{id: "opening", name: __("Opening"), field: "opening", hidden: true,
@@ -78,7 +74,6 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 		this.show_zero_check();
-		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();
@@ -120,8 +115,8 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	prepare_balances: function() {
 		var me = this;
-		var from_date = dateutil.str_to_obj(this.from_date);
-		var to_date = dateutil.str_to_obj(this.to_date);
+		var from_date = frappe.datetime.str_to_obj(this.from_date);
+		var to_date = frappe.datetime.str_to_obj(this.to_date);
 		var data = frappe.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
@@ -130,7 +125,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
-			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
+			var posting_datetime = frappe.datetime.str_to_obj(sl.posting_datetime);
 
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
@@ -139,7 +134,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
 					var valuation_method = item.valuation_method ?
-						item.valuation_method : sys_defaults.valuation_method;
+						item.valuation_method : frappe.sys_defaults.valuation_method;
 					var is_fifo = valuation_method == "FIFO";
 
 					if(sl.voucher_type=="Stock Reconciliation") {
@@ -185,7 +180,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 
 				var parent = me.parent_map[item.name];
 				while(parent) {
-					parent_group = me.item_by_name[parent];
+					var parent_group = me.item_by_name[parent];
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
 							parent_group[col.field] =

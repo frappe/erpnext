@@ -24,14 +24,17 @@ def get():
 	                "account_type": "Cash"
 	            },
 	            _("Loans and Advances (Assets)"): {
-	            	"is_group": 1
+                    	_("Employee Advances"): {
+                    	},
 	            },
 	            _("Securities and Deposits"): {
 	                _("Earnest Money"): {}
 	            },
 	            _("Stock Assets"): {
+	                _("Stock In Hand"): {
+	                    "account_type": "Stock"
+	                },
 	                "account_type": "Stock",
-					"is_group": 1
 	            },
 	            _("Tax Assets"): {
 					"is_group": 1
@@ -61,7 +64,10 @@ def get():
 				},
 	            _("Accumulated Depreciation"): {
 	            	"account_type": "Accumulated Depreciation"
-	            }
+	            },
+                _("CWIP Account"): {
+                    "account_type": "Capital Work in Progress",
+                }
 	        },
 	        _("Investments"): {
 	        	"is_group": 1
@@ -79,6 +85,9 @@ def get():
 	                _("Cost of Goods Sold"): {
 	                    "account_type": "Cost of Goods Sold"
 	                },
+                    _("Expenses Included In Asset Valuation"): {
+                        "account_type": "Expenses Included In Asset Valuation"
+                    },
 	                _("Expenses Included In Valuation"): {
 	                    "account_type": "Expenses Included In Valuation"
 	                },
@@ -107,7 +116,7 @@ def get():
 	            _("Office Maintenance Expenses"): {},
 	            _("Office Rent"): {},
 	            _("Postal Expenses"): {},
-	            _("Print and Stationary"): {},
+	            _("Print and Stationery"): {},
 	            _("Round Off"): {
 	                "account_type": "Round Off"
 	            },
@@ -137,12 +146,16 @@ def get():
 			    _("Accounts Payable"): {
 			        _("Creditors"): {
 			            "account_type": "Payable"
-			        }
+			        },
+			        _("Payroll Payable"): {},
 			    },
 			    _("Stock Liabilities"): {
 				    _("Stock Received But Not Billed"): {
 				        "account_type": "Stock Received But Not Billed"
 				    },
+                    _("Asset Received But Not Billed"): {
+                        "account_type": "Asset Received But Not Billed"
+                    }
 			    },
 				_("Duties and Taxes"): {
 					"account_type": "Tax",

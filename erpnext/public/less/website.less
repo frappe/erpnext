@@ -8,6 +8,10 @@
 	line-height: 200%;
 }
 
+.web-page-content {
+	margin-bottom: 30px;
+}
+
 .item-stock {
 	margin-bottom: 10px !important;
 }
@@ -32,8 +36,6 @@
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center top;
-	border-radius-top: 4px;
-	border-radius-right: 4px;
 }
 
 .product-image.missing-image {
@@ -45,16 +47,6 @@
 .product-image.missing-image .octicon {
 	font-size: 32px;
 	color: @border-color;
-}
-
-.product-text {
-	padding: 15px 0px;
-}
-
-.product-label {
-	padding-bottom: 4px;
-	text-transform: uppercase;
-	font-size: 12px;
 }
 
 .product-search {
@@ -84,25 +76,15 @@
 }
 
 .transaction-list-item {
-	&:hover,
-	&:active,
-	&:focus {
-		background-color: @light-bg;
-	}
-
 	.indicator {
 		font-weight: inherit;
 		color: @text-muted;
 	}
 
 	.transaction-time {
-		// margin-left: 15px;
-	}
-
-	.items-preview,
-	.transaction-time {
 		margin-top: 5px;
 	}
+
 }
 
 // order.html
@@ -165,7 +147,7 @@
 
 .cart-container {
 	margin: 50px 0px;
-	
+
 	.checkout {
 		margin-bottom:15px;
 	}
@@ -223,7 +205,7 @@
 .cart-dropdown-container {
 	width: 400px;
 	padding: 15px;
-	
+
 	.item-price {
 		display: block !important;
 		padding-bottom: 10px;
@@ -232,12 +214,11 @@
 	.cart-item-header {
 		border-bottom: 1px solid #d1d8dd;
 	}
-	
+
 	.cart-items-dropdown {
 		max-height: 350px;
-		overflow: auto;	
 	}
-	
+
 	.cart-items-dropdown .cart-dropdown {
 		display:block;
 	   	margin-top:15px;
@@ -254,7 +235,7 @@
 	}
 
 	.checkout-btn {
-		padding-top:25px;
+		padding-bottom:25px;
 	}
 	.col-name-description {
 		margin-bottom:8px;
@@ -323,8 +304,42 @@
 	padding: 15px;
 	word-wrap: break-word;
 	height: 75px;
+	display: block; /* Fallback for non-webkit */
+	display: -webkit-box;
+	max-width: 100%;
+	margin: 0 auto;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .product-image-wrapper {
 	padding-bottom: 40px;
+}
+
+.duration-bar {
+  display: inline-block;
+  color: white;
+  background: #8FD288;
+  padding: 3px;
+}
+
+.duration-invisible {
+  visibility: hidden;
+}
+
+.duration-value {
+  float: right;
+}
+
+.bar-outer-text {
+  color: #8FD288;
+  background: none;
+  float: none;
+  border: none;
+}
+
+.bom-spec {
+	margin-bottom: 20px;
 }

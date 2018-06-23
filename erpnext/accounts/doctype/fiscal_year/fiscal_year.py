@@ -43,11 +43,13 @@ class FiscalYear(Document):
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
+		frappe.cache().delete_value("fiscal_years")
 	
 	def on_trash(self):
 		global_defaults = frappe.get_doc("Global Defaults")
 		if global_defaults.current_fiscal_year == self.name:
 			frappe.throw(_("You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings").format(self.name))
+		frappe.cache().delete_value("fiscal_years")
 
 	def validate_overlap(self):
 		existing_fiscal_years = frappe.db.sql("""select name from `tabFiscal Year`
@@ -102,6 +104,7 @@ def auto_create_fiscal_year():
 			start_year = cstr(new_fy.year_start_date.year)
 			end_year = cstr(new_fy.year_end_date.year)
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
+			new_fy.auto_created = 1
 
 			new_fy.insert(ignore_permissions=True)
 		except frappe.NameError:

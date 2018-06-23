@@ -1,0 +1,18 @@
+[
+	{
+		"doctype": "Assessment Criteria",
+		"assessment_criteria": "Aptitude"
+	},
+	{
+		"doctype": "Assessment Criteria",
+		"assessment_criteria": "Application"
+	},
+	{
+		"doctype": "Assessment Criteria",
+		"assessment_criteria": "Understanding"
+	},
+	{
+		"doctype": "Assessment Criteria",
+		"assessment_criteria": "Knowledge"
+	}
+]

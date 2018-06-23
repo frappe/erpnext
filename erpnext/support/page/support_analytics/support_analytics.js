@@ -19,7 +19,6 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
 			title: __("Support Analtyics"),
-			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Issue", "Fiscal Year"],
@@ -27,14 +26,14 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	},
 
 	filters: [
-		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year",
+		{fieldname: "fiscal_year", fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year",
 			default_value: __("Select Fiscal Year") + "..."},
-		{fieldtype:"Date", label: __("From Date")},
-		{fieldtype:"Date", label: __("To Date")},
-		{fieldtype:"Select", label: __("Range"),
+		{fieldname: "from_date", fieldtype:"Date", label: __("From Date")},
+		{fieldname: "to_date", fieldtype:"Date", label: __("To Date")},
+		{fieldname: "range", fieldtype:"Select", label: __("Range"),
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"], default_value: "Monthly"}
 	],
-	
+
 	init_filter_values: function() {
 		this._super();
 		this.filter_inputs.range.val('Monthly');
@@ -42,8 +41,6 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
 			{id: "name", name: __("Status"), field: "name", width: 100},
 		];
 		this.make_date_range_columns();
@@ -67,7 +64,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 
 		$.each(frappe.report_dump.data["Issue"], function(i, d) {
-			var dateobj = dateutil.str_to_obj(d.creation);
+			var dateobj = frappe.datetime.str_to_obj(d.creation);
 			var date = d.creation.split(" ")[0];
 			var col = me.column_map[date];
 			if(col) {
@@ -77,17 +74,17 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 					total_closed[col.field] = flt(total_closed[col.field]) + 1;
 
 					days_to_close[col.field] = flt(days_to_close[col.field])
-						+ dateutil.get_diff(d.resolution_date, d.creation);
+						+ frappe.datetime.get_diff(d.resolution_date, d.creation);
 
 					hours_to_close[col.field] = flt(hours_to_close[col.field])
-						+ dateutil.get_hour_diff(d.resolution_date, d.creation);
+						+ frappe.datetime.get_hour_diff(d.resolution_date, d.creation);
 
 				}
 				if (d.first_responded_on) {
 					total_responded[col.field] = flt(total_responded[col.field]) + 1;
 
 					hours_to_respond[col.field] = flt(hours_to_respond[col.field])
-						+ dateutil.get_hour_diff(d.first_responded_on, d.creation);
+						+ frappe.datetime.get_hour_diff(d.first_responded_on, d.creation);
 				}
 			}
 		});

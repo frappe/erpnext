@@ -1,0 +1,21 @@
+<div class="row medical_record-row" data-creation="{%= creation.split(" ")[0] + " 00:00:00" %}">
+	<div class="col-xs-3 text-right medical_record-date"><span class="{%= date_class %}">
+		{%= date_sep || "" %}</span>
+	</div>
+	<div class="col-xs-9 medical_record-message"
+		data-doctype="{%= reference_doctype %}"
+		data-docname="{%= reference_name %}"
+		title="{%= by %} / {%= dateutil.str_to_user(creation) %}">
+		<span class="avatar avatar-small">
+			<div class="avatar-frame" style="background-image: url({{ imgsrc }});"></div>
+			<!-- <img src="{%= imgsrc %}"> -->
+		</span>
+		<span class="small">
+		{% if (reference_doctype && reference_name) { %}
+			{%= __("{0}: {1}", [link, "<strong>" + subject + "</strong>"]) %}
+		{% } else { %}
+			{%= subject %}
+		{% } %}
+	</span>
+	</div>
+</div>

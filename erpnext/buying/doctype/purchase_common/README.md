@@ -1,1 +1,0 @@
-Common scripts for purchase transactions.

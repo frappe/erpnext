@@ -1,23 +1,34 @@
 <div class="row pos-bill-row pos-bill-item" data-item-code="{%= item_code %}">
-    <div class="col-xs-5"><h6>{%= item_code || "" %}{%= item_name || "" %}</h6></div>
-    <div class="col-xs-4">
+    <div class="col-xs-4"><h6>{%= item_code || "" %}{%= __(item_name) || "" %}</h6></div>
+    <div class="col-xs-3">
         <div class="row pos-qty-row">
-            <div class="col-xs-2 text-center pos-qty-btn" data-action="decrease-qty"><i class="icon-minus-sign text-muted"></i></div>
+            <div class="col-xs-2 text-center pos-qty-btn" data-action="decrease-qty"><i class="fa fa-minus text-muted" style="font-size:12px"></i></div>
             <div class="col-xs-8">
 				<div>
-                    <input type="text" value="{%= qty %}" class="form-control input-sm pos-item-qty text-right">
+                    <input type="tel" value="{%= qty %}" class="form-control   pos-item-qty text-right">
                 </div>
                 {% if(actual_qty != null) { %}
                 <div style="margin-top: 5px;" class="text-muted small text-right">
-                    <span title="{%= __("In Stock") %}">{%= actual_qty || 0 %}<span>                
+                    {%= __("In Stock: ") %} <span>{%= actual_qty || 0.0 %}</span>
                 </div>
                 {% } %}
             </div>
-            <div class="col-xs-2 text-center pos-qty-btn" data-action="increase-qty"><i class="icon-plus-sign text-muted"></i></div>
+            <div class="col-xs-2 text-center pos-qty-btn" data-action="increase-qty"><i class="fa fa-plus text-muted" style="font-size:12px"></i></div>
+        </div>
+    </div>
+    <div class="col-xs-2 text-right">
+		<div class="row input-sm">
+            <input type="tel" value="{%= discount_percentage %}" class="form-control text-right pos-item-disc">
         </div>
     </div>
     <div class="col-xs-3 text-right">
-        <div class="text-muted" style="margin-top: 5px;"><input type="text" value="{%= rate %}" class="form-control input-sm pos-item-rate text-right"></div>
+        <div class="text-muted" style="margin-top: 5px;">
+			{% if(enabled) { %}
+				<input type="tel" value="{%= rate %}" class="form-control input-sm pos-item-price text-right">
+			{% } else { %}
+				<h6>{%= format_currency(rate) %}</h6>
+			{% } %}
+		</div>
 		<p><h6>{%= amount %}</h6></p>
     </div>
 </div>

@@ -5,41 +5,46 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import getdate, validate_email_add, today, add_years
-from frappe.model.naming import make_autoname
-from frappe import throw, _
-import frappe.permissions
+from frappe.model.naming import set_name_by_naming_series
+from frappe import throw, _, scrub
+from frappe.permissions import add_user_permission, remove_user_permission, \
+	set_user_permission_if_allowed, has_permission
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import delete_events
-
+from frappe.utils.nestedset import NestedSet
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
 
+class Employee(NestedSet):
+	nsm_parent_field = 'reports_to'
 
-class Employee(Document):
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method == 'Naming Series':
-				self.name = make_autoname(self.naming_series + '.####')
+				set_name_by_naming_series(self)
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
+			elif naming_method == 'Full Name':
+				self.name = self.employee_name
 
 		self.employee = self.name
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Left"])
+		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
 
 		self.employee = self.name
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
-		self.validate_employee_leave_approver()
 		self.validate_reports_to()
+		self.validate_preferred_email()
+		if self.job_applicant:
+			self.validate_onboarding_process()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -47,25 +52,32 @@ class Employee(Document):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
-				frappe.permissions.remove_user_permission(
+				remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
+
 	def on_update(self):
+		self.update_nsm_model()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
 
 	def update_user_permissions(self):
-		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
-		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
+		if not self.create_user_permission: return
+		if not has_permission('User Permission', ptype='write'): return
+
+		add_user_permission("Employee", self.name, self.user_id)
+		set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
 		user = frappe.get_doc("User", self.user_id)
 		user.flags.ignore_permissions = True
 
-		if "Employee" not in user.get("user_roles"):
-			user.add_roles("Employee")
+		if "Employee" not in user.get("roles"):
+			user.append_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name and not (user.first_name and user.last_name):
@@ -142,29 +154,39 @@ class Employee(Document):
 			throw(_("User {0} is already assigned to Employee {1}").format(
 				self.user_id, employee[0]), frappe.DuplicateEntryError)
 
-	def validate_employee_leave_approver(self):
-		for l in self.get("leave_approvers")[:]:
-			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
-
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
 
 	def on_trash(self):
+		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
+		if frappe.db.exists("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1}):
+			emp_transfer = frappe.get_doc("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1})
+			emp_transfer.db_set("new_employee_id", '')
+
+	def validate_preferred_email(self):
+		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
+			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+
+	def validate_onboarding_process(self):
+		employee_onboarding = frappe.get_all("Employee Onboarding",
+			filters={"job_applicant": self.job_applicant, "docstatus": 1, "boarding_status": ("!=", "Completed")})
+		if employee_onboarding:
+			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
+			doc.validate_employee_creation()
+			doc.db_set("employee", self.name)
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(att_date), count(*)
+	return dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
 		from `tabAttendance` where employee=%s
-			and att_date > date_sub(curdate(), interval 1 year)
+			and attendance_date > date_sub(curdate(), interval 1 year)
 			and status in ('Present', 'Half Day')
-			group by att_date''', name))
+			group by attendance_date''', name))
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
-	import datetime
 	ret = {}
 	if date_of_birth:
 		try:
@@ -177,17 +199,17 @@ def get_retirement_date(date_of_birth=None):
 
 	return ret
 
-
 def validate_employee_role(doc, method):
 	# called via User hook
-	if "Employee" in [d.role for d in doc.get("user_roles")]:
+	if "Employee" in [d.role for d in doc.get("roles")]:
 		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
 			frappe.msgprint(_("Please set User ID field in an Employee record to set Employee Role"))
-			doc.get("user_roles").remove(doc.get("user_roles", {"role": "Employee"})[0])
+			doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
 
 def update_user_permissions(doc, method):
 	# called via User hook
-	if "Employee" in [d.role for d in doc.get("user_roles")]:
+	if "Employee" in [d.role for d in doc.get("roles")]:
+		if not has_permission('User Permission', ptype='write'): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
@@ -219,7 +241,11 @@ def get_employees_who_are_born_today():
 		and status = 'Active'""", {"date": today()}, as_dict=True)
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
-	holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+	if employee:
+		holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+	else:
+		holiday_list=''
+		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	if not holiday_list:
 		holiday_list = frappe.db.get_value("Company", company, "default_holiday_list")
@@ -229,3 +255,102 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
+def is_holiday(employee, date=None):
+	'''Returns True if given Employee has an holiday on the given date
+	:param employee: Employee `name`
+	:param date: Date to check. Will check for today if None'''
+
+	holiday_list = get_holiday_list_for_employee(employee)
+	if not date:
+		date = today()
+
+	if holiday_list:
+		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+
+@frappe.whitelist()
+def deactivate_sales_person(status = None, employee = None):
+	if status == "Left":
+		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
+		if sales_person:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+
+@frappe.whitelist()
+def create_user(employee, user = None, email=None):
+	emp = frappe.get_doc("Employee", employee)
+
+	employee_name = emp.employee_name.split(" ")
+	middle_name = last_name = ""
+
+	if len(employee_name) >= 3:
+		last_name = " ".join(employee_name[2:])
+		middle_name = employee_name[1]
+	elif len(employee_name) == 2:
+		last_name = employee_name[1]
+
+	first_name = employee_name[0]
+
+	if email:
+		emp.prefered_email = email
+
+	user = frappe.new_doc("User")
+	user.update({
+		"name": emp.employee_name,
+		"email": emp.prefered_email,
+		"enabled": 1,
+		"first_name": first_name,
+		"middle_name": middle_name,
+		"last_name": last_name,
+		"gender": emp.gender,
+		"birth_date": emp.date_of_birth,
+		"phone": emp.cell_number,
+		"bio": emp.bio
+	})
+	user.insert()
+	return user.name
+
+def get_employee_emails(employee_list):
+	'''Returns list of employee emails either based on user_id or company_email'''
+	employee_emails = []
+	for employee in employee_list:
+		if not employee:
+			continue
+		user, email = frappe.db.get_value('Employee', employee, ['user_id', 'company_email'])
+		if user or email:
+			employee_emails.append(user or email)
+
+	return employee_emails
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
+	filters = [['company', '=', company]]
+	fields = ['name as value', 'employee_name as title']
+
+	if is_root:
+		parent = ''
+	if parent and company and parent!=company:
+		filters.append(['reports_to', '=', parent])
+	else:
+		filters.append(['reports_to', '=', ''])
+
+	employees = frappe.get_list(doctype, fields=fields,
+		filters=filters, order_by='name')
+
+	for employee in employees:
+		is_expandable = frappe.get_all(doctype, filters=[
+			['reports_to', '=', employee.get('value')]
+		])
+		employee.expandable = 1 if is_expandable else 0
+
+	return employees
+
+
+def on_doctype_update():
+	frappe.db.add_index("Employee", ["lft", "rgt"])
+
+def has_user_permission_for_employee(user_name, employee_name):
+	return frappe.db.exists({
+		'doctype': 'User Permission',
+		'user': user_name,
+		'allow': 'Employee',
+		'for_value': employee_name
+	})

@@ -65,11 +65,11 @@
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
- "icon": "icon-edit", 
+ "icon": "fa fa-edit", 
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
+
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 

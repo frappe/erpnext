@@ -1,0 +1,75 @@
+From: {{ sender }}
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_29597CF7-20DD-4184-B3FA-85582C5C4361"
+Message-Id: <07D687F6-10AA-4B9F-82DE-27753096164E@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+X-Smtp-Server: 73CC8281-7E8F-4B47-8324-D5DA86EEDD4F
+Subject: Re: What did you work on today?
+Date: Thu, 10 Nov 2016 16:04:43 +0530
+X-Universally-Unique-Identifier: A4D9669F-179C-42D8-A3D3-AA6A8C49A6F2
+References: <{{ message_id }}>
+To: test_in@iwebnotes.com
+In-Reply-To: <{{ message_id }}>
+
+
+--Apple-Mail=_29597CF7-20DD-4184-B3FA-85582C5C4361
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
+
+I built Daily Work Summary!
+
+> On 10-Nov-2016, at 3:20 PM, Frappe <test@erpnext.com> wrote:
+>=20
+> Please share what did you do today. If you reply by midnight, your =
+response will be recorded!
+>=20
+> This email was sent to rmehta@gmail.com
+> Unsubscribe from this list =
+<http://demo-test.erpnext.com.dev/api/method/frappe.email.queue.unsubscrib=
+e?email=3Drmehta%40gmail.com&name=3D26cc3e5a5d&doctype=3DDaily+Work+Summar=
+y&_signature=3D2c7ab37e6d775e5a481e9b4376154a41>
+> Sent via ERPNext <https://erpnext.com/?source=3Dvia_email_footer>
+
+
+--Apple-Mail=_29597CF7-20DD-4184-B3FA-85582C5C4361
+Content-Transfer-Encoding: 7bit
+Content-Type: text/html;
+	charset=us-ascii
+
+<html><head><meta http-equiv="Content-Type" content="text/html charset=us-ascii"></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" class="">I built Daily Work Summary!<div class=""><br class=""><div><blockquote type="cite" class=""><div class="">On 10-Nov-2016, at 3:20 PM, Frappe &lt;<a href="mailto:test@erpnext.com" class="">test@erpnext.com</a>&gt; wrote:</div><br class="Apple-interchange-newline"><div class="">
+
+
+<meta name="viewport" content="width=device-width" class="">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" class="">
+<title class="">What did you work on today?</title>
+
+<div style="line-height: 1.5; color: #36414C;" class="">
+<!-- body -->
+<div style="font-family: -apple-system, BlinkMacSystemFont,
+	    " segoe="" ui",="" "roboto",="" "oxygen",="" "ubuntu",="" "cantarell",="" "fira="" sans",="" "droid="" "helvetica="" neue",="" sans-serif;="" font-size:="" 14px;="" padding:="" 10px;"="" class=""><p class="">Please share what did you do today. If you reply by midnight, your response will be recorded!</p>
+
+</div>
+
+<!-- footer -->
+<div style="margin-top: 30px; font-family: Helvetica, Arial, sans-serif; font-size: 11px;
+    margin-bottom: 15px; border-top: 1px solid #d1d8dd;" data-email-footer="true" class="">
+	<div style="margin: 15px auto; padding: 0px 7px; text-align: center; color: #8d99a6;" class="">
+			This email was sent to <a href="mailto:rmehta@gmail.com" class="">rmehta@gmail.com</a>
+			<p style="margin: 15px auto;" class="">
+				<a href="http://demo-test.erpnext.com.dev/api/method/frappe.email.queue.unsubscribe?email=rmehta%40gmail.com&amp;name=26cc3e5a5d&amp;doctype=Daily+Work+Summary&amp;_signature=2c7ab37e6d775e5a481e9b4376154a41" style="color: #8d99a6; text-decoration: underline;
+					target=" _blank"="" class="">Unsubscribe from this list
+				</a>
+			</p>
+		</div><div style="margin: 15px auto;" class=""><div style="text-align: center;" class="">
+	<a href="https://erpnext.com/?source=via_email_footer" target="_blank" style="color: #8d99a6;" class="">
+		Sent via ERPNext
+	</a>
+</div></div>
+</div>
+<!-- /footer -->
+
+<div class="print-html"></div>
+</div>
+</div></blockquote></div><br class=""></div></body></html>
+--Apple-Mail=_29597CF7-20DD-4184-B3FA-85582C5C4361--

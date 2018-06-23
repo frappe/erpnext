@@ -15,8 +15,57 @@ frappe.ui.form.on('Cost Center', {
 				}
 			}
 		})
+	},
+	refresh: function(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__('Update Cost Center Number'), function () {
+				frm.trigger("update_cost_center_number");
+			});
+		}
+	},
+	update_cost_center_number: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __('Update Cost Center Number'),
+			fields: [
+				{
+					"label": 'Cost Center Number',
+					"fieldname": "cost_center_number",
+					"fieldtype": "Data",
+					"reqd": 1
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				if(data.cost_center_number === frm.doc.cost_center_number) {
+					d.hide();
+					return;
+				}
+				frappe.call({
+					method: "erpnext.accounts.utils.update_number_field",
+					args: {
+						doctype_name: frm.doc.doctype,
+						name: frm.doc.name,
+						field_name: d.fields[0].fieldname,
+						field_value: data.cost_center_number,
+						company: frm.doc.company
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							if(r.message) {
+								frappe.set_route("Form", "Cost Center", r.message);
+							} else {
+								me.frm.set_value("cost_center_number", data.cost_center_number);
+							}
+							d.hide();
+						}
+					}
+				});
+			},
+			primary_action_label: __('Update')
+		});
+		d.show();
 	}
-})
+});
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
@@ -43,18 +92,18 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 	if(!doc.company){
-		msgprint(__('Please enter company name first'));
+		frappe.msgprint(__('Please enter company name first'));
 	}
 }
 
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	if (doc.is_group == 1) {
 		cur_frm.add_custom_button(__('Convert to Non-Group'),
-			function() { cur_frm.cscript.convert_to_ledger(); }, "icon-retweet",
+			function() { cur_frm.cscript.convert_to_ledger(); }, "fa fa-retweet",
 				"btn-default")
 	} else if (doc.is_group == 0) {
 		cur_frm.add_custom_button(__('Convert to Group'),
-			function() { cur_frm.cscript.convert_to_group(); }, "icon-retweet",
+			function() { cur_frm.cscript.convert_to_group(); }, "fa fa-retweet",
 				"btn-default")
 	}
 }

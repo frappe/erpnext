@@ -4,7 +4,7 @@ def get_data():
 	return [
 		{
 			"label": _("Maintenance"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",

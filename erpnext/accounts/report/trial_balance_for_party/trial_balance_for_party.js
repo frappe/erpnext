@@ -46,9 +46,23 @@ frappe.query_reports["Trial Balance for Party"] = {
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Select",
-			"options": ["Customer", "Supplier"],
-			"default": "Customer"
+			"fieldtype": "Link",
+			"options": "Party Type",
+			"default": "Customer",
+			"reqd": 1
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"get_options": function() {
+				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
+				var party = frappe.query_report_filters_by_name.party.get_value();
+				if(party && !party_type) {
+					frappe.throw(__("Please select Party Type first"));
+				}
+				return party_type;
+			}
 		},
 		{
 			"fieldname": "show_zero_values",

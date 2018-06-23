@@ -7,7 +7,6 @@
   "customer": "_Test Customer", 
   "customer_group": "_Test Customer Group", 
   "customer_name": "_Test Customer", 
-  "delivery_date": "2013-02-23", 
   "doctype": "Sales Order", 
   "base_grand_total": 1000.0, 
   "grand_total": 1000.0, 
@@ -23,10 +22,14 @@
     "doctype": "Sales Order Item", 
     "item_code": "_Test Item Home Desktop 100", 
     "item_name": "CPU", 
+    "delivery_date": "2013-02-23", 
     "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0, 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TC",
+    "stock_uom": "_Test UOM",
+	"conversion_factor": 1.0,
+	"uom": "_Test UOM"
    }
   ], 
   "selling_price_list": "_Test Price List", 

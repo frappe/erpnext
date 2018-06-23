@@ -1,0 +1,5 @@
+Disease
+Crop
+Land Unit
+Crop Cycle
+Soil Texture

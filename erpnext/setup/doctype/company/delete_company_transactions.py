@@ -14,11 +14,10 @@ def delete_company_transactions(company_name):
 	doc = frappe.get_doc("Company", company_name)
 
 	if frappe.session.user != doc.owner:
-		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), 
+		frappe.throw(_("Transactions can only be deleted by the creator of the Company"),
 			frappe.PermissionError)
 
 	delete_bins(company_name)
-	delete_time_sheets(company_name)
 	delete_lead_addresses(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
@@ -28,6 +27,10 @@ def delete_company_transactions(company_name):
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
 
+	# reset company values
+	doc.total_monthly_sales = 0
+	doc.sales_monthly_history = None
+	doc.save()
 	# Clear notification counts
 	clear_notifications()
 
@@ -38,6 +41,9 @@ def delete_for_doctype(doctype, company_name):
 
 	if not meta.issingle:
 		if not meta.istable:
+			# delete communication
+			delete_communications(doctype, company_name, company_fieldname)
+
 			# delete children
 			for df in meta.get_table_fields():
 				frappe.db.sql("""delete from `tab{0}` where parent in
@@ -65,23 +71,34 @@ def delete_for_doctype(doctype, company_name):
 					frappe.db.sql("""update tabSeries set current = %s
 						where name=%s""", (last, prefix))
 
-
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
 			(select name from tabWarehouse where company=%s)""", company_name)
 
-def delete_time_sheets(company_name):
-	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
-	frappe.db.sql("""
-		delete from `tabTimesheet`
-		where
-			company=%(company)s
-	""", {"company": company_name})
-
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
-	for lead in frappe.get_all("Lead", filters={"company": company_name}):
-		frappe.db.sql("""delete from `tabAddress`
-			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
+	leads = frappe.get_all("Lead", filters={"company": company_name})
+	leads = [ "'%s'"%row.get("name") for row in leads ]
+	addresses = []
+	if leads:
+		addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name 
+			in ({leads})""".format(leads=",".join(leads)))
 
-		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
+		if addresses:
+			addresses = ["'%s'"%frappe.db.escape(addr) for addr in addresses]
+
+			frappe.db.sql("""delete from tabAddress where name in ({addresses}) and 
+				name not in (select distinct dl1.parent from `tabDynamic Link` dl1 
+				inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent 
+				and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)))
+
+			frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' 
+				and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads)))
+
+		frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
+
+def delete_communications(doctype, company_name, company_fieldname):
+		frappe.db.sql("""
+			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
+			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
+			""".format(doctype, company_fieldname), (doctype, company_name))

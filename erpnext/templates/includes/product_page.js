@@ -7,38 +7,55 @@ frappe.ready(function() {
 
 	frappe.call({
 		type: "POST",
-		method: "erpnext.shopping_cart.product.get_product_info",
+		method: "erpnext.shopping_cart.product_info.get_product_info_for_website",
 		args: {
 			item_code: get_item_code()
 		},
 		callback: function(r) {
-			$(".item-cart").toggleClass("hide", !!!r.message.price);
-			if(r.message && r.message.price) {
-				$(".item-price")
-					.html(r.message.price.formatted_price + " per " + r.message.uom);
-
-				if(r.message.stock==0) {
-					$(".item-stock").html("<div class='help'>Not in stock</div>");
+			if(r.message) {
+				if(r.message.cart_settings.enabled) {
+					$(".item-cart, .item-price, .item-stock").toggleClass("hide", (!!!r.message.product_info.price || !!!r.message.product_info.in_stock));
 				}
-				else if(r.message.stock==1) {
-					$(".item-stock").html("<div style='color: green'>\
-						<i class='icon-check'></i> Available (in stock)</div>");
+				if(r.message.cart_settings.show_price) {
+					$(".item-price").toggleClass("hide", false);
 				}
+				if(r.message.cart_settings.show_stock_availability) {
+					$(".item-stock").toggleClass("hide", false);
+				}
+				if(r.message.product_info.price) {
+					$(".item-price")
+						.html(r.message.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
+							(" + r.message.product_info.price.formatted_price + " / " + r.message.product_info.uom + ")</div>");
 
-				if(r.message.qty) {
-					qty = r.message.qty;
-					toggle_update_cart(r.message.qty);
-				} else {
-					toggle_update_cart(0);
+					if(r.message.product_info.in_stock==0) {
+						$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
+					}
+					else if(r.message.product_info.in_stock==1) {
+						var qty_display = "{{ _("In stock") }}";
+						if (r.message.product_info.show_stock_qty) {
+							qty_display += " ("+r.message.product_info.stock_qty+")";
+						}
+						$(".item-stock").html("<div style='color: green'>\
+							<i class='fa fa-check'></i> "+qty_display+"</div>");
+					}
+
+					if(r.message.product_info.qty) {
+						qty = r.message.product_info.qty;
+						toggle_update_cart(r.message.product_info.qty);
+					} else {
+						toggle_update_cart(0);
+					}
 				}
 			}
 		}
 	})
 
 	$("#item-add-to-cart button").on("click", function() {
-		shopping_cart.update_cart({
+		frappe.provide('erpnext.shopping_cart');
+
+		erpnext.shopping_cart.update_cart({
 			item_code: get_item_code(),
-			qty: 1,
+			qty: $("#item-spinner .cart-qty").val(),
 			callback: function(r) {
 				if(!r.exc) {
 					toggle_update_cart(1);
@@ -47,6 +64,25 @@ frappe.ready(function() {
 			},
 			btn: this,
 		});
+	});
+
+	$("#item-spinner").on('click', '.number-spinner button', function () {
+		var btn = $(this),
+			input = btn.closest('.number-spinner').find('input'),
+			oldValue = input.val().trim(),
+			newVal = 0;
+
+		if (btn.attr('data-dir') == 'up') {
+			newVal = parseInt(oldValue) + 1;
+		} else if (btn.attr('data-dir') == 'dwn')  {
+			if (parseInt(oldValue) > 1) {
+				newVal = parseInt(oldValue) - 1;
+			}
+			else {
+				newVal = parseInt(oldValue);
+			}
+		}
+		input.val(newVal);
 	});
 
 	$("[itemscope] .item-view-attribute .form-control").on("change", function() {
@@ -58,16 +94,16 @@ frappe.ready(function() {
 			// then chose the closest available one
 
 			var attribute = $(this).attr("data-attribute");
-			var attribute_value = $(this).val()
+			var attribute_value = $(this).val();
 			var item_code = find_closest_match(attribute, attribute_value);
 
 			if (!item_code) {
-				msgprint(__("Cannot find a matching Item. Please select some other value for {0}.", [attribute]))
+				frappe.msgprint(__("Cannot find a matching Item. Please select some other value for {0}.", [attribute]))
 				throw e;
 			}
 		}
 
-		if (window.location.search.indexOf(item_code)!==-1) {
+		if (window.location.search == ("?variant=" + item_code) || window.location.search.includes(item_code)) {
 			return;
 		}
 
@@ -80,10 +116,12 @@ var toggle_update_cart = function(qty) {
 	$("#item-update-cart")
 		.toggle(qty ? true : false)
 		.find("input").val(qty);
+	$("#item-spinner").toggle(qty ? false : true);
 }
 
 function get_item_code() {
-	if(window.variant_info) {
+	var variant_info = window.variant_info;
+	if(variant_info) {
 		var attributes = get_selected_attributes();
 		var no_of_attributes = Object.keys(attributes).length;
 
@@ -98,9 +136,10 @@ function get_item_code() {
 			var match = true;
 			for(var j in variant.attributes) {
 				if(attributes[variant.attributes[j].attribute]
-					!= variant.attributes[j].attribute_value) {
-						match = false;
-						break;
+					!= variant.attributes[j].attribute_value
+				) {
+					match = false;
+					break;
 				}
 			}
 			if(match) {
@@ -109,7 +148,7 @@ function get_item_code() {
 		}
 		throw "Unable to match variant";
 	} else {
-		return item_code;
+		return window.item_code;
 	}
 }
 
@@ -122,6 +161,7 @@ function find_closest_match(selected_attribute, selected_attribute_value) {
 	var previous_no_of_attributes = 0;
 	var matched;
 
+	var variant_info = window.variant_info;
 	for(var i in variant_info) {
 		var variant = variant_info[i];
 		var match_score = 0;

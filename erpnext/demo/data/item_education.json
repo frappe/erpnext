@@ -1,0 +1,137 @@
+[
+ {
+  "default_supplier": "Asiatic Solutions",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Books",
+  "item_group": "Raw Material",
+  "item_name": "Books"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Pencil",
+  "item_group": "Raw Material",
+  "item_name": "Pencil"
+ },
+ {
+  "default_supplier": "New World Realty",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Tables",
+  "item_group": "Raw Material",
+  "item_name": "Tables"
+ },
+ {
+  "default_supplier": "Eagle Hardware",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Chair",
+  "item_group": "Raw Material",
+  "item_name": "Chair"
+ },
+ {
+  "default_supplier": "Asiatic Solutions",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Black Board",
+  "item_group": "Sub Assemblies",
+  "item_name": "Black Board"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Chalk",
+  "item_group": "Raw Material",
+  "item_name": "Chalk"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Notepad",
+  "item_group": "Raw Material",
+  "item_name": "Notepad"
+ },
+ {
+  "default_supplier": "Ks Merchandise",
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "item_code": "Uniform",
+  "item_group": "Raw Material",
+  "item_name": "Uniform"
+ },
+ {
+  "is_stock_item": 0,
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "description": "Computer",
+  "item_code": "Computer",
+  "item_name": "Computer",
+  "item_group": "Products"
+ },
+ {
+  "is_stock_item": 0,
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "description": "Mobile",
+  "item_code": "Mobile",
+  "item_name": "Mobile",
+  "item_group": "Products"
+ },
+ {
+  "is_stock_item": 0,
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "description": "ERP",
+  "item_code": "ERP",
+  "item_name": "ERP",
+  "item_group": "All Item Groups"
+ },
+ {
+  "is_stock_item": 0,
+  "item_defaults": [{
+      "default_warehouse": "Stores",
+      "company": "Whitmore College"
+  }],
+  "description": "Autocad",
+  "item_code": "Autocad",
+  "item_name": "Autocad",
+  "item_group": "All Item Groups"
+ },
+ {
+  "item_defaults": [{
+        "default_warehouse": "Stores",
+        "company": "Whitmore College"
+  }],
+  "item_code": "Service",
+  "item_group": "Services",
+  "item_name": "Service",
+  "has_variants": 0,
+  "is_stock_item": 0
+ }
+]

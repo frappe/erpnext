@@ -10,7 +10,15 @@ Stock
 Support
 Utilities
 Shopping Cart
+Assets
 Hub Node
 Portal
 Maintenance
-Schools
+Education
+Regional
+Healthcare
+Restaurant
+Agriculture
+ERPNext Integrations
+Non Profit
+Hotels

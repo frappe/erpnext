@@ -7,8 +7,8 @@ frappe.provide("erpnext.hr");
 
 erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 	onload: function() {
-		this.frm.set_value("att_fr_date", get_today());
-		this.frm.set_value("att_to_date", get_today());
+		this.frm.set_value("att_fr_date", frappe.datetime.get_today());
+		this.frm.set_value("att_to_date", frappe.datetime.get_today());
 	},
 
 	refresh: function() {
@@ -18,7 +18,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {
-			msgprint(__("Attendance From Date and Attendance To Date is mandatory"));
+			frappe.msgprint(__("Attendance From Date and Attendance To Date is mandatory"));
 			return;
 		}
 		window.location.href = repl(frappe.request.url +
@@ -39,6 +39,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 			args: {
 				method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload'
 			},
+			no_socketio: true,
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(attachment, r) {
 				var $log_wrapper = $(cur_frm.fields_dict.import_log.wrapper).empty();

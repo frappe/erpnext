@@ -2,20 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
+from erpnext.accounts.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
 
 class StockReconciliation(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(StockReconciliation, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(StockReconciliation, self).__init__(*args, **kwargs)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
@@ -27,6 +28,7 @@ class StockReconciliation(StockController):
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
+		self.set_total_qty_and_amount()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -54,7 +56,9 @@ class StockReconciliation(StockController):
 
 				item.current_qty = qty
 				item.current_valuation_rate = rate
-				self.difference_amount += (flt(item.qty or qty) * flt(item.valuation_rate or rate) - (flt(qty) * flt(rate)))
+				self.difference_amount += (flt(item.qty, item.precision("qty")) * \
+					flt(item.valuation_rate or rate, item.precision("valuation_rate")) \
+					- flt(qty) * flt(rate))
 				return True
 
 		items = filter(lambda d: _changed(d), self.items)
@@ -116,6 +120,10 @@ class StockReconciliation(StockController):
 					if buying_rate:
 						row.valuation_rate = buying_rate
 
+					else:
+						# get valuation rate from Item
+						row.valuation_rate = frappe.get_value('Item', row.item_code, 'valuation_rate')
+
 		# throw all validation messages
 		if self.validation_messages:
 			for msg in self.validation_messages:
@@ -138,18 +146,16 @@ class StockReconciliation(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no == 1:
-				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated \
-					using Stock Reconciliation").format(item_code)
+				raise frappe.ValidationError(_("Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry").format(item_code))
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no == 1:
-				raise frappe.ValidationError, _("Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry").format(item_code)
+				raise frappe.ValidationError(_("Batched Item {0} cannot be updated using Stock Reconciliation, instead use Stock Entry").format(item_code))
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
 
-		except Exception, e:
+		except Exception as e:
 			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num)) + cstr(e))
 
 	def update_stock_ledger(self):
@@ -194,8 +200,8 @@ class StockReconciliation(StockController):
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"is_cancelled": "No",
-			"qty_after_transaction": row.qty,
-			"valuation_rate": row.valuation_rate
+			"qty_after_transaction": flt(row.qty, row.precision("qty")),
+			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))
 		})
 		self.make_sl_entries([args])
 
@@ -228,7 +234,7 @@ class StockReconciliation(StockController):
 			self.expense_account, self.cost_center)
 
 	def validate_expense_account(self):
-		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 			return
 
 		if not self.expense_account:
@@ -236,6 +242,13 @@ class StockReconciliation(StockController):
 		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
+
+	def set_total_qty_and_amount(self):
+		for d in self.get("items"):
+			d.amount = flt(d.qty, d.precision("qty")) * flt(d.valuation_rate, d.precision("valuation_rate"))
+			d.current_amount = flt(d.current_qty) * flt(d.current_valuation_rate)
+			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
+			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
 	def get_items_for(self, warehouse):
 		self.items = []
@@ -255,11 +268,12 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time):
-	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
+def get_items(warehouse, posting_date, posting_time, company):
+	items = [d.item_code for d in frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse})]
 
-	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse}, as_list=1)
+	items += frappe.db.sql_list('''select i.name from `tabItem` i, `tabItem Default` id where i.name = id.parent
+		and i.is_stock_item=1 and i.has_serial_no=0 and i.has_batch_no=0 and i.has_variants=0 and i.disabled=0
+		and id.default_warehouse=%s and id.company=%s''', (warehouse, company))
 
 	res = []
 	for item in set(items):
@@ -272,6 +286,7 @@ def get_items(warehouse, posting_date, posting_time):
 				"item_code": item[0],
 				"warehouse": warehouse,
 				"qty": stock_bal[0],
+				"item_name": frappe.db.get_value('Item', item[0], 'item_name'),
 				"valuation_rate": stock_bal[1],
 				"current_qty": stock_bal[0],
 				"current_valuation_rate": stock_bal[1]
@@ -290,3 +305,13 @@ def get_stock_balance_for(item_code, warehouse, posting_date, posting_time):
 		'qty': qty,
 		'rate': rate
 	}
+
+@frappe.whitelist()
+def get_difference_account(purpose, company):
+	if purpose == 'Stock Reconciliation':
+		account = get_company_default(company, "stock_adjustment_account")
+	else:
+		account = frappe.db.get_value('Account', {'is_group': 0,
+			'company': company, 'account_type': 'Temporary'}, 'name')
+
+	return account

@@ -25,4 +25,5 @@ class ModeofPayment(Document):
 		for entry in self.accounts:
 			"""Error when Company of Ledger account doesn't match with Company Selected"""
 			if frappe.db.get_value("Account", entry.default_account, "company") != entry.company:
-				frappe.throw(_("Account does not match with Company"))
+				frappe.throw(_("Account {0} does not match with Company {1} in Mode of Account: {2}")
+					.format(entry.default_account, entry.company, self.name))

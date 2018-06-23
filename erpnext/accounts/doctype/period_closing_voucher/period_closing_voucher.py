@@ -35,9 +35,9 @@ class PeriodClosingVoucher(AccountsController):
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 
-		validate_fiscal_year(self.posting_date, self.fiscal_year, label=_("Posting Date"), doc=self)
+		validate_fiscal_year(self.posting_date, self.fiscal_year, self.company, label=_("Posting Date"), doc=self)
 
-		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year)[1]
+		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year, company=self.company)[1]
 
 		pce = frappe.db.sql("""select name from `tabPeriod Closing Voucher`
 			where posting_date > %s and fiscal_year = %s and docstatus = 1""",

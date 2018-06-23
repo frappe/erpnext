@@ -9,7 +9,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
+from frappe.core.doctype.sms_settings.sms_settings import send_sms
 
 class SMSCenter(Document):
 	def create_receiver_list(self):

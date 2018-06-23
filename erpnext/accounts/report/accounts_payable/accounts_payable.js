@@ -11,22 +11,34 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"supplier",
 			"label": __("Supplier"),
 			"fieldtype": "Link",
-			"options": "Supplier"
+			"options": "Supplier",
+			on_change: () => {
+				var supplier = frappe.query_report_filters_by_name.supplier.get_value();
+				frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
+					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+				});
+			}
 		},
 		{
 			"fieldname":"report_date",
 			"label": __("As on Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
-			"options": 'Posting Date' + NEWLINE + 'Due Date',
+			"options": 'Posting Date\nDue Date\nSupplier Invoice Date',
 			"default": "Posting Date"
 		},
 		{
@@ -52,6 +64,18 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Int",
 			"default": "90",
 			"reqd": 1
+		},
+		{
+			"fieldname":"tax_id",
+			"label": __("Tax Id"),
+			"fieldtype": "Data",
+			"hidden": 1
 		}
-	]
+	],
+	onload: function(report) {
+		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
+		});
+	}
 }
