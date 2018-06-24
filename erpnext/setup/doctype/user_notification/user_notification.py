@@ -9,24 +9,42 @@ from frappe.model.document import Document
 class UserNotification(Document):
     pass
 
-def hr_notifications(doc, method):
-    if frappe.modules.utils.get_doctype_module(doc.doctype) == 'HR':
-    
-        if hasattr(doc, 'handled_by'):
+def set_notifications(doc, method):
+    module = frappe.modules.utils.get_doctype_module(doc.doctype)
+    if  module == 'HR' or module == 'Buying' or module == 'Stock':
+        get_notifications(doc)
+
+def get_notifications(doc):
+
+    if hasattr(doc, 'handled_by'):
             
             if doc.handled_by != "--":
+
+                if doc.handled_by =="Employee" and doc.doctype == "Purchase Order":
+                    if doc.material_request:
+
+                        permitted_user = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": doc.material_request}, fieldname = "user")
+
+                        if permitted_user:
+                            
+                            send_notification_email(doc.name, doc.doctype, permitted_user)
+                    else:
+                        pass
                 
-                if doc.handled_by in ["Line Manager", "Manager", "Director"]:
+                elif doc.handled_by in ["Line Manager", "Manager", "Director"]:
                     user = check_departement_roles(doc)
 
                     if user:
                         save_user_notification(doc, user[0][0])
                         add_message(doc, user[0][0])
+                        send_notification_email(doc.name, doc.doctype, user[0][0])
+                        # frappe.throw(user[0][0])
                 else:
                     users = get_role_users(doc.handled_by)
                     for usr in users:
                         save_user_notification(doc, usr[0])
                         add_message(doc, usr[0])
+                        send_notification_email(doc.name, doc.doctype, usr[0])
 
 # def leave_application_notification_count(as_list=False):
 #     notification_count = frappe.db.sql("""
@@ -88,6 +106,7 @@ def add_message(doc, user, message=None):
 			"label": "Message",
 			"read_only": 1,
 			"allow_on_submit": 1,
+            "depends_on": "eval:!(doc.__islocal)",
 			"fieldtype": "Text"
 				}).save(ignore_permissions = True)
 		frappe.db.commit()
@@ -95,3 +114,17 @@ def add_message(doc, user, message=None):
     # doc.notification_message = message
     frappe.db.set_value(doc.doctype, doc.name, "notification_message", message, update_modified=False)
     doc.set("notification_message", message)
+
+def send_notification_email(docname, doctype, emp_user):
+    from frappe.core.doctype.communication.email import make
+    frappe.flags.sent_mail = None
+    content_msg="Please review {0} , {1} for action".format(doctype, docname)
+    prefered_email = frappe.get_value("Employee", filters = {"user_id": emp_user}, fieldname = "prefered_email")
+
+    if prefered_email:
+
+        try:
+            make(subject = "Approval Notification", content=content_msg, recipients=prefered_email,
+                send_email=True, sender="erp@tawari.sa")
+        except:
+            frappe.msgprint("could not send")

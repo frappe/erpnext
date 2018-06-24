@@ -169,8 +169,8 @@ standard_queries = {
 doc_events = {
 	"*": {
 		"validate": "erpnext.controllers.queries.update_custom_field",
-        "on_update": "erpnext.setup.doctype.user_notification.user_notification.hr_notifications",
-        "on_submit": "erpnext.setup.doctype.user_notification.user_notification.hr_notifications"
+        "on_update": "erpnext.setup.doctype.user_notification.user_notification.set_notifications",
+        "on_submit": "erpnext.setup.doctype.user_notification.user_notification.set_notifications"
 
     },
 	"Stock Entry": {
