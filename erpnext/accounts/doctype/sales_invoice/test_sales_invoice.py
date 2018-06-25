@@ -691,6 +691,7 @@ class TestSalesInvoice(unittest.TestCase):
 		item = make_item("_Test POS Item")
 		pos = copy.deepcopy(test_records[1])
 		pos['items'][0]['item_code'] = item.name
+		pos['items'][0]['warehouse'] = "_Test Warehouse - _TC"
 		pos["is_pos"] = 1
 		pos["offline_pos_name"] = timestamp
 		pos["update_stock"] = 1
