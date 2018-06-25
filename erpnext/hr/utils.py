@@ -303,9 +303,7 @@ def get_salary_assignment(employee, date):
 		select * from `tabSalary Structure Assignment`
 		where employee=%(employee)s
 		and docstatus = 1
-		and (
-			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
-		)""", {
+		and %(on_date)s >= from_date order by from_date desc limit 1""", {
 			'employee': employee,
 			'on_date': date,
 		}, as_dict=1)
