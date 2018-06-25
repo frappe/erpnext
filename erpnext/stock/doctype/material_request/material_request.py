@@ -408,6 +408,7 @@ def make_stock_entry(source_name, target_doc=None):
 				"name": "material_request_item",
 				"parent": "material_request",
 				"uom": "stock_uom",
+				"allow_zero_valuation_rate": "allow_zero_valuation_rate"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
