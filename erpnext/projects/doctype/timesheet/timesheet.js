@@ -212,7 +212,7 @@ var calculate_end_time = function(frm, cdt, cdn) {
 		d.add(child.hours, "hours");
 		frm._setting_hours = true;
 		frappe.model.set_value(cdt, cdn, "to_time",
-			d.format(moment.defaultDatetimeFormat)).then(() => {
+			d.format(frappe.defaultDatetimeFormat)).then(() => {
 				frm._setting_hours = false;
 			});
 	}
