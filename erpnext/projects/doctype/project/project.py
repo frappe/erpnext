@@ -412,22 +412,29 @@ def create_project_update(project):
 			)
 	return data
 
-def update_project_daily():
-	if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Daily":
+def update_project_sales_billing():
+	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
+	if sales_update_frequency == "Each Transaction":
 		return
-	for project in frappe.get_all('Project'):
-		project = frappe.get_doc('Project', project.name)
-		project.update_sales_amount()
-		project.update_billed_amount()
-		project.save()
+	elif (sales_update_frequency == "Monthly" and frappe.utils.now_datetime().day != 1):
+		return
 
-def update_project_monthly():
-	if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Monthly":
-		return
-	for project in frappe.get_all('Project'):
-		project = frappe.get_doc('Project', project.name)
-		project.update_sales_amount()
-		project.update_billed_amount()
+	#Else simply fallback to Daily
+	exists_query = '(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)'
+	for project_details in frappe.db.sql('''
+		SELECT name, {order_exists} as order_exists, {invoice_exists} as invoice_exists from `tabProject` where
+			exists {order_exists}
+			or exists {invoice_exists};
+		'''.format(
+			order_exists=exists_query.format(doctype="Sales Order"),
+			invoice_exists=exists_query.format(doctype="Sales Invoice"),
+		), as_dict=True):
+		project = frappe.get_doc('Project', project_details.name)
+		if project_details.order_exists:
+			project.update_sales_amount()
+		if project_details.invoice_exists:
+			project.update_billed_amount()
+
 		project.save()
 
 @frappe.whitelist()
