@@ -120,7 +120,7 @@ DocType: Opportunity,Customer / Lead Address,Cliente / Dirección de Oportunidad
 DocType: Quotation,In Words will be visible once you save the Quotation.,En palabras serán visibles una vez que guarde la cotización.
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +284,Installation Note {0} has already been submitted,La nota de instalación {0} ya se ha presentado
 apps/erpnext/erpnext/config/selling.py +105,Manage Territory Tree.,Vista en árbol para la administración de los territorios
-apps/erpnext/erpnext/stock/utils.py +207,Serial number {0} entered more than once,Número de serie {0} entraron más de una vez
+apps/erpnext/erpnext/stock/utils.py +233,Serial number {0} entered more than once,Número de serie {0} entraron más de una vez
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,"Lista de receptores está vacía. Por favor, cree Lista de receptores"
 DocType: Target Detail,Target Detail,Objetivo Detalle
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Plantillas de Cargos e Impuestos
@@ -297,7 +297,7 @@ DocType: Material Request,Requested For,Solicitados para
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +392,{0} against Sales Invoice {1},{0} contra Factura de Ventas {1}
 DocType: Production Plan,Select Items,Seleccione Artículos
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +257,Row {0}: {1} {2} does not match with {3},Fila {0}: {1} {2} no coincide con {3}
-apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +320,Quality Management,Gestión de la Calidad
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +325,Quality Management,Gestión de la Calidad
 apps/erpnext/erpnext/config/manufacturing.py +62,Details of the operations carried out.,Los detalles de las operaciones realizadas.
 DocType: Quality Inspection Reading,Quality Inspection Reading,Lectura de Inspección de Calidad
 DocType: Purchase Invoice Item,Net Amount (Company Currency),Importe neto (moneda de la compañía)
@@ -421,7 +421,7 @@ DocType: Lead,Lead,Iniciativas
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +209,There is not enough leave balance for Leave Type {0},No hay suficiente saldo para Tipo de Vacaciones {0}
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +58,Repeat Customers,Repita los Clientes
 DocType: Account,Depreciation,Depreciación
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +241,Please create Customer from Lead {0},"Por favor, cree Cliente de la Oportunidad {0}"
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +242,Please create Customer from Lead {0},"Por favor, cree Cliente de la Oportunidad {0}"
 DocType: Payment Request,Make Sales Invoice,Hacer Factura de Venta
 DocType: Payment Entry Reference,Supplier Invoice No,Factura del Proveedor No
 DocType: Payment Gateway Account,Payment Account,Pago a cuenta
@@ -535,7 +535,7 @@ DocType: Production Plan Item,Ordered Qty,Cantidad Pedida
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),Total (Amt)
 DocType: Journal Entry,Credit Card Entry,Introducción de tarjetas de crédito
 DocType: Authorization Rule,Applicable To (Designation),Aplicables a (Denominación )
-apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +212,Stock Options,Opciones sobre Acciones
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +217,Stock Options,Opciones sobre Acciones
 DocType: Account,Receivable,Cuenta por Cobrar
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,El campo 'Oportunidad de' es obligatorio
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +33,-Above,-Mayor
@@ -803,9 +803,9 @@ DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Solic
 DocType: Fiscal Year,Year End Date,Año de Finalización
 DocType: Purchase Invoice,Supplier Invoice Date,Fecha de la Factura de Proveedor
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +37,This is a root item group and cannot be edited.,Se trata de un grupo de elementos raíz y no se puede editar .
-apps/erpnext/erpnext/controllers/buying_controller.py +688,Specified BOM {0} does not exist for Item {1},Solicitud de Materiales especificado {0} no existe la partida {1}
+apps/erpnext/erpnext/controllers/buying_controller.py +690,Specified BOM {0} does not exist for Item {1},Solicitud de Materiales especificado {0} no existe la partida {1}
 apps/erpnext/erpnext/hr/doctype/appraisal_template/appraisal_template.py +21,Sum of points for all goals should be 100. It is {0},Suma de puntos para todas las metas debe ser 100. Es {0}
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +285,There are more holidays than working days this month.,Hay más vacaciones que días de trabajo este mes.
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +304,There are more holidays than working days this month.,Hay más vacaciones que días de trabajo este mes.
 DocType: Packing Slip,Gross Weight UOM,Peso Bruto de la Unidad de Medida
 ,Territory Target Variance Item Group-Wise,Variación de Grupo por Territorio Objetivo
 DocType: BOM,Item to be manufactured or repacked,Artículo a fabricar o embalados de nuevo
@@ -871,7 +871,7 @@ DocType: Expense Claim,Employees Email Id,Empleados Email Id
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +21,Shortage Qty,Escasez Cantidad
 ,Cash Flow,Flujo de Caja
 DocType: Accounts Settings,Role that is allowed to submit transactions that exceed credit limits set.,Función que esta autorizada a presentar las transacciones que excedan los límites de crédito establecidos .
-apps/erpnext/erpnext/stock/utils.py +212,{0} valid serial nos for Item {1},{0} No. de serie válidos para el producto {1}
+apps/erpnext/erpnext/stock/utils.py +238,{0} valid serial nos for Item {1},{0} No. de serie válidos para el producto {1}
 DocType: Stock Settings,Default Stock UOM,Unidad de Medida Predeterminada para Inventario
 DocType: Job Opening,Description of a Job Opening,Descripción de una oferta de trabajo
 apps/erpnext/erpnext/controllers/trends.py +269,Project-wise data is not available for Quotation,El seguimiento preciso del proyecto no está disponible para la cotización--
@@ -943,7 +943,7 @@ DocType: Employee,Short biography for website and other publications.,Breve biog
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +265,Leave of type {0} cannot be longer than {1},Permiso de tipo {0} no puede tener más de {1}
 ,Sales Browser,Navegador de Ventas
 DocType: Employee,Contact Details,Datos del Contacto
-apps/erpnext/erpnext/stock/utils.py +219,Warehouse {0} does not belong to company {1},Almacén {0} no pertenece a la empresa {1}
+apps/erpnext/erpnext/stock/utils.py +245,Warehouse {0} does not belong to company {1},Almacén {0} no pertenece a la empresa {1}
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +81,The Item {0} cannot have Batch,El artículo {0} no puede tener lotes
 DocType: Employee Leave Approver,Users who can approve a specific employee's leave applications,Los usuarios que pueden aprobar las solicitudes de licencia de un empleado específico
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +246,For Quantity (Manufactured Qty) is mandatory,Por Cantidad (Cantidad fabricada) es obligatorio
