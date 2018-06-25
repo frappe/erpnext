@@ -412,6 +412,24 @@ def create_project_update(project):
 			)
 	return data
 
+def update_project_daily():
+	if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Daily":
+		return
+	for project in frappe.get_all('Project'):
+		project = frappe.get_doc('Project', project.name)
+		project.update_sales_amount()
+		project.update_billed_amount()
+		project.save()
+
+def update_project_monthly():
+	if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Monthly":
+		return
+	for project in frappe.get_all('Project'):
+		project = frappe.get_doc('Project', project.name)
+		project.update_sales_amount()
+		project.update_billed_amount()
+		project.save()
+
 @frappe.whitelist()
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board

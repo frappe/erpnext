@@ -147,7 +147,8 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
-		update_company_current_month_sales(self.company)
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
 		self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
@@ -187,7 +188,8 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		update_company_current_month_sales(self.company)
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
 		self.update_project()
 
 		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -906,6 +908,8 @@ class SalesInvoice(SellingController):
 					)))
 
 	def update_project(self):
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
+			return
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
