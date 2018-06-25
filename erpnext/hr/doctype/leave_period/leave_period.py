@@ -30,9 +30,10 @@ class LeavePeriod(Document):
 
 	def grant_leave_allocation(self):
 		if self.employee:
-			leave_allocation = self.grant_leave_alloc(self.employee)
+			leave_allocation = []
+			leave_allocation = self.grant_leave_alloc(self.employee, leave_allocation)
 			if leave_allocation:
-				self.print_message([leave_allocation])
+				self.print_message(leave_allocation)
 		else:
 			self.grant_leave_alloc_for_employees()
 
@@ -41,25 +42,20 @@ class LeavePeriod(Document):
 		if employees:
 			leave_allocations = []
 			for employee in employees:
-				leave_allocation = self.grant_leave_alloc(cstr(employee[0]))
-				if leave_allocation:
-					leave_allocations.append(leave_allocation)
+				leave_allocations = self.grant_leave_alloc(cstr(employee[0]), leave_allocations)
 			if leave_allocations:
 				self.print_message(leave_allocations)
 		else:
 			frappe.msgprint(_("No employee found"))
 
-	def grant_leave_alloc(self, employee):
+	def grant_leave_alloc(self, employee, leave_allocations):
 		self.validate_allocation_exists(employee)
 		leave_policy = get_employee_leave_policy(employee)
 		if leave_policy:
 			for leave_policy_detail in leave_policy.leave_policy_details:
 				if not frappe.db.get_value("Leave Type", leave_policy_detail.leave_type, "is_lwp"):
-					return self.create_leave_allocation(employee, leave_policy_detail.leave_type, leave_policy_detail.annual_allocation)
-				else:
-					return None
-		else:
-			return None
+					leave_allocations.append(self.create_leave_allocation(employee, leave_policy_detail.leave_type, leave_policy_detail.annual_allocation))
+		return leave_allocations
 
 	def validate_allocation_exists(self, employee):
 		leave_alloc = frappe.db.exists({
@@ -82,8 +78,11 @@ class LeavePeriod(Document):
 		allocation.leave_type = leave_type
 		allocation.from_date = self.from_date
 		allocation.to_date = self.to_date
-		'''Earned Leaves are allocated by scheduler, initially allocate 0'''
-		allocation.new_leaves_allocated = new_leaves_allocated if not frappe.db.get_value("Leave Type", leave_type, "is_earned_leave") else 0
+		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
+		is_earned_leave, is_compensatory = frappe.db.get_value("Leave Type", leave_type, ["is_earned_leave", "is_compensatory"])
+		if is_earned_leave == 1 or is_compensatory == 1:
+			new_leaves_allocated = 0
+		allocation.new_leaves_allocated = new_leaves_allocated
 		allocation.leave_period = self.name
 		if self.carry_forward_leaves:
 			if frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
