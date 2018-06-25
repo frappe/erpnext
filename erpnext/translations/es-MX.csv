@@ -11,7 +11,7 @@ apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batc
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +193,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +58,Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +438,Show Salary Slip,Mostrar Recibo de Nómina
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +290,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +309,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
 #### Note
