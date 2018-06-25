@@ -78,7 +78,7 @@ class LeavePeriod(Document):
 		allocation.leave_type = leave_type
 		allocation.from_date = self.from_date
 		allocation.to_date = self.to_date
-		'''Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0'''
+		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
 		is_earned_leave, is_compensatory = frappe.db.get_value("Leave Type", leave_type, ["is_earned_leave", "is_compensatory"])
 		if is_earned_leave == 1 or is_compensatory == 1:
 			new_leaves_allocated = 0
