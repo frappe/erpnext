@@ -230,12 +230,11 @@ class SalarySlip(TransactionBase):
 			cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
 		st_name = frappe.db.sql("""select salary_structure from `tabSalary Structure Assignment`
-			where employee=%s and (from_date <= %s or from_date <= %s)
-			and (to_date is null or to_date >= %s or to_date >= %s)
+			where employee=%s and (from_date <= %s or from_date <= %s or from_date <= %s)
 			and docstatus = 1
 			and salary_structure in (select name from `tabSalary Structure`
-				where is_active = 'Yes'%s)
-			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
+				where is_active = 'Yes' %s) order by from_date desc limit 1
+			""", (self.employee, self.start_date, self.end_date, joining_date, cond))
 
 		if st_name:
 			if len(st_name) > 1:
