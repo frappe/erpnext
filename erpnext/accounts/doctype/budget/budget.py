@@ -80,7 +80,9 @@ def validate_expense_against_budget(args):
 	args = frappe._dict(args)
 
 	if args.get('company') and not args.fiscal_year:
-		args.fiscal_year = get_fiscal_year(nowdate(), company=args.get('company'))[0]
+		args.fiscal_year = get_fiscal_year(args.get('posting_date'), company=args.get('company'))[0]
+		frappe.flags.exception_approver_role = frappe.db.get_value('Company',
+			args.get('company'), 'exception_budget_approver_role')
 
 	if not args.account:
 		args.account = args.get("expense_account")
@@ -138,6 +140,7 @@ def validate_budget_records(args, budget_records):
 			if monthly_action in ["Stop", "Warn"]:
 				budget_amount = get_accumulated_monthly_budget(budget.monthly_distribution,
 					args.posting_date, args.fiscal_year, budget.budget_amount)
+
 				args["month_end_date"] = get_last_day(args.posting_date)
 
 				compare_expense_with_budget(args, budget_amount, 
@@ -159,6 +162,10 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 				frappe.bold(budget_against),
 				frappe.bold(fmt_money(budget_amount, currency=currency)), 
 				frappe.bold(fmt_money(diff, currency=currency)))
+
+		if (frappe.flags.exception_approver_role
+			and frappe.flags.exception_approver_role in frappe.get_roles(frappe.session.user)):
+			action = "Warn"
 
 		if action=="Stop":
 			frappe.throw(msg, BudgetError)
@@ -198,7 +205,7 @@ def get_requested_amount(args, budget):
 	data = frappe.db.sql(""" select ifnull((sum(mri.stock_qty - mri.ordered_qty) * rate), 0) as amount
 		from `tabMaterial Request Item` mri, `tabMaterial Request` mr where mr.name = mri.parent and
 		mri.item_code = %s and mr.docstatus = 1 and mri.stock_qty > mri.ordered_qty and {0} and
-		mr.material_request_type = 'Purchase'""".format(condition), item_code, as_list=1)
+		mr.material_request_type = 'Purchase' and mr.status != 'Stopped'""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
 
@@ -209,7 +216,7 @@ def get_ordered_amount(args, budget):
 	data = frappe.db.sql(""" select ifnull(sum(poi.amount - poi.billed_amt), 0) as amount
 		from `tabPurchase Order Item` poi, `tabPurchase Order` po where
 		po.name = poi.parent and poi.item_code = %s and po.docstatus = 1 and poi.amount > poi.billed_amt
-		and {0}""".format(condition), item_code, as_list=1)
+		and po.status != 'Closed' and {0}""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
 
