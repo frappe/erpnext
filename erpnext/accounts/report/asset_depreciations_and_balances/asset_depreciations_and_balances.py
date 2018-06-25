@@ -98,12 +98,14 @@ def get_accumulated_depreciations(assets, filters):
 		depr = asset_depreciations[d.asset_category]
 
 		if not asset.schedules: # if no schedule,
-			if asset.disposal_date: # and disposal is NOT within the period, then opening accumulated depreciation not included
+			if asset.disposal_date:
+				# and disposal is NOT within the period, then opening accumulated depreciation not included
 				if getdate(asset.disposal_date) < getdate(filters.from_date) or getdate(asset.disposal_date) > getdate(filters.to_date):
 					asset_depreciations[d.asset_category]['accumulated_depreciation_as_on_from_date'] = 0
-			# if no schedule, and disposal is within period, accumulated dep is the amount eliminated
-			if asset.disposal_date and getdate(asset.disposal_date) >= getdate(filters.from_date) and getdate(asset.disposal_date) <= getdate(filters.to_date):
-				depr.depreciation_eliminated_during_the_period += asset.opening_accumulated_depreciation
+
+				# if no schedule, and disposal is within period, accumulated dep is the amount eliminated
+				if getdate(asset.disposal_date) >= getdate(filters.from_date) and getdate(asset.disposal_date) <= getdate(filters.to_date):
+					depr.depreciation_eliminated_during_the_period += asset.opening_accumulated_depreciation
 		
 		for schedule in asset.get("schedules"):
 			if getdate(schedule.schedule_date) < getdate(filters.from_date):
