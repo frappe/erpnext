@@ -25,11 +25,10 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
-		frm.set_query("reserve_warehouse", "supplied_items", function() {
+		frm.set_query("blanket_order", "items", function() {
 			return {
 				filters: {
-					"company": frm.doc.company,
-					"is_group": 0
+					"docstatus": 1
 				}
 			}
 		});
