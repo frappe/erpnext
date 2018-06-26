@@ -371,7 +371,7 @@
    "remember_last_selected_value": 1, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "unique": 0
   }
@@ -386,7 +386,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-12-19 14:49:15.886339", 
+ "modified": "2018-06-26 11:46:50.890251", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project Task", 
