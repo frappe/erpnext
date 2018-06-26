@@ -300,6 +300,7 @@ def reconcile_against_document(args):
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 
 		doc.make_gl_entries(cancel=1, adv_adj=1)
+		doc.update_advance_paid()
 
 		# update ref in advance entry
 		if d.voucher_type == "Journal Entry":
