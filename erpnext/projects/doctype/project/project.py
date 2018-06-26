@@ -421,20 +421,24 @@ def update_project_sales_billing():
 
 	#Else simply fallback to Daily
 	exists_query = '(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)'
+	project_map = {}
 	for project_details in frappe.db.sql('''
-		SELECT name, {order_exists} as order_exists, {invoice_exists} as invoice_exists from `tabProject` where
+			SELECT name, 1 as order_exists, null as invoice_exists from `tabProject` where
 			exists {order_exists}
-			or exists {invoice_exists};
+			union
+			SELECT name, null as order_exists, 1 as invoice_exists from `tabProject` where
+			exists {invoice_exists}
 		'''.format(
 			order_exists=exists_query.format(doctype="Sales Order"),
 			invoice_exists=exists_query.format(doctype="Sales Invoice"),
 		), as_dict=True):
-		project = frappe.get_doc('Project', project_details.name)
+		project = project_map.setdefault(project_details.name, frappe.get_doc('Project', project_details.name))
 		if project_details.order_exists:
 			project.update_sales_amount()
 		if project_details.invoice_exists:
 			project.update_billed_amount()
 
+	for project in project_map.values():
 		project.save()
 
 @frappe.whitelist()
