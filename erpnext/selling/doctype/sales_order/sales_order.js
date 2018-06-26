@@ -35,6 +35,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_query("blanket_order", "items", function() {
 			return {
 				filters: {
+					"company": frm.doc.company,
 					"docstatus": 1
 				}
 			}
