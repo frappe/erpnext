@@ -32,6 +32,14 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 
+		frm.set_query("blanket_order", "items", function() {
+			return {
+				filters: {
+					"docstatus": 1
+				}
+			}
+		});
+
 		erpnext.queries.setup_warehouse_query(frm);
 	},
 
