@@ -612,6 +612,25 @@ frappe.ui.form.on('Sales Invoice', {
 				refresh_field(['timesheets'])
 			}
 		})
+	},
+
+	update_auto_repeat_reference: function(frm) {
+		if (frm.doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{ 
+					docname: frm.doc.auto_repeat,
+					reference:frm.doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
 	}
 })
 
