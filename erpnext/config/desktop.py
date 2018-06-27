@@ -324,14 +324,6 @@ def get_data():
 			"hidden": 1
         },
 		{
-			"module_name": "Hub",
-			"color": "#009248",
-			"icon": "/assets/erpnext/images/hub_logo.svg",
-			"type": "page",
-			"link": "Hub/Item",
-			"label": _("Hub")
-		},
-		{
 			"module_name": "Data Import",
 			"color": "#FFF168",
 			"reverse": 1,
