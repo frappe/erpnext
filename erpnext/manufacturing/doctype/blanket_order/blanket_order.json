@@ -139,7 +139,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -208,7 +208,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -452,7 +452,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-14 18:06:48.009635", 
+ "modified": "2018-06-27 15:01:05.314631", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Blanket Order", 
@@ -487,5 +487,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
