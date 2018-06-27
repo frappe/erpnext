@@ -13,7 +13,6 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
-from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
 
 from six import string_types, iteritems
 
@@ -120,7 +119,7 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			if not self.party_balance:
 				self.party_balance = get_balance_on(party_type=self.party_type,
-					party=self.party, date=self.posting_date, company=self.company, cost_center=self.cost_center)
+					party=self.party, date=self.posting_date, company=self.company)
 
 			if not self.party_account:
 				party_account = get_party_account(self.party_type, self.party, self.company)
@@ -412,18 +411,15 @@ class PaymentEntry(AccountsController):
 		if self.party_account:
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
-				against_cost_center = self.cost_center_to
 			else:
 				against_account = self.paid_from
-				against_cost_center = self.cost_center_from
 
 			party_gl_dict = self.get_gl_dict({
 				"account": self.party_account,
 				"party_type": self.party_type,
 				"party": self.party,
 				"against": against_account,
-				"account_currency": self.party_account_currency,
-				"cost_center": against_cost_center
+				"account_currency": self.party_account_currency
 			})
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
@@ -466,8 +462,7 @@ class PaymentEntry(AccountsController):
 					"account_currency": self.paid_from_account_currency,
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
-					"credit": self.base_paid_amount,
-					"cost_center": self.cost_center_from
+					"credit": self.base_paid_amount
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -477,8 +472,7 @@ class PaymentEntry(AccountsController):
 					"account_currency": self.paid_to_account_currency,
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					"debit_in_account_currency": self.received_amount,
-					"debit": self.base_received_amount,
-					"cost_center": self.cost_center_to
+					"debit": self.base_received_amount
 				})
 			)
 
@@ -525,8 +519,6 @@ class PaymentEntry(AccountsController):
 			"amount": self.total_allocated_amount * (tax_details['tax']['rate'] / 100)
 		}
 
-
-
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
 	if isinstance(args, string_types):
@@ -556,9 +548,6 @@ def get_outstanding_reference_documents(args):
 	if args.get("voucher_type") and args.get("voucher_no"):
 		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
-
-	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
-		condition = " and cost_center='{0}' ".format(frappe.db.escape(args["cost_center"]))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), condition=condition)
@@ -663,17 +652,17 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 
 
 @frappe.whitelist()
-def get_party_details(company, party_type, party, date, cost_center=None):
+def get_party_details(company, party_type, party, date):
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
 
 	party_account = get_party_account(party_type, party, company)
 
 	account_currency = get_account_currency(party_account)
-	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
+	account_balance = get_balance_on(party_account, date)
 	_party_name = "title" if party_type == "Student" else party_type.lower() + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
-	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
+	party_balance = get_balance_on(party_type=party_type, party=party)
 
 	return {
 		"party_account": party_account,
@@ -685,11 +674,11 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 
 @frappe.whitelist()
-def get_account_details(account, date, cost_center=None):
+def get_account_details(account, date):
 	frappe.has_permission('Payment Entry', throw=True)
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
-		"account_balance": get_balance_on(account, date, cost_center=cost_center),
+		"account_balance": get_balance_on(account, date),
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
 
