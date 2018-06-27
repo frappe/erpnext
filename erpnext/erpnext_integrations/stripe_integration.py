@@ -16,9 +16,9 @@ def create_stripe_subscription(gateway_controller, data):
 	stripe.default_http_client = stripe.http_client.RequestsClient()
 
 	try:
-			stripe_settings.integration_request = create_request_log(stripe_settings.data, "Host", "Stripe")
-			stripe_settings.payment_plans = frappe.get_doc("Payment Request", stripe_settings.data.reference_docname).subscription_plans
-			return create_subscription_on_stripe(stripe_settings)
+		stripe_settings.integration_request = create_request_log(stripe_settings.data, "Host", "Stripe")
+		stripe_settings.payment_plans = frappe.get_doc("Payment Request", stripe_settings.data.reference_docname).subscription_plans
+		return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
 		frappe.log_error(frappe.get_traceback())
@@ -33,9 +33,6 @@ def create_subscription_on_stripe(stripe_settings):
 		for payment_plan in stripe_settings.payment_plans:
 			plan = frappe.db.get_value("Subscription Plan", payment_plan.plan, "payment_plan_id")
 			items.append({"plan": plan, "quantity": payment_plan.qty})
-
-		frappe.log_error(items, 'Items')
-
 
 		try:
 			customer = stripe.Customer.create(description=stripe_settings.data.payer_name, email=stripe_settings.data.payer_email, source=stripe_settings.data.stripe_token_id)
