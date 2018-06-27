@@ -147,7 +147,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 
 		self.assertEqual(subscription.status, 'Active')
-		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_start, add_months(subscription.start, 1))
 		self.assertEqual(len(subscription.invoices), 1)
 
 		subscription.delete()
@@ -453,8 +453,9 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 		self.assertEqual(subscription.status, 'Active')
 
+		# A new invoice is generated
 		subscription.process()
-		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(subscription.status, 'Past Due Date')
 
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
