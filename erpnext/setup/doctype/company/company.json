@@ -16,6 +16,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -47,6 +48,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -79,6 +81,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -112,6 +115,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -143,6 +147,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 1,
    "collapsible": 0,
@@ -174,6 +179,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -206,6 +212,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -235,6 +242,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -266,6 +274,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -298,6 +307,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -329,6 +339,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -360,6 +371,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -386,10 +398,12 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
+   "translatable": 0,
    "unique": 0
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -422,6 +436,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -452,6 +467,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -484,6 +500,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -514,6 +531,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -545,6 +563,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -577,6 +596,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -609,6 +629,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -640,6 +661,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -670,6 +692,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -701,6 +724,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -733,6 +757,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -766,6 +791,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -799,6 +825,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -830,6 +857,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -861,6 +889,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -892,6 +921,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -926,6 +956,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -958,6 +989,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -992,6 +1024,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1024,6 +1057,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1056,6 +1090,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1088,6 +1123,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1120,6 +1156,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1151,6 +1188,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1185,6 +1223,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1217,6 +1256,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1249,6 +1289,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1281,6 +1322,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1314,6 +1356,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1347,6 +1390,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1379,6 +1423,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1409,6 +1454,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1441,6 +1487,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1471,6 +1518,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1505,6 +1553,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1538,6 +1587,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1569,6 +1619,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1601,6 +1652,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1633,6 +1685,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1664,6 +1717,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1694,6 +1748,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1725,6 +1780,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1756,6 +1812,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1787,6 +1844,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1819,6 +1877,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1851,6 +1910,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1882,6 +1942,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1914,6 +1975,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1944,6 +2006,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1976,6 +2039,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2008,6 +2072,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2040,6 +2105,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2072,6 +2138,72 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 1,
+   "columns": 0,
+   "fieldname": "budget_detail",
+   "fieldtype": "Section Break",
+   "hidden": 0,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "Budget Detail",
+   "length": 0,
+   "no_copy": 0,
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 0,
+   "print_hide_if_no_value": 0,
+   "read_only": 0,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 0,
+   "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
+   "allow_on_submit": 0,
+   "bold": 0,
+   "collapsible": 0,
+   "columns": 0,
+   "fieldname": "exception_budget_approver_role",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "ignore_user_permissions": 0,
+   "ignore_xss_filter": 0,
+   "in_filter": 0,
+   "in_global_search": 0,
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "label": "Exception Budget Approver Role",
+   "length": 0,
+   "no_copy": 0,
+   "options": "Role",
+   "permlevel": 0,
+   "precision": "",
+   "print_hide": 0,
+   "print_hide_if_no_value": 0,
+   "read_only": 0,
+   "remember_last_selected_value": 0,
+   "report_hide": 0,
+   "reqd": 0,
+   "search_index": 0,
+   "set_only_once": 0,
+   "translatable": 0,
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2103,6 +2235,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2134,6 +2267,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2164,6 +2298,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2195,6 +2330,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2227,6 +2363,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2260,6 +2397,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2293,6 +2431,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2326,6 +2465,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2358,6 +2498,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2391,6 +2532,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2424,6 +2566,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2455,6 +2598,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2486,6 +2630,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2517,6 +2662,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2548,6 +2694,7 @@
   },
   {
    "allow_bulk_edit": 0,
+   "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -2591,7 +2738,7 @@
  "istable": 0,
  "max_attachments": 0,
  "menu_index": 0,
- "modified": "2018-06-09 13:25:15.872138",
+ "modified": "2018-06-21 20:05:09.457580",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

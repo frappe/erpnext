@@ -17,13 +17,20 @@ def get_columns(filters=None):
 			"label": _("User"),
 			"fieldname": "user",
 			"fieldtype": "Data",
-			"width": 800
+			"width": 300
 		},
 		{
-			"label": _("Reply Count"),
+			"label": _("Replies"),
 			"fieldname": "count",
 			"fieldtype": "data",
-			"width": 150,
+			"width": 100,
+			"align": 'right',
+		},
+		{
+			"label": _("Total"),
+			"fieldname": "total",
+			"fieldtype": "data",
+			"width": 100,
 			"align": 'right',
 		}
 	]
@@ -42,8 +49,9 @@ def get_data(filters):
 				['sent_or_received', '=', 'Received']],
 			order_by='creation asc')
 	data = []
+	total = len(daily_summary_emails)
 	for user in get_user_emails_from_group(filters.group):
-		userName = frappe.get_value('User', user, 'full_name')
+		user_name = frappe.get_value('User', user, 'full_name')
 		count = len([d for d in replies if d.sender == user])
-		data.append([userName, "{0} / {1}".format(count, len(daily_summary_emails))])
+		data.append([user_name, count, total])
 	return data

@@ -25,11 +25,11 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
-		frm.set_query("reserve_warehouse", "supplied_items", function() {
+		frm.set_query("blanket_order", "items", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
-					"is_group": 0
+					"docstatus": 1
 				}
 			}
 		});
@@ -125,7 +125,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))

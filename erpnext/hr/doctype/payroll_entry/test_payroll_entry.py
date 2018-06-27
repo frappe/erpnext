@@ -18,7 +18,7 @@ class TestPayrollEntry(unittest.TestCase):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Loan"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
+		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA", "Leave Encashment"])
 		make_deduction_salary_component(["Professional Tax", "TDS"])
 
 	def test_payroll_entry(self): # pylint: disable=no-self-use

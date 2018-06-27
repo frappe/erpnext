@@ -518,7 +518,9 @@ class BuyingController(StockController):
 				args = data.as_dict()
 				args.update({
 					'doctype': self.doctype,
-					'company': self.company
+					'company': self.company,
+					'posting_date': (self.schedule_date
+						if self.doctype == 'Material Request' else self.transaction_date)
 				})
 
 				validate_expense_against_budget(args)
@@ -578,7 +580,6 @@ class BuyingController(StockController):
 			'doctype': 'Asset',
 			'item_code': row.item_code,
 			'asset_name': row.item_name,
-			'status': 'Receipt',
 			'naming_series': item_data.get('asset_naming_series') or 'AST',
 			'asset_category': item_data.get('asset_category'),
 			'location': row.asset_location,

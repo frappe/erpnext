@@ -71,7 +71,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					this.make_debit_note, __("Make"));
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))

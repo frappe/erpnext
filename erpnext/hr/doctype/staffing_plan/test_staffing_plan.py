@@ -15,8 +15,6 @@ class TestStaffingPlan(unittest.TestCase):
 	def test_staffing_plan(self):
 		_set_up()
 		frappe.db.set_value("Company", "_Test Company", "is_group", 1)
-		make_company()
-		set_employees()
 		if frappe.db.exists("Staffing Plan", "Test"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
@@ -25,15 +23,16 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
-			"designation": "Researcher",
+			"designation": "Designer",
 			"number_of_positions": 6,
 			"estimated_cost_per_position": 50000
 		})
 		staffing_plan.insert()
 		staffing_plan.submit()
-		self.assertEqual(staffing_plan.total_estimated_budget, 250000.00)
+		self.assertEqual(staffing_plan.total_estimated_budget, 300000.00)
 
 	def test_staffing_plan_subsidiary_company(self):
+		self.test_staffing_plan()
 		if frappe.db.exists("Staffing Plan", "Test 1"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
@@ -42,7 +41,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
-			"designation": "Researcher",
+			"designation": "Designer",
 			"number_of_positions": 3,
 			"estimated_cost_per_position": 45000
 		})
@@ -58,13 +57,13 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
-			"designation": "Researcher",
+			"designation": "Designer",
 			"number_of_positions": 7,
 			"estimated_cost_per_position": 50000
 		})
 		staffing_plan.insert()
 		staffing_plan.submit()
-		self.assertEqual(staffing_plan.total_estimated_budget, 250000.00)
+		self.assertEqual(staffing_plan.total_estimated_budget, 350000.00)
 		if frappe.db.exists("Staffing Plan", "Test 1"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
@@ -73,7 +72,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
-			"designation": "Researcher",
+			"designation": "Designer",
 			"number_of_positions": 7,
 			"estimated_cost_per_position": 60000
 		})
@@ -83,6 +82,7 @@ class TestStaffingPlan(unittest.TestCase):
 def _set_up():
 	for doctype in ["Staffing Plan", "Staffing Plan Detail"]:
 		frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
+	make_company()
 
 def make_company():
 	if frappe.db.exists("Company", "_Test Company 3"):
@@ -94,9 +94,3 @@ def make_company():
 	company.default_currency = "INR"
 	company.country = "India"
 	company.insert()
-
-def set_employees():
-	frappe.db.set_value("Employee", "_T-Employee-00001", "designation", "Researcher")
-	frappe.db.set_value("Employee", "_T-Employee-00001", "company", "_Test Company")
-	frappe.db.set_value("Employee", "_T-Employee-00002", "designation", "Researcher")
-	frappe.db.set_value("Employee", "_T-Employee-00002", "company", "_Test Company 3")

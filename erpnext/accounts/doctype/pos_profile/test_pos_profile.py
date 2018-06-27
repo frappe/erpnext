@@ -52,3 +52,5 @@ def make_pos_profile():
 
 	if not frappe.db.exists("POS Profile", "_Test POS Profile"):
 		pos_profile.insert()
+
+	return pos_profile

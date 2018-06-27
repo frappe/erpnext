@@ -11,21 +11,47 @@ from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
+def get_stock_value_from_bin (warehouse=None, item_code=None):
+
+	values = {}
+	conditions = ""
+	if warehouse:
+		conditions += """ and warehouse in (
+						select w2.name from `tabWarehouse` w1
+						join `tabWarehouse` w2 on
+						w1.name = %(warehouse)s
+						and w2.lft between w1.lft and w1.rgt
+						) """
+
+		values['warehouse'] = warehouse
+
+	if item_code:
+		conditions += " and item_code = %(item_code)s"
+
+
+		values['item_code'] = item_code
+
+	query = "select sum(stock_value) from `tabBin` where 1 = 1" + conditions
+
+	stock_value = frappe.db.sql(query, values)
+
+	return stock_value;
+
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if not posting_date: posting_date = nowdate()
 
 	values, condition = [posting_date], ""
 
 	if warehouse:
-		
+
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
-		
+
 		if is_group:
 			values.extend([lft, rgt])
 			condition += "and exists (\
 				select name from `tabWarehouse` wh where wh.name = sle.warehouse\
 				and wh.lft >= %s and wh.rgt <= %s)"
-		
+
 		else:
 			values.append(warehouse)
 			condition += " AND warehouse = %s"
@@ -45,7 +71,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	for sle in stock_ledger_entries:
 		if not (sle.item_code, sle.warehouse) in sle_map:
 			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
-		
+
 	return sum(sle_map.values())
 
 @frappe.whitelist()
@@ -75,17 +101,17 @@ def get_latest_stock_qty(item_code, warehouse=None):
 	values, condition = [item_code], ""
 	if warehouse:
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
-	
+
 		if is_group:
 			values.extend([lft, rgt])
 			condition += "and exists (\
 				select name from `tabWarehouse` wh where wh.name = tabBin.warehouse\
 				and wh.lft >= %s and wh.rgt <= %s)"
-	
+
 		else:
 			values.append(warehouse)
 			condition += " AND warehouse = %s"
-	
+
 	actual_qty = frappe.db.sql("""select sum(actual_qty) from tabBin
 		where item_code=%s {0}""".format(condition), values)[0][0]
 
@@ -222,4 +248,3 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
-	

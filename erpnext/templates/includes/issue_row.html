@@ -5,9 +5,9 @@
             <span class="indicator {{ "red" if doc.status=="Open" else "darkgrey"   }}">
                 {{ doc.name }}</span>
 				   </div>
-                <div class="col-xs-6 items-preview ellipsis">
+                <div class="col-xs-6 items-preview ellipsis ellipsis-width">
                     {{ doc.subject }}</div>
-     
+
         <div class="col-xs-3 text-right small text-muted">
             {{ frappe.format_date(doc.modified) }}
         </div>

@@ -26,6 +26,12 @@ frappe.ui.form.on('Salary Component', {
 	is_flexible_benefit: function(frm) {
 		if(frm.doc.is_flexible_benefit){
 			set_value_for_condition_and_formula(frm);
+			frm.set_value("is_additional_component", 0);
+		}
+	},
+	is_additional_component: function(frm) {
+		if(frm.doc.is_additional_component){
+			frm.set_value("is_flexible_benefit", 0);
 		}
 	},
 	type: function(frm) {

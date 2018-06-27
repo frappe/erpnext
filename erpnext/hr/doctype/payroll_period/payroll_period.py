@@ -67,4 +67,4 @@ def get_payroll_period_days(start_date, end_date, employee):
 			holidays = get_holidays_for_employee(employee, getdate(payroll_period_dates[0][0]), getdate(payroll_period_dates[0][1]))
 			working_days -= len(holidays)
 		return working_days, actual_no_of_days
-	return False
+	return False, False
