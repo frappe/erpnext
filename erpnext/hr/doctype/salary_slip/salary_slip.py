@@ -225,16 +225,16 @@ class SalarySlip(TransactionBase):
 			self.end_date = date_details.end_date
 
 	def check_sal_struct(self, joining_date, relieving_date):
-		cond = ''
+		cond = """and sa.employee=%(employee)s and (sa.from_date <= %(start_date)s or
+				sa.from_date <= %(end_date)s or sa.from_date <= %(joining_date)s)"""
 		if self.payroll_frequency:
-			cond = """and payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
+			cond += """and ss.payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-		st_name = frappe.db.sql("""select salary_structure from `tabSalary Structure Assignment`
-			where employee=%s and (from_date <= %s or from_date <= %s or from_date <= %s)
-			and docstatus = 1
-			and salary_structure in (select name from `tabSalary Structure`
-				where is_active = 'Yes' %s) order by from_date desc limit 1
-			""", (self.employee, self.start_date, self.end_date, joining_date, cond))
+		st_name = frappe.db.sql("""select sa.salary_structure from `tabSalary Structure Assignment` sa
+			join `tabSalary Structure` ss where sa.salary_structure=ss.name
+			and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
+			order by sa.from_date desc limit 1 """ %cond, {'employee': self.employee, 'start_date': self.start_date,
+			'end_date': self.end_date, 'joining_date': joining_date})
 
 		if st_name:
 			if len(st_name) > 1:
