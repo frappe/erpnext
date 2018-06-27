@@ -46,7 +46,6 @@ class PaymentRequest(Document):
 					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(plan.name)))
 
 				rate = plan.get_plan_rate()
-				frappe.log_error(rate)
 
 				amount += rate
 
@@ -261,7 +260,7 @@ class PaymentRequest(Document):
 
 	def get_subscription_details(self):
 		if self.reference_doctype == "Sales Invoice":
-			subscriptions = frappe.db.sql("""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice='{0}'""".format(self.reference_name), as_dict=1)
+			subscriptions = frappe.db.sql("""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""", self.reference_name, as_dict=1)
 			self.subscription_plans = []
 			for subscription in subscriptions:
 				plans = frappe.get_doc("Subscription", subscription.sub_name).plans
