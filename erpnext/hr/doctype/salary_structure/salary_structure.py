@@ -39,12 +39,12 @@ class SalaryStructure(Document):
 					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
 					flexi_amount += max_of_component
 			if have_a_flexi and self.max_benefits == 0:
-				frappe.throw(_("Max benefits should be greater than zero to despense flexi"))
+				frappe.throw(_("Max benefits should be greater than zero to dispense benefits"))
 			if have_a_flexi and self.max_benefits > flexi_amount:
-				frappe.throw(_("Total flexi component amount {0} should not be less \
+				frappe.throw(_("Total flexible benefit component amount {0} should not be less \
 				than max benefits {1}").format(flexi_amount, self.max_benefits))
 		if not have_a_flexi and self.max_benefits > 0:
-			frappe.throw(_("Flexi component require to add max benefit"))
+			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
 
 @frappe.whitelist()

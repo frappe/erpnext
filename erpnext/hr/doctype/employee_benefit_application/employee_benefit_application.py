@@ -112,7 +112,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 	if max_benefits and max_benefits > 0:
 		have_depends_on_lwp = False
 		per_day_amount_total = 0
-		payroll_period_days = get_payroll_period_days(on_date, on_date, employee)
+		payroll_period_days = get_payroll_period_days(on_date, on_date, employee)[0]
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
 
 		# Get all salary slip flexi amount in the payroll period

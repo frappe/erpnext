@@ -363,4 +363,4 @@ def check_active_sales_items(obj):
 						"company": obj.company,
 						"income_account": d.income_account
 					})
-				doc.save()
+				doc.save(ignore_permissions=True)
