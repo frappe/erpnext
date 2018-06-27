@@ -29,7 +29,7 @@ class TestFinanceBook(unittest.TestCase):
 
 		jv.accounts[1].update({
 			"party_type": "Customer",
-			"party": "_Test Customer USD"
+			"party": "_Test Customer"
 		})
 
 		jv.finance_book = finance_book.finance_book_name
