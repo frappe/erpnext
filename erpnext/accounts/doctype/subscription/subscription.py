@@ -244,7 +244,6 @@ class Subscription(Document):
 		# for that reason
 		items_list = self.get_items_from_plans(self.plans, prorate)
 		for item in items_list:
-			item['qty'] = self.quantity
 			invoice.append('items',	item)
 
 		# Taxes
