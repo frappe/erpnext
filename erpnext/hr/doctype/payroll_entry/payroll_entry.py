@@ -43,13 +43,13 @@ class PayrollEntry(Document):
 			cond += "and %(from_date)s >= t2.from_date"
 			emp_list = frappe.db.sql("""
 				select
-					t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.name
+					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
 				from
 					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
 					t1.name = t2.employee
 					and t2.docstatus = 1
-			%s order by t2.from_date desc limit 1"""% cond, {"sal_struct": sal_struct, "from_date": self.start_date}, as_dict=True)
+			%s order by t2.from_date desc"""% cond, {"sal_struct": sal_struct, "from_date": self.start_date}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):
