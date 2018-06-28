@@ -70,10 +70,10 @@ class Quotation(SellingController):
 		opp.status = None
 		opp.set_status(update=True)
 
-	def declare_order_lost(self, arg):
+	def declare_order_lost(self, reason):
 		if not self.has_sales_order():
 			frappe.db.set(self, 'status', 'Lost')
-			frappe.db.set(self, 'order_lost_reason', arg)
+			frappe.db.set(self, 'order_lost_reason', reason)
 			self.update_opportunity()
 			self.update_lead()
 		else:
