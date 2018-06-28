@@ -6,15 +6,20 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT
+from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class PayrollEntry(Document):
 
 	def on_submit(self):
 		self.create_salary_slips()
+
+	def before_submit(self):
+		if self.validate_attendance:
+			if self.validate_employee_attendance():
+				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
 	def get_emp_list(self):
 		"""
@@ -60,6 +65,9 @@ class PayrollEntry(Document):
 
 		for d in employees:
 			self.append('employees', d)
+
+		if self.validate_attendance:
+			return self.validate_employee_attendance()
 
 	def get_filter_condition(self):
 		self.check_mandatory()
@@ -381,6 +389,39 @@ class PayrollEntry(Document):
 		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
+	def validate_employee_attendance(self):
+		employees_to_mark_attendance = []
+		days_in_payroll, days_holiday, days_attendance_marked = 0, 0, 0
+		for employee_detail in self.employees:
+			days_holiday = self.get_count_holidays_of_employee(employee_detail.employee)
+			days_attendance_marked = self.get_count_employee_attendance(employee_detail.employee)
+			days_in_payroll = date_diff(self.end_date, self.start_date) + 1
+			if days_in_payroll > days_holiday + days_attendance_marked:
+				employees_to_mark_attendance.append({
+					"employee": employee_detail.employee,
+					"employee_name": employee_detail.employee_name
+					})
+		return employees_to_mark_attendance
+
+	def get_count_holidays_of_employee(self, employee):
+		holiday_list = get_holiday_list_for_employee(employee)
+		holidays = 0
+		if holiday_list:
+			days = frappe.db.sql("""select count(*) from tabHoliday where
+				parent=%s and holiday_date between %s and %s""", (holiday_list,
+				self.start_date, self.end_date))
+			if days and days[0][0]:
+				holidays = days[0][0]
+		return holidays
+
+	def get_count_employee_attendance(self, employee):
+		marked_days = 0
+		attendances = frappe.db.sql("""select count(*) from tabAttendance where
+			employee=%s and docstatus=1 and attendance_date between %s and %s""",
+			(employee, self.start_date, self.end_date))
+		if attendances and attendances[0][0]:
+			marked_days = attendances[0][0]
+		return marked_days
 
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
