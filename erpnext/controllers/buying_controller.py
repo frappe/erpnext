@@ -699,7 +699,7 @@ def get_subcontracted_raw_materials_from_se(purchase_orders):
 		from `tabStock Entry` se,`tabStock Entry Detail` sed
 		where
 			se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
-			and se.purchase_order= (%s) and ifnull(sed.t_warehouse, '') != ''
+			and se.purchase_order in (%s) and ifnull(sed.t_warehouse, '') != ''
 		group by sed.item_code, sed.t_warehouse
 	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders), as_dict=1)
 
@@ -709,7 +709,7 @@ def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, purchas
 			prsi.rm_item_code as item_code, sum(prsi.consumed_qty) as qty
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		where
-			pr.name = pri.parent and pr.name = prsi.parent and pri.purchase_order= (%s)
+			pr.name = pri.parent and pr.name = prsi.parent and pri.purchase_order in (%s)
 			and pri.item_code = prsi.main_item_code and pr.name != '%s'
 		group by prsi.rm_item_code
 	""" % (','.join(['%s'] * len(purchase_orders)), purchase_receipt), tuple(purchase_orders)))
