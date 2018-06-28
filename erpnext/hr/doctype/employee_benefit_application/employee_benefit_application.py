@@ -18,7 +18,7 @@ class EmployeeBenefitApplication(Document):
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		self.validate_max_benefit_for_component()
 		self.validate_prev_benefit_claim()
-		if self.remainig_benefits > 0:
+		if self.remaining_benefit > 0:
 			self.validate_remaining_benefit_amount()
 
 	def validate_prev_benefit_claim(self):
@@ -35,7 +35,7 @@ class EmployeeBenefitApplication(Document):
 
 	def validate_remaining_benefit_amount(self):
 		# check salary structure earnings have flexi component (sum of max_benefit_amount)
-		# without pro-rata which satisfy the remainig_benefits
+		# without pro-rata which satisfy the remaining_benefit
 		# else pro-rata component for the amount
 		# again comes the same validation and satisfy or throw
 		benefit_components = []
@@ -57,13 +57,13 @@ class EmployeeBenefitApplication(Document):
 							non_pro_rata_amount += max_benefit_amount
 
 			if pro_rata_amount == 0  and non_pro_rata_amount == 0:
-				frappe.throw(_("Please add the remainig benefits {0} to any of the existing component").format(self.remainig_benefits))
-			elif non_pro_rata_amount > 0 and non_pro_rata_amount < rounded(self.remainig_benefits):
+				frappe.throw(_("Please add the remainig benefits {0} to any of the existing component").format(self.remaining_benefit))
+			elif non_pro_rata_amount > 0 and non_pro_rata_amount < rounded(self.remaining_benefit):
 				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application \
-				as pro-rata component").format(non_pro_rata_amount, self.remainig_benefits - non_pro_rata_amount))
+				as pro-rata component").format(non_pro_rata_amount, self.remaining_benefit - non_pro_rata_amount))
 			elif non_pro_rata_amount == 0:
 				frappe.throw(_("Please add the remainig benefits {0} to the application as \
-				pro-rata component").format(self.remainig_benefits))
+				pro-rata component").format(self.remaining_benefit))
 
 	def validate_max_benefit_for_component(self):
 		if self.employee_benefits:
