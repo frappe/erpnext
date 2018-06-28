@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -8,7 +9,7 @@ import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate, get_number_format_info
-
+from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
@@ -722,6 +723,7 @@ def get_children(doctype, parent, company, is_root=False):
 		'name as value',
 		'is_group as expandable'
 	]
+	filters = [['docstatus', '<', 2]]
 
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
 
@@ -732,7 +734,6 @@ def get_children(doctype, parent, company, is_root=False):
 	else:
 		fields += ['account_currency'] if doctype == 'Account' else []
 		fields += [parent_fieldname + ' as parent']
-
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
