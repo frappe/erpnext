@@ -17,18 +17,7 @@ frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 		"fieldtype": "Link",
 		"options": "Fiscal Year",
 		"default": frappe.defaults.get_user_default("fiscal_year"),
-		"reqd": 1,
-		"on_change": function(query_report) {
-			var fiscal_year = query_report.get_values().fiscal_year;
-			if (!fiscal_year) {
-				return;
-			}
-			frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
-				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-				frappe.query_report_filters_by_name.fiscal_year.set_input(fy.name);
-				query_report.trigger_refresh();
-			});
-		}
+		"reqd": 1
 	}],
 
 	onload: function(query_report) {
