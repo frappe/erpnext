@@ -343,7 +343,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "", 
+   "default": "Each Transaction", 
    "description": "How often should project and company be updated based on Sales Transactions.", 
    "fieldname": "sales_update_frequency", 
    "fieldtype": "Select", 
