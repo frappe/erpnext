@@ -620,12 +620,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	cost_center_field = ""
-	cost_center_condition = ""
-	if "cost_center" in condition:
-		cost_center_field = ", cost_center"
-		cost_center_condition = " and payment_gl_entry.cost_center = invoice_gl_entry.cost_center"
-		
 	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
@@ -650,8 +644,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
 					and {payment_dr_or_cr} > 0
-					{cost_center_condition}
-			) as payment_amount {cost_center_field}
+			) as payment_amount
 		from
 			`tabGL Entry` invoice_gl_entry
 		where
@@ -661,15 +654,13 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no {cost_center_field}
+		group by voucher_type, voucher_no
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
 			payment_dr_or_cr=payment_dr_or_cr,
-			condition=condition or "",
-			cost_center_field=cost_center_field,
-			cost_center_condition=cost_center_condition
+			condition=condition or ""
 		), {
 			"party_type": party_type,
 			"party": party,
@@ -846,6 +837,22 @@ def get_doc_name_autoname(field_value, doc_title, name, company):
 	if cstr(field_value).strip():
 		parts.insert(0, cstr(field_value).strip())
 	return ' - '.join(parts)
+
+@frappe.whitelist()
+def get_coa(doctype, parent, is_root, chart=None):
+	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import build_tree_from_json
+
+	# add chart to flags to retrieve when called from expand all function
+	chart = chart if chart else frappe.flags.chart
+	frappe.flags.chart = chart
+
+	parent = None if parent==_('All Accounts') else parent
+	accounts = build_tree_from_json(chart) # returns alist of dict in a tree render-able form
+
+	# filter out to show data for the selected node only
+	accounts = [d for d in accounts if d['parent_account']==parent]
+
+	return accounts
 
 def get_allow_cost_center_in_entry_of_bs_account():
 	def generator():
