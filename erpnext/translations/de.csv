@@ -4721,7 +4721,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1969,Enter value must be positive
 DocType: Asset,Finance Books,Finanzbücher
 DocType: Employee Tax Exemption Declaration Category,Employee Tax Exemption Declaration Category,Kategorie Steuerbefreiungserklärungen für Arbeitnehmer
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py +448,All Territories,Alle Regionen
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1346,Invalid Blanket Order for the selected Customer and Item,Ungültiger Blankoauftrag für den ausgewählten Kunden und Artikel
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1346,Invalid Blanket Order for the selected Customer and Item,Ungültiger Rahmenauftrag für den ausgewählten Kunden und Artikel
 apps/erpnext/erpnext/projects/doctype/task/task_tree.js +49,Add Multiple Tasks,Fügen Sie mehrere Aufgaben hinzu
 DocType: Purchase Invoice,Items,Artikel
 apps/erpnext/erpnext/crm/doctype/contract/contract.py +38,End Date cannot be before Start Date.,Das Enddatum darf nicht vor dem Startdatum liegen.
@@ -5347,7 +5347,7 @@ DocType: Stock Ledger Entry,Stock Value Difference,Lagerwert-Differenz
 apps/erpnext/erpnext/config/learn.py +229,Human Resource,Personal
 DocType: Payment Reconciliation Payment,Payment Reconciliation Payment,Zahlung zum Zahlungsabgleich
 DocType: Disease,Treatment Task,Behandlungsaufgabe
-DocType: Purchase Order Item,Blanket Order,Blankoauftrag
+DocType: Purchase Order Item,Blanket Order,Rahmenauftrag
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +39,Tax Assets,Steuerguthaben
 apps/erpnext/erpnext/regional/india/utils.py +177,House rent paid days overlap with {0},Die bezahlten Tage der Hausmiete überschneiden sich mit {0}
 DocType: BOM Item,BOM No,Stücklisten-Nr.
