@@ -36,7 +36,7 @@ class AssetMovement(Document):
 			if not self.serial_no and not (self.from_employee or self.to_employee):
 				self.source_location = frappe.db.get_value("Asset", self.asset, "location")
 
-			if self.purpose == 'Issue' and not self.source_location:
+			if self.purpose == 'Issue' and not (self.source_location or self.from_employee):
 				frappe.throw(_("Source Location is required for the asset {0}").format(self.asset))
 
 			if self.serial_no and self.source_location:
@@ -51,7 +51,7 @@ class AssetMovement(Document):
 		if self.source_location and self.source_location == self.target_location and self.purpose == 'Transfer':
 			frappe.throw(_("Source and Target Location cannot be same"))
 
-		if self.purpose == 'Receipt' and not self.target_location:
+		if self.purpose == 'Receipt' and not (self.target_location or self.to_employee):
 			frappe.throw(_("Target Location is required for the asset {0}").format(self.asset))
 
 	def on_submit(self):
@@ -93,10 +93,13 @@ class AssetMovement(Document):
 		if not self.serial_no:
 			frappe.db.set_value("Asset", self.asset, "location", location)
 
+		if not employee and self.purpose in ['Receipt', 'Transfer']:
+			employee = self.to_employee
+
 		if self.serial_no:
 			for d in get_serial_nos(self.serial_no):
-				if (location or self.purpose == 'Issue'):
+				if (location or (self.purpose == 'Issue' and self.source_location)):
 					frappe.db.set_value('Serial No', d, 'location', location)
 
-				if employee:
+				if employee or self.docstatus==2 or self.purpose == 'Issue':
 					frappe.db.set_value('Serial No', d, 'employee', employee)
