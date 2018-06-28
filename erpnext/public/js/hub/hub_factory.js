@@ -1,14 +1,5 @@
 frappe.provide('erpnext.hub.pages');
 
-frappe.boot.desktop_icons.unshift({
-	force_show: 1,
-	idx: 0,
-	label: "Marketplace",
-	link: "Hub/Item",
-	module_name: "Marketplace",
-	type: "module",
-});
-
 frappe.views.HubFactory = frappe.views.Factory.extend({
 	make(route) {
 		const page_name = frappe.get_route_str();
