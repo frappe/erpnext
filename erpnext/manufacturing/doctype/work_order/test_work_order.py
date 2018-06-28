@@ -8,7 +8,7 @@ import frappe
 from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.work_order.work_order \
-	import make_stock_entry, ItemHasVariantError, stop_unstop
+	import make_stock_entry, ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.utils import get_bin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -59,8 +59,6 @@ class TestWorkOrder(unittest.TestCase):
 		return wo_order
 
 	def test_over_production(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
-
 		wo_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
@@ -279,6 +277,43 @@ class TestWorkOrder(unittest.TestCase):
 				self.assertEqual(wo_order_details.scrap_warehouse, item.t_warehouse)
 				self.assertEqual(flt(wo_order_details.qty)*flt(scrap_item_details[item.item_code]), item.qty)
 
+	def test_allow_overproduction(self):
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 3))
+		s.insert()
+		self.assertRaises(StockOverProductionError, s.submit)
+
+		allow_overproduction("overproduction_percentage_for_work_order", 50)
+		s.load_from_db()
+		s.submit()
+		self.assertEqual(s.docstatus, 1)
+
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
+	def test_over_production_for_sales_order(self):
+		so = make_sales_order(item_code="_Test FG Item", qty=2)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+		wo_order = make_wo_order_test_record(planned_start_date=now(),
+			sales_order=so.name, qty=3, do_not_save=True)
+
+		self.assertRaises(OverProductionError, wo_order.save)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 50)
+		wo_order = make_wo_order_test_record(planned_start_date=now(),
+			sales_order=so.name, qty=3)
+
+		wo_order.submit()
+		self.assertEqual(wo_order.docstatus, 1)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
 	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
@@ -286,6 +321,13 @@ def get_scrap_item_details(bom_no):
 		scrap_items[item.item_code] = item.stock_qty
 
 	return scrap_items
+
+def allow_overproduction(fieldname, percentage):
+	doc = frappe.get_doc("Manufacturing Settings")
+	doc.update({
+		fieldname: percentage
+	})
+	doc.save()
 
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
@@ -303,6 +345,7 @@ def make_wo_order_test_record(**args):
 	wo_order.use_multi_level_bom=0
 	wo_order.skip_transfer=1
 	wo_order.get_items_and_operations_from_bom()
+	wo_order.sales_order = args.sales_order or None
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):
