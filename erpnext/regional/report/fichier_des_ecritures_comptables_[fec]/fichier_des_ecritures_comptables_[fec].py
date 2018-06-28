@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import format_datetime
 from frappe import _
+import re
 
 def execute(filters=None):
 	account_details = {}
@@ -104,9 +105,9 @@ def get_result_as_list(data, filters):
 
 	for d in data:
 
-		JournalCode = d.get("voucher_no").split("-")[0]
+		JournalCode = re.split("-|/", d.get("voucher_no"))[0]
 
-		EcritureNum = d.get("voucher_no").split("-")[-1]
+		EcritureNum = re.split("-|/", d.get("voucher_no"))[1]
 
 		EcritureDate = format_datetime(d.get("GlPostDate"), "yyyyMMdd")
 
