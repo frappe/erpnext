@@ -111,7 +111,9 @@ class PayrollEntry(Document):
 						"employee": emp['employee'],
 						"employee_name": frappe.get_value("Employee", {"name":emp['employee']}, "employee_name"),
 						"company": self.company,
-						"posting_date": self.posting_date
+						"posting_date": self.posting_date,
+						"deduct_tax_for_unclaimed_employee_benefits": self.deduct_tax_for_unclaimed_employee_benefits,
+						"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof
 					})
 					ss.insert()
 					ss_dict = {}
