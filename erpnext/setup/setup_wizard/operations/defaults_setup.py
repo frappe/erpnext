@@ -44,6 +44,7 @@ def set_default_settings(args):
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
+	selling_settings.sales_update_frequency = "Each Transaction"
 	selling_settings.save()
 
 	buying_settings = frappe.get_doc("Buying Settings")
