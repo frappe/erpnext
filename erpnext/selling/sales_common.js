@@ -389,6 +389,25 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		});
 	},
+
+	update_auto_repeat_reference: function(doc) {
+		if (doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{ 
+					docname: doc.auto_repeat,
+					reference:doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
+	}
 });
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
