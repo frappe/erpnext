@@ -83,7 +83,7 @@ var calculate_all = function(doc) {
 		}
 	}
 	doc.total_amount = total_amount;
-	doc.remainig_benefits = doc.max_benefits - total_amount;
+	doc.remaining_benefit = doc.max_benefits - total_amount;
 	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;
-	refresh_many(['pro_rata_dispensed_amount', 'total_amount','remainig_benefits']);
+	refresh_many(['pro_rata_dispensed_amount', 'total_amount','remaining_benefit']);
 };

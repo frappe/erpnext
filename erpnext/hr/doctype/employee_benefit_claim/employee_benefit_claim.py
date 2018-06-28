@@ -128,7 +128,7 @@ def get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payro
 	)
 	if application:
 		application_obj = frappe.get_doc("Employee Benefit Application", application)
-		pro_rata_amount = application_obj.pro_rata_dispensed_amount + application_obj.max_benefits - application_obj.remainig_benefits
+		pro_rata_amount = application_obj.pro_rata_dispensed_amount + application_obj.max_benefits - application_obj.remaining_benefit
 	else:
 		pro_rata_amount = get_benefit_pro_rata_ratio_amount(employee, sal_slip_start_date, sal_struct)
 
@@ -140,23 +140,23 @@ def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end
 	max_benefits = get_max_benefits(employee, payroll_period.end_date)
 	if not max_benefits:
 		max_benefits = 0
-	remainig_benefits = max_benefits - get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period)
-	if remainig_benefits > 0:
+	remaining_benefit = max_benefits - get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period)
+	if remaining_benefit > 0:
 		have_remaining = True
 		# Set the remainig benefits to flexi non pro-rata component in the salary structure
 		salary_components_array = []
 		for d in sal_struct.get("earnings"):
 			if d.is_flexible_benefit == 1:
 				salary_component = frappe.get_doc("Salary Component", d.salary_component)
-				if salary_component.is_pro_rata_applicable != 1:
+				if salary_component.pay_against_benefit_claim == 1:
 					claimed_amount = get_benefit_claim_amount(employee, payroll_period.start_date, sal_slip_end_date, d.salary_component)
 					amount_fit_to_component = salary_component.max_benefit_amount - claimed_amount
 					if amount_fit_to_component > 0:
-						if remainig_benefits > amount_fit_to_component:
+						if remaining_benefit > amount_fit_to_component:
 							amount = amount_fit_to_component
-							remainig_benefits -= amount_fit_to_component
+							remaining_benefit -= amount_fit_to_component
 						else:
-							amount = remainig_benefits
+							amount = remaining_benefit
 							have_remaining = False
 						current_claimed_amount = get_benefit_claim_amount(employee, sal_slip_start_date, sal_slip_end_date, d.salary_component)
 						amount += current_claimed_amount
