@@ -148,7 +148,7 @@ def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end
 		for d in sal_struct.get("earnings"):
 			if d.is_flexible_benefit == 1:
 				salary_component = frappe.get_doc("Salary Component", d.salary_component)
-				if salary_component.is_pro_rata_applicable != 1:
+				if salary_component.pay_against_benefit_claim == 1:
 					claimed_amount = get_benefit_claim_amount(employee, payroll_period.start_date, sal_slip_end_date, d.salary_component)
 					amount_fit_to_component = salary_component.max_benefit_amount - claimed_amount
 					if amount_fit_to_component > 0:
