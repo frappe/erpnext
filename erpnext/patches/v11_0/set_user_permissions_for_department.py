@@ -13,5 +13,6 @@ def execute():
                 new_user_permission.save()
             except frappe.DuplicateEntryError:
                 pass
-    
+
+    frappe.reload_doc("hr", "doctype", "department")
     frappe.db.sql("update tabDepartment set disabled=1 where ifnull(company, '') = ''")
