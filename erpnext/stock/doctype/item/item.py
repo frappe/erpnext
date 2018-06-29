@@ -45,7 +45,7 @@ class Item(WebsiteGenerator):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 		if self.is_fixed_asset:
-			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+			asset = self.asset_exists()
 			self.set_onload("asset_exists", True if asset else False)
 
 	def set_asset_naming_series(self):
@@ -113,6 +113,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_has_variants()
 		self.validate_stock_exists_for_template_item()
+		self.validate_asset_exists_for_serialized_asset()
 		self.validate_attributes()
 		self.validate_variant_attributes()
 		self.validate_website_image()
@@ -692,6 +693,18 @@ class Item(WebsiteGenerator):
 				if not self.is_child_table_same('attributes'):
 					frappe.throw(
 						_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
+
+	def validate_asset_exists_for_serialized_asset(self):
+		if (not self.get("__islocal") and self.asset_exists() and
+			cint(self.has_serial_no) != cint(frappe.db.get_value('Item', self.name, 'has_serial_no'))):
+			frappe.throw(_("Asset is already exists against the item {0}, you cannot change the has serial no value")
+				.format(self.name))
+
+	def asset_exists(self):
+		if not hasattr(self, '_asset_created'):
+			self._asset_created = frappe.db.get_all("Asset",
+				filters={"item_code": self.name, "docstatus": 1}, limit=1)
+		return self._asset_created
 
 	def validate_uom(self):
 		if not self.get("__islocal"):

@@ -193,13 +193,14 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 	def update_project(self):
-		project_list = []
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
+			return
+
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
 			project.save()
-			project_list.append(self.project)
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -573,7 +574,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Sales Order": {
 			"doctype": "Sales Invoice",
 			"field_map": {
-				"party_account_currency": "party_account_currency"
+				"party_account_currency": "party_account_currency",
+				"payment_terms_template": "payment_terms_template"
 			},
 			"validation": {
 				"docstatus": ["=", 1]

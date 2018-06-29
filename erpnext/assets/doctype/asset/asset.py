@@ -337,7 +337,7 @@ class Asset(AccountsController):
 
 		if self.get('default_finance_book'):
 			for d in self.get('finance_books'):
-				if d.finance_books == self.default_finance_book:
+				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
 
 	def update_stock_movement(self):

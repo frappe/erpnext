@@ -412,6 +412,35 @@ def create_project_update(project):
 			)
 	return data
 
+def update_project_sales_billing():
+	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
+	if sales_update_frequency == "Each Transaction":
+		return
+	elif (sales_update_frequency == "Monthly" and frappe.utils.now_datetime().day != 1):
+		return
+
+	#Else simply fallback to Daily
+	exists_query = '(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)'
+	project_map = {}
+	for project_details in frappe.db.sql('''
+			SELECT name, 1 as order_exists, null as invoice_exists from `tabProject` where
+			exists {order_exists}
+			union
+			SELECT name, null as order_exists, 1 as invoice_exists from `tabProject` where
+			exists {invoice_exists}
+		'''.format(
+			order_exists=exists_query.format(doctype="Sales Order"),
+			invoice_exists=exists_query.format(doctype="Sales Invoice"),
+		), as_dict=True):
+		project = project_map.setdefault(project_details.name, frappe.get_doc('Project', project_details.name))
+		if project_details.order_exists:
+			project.update_sales_amount()
+		if project_details.invoice_exists:
+			project.update_billed_amount()
+
+	for project in project_map.values():
+		project.save()
+
 @frappe.whitelist()
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
