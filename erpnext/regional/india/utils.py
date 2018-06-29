@@ -111,18 +111,20 @@ def get_regional_address_details(out, doctype, company):
 	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
 def calculate_annual_eligible_hra_exemption(doc):
+	basic_component = frappe.db.get_value("Company", doc.company, "basic_component")
 	hra_component = frappe.db.get_value("Company", doc.company, "hra_component")
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
-	if hra_component:
+	if hra_component and basic_component:
 		assignment = get_salary_assignment(doc.employee, getdate())
 		if assignment and frappe.db.exists("Salary Detail", {
 			"parent": assignment.salary_structure,
 			"salary_component": hra_component, "parentfield": "earnings"}):
-			hra_amount = get_hra_from_salary_slip(doc.employee, assignment.salary_structure, hra_component)
+			basic_amount, hra_amount = get_component_amt_from_salary_slip(doc.employee,
+				assignment.salary_structure, basic_component, hra_component)
 			if hra_amount:
 				if doc.monthly_house_rent:
 					annual_exemption = calculate_hra_exemption(assignment.salary_structure,
-									assignment.base, hra_amount, doc.monthly_house_rent,
+									basic_amount, hra_amount, doc.monthly_house_rent,
 									doc.rented_in_metro_city)
 					if annual_exemption > 0:
 						monthly_exemption = annual_exemption / 12
@@ -130,24 +132,29 @@ def calculate_annual_eligible_hra_exemption(doc):
 						annual_exemption = 0
 	return {"hra_amount": hra_amount, "annual_exemption": annual_exemption, "monthly_exemption": monthly_exemption}
 
-def get_hra_from_salary_slip(employee, salary_structure, hra_component):
+def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
 	salary_slip = make_salary_slip(salary_structure, employee=employee)
+	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
-		if earning.salary_component == hra_component:
-			return earning.amount
+		if earning.salary_component == basic_component:
+			basic_amt = earning.amount
+		elif earning.salary_component == hra_component:
+			hra_amt = earning.amount
+		if basic_amt and hra_amt:
+			return basic_amt, hra_amt
 
-def calculate_hra_exemption(salary_structure, base, monthly_hra, monthly_house_rent, rented_in_metro_city):
+def calculate_hra_exemption(salary_structure, basic, monthly_hra, monthly_house_rent, rented_in_metro_city):
 	# TODO make this configurable
 	exemptions = []
 	frequency = frappe.get_value("Salary Structure", salary_structure, "payroll_frequency")
 	# case 1: The actual amount allotted by the employer as the HRA.
 	exemptions.append(get_annual_component_pay(frequency, monthly_hra))
 	actual_annual_rent = monthly_house_rent * 12
-	annual_base = get_annual_component_pay(frequency, base)
+	annual_basic = get_annual_component_pay(frequency, basic)
 	# case 2: Actual rent paid less 10% of the basic salary.
-	exemptions.append(flt(actual_annual_rent) - flt(annual_base * 0.1))
+	exemptions.append(flt(actual_annual_rent) - flt(annual_basic * 0.1))
 	# case 3: 50% of the basic salary, if the employee is staying in a metro city (40% for a non-metro city).
-	exemptions.append(annual_base * 0.5 if rented_in_metro_city else annual_base * 0.4)
+	exemptions.append(annual_basic * 0.5 if rented_in_metro_city else annual_basic * 0.4)
 	# return minimum of 3 cases
 	return min(exemptions)
 
