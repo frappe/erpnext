@@ -342,13 +342,17 @@ class PayrollEntry(Document):
 			for salary_slip_name in salary_slip_name_list:
 				salary_slip = frappe.get_doc("Salary Slip", salary_slip_name[0])
 				for sal_detail in salary_slip.earnings:
-					is_flexible_benefit, only_tax_impact, creat_separate_je = frappe.db.get_value("Salary Component", \
-					sal_detail.salary_component, ['is_flexible_benefit', 'only_tax_impact', 'create_separate_payment_entry_against_benefit_claim'])
-					if only_tax_impact != 1:
+					is_flexible_benefit, only_tax_impact, creat_separate_je, statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component,
+						['is_flexible_benefit', 'only_tax_impact', 'create_separate_payment_entry_against_benefit_claim', 'statistical_component'])
+					if only_tax_impact != 1 and statistical_component != 1:
 						if is_flexible_benefit == 1 and creat_separate_je == 1:
 							self.create_journal_entry(sal_detail.amount, sal_detail.salary_component)
 						else:
 							salary_slip_total += sal_detail.amount
+				for sal_detail in salary_slip.deductions:
+					statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component, 'statistical_component')
+					if statistical_component != 1:
+						salary_slip_total -= sal_detail.amount
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
 
@@ -383,7 +387,6 @@ class PayrollEntry(Document):
 		ss_list = self.get_sal_slip_list(ss_status=1)
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
-			frappe.db.set_value("Salary Slip", ss_obj.name, "status", "Paid")
 			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
