@@ -1,16 +1,16 @@
 [
 	{
-		"doctype": "Physician",
+		"doctype": "Practitioner",
 		"first_name": "Eddie Jessup",
 		"department": "Pathology"
 	},
 	{
-		"doctype": "Physician",
+		"doctype": "Practitioner",
 		"first_name": "Deepshi Garg",
 		"department": "ENT"
 	},
 	{
-		"doctype": "Physician",
+		"doctype": "Practitioner",
 		"first_name": "Amit Jain",
 		"department": "Microbiology"
 	}

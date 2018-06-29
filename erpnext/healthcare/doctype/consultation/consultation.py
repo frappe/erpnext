@@ -62,7 +62,7 @@ def create_drug_invoice(company, patient, prescriptions):
 	return sales_invoice.as_dict()
 
 @frappe.whitelist()
-def create_invoice(company, patient, physician, consultation_id):
+def create_invoice(company, patient, practitioner, consultation_id):
 	if not consultation_id:
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
@@ -71,7 +71,7 @@ def create_invoice(company, patient, physician, consultation_id):
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
 
-	create_invoice_items(physician, sales_invoice, company)
+	create_invoice_items(practitioner, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
 	frappe.db.sql("""update tabConsultation set invoice=%s where name=%s""", (sales_invoice.name, consultation_id))
@@ -80,15 +80,15 @@ def create_invoice(company, patient, physician, consultation_id):
 		frappe.db.set_value("Patient Appointment", appointment, "sales_invoice", sales_invoice.name)
 	return sales_invoice.name
 
-def create_invoice_items(physician, invoice, company):
+def create_invoice_items(practitioner, invoice, company):
 	item_line = invoice.append("items")
 	item_line.item_name = "Consulting Charges"
-	item_line.description = "Consulting Charges:  " + physician
+	item_line.description = "Consulting Charges:  " + practitioner
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(physician, company)
-	op_consulting_charge = frappe.get_value("Physician", physician, "op_consulting_charge")
+	item_line.income_account = get_income_account(practitioner, company)
+	op_consulting_charge = frappe.get_value("Practitioner", practitioner, "op_consulting_charge")
 	if op_consulting_charge:
 		item_line.rate = op_consulting_charge
 		item_line.amount = op_consulting_charge

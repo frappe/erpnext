@@ -21,7 +21,7 @@ def setup_data():
 	frappe.clear_cache()
 
 def make_masters():
-	import_json("Physician")
+	import_json("Practitioner")
 	import_drug()
 	frappe.db.commit()
 
@@ -46,8 +46,8 @@ def make_patient():
 def make_appointment():
 	i = 1
 	while i <= 4:
-		physician = get_random("Physician")
-		department = frappe.get_value("Physician", physician, "department")
+		practitioner = get_random("Practitioner")
+		department = frappe.get_value("Practitioner", practitioner, "department")
 		patient = get_random("Patient")
 		patient_sex = frappe.get_value("Patient", patient, "sex")
 		appointment = frappe.new_doc("Patient Appointment")
@@ -59,33 +59,33 @@ def make_appointment():
 		appointment.appointment_date = appointment_datetime
 		appointment.patient = patient
 		appointment.patient_sex = patient_sex
-		appointment.physician = physician
+		appointment.practitioner = practitioner
 		appointment.department = department
 		appointment.save(ignore_permissions = True)
 		i += 1
 
 def make_consulation():
 	for i in range(3):
-		physician = get_random("Physician")
-		department = frappe.get_value("Physician", physician, "department")
+		practitioner = get_random("Practitioner")
+		department = frappe.get_value("Practitioner", practitioner, "department")
 		patient = get_random("Patient")
 		patient_sex = frappe.get_value("Patient", patient, "sex")
-		consultation = set_consultation(patient, patient_sex, physician, department, getdate(), i)
+		consultation = set_consultation(patient, patient_sex, practitioner, department, getdate(), i)
 		consultation.save(ignore_permissions=True)
 
 def consulation_on_appointment():
 	for i in range(3):
 		appointment = get_random("Patient Appointment")
 		appointment = frappe.get_doc("Patient Appointment",appointment)
-		consultation = set_consultation(appointment.patient, appointment.patient_sex, appointment.physician, appointment.department, appointment.appointment_date, i)
+		consultation = set_consultation(appointment.patient, appointment.patient_sex, appointment.practitioner, appointment.department, appointment.appointment_date, i)
 		consultation.appointment = appointment.name
 		consultation.save(ignore_permissions=True)
 
-def set_consultation(patient, patient_sex, physician, department, consultation_date, i):
+def set_consultation(patient, patient_sex, practitioner, department, consultation_date, i):
 	consultation = frappe.new_doc("Consultation")
 	consultation.patient = patient
 	consultation.patient_sex = patient_sex
-	consultation.physician = physician
+	consultation.practitioner = practitioner
 	consultation.visit_department = department
 	consultation.consultation_date = consultation_date
 	if i > 2 and patient_sex=='Female':
@@ -101,11 +101,11 @@ def set_consultation(patient, patient_sex, physician, department, consultation_d
 	return consultation
 
 def make_lab_test():
-	physician = get_random("Physician")
+	practitioner = get_random("Practitioner")
 	patient = get_random("Patient")
 	patient_sex = frappe.get_value("Patient", patient, "sex")
 	template = get_random("Lab Test Template")
-	set_lab_test(patient, patient_sex, physician, template)
+	set_lab_test(patient, patient_sex, practitioner, template)
 
 def lab_test_on_consultation():
 	i = 1
@@ -113,12 +113,12 @@ def lab_test_on_consultation():
 		test_rx = get_random("Lab Prescription", filters={'test_created': 0})
 		test_rx = frappe.get_doc("Lab Prescription", test_rx)
 		consultation = frappe.get_doc("Consultation", test_rx.parent)
-		set_lab_test(consultation.patient, consultation.patient_sex, consultation.physician, test_rx.test_code, test_rx.name)
+		set_lab_test(consultation.patient, consultation.patient_sex, consultation.practitioner, test_rx.test_code, test_rx.name)
 		i += 1
 
-def set_lab_test(patient, patient_sex, physician, template, rx=None):
+def set_lab_test(patient, patient_sex, practitioner, template, rx=None):
 	lab_test = frappe.new_doc("Lab Test")
-	lab_test.physician = physician
+	lab_test.practitioner = practitioner
 	lab_test.patient = patient
 	lab_test.patient_sex = patient_sex
 	lab_test.template = template

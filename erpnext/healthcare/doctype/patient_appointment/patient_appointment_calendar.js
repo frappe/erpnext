@@ -14,9 +14,9 @@ frappe.views.calendar["Patient Appointment"] = {
 	filters: [
 		{
 			'fieldtype': 'Link',
-			'fieldname': 'physician',
-			'options': 'Physician',
-			'label': __('Physician')
+			'fieldname': 'practitioner',
+			'options': 'Practitioner',
+			'label': __('Practitioner')
 		},
 		{
 			'fieldtype': 'Link',

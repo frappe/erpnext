@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-06-20 11:56:05.132154", 
+ "modified": "2018-06-29 16:46:04.049449", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "prescription", 
@@ -33,13 +33,13 @@
  "title": "Prescription", 
  "web_form_fields": [
   {
-   "fieldname": "physician", 
+   "fieldname": "practitioner", 
    "fieldtype": "Link", 
    "hidden": 0, 
-   "label": "Doctor", 
+   "label": "Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Physician", 
+   "options": "Practitioner", 
    "read_only": 0, 
    "reqd": 1
   }, 

@@ -74,8 +74,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Physician",
-					"label": _("Physician"),
+					"name": "Practitioner",
+					"label": _("Practitioner"),
 				},
 				{
 					"type": "doctype",

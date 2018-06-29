@@ -83,7 +83,7 @@ frappe.ui.form.on('Consultation', {
 		frm.set_df_property("patient_age", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient_sex", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("type", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("physician", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("practitioner", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("visit_department", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_date", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_time", "read_only", frm.doc.__islocal ? 0:1);
@@ -95,7 +95,7 @@ var btn_invoice_consultation = function(frm){
 	frappe.call({
 		method:
 		"erpnext.healthcare.doctype.consultation.consultation.create_invoice",
-		args: {company: doc.company, patient: doc.patient, physician: doc.physician, consultation_id: doc.name },
+		args: {company: doc.company, patient: doc.patient, practitioner: doc.practitioner, consultation_id: doc.name },
 		callback: function(data){
 			if(!data.exc){
 				if(data.message){
@@ -153,20 +153,20 @@ frappe.ui.form.on("Consultation", "appointment", function(frm){
 			callback: function (data) {
 				frappe.model.set_value(frm.doctype,frm.docname, "patient", data.message.patient);
 				frappe.model.set_value(frm.doctype,frm.docname, "type", data.message.appointment_type);
-				frappe.model.set_value(frm.doctype,frm.docname, "physician", data.message.physician);
+				frappe.model.set_value(frm.doctype,frm.docname, "practitioner", data.message.practitioner);
 				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice);
 			}
 		});
 	}
 });
 
-frappe.ui.form.on("Consultation", "physician", function(frm) {
-	if(frm.doc.physician){
+frappe.ui.form.on("Consultation", "practitioner", function(frm) {
+	if(frm.doc.practitioner){
 		frappe.call({
 			"method": "frappe.client.get",
 			args: {
-				doctype: "Physician",
-				name: frm.doc.physician
+				doctype: "Practitioner",
+				name: frm.doc.practitioner
 			},
 			callback: function (data) {
 				frappe.model.set_value(frm.doctype,frm.docname, "visit_department",data.message.department);

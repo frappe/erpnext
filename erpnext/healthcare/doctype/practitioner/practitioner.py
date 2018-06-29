@@ -10,12 +10,12 @@ from frappe.utils import cstr
 from erpnext.accounts.party import validate_party_accounts
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 
-class Physician(Document):
+class Practitioner(Document):
 	def onload(self):
 		load_address_and_contact(self)
 
 	def autoname(self):
-		# physician first_name and last_name
+		# practitioner first_name and last_name
 		self.name = " ".join(filter(None,
 			[cstr(self.get(f)).strip() for f in ["first_name","middle_name","last_name"]]))
 
@@ -25,20 +25,20 @@ class Physician(Document):
 		if self.user_id:
 			self.validate_for_enabled_user_id()
 			self.validate_duplicate_user_id()
-			existing_user_id = frappe.db.get_value("Physician", self.name, "user_id")
+			existing_user_id = frappe.db.get_value("Practitioner", self.name, "user_id")
 			if self.user_id != existing_user_id:
 				frappe.permissions.remove_user_permission(
-					"Physician", self.name, existing_user_id)
+					"Practitioner", self.name, existing_user_id)
 
 		else:
-			existing_user_id = frappe.db.get_value("Physician", self.name, "user_id")
+			existing_user_id = frappe.db.get_value("Practitioner", self.name, "user_id")
 			if existing_user_id:
 				frappe.permissions.remove_user_permission(
-					"Physician", self.name, existing_user_id)
+					"Practitioner", self.name, existing_user_id)
 
 	def on_update(self):
 		if self.user_id:
-			frappe.permissions.add_user_permission("Physician", self.name, self.user_id)
+			frappe.permissions.add_user_permission("Practitioner", self.name, self.user_id)
 
 
 	def validate_for_enabled_user_id(self):
@@ -49,11 +49,11 @@ class Physician(Document):
 			frappe.throw(_("User {0} is disabled").format(self.user_id))
 
 	def validate_duplicate_user_id(self):
-		physician = frappe.db.sql_list("""select name from `tabPhysician` where
+		practitioner = frappe.db.sql_list("""select name from `tabPractitioner` where
 			user_id=%s and name!=%s""", (self.user_id, self.name))
-		if physician:
-			throw(_("User {0} is already assigned to Physician {1}").format(
-				self.user_id, physician[0]), frappe.DuplicateEntryError)
+		if practitioner:
+			throw(_("User {0} is already assigned to Practitioner {1}").format(
+				self.user_id, practitioner[0]), frappe.DuplicateEntryError)
 
 	def on_trash(self):
-		delete_contact_and_address('Physician', self.name)
+		delete_contact_and_address('Practitioner', self.name)
