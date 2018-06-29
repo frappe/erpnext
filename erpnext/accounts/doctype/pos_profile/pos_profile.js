@@ -35,7 +35,7 @@ frappe.ui.form.on('POS Profile', {
 
 		frm.set_query("print_format", function() {
 			return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
-		});
+		}); 
 
 		frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'use_pos_in_offline_mode', (r) => {
 			is_offline = r && cint(r.use_pos_in_offline_mode)
