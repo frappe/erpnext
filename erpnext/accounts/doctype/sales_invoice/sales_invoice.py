@@ -108,7 +108,7 @@ class SalesInvoice(SellingController):
 		self.set_status()
 		if self.is_pos and not self.is_return:
 			self.verify_payment_amount_is_positive()
-		if self.redeem_loyalty_points:
+		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
 
@@ -152,17 +152,18 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
-		update_company_current_month_sales(self.company)
-		self.update_project()
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
+			self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program 
-		if not self.is_return:
+		if not self.is_return and self.loyalty_program:
 			self.make_loyalty_point_entry()
-		else:
+		elif self.is_return and self.return_against and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.delete_loyalty_point_entry()
-		if self.redeem_loyalty_points:
+		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 
 	def validate_pos_paid_amount(self):
@@ -201,8 +202,9 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		update_company_current_month_sales(self.company)
-		self.update_project()
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
+			self.update_project()
 		if not self.is_return:
 			self.delete_loyalty_point_entry()
 		else:
