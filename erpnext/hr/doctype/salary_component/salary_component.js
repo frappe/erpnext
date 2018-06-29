@@ -52,9 +52,15 @@ frappe.ui.form.on('Salary Component', {
 	create_separate_payment_entry_against_benefit_claim: function(frm) {
 		if(frm.doc.create_separate_payment_entry_against_benefit_claim){
 			frm.set_df_property("accounts", "reqd", 1);
+			frm.set_value("only_tax_impact", 0);
 		}
 		else{
 			frm.set_df_property("accounts", "reqd", 0);
+		}
+	},
+	only_tax_impact: function(frm) {
+		if(frm.only_tax_impact){
+			frm.set_value("create_separate_payment_entry_against_benefit_claim", 0);
 		}
 	}
 });
