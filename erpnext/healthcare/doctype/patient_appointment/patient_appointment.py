@@ -109,8 +109,8 @@ def get_availability_data(date, physician):
 				frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
 
 	# get physicians schedule
-	if physician_obj.physician_schedules:
-		for schedule in physician_obj.physician_schedules:
+	if physician_obj.practitioner_schedules:
+		for schedule in physician_obj.practitioner_schedules:
 			if schedule.schedule:
 				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
 			else:

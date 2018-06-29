@@ -14,6 +14,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -45,6 +46,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -76,6 +78,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -107,6 +110,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -138,6 +142,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -170,6 +175,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -202,6 +208,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -234,6 +241,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -266,6 +274,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -296,6 +305,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -327,6 +337,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -358,6 +369,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -389,6 +401,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -420,6 +433,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -451,11 +465,12 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fieldname": "physician_schedules", 
+   "fieldname": "practitioner_schedules", 
    "fieldtype": "Table", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -464,10 +479,10 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Physician Schedules", 
+   "label": "Practitioner Schedules", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Physician Service Unit Schedule", 
+   "options": "Practitioner Service Unit Schedule", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -483,6 +498,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -514,6 +530,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -546,6 +563,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -577,6 +595,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -608,6 +627,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -638,6 +658,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -669,6 +690,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -700,6 +722,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -732,6 +755,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -774,7 +798,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-03-09 15:25:43.166877", 
+ "modified": "2018-06-29 15:30:50.675505", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Physician", 
@@ -783,7 +807,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -803,7 +826,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -823,7 +845,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
