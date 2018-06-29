@@ -710,7 +710,7 @@ def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, purchas
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		where
 			pr.name = pri.parent and pr.name = prsi.parent and pri.purchase_order in (%s)
-			and pri.item_code = prsi.main_item_code and pr.name != '%s'
+			and pri.item_code = prsi.main_item_code and pr.name != '%s' and pr.docstatus = 1
 		group by prsi.rm_item_code
 	""" % (','.join(['%s'] * len(purchase_orders)), purchase_receipt), tuple(purchase_orders)))
 
