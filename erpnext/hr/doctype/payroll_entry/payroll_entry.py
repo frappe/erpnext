@@ -317,6 +317,7 @@ class PayrollEntry(Document):
 			})
 
 			journal_entry.set("accounts", accounts)
+			journal_entry.title = default_payroll_payable_account
 			journal_entry.save()
 
 			try:
@@ -337,8 +338,8 @@ class PayrollEntry(Document):
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
 
 		if salary_slip_name_list and len(salary_slip_name_list) > 0:
+			salary_slip_total = 0
 			for salary_slip_name in salary_slip_name_list:
-				salary_slip_total = 0
 				salary_slip = frappe.get_doc("Salary Slip", salary_slip_name[0])
 				for sal_detail in salary_slip.earnings:
 					is_flexible_benefit, only_tax_impact, creat_separate_je = frappe.db.get_value("Salary Component", \
@@ -348,8 +349,8 @@ class PayrollEntry(Document):
 							self.create_journal_entry(sal_detail.amount, sal_detail.salary_component)
 						else:
 							salary_slip_total += sal_detail.amount
-				if salary_slip_total > 0:
-					self.create_journal_entry(salary_slip_total, "salary")
+			if salary_slip_total > 0:
+				self.create_journal_entry(salary_slip_total, "salary")
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
