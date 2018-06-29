@@ -579,7 +579,7 @@ class POSCart {
 						</div>
 						<div class="cart-items">
 							<div class="empty-state">
-								<span>No Items added to cart</span>
+								<span>${__('No Items added to cart')}</span>
 							</div>
 						</div>
 						<div class="taxes-and-totals">
@@ -1122,8 +1122,8 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + i)',
-				placeholder: 'Search by item code, serial number, batch no or barcode'
+				label: __('Search Item (Ctrl + i)'),
+				placeholder: __('Search by item code, serial number, batch no or barcode')
 			},
 			parent: this.wrapper.find('.search-field'),
 			render_input: true,
