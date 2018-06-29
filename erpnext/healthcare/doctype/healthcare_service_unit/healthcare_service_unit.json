@@ -380,7 +380,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Medical Administrator", 
+   "role": "Healthcare Administrator", 
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
