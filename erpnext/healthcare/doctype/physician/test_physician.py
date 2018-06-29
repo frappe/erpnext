@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
-test_dependencies = ['Physician Schedule']
+test_dependencies = ['Practitioner Schedule']
 
 
 class TestPhysician(unittest.TestCase):

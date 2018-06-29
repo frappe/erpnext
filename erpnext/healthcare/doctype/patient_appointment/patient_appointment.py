@@ -77,7 +77,7 @@ def get_availability_data(date, physician):
 
 	available_slots = []
 	slot_details = []
-	physician_schedule = None
+	practitioner_schedule = None
 
 	employee = None
 
@@ -112,13 +112,13 @@ def get_availability_data(date, physician):
 	if physician_obj.physician_schedules:
 		for schedule in physician_obj.physician_schedules:
 			if schedule.schedule:
-				physician_schedule = frappe.get_doc("Physician Schedule", schedule.schedule)
+				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
 			else:
-				frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
+				frappe.throw(_("Dr {0} does not have a Practitioner Schedule. Add it in Physician master".format(physician)))
 
-			if physician_schedule:
+			if practitioner_schedule:
 				available_slots = []
-				for t in physician_schedule.time_slots:
+				for t in practitioner_schedule.time_slots:
 					if weekday == t.day:
 						available_slots.append(t)
 
@@ -152,7 +152,7 @@ def get_availability_data(date, physician):
 						"avail_slot":available_slots, 'appointments': appointments})
 
 	else:
-		frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
+		frappe.throw(_("Dr {0} does not have a Practitioner Schedule. Add it in Physician master".format(physician)))
 
 	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates

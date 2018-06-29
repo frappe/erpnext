@@ -14,6 +14,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -30,7 +31,7 @@
    "label": "Schedule", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Physician Schedule", 
+   "options": "Practitioner Schedule", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -46,6 +47,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -87,7 +89,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-05-02 03:38:09.935153", 
+ "modified": "2018-06-29 14:55:29.558771", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Physician Service Unit Schedule", 

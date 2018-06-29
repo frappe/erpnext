@@ -1,7 +1,7 @@
-// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Physician Schedule', {
+frappe.ui.form.on('Practitioner Schedule', {
 	refresh: function(frm) {
 		cur_frm.fields_dict["time_slots"].grid.wrapper.find('.grid-add-row').hide();
 		cur_frm.fields_dict["time_slots"].grid.add_custom_button(__('Add Time Slots'), () => {
