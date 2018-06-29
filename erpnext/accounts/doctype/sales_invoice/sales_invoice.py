@@ -309,6 +309,9 @@ class SalesInvoice(SellingController):
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			self.pos_profile = pos_profile.get('name')
+			self.write_off_amount_of_pos_profile = pos_profile.get('write_off__amount')
+			self.write_off_amount_can_not_be_more_than_positive_or_negative = pos_profile.get('write_off_amount_can_not_be_more_than_positive_or_negative')
+			self.outstanding_amount_has_to_be_0 = pos_profile.get('outstanding_amount_has_to_be_0')
 
 		pos = {}
 		if self.pos_profile:
