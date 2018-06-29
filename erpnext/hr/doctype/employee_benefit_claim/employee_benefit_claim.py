@@ -143,7 +143,7 @@ def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end
 	remaining_benefit = max_benefits - get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period)
 	if remaining_benefit > 0:
 		have_remaining = True
-		# Set the remainig benefits to flexi non pro-rata component in the salary structure
+		# Set the remaining benefits to flexi non pro-rata component in the salary structure
 		salary_components_array = []
 		for d in sal_struct.get("earnings"):
 			if d.is_flexible_benefit == 1:
