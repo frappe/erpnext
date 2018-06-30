@@ -100,7 +100,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
 				on_numpad: (value) => {
-					debugger;
 					if (value == __('Pay')) {
 						if (!this.payment) {
 							this.make_payment_modal();
