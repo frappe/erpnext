@@ -9,3 +9,13 @@ def execute():
 
 	if not frappe.db.a_row_exists("UOM Conversion Factor"):
 		add_uom_data()
+	else:
+		# delete conversion data and insert again
+		frappe.db.sql("delete from `tabUOM Conversion Factor`")
+		try:
+			frappe.delete_doc('UOM', 'Hundredweight')
+			frappe.delete_doc('UOM', 'Pound Cubic Yard')
+		except frappe.LinkExistsError:
+			pass
+
+		add_uom_data()
