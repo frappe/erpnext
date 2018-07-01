@@ -100,7 +100,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
 				on_numpad: (value) => {
-					if (value == 'Pay') {
+					if (value == __('Pay')) {
 						if (!this.payment) {
 							this.make_payment_modal();
 						} else {
@@ -548,6 +548,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 };
 
+const [Qty,Disc,Rate,Del,Pay] = [__("Qty"), __('Disc'), __('Rate'), __('Del'), __('Pay')];
+
 class POSCart {
 	constructor({frm, wrapper, events}) {
 		this.frm = frm;
@@ -579,7 +581,7 @@ class POSCart {
 						</div>
 						<div class="cart-items">
 							<div class="empty-state">
-								<span>No Items added to cart</span>
+								<span>${__('No Items added to cart')}</span>
 							</div>
 						</div>
 						<div class="taxes-and-totals">
@@ -775,42 +777,45 @@ class POSCart {
 	disable_numpad_control() {
 		let disabled_btns = [];
 		if(!this.frm.allow_edit_rate) {
-			disabled_btns.push('Rate');
+			disabled_btns.push(__('Rate'));
 		}
 		if(!this.frm.allow_edit_discount) {
-			disabled_btns.push('Disc');
+			disabled_btns.push(__('Disc'));
 		}
 		return disabled_btns;
 	}
 
+
 	make_numpad() {
+
+		var pay_class = {}
+		pay_class[__('Pay')]='brand-primary'
 		this.numpad = new NumberPad({
 			button_array: [
-				[1, 2, 3, 'Qty'],
-				[4, 5, 6, 'Disc'],
-				[7, 8, 9, 'Rate'],
-				['Del', 0, '.', 'Pay']
+				[1, 2, 3, Qty],
+				[4, 5, 6, Disc],
+				[7, 8, 9, Rate],
+				[Del, 0, '.', Pay]
 			],
-			add_class: {
-				'Pay': 'brand-primary'
-			},
-			disable_highlight: ['Qty', 'Disc', 'Rate', 'Pay'],
-			reset_btns: ['Qty', 'Disc', 'Rate', 'Pay'],
-			del_btn: 'Del',
+			add_class: pay_class,
+			disable_highlight: [Qty, Disc, Rate, Pay],
+			reset_btns: [Qty, Disc, Rate, Pay],
+			del_btn: Del,
 			disable_btns: this.disable_numpad_control(),
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
-				if (!this.selected_item && btn_value !== 'Pay') {
+
+				if (!this.selected_item && btn_value !== Pay) {
 					frappe.show_alert({
 						indicator: 'red',
 						message: __('Please select an item in the cart')
 					});
 					return;
 				}
-				if (['Qty', 'Disc', 'Rate'].includes(btn_value)) {
+				if ([Qty, Disc, Rate].includes(btn_value)) {
 					this.set_input_active(btn_value);
-				} else if (btn_value !== 'Pay') {
+				} else if (btn_value !== Pay) {
 					if (!this.selected_item.active_field) {
 						frappe.show_alert({
 							indicator: 'red',
@@ -844,13 +849,13 @@ class POSCart {
 		this.selected_item.removeClass('qty disc rate');
 
 		this.numpad.set_active(btn_value);
-		if (btn_value === 'Qty') {
+		if (btn_value === Qty) {
 			this.selected_item.addClass('qty');
 			this.selected_item.active_field = 'qty';
-		} else if (btn_value == 'Disc') {
+		} else if (btn_value == Disc) {
 			this.selected_item.addClass('disc');
 			this.selected_item.active_field = 'discount_percentage';
-		} else if (btn_value == 'Rate') {
+		} else if (btn_value == Rate) {
 			this.selected_item.addClass('rate');
 			this.selected_item.active_field = 'rate';
 		}
@@ -982,16 +987,6 @@ class POSCart {
 				}
 			});
 
-		// this.$cart_items.on('focus', '.quantity input', function(e) {
-		// 	const $input = $(this);
-		// 	const $item = $input.closest('.list-item[data-item-code]');
-		// 	me.set_selected_item($item);
-		// 	me.set_input_active('Qty');
-		// 	e.preventDefault();
-		// 	e.stopPropagation();
-		// 	return false;
-		// });
-
 		this.$cart_items.on('change', '.quantity input', function() {
 			const $input = $(this);
 			const $item = $input.closest('.list-item[data-item-code]');
@@ -1003,16 +998,6 @@ class POSCart {
 		this.$cart_items.on('click', '.list-item', function() {
 			me.set_selected_item($(this));
 		});
-
-		// disable current item
-		// $('body').on('click', function(e) {
-		// 	console.log(e);
-		// 	if($(e.target).is('.list-item')) {
-		// 		return;
-		// 	}
-		// 	me.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
-		// 	me.selected_item = null;
-		// });
 
 		this.wrapper.find('.additional_discount_percentage').on('change', (e) => {
 			const discount_percentage = flt(e.target.value,
@@ -1122,8 +1107,8 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + i)',
-				placeholder: 'Search by item code, serial number, batch no or barcode'
+				label: __('Search Item (Ctrl + i)'),
+				placeholder: __('Search by item code, serial number, batch no or barcode')
 			},
 			parent: this.wrapper.find('.search-field'),
 			render_input: true,
@@ -1486,7 +1471,7 @@ class Payment {
 				[1, 2, 3],
 				[4, 5, 6],
 				[7, 8, 9],
-				['Del', 0, '.'],
+				[__('Del'), 0, '.'],
 			],
 			onclick: () => {
 				if(this.fieldname) {

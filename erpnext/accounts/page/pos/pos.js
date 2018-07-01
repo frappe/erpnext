@@ -408,7 +408,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.search_item = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
-				"label": "Item",
+				"label": __("Item"),
 				"fieldname": "pos_item",
 				"placeholder": __("Search Item")
 			},
