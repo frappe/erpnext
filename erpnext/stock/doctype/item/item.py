@@ -934,15 +934,16 @@ def get_uom_conv_factor(uom, stock_uom):
 
 	for d in uom_details:
 		if d.from_uom == stock_uom and d.to_uom == uom:
-			value = d.value
-		elif d.from_uom == uom and d.to_uom == stock_uom:
 			value = 1/flt(d.value)
-		else:
-			uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-			uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+		elif d.from_uom == uom and d.to_uom == stock_uom:
+			value = d.value
 
-			if uom_stock and uom_row:
-				if uom_stock.from_uom == uom_row.from_uom:
-					value = flt(uom_stock.value) * 1/flt(uom_row.value)
+	if not value:
+		uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
+		uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+
+		if uom_stock and uom_row:
+			if uom_stock.from_uom == uom_row.from_uom:
+				value = flt(uom_stock.value) * 1/flt(uom_row.value)
 
 	return value

@@ -163,7 +163,7 @@
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
-   "precision": "", 
+   "precision": "9",
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 0, 
@@ -186,7 +186,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-05 12:50:02.648100", 
+ "modified": "2018-06-29 15:35:34.580831",
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "UOM Conversion Factor", 
@@ -220,5 +220,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0,
+ "track_views": 0
 }
