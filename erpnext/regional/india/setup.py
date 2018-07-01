@@ -196,8 +196,10 @@ def make_custom_fields():
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
 				fieldtype='Section Break', insert_after='asset_received_but_not_billed'),
-			dict(fieldname='hra_component', label='HRA Component',
+			dict(fieldname='basic_component', label='Basic Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
+			dict(fieldname='hra_component', label='HRA Component',
+				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_component')
 		],
