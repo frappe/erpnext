@@ -251,7 +251,7 @@ let make_bank_entry = function (frm) {
 				);
 			},
 			freeze: true,
-			freeze_message: __("Creating Bank Entries......")
+			freeze_message: __("Creating Payment Entries......")
 		});
 	} else {
 		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));

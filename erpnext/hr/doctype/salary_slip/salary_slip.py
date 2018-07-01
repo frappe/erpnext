@@ -22,6 +22,14 @@ class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(SalarySlip, self).__init__(*args, **kwargs)
 		self.series = 'Sal Slip/{0}/.#####'.format(self.employee)
+		self.whitelisted_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date,
+			"getdate": getdate
+		}
 
 	def autoname(self):
 		self.name = make_autoname(self.series)
@@ -64,7 +72,7 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount and struct_row.statistical_component == 0 and struct_row.variable_based_on_taxable_salary != 1:
+				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
 
 				if key=="earnings" and struct_row.is_flexible_benefit == 1:
@@ -84,7 +92,7 @@ class SalarySlip(TransactionBase):
 
 		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
 		for struct_row in self._salary_structure_doc.get("deductions"):
-			if struct_row.variable_based_on_taxable_salary == 1:
+			if struct_row.variable_based_on_taxable_salary == 1 and not struct_row.formula and not struct_row.amount:
 				tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
 				if tax_row and amount:
 					self.update_component_row(frappe._dict(tax_row), amount, "deductions")
@@ -143,13 +151,13 @@ class SalarySlip(TransactionBase):
 		try:
 			condition = d.condition.strip() if d.condition else None
 			if condition:
-				if not frappe.safe_eval(condition, None, data):
+				if not frappe.safe_eval(condition, self.whitelisted_globals, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
 				formula = d.formula.strip() if d.formula else None
 				if formula:
-					amount = frappe.safe_eval(formula, None, data)
+					amount = frappe.safe_eval(formula, self.whitelisted_globals, data)
 			if amount:
 				data[d.abbr] = amount
 
@@ -761,17 +769,10 @@ class SalarySlip(TransactionBase):
 		return taxable_amount
 
 	def eval_tax_slab_condition(self, condition, data):
-		whitelisted_globals = {
-			"int": int,
-			"float": float,
-			"long": int,
-			"round": round,
-			"date": datetime.date
-		}
 		try:
 			condition = condition.strip()
 			if condition:
-				return frappe.safe_eval(condition, whitelisted_globals, data)
+				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
 			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
