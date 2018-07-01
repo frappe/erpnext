@@ -165,19 +165,22 @@ def calculate_lwp(employee, start_date, holidays, working_days):
 	return lwp
 
 def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, period_length, frequency):
-	# Considering there is only one application for an year
+	payroll_period, period_factor, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
+
+	if not payroll_period:
+		frappe.msgprint(_("Start and end dates not in a valid Payroll Period, cannot calculate {0}.")
+			.format(struct_row.salary_component))
+		return False
+
+	# Considering there is only one application for a year
 	benefit_application_name = frappe.db.sql("""
 	select name from `tabEmployee Benefit Application`
-	where employee=%(employee)s
+	where payroll_period=%(payroll_period)s and employee=%(employee)s
 	and docstatus = 1
-	and (date between %(start_date)s and %(end_date)s)
 	""", {
 		'employee': employee,
-		'start_date': start_date,
-		'end_date': end_date
+		'payroll_period': payroll_period
 	})
-
-	period_factor, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
 
 	if frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp") != 1:
 		if frequency == "Monthly" and actual_payroll_days in range(360, 370):
@@ -186,12 +189,12 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 
 	if period_factor:
 		# If there is application for benefit then fetch the amount from the application.
-		# else Split the max benefits to the pro-rata components with the ratio of thier max_benefit_amount
+		# else Split the max benefits to the pro-rata components with the ratio of their max_benefit_amount
 		if benefit_application_name:
 			benefit_application = frappe.get_doc("Employee Benefit Application", benefit_application_name[0][0])
 			return get_benefit_amount(benefit_application, struct_row, period_factor, period_length)
 
-		# TODO: Check if there is benefit claim for employee then pro-rata devid the rest of amount (Late Benefit Application)
+		# TODO: Check if there is benefit claim for employee then pro-rata divide the rest of amount (Late Benefit Application)
 		else:
 			component_max = frappe.db.get_value("Salary Component", struct_row.salary_component, "max_benefit_amount")
 			if component_max > 0:
