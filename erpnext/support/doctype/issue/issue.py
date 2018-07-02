@@ -133,7 +133,5 @@ def has_website_permission(doc, ptype, user, verbose=False):
 
 
 def update_issue(contact, method):
-	"""Update tabIssue"""
-	frappe.db.sql("""
-		UPDATE `tabIssue` set contact='' where contact=%s
-	""",contact.name)
+	"""Called when Contact is deleted"""
+	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
