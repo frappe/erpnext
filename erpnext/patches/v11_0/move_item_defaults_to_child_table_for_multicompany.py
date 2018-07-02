@@ -45,7 +45,7 @@ def execute():
 				})
 
 			for d in [
-						["default_warehouse", "Warehouse"], ["expense_account", "Account"], ["expense_account", "Account"],
+						["default_warehouse", "Warehouse"], ["expense_account", "Account"], ["income_account", "Account"],
 						["buying_cost_center", "Cost Center"], ["selling_cost_center", "Cost Center"]
 					]:
 				if item.get(d[0]):
