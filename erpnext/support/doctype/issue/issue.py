@@ -130,3 +130,10 @@ def set_multiple_status(names, status):
 
 def has_website_permission(doc, ptype, user, verbose=False):
 	return doc.raised_by==user
+
+
+def update_issue(contact, method):
+	"""Update tabIssue"""
+	frappe.db.sql("""
+		UPDATE `tabIssue` set contact='' where contact=%s
+	""",contact.name)

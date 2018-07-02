@@ -208,7 +208,7 @@ doc_events = {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	},
 	"Contact":{
-		"on_trash": "erpnext.custom_hooks.contacts.update_issue"
+		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
 	}
 }
 
