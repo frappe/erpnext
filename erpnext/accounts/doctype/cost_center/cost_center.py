@@ -13,8 +13,8 @@ class CostCenter(NestedSet):
 	nsm_parent_field = 'parent_cost_center'
 
 	def autoname(self):
-		self.name = self.cost_center_name.strip() + ' - ' + \
-			frappe.db.get_value("Company", self.company, "abbr")
+		from erpnext.accounts.utils import get_doc_name_autoname
+		self.name = get_doc_name_autoname(self.cost_center_number, self.cost_center_name, None, self.company)
 
 	def validate(self):
 		self.validate_mandatory()
