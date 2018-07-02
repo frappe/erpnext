@@ -199,19 +199,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Template"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Separation Template",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Onboarding Template"
-				}
-			]
-		},
-		{
 			"label": _("Employee Lifecycle"),
 			"items": [
 				{
@@ -229,6 +216,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Onboarding"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation Template",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding Template"
 				}
 			]
 		},
