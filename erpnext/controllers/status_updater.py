@@ -129,7 +129,7 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate,
 							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
@@ -256,7 +256,7 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
-				
+
 				frappe.db.sql("""update `tab%(target_dt)s`
 					set %(target_field)s = (
 						(select ifnull(sum(%(source_field)s), 0)
@@ -281,16 +281,20 @@ class StatusUpdater(Document):
 		"""Update percent field in parent transaction"""
 
 		self._update_modified(args, update_modified)
-		
+
 		if args.get('target_parent_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(target_parent_field)s = round(
-					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
-						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
-					%(update_modified)s
-				where name='%(name)s'""" % args)
+			frappe.db.sql("""
+			UPDATE `tab%(target_parent_dt)s`
+			SET %(target_parent_field)s = round(ifnull(
+				(
+					SELECT IF(sum(abs(%(target_ref_field)s)) = 0, 100, ifnull(
+						sum(IF(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0
+						)) / IF(sum(abs(%(target_ref_field)s)) = 0, 100, sum(abs(%(target_ref_field)s))) * 100
+					FROM `tab%(target_dt)s`
+					WHERE parent="%(name)s"
+				), 0), 6) %(update_modified)s
+			WHERE name='%(name)s'
+			""" % args)
 
 			# update field
 			if args.get('status_field'):
@@ -335,8 +339,7 @@ class StatusUpdater(Document):
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 
-			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
-				/ ref_doc_qty)*100
+			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
