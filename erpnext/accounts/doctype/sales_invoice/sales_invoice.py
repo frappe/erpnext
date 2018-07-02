@@ -205,9 +205,9 @@ class SalesInvoice(SellingController):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
-		if not self.is_return:
+		if not self.is_return and self.loyalty_program:
 			self.delete_loyalty_point_entry()
-		else:
+		elif self.is_return and self.return_against and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.make_loyalty_point_entry()
 
