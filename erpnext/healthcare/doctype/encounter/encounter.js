@@ -1,7 +1,7 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Consultation', {
+frappe.ui.form.on('Encounter', {
 	setup: function(frm) {
 		frm.get_field('drug_prescription').grid.editable_fields = [
 			{fieldname: 'drug_code', columns: 2},
@@ -75,7 +75,7 @@ frappe.ui.form.on('Consultation', {
 		});
 		if(!frm.doc.__islocal && !frm.doc.invoice && (frappe.user.has_role("Accounts User"))){
 			frm.add_custom_button(__('Invoice'), function() {
-				btn_invoice_consultation(frm);
+				btn_invoice_encounter(frm);
 			},__("Create"));
 		}
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);
@@ -85,17 +85,17 @@ frappe.ui.form.on('Consultation', {
 		frm.set_df_property("type", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("practitioner", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("visit_department", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("consultation_date", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("consultation_time", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("encounter_date", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("encounter_time", "read_only", frm.doc.__islocal ? 0:1);
 	}
 });
 
-var btn_invoice_consultation = function(frm){
+var btn_invoice_encounter = function(frm){
 	var doc = frm.doc;
 	frappe.call({
 		method:
-		"erpnext.healthcare.doctype.consultation.consultation.create_invoice",
-		args: {company: doc.company, patient: doc.patient, practitioner: doc.practitioner, consultation_id: doc.name },
+		"erpnext.healthcare.doctype.encounter.encounter.create_invoice",
+		args: {company: doc.company, patient: doc.patient, practitioner: doc.practitioner, encounter_id: doc.name },
 		callback: function(data){
 			if(!data.exc){
 				if(data.message){
@@ -142,7 +142,7 @@ var btn_create_procedure = function (frm) {
 	frappe.new_doc("Clinical Procedure");
 };
 
-frappe.ui.form.on("Consultation", "appointment", function(frm){
+frappe.ui.form.on("Encounter", "appointment", function(frm){
 	if(frm.doc.appointment){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -160,7 +160,7 @@ frappe.ui.form.on("Consultation", "appointment", function(frm){
 	}
 });
 
-frappe.ui.form.on("Consultation", "practitioner", function(frm) {
+frappe.ui.form.on("Encounter", "practitioner", function(frm) {
 	if(frm.doc.practitioner){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -175,7 +175,7 @@ frappe.ui.form.on("Consultation", "practitioner", function(frm) {
 	}
 });
 
-frappe.ui.form.on("Consultation", "symptoms_select", function(frm) {
+frappe.ui.form.on("Encounter", "symptoms_select", function(frm) {
 	if(frm.doc.symptoms_select){
 		var symptoms = null;
 		if(frm.doc.symptoms)
@@ -186,7 +186,7 @@ frappe.ui.form.on("Consultation", "symptoms_select", function(frm) {
 		frappe.model.set_value(frm.doctype,frm.docname, "symptoms_select", null);
 	}
 });
-frappe.ui.form.on("Consultation", "diagnosis_select", function(frm) {
+frappe.ui.form.on("Encounter", "diagnosis_select", function(frm) {
 	if(frm.doc.diagnosis_select){
 		var diagnosis = null;
 		if(frm.doc.diagnosis)
@@ -198,7 +198,7 @@ frappe.ui.form.on("Consultation", "diagnosis_select", function(frm) {
 	}
 });
 
-frappe.ui.form.on("Consultation", "patient", function(frm) {
+frappe.ui.form.on("Encounter", "patient", function(frm) {
 	if(frm.doc.patient){
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",

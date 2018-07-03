@@ -16,7 +16,7 @@ def setup_data():
 	make_consulation()
 	make_appointment()
 	consulation_on_appointment()
-	lab_test_on_consultation()
+	lab_test_on_encounter()
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -70,35 +70,35 @@ def make_consulation():
 		department = frappe.get_value("Practitioner", practitioner, "department")
 		patient = get_random("Patient")
 		patient_sex = frappe.get_value("Patient", patient, "sex")
-		consultation = set_consultation(patient, patient_sex, practitioner, department, getdate(), i)
-		consultation.save(ignore_permissions=True)
+		encounter = set_encounter(patient, patient_sex, practitioner, department, getdate(), i)
+		encounter.save(ignore_permissions=True)
 
 def consulation_on_appointment():
 	for i in range(3):
 		appointment = get_random("Patient Appointment")
 		appointment = frappe.get_doc("Patient Appointment",appointment)
-		consultation = set_consultation(appointment.patient, appointment.patient_sex, appointment.practitioner, appointment.department, appointment.appointment_date, i)
-		consultation.appointment = appointment.name
-		consultation.save(ignore_permissions=True)
+		encounter = set_encounter(appointment.patient, appointment.patient_sex, appointment.practitioner, appointment.department, appointment.appointment_date, i)
+		encounter.appointment = appointment.name
+		encounter.save(ignore_permissions=True)
 
-def set_consultation(patient, patient_sex, practitioner, department, consultation_date, i):
-	consultation = frappe.new_doc("Consultation")
-	consultation.patient = patient
-	consultation.patient_sex = patient_sex
-	consultation.practitioner = practitioner
-	consultation.visit_department = department
-	consultation.consultation_date = consultation_date
+def set_encounter(patient, patient_sex, practitioner, department, encounter_date, i):
+	encounter = frappe.new_doc("Encounter")
+	encounter.patient = patient
+	encounter.patient_sex = patient_sex
+	encounter.practitioner = practitioner
+	encounter.visit_department = department
+	encounter.encounter_date = encounter_date
 	if i > 2 and patient_sex=='Female':
-		consultation.symptoms = "Having chest pains for the last week."
-		consultation.diagnosis = """This patient's description of dull, aching,
+		encounter.symptoms = "Having chest pains for the last week."
+		encounter.diagnosis = """This patient's description of dull, aching,
 		exertion related substernal chest pain is suggestive of ischemic
 		cardiac origin. Her findings of a FH of early ASCVD, hypertension,
 		and early surgical menopause are pertinent risk factors for development
 		of coronary artery disease. """
 	else:
-		consultation = append_drug_rx(consultation)
-		consultation = append_test_rx(consultation)
-	return consultation
+		encounter = append_drug_rx(encounter)
+		encounter = append_test_rx(encounter)
+	return encounter
 
 def make_lab_test():
 	practitioner = get_random("Practitioner")
@@ -107,13 +107,13 @@ def make_lab_test():
 	template = get_random("Lab Test Template")
 	set_lab_test(patient, patient_sex, practitioner, template)
 
-def lab_test_on_consultation():
+def lab_test_on_encounter():
 	i = 1
 	while i <= 2:
 		test_rx = get_random("Lab Prescription", filters={'test_created': 0})
 		test_rx = frappe.get_doc("Lab Prescription", test_rx)
-		consultation = frappe.get_doc("Consultation", test_rx.parent)
-		set_lab_test(consultation.patient, consultation.patient_sex, consultation.practitioner, test_rx.test_code, test_rx.name)
+		encounter = frappe.get_doc("Encounter", test_rx.parent)
+		set_lab_test(encounter.patient, encounter.patient_sex, encounter.practitioner, test_rx.test_code, test_rx.name)
 		i += 1
 
 def set_lab_test(patient, patient_sex, practitioner, template, rx=None):
@@ -125,26 +125,26 @@ def set_lab_test(patient, patient_sex, practitioner, template, rx=None):
 	lab_test.prescription = rx
 	create_test_from_template(lab_test)
 
-def append_test_rx(consultation):
+def append_test_rx(encounter):
 	i = 1
 	while i <= 2:
-		test_rx = consultation.append("test_prescription")
+		test_rx = encounter.append("test_prescription")
 		test_rx.test_code = get_random("Lab Test Template")
 		i += 1
-	return consultation
+	return encounter
 
-def append_drug_rx(consultation):
+def append_drug_rx(encounter):
 	i = 1
 	while i <= 3:
 		drug = get_random("Item", filters={"item_group":"Drug"})
 		drug = frappe.get_doc("Item", drug)
-		drug_rx = consultation.append("drug_prescription")
+		drug_rx = encounter.append("drug_prescription")
 		drug_rx.drug_code = drug.item_code
 		drug_rx.drug_name = drug.item_name
 		drug_rx.dosage = get_random("Prescription Dosage")
 		drug_rx.period = get_random("Prescription Duration")
 		i += 1
-	return consultation
+	return encounter
 
 def random_date(start,l):
    current = start

@@ -9,14 +9,14 @@ from frappe.utils import getdate, cstr
 import json
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
-class Consultation(Document):
+class Encounter(Document):
 	def on_update(self):
 		if(self.appointment):
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
-		update_consultation_to_medical_record(self)
+		update_encounter_to_medical_record(self)
 
 	def after_insert(self):
-		insert_consultation_to_medical_record(self)
+		insert_encounter_to_medical_record(self)
 
 	def on_cancel(self):
 		if(self.appointment):
@@ -62,8 +62,8 @@ def create_drug_invoice(company, patient, prescriptions):
 	return sales_invoice.as_dict()
 
 @frappe.whitelist()
-def create_invoice(company, patient, practitioner, consultation_id):
-	if not consultation_id:
+def create_invoice(company, patient, practitioner, encounter_id):
+	if not encounter_id:
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
@@ -74,8 +74,8 @@ def create_invoice(company, patient, practitioner, consultation_id):
 	create_invoice_items(practitioner, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql("""update tabConsultation set invoice=%s where name=%s""", (sales_invoice.name, consultation_id))
-	appointment = frappe.db.get_value("Consultation", consultation_id, "appointment")
+	frappe.db.sql("""update tabEncounter set invoice=%s where name=%s""", (sales_invoice.name, encounter_id))
+	appointment = frappe.db.get_value("Encounter", encounter_id, "appointment")
 	if appointment:
 		frappe.db.set_value("Patient Appointment", appointment, "sales_invoice", sales_invoice.name)
 	return sales_invoice.name
@@ -94,38 +94,38 @@ def create_invoice_items(practitioner, invoice, company):
 		item_line.amount = op_consulting_charge
 	return invoice
 
-def insert_consultation_to_medical_record(doc):
+def insert_encounter_to_medical_record(doc):
 	subject = set_subject_field(doc)
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject
 	medical_record.status = "Open"
-	medical_record.communication_date = doc.consultation_date
-	medical_record.reference_doctype = "Consultation"
+	medical_record.communication_date = doc.encounter_date
+	medical_record.reference_doctype = "Encounter"
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
 
-def update_consultation_to_medical_record(consultation):
-	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s", (consultation.name))
+def update_encounter_to_medical_record(encounter):
+	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s", (encounter.name))
 	if medical_record_id and medical_record_id[0][0]:
-		subject = set_subject_field(consultation)
+		subject = set_subject_field(encounter)
 		frappe.db.set_value("Patient Medical Record", medical_record_id[0][0], "subject", subject)
 	else:
-		insert_consultation_to_medical_record(consultation)
+		insert_encounter_to_medical_record(encounter)
 
-def delete_medical_record(consultation):
-	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (consultation.name))
+def delete_medical_record(encounter):
+	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (encounter.name))
 
-def set_subject_field(consultation):
+def set_subject_field(encounter):
 	subject = "No Diagnosis "
-	if(consultation.diagnosis):
-		subject = "Diagnosis: \n"+ cstr(consultation.diagnosis)+". "
-	if(consultation.drug_prescription):
+	if(encounter.diagnosis):
+		subject = "Diagnosis: \n"+ cstr(encounter.diagnosis)+". "
+	if(encounter.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
-	if(consultation.test_prescription):
+	if(encounter.test_prescription):
 		subject += "\nTest(s) Prescribed."
-	if(consultation.procedure_prescription):
+	if(encounter.procedure_prescription):
 		subject += "\nProcedure(s) Prescribed."
 
 	return subject

@@ -2,7 +2,7 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'consultation',
+		'fieldname': 'encounter',
 		'non_standard_fieldnames': {
 			'Patient Medical Record': 'reference_name'
 		},
