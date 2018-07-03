@@ -33,7 +33,7 @@ class PayrollEntry(Document):
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": self.payroll_frequency}
 
-		sal_struct = frappe.db.sql("""
+		sal_struct = frappe.db.sql_list("""
 				select
 					name from `tabSalary Structure`
 				where
@@ -54,7 +54,8 @@ class PayrollEntry(Document):
 				where
 					t1.name = t2.employee
 					and t2.docstatus = 1
-			%s order by t2.from_date desc"""% cond, {"sal_struct": sal_struct, "from_date": self.start_date}, as_dict=True)
+			%s order by t2.from_date desc
+			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.start_date}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):
