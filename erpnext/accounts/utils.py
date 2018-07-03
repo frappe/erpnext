@@ -146,7 +146,6 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# for all accounts, get balance within a fiscal year if maintain cost center in balance account is checked
 			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 				% year_start_date)
-			
 		# different filter for group and ledger - improved performance
 		if acc.is_group:
 			cond.append("""exists (

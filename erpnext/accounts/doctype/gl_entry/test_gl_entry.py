@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, unittest
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from frappe.utils import cint
 
 class TestGLEntry(unittest.TestCase):
 	def test_round_off_entry(self):
