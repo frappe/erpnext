@@ -43,6 +43,7 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		project.save()
 		doc.reload()
 		employee = make_employee(doc.name)
+		employee.first_name = employee.employee_name
 		employee.date_of_joining = nowdate()
 		employee.date_of_birth = '1990-05-08'
 		employee.gender = 'Female'
