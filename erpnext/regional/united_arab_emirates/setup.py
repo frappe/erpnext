@@ -17,7 +17,7 @@ def setup(company=None, patch=True):
 def make_custom_fields():
 	invoice_fields = [
 		dict(fieldname='vat_section', label='VAT Details', fieldtype='Section Break',
-			insert_after='select_print_heading', print_hide=1, collapsible=1),
+			insert_after='group_same_items', print_hide=1, collapsible=1),
 		dict(fieldname='permit_no', label='Permit Number',
 			fieldtype='Data', insert_after='vat_section', print_hide=1),
 		dict(fieldname='reverse_charge_applicable', label='Reverse Charge Applicable',
