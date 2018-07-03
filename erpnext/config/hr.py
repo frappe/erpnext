@@ -211,11 +211,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Separation"
+					"name": "Employee Separation",
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Onboarding"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation Template",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding Template"
 				}
 			]
 		},
@@ -317,7 +325,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Settings"
+					"name": "Daily Work Summary Group"
 				},
 				{
 					"type": "doctype",

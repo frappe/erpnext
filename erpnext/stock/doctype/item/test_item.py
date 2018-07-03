@@ -255,9 +255,9 @@ class TestItem(unittest.TestCase):
 			d.conversion_factor = value
 
 		self.assertEqual(item_doc.uoms[0].uom, "Carat")
-		self.assertEqual(item_doc.uoms[0].conversion_factor, 5)
+		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
-		self.assertEqual(item_doc.uoms[1].conversion_factor, 0.001)
+		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]

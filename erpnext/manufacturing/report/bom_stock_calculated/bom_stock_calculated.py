@@ -19,7 +19,7 @@ def execute(filters=None):
 		last_pur_price = frappe.db.get_value("Item", rows[0], "last_purchase_rate")
 		if rows[4] > 0:
 			diff_qty = rows[4] - reqd_qty
-				summ_data.append([rows[0], rows[1], item_map[rows[0]]["manufacturer"], item_map[rows[0]]["manufacturer_part_no"], rows[3], rows[4], reqd_qty, diff_qty, last_pur_price])
+			summ_data.append([rows[0], rows[1], item_map[rows[0]]["manufacturer"], item_map[rows[0]]["manufacturer_part_no"], rows[3], rows[4], reqd_qty, diff_qty, last_pur_price])
 		else:
 			diff_qty = 0 - reqd_qty
 			summ_data.append([rows[0], rows[1], item_map[rows[0]]["manufacturer"], item_map[rows[0]]["manufacturer_part_no"], rows[3], "0.000", reqd_qty, diff_qty, last_pur_price])
