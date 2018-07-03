@@ -268,13 +268,12 @@ erpnext.setup.slides_settings = [
 			});
 
 			// add class to show buttons side by side
-			$('.modal-content .form-column').addClass('row');
-			$('div[data-fieldname="collapse_all"]')
-				.addClass('col-sm-2 col-xs-3')
-				.css({"width": "auto"});
-			$('div[data-fieldname="expand_all"]')
-				.addClass('col-sm-2 col-xs-3')
-				.css({"width": "auto"});
+			const form_container = $(dialog.body).find('form');
+			const buttons = $(form_container).find('.frappe-control');
+			form_container.addClass('flex');
+			buttons.map((index, button) => {
+				$(button).css({"margin-right": "1em"});
+			})
 
 			dialog.show();
 			coa_tree.load_children(coa_tree.root_node, true); // expand all node trigger
