@@ -105,7 +105,7 @@ def get_actual_details(name, filters):
 			and b.{budget_against} = gl.{budget_against}
 			and gl.fiscal_year=%s 
 			and b.{budget_against}=%s
-			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond})
+			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond}) group by gl.name
 	""".format(tab = filters.budget_against, budget_against = budget_against, cond = cond),
 	(filters.fiscal_year, name), as_dict=1)
 
