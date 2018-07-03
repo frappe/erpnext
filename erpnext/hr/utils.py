@@ -333,7 +333,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 		'component': component
 	}, as_dict=True)
 
-	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
+	if sum_of_given_benefit and flt(sum_of_given_benefit[0].total_amount) > 0:
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
 

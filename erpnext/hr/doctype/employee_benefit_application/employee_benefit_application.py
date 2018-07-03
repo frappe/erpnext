@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint
+from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint, flt
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
@@ -14,7 +14,7 @@ from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_
 class EmployeeBenefitApplication(Document):
 	def validate(self):
 		self.validate_duplicate_on_payroll_period()
-		if self.max_benefits <= 0:
+		if flt(self.max_benefits) <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		self.validate_max_benefit_for_component()
 		self.validate_prev_benefit_claim()
