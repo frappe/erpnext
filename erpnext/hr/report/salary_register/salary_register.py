@@ -74,13 +74,18 @@ def get_columns(salary_slips):
 def get_salary_slips(filters):
 	filters.update({"from_date": filters.get("from_date"), "to_date":filters.get("to_date")})
 	conditions, filters = get_conditions(filters)
-	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where docstatus = 1 %s
+	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where %s
 		order by employee""" % conditions, filters, as_dict=1)
 
 	return salary_slips or []
 
 def get_conditions(filters):
 	conditions = ""
+	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
+
+	if filters.get("docstatus"):
+		conditions += "docstatus = {0}".format(doc_status[filters.get("docstatus")])
+
 	if filters.get("from_date"): conditions += " and start_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and end_date <= %(to_date)s"
 	if filters.get("company"): conditions += " and company = %(company)s"
