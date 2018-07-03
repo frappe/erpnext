@@ -11,10 +11,12 @@ def execute():
 	[ default_warehouse, buying_cost_center, expense_account, selling_cost_center, income_account ]
 
 	'''
+	if not frappe.db.has_column('Item', 'default_warehouse'):
+		return
 
 	frappe.reload_doc('stock', 'doctype', 'item_default')
 	frappe.reload_doc('stock', 'doctype', 'item')
-
+	
 	companies = frappe.get_all("Company")
 	if len(companies) == 1:
 		frappe.db.sql('''
