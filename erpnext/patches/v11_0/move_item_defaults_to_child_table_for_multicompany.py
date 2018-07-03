@@ -19,16 +19,19 @@ def execute():
 	
 	companies = frappe.get_all("Company")
 	if len(companies) == 1:
-		frappe.db.sql('''
-				INSERT INTO `tabItem Default`
-					(name, parent, parenttype, parentfield, idx, company, default_warehouse,
-					buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier)
-				SELECT
-					SUBSTRING(SHA2(name,224), 1, 10) as name, name as parent, 'Item' as parenttype,
-					'item_defaults' as parentfield, 1 as idx, %s as company, default_warehouse,
-					buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier
-				FROM `tabItem`;
-		''', companies[0].name)
+		try:
+			frappe.db.sql('''
+					INSERT INTO `tabItem Default`
+						(name, parent, parenttype, parentfield, idx, company, default_warehouse,
+						buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier)
+					SELECT
+						SUBSTRING(SHA2(name,224), 1, 10) as name, name as parent, 'Item' as parenttype,
+						'item_defaults' as parentfield, 1 as idx, %s as company, default_warehouse,
+						buying_cost_center, selling_cost_center, expense_account, income_account, default_supplier
+					FROM `tabItem`;
+			''', companies[0].name)
+		except:
+			pass
 	else:
 		item_details = frappe.get_all("Item", fields=["name", "default_warehouse", "buying_cost_center",
 									"expense_account", "selling_cost_center", "income_account"], limit=100)
