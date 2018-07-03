@@ -52,4 +52,5 @@ def execute():
 		for dt, field_list in field_rename_map.items():
 			if frappe.db.exists('DocType', dt):
 				for field in field_list:
-					rename_field(dt, field[0], field[1])
+					if frappe.db.has_column(dt, field[0]):
+						rename_field(dt, field[0], field[1])
