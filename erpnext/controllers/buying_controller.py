@@ -737,8 +737,8 @@ def validate_item_type(doc, fieldname, message):
 		""".format(item_list, fieldname), as_list=True)]
 
 	if invalid_items:
-		frappe.throw(_("Following item {items} {verb} not marked as {message} item.\
+		frappe.throw(_("Following item {items} {verb} marked as {message} item.\
 			You can enable them as {message} item from its Item master".format(
 				items = ", ".join([d for d in invalid_items]),
-				verb = "are" if len(invalid_items) > 1 else "is",
+				verb = _("are not") if len(invalid_items) > 1 else _("is not"),
 				message = message)))
