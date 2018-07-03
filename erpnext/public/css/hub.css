@@ -1,0 +1,143 @@
+body[data-route^="Hub/"] .hub-icon {
+  width: 40px;
+  height: 40px;
+}
+body[data-route^="Hub/"] .hub-page-title {
+  margin-left: 10px;
+}
+body[data-route^="Hub/"] .img-wrapper {
+  border: 1px solid #d1d8dd;
+  border-radius: 3px;
+  padding: 12px;
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+}
+body[data-route^="Hub/"] .img-wrapper .helper {
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+body[data-route^="Hub/"] .tree {
+  margin: 10px 0px;
+  padding: 0px;
+  height: 100%;
+  position: relative;
+}
+body[data-route^="Hub/"] .tree.with-skeleton.opened::before {
+  left: 9px;
+  top: 14px;
+  height: calc(100% - 32px);
+}
+body[data-route^="Hub/"] .list-header-icon {
+  width: 72px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin: 10px;
+  padding: 1px;
+  border: 1px solid #d1d8dd;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body[data-route^="Hub/"] .list-header-icon img {
+  border-radius: 4px;
+}
+body[data-route^="Hub/"] .star-icon.fa-star {
+  color: #ffa00a;
+}
+body[data-route^="Hub/"] .octicon-heart.liked {
+  color: #ff5858;
+}
+body[data-route^="Hub/"] .margin-vertical-10 {
+  margin: 10px 0px;
+}
+body[data-route^="Hub/"] .margin-vertical-15 {
+  margin: 15px 0px;
+}
+body[data-route^="Hub/"] .frappe-list .result {
+  min-height: 100px;
+}
+body[data-route^="Hub/"] .frappe-control[data-fieldtype="Attach Image"] {
+  width: 140px;
+  height: 180px;
+  margin-top: 20px;
+}
+body[data-route^="Hub/"] .frappe-control[data-fieldtype="Attach Image"] .form-group {
+  display: none;
+}
+body[data-route^="Hub/"] .frappe-control[data-fieldtype="Attach Image"] .clearfix {
+  display: none;
+}
+body[data-route^="Hub/"] .missing-image {
+  display: block;
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid #d1d8dd;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+body[data-route^="Hub/"] .missing-image .octicon {
+  position: relative;
+  top: 50%;
+  transform: translate(0px, -50%);
+  -webkit-transform: translate(0px, -50%);
+}
+body[data-route^="Hub/"] .attach-image-display {
+  display: block;
+  position: relative;
+  border-radius: 4px;
+}
+body[data-route^="Hub/"] .img-container {
+  height: 100%;
+  width: 100%;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #d1d8dd;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+body[data-route^="Hub/"] .img-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  color: #777777;
+  background-color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+}
+body[data-route^="Hub/"] .img-overlay:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+.image-view-container .image-view-body:hover .like-button {
+  opacity: 0.7;
+}
+.image-view-container .like-button {
+  bottom: 10px !important;
+  left: 10px !important;
+  width: 36px;
+  height: 36px;
+  opacity: 0;
+  font-size: 16px;
+  color: #36414C;
+  position: absolute;
+}
+@media (max-width: 767px) {
+  .image-view-container .like-button {
+    opacity: 0.5;
+  }
+}
+.image-view-container .image-view-body:hover .like-button {
+  opacity: 0.7;
+}
+.rating-area .star-icon {
+  cursor: pointer;
+  font-size: 15px;
+}
