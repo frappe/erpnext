@@ -266,9 +266,6 @@ class Project(Document):
 				dependency_map[task.title] = [x['subject'] for x in frappe.get_list(
 					'Task Depends On', {"parent": name}, ['subject'])]
 
-			for key, value in dependency_map.iteritems():
-				task_name = frappe.db.get_value('Task', {"subject": key, "project": self.name})
-
 			for key, value in iteritems(dependency_map):
 				task_name = frappe.db.get_value('Task', {"subject": key, "project": self.name })
 
