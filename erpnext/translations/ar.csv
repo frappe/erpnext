@@ -10482,7 +10482,7 @@ DocType: Bin,Reserved Qty for Production,الكمية المحجوزة للان�
 
 DocType: Student Group Creation Tool,Leave unchecked if you don't want to consider batch while making course based groups.,ترك دون تحديد إذا كنت لا ترغب في النظر في دفعة مع جعل مجموعات مقرها بالطبع.
 
-DocType: Asset,Frequency of Depreciation (Months),تواتر او تكرار الاهلاك (أشهر)
+DocType: Asset,Frequency of Depreciation (Months),معدل الإهلاك (شهري)
 
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +501,Credit Account,حساب دائن
 
