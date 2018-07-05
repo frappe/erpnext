@@ -42,7 +42,7 @@ class PaymentRequest(Document):
 			for subscription_plan in self.subscription_plans:
 				payment_gateway = frappe.db.get_value("Subscription Plan", subscription_plan.plan, "payment_gateway")
 				if payment_gateway != self.payment_gateway_account:
-					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(plan.name)))
+					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(subscription_plan.name)))
 
 				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
 
