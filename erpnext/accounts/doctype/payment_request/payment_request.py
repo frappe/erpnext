@@ -13,12 +13,14 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 
 class PaymentRequest(Document):
 	def validate(self):
 		self.validate_reference_document()
 		self.validate_payment_request()
 		self.validate_currency()
+		self.validate_subscription_details()
 
 	def validate_reference_document(self):
 		if not self.reference_doctype or not self.reference_name:
@@ -34,18 +36,15 @@ class PaymentRequest(Document):
 		if self.payment_account and ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
 
-	def on_update(self):
-		self.validate_subscription_details()
-
 	def validate_subscription_details(self):
 		if self.is_a_subscription:
 			amount = 0
 			for subscription_plan in self.subscription_plans:
-				plan = frappe.get_doc("Subscription Plan", subscription_plan.plan)
-				if plan.payment_gateway != self.payment_gateway_account:
+				payment_gateway = frappe.db.get_value("Subscription Plan", subscription_plan.plan, "payment_gateway")
+				if payment_gateway != self.payment_gateway_account:
 					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(plan.name)))
 
-				rate = plan.get_plan_rate()
+				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
 
 				amount += rate
 
@@ -258,15 +257,6 @@ class PaymentRequest(Document):
 		if payment_provider == "stripe":
 			return create_stripe_subscription(gateway_controller, data)
 
-	def get_subscription_details(self):
-		if self.reference_doctype == "Sales Invoice":
-			subscriptions = frappe.db.sql("""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""", self.reference_name, as_dict=1)
-			self.subscription_plans = []
-			for subscription in subscriptions:
-				plans = frappe.get_doc("Subscription", subscription.sub_name).plans
-				for plan in plans:
-					self.append('subscription_plans', plan)
-
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
@@ -407,3 +397,14 @@ def get_dummy_message(doc):
 
 <p>{{ _("Thank you for your business!") }}</p>
 """, dict(doc=doc, payment_url = '{{ payment_url }}'))
+
+@frappe.whitelist()
+def get_subscription_details(reference_doctype, reference_name):
+	if reference_doctype == "Sales Invoice":
+		subscriptions = frappe.db.sql("""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",reference_name, as_dict=1)
+		subscription_plans = []
+		for subscription in subscriptions:
+			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
+			for plan in plans:
+				subscription_plans.append(plan)
+		return subscription_plans

@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_last_day, add_to_date, flt
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 
 
 class Subscription(Document):
@@ -298,11 +299,11 @@ class Subscription(Document):
 		items = []
 		customer = self.get_customer(self.subscriber)
 		for plan in plans:
-			subscription_plan = frappe.get_doc("Subscription Plan", plan.plan)
+			item_code = frappe.db.get_value("Subscription Plan", plan.plan, "item")
 			if not prorate:
-				items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': subscription_plan.get_plan_rate(customer)})
+				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, customer)})
 			else:
-				items.append({'item_code': subscription_plan.item, 'qty': plan.qty, 'rate': (subscription_plan.get_plan_rate(customer) * prorate_factor)})
+				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': (get_plan_rate(plan.plan, plan.qty, customer) * prorate_factor)})
 
 		return items
 
