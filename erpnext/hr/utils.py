@@ -385,6 +385,6 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 		'end_date': payroll_period.end_date,
 		'component': component
 	}, as_dict=True)
-	if sum_of_claimed_amount and sum_of_claimed_amount[0].total_amount > 0:
+	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
