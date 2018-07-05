@@ -55,11 +55,16 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function(frm) {
 
 	if (frm.doc.is_a_subscription) {
 		frappe.call({
-			method: "get_subscription_details",
-			doc: frm.doc,
+			method: "erpnext.accounts.doctype.payment_request.payment_request.get_subscription_details",
+			args: {"reference_doctype": frm.doc.reference_doctype, "reference_name": frm.doc.reference_name},
 			freeze: true,
-			callback: function(r){
-				if(!r.exc) {
+			callback: function(data){
+				if(!data.exc) {
+					$.each(data.message || [], function(i, v){
+						var d = frappe.model.add_child(frm.doc, "Subscription Plan Detail", "subscription_plans");
+						d.qty = v.qty;
+						d.plan = v.plan;
+					});
 					frm.refresh_field("subscription_plans");
 				}
 			}
