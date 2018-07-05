@@ -8,15 +8,11 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Leave and Attendance'),
-				'items': ['Attendance', 'Leave Application', 'Leave Allocation']
+				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation']
 			},
 			{
 				'label': _('Payroll'),
-				'items': ['Salary Slip', 'Timesheet']
-			},
-			{
-				'label': _('Training Events/Results'),
-				'items': ['Training Event', 'Training Result']
+				'items': ['Salary Structure Assignment', 'Salary Slip', 'Timesheet']
 			},
 			{
 				'label': _('Expense'),
@@ -27,8 +23,12 @@ def get_data():
 				'items': ['Appraisal']
 			},
 			{
-				'label': _('Employee Lifecycle'),
-				'items': ['Employee Transfer', 'Employee Promotion']
+				'label': _('Training'),
+				'items': ['Training Event', 'Training Result']
+			},
+			{
+				'label': _('Lifecycle'),
+				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Separation']
 			}
 		]
 	}
