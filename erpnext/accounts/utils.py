@@ -784,7 +784,7 @@ def update_number_field(doctype_name, name, field_name, field_value, company):
 
 	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
 
-	new_name = get_doc_name_autoname(field_value, doc_title, name, company)
+	new_name = get_autoname_with_number(field_value, doc_title, name, company)
 
 	if name != new_name:
 		frappe.rename_doc(doctype_name, name, new_name)
@@ -803,7 +803,7 @@ def validate_field_number(doctype_name, name, field_value, company, field_name):
 			frappe.throw(_("{0} Number {1} already used in account {2}")
 				.format(doctype_name, field_value, doctype_with_same_number))
 
-def get_doc_name_autoname(field_value, doc_title, name, company):
+def get_autoname_with_number(number_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
 	if name:
 		name_split=name.split("-")
