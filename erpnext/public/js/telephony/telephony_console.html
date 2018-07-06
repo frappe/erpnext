@@ -1,0 +1,73 @@
+<div id="cc_console">
+	<div class="col-xs-4" style="padding:0px;">
+		<ul class="list-group">
+			{% if(info.title == "New Caller") { %}
+			<li class="list-group-item">
+			<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
+				New Caller
+			</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="new_lead" class="btn btn-sm btn-primary">Create Lead</button>
+				<button id="new_customer" class="btn btn-sm btn-primary">Customer</button>
+				<button id="new_caller_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
+			{% } else if (info.title == "Customer") { %}
+			<li class="list-group-item">
+				<span class="h4">Customer</span>
+				<span style="margin-left: 10px" class="muted">Services: <span class="strong">{%= info.service_count %}</span></span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
+					<a href="/desk#Form/Customer/{{ info.name }}">{{ info.name }}</a>
+				</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="customer_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
+			{% } else if (info.title == "Lead") { %}
+			<li class="list-group-item"><h4>Lead</h4></li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
+					<a href="/desk#Form/Lead/{{ info.route_link }}">{{ info.name }}</a>
+				</span>
+			</li>
+			<li class="list-group-item">
+				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+			</li>
+			<li class="list-group-item">
+				<button id="lead_to_customer" class="btn btn-sm btn-primary">Customer</button>
+				<button id="lead_issue" class="btn btn-sm btn-primary">Log Issue</button>
+			</li>
+			{% } %}
+		</ul>
+	</div>
+	<div class="col-xs-8" style="padding-right:0px;">
+		<b> <h4>Issue List:</h4></b>
+		<ul class="list-group">
+			{% if (info.issue_list.length == 0){ %}
+				<div class="row">
+					<div class="col-xs-12">
+						No Issues linked to this number
+					</div>
+				</div>
+			{% } else { %}
+				{% for(var i=0;i<=info.issue_list.length - 1;i++){ %}
+				<li class="list-group-item">
+					<div class="row">
+						<div class="col-xs-12">
+							<a href="/desk#Form/Issue/{{ info.issue_list[i].name }}">{{ info.issue_list[i].subject }}</a>
+						</div>
+					</div>	
+				</li>
+				{% } %}
+			{% } %}	
+		</ul>
+	</div>	
+</div>
