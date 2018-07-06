@@ -1145,7 +1145,7 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
+   "allow_bulk_edit": 1, 
    "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
@@ -3163,8 +3163,8 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2018-06-27 20:35:10.333687", 
- "modified_by": "Administrator", 
+ "modified": "2018-07-06 03:23:15.354674",
+ "modified_by": "Administrator",
  "module": "Selling", 
  "name": "Quotation", 
  "owner": "Administrator", 
