@@ -131,6 +131,8 @@ class AccountsController(TransactionBase):
 					self.meta.get_label(date_field), self)
 
 	def validate_due_date(self):
+		if self.get('is_pos'): return
+
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
 			if not self.due_date:
