@@ -270,7 +270,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			}
 		}
 
-		return this.frm.script_manager.trigger('qty', item.doctype, item.name)
+		return this.frm.script_manager.trigger('price_list_rate', item.doctype, item.name)
 			.then(() => {
 				if (field === 'qty' && item.qty === 0) {
 					frappe.model.clear_doc(item.doctype, item.name);
