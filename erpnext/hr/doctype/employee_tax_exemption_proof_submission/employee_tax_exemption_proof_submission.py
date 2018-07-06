@@ -11,15 +11,15 @@ from erpnext.hr.utils import validate_tax_declaration, calculate_hra_exemption_f
 class EmployeeTaxExemptionProofSubmission(Document):
 	def validate(self):
 		validate_tax_declaration(self.tax_exemption_proofs)
-		self.total_amount = 0
+		self.exemption_amount = 0
 		self.calculate_hra_exemption()
 		for proof in self.tax_exemption_proofs:
-			self.total_amount += proof.amount
+			self.exemption_amount += proof.amount
 
 	def calculate_hra_exemption(self):
 		hra_exemption = calculate_hra_exemption_for_period(self)
 		if hra_exemption:
-			self.total_amount += hra_exemption["total_eligible_hra_exemption"]
+			self.exemption_amount += hra_exemption["total_eligible_hra_exemption"]
 			self.monthly_hra_exemption = hra_exemption["monthly_exemption"]
 			self.monthly_house_rent = hra_exemption["monthly_house_rent"]
 			self.total_eligible_hra_exemption = hra_exemption["total_eligible_hra_exemption"]
