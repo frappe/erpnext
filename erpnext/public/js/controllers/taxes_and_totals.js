@@ -568,9 +568,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_outstanding_amount: function(update_paid_amount) {
 		// NOTE:
-		// paid_amount and write_off_amount is only for POS Invoice
+		// paid_amount and write_off_amount is only for POS/Loyalty Point Redemption Invoice
 		// total_advance is only for non POS Invoice
-
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
 			this.calculate_paid_amount();
 		}
@@ -602,16 +601,19 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			}
 
 			if(this.frm.doc.doctype == "Sales Invoice") {
-				this.set_default_payment(total_amount_to_pay, update_paid_amount);
+				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
+					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
+					: total_amount_to_pay;
+				this.set_default_payment(total_amount_for_payment, update_paid_amount);
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+			console.log("set the outstanding amount");
 		}
 	},
 
@@ -644,9 +646,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		} else if(!this.frm.doc.is_return){
 			this.frm.doc.payments = [];
 		}
+		if (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount) {
+			base_paid_amount += this.frm.doc.loyalty_amount;
+			paid_amount += flt(this.frm.doc.loyalty_amount / me.frm.doc.conversion_rate, precision("paid_amount"));
+		}
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
 		this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
+		console.log("paid amount set as -> ", paid_amount, base_paid_amount);
 	},
 
 	calculate_change_amount: function(){

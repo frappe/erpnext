@@ -24,6 +24,9 @@ class Customer(TransactionBase):
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
+		loyalty_point_details = self.get_loyalty_points()
+		if loyalty_point_details and loyalty_point_details.get("loyalty_points"):
+			info["loyalty_point"] = loyalty_point_details.loyalty_points
 		self.set_onload('dashboard_info', info)
 
 	def autoname(self):
@@ -32,6 +35,11 @@ class Customer(TransactionBase):
 			self.name = self.get_customer_name()
 		else:
 			set_name_by_naming_series(self)
+
+	def get_loyalty_points(self):
+		if self.loyalty_program:
+			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
+			return get_loyalty_details(self.name, self.loyalty_program)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
@@ -51,6 +59,7 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
+		self.set_loyalty_program()
 		self.check_customer_group_change()
 
 	def check_customer_group_change(self):
@@ -177,6 +186,17 @@ class Customer(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':
 			frappe.db.set(self, "customer_name", newdn)
+
+	def set_loyalty_program(self):
+		if not self.loyalty_program:
+			loyalty_programs = frappe.get_all("Loyalty Program", fields=["name", "customer_group",
+				"customer_territory"], filters={"auto_opt_in": 1, "disabled": 0})
+			from frappe.desk.treeview import get_children
+			for loyalty_program in loyalty_programs:
+				customer_groups = get_children("Customer Group", loyalty_program.customer_group, )
+				if self.customer_group in customer_groups and\
+					self.territory in get_children("Territory", loyalty_program.customer_territory):
+					self.loyalty_program = loyalty_program.name
 
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
