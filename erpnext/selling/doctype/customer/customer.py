@@ -193,11 +193,10 @@ class Customer(TransactionBase):
 				"customer_territory"], filters={"auto_opt_in": 1, "disabled": 0})
 			from frappe.desk.treeview import get_children
 			for loyalty_program in loyalty_programs:
-				customer_groups = get_children("Customer Group", loyalty_program.customer_group, )
-				if self.customer_group in customer_groups and\
-					self.territory in get_children("Territory", loyalty_program.customer_territory):
+				customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)]
+				customer_territories = [d.value for d in get_children("Territory", loyalty_program.customer_territory)]
+				if self.customer_group in customer_groups and self.territory in customer_territories:
 					self.loyalty_program = loyalty_program.name
-
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
