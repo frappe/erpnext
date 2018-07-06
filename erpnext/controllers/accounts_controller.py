@@ -239,7 +239,9 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 							elif fieldname == "serial_no":
-								item_qty = abs(item.get("qty")) * item.get("conversion_factor")
+								# Ensure that serial numbers are matched against Stock UOM
+								item_conversion_factor = item.get("conversion_factor") or 1.0
+								item_qty = abs(item.get("qty")) * item_conversion_factor
 
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
