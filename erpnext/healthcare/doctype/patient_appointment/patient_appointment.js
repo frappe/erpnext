@@ -4,7 +4,6 @@ frappe.provide("erpnext.queries");
 frappe.ui.form.on('Patient Appointment', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Sales Invoice': 'Invoice',
 			'Vital Signs': 'Vital Signs',
 			'Patient Encounter': 'Patient Encounter'
 		};
@@ -83,19 +82,6 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Cancel'), function() {
 				btn_update_status(frm, "Cancelled");
 			});
-		}
-
-		if(!frm.doc.__islocal){
-			if(frm.doc.sales_invoice && frappe.user.has_role("Accounts User")){
-				frm.add_custom_button(__('Invoice'), function() {
-					frappe.set_route("Form", "Sales Invoice", frm.doc.sales_invoice);
-				},__("View") );
-			}
-			else if(frm.doc.status != "Cancelled" && frappe.user.has_role("Accounts User")){
-				frm.add_custom_button(__('Invoice'), function() {
-					btn_invoice_encounter(frm);
-				},__("Create"));
-			}
 		}
 		frm.set_df_property("get_procedure_from_encounter", "read_only", frm.doc.__islocal ? 0 : 1);
 	},
@@ -337,21 +323,6 @@ var btn_update_status = function(frm, status){
 			});
 		}
 	);
-};
-
-var btn_invoice_encounter = function(frm){
-	frappe.call({
-		doc: frm.doc,
-		method:"create_invoice",
-		callback: function(data){
-			if(!data.exc){
-				if(data.message){
-					frappe.set_route("Form", "Sales Invoice", data.message);
-				}
-				cur_frm.reload_doc();
-			}
-		}
-	});
 };
 
 frappe.ui.form.on("Patient Appointment", "practitioner", function(frm) {

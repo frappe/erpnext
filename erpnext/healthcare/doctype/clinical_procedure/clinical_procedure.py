@@ -24,6 +24,8 @@ class ClinicalProcedure(Document):
 			self.set_actual_qty();
 
 	def after_insert(self):
+		if self.prescription:
+			frappe.db.set_value("Procedure Prescription", self.prescription, "procedure_created", 1)
 		if self.appointment:
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
 		template = frappe.get_doc("Clinical Procedure Template", self.procedure_template)
@@ -130,6 +132,8 @@ def set_stock_items(doc, stock_detail_parent, parenttype):
 		se_child.conversion_factor = flt(d["conversion_factor"])
 		if d["batch_no"]:
 			se_child.batch_no = d["batch_no"]
+		if parenttype == "Clinical Procedure Template":
+			se_child.invoice_separately_as_consumables = d["invoice_separately_as_consumables"]
 	return doc
 
 def get_item_dict(table, parent, parenttype):
@@ -165,6 +169,8 @@ def create_procedure(appointment):
 	procedure.patient_age = appointment.patient_age
 	procedure.patient_sex = appointment.patient_sex
 	procedure.procedure_template = appointment.procedure_template
+	procedure.procedure_prescription = appointment.procedure_prescription
+	procedure.invoiced = appointment.invoiced
 	procedure.medical_department = appointment.department
 	procedure.start_date = appointment.appointment_date
 	procedure.start_time = appointment.appointment_time

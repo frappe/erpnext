@@ -16,7 +16,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	onload: function() {
 		var me = this;
-		this._super();		
+		this._super();
+		console.log("class erpnext.accounts.SalesInvoiceController, onload this->", this);
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -466,7 +467,7 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	}
 }
 
-//project name
+// project name
 //--------------------------
 cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
 	return{
@@ -543,7 +544,7 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 
 frappe.ui.form.on('Sales Invoice', {
 	setup: function(frm){
-		
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
@@ -625,7 +626,7 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-	//When multiple companies are set up. in case company name is changed set default company address
+	// When multiple companies are set up. in case company name is changed set default company address
 	company:function(frm){
 		if (frm.doc.company)
 		{
@@ -712,8 +713,41 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 			frm.set_value("loyalty_amount", loyalty_amount);
 		}
-	}
+	},
 
+	// Healthcare
+	patient: function(frm) {
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			if(frm.doc.patient){
+				frappe.call({
+					method: "frappe.client.get_value",
+					args:{
+						doctype: "Patient",
+						filters: {"name": frm.doc.patient},
+						fieldname: "customer"
+					},
+					callback:function(patient_customer) {
+						if(patient_customer){
+							frm.set_value("customer", patient_customer.message.customer);
+							frm.refresh_fields();
+						}
+					}
+				});
+			}
+			else{
+					frm.set_value("customer", '');
+			}
+		}
+	},
+	refresh: function(frm) {
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
+				frm.add_custom_button(__('Healthcare Services'), function() {
+					get_healthcare_services_to_invoice(frm);
+				},"Get items from");
+			}
+		}
+	}
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {
@@ -816,3 +850,169 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 
 	dialog.show();
 }
+
+var get_healthcare_services_to_invoice = function(frm) {
+	var me = this;
+	let selected_patient = '';
+	var dialog = new frappe.ui.Dialog({
+		title: __("Get Items from Healthcare Services"),
+		fields:[
+			{
+				fieldtype: 'Link',
+				options: 'Patient',
+				label: 'Patient',
+				fieldname: "patient",
+				reqd: true
+			},
+			{ fieldtype: 'Section Break'	},
+			{ fieldtype: 'HTML', fieldname: 'results_area' }
+		]
+	});
+	var $wrapper;
+	var $results;
+	var $placeholder;
+	dialog.set_values({
+		'patient': frm.doc.patient
+	});
+	dialog.fields_dict["patient"].df.onchange = () => {
+		var patient = dialog.fields_dict.patient.input.value;
+		if(patient && patient!=selected_patient){
+			selected_patient = patient;
+			get_services(frm, patient, $results, $placeholder)
+		}
+		else if(!patient){
+			selected_patient = '';
+			$results.empty();
+			$results.append($placeholder);
+		}
+	}
+	$wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
+		style="border: 1px solid #d1d8dd; border-radius: 3px; height: 300px; overflow: auto;"></div>`);
+	$results = $wrapper.find('.results');
+	$placeholder = $(`<div class="multiselect-empty-state">
+				<span class="text-center" style="margin-top: -40px;">
+					<i class="fa fa-2x fa-heartbeat text-extra-muted"></i>
+					<p class="text-extra-muted">No billable Healthcare Services found</p>
+				</span>
+			</div>`);
+	$results.on('click', '.list-item--head :checkbox', (e) => {
+		$results.find('.list-item-container .list-row-check')
+			.prop("checked", ($(e.target).is(':checked')));
+	});
+	set_primary_action(frm, dialog, $results);
+	dialog.show();
+};
+
+var get_services= function(frm, patient_id, $results, $placeholder) {
+	var me = this;
+	$results.empty();
+	frappe.call({
+		method:"erpnext.healthcare.utils.get_healthcare_services_to_invoice",
+		args: {
+			patient: patient_id
+		},
+		callback: function(data) {
+			if(data.message){
+				$results.append(make_list_row());
+				for(let i=0; i<data.message.length; i++){
+					$results.append(make_list_row(data.message[i]));
+				}
+			}else {
+				$results.append($placeholder);
+			}
+		}
+	});
+};
+
+var make_list_row= function(result={}) {
+	var me = this;
+	// Make a head row by default (if result not passed)
+	let head = Object.keys(result).length === 0;
+	let contents = ``;
+	let columns = (["service", "reference_name", "reference_type"]);
+	columns.forEach(function(column) {
+		contents += `<div class="list-item__content ellipsis">
+			${
+				head ? `<span class="ellipsis">${__(frappe.model.unscrub(column))}</span>`
+
+				:(column !== "name" ? `<span class="ellipsis">${__(result[column])}</span>`
+					: `<a class="list-id ellipsis">
+						${__(result[column])}</a>`)
+			}
+		</div>`;
+	})
+
+	let $row = $(`<div class="list-item">
+		<div class="list-item__content" style="flex: 0 0 10px;">
+			<input type="checkbox" class="list-row-check" ${result.checked ? 'checked' : ''}>
+		</div>
+		${contents}
+	</div>`);
+
+	head ? $row.addClass('list-item--head')
+		: $row = $(`<div class="list-item-container"
+			data-dn= "${result.reference_name}" data-dt= "${result.reference_type}" data-item= "${result.service}"
+			data-rate = ${result.rate}
+			data-income-account = "${result.income_account}"
+			data-qty = ${result.qty}>
+			</div>`).append($row);
+	return $row;
+};
+
+var set_primary_action= function(frm, dialog, $results) {
+	var me = this;
+	dialog.set_primary_action(__('Add'), function() {
+		// TODO: Get checked items
+		let checked_values = get_checked_values($results);
+		if(checked_values.length > 0){
+			frm.set_value("patient", dialog.fields_dict.patient.input.value);
+			frm.set_value("items", []);
+			for(let i=0; i<checked_values.length; i++){
+				var si_item = frappe.model.add_child(frm.doc, 'Sales Invoice Item', 'items');
+				if(checked_values[i]['item'] == "Consulting Charges"){
+					frappe.model.set_value(si_item.doctype, si_item.name, 'item_name', checked_values[i]['item']);
+					frappe.model.set_value(si_item.doctype, si_item.name, 'description', checked_values[i]['item']);
+					frappe.model.set_value(si_item.doctype, si_item.name, 'rate', checked_values[i]['rate']);
+					frappe.model.set_value(si_item.doctype, si_item.name, 'income_account', checked_values[i]['income_account']);
+					frappe.model.set_value(si_item.doctype, si_item.name, 'uom', 'Nos');
+					frappe.model.set_value(si_item.doctype, si_item.name, 'conversion_factor', 1);
+				}
+				else{
+					frappe.model.set_value(si_item.doctype, si_item.name, 'item_code', checked_values[i]['item']);
+				}
+				frappe.model.set_value(si_item.doctype, si_item.name, 'reference_dt', checked_values[i]['dt']);
+				frappe.model.set_value(si_item.doctype, si_item.name, 'reference_dn', checked_values[i]['dn']);
+				frappe.model.set_value(si_item.doctype, si_item.name, 'qty', 1);
+				if(checked_values[i]['qty'] > 1){
+					frappe.model.set_value(si_item.doctype, si_item.name, 'qty', checked_values[i]['qty']);
+				}
+			}
+			frm.refresh_fields();
+			dialog.hide();
+		}
+		else{
+			frappe.msgprint(__("Please select Healthcare Service"));
+		}
+	});
+};
+
+var get_checked_values= function($results) {
+	return $results.find('.list-item-container').map(function() {
+		let checked_values = {};
+		if ($(this).find('.list-row-check:checkbox:checked').length > 0 ) {
+			checked_values['dn'] = $(this).attr('data-dn');
+			checked_values['dt'] = $(this).attr('data-dt');
+			checked_values['item'] = $(this).attr('data-item');
+			if($(this).attr('data-rate')){
+				checked_values['rate'] = $(this).attr('data-rate');
+			}
+			if($(this).attr('data-income-account')){
+				checked_values['income_account'] = $(this).attr('data-income-account');
+			}
+			if($(this).attr('data-qty')){
+				checked_values['qty'] = $(this).attr('data-qty');
+			}
+			return checked_values;
+		}
+	}).get();
+};
