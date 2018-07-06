@@ -239,8 +239,9 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 							elif fieldname == "serial_no":
-								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
-								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
+								item_qty = abs(item.get("qty")) * item.get("conversion_factor")
+
+								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
