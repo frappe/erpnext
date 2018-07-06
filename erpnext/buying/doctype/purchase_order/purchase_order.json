@@ -1207,7 +1207,7 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
+   "allow_bulk_edit": 1, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -3355,7 +3355,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-02-17 11:00:05.037716", 
+ "modified": "2018-07-06 11:00:05.037716", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

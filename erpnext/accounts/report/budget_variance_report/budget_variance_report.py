@@ -10,9 +10,13 @@ from erpnext.controllers.trends import get_period_date_ranges, get_period_month_
 
 def execute(filters=None):
 	if not filters: filters = {}
-
+	validate_filters(filters)
 	columns = get_columns(filters)
-	cost_centers = get_cost_centers(filters)
+	if filters.get("cost_center"):
+		cost_centers = [filters.get("cost_center")]
+	else:
+		cost_centers = get_cost_centers(filters)
+
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	cam_map = get_cost_center_account_month_map(filters)
 
@@ -38,6 +42,10 @@ def execute(filters=None):
 				data.append(row)
 
 	return columns, data
+
+def validate_filters(filters):
+	if filters.get("budget_against")=="Project" and filters.get("cost_center"):
+		frappe.throw(_("Filter based on Cost Center is only applicable if Budget Against is selected as Cost Center"))
 
 def get_columns(filters):
 	columns = [_(filters.get("budget_against")) + ":Link/%s:120"%(filters.get("budget_against")), _("Account") + ":Link/Account:120"]
@@ -66,12 +74,16 @@ def get_cost_centers(filters):
 
 #Get cost center & target details
 def get_cost_center_target_details(filters):
+	cond = ""
+	if filters.get("cost_center"):
+		cond += " and b.cost_center='%s'" % frappe.db.escape(filters.get("cost_center"))
+
 	return frappe.db.sql("""
 			select b.{budget_against} as budget_against, b.monthly_distribution, ba.account, ba.budget_amount
 			from `tabBudget` b, `tabBudget Account` ba
 			where b.name=ba.parent and b.docstatus = 1 and b.fiscal_year=%s
-			and b.budget_against = %s and b.company=%s
-		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower()),
+			and b.budget_against = %s and b.company=%s {cond}
+		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower(), cond=cond),
 		(filters.fiscal_year, filters.budget_against, filters.company), as_dict=True)
 
 #Get target distribution details of accounts of cost center

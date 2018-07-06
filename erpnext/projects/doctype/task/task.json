@@ -38,7 +38,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 1, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "unique": 0
   }, 
@@ -70,7 +70,7 @@
    "remember_last_selected_value": 1, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "unique": 0
   }, 
@@ -1214,7 +1214,7 @@
  "istable": 0, 
  "max_attachments": 5, 
  "menu_index": 0, 
- "modified": "2017-11-10 18:37:19.660293", 
+ "modified": "2018-06-26 11:46:06.678115", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

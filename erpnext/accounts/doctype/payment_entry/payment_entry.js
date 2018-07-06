@@ -819,28 +819,30 @@ frappe.ui.form.on('Payment Entry Reference', {
 
 	reference_name: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		return frappe.call({
-			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details",
-			args: {
-				reference_doctype: row.reference_doctype,
-				reference_name: row.reference_name,
-				party_account_currency: frm.doc.payment_type=="Receive" ?
-					frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency
-			},
-			callback: function(r, rt) {
-				if(r.message) {
-					$.each(r.message, function(field, value) {
-						frappe.model.set_value(cdt, cdn, field, value);
-					})
+		if (row.reference_name && row.reference_doctype) {
+			return frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details",
+				args: {
+					reference_doctype: row.reference_doctype,
+					reference_name: row.reference_name,
+					party_account_currency: frm.doc.payment_type=="Receive" ?
+						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						$.each(r.message, function(field, value) {
+							frappe.model.set_value(cdt, cdn, field, value);
+						})
 
-					let allocated_amount = frm.doc.unallocated_amount > row.outstanding_amount ?
-						row.outstanding_amount : frm.doc.unallocated_amount;
+						let allocated_amount = frm.doc.unallocated_amount > row.outstanding_amount ?
+							row.outstanding_amount : frm.doc.unallocated_amount;
 
-					frappe.model.set_value(cdt, cdn, 'allocated_amount', allocated_amount);
-					frm.refresh_fields();
+						frappe.model.set_value(cdt, cdn, 'allocated_amount', allocated_amount);
+						frm.refresh_fields();
+					}
 				}
-			}
-		})
+			})
+		}
 	},
 
 	allocated_amount: function(frm) {
