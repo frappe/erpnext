@@ -781,7 +781,7 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
+   "allow_bulk_edit": 1, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -2549,7 +2549,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-05-28 02:45:48.616334",
+ "modified": "2018-07-06 02:45:48.616334",
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
