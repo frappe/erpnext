@@ -93,9 +93,9 @@ class SalarySlip(TransactionBase):
 		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
 		for struct_row in self._salary_structure_doc.get("deductions"):
 			if struct_row.variable_based_on_taxable_salary == 1 and not struct_row.formula and not struct_row.amount:
-				tax_row, amount = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
-				if tax_row and amount:
-					self.update_component_row(frappe._dict(tax_row), amount, "deductions")
+				tax_detail = self.calculate_variable_based_on_taxable_salary(struct_row.salary_component)
+				if tax_detail and tax_detail[1]:
+					self.update_component_row(frappe._dict(tax_detail[0]), tax_detail[1], "deductions", tax_detail[2], tax_detail[3])
 
 	def get_last_payroll_period_benefit(self):
 		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
@@ -125,7 +125,7 @@ class SalarySlip(TransactionBase):
 			if benefit_claim_amount:
 				self.update_component_row(struct_row, benefit_claim_amount, "earnings")
 
-	def update_component_row(self, struct_row, amount, key):
+	def update_component_row(self, struct_row, amount, key, benefit_tax=None, additional_tax=None):
 		component_row = None
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
@@ -142,10 +142,14 @@ class SalarySlip(TransactionBase):
 				'is_tax_applicable': struct_row.is_tax_applicable,
 				'is_flexible_benefit': struct_row.is_flexible_benefit,
 				'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
-				'is_additional_component': struct_row.is_additional_component
+				'is_additional_component': struct_row.is_additional_component,
+				'tax_on_flexible_benefit': benefit_tax,
+				'tax_on_additional_salary': additional_tax
 			})
 		else:
 			component_row.amount = amount
+			component_row.tax_on_flexible_benefit = benefit_tax
+			component_row.tax_on_additional_salary = additional_tax
 
 	def eval_condition_and_formula(self, d, data):
 		try:
@@ -191,7 +195,6 @@ class SalarySlip(TransactionBase):
 				data[d.abbr] = d.amount
 
 		return data
-
 
 	def get_emp_and_leave_details(self):
 		'''First time, load all the components from salary structure'''
@@ -293,7 +296,6 @@ class SalarySlip(TransactionBase):
 		if emp:
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
-
 
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not joining_date:
@@ -537,79 +539,66 @@ class SalarySlip(TransactionBase):
 		if not payroll_period:
 			frappe.msgprint(_("Start and end dates not in a valid Payroll Period, cannot calculate {0}.")
 				.format(tax_component))
-			return False, False
+			return False
 		if payroll_period.end_date <= getdate(self.end_date):
-			if not self.deduct_tax_for_unsubmitted_tax_exemption_proof \
-				or not self.deduct_tax_for_unclaimed_employee_benefits:
-				frappe.throw(_("You have to Deduct Tax for Unsubmitted Tax Exemption Proof and Unclaimed Employee Benefits in the last Salary Slip of Payroll Period"))
-			else:
-				return self.calculate_tax_for_payroll_period(tax_component, payroll_period)
+			if not self.deduct_tax_for_unsubmitted_tax_exemption_proof or not\
+				self.deduct_tax_for_unclaimed_employee_benefits:
+				frappe.throw(_("You have to Deduct Tax for Unsubmitted Tax Exemption Proof and Unclaimed \
+					Employee Benefits in the last Salary Slip of Payroll Period"))
+		# calc prorata tax to be applied
+		return self.calculate_variable_tax(tax_component, payroll_period)
 
-		benefit_amount_to_tax = 0
+	def calculate_variable_tax(self, tax_component, payroll_period):
+		annual_taxable_earning, period_factor = 0, 0
+		pro_rata_tax_paid, additional_tax_paid,  benefit_tax_paid = 0, 0, 0
+		unclaimed_earning, unclaimed_benefit, additional_income = 0, 0, 0
+
+		# get taxable_earning, additional_income in this slip
+		taxable_earning = self.get_taxable_earnings()
 		if self.deduct_tax_for_unclaimed_employee_benefits:
 			# get all untaxed benefits till date, pass amount to be taxed by later methods
-			benefit_amount_to_tax = self.calculate_unclaimed_taxable_benefit(payroll_period)
-			# flexi's excluded from monthly tax, add flexis in this slip to total_taxable_benefit
-			benefit_amount_to_tax += self.get_taxable_earnings(only_flexi=True)["taxable_earning"]
+			unclaimed_benefit = self.calculate_unclaimed_taxable_benefit(payroll_period)
+			# flexi's excluded from monthly tax, add flexis in this slip to unclaimed_benefit
+			unclaimed_benefit += self.get_taxable_earnings(only_flexi=True)["taxable_earning"]
 		if self.deduct_tax_for_unsubmitted_tax_exemption_proof:
-			# calc tax to be paid for the period till date considering prorata taxes paid and proofs submitted
-			return self.calculate_unclaimed_taxable_earning(payroll_period, tax_component, benefit_amount_to_tax)
+			# do not consider exemption, calc tax to be paid for the period till date
+			# considering prorata taxes paid and proofs submitted
+			unclaimed_earning = self.calculate_unclaimed_taxable_earning(payroll_period, tax_component)
+			earning_in_period = taxable_earning["taxable_earning"] + unclaimed_earning
+			period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date,
+								payroll_period.start_date, self.end_date)
+			annual_taxable_earning = earning_in_period * period_factor
+			additional_income += self.get_total_additional_income(payroll_period.start_date)
+		else:
+			# consider exemption declaration, find annual_earning by monthly taxable salary
+			period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date)
+			annual_earning = taxable_earning["taxable_earning"] * period_factor
+			exemption_amount = 0
+			if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
+			"payroll_period": payroll_period.name, "docstatus": 1}):
+				exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
+					{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
+					"total_exemption_amount")
+			annual_taxable_earning = annual_earning - exemption_amount
 
-		# calc prorata tax to be applied
-		return self.calculate_variable_tax(tax_component, payroll_period, benefit_amount_to_tax)
+		if self.deduct_tax_for_unclaimed_employee_benefits or self.deduct_tax_for_unsubmitted_tax_exemption_proof:
+			tax_detail = self.get_tax_paid_in_period(payroll_period, tax_component)
+			if tax_detail:
+				pro_rata_tax_paid = tax_detail["total_tax_paid"] - tax_detail["additional_tax"] - tax_detail["benefit_tax"]
+				additional_tax_paid = tax_detail["additional_tax"]
+				benefit_tax_paid = tax_detail["benefit_tax"]
 
-	def calculate_variable_tax(self, tax_component, payroll_period, benefit_amount_to_tax=0):
-		taxable_earnings = self.get_taxable_earnings()
-		period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date)
-		annual_earning = taxable_earnings["taxable_earning"] * period_factor
-
-		# Calculate total exemption declaration
-		exemption_amount = 0
-		if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
-		"payroll_period": payroll_period.name, "docstatus": 1}):
-			exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
-				{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
-				"total_exemption_amount")
-		annual_taxable_earning = annual_earning - exemption_amount
-		additional_income = benefit_amount_to_tax + taxable_earnings["additional_income"]
-		return self.calculate_tax(payroll_period, tax_component, annual_taxable_earning, period_factor, 0, additional_income)
-
-	def calculate_tax_for_payroll_period(self, tax_component, payroll_period):
-		# get total taxable income, total tax paid in payroll period
-		taxable_income, tax_paid = self.get_tax_detail_till_date(payroll_period, tax_component)
-		total_tax_exemption_proof = 0
-		if self.deduct_tax_for_unsubmitted_tax_exemption_proof:
-			sum_exemption_proof = frappe.db.sql("""select sum(total_amount) from
-			`tabEmployee Tax Exemption Proof Submission` where payroll_period='{0}' and docstatus=1
-			and employee='{1}'""".format(payroll_period.name, self.employee))
-			if sum_exemption_proof and sum_exemption_proof[0][0]:
-				total_tax_exemption_proof = sum_exemption_proof[0][0]
-		total_benefit_claim = 0
-		if self.deduct_tax_for_unclaimed_employee_benefits:
-			sum_benefit_claim = frappe.db.sql("""select sum(claimed_amount) from
-			`tabEmployee Benefit Claim` where docstatus=1 and employee='{0}' and claim_date between
-			'{1}' and '{2}'""".format(self.employee, payroll_period.start_date, self.end_date))
-			if sum_benefit_claim and sum_benefit_claim[0][0]:
-				total_benefit_claim = sum_benefit_claim[0][0]
-		total_taxable_earning = taxable_income - total_tax_exemption_proof - total_benefit_claim
-
-		# add taxable earnings of current salary_slip, include flexi
-		taxable_earnings = self.get_taxable_earnings(include_flexi=1)
-		total_taxable_earning += taxable_earnings["taxable_earning"] + taxable_earnings["additional_income"]
-		return self.calculate_tax(payroll_period, tax_component, total_taxable_earning, 1, tax_paid, 0)
+		# add any additional income in this slip
+		additional_income += taxable_earning["additional_income"]
+		args = {"payroll_period": payroll_period.name, "tax_component": tax_component,
+				"annual_taxable_earning": annual_taxable_earning, "period_factor": period_factor,
+				"unclaimed_benefit": unclaimed_benefit, "additional_income": additional_income,
+				"pro_rata_tax_paid": pro_rata_tax_paid, "benefit_tax_paid": benefit_tax_paid,
+				"additional_tax_paid": additional_tax_paid}
+		return self.calculate_tax(args)
 
 	def calculate_unclaimed_taxable_benefit(self, payroll_period):
-		total_benefit = 0
-		start_date = payroll_period.start_date
-
-		# if tax for unclaimed benefit deducted earlier set the start date
-		last_deducted =	frappe.db.sql("""select end_date from `tabSalary Slip` where
-				deduct_tax_for_unclaimed_employee_benefits=1 and docstatus=1 and
-				employee='{0}' and start_date between '{1}' and '{2}' and end_date
-				between '{1}' and '{2}' order by end_date desc limit 1""".format(
-				self.employee, payroll_period.start_date, payroll_period.end_date))
-		if last_deducted and last_deducted[0][0]:
-			start_date = getdate(last_deducted[0][0])
+		total_benefit, total_benefit_claim = 0, 0
 
 		# get total sum of benefits paid
 		sum_benefit = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
@@ -617,103 +606,62 @@ class SalarySlip(TransactionBase):
 					and sd.is_tax_applicable=1 and is_flexible_benefit=1 and ss.docstatus=1
 					and ss.employee='{0}' and ss.start_date between '{1}' and '{2}' and
 					ss.end_date between '{1}' and '{2}'""".format(self.employee,
-					start_date, payroll_period.end_date))
+					payroll_period.start_date, self.start_date))
 		if sum_benefit and sum_benefit[0][0]:
 			total_benefit = sum_benefit[0][0]
 
 		# get total benefits claimed
-		total_benefit_claim = 0
 		sum_benefit_claim = frappe.db.sql("""select sum(claimed_amount) from
 		`tabEmployee Benefit Claim` where docstatus=1 and employee='{0}' and claim_date
-		between '{1}' and '{2}'""".format(self.employee, start_date, self.end_date))
+		between '{1}' and '{2}'""".format(self.employee, payroll_period.start_date, self.end_date))
 		if sum_benefit_claim and sum_benefit_claim[0][0]:
 			total_benefit_claim = sum_benefit_claim[0][0]
 		return total_benefit - total_benefit_claim
 
-	def calculate_unclaimed_taxable_earning(self, payroll_period, tax_component, benefit_amount_to_tax):
-		start_date = payroll_period.start_date
-
-		# if tax deducted earlier set the start date
-		last_deducted =	frappe.db.sql("""select end_date from `tabSalary Slip` where
-				deduct_tax_for_unsubmitted_tax_exemption_proof=1 and docstatus=1 and
-				employee='{0}' and start_date between '{1}' and '{2}' and end_date
-				between '{1}' and '{2}' order by end_date desc limit 1""".format(
-				self.employee, payroll_period.start_date, self.start_date))
-		if last_deducted and last_deducted[0][0]:
-			start_date = getdate(last_deducted[0][0])
-
-		total_taxable_earning, total_additional_pay = self.get_taxable_earnings_after(start_date)
-		total_tax_paid = self.get_tax_paid_after(start_date, payroll_period, tax_component)
-
-		total_exemption_amount = 0
-		# add up total Proof Submission
-		sum_exemption = frappe.db.sql("""select sum(total_amount) from
-		`tabEmployee Tax Exemption Proof Submission` where docstatus=1 and employee='{0}' and
-		payroll_period='{1}' and processed_in_payroll=0""".format(self.employee, payroll_period.name))
-		if sum_exemption and sum_exemption[0][0]:
-			total_exemption_amount = sum_exemption[0][0]
-		total_taxable_earning -= total_exemption_amount
-
-		total_additional_pay += benefit_amount_to_tax
-		# recalc annual tax slab by start date and end date
-		period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date, start_date, self.end_date)
-		annual_taxable_earning = total_taxable_earning * period_factor
-		return self.calculate_tax(payroll_period, tax_component, annual_taxable_earning, period_factor, total_tax_paid, total_additional_pay)
-
-	def get_taxable_earnings_after(self, start_date):
-		total_taxable_earning, total_additional_pay = 0, 0
+	def calculate_unclaimed_taxable_earning(self, payroll_period, tax_component):
+		total_taxable_earning, total_exemption_amount = 0, 0
 		# calc total taxable amount in period
 		sum_taxable_earning = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
 					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='earnings'
 					and sd.is_tax_applicable=1 and is_additional_component=0 and is_flexible_benefit=0
 					and ss.docstatus=1 and ss.employee='{0}' and ss.start_date between '{1}' and '{2}'
 					and ss.end_date between '{1}' and '{2}'""".format(self.employee,
-					start_date, self.start_date))
+					payroll_period.start_date, self.start_date))
 		if sum_taxable_earning and sum_taxable_earning[0][0]:
 			total_taxable_earning = sum_taxable_earning[0][0]
 
+		# add up total Proof Submission
+		sum_exemption = frappe.db.sql("""select sum(exemption_amount) from
+		`tabEmployee Tax Exemption Proof Submission` where docstatus=1 and employee='{0}' and
+		payroll_period='{1}' and submission_date between '{2}' and '{3}'""".format(self.employee,
+		payroll_period.name, payroll_period.start_date, self.end_date))
+		if sum_exemption and sum_exemption[0][0]:
+			total_exemption_amount = sum_exemption[0][0]
+		total_taxable_earning -= total_exemption_amount
+		return total_taxable_earning
+
+	def get_total_additional_income(self, from_date):
+		total_additional_pay = 0
 		sum_additional_earning = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
 					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='earnings'
 					and sd.is_tax_applicable=1 and is_additional_component=1 and is_flexible_benefit=0
 					and ss.docstatus=1 and ss.employee='{0}' and ss.start_date between '{1}' and '{2}'
 					and ss.end_date between '{1}' and '{2}'""".format(self.employee,
-					start_date, self.start_date))
+					from_date, self.start_date))
 		if sum_additional_earning and sum_additional_earning[0][0]:
 			total_additional_pay = sum_additional_earning[0][0]
+		return total_additional_pay
 
-		# add taxable earning, additional_income in this salary slip
-		taxable_earnings = self.get_taxable_earnings()
-		total_taxable_earning += taxable_earnings["taxable_earning"]
-		total_additional_pay += taxable_earnings["additional_income"]
-
-		return total_taxable_earning, total_additional_pay
-
-	def get_tax_paid_after(self, start_date, payroll_period, tax_component):
-		total_tax_paid = 0
-		# find total_tax_paid from salary slip where benefit is not taxed
-		sum_tax_paid = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
-					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='deductions'
-					and sd.salary_component='{3}' and sd.variable_based_on_taxable_salary=1 and ss.docstatus=1
-					and ss.employee='{0}' and ss.deduct_tax_for_unclaimed_employee_benefits=0
-					and ss.start_date between '{1}' and '{2}' and ss.end_date between '{1}' and
-					'{2}'""".format(self.employee, start_date, self.start_date, tax_component))
+	def get_tax_paid_in_period(self, payroll_period, tax_component, only_total=False):
+		# find total_tax_paid, tax paid for benefit, additional_salary
+		sum_tax_paid = frappe.db.sql("""select sum(sd.amount), sum(tax_on_flexible_benefit),
+			sum(tax_on_additional_salary)  from `tabSalary Detail` sd join `tabSalary Slip`
+			ss on sd.parent=ss.name where sd.parentfield='deductions' and sd.salary_component='{3}'
+			and sd.variable_based_on_taxable_salary=1 and ss.docstatus=1 and ss.employee='{0}'
+			and ss.start_date between '{1}' and '{2}' and ss.end_date between '{1}' and
+			'{2}'""".format(self.employee, payroll_period.start_date, self.start_date, tax_component))
 		if sum_tax_paid and sum_tax_paid[0][0]:
-			total_tax_paid = sum_tax_paid[0][0]
-
-		# get benefit taxed salary slips
-		benefit_taxed_ss = frappe.db.sql("""select name from `tabSalary Slip` where
-					deduct_tax_for_unsubmitted_tax_exemption_proof=0 and
-					deduct_tax_for_unclaimed_employee_benefits=1 and docstatus=1 and employee='{0}'
-					and start_date between '{1}' and '{2}' and end_date between '{1}'
-					and '{2}'""".format(self.employee, start_date, self.start_date))
-		# add pro_rata_tax of all salary slips where benefit tax added up
-		if benefit_taxed_ss and benefit_taxed_ss[0]:
-			for salary_slip in benefit_taxed_ss[0]:
-				ss_obj = frappe.get_doc("Salary Slip", salary_slip)
-				struct_row, pro_rata_tax = ss_obj.calculate_variable_tax(tax_component, payroll_period)
-				if pro_rata_tax:
-					total_tax_paid += pro_rata_tax
-		return total_tax_paid
+			return {'total_tax_paid': sum_tax_paid[0][0], 'benefit_tax':sum_tax_paid[0][1], 'additional_tax': sum_tax_paid[0][2]}
 
 	def get_taxable_earnings(self, include_flexi=0, only_flexi=0):
 		taxable_earning = 0
@@ -735,22 +683,37 @@ class SalarySlip(TransactionBase):
 						taxable_earning += earning.amount
 		return {"taxable_earning": taxable_earning, "additional_income": additional_income}
 
-	def calculate_tax(self, payroll_period, tax_component, annual_taxable_earning, period_factor, tax_paid=0, additional_income=0):
+	def calculate_tax(self, args):
+		tax_amount, benefit_tax, additional_tax = 0, 0, 0
+		annual_taxable_earning = args.get("annual_taxable_earning")
+		benefit_to_tax = args.get("unclaimed_benefit")
+		additional_income = args.get("additional_income")
 		# Get tax calc by period
-		annual_tax = self.calculate_tax_by_tax_slab(payroll_period.name, annual_taxable_earning)
+		annual_tax = self.calculate_tax_by_tax_slab(args.get("payroll_period"), annual_taxable_earning)
 
 		# Calc prorata tax
-		tax_amount = annual_tax / period_factor
+		tax_amount = annual_tax / args.get("period_factor")
+
+		# Benefit is a part of Salary Structure, add the tax diff, update annual_tax
+		if benefit_to_tax > 0:
+			annual_taxable_earning += benefit_to_tax
+			annual_tax_with_benefit_income = self.calculate_tax_by_tax_slab(
+								args.get("payroll_period"), annual_taxable_earning)
+			benefit_tax = annual_tax_with_benefit_income - annual_tax - args.get("benefit_tax_paid")
+			tax_amount += benefit_tax
+			annual_tax = annual_tax_with_benefit_income
 
 		# find the annual tax diff caused by additional_income, add to tax_amount
 		if additional_income > 0:
-			annual_tax_with_additional_income = self.calculate_tax_by_tax_slab(payroll_period.name, annual_taxable_earning + additional_income)
-			tax_amount += annual_tax_with_additional_income - annual_tax
-		#less paid taxes
-		if tax_paid:
-			tax_amount -= tax_paid
-		struct_row = self.get_salary_slip_row(tax_component)
-		return struct_row, tax_amount
+			annual_tax_with_additional_income = self.calculate_tax_by_tax_slab(
+					args.get("payroll_period"), annual_taxable_earning + additional_income)
+			additional_tax = annual_tax_with_additional_income - annual_tax - args.get("additional_tax_paid")
+			tax_amount += additional_tax
+		# less paid taxes
+		if args.get("pro_rata_tax_paid"):
+			tax_amount -= args.get("pro_rata_tax_paid")
+		struct_row = self.get_salary_slip_row(args.get("tax_component"))
+		return [struct_row, tax_amount, benefit_tax, additional_tax]
 
 	def calculate_tax_by_tax_slab(self, payroll_period, annual_earning):
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
@@ -782,6 +745,7 @@ class SalarySlip(TransactionBase):
 			raise
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
+		# TODO if both deduct checked update the factor to make tax consistent
 		payroll_days = date_diff(period_end, period_start) + 1
 		if start_date and end_date:
 			salary_days = date_diff(end_date, start_date) + 1
@@ -791,28 +755,6 @@ class SalarySlip(TransactionBase):
 			return 12
 		salary_days = date_diff(self.end_date, self.start_date) + 1
 		return flt(payroll_days)/flt(salary_days)
-
-	def get_tax_detail_till_date(self, payroll_period, tax_component):
-		# find total taxable income, total tax paid by employee in payroll period
-		total_taxable_income = 0
-		total_tax_paid = 0
-		sum_income = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
-					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='earnings'
-					and sd.is_tax_applicable=1 and ss.docstatus=1 and ss.employee='{0}' and
-					ss.start_date between '{1}' and '{2}' and ss.end_date between '{1}' and
-					'{2}'""".format(self.employee, payroll_period.start_date,
-							payroll_period.end_date))
-		if sum_income and sum_income[0][0]:
-			total_taxable_income = sum_income[0][0]
-		sum_tax_paid = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
-					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='deductions'
-					and sd.salary_component='{0}' and sd.variable_based_on_taxable_salary=1 and
-					ss.docstatus=1 and ss.employee='{1}' and ss.start_date between '{2}' and
-					'{3}' and ss.end_date between '{2}' and '{3}'""".format(tax_component,
-					self.employee, payroll_period.start_date, payroll_period.end_date))
-		if sum_tax_paid and sum_tax_paid[0][0]:
-			total_tax_paid = sum_tax_paid[0][0]
-		return total_taxable_income, total_tax_paid
 
 	def get_salary_slip_row(self, salary_component):
 		component = frappe.get_doc("Salary Component", salary_component)
