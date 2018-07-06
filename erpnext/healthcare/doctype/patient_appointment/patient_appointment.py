@@ -10,7 +10,6 @@ from frappe.utils import getdate
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 from erpnext.hr.doctype.employee.employee import is_holiday
 
 class PatientAppointment(Document):
@@ -38,26 +37,23 @@ class PatientAppointment(Document):
 				visited = fee_validity.visited + 1
 				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 				if fee_validity.ref_invoice:
-					frappe.db.set_value("Patient Appointment", appointment.name, "sales_invoice", fee_validity.ref_invoice)
+					frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
-
-	def create_invoice(self):
-		return invoice_appointment(self)
 
 def appointment_cancel(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)
 
-	# If invoice --> fee_validity update with -1 visit
-	if appointment.sales_invoice:
-		validity = frappe.db.exists({"doctype": "Fee Validity", "ref_invoice": appointment.sales_invoice})
+	# If invoiced --> fee_validity update with -1 visit
+	if appointment.invoiced:
+		validity = validity_exists(appointment.practitioner, appointment.patient)
 		if validity:
 			fee_validity = frappe.get_doc("Fee Validity", validity[0][0])
 			visited = fee_validity.visited - 1
 			frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 			if visited <= 0:
 				frappe.msgprint(
-					_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice))
+					_("Appointment cancelled, Please review and cancel the invoice {0}".format(fee_validity.ref_invoice))
 				)
 			else:
 				frappe.msgprint(_("Appointment cancelled"))
@@ -198,98 +194,11 @@ def confirm_sms(doc):
 		send_message(doc, message)
 
 
-@frappe.whitelist()
-def invoice_appointment(appointment_doc):
-	if not appointment_doc.name:
-		return False
-	sales_invoice = frappe.new_doc("Sales Invoice")
-	sales_invoice.customer = frappe.get_value("Patient", appointment_doc.patient, "customer")
-	sales_invoice.appointment = appointment_doc.name
-	sales_invoice.due_date = getdate()
-	sales_invoice.is_pos = '0'
-	sales_invoice.company = appointment_doc.company
-	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
-
-	fee_validity = get_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date)
-	procedure_template = False
-	if appointment_doc.procedure_template:
-		procedure_template = appointment_doc.procedure_template
-	create_invoice_items(appointment_doc.practitioner, appointment_doc.company, sales_invoice, procedure_template)
-
-	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_doc.name))
-	frappe.db.set_value("Fee Validity", fee_validity.name, "ref_invoice", sales_invoice.name)
-	encounter = frappe.db.exists({
-			"doctype": "Patient Encounter",
-			"appointment": appointment_doc.name})
-	if encounter:
-		frappe.db.set_value("Patient Encounter", encounter[0][0], "invoice", sales_invoice.name)
-	return sales_invoice.name
-
-
-def get_fee_validity(practitioner, patient, date):
-	validity_exist = validity_exists(practitioner, patient)
-	if validity_exist:
-		fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
-		fee_validity = update_fee_validity(fee_validity, date)
-	else:
-		fee_validity = create_fee_validity(practitioner, patient, date)
-	return fee_validity
-
-
 def validity_exists(practitioner, patient):
 	return frappe.db.exists({
 			"doctype": "Fee Validity",
 			"practitioner": practitioner,
 			"patient": patient})
-
-
-def update_fee_validity(fee_validity, date):
-	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
-	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
-	if not valid_days:
-		valid_days = 1
-	if not max_visit:
-		max_visit = 1
-	date = getdate(date)
-	valid_till = date + datetime.timedelta(days=int(valid_days))
-	fee_validity.max_visit = max_visit
-	fee_validity.visited = 1
-	fee_validity.valid_till = valid_till
-	fee_validity.save(ignore_permissions=True)
-	return fee_validity
-
-
-def create_fee_validity(practitioner, patient, date):
-	fee_validity = frappe.new_doc("Fee Validity")
-	fee_validity.practitioner = practitioner
-	fee_validity.patient = patient
-	fee_validity = update_fee_validity(fee_validity, date)
-	return fee_validity
-
-
-def create_invoice_items(practitioner, company, invoice, procedure_template):
-	item_line = invoice.append("items")
-	if procedure_template:
-		procedure_template_obj = frappe.get_doc("Clinical Procedure Template", procedure_template)
-		item_line.item_code = procedure_template_obj.item_code
-		item_line.item_name = procedure_template_obj.template
-		item_line.description = procedure_template_obj.description
-	else:
-		item_line.item_name = "Consulting Charges"
-		item_line.description = "Consulting Charges:  " + practitioner
-		item_line.uom = "Nos"
-		item_line.conversion_factor = 1
-		item_line.income_account = get_income_account(practitioner, company)
-		op_consulting_charge = frappe.db.get_value("Healthcare Practitioner", practitioner, "op_consulting_charge")
-		if op_consulting_charge:
-			item_line.rate = op_consulting_charge
-			item_line.amount = op_consulting_charge
-	item_line.qty = 1
-
-
-	return invoice
-
 
 @frappe.whitelist()
 def create_encounter(appointment):
@@ -301,8 +210,8 @@ def create_encounter(appointment):
 	encounter.visit_department = appointment.department
 	encounter.patient_sex = appointment.patient_sex
 	encounter.encounter_date = appointment.appointment_date
-	if appointment.sales_invoice:
-		encounter.invoice = appointment.sales_invoice
+	if appointment.invoiced:
+		encounter.invoiced = True
 	return encounter.as_dict()
 
 
@@ -359,6 +268,7 @@ def get_events(start, end, filters=None):
 		item.appointment_datetime = item.appointment_date + datetime.timedelta(minutes = item.duration)
 
 	return data
+
 @frappe.whitelist()
 def get_procedure_prescribed(patient):
 	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,

@@ -5,10 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import json
 from frappe.utils import getdate, cstr
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account
-from frappe import _
 
 class LabTest(Document):
 	def on_submit(self):
@@ -31,6 +28,8 @@ class LabTest(Document):
 	def after_insert(self):
 		if(self.prescription):
 			frappe.db.set_value("Lab Prescription", self.prescription, "test_created", 1)
+			if frappe.db.get_value("Lab Prescription", self.prescription, 'invoiced') == 1:
+				self.invoiced = True
 		if not self.test_name and self.template:
 			self.load_test_from_template()
 			self.reload()
@@ -64,7 +63,7 @@ def create_lab_test_doc(invoice, encounter, patient, template):
 	#create Test Result for template, copy vals from Invoice
 	lab_test = frappe.new_doc("Lab Test")
 	if(invoice):
-		lab_test.invoice = invoice
+		lab_test.invoiced = True
 	if(encounter):
 		lab_test.practitioner = encounter.practitioner
 	lab_test.patient = patient.name
@@ -133,7 +132,7 @@ def create_sample_doc(template, patient, invoice):
 			#create Sample Collection for template, copy vals from Invoice
 			sample_collection = frappe.new_doc("Sample Collection")
 			if(invoice):
-				sample_collection.invoice = invoice
+				sample_collection.invoiced = True
 			sample_collection.patient = patient.name
 			sample_collection.patient_age = patient.get_age()
 			sample_collection.patient_sex = patient.sex
@@ -211,7 +210,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 		if(prescription):
 			lab_test.prescription = prescription
 			if(invoice):
-				frappe.db.set_value("Lab Prescription", prescription, "invoice", invoice)
+				frappe.db.set_value("Lab Prescription", prescription, "invoiced", True)
 		lab_test.save(ignore_permissions=True) # insert the result
 		return lab_test
 
@@ -248,49 +247,7 @@ def delete_lab_test_from_medical_record(self):
 	if medical_record_id and medical_record_id[0][0]:
 		frappe.delete_doc("Patient Medical Record", medical_record_id[0][0])
 
-def create_item_line(test_code, sales_invoice):
-	if test_code:
-		item = frappe.get_doc("Item", test_code)
-		if item:
-			if not item.disabled:
-				sales_invoice_line = sales_invoice.append("items")
-				sales_invoice_line.item_code = item.item_code
-				sales_invoice_line.item_name =  item.item_name
-				sales_invoice_line.qty = 1.0
-				sales_invoice_line.description = item.description
-
-@frappe.whitelist()
-def create_invoice(company, patient, lab_tests, prescriptions):
-	test_ids = json.loads(lab_tests)
-	line_ids = json.loads(prescriptions)
-	if not test_ids and not line_ids:
-		return
-	sales_invoice = frappe.new_doc("Sales Invoice")
-	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
-	sales_invoice.due_date = getdate()
-	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(company)
-	for line in line_ids:
-		test_code = frappe.get_value("Lab Prescription", line, "test_code")
-		create_item_line(test_code, sales_invoice)
-	for test in test_ids:
-		template = frappe.get_value("Lab Test", test, "template")
-		test_code = frappe.get_value("Lab Test Template", template, "item")
-		create_item_line(test_code, sales_invoice)
-	sales_invoice.set_missing_values()
-	sales_invoice.save()
-	#set invoice in lab test
-	for test in test_ids:
-		frappe.db.set_value("Lab Test", test, "invoice", sales_invoice.name)
-		prescription = frappe.db.get_value("Lab Test", test, "prescription")
-		if prescription:
-			frappe.db.set_value("Lab Prescription", prescription, "invoice", sales_invoice.name)
-	#set invoice in prescription
-	for line in line_ids:
-		frappe.db.set_value("Lab Prescription", line, "invoice", sales_invoice.name)
-	return sales_invoice.name
-
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
-	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
+	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoiced, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
 	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))
