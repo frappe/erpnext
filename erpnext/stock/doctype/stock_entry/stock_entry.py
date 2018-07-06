@@ -918,10 +918,18 @@ class StockEntry(StockController):
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
-			req_qty = flt(req_items[0].required_qty)
-			req_qty_each = flt(req_qty / manufacturing_qty)
-			consumed_qty = flt(req_items[0].consumed_qty)
-
+			try:
+				req_qty = flt(req_items[0].required_qty)
+			except:
+				req_qty = 0
+			try:
+				req_qty_each = flt(req_qty / manufacturing_qty)
+			except:
+				req_qty_each = 0
+			try:
+				consumed_qty = flt(req_items[0].consumed_qty)
+			except:
+				consumed_qty = 0
 			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
 					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
