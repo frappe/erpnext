@@ -107,7 +107,15 @@ frappe.ui.form.on('Account', {
 					"fieldname": "account_number",
 					"fieldtype": "Data",
 					"reqd": 1
+				},
+				{
+					"label": "Account Name",
+					"fieldname": "account_name",
+					"fieldtype": "Data",
+					"reqd": 1,
+					"default": frm.doc.account_name
 				}
+
 			],
 			primary_action: function() {
 				var data = d.get_values();
@@ -120,6 +128,7 @@ frappe.ui.form.on('Account', {
 					method: "erpnext.accounts.doctype.account.account.update_account_number",
 					args: {
 						account_number: data.account_number,
+						account_name: data.account_name,
 						name: frm.doc.name
 					},
 					callback: function(r) {
@@ -128,6 +137,7 @@ frappe.ui.form.on('Account', {
 								frappe.set_route("Form", "Account", r.message);
 							} else {
 								frm.set_value("account_number", data.account_number);
+								frm.set_value("account_name", data.account_name);
 							}
 							d.hide();
 						}

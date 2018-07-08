@@ -188,7 +188,7 @@ class Account(NestedSet):
 
 		return new_account
 
-	def after_rename(self, old, new, merge=False):
+	def after_not(self, old, new, merge=False):
 		super(Account, self).after_rename(old, new, merge)
 
 		if not merge:
@@ -252,14 +252,14 @@ def validate_account_number(name, account_number, company):
 				.format(account_number, account_with_same_number))
 
 @frappe.whitelist()
-def update_account_number(name, account_number):
-	account = frappe.db.get_value("Account", name, ["account_name", "company"], as_dict=True)
+def update_account_number(name, account_number, account_name):
 
+	account = frappe.db.get_value("Account", name, ["company"], as_dict=True)
 	validate_account_number(name, account_number, account.company)
 
 	frappe.db.set_value("Account", name, "account_number", account_number)
+	frappe.db.set_value("Account", name, "account_name", account_name)
 
-	account_name = account.account_name
 	if account_name[0].isdigit():
 		separator = " - " if " - " in account_name else " "
 		account_name = account_name.split(separator, 1)[1]
@@ -267,7 +267,7 @@ def update_account_number(name, account_number):
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
 	if name != new_name:
-		frappe.rename_doc("Account", name, new_name)
+		frappe.rename_doc("Account", name, new_name, ignore_permissions=1)
 		return new_name
 
 def get_name_with_number(new_account, account_number):
