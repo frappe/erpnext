@@ -298,7 +298,7 @@ class Project(Document):
 					dt_name = frappe.db.get_value('Task', {"subject": dt, "project": self.name })
 					task_doc.append('depends_on', {"task": dt_name})
 
-				task_doc.update_db()
+				task_doc.db_update()
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
