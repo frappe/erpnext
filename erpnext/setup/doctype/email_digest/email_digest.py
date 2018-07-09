@@ -419,8 +419,9 @@ class EmailDigest(Document):
 		value, count, billed_value, delivered_value = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*),
 			ifnull(sum(grand_total*per_billed/100),0), ifnull(sum(grand_total*{0}/100),0)  from `tab{1}`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Closed','Cancelled', 'Completed') """.format(getfield, doc_type),
-			{"to_date": self.future_to_date})[0]
+			and status not in ('Closed','Cancelled', 'Completed')
+			and company = %(company)s """.format(getfield, doc_type),
+			{"to_date": self.future_to_date, "company": self.company})[0]
 
 		return {
 			"label": self.meta.get_label(fieldname),
@@ -434,11 +435,13 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.future_to_date})[0]
+			and company = %(company)s
+			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.future_to_date, "company": self.company})[0]
 
 		last_value = frappe.db.sql("""select ifnull(sum(grand_total),0) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date})[0][0]
+			and company = %(company)s
+			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date, "company": self.company})[0][0]
 
 		return {
 			"label": self.meta.get_label(fieldname),
@@ -464,8 +467,9 @@ class EmailDigest(Document):
 	def get_total_on(self, doc_type, from_date, to_date):
 
 		return frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tab{0}`
-			where (transaction_date between %(from_date)s and %(to_date)s) and status not in ('Cancelled')""".format(doc_type),
-			{"from_date": from_date, "to_date": to_date})[0]
+			where (transaction_date between %(from_date)s and %(to_date)s) and company=%(company)s
+			and status not in ('Cancelled')""".format(doc_type),
+			{"from_date": from_date, "to_date": to_date, "company": self.company})[0]
 
 	def get_from_to_date(self):
 		today = now_datetime().date()
