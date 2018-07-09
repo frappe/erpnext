@@ -300,8 +300,8 @@ frappe.ui.form.on("Work Order", {
 				freeze: true,
 				callback: function(r) {
 					if(r.message) {
-						frm.set_value('sales_order', "");
-						frm.trigger('set_sales_order');
+// 						frm.set_value('sales_order', "");
+// 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
 						$.each(["description", "stock_uom", "project", "bom_no",
 							"allow_alternative_item", "transfer_material_against"], function(i, field) {
