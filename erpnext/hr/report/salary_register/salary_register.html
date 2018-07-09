@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h5 class="text-center">{{ __("From") }} {%= filters.date_range[0] %} {{ __("to") }} {%= filters.date_range[1] %}</h5>
+<h5 class="text-center">{{ __("From") }} {%= filters.from_date %} {{ __("to") }} {%= filters.to_date %}</h5>
 <hr>
 <table class="table table-bordered">
 	<thead>
