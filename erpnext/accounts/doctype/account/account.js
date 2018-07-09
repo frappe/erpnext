@@ -49,7 +49,7 @@ frappe.ui.form.on('Account', {
 		}
 
 		if(!frm.doc.__islocal) {
-			frm.add_custom_button(__('Update Account Number'), function () {
+			frm.add_custom_button(__('Update Account Number / Account Name'), function () {
 				frm.trigger("update_account_number");
 			});
 		}
@@ -100,13 +100,14 @@ frappe.ui.form.on('Account', {
 
 	update_account_number: function(frm) {
 		var d = new frappe.ui.Dialog({
-			title: __('Update Account Number'),
+			title: __('Update Account Number / Account Name'),
 			fields: [
 				{
 					"label": "Account Number",
 					"fieldname": "account_number",
 					"fieldtype": "Data",
-					"reqd": 1
+					"reqd": 1,
+					"default": frm.doc.account_number
 				},
 				{
 					"label": "Account Name",
