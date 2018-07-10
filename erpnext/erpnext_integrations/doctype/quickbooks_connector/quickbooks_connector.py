@@ -26,7 +26,8 @@ def callback(*args, **kwargs):
 	code = kwargs.get("code")
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
-	fetch_customer(token, company_id, 63)
+	print("Enqueing Customer Fetch Job")
+	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_customer", token=token, company_id=company_id, customer_id=63)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
@@ -34,7 +35,7 @@ def get_access_token(code):
 	return token
 
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
-def fetch_customer(token, company_id, customer_id):
+def fetch_customer(token="", company_id=1, customer_id=1):
 	customer_uri = BASE_URL.format(company_id, "customer", customer_id)
 	customer = requests.get(customer_uri, headers=get_headers(token)).json()
 	print("Fetched", customer)
