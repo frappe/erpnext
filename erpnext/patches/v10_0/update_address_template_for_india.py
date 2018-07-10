@@ -7,4 +7,6 @@ from erpnext.regional.india.setup import update_address_template
 
 def execute():
 	if frappe.db.get_value('Company', {'country': 'India'}, 'name'):
-		update_address_template()
+		address_template = frappe.db.get_value('Address Template', 'India', 'template')
+		if address_template and "gstin" not in address_template:
+			update_address_template()
