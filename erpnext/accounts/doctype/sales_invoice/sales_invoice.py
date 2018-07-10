@@ -1312,3 +1312,19 @@ def make_inter_company_invoice(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def get_loyalty_programs(customer):
+	''' sets applicable loyalty program to the customer or returns a list of applicable programs '''
+	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
+
+	customer = frappe.get_doc('Customer', customer)
+	if customer.loyalty_program: return
+
+	lp_details = get_loyalty_programs(customer)
+
+	if len(lp_details) == 1:
+		frappe.db.set(customer, 'loyalty_program', lp_details[0])
+		return []
+	else:
+		return lp_details
