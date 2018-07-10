@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe import _
 
 no_cache = 1
 no_sitemap = 1
