@@ -220,10 +220,10 @@ def invoice_appointment(appointment_doc):
 	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_doc.name))
 	frappe.db.set_value("Fee Validity", fee_validity.name, "ref_invoice", sales_invoice.name)
 	encounter = frappe.db.exists({
-			"doctype": "Encounter",
+			"doctype": "Patient Encounter",
 			"appointment": appointment_doc.name})
 	if encounter:
-		frappe.db.set_value("Encounter", encounter[0][0], "invoice", sales_invoice.name)
+		frappe.db.set_value("Patient Encounter", encounter[0][0], "invoice", sales_invoice.name)
 	return sales_invoice.name
 
 
@@ -294,7 +294,7 @@ def create_invoice_items(practitioner, company, invoice, procedure_template):
 @frappe.whitelist()
 def create_encounter(appointment):
 	appointment = frappe.get_doc("Patient Appointment", appointment)
-	encounter = frappe.new_doc("Encounter")
+	encounter = frappe.new_doc("Patient Encounter")
 	encounter.appointment = appointment.name
 	encounter.patient = appointment.patient
 	encounter.practitioner = appointment.practitioner
@@ -362,6 +362,6 @@ def get_events(start, end, filters=None):
 def get_procedure_prescribed(patient):
 	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,
 	ct.encounter_date, pp.practitioner, pp.date, pp.department
-	from tabEncounter ct, `tabProcedure Prescription` pp
+	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
 	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
 	order by ct.creation desc""".format(patient))

@@ -33,7 +33,7 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Medical Record'), function () {
 				create_medical_record(frm);
 			}, "Create");
-			frm.add_custom_button(__('Encounter'), function () {
+			frm.add_custom_button(__('Patient Encounter'), function () {
 				btn_create_encounter(frm);
 			}, "Create");
 		}
@@ -101,7 +101,7 @@ var btn_create_encounter = function (frm) {
 	frappe.route_options = {
 		"patient": frm.doc.name,
 	};
-	frappe.new_doc("Encounter");
+	frappe.new_doc("Patient Encounter");
 };
 
 var btn_invoice_registration = function (frm) {

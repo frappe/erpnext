@@ -15,8 +15,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Encounter",
-					"label": _("Encounter"),
+					"name": "Patient Encounter",
+					"label": _("Patient Encounter"),
 				},
 				{
 					"type": "doctype",

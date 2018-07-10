@@ -82,7 +82,7 @@ def consulation_on_appointment():
 		encounter.save(ignore_permissions=True)
 
 def set_encounter(patient, patient_sex, practitioner, department, encounter_date, i):
-	encounter = frappe.new_doc("Encounter")
+	encounter = frappe.new_doc("Patient Encounter")
 	encounter.patient = patient
 	encounter.patient_sex = patient_sex
 	encounter.practitioner = practitioner
@@ -112,7 +112,7 @@ def lab_test_on_encounter():
 	while i <= 2:
 		test_rx = get_random("Lab Prescription", filters={'test_created': 0})
 		test_rx = frappe.get_doc("Lab Prescription", test_rx)
-		encounter = frappe.get_doc("Encounter", test_rx.parent)
+		encounter = frappe.get_doc("Patient Encounter", test_rx.parent)
 		set_lab_test(encounter.patient, encounter.patient_sex, encounter.practitioner, test_rx.test_code, test_rx.name)
 		i += 1
 

@@ -304,13 +304,13 @@ def get_data():
 			"hidden": 1
         },
         {
-			"module_name": "Encounter",
+			"module_name": "Patient Encounter",
 			"color": "#2ecc71",
 			"icon": "fa fa-stethoscope",
-			"doctype": "Encounter",
+			"doctype": "Patient Encounter",
 			"type": "link",
-			"link": "List/Encounter",
-			"label": _("Encounter"),
+			"link": "List/Patient Encounter",
+			"label": _("Patient Encounter"),
 			"hidden": 1
         },
         {

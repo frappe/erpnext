@@ -6,7 +6,7 @@ frappe.ui.form.on('Patient Appointment', {
 		frm.custom_make_buttons = {
 			'Sales Invoice': 'Invoice',
 			'Vital Signs': 'Vital Signs',
-			'Encounter': 'Encounter'
+			'Patient Encounter': 'Patient Encounter'
 		};
 	},
 	refresh: function(frm) {
@@ -47,7 +47,7 @@ frappe.ui.form.on('Patient Appointment', {
 				},"Create");
 			}
 			else{
-				frm.add_custom_button(__("Encounter"),function(){
+				frm.add_custom_button(__("Patient Encounter"),function(){
 					btn_create_encounter(frm);
 				},"Create");
 			}
@@ -67,7 +67,7 @@ frappe.ui.form.on('Patient Appointment', {
 				},"Create");
 			}
 			else{
-				frm.add_custom_button(__("Encounter"),function(){
+				frm.add_custom_button(__("Patient Encounter"),function(){
 					btn_create_encounter(frm);
 				},"Create");
 			}

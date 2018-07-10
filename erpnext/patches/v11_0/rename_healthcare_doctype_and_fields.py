@@ -4,7 +4,7 @@ from frappe.model.utils.rename_field import rename_field
 from frappe.modules import scrub, get_doctype_module
 
 field_rename_map = {
-	"Encounter": [
+	"Patient Encounter": [
 		["consultation_time", "encounter_time"],
 		["consultation_date", "encounter_date"],
 		["consultation_comment", "encounter_comment"],
@@ -29,7 +29,7 @@ doc_rename_map = {
 	"Physician Schedule Time Slot": "Healthcare Schedule Time Slot",
 	"Physician Schedule": "Practitioner Schedule",
 	"Physician Service Unit Schedule": "Practitioner Service Unit Schedule",
-	"Consultation": "Encounter",
+	"Consultation": "Patient Encounter",
 	"Physician": "Healthcare Practitioner"
 }
 

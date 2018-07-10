@@ -2,7 +2,7 @@ data = {
 	'desktop_icons': [
 		'Patient',
 		'Patient Appointment',
-		'Encounter',
+		'Patient Encounter',
 		'Lab Test',
 		'Healthcare',
 		'Accounts',

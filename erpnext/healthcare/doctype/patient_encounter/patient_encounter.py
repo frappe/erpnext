@@ -9,7 +9,7 @@ from frappe.utils import getdate, cstr
 import json
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
-class Encounter(Document):
+class PatientEncounter(Document):
 	def on_update(self):
 		if(self.appointment):
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
@@ -74,8 +74,8 @@ def create_invoice(company, patient, practitioner, encounter_id):
 	create_invoice_items(practitioner, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql("""update tabEncounter set invoice=%s where name=%s""", (sales_invoice.name, encounter_id))
-	appointment = frappe.db.get_value("Encounter", encounter_id, "appointment")
+	frappe.db.sql("""update tabPatient Encounter set invoice=%s where name=%s""", (sales_invoice.name, encounter_id))
+	appointment = frappe.db.get_value("Patient Encounter", encounter_id, "appointment")
 	if appointment:
 		frappe.db.set_value("Patient Appointment", appointment, "sales_invoice", sales_invoice.name)
 	return sales_invoice.name
@@ -101,7 +101,7 @@ def insert_encounter_to_medical_record(doc):
 	medical_record.subject = subject
 	medical_record.status = "Open"
 	medical_record.communication_date = doc.encounter_date
-	medical_record.reference_doctype = "Encounter"
+	medical_record.reference_doctype = "Patient Encounter"
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)

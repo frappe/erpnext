@@ -1,7 +1,7 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Encounter', {
+frappe.ui.form.on('Patient Encounter', {
 	setup: function(frm) {
 		frm.get_field('drug_prescription').grid.editable_fields = [
 			{fieldname: 'drug_code', columns: 2},
@@ -142,7 +142,7 @@ var btn_create_procedure = function (frm) {
 	frappe.new_doc("Clinical Procedure");
 };
 
-frappe.ui.form.on("Encounter", "appointment", function(frm){
+frappe.ui.form.on("Patient Encounter", "appointment", function(frm){
 	if(frm.doc.appointment){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -160,7 +160,7 @@ frappe.ui.form.on("Encounter", "appointment", function(frm){
 	}
 });
 
-frappe.ui.form.on("Encounter", "practitioner", function(frm) {
+frappe.ui.form.on("Patient Encounter", "practitioner", function(frm) {
 	if(frm.doc.practitioner){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -175,7 +175,7 @@ frappe.ui.form.on("Encounter", "practitioner", function(frm) {
 	}
 });
 
-frappe.ui.form.on("Encounter", "symptoms_select", function(frm) {
+frappe.ui.form.on("Patient Encounter", "symptoms_select", function(frm) {
 	if(frm.doc.symptoms_select){
 		var symptoms = null;
 		if(frm.doc.symptoms)
@@ -186,7 +186,7 @@ frappe.ui.form.on("Encounter", "symptoms_select", function(frm) {
 		frappe.model.set_value(frm.doctype,frm.docname, "symptoms_select", null);
 	}
 });
-frappe.ui.form.on("Encounter", "diagnosis_select", function(frm) {
+frappe.ui.form.on("Patient Encounter", "diagnosis_select", function(frm) {
 	if(frm.doc.diagnosis_select){
 		var diagnosis = null;
 		if(frm.doc.diagnosis)
@@ -198,7 +198,7 @@ frappe.ui.form.on("Encounter", "diagnosis_select", function(frm) {
 	}
 });
 
-frappe.ui.form.on("Encounter", "patient", function(frm) {
+frappe.ui.form.on("Patient Encounter", "patient", function(frm) {
 	if(frm.doc.patient){
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",

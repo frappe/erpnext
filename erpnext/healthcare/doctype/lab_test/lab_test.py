@@ -160,7 +160,7 @@ def create_lab_test_from_desk(patient, template, prescription, invoice=None):
 		return
 	patient = frappe.get_doc("Patient", patient)
 	encounter_id = frappe.get_value("Lab Prescription", prescription, "parent")
-	encounter = frappe.get_doc("Encounter", encounter_id)
+	encounter = frappe.get_doc("Patient Encounter", encounter_id)
 	lab_test = create_lab_test(patient, template, prescription, encounter, invoice)
 	return lab_test.name
 
