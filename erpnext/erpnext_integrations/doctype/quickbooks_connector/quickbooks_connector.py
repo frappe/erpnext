@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
+import requests
 
 client_id = "Q02P61JeL3TNEr5HjcWTrXB9bQEab6LhoPaGg3uF2RQ1iKG6nL"
 client_secret = "B1se8GzM4FvfNAbeRjZGF5q2BNyRcV4O2V4fb0ZQ"
@@ -23,11 +24,24 @@ def get_authorization_url():
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
 	code = kwargs.get("code")
-	get_access_token(code)
+	company_id = kwargs.get("realmId")
+	token = get_access_token(code)
+	fetch_customer(token, company_id, 63)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
 	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)["access_token"]
+	return token
+
+BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
+def fetch_customer(token, company_id, customer_id):
+	customer_uri = BASE_URL.format(company_id, "customer", customer_id)
+	customer = requests.get(customer_uri, headers=get_headers(token)).json()
+	print("Fetched", customer)
+
+def get_headers(token):
+	return {"Accept": "application/json",
+	"Authorization": "Bearer {}".format(token)}
 
 class QuickBooksConnector(Document):
 	pass
