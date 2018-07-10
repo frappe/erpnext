@@ -232,6 +232,20 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}, function() {
 				me.apply_pricing_rule();
 			});
+
+		if(this.frm.doc.customer) {
+			frappe.call({
+				"method": "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
+				"args": {
+					"customer": this.frm.doc.customer
+				},
+				callback: function(r) {
+					if(r.message) {
+						select_loyalty_program(me.frm, r.message);
+					}
+				}
+			});
+		}
 	},
 
 	make_inter_company_invoice: function() {
@@ -730,4 +744,35 @@ var calculate_total_billing_amount =  function(frm) {
 	}
 
 	refresh_field('total_billing_amount')
+}
+
+var select_loyalty_program = function(frm, loyalty_programs) {
+	var dialog = new frappe.ui.Dialog({
+		title: __("Select Loyalty Program"),
+		fields: [
+			{
+				"label": __("Loyalty Program"),
+				"fieldname": "loyalty_program",
+				"fieldtype": "Select",
+				"options": loyalty_programs,
+				"default": loyalty_programs[0]
+			}
+		]
+	});
+
+	dialog.set_primary_action(__("Set"), function() {
+		dialog.hide();
+		return frappe.call({
+			method: "frappe.client.set_value",
+			args: {
+				doctype: "Customer",
+				name: frm.doc.customer,
+				fieldname: "loyalty_program",
+				value: dialog.get_value("loyalty_program"),
+			},
+			callback: function(r) { }
+		});
+	});
+
+	dialog.show();
 }
