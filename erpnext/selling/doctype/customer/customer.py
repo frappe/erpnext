@@ -6,7 +6,7 @@ import frappe
 from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
-from frappe.utils import flt, cint, cstr
+from frappe.utils import flt, cint, cstr, today
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
@@ -194,8 +194,7 @@ class Customer(TransactionBase):
 		if len(loyalty_program) == 1:
 			self.loyalty_program = loyalty_program[0]
 		else:
-			frappe.msgprint(_("Multiple Loyalty Program found for the Customer.\
-				Please select manually."))
+			frappe.msgprint(_("Multiple Loyalty Program found for the Customer. Please select manually."))
 
 @frappe.whitelist()
 def get_loyalty_programs(doc):
@@ -203,8 +202,10 @@ def get_loyalty_programs(doc):
 	from frappe.desk.treeview import get_children
 
 	lp_details = []
-	loyalty_programs = frappe.get_all("Loyalty Program", fields=["name", "customer_group",\
-		"customer_territory"], filters={"auto_opt_in": 1, "disabled": 0})
+	loyalty_programs = frappe.get_all("Loyalty Program",
+		fields=["name", "customer_group", "customer_territory"],
+		filters={"auto_opt_in": 1, "from_date": ["<=", today()],
+			"ifnull(to_date, '2500-01-01')": [">=", today()]})
 
 	for loyalty_program in loyalty_programs:
 		customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)]
