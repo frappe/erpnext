@@ -15,18 +15,19 @@ redirect_uri = "http://localhost/api/method/erpnext.erpnext_integrations.doctype
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
 authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
-
-@frappe.whitelist(allow_guest=True)
-def callback(*args, **kwargs):
-	print("*"*50)
-	print(args, kwargs)
-	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
-
 @frappe.whitelist()
 def get_authorization_url():
 	return oauth.authorization_url(authorization_endpoint)[0]
 
+@frappe.whitelist(allow_guest=True)
+def callback(*args, **kwargs):
+	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
+	code = kwargs.get("code")
+	get_access_token(code)
+
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+def get_access_token(code):
+	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)["access_token"]
 
 class QuickBooksConnector(Document):
 	pass
