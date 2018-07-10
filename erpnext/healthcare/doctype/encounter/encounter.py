@@ -88,7 +88,7 @@ def create_invoice_items(practitioner, invoice, company):
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
 	item_line.income_account = get_income_account(practitioner, company)
-	op_consulting_charge = frappe.get_value("Practitioner", practitioner, "op_consulting_charge")
+	op_consulting_charge = frappe.get_value("Healthcare Practitioner", practitioner, "op_consulting_charge")
 	if op_consulting_charge:
 		item_line.rate = op_consulting_charge
 		item_line.amount = op_consulting_charge

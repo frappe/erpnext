@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-06-29 16:44:54.741387", 
+ "modified": "2018-07-10 11:30:06.354711", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "lab-test", 
@@ -83,7 +83,7 @@
    "label": "Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Practitioner", 
+   "options": "Healthcare Practitioner", 
    "read_only": 0, 
    "reqd": 0
   }, 

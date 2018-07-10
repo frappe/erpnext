@@ -10,9 +10,6 @@ field_rename_map = {
 		["consultation_comment", "encounter_comment"],
 		["physician", "practitioner"]
 	],
-	"Practitioner": [
-		["physician_schedules", "practitioner_schedules"]
-	],
 	"Fee Validity": [
 		["physician", "practitioner"]
 	],
@@ -33,7 +30,7 @@ doc_rename_map = {
 	"Physician Schedule": "Practitioner Schedule",
 	"Physician Service Unit Schedule": "Practitioner Service Unit Schedule",
 	"Consultation": "Encounter",
-	"Physician": "Practitioner"
+	"Physician": "Healthcare Practitioner"
 }
 
 def execute():
@@ -54,3 +51,10 @@ def execute():
 				for field in field_list:
 					if frappe.db.has_column(dt, field[0]):
 						rename_field(dt, field[0], field[1])
+
+		if frappe.db.exists('DocType', 'Practitioner Service Unit Schedule'):
+			if frappe.db.has_column('Practitioner Service Unit Schedule', 'parentfield'):
+				frappe.db.sql("""
+					update `tabPractitioner Service Unit Schedule` set parentfield = 'practitioner_schedules'
+					where parentfield = 'physician_schedules' and parenttype = 'Healthcare Practitioner'
+				""")

@@ -358,7 +358,7 @@ frappe.ui.form.on("Patient Appointment", "practitioner", function(frm) {
 		frappe.call({
 			"method": "frappe.client.get",
 			args: {
-				doctype: "Practitioner",
+				doctype: "Healthcare Practitioner",
 				name: frm.doc.practitioner
 			},
 			callback: function (data) {

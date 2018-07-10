@@ -52,7 +52,7 @@ def get_receivable_account(company):
 
 def get_income_account(practitioner, company):
     if(practitioner):
-        income_account = get_account("Practitioner", None, practitioner, company)
+        income_account = get_account("Healthcare Practitioner", None, practitioner, company)
         if income_account:
             return income_account
     income_account = get_account(None, "income_account", "Healthcare Settings", company)

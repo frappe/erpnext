@@ -798,10 +798,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-29 15:56:37.774700", 
+ "modified": "2018-07-10 11:18:58.760297", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Practitioner", 
+ "name": "Healthcare Practitioner", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

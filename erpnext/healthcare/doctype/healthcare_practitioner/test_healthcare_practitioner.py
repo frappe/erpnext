@@ -4,5 +4,5 @@
 from __future__ import unicode_literals
 import unittest
 
-class TestPractitioner(unittest.TestCase):
+class TestHealthcarePractitioner(unittest.TestCase):
 	pass

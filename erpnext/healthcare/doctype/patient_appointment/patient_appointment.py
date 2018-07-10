@@ -81,7 +81,7 @@ def get_availability_data(date, practitioner):
 
 	employee = None
 
-	practitioner_obj = frappe.get_doc("Practitioner", practitioner)
+	practitioner_obj = frappe.get_doc("Healthcare Practitioner", practitioner)
 
 	# Get practitioner employee relation
 	if practitioner_obj.employee:
@@ -114,7 +114,7 @@ def get_availability_data(date, practitioner):
 			if schedule.schedule:
 				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
 			else:
-				frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Practitioner master".format(practitioner)))
+				frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
 
 			if practitioner_schedule:
 				available_slots = []
@@ -152,7 +152,7 @@ def get_availability_data(date, practitioner):
 						"avail_slot":available_slots, 'appointments': appointments})
 
 	else:
-		frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Practitioner master".format(practitioner)))
+		frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
 
 	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates
@@ -281,7 +281,7 @@ def create_invoice_items(practitioner, company, invoice, procedure_template):
 		item_line.uom = "Nos"
 		item_line.conversion_factor = 1
 		item_line.income_account = get_income_account(practitioner, company)
-		op_consulting_charge = frappe.db.get_value("Practitioner", practitioner, "op_consulting_charge")
+		op_consulting_charge = frappe.db.get_value("Healthcare Practitioner", practitioner, "op_consulting_charge")
 		if op_consulting_charge:
 			item_line.rate = op_consulting_charge
 			item_line.amount = op_consulting_charge

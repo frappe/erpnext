@@ -1,7 +1,7 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Practitioner', {
+frappe.ui.form.on('Healthcare Practitioner', {
 	setup: function(frm) {
 		frm.set_query('account', 'accounts', function(doc, cdt, cdn) {
 			var d	= locals[cdt][cdn];
@@ -15,7 +15,7 @@ frappe.ui.form.on('Practitioner', {
 		});
 	},
 	refresh: function(frm) {
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Practitioner'};
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Healthcare Practitioner'};
 		if(!frm.is_new()) {
 			frappe.contacts.render_address_and_contact(frm);
 		}
@@ -30,7 +30,7 @@ frappe.ui.form.on('Practitioner', {
 	}
 });
 
-frappe.ui.form.on("Practitioner", "user_id",function(frm) {
+frappe.ui.form.on("Healthcare Practitioner", "user_id",function(frm) {
 	if(frm.doc.user_id){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -64,7 +64,7 @@ frappe.ui.form.on("Practitioner", "user_id",function(frm) {
 	}
 });
 
-frappe.ui.form.on("Practitioner", "employee", function(frm) {
+frappe.ui.form.on("Healthcare Practitioner", "employee", function(frm) {
 	if(frm.doc.employee){
 		frappe.call({
 			"method": "frappe.client.get",

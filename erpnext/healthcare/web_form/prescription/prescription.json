@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-07-03 12:50:31.086604", 
+ "modified": "2018-07-10 11:31:05.957421", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "prescription", 
@@ -39,7 +39,7 @@
    "label": "Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Practitioner", 
+   "options": "Healthcare Practitioner", 
    "read_only": 0, 
    "reqd": 1
   }, 

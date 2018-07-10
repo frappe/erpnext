@@ -27,7 +27,7 @@ def get_columns():
 	columns = [
 		_("Test") + ":Data:120",
 		_("Patient") + ":Link/Patient:180",
-		_("Practitioner") + ":Link/Practitioner:120",
+		_("Practitioner") + ":Link/Healthcare Practitioner:120",
 		_("Invoice") + ":Link/Sales Invoice:120",
 		_("Status") + ":Data:120",
 		_("Result Date") + ":Date:120",

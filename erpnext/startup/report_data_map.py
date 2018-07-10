@@ -301,11 +301,11 @@ data_map = {
 		"columns": ["name", "appointment_type", "patient", "practitioner", "appointment_date", "department", "status", "company"],
 		"order_by": "name",
 		"links": {
-			"practitioner": ["Practitioner", "name"],
+			"practitioner": ["Healthcare Practitioner", "name"],
 			"appointment_type": ["Appointment Type", "name"]
 		}
 	},
-	"Practitioner": {
+	"Healthcare Practitioner": {
 		"columns": ["name", "department"],
 		"order_by": "name",
 		"links": {

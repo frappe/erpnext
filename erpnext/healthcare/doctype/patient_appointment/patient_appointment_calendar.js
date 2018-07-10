@@ -15,7 +15,7 @@ frappe.views.calendar["Patient Appointment"] = {
 		{
 			'fieldtype': 'Link',
 			'fieldname': 'practitioner',
-			'options': 'Practitioner',
+			'options': 'Healthcare Practitioner',
 			'label': __('Practitioner')
 		},
 		{

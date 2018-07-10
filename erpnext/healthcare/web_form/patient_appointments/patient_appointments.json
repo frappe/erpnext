@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-06-29 16:45:36.874470", 
+ "modified": "2018-07-10 11:30:37.187236", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "patient-appointments", 
@@ -49,7 +49,7 @@
    "label": "Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Practitioner", 
+   "options": "Healthcare Practitioner", 
    "read_only": 0, 
    "reqd": 1
   }, 

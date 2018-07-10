@@ -13,7 +13,7 @@ from frappe.utils import nowdate, add_days
 class TestFeeValidity(unittest.TestCase):
 	def test_fee_validity(self):
 		patient = get_random("Patient")
-		practitioner = get_random("Practitioner")
+		practitioner = get_random("Healthcare Practitioner")
 		department = get_random("Medical Department")
 
 		if not patient:
@@ -30,7 +30,7 @@ class TestFeeValidity(unittest.TestCase):
 			department = medical_department.name
 
 		if not practitioner:
-			practitioner = frappe.new_doc("Practitioner")
+			practitioner = frappe.new_doc("Healthcare Practitioner")
 			practitioner.first_name = "Amit Jain"
 			practitioner.department = department
 			practitioner.save(ignore_permissions=True)

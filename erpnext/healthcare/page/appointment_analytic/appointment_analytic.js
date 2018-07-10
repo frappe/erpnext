@@ -14,7 +14,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			title: __("Appointment Analytics"),
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Patient Appointment", "Practitioner", "Medical Department", "Appointment Type", "Patient"],
+			doctypes: ["Patient Appointment", "Healthcare Practitioner", "Medical Department", "Appointment Type", "Patient"],
 			tree_grid: { show: true }
 		});
 
@@ -28,7 +28,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 					return item.name;
 				}
 			},
-			"Practitioner": {
+			"Healthcare Practitioner": {
 				label: __("Practitioner"),
 				show: true,
 				item_key: "practitioner",
@@ -52,7 +52,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: __("Tree Type"), fieldname: "tree_type",
-			options:["Practitioner", "Medical Department"], filter: function(val, item, opts, me) {
+			options:["Healthcare Practitioner", "Medical Department"], filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);}},
 		{fieldtype:"Select", label: __("Status"), fieldname: "status",
 			options:[
@@ -64,7 +64,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				{label: __("Cancelled"), value: "Cancelled"}]},
 		{fieldtype:"Select", label: __("Type"), link:"Appointment Type", fieldname: "type",
 			default_value: __("Select Type...")},
-		{fieldtype:"Select", label: __("Practitioner"), link:"Practitioner", fieldname: "practitioner",
+		{fieldtype:"Select", label: __("Practitioner"), link:"Healthcare Practitioner", fieldname: "practitioner",
 			default_value: __("Select Practitioner..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.name == val || item._show;
 			}, link_formatter: {filter_input: "practitioner"}},
@@ -96,10 +96,10 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		}
 		if(!this.data || me.item_type != me.tree_type) {
 			var items = null;
-			if(me.tree_type=='Practitioner') {
-				items = frappe.report_dump.data["Practitioner"];
+			if(me.tree_type=='Healthcare Practitioner') {
+				items = frappe.report_dump.data["Healthcare Practitioner"];
 			} if(me.tree_type=='Medical Department') {
-				items = this.prepare_tree("Practitioner", "Medical Department");
+				items = this.prepare_tree("Healthcare Practitioner", "Medical Department");
 			}
 			me.item_type = me.tree_type;
 			me.parent_map = {};
