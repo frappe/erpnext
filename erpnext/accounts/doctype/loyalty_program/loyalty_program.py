@@ -16,14 +16,17 @@ class LoyaltyProgram(Document):
 def get_loyalty_details(customer, loyalty_program, expiry_date=None, company=None):
 	if not expiry_date:
 		expiry_date = today()
-	args_list = [customer, loyalty_program, expiry_date]
+
+	args_list = [customer, loyalty_program, expiry_date, expiry_date]
 	condition = ''
 	if company:
 		condition = " and company=%s "
 		args_list.append(company)
 	loyalty_point_details = frappe.db.sql('''select sum(loyalty_points) as loyalty_points,
 		sum(purchase_amount) as total_spent from `tabLoyalty Point Entry`
-		where customer=%s and loyalty_program=%s and (expiry_date>=%s) {condition}
+		where customer=%s and loyalty_program=%s
+		and expiry_date>=%s and posting_date <= %s
+		{condition}
 		group by customer'''.format(condition=condition), tuple(args_list), as_dict=1)
 	if loyalty_point_details:
 		return loyalty_point_details[0]
@@ -33,35 +36,28 @@ def get_loyalty_details(customer, loyalty_program, expiry_date=None, company=Non
 @frappe.whitelist()
 def get_loyalty_program_details(customer, loyalty_program=None, expiry_date=None, company=None, silent=False):
 	lp_details = frappe._dict()
-	customer_loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
-
-	if not (customer_loyalty_program or silent):
-		frappe.throw(_("Customer isn't enrolled in any Loyalty Program"))
-	elif silent and not customer_loyalty_program:
-		return frappe._dict({"loyalty_program": None})
-
-	if loyalty_program and loyalty_program != customer_loyalty_program:
-		frappe.throw(_("Customer isn't enrolled in this Loyalty Program"))
 
 	if not loyalty_program:
-		loyalty_program = customer_loyalty_program
+		loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
+
+		if not (loyalty_program or silent):
+			frappe.throw(_("Customer isn't enrolled in any Loyalty Program"))
+		elif silent and not loyalty_program:
+			return frappe._dict({"loyalty_program": None})
+
 	if not company:
 		company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
 
-	lp_details.update(get_loyalty_details(customer, loyalty_program, expiry_date, company))
+	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
+	lp_details.update({"loyalty_program": loyalty_program.name})
+	lp_details.update(loyalty_program.as_dict())
 
-	lp_details.update({"loyalty_program": loyalty_program})
-	loyalty_program = frappe.get_doc("Loyalty Program", lp_details.loyalty_program)
+	lp_details.update(get_loyalty_details(customer, loyalty_program.name, expiry_date, company))
 
-	lp_details.expiry_duration = loyalty_program.expiry_duration
-	lp_details.conversion_factor = loyalty_program.conversion_factor
-	lp_details.expense_account = loyalty_program.expense_account
-	lp_details.cost_center = loyalty_program.cost_center
-	lp_details.company = loyalty_program.company
-
-	tier_spent_level = sorted([d.as_dict() for d in loyalty_program.collection_rules], key=lambda rule:rule.min_spent, reverse=True)
+	tier_spent_level = sorted([d.as_dict() for d in loyalty_program.collection_rules],
+		key=lambda rule:rule.min_spent, reverse=True)
 	for i, d in enumerate(tier_spent_level):
-		if i==0 or lp_details.total_spent < d.min_spent:
+		if i == 0 or lp_details.total_spent < d.min_spent:
 			lp_details.tier_name = d.tier_name
 			lp_details.collection_factor = d.collection_factor
 		else:

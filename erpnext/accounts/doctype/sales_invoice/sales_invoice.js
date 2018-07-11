@@ -230,6 +230,20 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}, function() {
 				me.apply_pricing_rule();
 			});
+
+		if(this.frm.doc.customer) {
+			frappe.call({
+				"method": "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
+				"args": {
+					"customer": this.frm.doc.customer
+				},
+				callback: function(r) {
+					if(r.message) {
+						select_loyalty_program(me.frm, r.message);
+					}
+				}
+			});
+		}
 	},
 
 	make_inter_company_invoice: function() {
@@ -530,10 +544,6 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 });
 
 frappe.ui.form.on('Sales Invoice', {
-	refresh: function(frm) {
-		frm.add_fetch('customer', 'loyalty_program', 'loyalty_program');
-	},
-
 	setup: function(frm){
 		
 		frm.custom_make_buttons = {
@@ -598,6 +608,24 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			};
 		});
+
+		// set get_query for loyalty redemption account
+		frm.fields_dict["loyalty_redemption_account"].get_query = function() {
+			return {
+				filters:{
+					"company": frm.doc.company
+				}
+			}
+		};
+
+		// set get_query for loyalty redemption cost center
+		frm.fields_dict["loyalty_redemption_cost_center"].get_query = function() {
+			return {
+				filters:{
+					"company": frm.doc.company
+				}
+			}
+		};
 	},
 	//When multiple companies are set up. in case company name is changed set default company address
 	company:function(frm){
@@ -661,18 +689,15 @@ frappe.ui.form.on('Sales Invoice', {
 				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
 				args: {
 					"customer": frm.doc.customer,
-					"till_date": frm.doc.posting_date,
+					"loyalty_program": frm.doc.loyalty_program,
+					"expiry_date": frm.doc.posting_date,
 					"company": frm.doc.company
 				},
 				callback: function(r) {
 					if (r) {
-						frm.set_value("loyalty_program", r.message.loyalty_program);
 						frm.set_value("loyalty_redemption_account", r.message.expense_account);
 						frm.set_value("loyalty_redemption_cost_center", r.message.cost_center);
 						frm.redemption_conversion_factor = r.message.conversion_factor;
-						// let max_loyalty_points = parseInt((frm.doc.grand_total-frm.doc.total_advance)/r.message.conversion_factor);
-						// let redeemable_points = max_loyalty_points > r.message.loyalty_points ? r.message.loyalty_points : max_loyalty_points;
-						// frm.set_value("loyalty_points", redeemable_points);
 					}
 				}
 			});
@@ -682,10 +707,10 @@ frappe.ui.form.on('Sales Invoice', {
 	set_loyalty_points: function(frm) {
 		if (frm.redemption_conversion_factor) {
 			let loyalty_amount = flt(frm.redemption_conversion_factor*flt(frm.doc.loyalty_points), precision("loyalty_amount"));
-			var remaining_amount = flt(frm.doc.grand_total - frm.doc.total_advance)
+			var remaining_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance) - flt(frm.doc.write_off_amount);
 			if (frm.doc.grand_total && (remaining_amount < loyalty_amount)) {
-				let redeemable_amount = parseInt(remaining_amount/frm.redemption_conversion_factor);
-				frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_amount]));
+				let redeemable_points = parseInt(remaining_amount/frm.redemption_conversion_factor);
+				frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_points]));
 			}
 			frm.set_value("loyalty_amount", loyalty_amount);
 		}
@@ -728,4 +753,35 @@ var calculate_total_billing_amount =  function(frm) {
 	}
 
 	refresh_field('total_billing_amount')
+}
+
+var select_loyalty_program = function(frm, loyalty_programs) {
+	var dialog = new frappe.ui.Dialog({
+		title: __("Select Loyalty Program"),
+		fields: [
+			{
+				"label": __("Loyalty Program"),
+				"fieldname": "loyalty_program",
+				"fieldtype": "Select",
+				"options": loyalty_programs,
+				"default": loyalty_programs[0]
+			}
+		]
+	});
+
+	dialog.set_primary_action(__("Set"), function() {
+		dialog.hide();
+		return frappe.call({
+			method: "frappe.client.set_value",
+			args: {
+				doctype: "Customer",
+				name: frm.doc.customer,
+				fieldname: "loyalty_program",
+				value: dialog.get_value("loyalty_program"),
+			},
+			callback: function(r) { }
+		});
+	});
+
+	dialog.show();
 }

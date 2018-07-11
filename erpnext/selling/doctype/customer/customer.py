@@ -6,7 +6,7 @@ import frappe
 from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
-from frappe.utils import flt, cint, cstr
+from frappe.utils import flt, cint, cstr, today
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
@@ -188,16 +188,33 @@ class Customer(TransactionBase):
 			frappe.db.set(self, "customer_name", newdn)
 
 	def set_loyalty_program(self):
-		if not self.loyalty_program:
-			loyalty_programs = frappe.get_all("Loyalty Program", fields=["name", "customer_group",
-				"customer_territory"], filters={"auto_opt_in": 1, "disabled": 0})
-			from frappe.desk.treeview import get_children
-			for loyalty_program in loyalty_programs:
-				customer_groups = get_children("Customer Group", loyalty_program.customer_group, )
-				if self.customer_group in customer_groups and\
-					self.territory in get_children("Territory", loyalty_program.customer_territory):
-					self.loyalty_program = loyalty_program.name
+		if self.loyalty_program: return
+		loyalty_program = get_loyalty_programs(self)
+		if not loyalty_program: return
+		if len(loyalty_program) == 1:
+			self.loyalty_program = loyalty_program[0]
+		else:
+			frappe.msgprint(_("Multiple Loyalty Program found for the Customer. Please select manually."))
 
+@frappe.whitelist()
+def get_loyalty_programs(doc):
+	''' returns applicable loyalty programs for a customer '''
+	from frappe.desk.treeview import get_children
+
+	lp_details = []
+	loyalty_programs = frappe.get_all("Loyalty Program",
+		fields=["name", "customer_group", "customer_territory"],
+		filters={"auto_opt_in": 1, "from_date": ["<=", today()],
+			"ifnull(to_date, '2500-01-01')": [">=", today()]})
+
+	for loyalty_program in loyalty_programs:
+		customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)]
+		customer_territories = [d.value for d in get_children("Territory", loyalty_program.customer_territory)]
+		if (not loyalty_program.customer_group or doc.customer_group in customer_groups)\
+			and (not loyalty_program.customer_territory or doc.territory in customer_territories):
+			lp_details.append(loyalty_program.name)
+
+	return lp_details
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
