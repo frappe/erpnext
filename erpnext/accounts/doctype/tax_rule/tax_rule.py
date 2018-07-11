@@ -12,6 +12,8 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.utils.nestedset import get_root_of
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
+import functools
+
 from six import iteritems
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
@@ -163,7 +165,10 @@ def get_tax_template(posting_date, args):
 		for key in args:
 			if rule.get(key): rule.no_of_keys_matched += 1
 
-	rule = sorted(tax_rule, lambda b, a: cmp(a.no_of_keys_matched, b.no_of_keys_matched) or cmp(a.priority, b.priority))[0]
+	rule = sorted(tax_rule,
+		key = functools.cmp_to_key(lambda b, a:
+		cmp(a.no_of_keys_matched, b.no_of_keys_matched) or
+		cmp(a.priority, b.priority)))[0]
 
 	tax_template = rule.sales_tax_template or rule.purchase_tax_template
 	doctype = "{0} Taxes and Charges Template".format(rule.tax_type)

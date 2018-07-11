@@ -20,8 +20,8 @@ class Account(NestedSet):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		from erpnext.accounts.utils import get_doc_name_autoname
-		self.name = get_doc_name_autoname(self.account_number, self.account_name, None, self.company)
+		from erpnext.accounts.utils import get_autoname_with_number
+		self.name = get_autoname_with_number(self.account_number, self.account_name, None, self.company)
 
 	def validate(self):
 		from erpnext.accounts.utils import validate_field_number

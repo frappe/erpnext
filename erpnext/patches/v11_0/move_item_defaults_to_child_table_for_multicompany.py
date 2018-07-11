@@ -16,7 +16,9 @@ def execute():
 
 	frappe.reload_doc('stock', 'doctype', 'item_default')
 	frappe.reload_doc('stock', 'doctype', 'item')
-	
+
+	if frappe.db.a_row_exists('Item Default'): return
+
 	companies = frappe.get_all("Company")
 	if len(companies) == 1:
 		try:

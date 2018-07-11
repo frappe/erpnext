@@ -13,6 +13,7 @@ class OverlapError(frappe.ValidationError): pass
 class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
+		self.total_holidays = len(self.holidays)
 
 	def get_weekly_off_dates(self):
 		self.validate_values()

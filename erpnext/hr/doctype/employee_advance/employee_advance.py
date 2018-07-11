@@ -40,7 +40,7 @@ class EmployeeAdvance(Document):
 		company_currency = erpnext.get_company_currency(self.company)
 		if (self.advance_account and
 			company_currency != frappe.db.get_value('Account', self.advance_account, 'account_currency')):
-			frappe.throw(_("Advance account currency should be same as company curreny {0}")
+			frappe.throw(_("Advance account currency should be same as company currency {0}")
 				.format(company_currency))
 
 	def set_total_advance_paid(self):

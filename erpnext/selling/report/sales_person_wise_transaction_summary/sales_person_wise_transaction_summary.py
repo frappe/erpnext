@@ -15,7 +15,7 @@ def execute(filters=None):
 	data = []
 
 	for d in entries:
-		if d.stock_qty > 0:
+		if d.stock_qty > 0 or filters.get('show_return_entries', 0):
 			data.append([
 				d.name, d.customer, d.territory, d.posting_date, d.item_code,
 				item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),

@@ -17,7 +17,7 @@ class EmployeeBenefitClaim(Document):
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
 		payroll_period = get_payroll_period(self.claim_date, self.claim_date, frappe.db.get_value("Employee", self.employee, "company"))
 		if not payroll_period:
-			frappe.throw(_("{0} is not in a valid Payroll Period").format(self.claim_date))
+			frappe.throw(_("{0} is not in a valid Payroll Period").format(frappe.format(self.claim_date, dict(fieldtype='Date'))))
 		self.validate_max_benefit_for_component(payroll_period)
 		self.validate_max_benefit_for_sal_struct(max_benefits)
 		self.validate_benefit_claim_amount(max_benefits, payroll_period)
