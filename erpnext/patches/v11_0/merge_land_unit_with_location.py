@@ -26,25 +26,25 @@ def execute():
 
 	if 'land_unit' in frappe.db.get_table_columns('Linked Location'):
 		rename_field('Linked Location', 'land_unit', 'location')
+	
+	if not frappe.db.exists("Location", "All Land Units"):
+		frappe.get_doc({"doctype": "Location", "is_group": True, "location_name": "All Land Units"}).insert(ignore_permissions=True)
 
 	if frappe.db.table_exists('Land Unit'):
-		land_units = frappe.get_all('Land Unit', fields=['*'], order_by='parent_location')
+		land_units = frappe.get_all('Land Unit', fields=['*'], order_by='lft')
 
 		for land_unit in land_units:
 			if not frappe.db.exists('Location', land_unit.get('land_unit_name')):
 				frappe.get_doc({
 					'doctype': 'Location',
 					'location_name': land_unit.get('land_unit_name'),
-					'parent_location': land_unit.get('parent_land_unit'),
+					'parent_location': land_unit.get('parent_land_unit') or "All Land Units",
 					'is_container': land_unit.get('is_container'),
 					'is_group': land_unit.get('is_group'),
 					'latitude': land_unit.get('latitude'),
 					'longitude': land_unit.get('longitude'),
 					'area': land_unit.get('area'),
 					'location': land_unit.get('location'),
-					'linked_soil_texture': land_unit.get('linked_soil_texture'),
-					'linked_soil_analysis': land_unit.get('linked_soil_analysis'),
-					'linked_plant_analysis': land_unit.get('linked_plant_analysis'),
 					'lft': land_unit.get('lft'),
 					'rgt': land_unit.get('rgt')
 				}).insert(ignore_permissions=True)
