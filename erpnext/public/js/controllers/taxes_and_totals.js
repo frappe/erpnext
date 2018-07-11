@@ -613,7 +613,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
-			console.log("set the outstanding amount");
 		}
 	},
 
@@ -653,7 +652,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
 		this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
-		console.log("paid amount set as -> ", paid_amount, base_paid_amount);
 	},
 
 	calculate_change_amount: function(){

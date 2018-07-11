@@ -16,9 +16,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	onload: function() {
 		var me = this;
-		this._super();
-		console.log("class erpnext.accounts.SalesInvoiceController, onload this->", this);
-		
+		this._super();		
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
