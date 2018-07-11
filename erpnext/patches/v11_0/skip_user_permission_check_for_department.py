@@ -8,12 +8,17 @@ def execute():
         filters=[['allow', '=', 'Department']],
         fields=['name', 'skip_for_doctype'])
 
+    doctypes_to_skip = []
+
+    for doctype in ['Appraisal', 'Leave Allocation', 'Expense Claim', 'Instructor', 'Salary Slip',
+                    'Attendance', 'Training Feedback', 'Training Result Employee',
+                    'Leave Application', 'Employee Advance', 'Activity Cost', 'Training Event Employee',
+                    'Timesheet', 'Sales Person', 'Payroll Employee Detail']:
+        if frappe.db.exists('Custom Field', { 'dt': doctype, 'fieldname': 'department'}): return
+        doctypes_to_skip.append(doctype)
+
     for perm in user_permissions:
         skip_for_doctype = perm.get('skip_for_doctype')
-        doctypes_to_skip = ['Appraisal', 'Leave Allocation', 'Expense Claim', 'Instructor', 'Salary Slip',
-            'Attendance', 'Training Feedback', 'Training Result Employee',
-            'Leave Application', 'Employee Advance', 'Activity Cost', 'Training Event Employee',
-            'Timesheet', 'Sales Person', 'Payroll Employee Detail']
 
         skip_for_doctype = skip_for_doctype.split('\n') + doctypes_to_skip
         skip_for_doctype = set(skip_for_doctype) # to remove duplicates
