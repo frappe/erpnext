@@ -32,7 +32,7 @@ frappe.ui.form.on("Item Group", {
 		frm.fields_dict["item_group_defaults"].grid.get_field("buying_cost_center").get_query = function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {
-				filters: { 
+				filters: {
 					"is_group": 0,
 					"company": row.company
 				}
