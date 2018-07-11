@@ -129,7 +129,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
 							args: {
 								"customer": me.frm.doc.customer,
-								"till_date": me.frm.doc.posting_date,
+								"expiry_date": me.frm.doc.posting_date,
 								"company": me.frm.doc.company,
 								"silent": true
 							},

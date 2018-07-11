@@ -13,15 +13,22 @@ class LoyaltyPointEntry(Document):
 	pass
 
 
-def get_loyalty_point_entries(customer, loyalty_program, expiry_date=None, company=None):
+def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=None):
 	if not expiry_date:
 		date = today()
-	args_list = [customer, loyalty_program, expiry_date]
-	condition = ''
-	if company:
-		condition = " and company=%s "
-		args_list.append(company)
-	loyalty_point_details = frappe.db.sql('''select name, loyalty_points, expiry_date, loyalty_program_tier
-		from `tabLoyalty Point Entry` where customer=%s and loyalty_program=%s and expiry_date>=%s and loyalty_points>0
-		{condition} order by expiry_date'''.format(condition=condition), tuple(args_list), as_dict=1)
-	return loyalty_point_details
+
+	return frappe.db.sql('''
+		select name, loyalty_points, expiry_date, loyalty_program_tier
+		from `tabLoyalty Point Entry`
+		where customer=%s and loyalty_program=%s
+			and expiry_date>=%s and loyalty_points>0 and company=%s
+		order by expiry_date
+	''', (customer, loyalty_program, expiry_date, company), as_dict=1)
+
+def get_redemption_details(customer, loyalty_program, company):
+	return frappe._dict(frappe.db.sql('''
+		select redeem_against, sum(loyalty_points)
+		from `tabLoyalty Point Entry`
+		where customer=%s and loyalty_program=%s and loyalty_points<0 and company=%s
+		group by redeem_against
+	''', (customer, loyalty_program, company)))
