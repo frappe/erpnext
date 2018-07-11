@@ -570,7 +570,6 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
 
 def create_delivery_note(**args):
-	print (frappe.session.user)
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
 	dn.posting_date = args.posting_date or nowdate()
