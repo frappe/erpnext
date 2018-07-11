@@ -35,6 +35,18 @@ frappe.ui.form.on("Purchase Order", {
 		});
 	},
 
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Receive and Bill') {
+			frm.add_custom_button(__('Update Items'), () => {
+				erpnext.utils.update_child_items({
+					frm: frm,
+					child_docname: "items",
+					child_doctype: "Purchase Order Detail",
+				})
+			});
+		}
+	},
+
 	onload: function(frm) {
 		set_schedule_date(frm);
 

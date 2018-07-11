@@ -18,6 +18,17 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 	},
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Deliver and Bill') {
+			frm.add_custom_button(__('Update Items'), () => {
+				erpnext.utils.update_child_items({
+					frm: frm,
+					child_docname: "items",
+					child_doctype: "Sales Order Detail",
+				})
+			});
+		}
+	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
