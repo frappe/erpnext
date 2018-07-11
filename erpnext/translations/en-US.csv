@@ -13,16 +13,16 @@ DocType: Cheque Print Template,Cheque Size,Check Size
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +25,Maintenance Status has to be Cancelled or Completed to Submit,Maintenance Status has to be Canceled or Completed to Submit
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +481,'Entries' cannot be empty,'Entries' can not be empty
 apps/erpnext/erpnext/setup/doctype/company/company.py +82,"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Cannot change company's default currency, because there are existing transactions. Transactions must be canceled to change the default currency."
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +248,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +228,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +249,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +229,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order
 DocType: Bank Reconciliation Detail,Cheque Date,Check Date
-apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +234,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Stopped Work Order cannot be canceled, Unstop it first to cancel"
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +240,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Stopped Work Order cannot be canceled, Unstop it first to cancel"
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +167,Material Request {0} is cancelled or stopped,Material Request {0} is canceled or stopped
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +184,Closed order cannot be cancelled. Unclose to cancel.,Closed order cannot be canceled. Unclose to cancel.
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +238,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +239,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Unlink Payment on Cancelation of Invoice
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +218,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +258,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +219,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +259,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
 apps/erpnext/erpnext/config/accounts.py +278,Setup cheque dimensions for printing,Setup check dimensions for printing
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,Checks and Deposits incorrectly cleared
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +134,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
@@ -33,9 +33,9 @@ DocType: Bank Reconciliation,Select account head of the bank where cheque was de
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
 apps/erpnext/erpnext/controllers/buying_controller.py +474,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +161,Quotation {0} is cancelled,Quotation {0} is canceled
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +301,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +322,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py +136,Payment Cancelled. Please check your GoCardless Account for more details,Payment Canceled. Please check your GoCardless Account for more details
-apps/erpnext/erpnext/stock/doctype/item/item.py +785,Item {0} is cancelled,Item {0} is canceled
+apps/erpnext/erpnext/stock/doctype/item/item.py +798,Item {0} is cancelled,Item {0} is canceled
 DocType: Serial No,Is Cancelled,Is Canceled
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +231,{0} {1} is cancelled or stopped,{0} {1} is canceled or stopped
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +178,Colour,Color

@@ -198,3 +198,30 @@ def validate_bank_account(coa, bank_account):
 		_get_account_names(chart)
 
 	return (bank_account in accounts)
+
+@frappe.whitelist()
+def build_tree_from_json(chart_template):
+	''' get chart template from its folder and parse the json to be rendered as tree '''
+	chart = get_chart(chart_template)
+
+	# if no template selected, return as it is
+	if not chart:
+		return
+
+	accounts = []
+	def _import_accounts(children, parent):
+		''' recursively called to form a parent-child based list of dict from chart template '''
+		for account_name, child in iteritems(children):
+			account = {}
+			if account_name in ["account_number", "account_type",\
+				"root_type", "is_group", "tax_rate"]: continue
+
+			account['parent_account'] = parent
+			account['expandable'] = True if identify_is_group(child) else False
+			account['value'] = (child.get('account_number') + ' - ' + account_name) \
+				if child.get('account_number') else account_name
+			accounts.append(account)
+			_import_accounts(child, account['value'])
+
+	_import_accounts(chart, None)
+	return accounts

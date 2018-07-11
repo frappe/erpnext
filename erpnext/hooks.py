@@ -12,6 +12,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '11.x.x-develop'
+beta_version = '11.x.x'
 
 error_report_email = "support@erpnext.com"
 
@@ -210,6 +211,9 @@ doc_events = {
 	},
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
+	},
+	"Contact":{
+		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
 	}
 }
 
@@ -235,7 +239,8 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
-		"erpnext.crm.doctype.contract.contract.update_status_for_contracts"
+		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
+		"erpnext.projects.doctype.project.project.update_project_sales_billing"
   ],
 	"monthly": [
 		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",

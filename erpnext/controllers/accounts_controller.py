@@ -154,6 +154,8 @@ class AccountsController(TransactionBase):
 					self.meta.get_label(date_field), self)
 
 	def validate_due_date(self):
+		if self.get('is_pos'): return
+
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
 			if not self.due_date:
@@ -237,8 +239,11 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 							elif fieldname == "serial_no":
-								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
-								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
+								# Ensure that serial numbers are matched against Stock UOM
+								item_conversion_factor = item.get("conversion_factor") or 1.0
+								item_qty = abs(item.get("qty")) * item_conversion_factor
+
+								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):

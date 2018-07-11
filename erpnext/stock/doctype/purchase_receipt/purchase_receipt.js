@@ -11,6 +11,14 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Stock Entry': 'Return',
 			'Purchase Invoice': 'Invoice'
 		}
+
+		frm.set_query("asset", "items", function() {
+			return {
+				filters: {
+					"purchase_receipt": frm.doc.name
+				}
+			}
+		})
 	},
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {

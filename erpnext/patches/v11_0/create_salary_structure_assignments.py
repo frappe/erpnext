@@ -8,9 +8,15 @@ from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment 
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "salary_structure_assignment")
+	frappe.db.sql("""
+		delete from `tabSalary Structure Assignment`
+		where salary_structure in (select name from `tabSalary Structure` where is_active='No' or docstatus!=1)
+	""")
 	for d in frappe.db.sql("""
-		select sse.*, ss.company from `tabSalary Structure Employee` sse, `tabSalary Structure` ss
-		where ss.name = sse.parent AND sse.employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')""", as_dict=1):
+		select sse.*, ss.company
+		from `tabSalary Structure Employee` sse, `tabSalary Structure` ss
+		where ss.name = sse.parent AND ss.is_active='Yes'
+		AND sse.employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')""", as_dict=1):
 		try:
 			s = frappe.new_doc("Salary Structure Assignment")
 			s.employee = d.employee

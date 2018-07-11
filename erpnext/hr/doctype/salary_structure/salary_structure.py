@@ -38,14 +38,13 @@ class SalaryStructure(Document):
 					have_a_flexi = True
 					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
 					flexi_amount += max_of_component
-			if have_a_flexi and self.max_benefits == 0:
+			if have_a_flexi and flt(self.max_benefits) == 0:
 				frappe.throw(_("Max benefits should be greater than zero to dispense benefits"))
-			if have_a_flexi and self.max_benefits > flexi_amount:
+			if have_a_flexi and flt(self.max_benefits) > flexi_amount:
 				frappe.throw(_("Total flexible benefit component amount {0} should not be less \
 				than max benefits {1}").format(flexi_amount, self.max_benefits))
-		if not have_a_flexi and self.max_benefits > 0:
+		if not have_a_flexi and flt(self.max_benefits) > 0:
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
-
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
