@@ -187,6 +187,3 @@ def get_item_group_defaults(item, company):
 	''', (company, item_group), as_dict=1)
 	if item_group_defaults:
 		return item_group_defaults[0]
-	else:
-		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
-			"is_stock_item", "item_code", "item_group"], as_dict=1)

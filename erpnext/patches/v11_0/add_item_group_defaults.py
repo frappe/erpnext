@@ -24,7 +24,7 @@ def execute():
 			doc = frappe.get_doc("Item Group", item_group.get("name"))
 			item_group_defaults = []
 			item_group_defaults.append({
-				"company": company,
+				"company": companies[0].name,
 				"income_account": item_group.get("default_income_account"),
 				"expense_account": item_group.get("default_expense_account"),
 				"buying_cost_center": item_group.get("default_cost_center"),
