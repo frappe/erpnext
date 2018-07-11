@@ -298,8 +298,7 @@ def get_item_details(args):
 
 	if not (cost_center and expense_account):
 		for doctype in ['Item Group', 'Company']:
-			data = get_expense_cost_center(doctype,
-				args.get(frappe.scrub(doctype)))
+			data = get_expense_cost_center(doctype, args)
 
 			if not cost_center and data:
 				cost_center = data[0]
@@ -312,8 +311,11 @@ def get_item_details(args):
 
 	return cost_center, expense_account
 
-def get_expense_cost_center(doctype, value):
-	fields = (['default_cost_center', 'default_expense_account']
-		if doctype == 'Item Group' else ['cost_center', 'default_expense_account'])
-
-	return frappe.db.get_value(doctype, value, fields)
+def get_expense_cost_center(doctype, args):
+	if doctype == 'Item Group':
+		return frappe.db.get_value('Item Default',
+			{'parent': args.get(frappe.scrub(doctype)), 'company': args.get('company')},
+			['buying_cost_center', 'expense_account'])
+	else:
+		return frappe.db.get_value(doctype, args.get(frappe.scrub(doctype)),\
+			['cost_center', 'default_expense_account'])
