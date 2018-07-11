@@ -127,7 +127,7 @@ class ProductionPlanningTool(Document):
 
 		item_condition = ""
 		if self.fg_item:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.fg_item))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.fg_item))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - delivered_qty)*conversion_factor as pending_qty
@@ -138,7 +138,7 @@ class ProductionPlanningTool(Document):
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.fg_item:
-			item_condition = ' and pi.item_code = "{0}"'.format(frappe.db.escape(self.fg_item))
+			item_condition = ' and pi.item_code = {0}'.format(frappe.db.escape(self.fg_item))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
@@ -161,7 +161,7 @@ class ProductionPlanningTool(Document):
 
 		item_condition = ""
 		if self.fg_item:
-			item_condition = ' and mr_item.item_code = "' + frappe.db.escape(self.fg_item, percent=False) + '"'
+			item_condition = ' and mr_item.item_code =' + frappe.db.escape(self.fg_item, percent=False)
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -487,7 +487,7 @@ class ProductionPlanningTool(Document):
 	def get_item_projected_qty(self,item):
 		conditions = ""
 		if self.purchase_request_for_warehouse:
-			conditions = " and warehouse='{0}'".format(frappe.db.escape(self.purchase_request_for_warehouse))
+			conditions = " and warehouse={0}".format(frappe.db.escape(self.purchase_request_for_warehouse))
 
 		item_projected_qty = frappe.db.sql("""
 			select ifnull(sum(projected_qty),0) as qty

@@ -375,17 +375,17 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 	if filters:
 		if filters.get("project"):
-			additional_conditions.append("project = '%s'" % (frappe.db.escape(filters.get("project"))))
+			additional_conditions.append("project = %s" % (frappe.db.escape(filters.get("project"))))
 		if filters.get("cost_center"):
 			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
 
 		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 
 		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
-			additional_conditions.append("ifnull(finance_book, '') in ('%s', '')" %
+			additional_conditions.append("ifnull(finance_book, '') in (%s, '')" %
 				frappe.db.escape(company_finance_book))
 		elif filters.get("finance_book"):
-			additional_conditions.append("ifnull(finance_book, '') = '%s' " %
+			additional_conditions.append("ifnull(finance_book, '') = %s " %
 				frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""

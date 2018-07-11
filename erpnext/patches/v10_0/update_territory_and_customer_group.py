@@ -15,8 +15,8 @@ def execute():
 				value = frappe.db.escape(frappe.as_unicode(customer.get("customer_group")))
 
 				when_then.append('''
-					WHEN `%s` = "%s" and %s != "%s"
-					THEN "%s"
+					WHEN `%s` = %s and %s != %s
+					THEN %s
 				'''%(d["master_fieldname"], frappe.db.escape(frappe.as_unicode(customer.name)),
 					d["linked_to_fieldname"], value, value))
 

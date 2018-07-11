@@ -35,7 +35,7 @@ def execute():
 			else:
 				template = frappe.get_doc("Payment Terms Template", pyt_template_name)
 
-			payment_terms.append('WHEN `name`="%s" THEN "%s"' % (frappe.db.escape(party_name), template.template_name))
+			payment_terms.append('WHEN `name`={0} THEN {1}'.format(frappe.db.escape(party_name), template.template_name))
 			records.append(frappe.db.escape(party_name))
 
 		begin_query_str = "UPDATE `tab{0}` SET `payment_terms` = CASE ".format(doctype)

@@ -103,7 +103,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, name
@@ -114,7 +114,7 @@ class ProductionPlan(Document):
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
@@ -138,7 +138,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code ='{0}'".format(frappe.db.escape(self.item_code))
+			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -280,7 +280,7 @@ class ProductionPlan(Document):
 				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
 
 		return item_dict
-		
+
 	def get_items_for_material_requests(self):
 		self.mr_items = []
 
@@ -295,13 +295,13 @@ class ProductionPlan(Document):
 						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
 						item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
 					from
-						`tabBOM Explosion Item` bei 
+						`tabBOM Explosion Item` bei
 						JOIN `tabBOM` bom ON bom.name = bei.parent
 						JOIN `tabItem` item ON item.name = bei.item_code
 						LEFT JOIN `tabItem Default` item_default
 							ON item_default.parent = item.name and item_default.company=%s
 					where
-						bei.docstatus < 2 
+						bei.docstatus < 2
 						and bom.name=%s and item.is_stock_item in (1, {0})
 					group by bei.item_code, bei.stock_uom""".format(self.include_non_stock_items),
 					(self.company, data.bom_no), as_dict=1):
@@ -447,7 +447,7 @@ class ProductionPlan(Document):
 			material_request.run_method("set_missing_values")
 			material_request.submit()
 			material_request_list.append(material_request.name)
-		
+
 		frappe.flags.mute_messages = False
 
 		if material_request_list:
@@ -513,10 +513,10 @@ def get_bin_details(row):
 	conditions = ""
 	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
 	if warehouse:
-		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
+		conditions = " and warehouse={0}".format(frappe.db.escape(warehouse))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
-		ifnull(sum(actual_qty),0) as actual_qty from `tabBin` 
+		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`
 		where item_code = %(item_code)s {conditions}
 	""".format(conditions=conditions), { "item_code": row.item_code }, as_list=1)
 

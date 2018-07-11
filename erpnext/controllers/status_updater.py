@@ -129,7 +129,7 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate,
 							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
@@ -256,7 +256,7 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
-				
+
 				frappe.db.sql("""update `tab%(target_dt)s`
 					set %(target_field)s = (
 						(select ifnull(sum(%(source_field)s), 0)
@@ -281,7 +281,7 @@ class StatusUpdater(Document):
 		"""Update percent field in parent transaction"""
 
 		self._update_modified(args, update_modified)
-		
+
 		if args.get('target_parent_field'):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
@@ -308,7 +308,7 @@ class StatusUpdater(Document):
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
 		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = "{0}"'\
+			args['update_modified'] = ', modified = now(), modified_by = {0}'\
 				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
