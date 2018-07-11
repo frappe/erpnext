@@ -71,8 +71,8 @@ class EmployeeBoardingController(Document):
 	def on_cancel(self):
 		# delete task project
 		for task in frappe.get_all("Task", filters={"project": self.project}):
-			frappe.delete_doc("Task", task.name)
-		frappe.delete_doc("Project", self.project)
+			frappe.delete_doc("Task", task.name, force=1)
+		frappe.delete_doc("Project", self.project, force=1)
 		self.db_set('project', '')
 		for activity in self.activities:
 			activity.db_set("task", "")
