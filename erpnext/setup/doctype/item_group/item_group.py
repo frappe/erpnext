@@ -173,3 +173,20 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group_name = frappe.db.get_value("Item Group", d.get('name'))
 		if item_group_name:
 			clear_cache(frappe.db.get_value('Item Group', item_group_name, 'route'))
+
+def get_item_group_defaults(item, company):
+	item_group = frappe.db.get_value("Item", item, "item_group")
+	item_group_defaults = frappe.db.sql('''
+		select
+			ig.name, id.expense_account, id.income_account, id.buying_cost_center, id.default_warehouse,
+			id.selling_cost_center, id.default_supplier
+		from
+			`tabItem Group` ig LEFT JOIN `tabItem Default` id ON ig.name = id.parent and id.company = %s
+		where
+			ig.name = %s
+	''', (company, item_group), as_dict=1)
+	if item_group_defaults:
+		return item_group_defaults[0]
+	else:
+		return frappe.db.get_value("Item", item, ["name", "item_name", "description", "stock_uom",
+			"is_stock_item", "item_code", "item_group"], as_dict=1)

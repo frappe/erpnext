@@ -16,7 +16,7 @@ from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
-
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -503,11 +503,12 @@ def make_delivery_note(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 				or item.get("selling_cost_center") \
-				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+				or item_group.get("selling_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
