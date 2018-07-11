@@ -4,16 +4,16 @@ import frappe
 # https://github.com/frappe/erpnext/pull/14121
 
 def execute():
-    user_permissions = frappe.get_all("User Permission", filters=[['allow', '=', 'Department']], fields=['name', 'skip_for_doctype'])
+    user_permissions = frappe.get_all("User Permission",
+        filters=[['allow', '=', 'Department']],
+        fields=['name', 'skip_for_doctype'])
 
     for perm in user_permissions:
         skip_for_doctype = perm.get('skip_for_doctype')
-        doctypes_to_skip = ['Appraisal', 'Retention Bonus', 'Compensatory Leave Request', 'Additional Salary Component', 'Shift Request',
-            'Leave Allocation', 'Shift Assignment', 'Expense Claim', 'Instructor', 'Salary Slip', 'Employee Tax Exemption Proof Submission',
-            'Attendance', 'Training Feedback', 'Employee Incentive', 'Employee Tax Exemption Declaration', 'Training Result Employee',
-            'Travel Request', 'Leave Application', 'Employee Advance', 'Activity Cost', 'Salary Structure Assignment','Training Event Employee',
-            'Timesheet', 'Employee Transfer', 'Sales Person', 'Employee Benefit Application', 'Attendance Request',
-            'Payroll Employee Detail', 'Employee Promotion', 'Leave Encashment', 'Employee Benefit Claim']
+        doctypes_to_skip = ['Appraisal', 'Leave Allocation', 'Expense Claim', 'Instructor', 'Salary Slip',
+            'Attendance', 'Training Feedback', 'Training Result Employee',
+            'Leave Application', 'Employee Advance', 'Activity Cost', 'Training Event Employee',
+            'Timesheet', 'Sales Person', 'Payroll Employee Detail']
 
         skip_for_doctype = skip_for_doctype.split('\n') + doctypes_to_skip
         skip_for_doctype = set(skip_for_doctype) # to remove duplicates
