@@ -62,6 +62,12 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 
+		# set loyalty program tier
+		if frappe.db.exists('Customer', self.name):
+			customer = frappe.get_doc('Customer', self.name)
+			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
+				self.loyalty_program_tier = customer.loyalty_program_tier
+
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
 
