@@ -1,6 +1,6 @@
 import frappe
 
-# Set department value based on employees 
+# Set department value based on employee value
 
 def execute():
 
