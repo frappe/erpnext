@@ -43,6 +43,13 @@ update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_def
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
+explore_links = [{
+	"name": "marketplace",
+	"link": "#Hub/Item",
+	"_label": "Marketplace", 
+	"label": '<img class="hub-icon-small" src="assets/erpnext/images/hub_logo.svg">Marketplace'
+}]
+
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
 
 # website
