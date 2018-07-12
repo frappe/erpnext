@@ -528,7 +528,8 @@ class WorkOrder(Document):
 						'description': item.description,
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
-						'source_warehouse': item.source_warehouse or item.default_warehouse
+						'source_warehouse': item.source_warehouse or item.default_warehouse,
+						'allow_transfer_for_manufacture': item.allow_transfer_for_manufacture
 					})
 
 			self.set_available_qty()
@@ -663,8 +664,28 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 			stock_entry.set("additional_costs", additional_costs)
 
+		add_additionl_cost(stock_entry, work_order)
+
 	stock_entry.get_items()
 	return stock_entry.as_dict()
+
+def add_additionl_cost(stock_entry, work_order):
+	# Add non stock items cost in the additional cost
+	bom = frappe.get_doc('BOM', work_order.bom_no)
+	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+
+	items = {}
+	for d in bom.get(table):
+		items.setdefault(d.item_code, d.rate)
+
+	non_stock_items = frappe.get_all('Item',
+		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+
+	for name in non_stock_items:
+		stock_entry.append('additional_costs', {
+			'description': name[0],
+			'amount': items.get(name[0])
+		})
 
 @frappe.whitelist()
 def make_timesheet(work_order, company):
