@@ -955,7 +955,7 @@ class StockEntry(StockController):
 			wip_warehouse = None
 
 		for d in pro_order.get("required_items"):
-			if (flt(d.required_qty) > flt(d.transferred_qty) and 
+			if (flt(d.required_qty) > flt(d.transferred_qty) and
 				(d.allow_transfer_for_manufacture or self.purpose != "Material Transfer for Manufacture")):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
