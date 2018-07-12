@@ -511,6 +511,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name":"Subscription"
+				},
+				{
+					"type": "doctype",
+					"name": "Subscription Settings"
 				}
 			]
 		},

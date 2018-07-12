@@ -35,10 +35,10 @@ class Subscription(Document):
 		"""
 		if self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
-		elif not date:
-			self.current_invoice_start = nowdate()
 		elif date:
 			self.current_invoice_start = date
+		else:
+			self.current_invoice_start = nowdate()
 
 	def set_current_invoice_end(self):
 		"""
