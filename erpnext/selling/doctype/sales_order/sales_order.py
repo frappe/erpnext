@@ -377,15 +377,26 @@ class SalesOrder(SellingController):
 		return items
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
-														 auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
+
+		def _get_delivery_date(ref_doc_date, cur_doc_date):
+			delivery_date = ref_doc_date
+
+			if ref_doc_date <= cur_doc_date:
+				delivery_date = cur_doc_date
+
+			return delivery_date
+
+		self.set("delivery_date", get_next_schedule_date(
+			_get_delivery_date(reference_doc.delivery_date, self.transaction_date), auto_repeat_doc.frequency,
+				cint(auto_repeat_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
-														  auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
+			d.set("delivery_date", get_next_schedule_date(
+				_get_delivery_date(reference_delivery_date, self.transaction_date), auto_repeat_doc.frequency,
+					cint(auto_repeat_doc.repeat_on_day)))
 
 
 def get_list_context(context=None):
