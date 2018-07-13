@@ -256,17 +256,21 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_update_child_qty_rate(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
-
-		make_delivery_note(so.name)
-
+		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
 
-		trans_item = {'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		existing_reserved_qty = get_reserved_qty()
+		
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': so.items[0].name}])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
-
+		
+		so.reload()
 		self.assertEqual(so.get("items")[0].rate, 200)
 		self.assertEqual(so.get("items")[0].qty, 7)
 		self.assertEqual(so.get("items")[0].amount, 1400)
+		self.assertEqual(so.status, 'To Deliver and Bill')
+
+		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 3)
 
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")

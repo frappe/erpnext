@@ -783,7 +783,6 @@ class AccountsController(TransactionBase):
 		else:
 			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
-
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -1045,13 +1044,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
-		child_item.qty = float(d.get("qty"))
+		child_item.qty = flt(d.get("qty"))
 
-		if child_item.billed_amt > (float(d.get("rate")) * float(d.get("qty"))):
+		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
-			child_item.rate = float(d.get("rate"))
+			child_item.rate = flt(d.get("rate"))
 		child_item.flags.ignore_validate_update_after_submit = True
 		child_item.save()
 
@@ -1059,28 +1058,36 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 
 	p_doctype.flags.ignore_validate_update_after_submit = True
 	p_doctype.set_qty_as_per_stock_uom()
-	if parent_doctype == 'Purchase Order':
-		p_doctype.validate_minimum_order_qty()
-		update_last_purchase_rate(p_doctype, is_submit = 1)
-		if p_doctype.is_against_so():
-			p_doctype.update_status_updater()
-		p_doctype.update_prevdoc_status()
-		p_doctype.update_requested_qty()
-		p_doctype.update_ordered_qty()
-		p_doctype.validate_budget()
-		p_doctype.update_ordered_and_reserved_qty()
-		if p_doctype.is_subcontracted == "Yes":
-			p_doctype.update_reserved_qty_for_subcontract()
-	else:
-		p_doctype.check_credit_limit()
-		p_doctype.update_reserved_qty()
-		p_doctype.update_project()
-		p_doctype.update_prevdoc_status('submit')
-	p_doctype.update_blanket_order()
-	p_doctype.set_status()
+	p_doctype.calculate_taxes_and_totals()
 	frappe.get_doc('Authorization Control').validate_approving_authority(p_doctype.doctype,
 		p_doctype.company, p_doctype.base_grand_total)
 
-	p_doctype.calculate_taxes_and_totals()
 	p_doctype.set_payment_schedule()
+	if parent_doctype == 'Purchase Order':
+		p_doctype.validate_minimum_order_qty()
+		p_doctype.validate_budget()
+		if p_doctype.is_against_so():
+			p_doctype.update_status_updater()
+	else:
+		p_doctype.check_credit_limit()
+
 	p_doctype.save()
+
+	if parent_doctype == 'Purchase Order':
+		update_last_purchase_rate(p_doctype, is_submit = 1)
+		p_doctype.update_prevdoc_status()
+		p_doctype.update_requested_qty()
+		p_doctype.update_ordered_qty()
+		p_doctype.update_ordered_and_reserved_qty()
+		p_doctype.update_receiving_percentage()
+		if p_doctype.is_subcontracted == "Yes":
+			p_doctype.update_reserved_qty_for_subcontract()
+	else:
+		p_doctype.update_reserved_qty()
+		p_doctype.update_project()
+		p_doctype.update_prevdoc_status('submit')
+		p_doctype.update_delivery_status()
+
+	p_doctype.update_blanket_order()
+	p_doctype.update_billing_percentage()
+	p_doctype.set_status()
