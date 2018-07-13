@@ -398,13 +398,13 @@ def get_data():
 			"hidden": 1
 		},
 		{
-			"module_name": "Land Unit",
-			"_doctype": "Land Unit",
-			"label": _("Land Unit"),
+			"module_name": "Location",
+			"_doctype": "Location",
+			"label": _("Location"),
 			"color": "#8BC34A",
 			"icon": "fa fa-map",
 			"type": "list",
-			"link": "List/Land Unit",
+			"link": "List/Location",
 			"hidden": 1
 		},
 		{
