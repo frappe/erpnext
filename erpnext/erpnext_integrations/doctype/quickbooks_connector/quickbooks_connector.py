@@ -36,16 +36,15 @@ def get_access_token(code):
 	return token
 
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
-def fetch_and_save_customer(token="", company_id=1, customer_id=1):
-	customer_uri = BASE_URL.format(company_id, "customer", customer_id)
-	customer = requests.get(customer_uri, headers=get_headers(token)).json()["Customer"]
-	erpcustomer = frappe.get_doc({
-		"doctype": "Customer",
-		"customer_name" : customer["DisplayName"],
-		"customer_type" : _("Individual"),
-		"customer_group" : _("Commercial"),
-		"territory" : _("All Territories"),
-	}).insert(ignore_permissions=True)
+def save_customers(customers):
+	for customer in customers:
+		erpcustomer = frappe.get_doc({
+			"doctype": "Customer",
+			"customer_name" : customer["DisplayName"],
+			"customer_type" : _("Individual"),
+			"customer_group" : _("Commercial"),
+			"territory" : _("All Territories"),
+		}).insert(ignore_permissions=True)
 
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 10
@@ -73,7 +72,7 @@ def fetch_all_customers(token="", company_id=1):
 			headers=get_headers(token)
 		).json()["QueryResponse"]["Customer"]
 		customers.extend(response)
-	print(customers)
+	save_customers(customers)
 
 def get_headers(token):
 	return {"Accept": "application/json",
