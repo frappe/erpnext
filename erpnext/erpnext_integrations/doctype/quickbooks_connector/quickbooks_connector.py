@@ -27,8 +27,8 @@ def callback(*args, **kwargs):
 	code = kwargs.get("code")
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
-	print("Enqueing Customer Fetch Job")
-	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_and_save_customer", token=token, company_id=company_id, customer_id=63)
+	print("Enqueing Customer Bulk Fetch Job")
+	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_customers", token=token, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
@@ -46,6 +46,34 @@ def fetch_and_save_customer(token="", company_id=1, customer_id=1):
 		"customer_group" : _("Commercial"),
 		"territory" : _("All Territories"),
 	}).insert(ignore_permissions=True)
+
+# A quickbooks api contraint
+MAX_RESULT_COUNT = 10
+BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
+
+def fetch_all_customers(token="", company_id=1):
+	query_uri = BASE_QUERY_URL.format(company_id, "query")
+
+	# Count number of customers
+	customer_query_response = requests.get(query_uri,
+		params={
+			"query": """SELECT COUNT(*) FROM Customer"""
+		},
+		headers=get_headers(token)
+	).json()
+	customer_count = customer_query_response["QueryResponse"]["totalCount"]
+
+	# fetch pages and accumulate
+	customers = []
+	for start_position in range(1, customer_count + 1, MAX_RESULT_COUNT):
+		response = requests.get(query_uri,
+			params={
+				"query": """SELECT * FROM Customer STARTPOSITION {} MAXRESULTS {}""".format(start_position, MAX_RESULT_COUNT)
+			},
+			headers=get_headers(token)
+		).json()["QueryResponse"]["Customer"]
+		customers.extend(response)
+	print(customers)
 
 def get_headers(token):
 	return {"Accept": "application/json",
