@@ -17,7 +17,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	warehouse = ""
 	display_items_in_stock = 0
 	item_code = search_value
-
+	
 	if pos_profile:
 		pos_result = frappe.db.sql("""select 
         			warehouse,display_items_in_stock 
