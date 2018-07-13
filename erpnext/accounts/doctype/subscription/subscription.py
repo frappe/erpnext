@@ -35,10 +35,10 @@ class Subscription(Document):
 		"""
 		if self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
-		elif not date:
-			self.current_invoice_start = nowdate()
 		elif date:
 			self.current_invoice_start = date
+		else:
+			self.current_invoice_start = nowdate()
 
 	def set_current_invoice_end(self):
 		"""
@@ -54,18 +54,11 @@ class Subscription(Document):
 		if self.is_trialling():
 			self.current_invoice_end = self.trial_period_end
 		else:
-			billing_cycle_info = self.get_billing_cycle()
+			billing_cycle_info = self.get_billing_cycle_data()
 			if billing_cycle_info:
 				self.current_invoice_end = add_to_date(self.current_invoice_start, **billing_cycle_info)
 			else:
 				self.current_invoice_end = get_last_day(self.current_invoice_start)
-
-	def get_billing_cycle(self):
-		"""
-		Returns a dict containing billing cycle information deduced from the
-		`Subscription Plan` in the `Subscription`.
-		"""
-		return self.get_billing_cycle_data()
 
 	@staticmethod
 	def validate_plans_billing_cycle(billing_cycle_data):
@@ -297,23 +290,21 @@ class Subscription(Document):
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 		plan_items = [plan.plan for plan in plans]
-		item_names = None
+		item_details = None
 
-		if plan_items and not prorate:
-			item_names = frappe.db.sql(
+		if plan_items:
+			item_details = frappe.db.sql(
 				'select item as item_code, cost as rate from `tabSubscription Plan` where name in %s',
 				(plan_items,), as_dict=1
 			)
 
-		elif plan_items:
-			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			if prorate:
+				prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
-			item_names = frappe.db.sql(
-				'select item as item_code, cost * %s as rate from `tabSubscription Plan` where name in %s',
-				(prorate_factor, plan_items,), as_dict=1
-			)
+				for item in item_details:
+					item['rate'] = item['rate'] * prorate_factor
 
-		return item_names
+		return item_details
 
 	def process(self):
 		"""
