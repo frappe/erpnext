@@ -188,7 +188,7 @@ def make_bom(**args):
 			'qty': 1,
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
-			'rate': item_doc.valuation_rate
+			'rate': item_doc.valuation_rate or args.rate
 		})
 		
 	bom.insert(ignore_permissions=True)

@@ -654,7 +654,6 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 
 		return bom_items
 
-
 def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):
 		return frappe.db.sql_list("""select distinct parent from `tabBOM Item`
@@ -677,3 +676,21 @@ def get_boms_in_bottom_up_order(bom_no=None):
 		count += 1
 
 	return bom_list
+
+def add_additional_cost(stock_entry, work_order):
+	# Add non stock items cost in the additional cost
+	bom = frappe.get_doc('BOM', work_order.bom_no)
+	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+
+	items = {}
+	for d in bom.get(table):
+		items.setdefault(d.item_code, d.rate)
+
+	non_stock_items = frappe.get_all('Item',
+		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+
+	for name in non_stock_items:
+		stock_entry.append('additional_costs', {
+			'description': name[0],
+			'amount': items.get(name[0])
+		})
