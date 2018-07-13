@@ -305,8 +305,6 @@ class Subscription(Document):
 			else:
 				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': (get_plan_rate(plan.plan, plan.qty, customer) * prorate_factor)})
 
-		frappe.log_error(items)
-
 		return items
 
 	def process(self):
