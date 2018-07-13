@@ -601,5 +601,21 @@ class TestMaterialRequest(unittest.TestCase):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(mr.per_ordered, 100)
 
+def make_material_request(**args):
+	args = frappe._dict(args)
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = args.material_request_type or "Purchase"
+	mr.company = args.company or "_Test Company"
+	mr.append("items", {
+		"item_code": args.item_code or "_Test Item",
+		"qty": args.qty or 10,
+		"schedule_date": args.schedule_date or today(),
+		"warehouse": args.warehouse or "_Test Warehouse - _TC"
+	})
+	mr.insert()
+	if not args.do_not_submit:
+		mr.submit()
+	return mr
+
 test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')

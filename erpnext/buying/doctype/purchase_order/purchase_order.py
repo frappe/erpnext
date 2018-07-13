@@ -292,6 +292,13 @@ class PurchaseOrder(BuyingController):
 			if d.rm_item_code:
 				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
+	
+	def update_receiving_percentage(self):
+		total_qty, received_qty = 0.0, 0.0
+		for item in self.items:
+			received_qty += item.received_qty
+			total_qty += item.qty
+		self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
