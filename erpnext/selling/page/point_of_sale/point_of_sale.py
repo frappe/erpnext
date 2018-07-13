@@ -14,8 +14,21 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	serial_no = ""
 	batch_no = ""
 	barcode = ""
-
+	warehouse = ""
+	display_items_in_stock = 0
 	item_code = search_value
+
+	if pos_profile:
+		pos_result = frappe.db.sql("""select 
+        			warehouse,display_items_in_stock 
+    	        		from
+        				`tabPOS Profile`
+    	     			where
+        				name=%s""", pos_profile, as_dict=1) 
+		if len(pos_result)!=0:
+			display_items_in_stock = pos_result[0]['display_items_in_stock']
+			warehouse = pos_result[0]['warehouse']
+
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
 
@@ -42,28 +55,80 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
-	res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
-		i.is_stock_item, item_det.price_list_rate, item_det.currency
-		from `tabItem` i LEFT JOIN
-			(select item_code, price_list_rate, currency from
-				`tabItem Price`	where price_list=%(price_list)s) item_det
-		ON
-			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
-		where
-			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1 and ifnull(i.is_fixed_asset, 0) = 0
-			and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
-			and ifnull(i.end_of_life, curdate()) >= curdate()
-			and {condition}
-		limit {start}, {page_length}""".format(start=start,
-			page_length=page_length, lft=lft, rgt=rgt, condition=condition),
-		{
-			'item_code': item_code,
-			'price_list': price_list
-		} , as_dict=1)
 
-	res = {
+
+	if display_items_in_stock == 0:
+		res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
+			i.is_stock_item, item_det.price_list_rate, item_det.currency
+			from `tabItem` i LEFT JOIN
+				(select item_code, price_list_rate, currency from
+					`tabItem Price`	where price_list=%(price_list)s) item_det
+			ON
+				(item_det.item_code=i.name or item_det.item_code=i.variant_of)
+			where
+				i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+				and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
+		        	and {condition} limit {start}, {page_length}""".format(start=start,page_length=page_length,lft=lft, rgt=rgt, 					condition=condition),
+			{
+				'item_code': item_code,
+				'price_list': price_list
+			} , as_dict=1)
+
+		res = {
 		'items': res
-	}
+		}
+	elif display_items_in_stock == 1:
+		if warehouse is not None:
+			res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
+				i.is_stock_item, item_det.price_list_rate, item_det.currency
+				from `tabItem` i LEFT JOIN
+					(select item_code, price_list_rate, currency from
+						`tabItem Price`	where price_list=%(price_list)s) item_det
+				ON
+					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN 
+					(select item_code,actual_qty from 
+					`tabStock Ledger Entry` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se
+				ON
+					((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
+			
+				where
+					i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+					and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
+		        		and {condition} limit {start}, {page_length}""".format(start=start,page_length=page_length,lft=lft, 						rgt=rgt, condition=condition),
+				{
+					'item_code': item_code,
+					'price_list': price_list,
+					'warehouse': warehouse
+				} , as_dict=1)
+
+			res = {
+			'items': res
+			}
+		else:
+			res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
+				i.is_stock_item, item_det.price_list_rate, item_det.currency
+				from `tabItem` i LEFT JOIN
+					(select item_code, price_list_rate, currency from
+						`tabItem Price`	where price_list=%(price_list)s) item_det
+				ON
+					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN 
+					(select item_code,actual_qty from 
+					`tabStock Ledger Entry` where actual_qty > 0 group by item_code) item_se
+				ON
+					((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
+			
+				where
+					i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+					and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
+		        		and {condition} limit {start}, {page_length}""".format(start=start,page_length=page_length,lft=lft, 						rgt=rgt, condition=condition),
+				{
+					'item_code': item_code,
+					'price_list': price_list
+				} , as_dict=1)
+
+			res = {
+			'items': res
+			}
 
 	if serial_no:
 		res.update({
