@@ -16,32 +16,38 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 	def test_loyalty_points_earned_single_tier(self):
 		# create a new sales invoice
-		si = create_sales_invoice_record()
-		si.insert()
-		si.submit()
+		si_original = create_sales_invoice_record()
+		si_original.insert()
+		si_original.submit()
 
 		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
-		earned_points = get_points_earned(si)
+		earned_points = get_points_earned(si_original)
 
-		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'customer': si.customer})
+		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
 
-		self.assertEqual(si.get('loyalty_program'), customer.loyalty_program)
+		self.assertEqual(si_original.get('loyalty_program'), customer.loyalty_program)
 		self.assertEqual(lpe.get('loyalty_program_tier'), customer.loyalty_program_tier)
 		self.assertEqual(lpe.loyalty_points, earned_points)
 
 		# add redemption point
-		si = create_sales_invoice_record()
-		si.redeem_loyalty_points = 1
-		si.loyalty_points = earned_points
-		si.insert()
-		si.submit()
-		earned_after_redemption = get_points_earned(si)
+		si_redeem = create_sales_invoice_record()
+		si_redeem.redeem_loyalty_points = 1
+		si_redeem.loyalty_points = earned_points
+		si_redeem.insert()
+		si_redeem.submit()
 
-		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'redeem_against': lpe.name})
-		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'name': ['!=', lpe_redeem.name]})
+		earned_after_redemption = get_points_earned(si_redeem)
+
+		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'redeem_against': lpe.name})
+		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
 
 		self.assertEqual(lpe_earn.loyalty_points, earned_after_redemption)
 		self.assertEqual(lpe_redeem.loyalty_points, (-1*earned_points))
+
+		# cancel and delete
+		for d in [si_redeem, si_original]:
+			d.cancel()
+			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_loyalty_points_earned_multiple_tier(self):
 		# assign multiple tier program to the customer
@@ -50,35 +56,39 @@ class TestLoyaltyProgram(unittest.TestCase):
 		customer.save()
 
 		# create a new sales invoice
-		si = create_sales_invoice_record()
-		si.insert()
-		si.submit()
+		si_original = create_sales_invoice_record()
+		si_original.insert()
+		si_original.submit()
 
-		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
-		earned_points = get_points_earned(si)
+		earned_points = get_points_earned(si_original)
 
-		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'customer': si.customer})
+		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
 
-		self.assertEqual(si.get('loyalty_program'), customer.loyalty_program)
+		self.assertEqual(si_original.get('loyalty_program'), customer.loyalty_program)
 		self.assertEqual(lpe.get('loyalty_program_tier'), customer.loyalty_program_tier)
 		self.assertEqual(lpe.loyalty_points, earned_points)
 
 		# add redemption point
-		si = create_sales_invoice_record()
-		si.redeem_loyalty_points = 1
-		si.loyalty_points = earned_points
-		si.insert()
-		si.submit()
+		si_redeem = create_sales_invoice_record()
+		si_redeem.redeem_loyalty_points = 1
+		si_redeem.loyalty_points = earned_points
+		si_redeem.insert()
+		si_redeem.submit()
 
 		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
-		earned_after_redemption = get_points_earned(si)
+		earned_after_redemption = get_points_earned(si_redeem)
 
-		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'redeem_against': lpe.name})
-		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'name': ['!=', lpe_redeem.name]})
+		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'redeem_against': lpe.name})
+		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
 
 		self.assertEqual(lpe_earn.loyalty_points, earned_after_redemption)
-		self.assertEqual(lpe_redeem.loyalty_points, (-1*earned_after_redemption))
+		self.assertEqual(lpe_redeem.loyalty_points, (-1*earned_points))
 		self.assertEqual(lpe_earn.loyalty_program_tier, customer.loyalty_program_tier)
+
+		# cancel and delete
+		for d in [si_redeem, si_original]:
+			d.cancel()
+			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_cancel_sales_invoice(self):
 		''' cancelling the sales invoice should cancel the earned points'''
@@ -97,24 +107,8 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 	def test_sales_invoice_return(self):
 		# create a new sales invoice
-		si_original = frappe.get_doc({
-			"doctype": "Sales Invoice",
-			"customer": frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"}).name,
-			"company": '_Test Company',
-			"due_date": today(),
-			"posting_date": today(),
-			"taxes_and_charges": "",
-			"debit_to": "Debtors - _TC",
-			"taxes": [],
-			"items": [{
-				'doctype': 'Sales Invoice Item',
-				'item_code': frappe.get_doc('Item', {'item_name': 'Loyal Item'}).name,
-				'qty': 2,
-				'income_account': 'Sales - _TC',
-				'cost_center': 'Main - _TC',
-				'expense_account': 'Cost of Goods Sold - _TC'
-			}]
-		})
+		si_original = create_sales_invoice_record(2)
+		si_original.conversion_rate = flt(1)
 		si_original.insert()
 		si_original.submit()
 
@@ -123,17 +117,28 @@ class TestLoyaltyProgram(unittest.TestCase):
 		self.assertEqual(lpe_original.loyalty_points, earned_points)
 
 		# create sales invoice return
-		si_return = create_sales_invoice_record()
-		si_return.items[0].qty = -1
+		si_return = create_sales_invoice_record(-1)
+		si_return.conversion_rate = flt(1)
 		si_return.is_return = 1
+		si_return.return_against = si_original.name
 		si_return.insert()
 		si_return.submit()
 
+		# fetch original invoice again as its status would have been updated
+		si_original = frappe.get_doc('Sales Invoice', lpe_original.sales_invoice)
 
 		earned_points = get_points_earned(si_original)
 		lpe_after_return = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
 		self.assertEqual(lpe_after_return.loyalty_points, earned_points)
-		self.assertEqual(True, (lpe_original > lpe_after_return))
+		self.assertEqual(True, (lpe_original.loyalty_points > lpe_after_return.loyalty_points))
+
+		# cancel and delete
+		for d in [si_return, si_original]:
+			try:
+				d.cancel()
+			except frappe.TimestampMismatchError:
+				frappe.get_doc('Sales Invoice', d.name).cancel()
+			frappe.delete_doc('Sales Invoice', d.name)
 
 def get_points_earned(self):
 	def get_returned_amount():
@@ -154,7 +159,7 @@ def get_points_earned(self):
 
 	return points_earned or 0
 
-def create_sales_invoice_record():
+def create_sales_invoice_record(qty=1):
 	# return sales invoice doc object
 	return frappe.get_doc({
 		"doctype": "Sales Invoice",
@@ -168,6 +173,7 @@ def create_sales_invoice_record():
 		"items": [{
 			'doctype': 'Sales Invoice Item',
 			'item_code': frappe.get_doc('Item', {'item_name': 'Loyal Item'}).name,
+			'qty': qty,
 			'income_account': 'Sales - _TC',
 			'cost_center': 'Main - _TC',
 			'expense_account': 'Cost of Goods Sold - _TC'
@@ -176,7 +182,7 @@ def create_sales_invoice_record():
 
 def create_records():
 	# create a new loyalty Account
-	loyalty_account = frappe.get_doc({
+	frappe.get_doc({
 		"doctype": "Account",
 		"account_name": "Loyalty",
 		"parent_account": "Direct Expenses - _TC",
@@ -186,7 +192,7 @@ def create_records():
 	}).insert()
 
 	# create a new loyalty program Single tier
-	lp_single = frappe.get_doc({
+	frappe.get_doc({
 		"doctype": "Loyalty Program",
 		"loyalty_program_name": "Test Single Loyalty",
 		"auto_opt_in": 1,
@@ -205,7 +211,7 @@ def create_records():
 	}).insert()
 
 	# create a new customer
-	customer = frappe.get_doc({
+	frappe.get_doc({
 		"customer_group": "_Test Customer Group",
 		"customer_name": "Test Loyalty Customer",
 		"customer_type": "Individual",
@@ -214,7 +220,7 @@ def create_records():
 	}).insert()
 
 	# create a new loyalty program Multiple tier
-	lp_multiple = frappe.get_doc({
+	frappe.get_doc({
 		"doctype": "Loyalty Program",
 		"loyalty_program_name": "Test Multiple Loyalty",
 		"auto_opt_in": 1,
@@ -252,7 +258,7 @@ def create_records():
 	}).insert()
 
 	# create item price
-	item_price = frappe.get_doc({
+	frappe.get_doc({
 		"doctype": "Item Price",
 		"price_list": "Standard Selling",
 		"item_code": item.item_code,
