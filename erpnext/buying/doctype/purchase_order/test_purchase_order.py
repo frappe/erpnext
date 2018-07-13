@@ -9,7 +9,10 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from frappe.utils import flt, add_days, nowdate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 
 class TestPurchaseOrder(unittest.TestCase):
@@ -49,12 +52,12 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
-		
+
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
 
 		po = create_purchase_order()
-		
+
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
@@ -64,7 +67,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi.items[0].qty = 12
 		pi.insert()
 		pi.submit()
-		
+
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
@@ -75,6 +78,36 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
+
+	def test_update_child_qty_rate(self):
+		mr = make_material_request(qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+
+		create_pr_against_po(po.name)
+
+		make_purchase_invoice(po.name)
+
+		existing_ordered_qty = get_ordered_qty()
+		existing_requested_qty = get_requested_qty()
+
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.items[0].name}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, 7)
+		self.assertEqual(mr.per_ordered, 70)
+		self.assertEqual(get_requested_qty(), existing_requested_qty - 3)
+
+		po.reload()
+		self.assertEqual(po.get("items")[0].rate, 200)
+		self.assertEqual(po.get("items")[0].qty, 7)
+		self.assertEqual(po.get("items")[0].amount, 1400)
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
+
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -141,7 +174,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.update_status("Closed")
 
 		self.assertEqual(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
-		
+
 	def test_group_same_items(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 		frappe.get_doc({
@@ -520,6 +553,10 @@ def create_pr_against_po(po, received_qty=4):
 def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		"ordered_qty"))
+
+def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
+	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+		"indented_qty"))
 
 test_dependencies = ["BOM", "Item Price"]
 
