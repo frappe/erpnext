@@ -25,6 +25,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	if department_details:
 		department_list = frappe.db.sql("""select name from `tabDepartment` where lft <= %s
 			and rgt >= %s
+			and disabled=0
 			order by lft desc""", (department_details.lft, department_details.rgt), as_list = True)
 
 	if filters.get("doctype") == "Leave Application":
