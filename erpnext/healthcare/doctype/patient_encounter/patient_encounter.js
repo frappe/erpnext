@@ -19,7 +19,28 @@ frappe.ui.form.on('Patient Encounter', {
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
-
+		if (!frm.doc.__islocal){
+			frappe.call({
+				method: 'frappe.client.get_value',
+				args: {
+					doctype: 'Patient',
+					fieldname: 'inpatient',
+					filters: {name: frm.doc.patient}
+				},
+				callback: function(data) {
+					if(data.message && data.message.inpatient == "Scheduled" || data.message.inpatient == "Admitted"){
+						frm.add_custom_button(__('Discharge'), function() {
+							discharge(frm);
+						});
+					}
+					else{
+						frm.add_custom_button(__('Schedule Inpatient'), function() {
+							schedule_inpatient(frm);
+						});
+					}
+				}
+			});
+		}
 		frm.add_custom_button(__('Medical Record'), function() {
 			if (frm.doc.patient) {
 				frappe.route_options = {"patient": frm.doc.patient};
@@ -89,6 +110,34 @@ frappe.ui.form.on('Patient Encounter', {
 		frm.set_df_property("encounter_time", "read_only", frm.doc.__islocal ? 0:1);
 	}
 });
+
+var schedule_inpatient = function(frm) {
+	frappe.call({
+		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_inpatient",
+		args: {patient: frm.doc.patient},
+		callback: function(data) {
+			if(!data.exc){
+				frm.reload_doc();
+			}
+		},
+		freeze: true,
+		freeze_message: "Process Inpatient Scheduling"
+	});
+};
+
+var discharge = function(frm) {
+	frappe.call({
+		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.discharge_from_encounter",
+		args: {patient: frm.doc.patient},
+		callback: function(data) {
+			if(!data.exc){
+				frm.reload_doc();
+			}
+		},
+		freeze: true,
+		freeze_message: "Process Discharge"
+	});
+};
 
 var btn_invoice_encounter = function(frm){
 	var doc = frm.doc;
