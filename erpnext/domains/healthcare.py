@@ -31,7 +31,7 @@ data = {
 				'insert_after': 'patient', 'read_only': True
 			},
 			{
-				'fieldname': 'ref_practitioner', 'label': 'Referring Practitioner', 'fieldtype': 'Link', 'options': 'Practitioner',
+				'fieldname': 'ref_practitioner', 'label': 'Referring Practitioner', 'fieldtype': 'Link', 'options': 'Healthcare Practitioner',
 				'insert_after': 'customer'
 			}
 		],

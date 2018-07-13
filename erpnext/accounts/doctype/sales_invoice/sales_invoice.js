@@ -984,7 +984,7 @@ var set_primary_action= function(frm, dialog, $results) {
 				frappe.model.set_value(si_item.doctype, si_item.name, 'reference_dn', checked_values[i]['dn']);
 				frappe.model.set_value(si_item.doctype, si_item.name, 'qty', 1);
 				if(checked_values[i]['qty'] > 1){
-					frappe.model.set_value(si_item.doctype, si_item.name, 'qty', checked_values[i]['qty']);
+					frappe.model.set_value(si_item.doctype, si_item.name, 'qty', parseFloat(checked_values[i]['qty']));
 				}
 			}
 			frm.refresh_fields();
