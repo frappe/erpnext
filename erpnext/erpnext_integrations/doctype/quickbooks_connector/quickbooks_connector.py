@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
 import requests
@@ -27,7 +28,7 @@ def callback(*args, **kwargs):
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
 	print("Enqueing Customer Fetch Job")
-	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_customer", token=token, company_id=company_id, customer_id=63)
+	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_and_save_customer", token=token, company_id=company_id, customer_id=63)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
@@ -35,10 +36,16 @@ def get_access_token(code):
 	return token
 
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
-def fetch_customer(token="", company_id=1, customer_id=1):
+def fetch_and_save_customer(token="", company_id=1, customer_id=1):
 	customer_uri = BASE_URL.format(company_id, "customer", customer_id)
-	customer = requests.get(customer_uri, headers=get_headers(token)).json()
-	print("Fetched", customer)
+	customer = requests.get(customer_uri, headers=get_headers(token)).json()["Customer"]
+	erpcustomer = frappe.get_doc({
+		"doctype": "Customer",
+		"customer_name" : customer["DisplayName"],
+		"customer_type" : _("Individual"),
+		"customer_group" : _("Commercial"),
+		"territory" : _("All Territories"),
+	}).insert(ignore_permissions=True)
 
 def get_headers(token):
 	return {"Accept": "application/json",
