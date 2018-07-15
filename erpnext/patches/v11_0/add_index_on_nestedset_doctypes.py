@@ -4,7 +4,7 @@
 import frappe
 
 def execute():
-	frappe.reload_doc("agriculture", "doctype", "Location")
+	frappe.reload_doc("assets", "doctype", "Location")
 	for dt in ("Account", "Cost Center", "File", "Employee", "Location", "Task", "Customer Group", "Sales Person", "Territory"):
 		frappe.reload_doctype(dt)
 		frappe.get_doc("DocType", dt).run_module_method("on_doctype_update")
