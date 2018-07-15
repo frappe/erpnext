@@ -8,6 +8,7 @@ import unittest
 
 import frappe
 
+test_records = frappe.get_test_records('Location')
 
 class TestLocation(unittest.TestCase):
 	def runTest(self):
@@ -25,7 +26,7 @@ class TestLocation(unittest.TestCase):
 			formatted_locations.extend(temp['features'])
 
 		formatted_location_string = str(formatted_locations)
-		test_location = frappe.get_doc('Location', 'Test Location')
+		test_location = frappe.get_doc('Location', 'Test Location Area')
 
 		self.assertEqual(formatted_location_string, str(json.loads(test_location.get('location'))['features']))
 		self.assertEqual(area, test_location.get('area'))
