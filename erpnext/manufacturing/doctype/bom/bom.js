@@ -140,7 +140,7 @@ frappe.ui.form.on("BOM", {
 						frm.refresh_fields();
 						erpnext.bom.calculate_op_cost(frm.doc);
 						erpnext.bom.calculate_total(frm.doc);
-					};
+					}
 				}
 			});
 		}
