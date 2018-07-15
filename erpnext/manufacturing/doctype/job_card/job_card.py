@@ -11,10 +11,13 @@ from frappe.model.document import Document
 
 class JobCard(Document):
 	def get_required_items(self):
-		if not self.get('work_order') and not self.transfer_material_against_job_card:
+		if not self.get('work_order'):
 			return
 
 		doc = frappe.get_doc('Work Order', self.get('work_order'))
+		if not doc.transfer_material_against_job_card:
+			return
+
 		for d in doc.required_items:
 			if not d.operation:
 				frappe.throw(_("Row {0} : Operation is required against the raw material item {1}")
