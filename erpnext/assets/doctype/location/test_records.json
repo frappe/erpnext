@@ -1,7 +1,7 @@
 [
 	{
 		"doctype": "Location",
-		"location_name": "Test Location",
+		"location_name": "Test Location Area",
 		"is_group": 1,
 		"is_container": 1
 	},
@@ -9,8 +9,8 @@
 		"doctype": "Location",
 		"location_name": "Basil Farm",
 		"location": "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"point_type\":\"circle\",\"radius\":884.5625420736483},\"geometry\":{\"type\":\"Point\",\"coordinates\":[72.875834,19.100566]}}]}",
-		"parent_location": "Test Location",
-		"parent": "Test Location",
+		"parent_location": "Test Location Area",
+		"parent": "Test Location Area",
 		"is_group": 1,
 		"is_container": 1
 	},

@@ -20,6 +20,9 @@ def execute():
 
 	frappe.reload_doc('assets', 'doctype', 'linked_location')
 
+	if not frappe.db.table_exists('Crop Cycle'):
+		frappe.reload_doc('agriculture', 'doctype', 'crop_cycle')
+
 	# Rename the fields in related doctypes
 	if 'linked_land_unit' in frappe.db.get_table_columns('Crop Cycle'):
 		rename_field('Crop Cycle', 'linked_land_unit', 'linked_location')
