@@ -4,7 +4,6 @@
 frappe.ui.form.on("Work Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Timesheet': 'Make Timesheet',
 			'Stock Entry': 'Make Stock Entry',
 		}
 
@@ -113,15 +112,6 @@ frappe.ui.form.on("Work Order", {
 			frm.trigger('show_progress');
 		}
 
-		if(frm.doc.docstatus == 1 && frm.doc.status != 'Stopped'){
-			frm.add_custom_button(__('Make Timesheet'), function(){
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.work_order.work_order.make_new_timesheet",
-					frm: cur_frm
-				})
-			})
-		}
-
 		if(frm.doc.required_items && frm.doc.allow_alternative_item) {
 			const has_alternative = frm.doc.required_items.find(i => i.allow_alternative_item === 1);
 			if (frm.doc.docstatus == 0 && has_alternative) {
@@ -139,6 +129,26 @@ frappe.ui.form.on("Work Order", {
 				});
 			}
 		}
+
+		if (frm.doc.status == "Completed" &&
+			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
+			frm.add_custom_button(__("Make BOM"), () => {
+				frm.trigger("make_bom")
+			})
+		}
+	},
+
+	make_bom: function(frm) {
+		frappe.call({
+			method: "make_bom",
+			doc: frm.doc,
+			callback: function(r){
+				if (r.message) {
+					var doc = frappe.model.sync(r.message)[0];
+					frappe.set_route("Form", doc.doctype, doc.name);
+				}
+			}
+		});
 	},
 
 	show_progress: function(frm) {
@@ -189,7 +199,8 @@ frappe.ui.form.on("Work Order", {
 						frm.set_value('sales_order', "");
 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
-						$.each(["description", "stock_uom", "project", "bom_no", "allow_alternative_item"], function(i, field) {
+						$.each(["description", "stock_uom", "project", "bom_no",
+							"allow_alternative_item", "transfer_material_against_job_card"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
