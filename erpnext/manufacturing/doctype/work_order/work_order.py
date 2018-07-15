@@ -191,9 +191,14 @@ class WorkOrder(Document):
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where work_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
+			if self.transfer_material_against_job_card and purpose == 'Material Transfer for Manufacture':
+				qty = flt(frappe.db.sql("""select sum(for_quantity)
+					from `tabJob Card` where work_order=%s and docstatus=1""", (self.name))[0][0])
+				qty = qty / len(self.operations)
+			else:
+				qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
+					from `tabStock Entry` where work_order=%s and docstatus=1
+					and purpose=%s""", (self.name, purpose))[0][0])
 
 			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
 			if qty > completed_qty:
@@ -210,7 +215,7 @@ class WorkOrder(Document):
 		production_plan.run_method("update_produced_qty", self.produced_qty, self.production_plan_item)
 
 	def before_submit(self):
-		self.make_time_logs()
+		self.make_job_card()
 
 	def on_submit(self):
 		if not self.wip_warehouse:
@@ -335,98 +340,40 @@ class WorkOrder(Document):
 
 		return holidays[holiday_list]
 
-	def make_time_logs(self, open_new=False):
-		"""Capacity Planning. Plan time logs based on earliest availablity of workstation after
-			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
-			before manufacturing entry can be made."""
-
+	def make_job_card(self):
 		if not self.operations:
 			return
 
-		timesheets = []
-		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
+		workstation_wise_time = {}
+		card_count = 0
+		for d in self.operations:
+			start_date = workstation_wise_time.get(d.workstation) or self.planned_start_date
+			end_date = get_datetime(start_date) + relativedelta(minutes = d.time_in_mins)
+			workstation_wise_time[d.workstation] = end_date
 
-		timesheet = make_timesheet(self.name, self.company)
-		timesheet.set('time_logs', [])
+			doc = frappe.get_doc({
+				'doctype': 'Job Card',
+				'work_order': self.name,
+				'operation': d.operation,
+				'workstation': d.workstation,
+				'posting_date': nowdate(),
+				'for_quantity': self.qty,
+				'operation_id': d.name,
+				'estimated_start_date': start_date,
+				'estimated_end_date': end_date,
+				'bom_no': self.bom_no,
+				'project': self.project,
+				'company': self.company,
+				'wip_warehouse': self.wip_warehouse
+			})
 
-		for i, d in enumerate(self.operations):
+			doc.get_required_items()
+			doc.flags.ignore_mandatory = True
+			doc.save()
+			card_count += 1
 
-			if d.status != 'Completed':
-				self.set_start_end_time_for_workstation(d, i)
-
-				args = self.get_operations_data(d)
-
-				add_timesheet_detail(timesheet, args)
-				original_start_time = d.planned_start_time
-
-				# validate operating hours if workstation [not mandatory] is specified
-				try:
-					timesheet.validate_time_logs()
-				except OverlapError:
-					if frappe.message_log: frappe.message_log.pop()
-					timesheet.schedule_for_work_order(d.idx)
-				except WorkstationHolidayError:
-					if frappe.message_log: frappe.message_log.pop()
-					timesheet.schedule_for_work_order(d.idx)
-
-				from_time, to_time = self.get_start_end_time(timesheet, d.name)
-
-				if date_diff(from_time, original_start_time) > plan_days:
-					frappe.throw(_("Unable to find Time Slot in the next {0} days for Operation {1}").format(plan_days, d.operation))
-					break
-
-				d.planned_start_time = from_time
-				d.planned_end_time = to_time
-				d.db_update()
-
-		if timesheet and open_new:
-			return timesheet
-
-		if timesheet and timesheet.get("time_logs"):
-			timesheet.save()
-			timesheets.append(getlink("Timesheet", timesheet.name))
-
-		self.planned_end_date = self.operations[-1].planned_end_time
-		if timesheets:
-			frappe.local.message_log = []
-			frappe.msgprint(_("Timesheet created:") + "\n" + "\n".join(timesheets))
-
-	def get_operations_data(self, data):
-		return {
-			'from_time': get_datetime(data.planned_start_time),
-			'hours': data.time_in_mins / 60.0,
-			'to_time': get_datetime(data.planned_end_time),
-			'project': self.project,
-			'operation': data.operation,
-			'operation_id': data.name,
-			'workstation': data.workstation,
-			'completed_qty': flt(self.qty) - flt(data.completed_qty)
-		}
-
-	def set_start_end_time_for_workstation(self, data, index):
-		"""Set start and end time for given operation. If first operation, set start as
-		`planned_start_date`, else add time diff to end time of earlier operation."""
-
-		if index == 0:
-			data.planned_start_time = self.planned_start_date
-		else:
-			data.planned_start_time = get_datetime(self.operations[index-1].planned_end_time)\
-								+ get_mins_between_operations()
-
-		data.planned_end_time = get_datetime(data.planned_start_time) + relativedelta(minutes = data.time_in_mins)
-
-		if data.planned_start_time == data.planned_end_time:
-			frappe.throw(_("Capacity Planning Error"))
-
-	def get_start_end_time(self, timesheet, operation_id):
-		for data in timesheet.time_logs:
-			if data.operation_id == operation_id:
-				return data.from_time, data.to_time
-
-	def check_operation_fits_in_working_hours(self, d):
-		"""Raises expection if operation is longer than working hours in the given workstation."""
-		from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours
-		check_if_within_operating_hours(d.workstation, d.operation, d.planned_start_time, d.planned_end_time)
+		if card_count:
+			frappe.msgprint(_("Total {0} job cards created").format(card_count))
 
 	def update_operation_status(self):
 		for d in self.get("operations"):
@@ -523,6 +470,7 @@ class WorkOrder(Document):
 			else:
 				for item in sorted(item_dict.values(), key=lambda d: d['idx']):
 					self.append('required_items', {
+						'operation': item.operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
@@ -573,6 +521,30 @@ class WorkOrder(Document):
 
 			d.db_set('consumed_qty', flt(consumed_qty), update_modified = False)
 
+	def make_bom(self):
+		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse
+			from `tabStock Entry Detail` sed, `tabStock Entry` se
+			where se.name = sed.parent and se.purpose = 'Manufacture'
+			and (sed.t_warehouse is null or sed.t_warehouse = '') and se.docstatus = 1
+			and se.work_order = %s""", (self.name), as_dict=1)
+
+		bom = frappe.new_doc("BOM")
+		bom.item = self.production_item
+		bom.conversion_rate = 1
+
+		for d in data:
+			bom.append('items', {
+				'item_code': d.item_code,
+				'qty': d.qty,
+				'source_warehouse': d.s_warehouse
+			})
+
+		if self.operations:
+			bom.set('operations', self.operations)
+			bom.with_operations = 1
+
+		bom.set_bom_material_details()
+		return bom
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
@@ -609,8 +581,12 @@ def get_item_details(item, project = None):
 		else:
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
-	res['project'] = project or frappe.db.get_value('BOM', res['bom_no'], 'project')
-	res['allow_alternative_item'] = frappe.db.get_value('BOM', res['bom_no'], 'allow_alternative_item')
+	bom_data = frappe.db.get_value('BOM', res['bom_no'],
+		['project', 'allow_alternative_item', 'transfer_material_against_job_card'], as_dict=1)
+
+	res['project'] = project or bom_data.project
+	res['allow_alternative_item'] = bom_data.allow_alternative_item
+	res['transfer_material_against_job_card'] = bom_data.transfer_material_against_job_card
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
