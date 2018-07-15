@@ -555,3 +555,4 @@ execute:frappe.db.sql("update `tabDesktop Icon` set type = 'module' where module
 erpnext.patches.v11_0.set_salary_component_properties
 erpnext.patches.v11_0.set_user_permissions_for_department
 erpnext.patches.v11_0.hr_ux_cleanups
+erpnext.patches.v11_0.update_allow_transfer_for_manufacture
