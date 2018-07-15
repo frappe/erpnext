@@ -34,27 +34,23 @@ doc_rename_map = {
 }
 
 def execute():
-	domain_settings = frappe.get_doc('Domain Settings')
-	active_domains = [d.domain for d in domain_settings.active_domains]
+	for dt in doc_rename_map:
+		if frappe.db.exists('DocType', dt):
+			rename_doc('DocType', dt, doc_rename_map[dt], force=True)
 
-	if "Healthcare" in active_domains:
-		for dt in doc_rename_map:
-			if frappe.db.exists('DocType', dt):
-				rename_doc('DocType', dt, doc_rename_map[dt], force=True)
+	for dn in field_rename_map:
+		if frappe.db.exists('DocType', dn):
+			frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
 
-		for dn in field_rename_map:
-			if frappe.db.exists('DocType', dn):
-				frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
+	for dt, field_list in field_rename_map.items():
+		if frappe.db.exists('DocType', dt):
+			for field in field_list:
+				if frappe.db.has_column(dt, field[0]):
+					rename_field(dt, field[0], field[1])
 
-		for dt, field_list in field_rename_map.items():
-			if frappe.db.exists('DocType', dt):
-				for field in field_list:
-					if frappe.db.has_column(dt, field[0]):
-						rename_field(dt, field[0], field[1])
-
-		if frappe.db.exists('DocType', 'Practitioner Service Unit Schedule'):
-			if frappe.db.has_column('Practitioner Service Unit Schedule', 'parentfield'):
-				frappe.db.sql("""
-					update `tabPractitioner Service Unit Schedule` set parentfield = 'practitioner_schedules'
-					where parentfield = 'physician_schedules' and parenttype = 'Healthcare Practitioner'
-				""")
+	if frappe.db.exists('DocType', 'Practitioner Service Unit Schedule'):
+		if frappe.db.has_column('Practitioner Service Unit Schedule', 'parentfield'):
+			frappe.db.sql("""
+				update `tabPractitioner Service Unit Schedule` set parentfield = 'practitioner_schedules'
+				where parentfield = 'physician_schedules' and parenttype = 'Healthcare Practitioner'
+			""")
