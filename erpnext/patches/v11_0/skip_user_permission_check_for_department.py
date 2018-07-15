@@ -14,7 +14,7 @@ def execute():
                     'Attendance', 'Training Feedback', 'Training Result Employee',
                     'Leave Application', 'Employee Advance', 'Activity Cost', 'Training Event Employee',
                     'Timesheet', 'Sales Person', 'Payroll Employee Detail']:
-        if frappe.db.exists('Custom Field', { 'dt': doctype, 'fieldname': 'department'}): return
+        if frappe.db.exists('Custom Field', { 'dt': doctype, 'fieldname': 'department'}): continue
         doctypes_to_skip.append(doctype)
 
     for perm in user_permissions:
