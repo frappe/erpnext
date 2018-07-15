@@ -133,8 +133,8 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.status == "Completed" &&
 			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
 			frm.add_custom_button(__("Make BOM"), () => {
-				frm.trigger("make_bom")
-			})
+				frm.trigger("make_bom");
+			});
 		}
 	},
 
