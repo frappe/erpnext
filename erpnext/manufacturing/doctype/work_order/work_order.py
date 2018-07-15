@@ -234,7 +234,7 @@ class WorkOrder(Document):
 
 		frappe.db.set(self,'status', 'Cancelled')
 		self.update_work_order_qty_in_so()
-		self.delete_timesheet()
+		self.delete_job_card()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
 		self.update_ordered_qty()
@@ -398,9 +398,9 @@ class WorkOrder(Document):
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
 
-	def delete_timesheet(self):
-		for timesheet in frappe.get_all("Timesheet", ["name"], {"work_order": self.name}):
-			frappe.delete_doc("Timesheet", timesheet.name)
+	def delete_job_card(self):
+		for d in frappe.get_all("Job Card", ["name"], {"work_order": self.name}):
+			frappe.delete_doc("Job Card", d.name)
 
 	def validate_production_item(self):
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
@@ -644,41 +644,12 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	return stock_entry.as_dict()
 
 @frappe.whitelist()
-def make_timesheet(work_order, company):
-	timesheet = frappe.new_doc("Timesheet")
-	timesheet.employee = ""
-	timesheet.work_order = work_order
-	timesheet.company = company
-	return timesheet
-
-@frappe.whitelist()
-def add_timesheet_detail(timesheet, args):
-	if isinstance(timesheet, string_types):
-		timesheet = frappe.get_doc('Timesheet', timesheet)
-
-	if isinstance(args, string_types):
-		args = json.loads(args)
-
-	timesheet.append('time_logs', args)
-	return timesheet
-
-@frappe.whitelist()
 def get_default_warehouse():
 	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings",
 		"default_wip_warehouse")
 	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings",
 		"default_fg_warehouse")
 	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}
-
-@frappe.whitelist()
-def make_new_timesheet(source_name, target_doc=None):
-	po = frappe.get_doc('Work Order', source_name)
-	ts = po.make_time_logs(open_new=True)
-
-	if not ts or not ts.get('time_logs'):
-		frappe.throw(_("Already completed"))
-
-	return ts
 
 @frappe.whitelist()
 def stop_unstop(work_order, status):
