@@ -95,6 +95,10 @@ class SalesInvoice(SellingController):
 		if self._action != 'submit' and self.update_stock and not self.is_return:
 			set_batch_nos(self, 'warehouse', True)
 
+		if self.redeem_loyalty_points:
+			lp = frappe.get_doc('Loyalty Program', self.loyalty_program)
+			self.loyalty_redemption_account = lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
+			self.loyalty_redemption_cost_center = lp.cost_center if not self.loyalty_redemption_cost_center else self.loyalty_redemption_cost_center
 
 		self.set_against_income_account()
 		self.validate_c_form()
@@ -1015,7 +1019,7 @@ class SalesInvoice(SellingController):
 			from `tabSales Invoice`
 			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
 		""", self.name)
-		return flt(returned_amount[0][0]) if returned_amount else 0
+		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
@@ -1026,7 +1030,7 @@ class SalesInvoice(SellingController):
 
 		points_to_redeem = self.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			available_points = lp_entry.loyalty_points - redemption_details.get(lp_entry.name)
+			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			if available_points > points_to_redeem:
 				redeemed_points = points_to_redeem
 			else:
