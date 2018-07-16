@@ -51,6 +51,7 @@ MAX_RESULT_COUNT = 10
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 
 def fetch_all_customers(token="", company_id=1):
+	make_custom_quickbooksid_field()
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of customers
@@ -73,6 +74,18 @@ def fetch_all_customers(token="", company_id=1):
 		).json()["QueryResponse"]["Customer"]
 		customers.extend(response)
 	save_customers(customers)
+
+def make_custom_quickbooksid_field():
+	if frappe.get_meta("Customer").has_field("quickbooks_id"):
+		return
+	frappe.get_doc({
+		"doctype": "Custom Field",
+		"label": "QuickBooks ID",
+		"dt": "Customer",
+		"fieldname": "quickbooks_id",
+		"fieldtype": "Data",
+		"unique": True
+	}).insert(ignore_permissions=True)
 
 def get_headers(token):
 	return {"Accept": "application/json",
