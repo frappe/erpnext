@@ -497,6 +497,28 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Subscription Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Subscriber",
+				},
+				{
+					"type": "doctype",
+					"name":"Subscription Plan",
+				},
+				{
+					"type": "doctype",
+					"name":"Subscription"
+				},
+				{
+					"type": "doctype",
+					"name": "Subscription Settings"
+				}
+			]
+		},
+		{
 			"label": _("Help"),
 			"icon": "fa fa-facetime-video",
 			"items": [

@@ -11,7 +11,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
 import json
 
@@ -703,6 +703,8 @@ class StockEntry(StockController):
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.work_order and self.purpose == "Manufacture":
 				self.set_serial_nos(self.work_order)
+				work_order = frappe.get_doc('Work Order', self.work_order)
+				add_additional_cost(self, work_order)
 
 			# add finished goods item
 			if self.purpose in ("Manufacture", "Repack"):
@@ -955,7 +957,8 @@ class StockEntry(StockController):
 			wip_warehouse = None
 
 		for d in pro_order.get("required_items"):
-			if flt(d.required_qty) > flt(d.transferred_qty):
+			if (flt(d.required_qty) > flt(d.transferred_qty) and
+				(d.allow_transfer_for_manufacture or self.purpose != "Material Transfer for Manufacture")):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse

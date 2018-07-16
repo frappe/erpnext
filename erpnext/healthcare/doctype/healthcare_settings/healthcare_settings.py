@@ -50,9 +50,9 @@ def get_receivable_account(company):
         return receivable_account
     return frappe.db.get_value("Company", company, "default_receivable_account")
 
-def get_income_account(physician, company):
-    if(physician):
-        income_account = get_account("Physician", None, physician, company)
+def get_income_account(practitioner, company):
+    if(practitioner):
+        income_account = get_account("Healthcare Practitioner", None, practitioner, company)
         if income_account:
             return income_account
     income_account = get_account(None, "income_account", "Healthcare Settings", company)

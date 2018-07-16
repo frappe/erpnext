@@ -142,6 +142,7 @@ def get_component_amt_from_salary_slip(employee, salary_structure, basic_compone
 			hra_amt = earning.amount
 		if basic_amt and hra_amt:
 			return basic_amt, hra_amt
+	return basic_amt, hra_amt
 
 def calculate_hra_exemption(salary_structure, basic, monthly_hra, monthly_house_rent, rented_in_metro_city):
 	# TODO make this configurable

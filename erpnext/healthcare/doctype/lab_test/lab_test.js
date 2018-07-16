@@ -30,7 +30,7 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 		if(frm.doc.__islocal){
-			frm.add_custom_button(__('Get from Consultation'), function () {
+			frm.add_custom_button(__('Get from Patient Encounter'), function () {
 				get_lab_test_prescribed(frm);
 			});
 		}
@@ -60,7 +60,7 @@ frappe.ui.form.on('Lab Test', {
 
 	},
 	onload: function (frm) {
-		frm.add_fetch("physician", "department", "department");
+		frm.add_fetch("practitioner", "department", "department");
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",
@@ -160,21 +160,21 @@ var show_lab_tests = function(frm, result){
 	$.each(result, function(x, y){
 		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
 		<div class="col-xs-2"> %(lab_test)s </div>\
-		<div class="col-xs-2"> %(consultation)s </div>\
-		<div class="col-xs-3"> %(physician)s </div>\
+		<div class="col-xs-2"> %(encounter)s </div>\
+		<div class="col-xs-3"> %(practitioner)s </div>\
 		<div class="col-xs-3"> %(date)s </div>\
 		<div class="col-xs-1">\
 		<a data-name="%(name)s" data-lab-test="%(lab_test)s"\
-		data-consultation="%(consultation)s" data-physician="%(physician)s"\
+		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
 		data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
-		</button></a></div></div>', {name:y[0], lab_test: y[1], consultation:y[2], invoice:y[3], physician:y[4], date:y[5]})).appendTo(html_field);
+		</button></a></div></div>', {name:y[0], lab_test: y[1], encounter:y[2], invoice:y[3], practitioner:y[4], date:y[5]})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.template = $(this).attr("data-lab-test");
 			frm.doc.prescription = $(this).attr("data-name");
-			frm.doc.physician = $(this).attr("data-physician");
+			frm.doc.practitioner = $(this).attr("data-practitioner");
 			frm.set_df_property("template", "read_only", 1);
 			frm.set_df_property("patient", "read_only", 1);
-			frm.set_df_property("physician", "read_only", 1);
+			frm.set_df_property("practitioner", "read_only", 1);
 			if($(this).attr("data-invoice") != 'null'){
 				frm.doc.invoice = $(this).attr("data-invoice");
 				refresh_field("invoice");

@@ -12,10 +12,10 @@ QUnit.test("test: Location", function (assert) {
 		// insert a new Location
 		() => frappe.tests.make('Location', [
 			// values to be set
-			{key: 'value'}
+			{ location_name: 'Basil Farm' }
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.name, 'Basil Farm');
 		},
 		() => done()
 	]);
