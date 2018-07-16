@@ -33,8 +33,8 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Medical Record'), function () {
 				create_medical_record(frm);
 			}, "Create");
-			frm.add_custom_button(__('Consultation'), function () {
-				btn_create_consultation(frm);
+			frm.add_custom_button(__('Patient Encounter'), function () {
+				btn_create_encounter(frm);
 			}, "Create");
 		}
 	},
@@ -94,14 +94,14 @@ var btn_create_vital_signs = function (frm) {
 	frappe.new_doc("Vital Signs");
 };
 
-var btn_create_consultation = function (frm) {
+var btn_create_encounter = function (frm) {
 	if (!frm.doc.name) {
 		frappe.throw(__("Please save the patient first"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
 	};
-	frappe.new_doc("Consultation");
+	frappe.new_doc("Patient Encounter");
 };
 
 var btn_invoice_registration = function (frm) {

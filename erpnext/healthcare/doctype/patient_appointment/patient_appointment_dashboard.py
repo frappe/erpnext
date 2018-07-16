@@ -9,7 +9,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Consultations'),
-				'items': ['Consultation', 'Vital Signs', 'Patient Medical Record']
+				'items': ['Patient Encounter', 'Vital Signs', 'Patient Medical Record']
 			},
 			{
 				'label': _('Billing'),

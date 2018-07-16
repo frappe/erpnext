@@ -60,13 +60,13 @@ def update_status(status, name):
 def update_lab_test_print_sms_email_status(print_sms_email, name):
 	frappe.db.set_value("Lab Test",name,print_sms_email,1)
 
-def create_lab_test_doc(invoice, consultation, patient, template):
+def create_lab_test_doc(invoice, encounter, patient, template):
 	#create Test Result for template, copy vals from Invoice
 	lab_test = frappe.new_doc("Lab Test")
 	if(invoice):
 		lab_test.invoice = invoice
-	if(consultation):
-		lab_test.physician = consultation.physician
+	if(encounter):
+		lab_test.practitioner = encounter.practitioner
 	lab_test.patient = patient.name
 	lab_test.patient_age = patient.get_age()
 	lab_test.patient_sex = patient.sex
@@ -159,9 +159,9 @@ def create_lab_test_from_desk(patient, template, prescription, invoice=None):
 	if not (template):
 		return
 	patient = frappe.get_doc("Patient", patient)
-	consultation_id = frappe.get_value("Lab Prescription", prescription, "parent")
-	consultation = frappe.get_doc("Consultation", consultation_id)
-	lab_test = create_lab_test(patient, template, prescription, consultation, invoice)
+	encounter_id = frappe.get_value("Lab Prescription", prescription, "parent")
+	encounter = frappe.get_doc("Patient Encounter", encounter_id)
+	lab_test = create_lab_test(patient, template, prescription, encounter, invoice)
 	return lab_test.name
 
 def create_sample_collection(lab_test, template, patient, invoice):
@@ -215,8 +215,8 @@ def load_result_format(lab_test, template, prescription, invoice):
 		lab_test.save(ignore_permissions=True) # insert the result
 		return lab_test
 
-def create_lab_test(patient, template, prescription,  consultation, invoice):
-	lab_test = create_lab_test_doc(invoice, consultation, patient, template)
+def create_lab_test(patient, template, prescription,  encounter, invoice):
+	lab_test = create_lab_test_doc(invoice, encounter, patient, template)
 	lab_test = create_sample_collection(lab_test, template, patient, invoice)
 	lab_test = load_result_format(lab_test, template, prescription, invoice)
 	return lab_test
@@ -292,5 +292,5 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
-	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.physician, ct.consultation_date from tabConsultation ct,
+	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
 	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))
