@@ -29,6 +29,8 @@ def callback(*args, **kwargs):
 	token = get_access_token(code)
 	print("Enqueing Customer Bulk Fetch Job")
 	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_customers", token=token, company_id=company_id)
+	print("Enqueing Item Bulk Fetch Job")
+	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_items", token=token, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
@@ -87,6 +89,58 @@ def make_custom_quickbooksid_field():
 		"doctype": "Custom Field",
 		"label": "QuickBooks ID",
 		"dt": "Customer",
+		"fieldname": "quickbooks_id",
+		"fieldtype": "Data",
+		"unique": True
+	}).insert(ignore_permissions=True)
+
+def save_items(items):
+	for item in items:
+		try:
+			frappe.get_doc({
+				"doctype": "Item",
+				"quickbooks_id": item["Id"],
+				"item_code" : item["Name"],
+				"stock_uom": "Unit",
+				"item_group": "All Item Groups", 
+				"item_defaults": [{"company": "Sandbox Actual"}]
+			}).insert(ignore_permissions=True)
+			frappe.db.commit()
+		except:
+			print("item exists, skipping, quickbooks_id:{}".format(item["Id"]))
+
+def fetch_all_items(token="", company_id=1):
+	make_custom_item_quickbooksid_field()
+	query_uri = BASE_QUERY_URL.format(company_id, "query")
+
+	# Count number of items
+	item_query_response = requests.get(query_uri,
+		params={
+			"query": """SELECT COUNT(*) FROM Item"""
+		},
+		headers=get_headers(token)
+	).json()
+	item_count = item_query_response["QueryResponse"]["totalCount"]
+
+	# fetch pages and accumulate
+	items = []
+	for start_position in range(1, item_count + 1, MAX_RESULT_COUNT):
+		response = requests.get(query_uri,
+			params={
+				"query": """SELECT * FROM Item STARTPOSITION {} MAXRESULTS {}""".format(start_position, MAX_RESULT_COUNT)
+			},
+			headers=get_headers(token)
+		).json()["QueryResponse"]["Item"]
+		items.extend(response)
+	save_items(items)
+
+def make_custom_item_quickbooksid_field():
+	if frappe.get_meta("Item").has_field("quickbooks_id"):
+		return
+	frappe.get_doc({
+		"doctype": "Custom Field",
+		"label": "QuickBooks ID",
+		"dt": "Item",
 		"fieldname": "quickbooks_id",
 		"fieldtype": "Data",
 		"unique": True
