@@ -47,6 +47,7 @@ def save_customers(customers):
 				"customer_group" : _("Commercial"),
 				"territory" : _("All Territories"),
 			}).insert(ignore_permissions=True)
+			frappe.db.commit()
 		except frappe.UniqueValidationError:
 			print("customer exists, skipping, quickbooks_id:{}".format(customer["Id"]))
 
