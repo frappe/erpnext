@@ -32,12 +32,14 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+	},
 
+	refresh: function(frm) {
 		if (frm.doc.__onload) {
 			frm.toggle_display('get_last_purchase_rate',
-				frm.doc.__onload.disable_fetch_last_purchase_rate);
+				!frm.doc.__onload.disable_fetch_last_purchase_rate);
 		}
-	},
+	}
 });
 
 frappe.ui.form.on("Purchase Order Item", {
