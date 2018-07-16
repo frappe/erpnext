@@ -29,7 +29,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				}
 			},
 			"Healthcare Practitioner": {
-				label: __("Practitioner"),
+				label: __("Healthcare Practitioner"),
 				show: true,
 				item_key: "practitioner",
 				formatter: function(item) {
@@ -64,8 +64,8 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				{label: __("Cancelled"), value: "Cancelled"}]},
 		{fieldtype:"Select", label: __("Type"), link:"Appointment Type", fieldname: "type",
 			default_value: __("Select Type...")},
-		{fieldtype:"Select", label: __("Practitioner"), link:"Healthcare Practitioner", fieldname: "practitioner",
-			default_value: __("Select Practitioner..."), filter: function(val, item, opts) {
+		{fieldtype:"Select", label: __("Healthcare Practitioner"), link:"Healthcare Practitioner", fieldname: "practitioner",
+			default_value: __("Select Healthcare Practitioner..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.name == val || item._show;
 			}, link_formatter: {filter_input: "practitioner"}},
 		{fieldtype:"Select", label: __("Department"), link:"Medical Department", fieldname: "department",

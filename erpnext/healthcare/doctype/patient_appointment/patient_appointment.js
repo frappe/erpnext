@@ -101,7 +101,7 @@ frappe.ui.form.on('Patient Appointment', {
 	check_availability: function(frm) {
 		var { practitioner, appointment_date } = frm.doc;
 		if(!(practitioner && appointment_date)) {
-			frappe.throw(__("Please select Practitioner and Date"));
+			frappe.throw(__("Please select Healthcare Practitioner and Date"));
 		}
 
 		// show booking modal
@@ -124,7 +124,7 @@ frappe.ui.form.on('Patient Appointment', {
 		function show_empty_state() {
 			frappe.msgprint({
 				title: __('Not Available'),
-				message: __("Practitioner {0} not available on {1}", [practitioner.bold(), appointment_date.bold()]),
+				message: __("Healthcare Practitioner {0} not available on {1}", [practitioner.bold(), appointment_date.bold()]),
 				indicator: 'red'
 			});
 		}

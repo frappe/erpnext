@@ -114,7 +114,7 @@ def get_availability_data(date, practitioner):
 			if schedule.schedule:
 				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
 			else:
-				frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
+				frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
 
 			if practitioner_schedule:
 				available_slots = []
@@ -152,11 +152,11 @@ def get_availability_data(date, practitioner):
 						"avail_slot":available_slots, 'appointments': appointments})
 
 	else:
-		frappe.throw(_("{0} does not have a Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
+		frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
 
 	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates
-		frappe.throw(_("Practitioner not available on {0}").format(weekday))
+		frappe.throw(_("Healthcare Practitioner not available on {0}").format(weekday))
 
 	return {
 		"slot_details": slot_details
