@@ -77,6 +77,12 @@ frappe.ui.form.on("Customer", {
 		}
 	},
 
+	loyalty_program: function(frm) {
+		if(frm.doc.loyalty_program) {
+			frm.set_value('loyalty_program_tier', null);
+		}
+	},
+
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
