@@ -15,8 +15,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Consultation",
-					"label": _("Consultation"),
+					"name": "Patient Encounter",
+					"label": _("Patient Encounter"),
 				},
 				{
 					"type": "doctype",
@@ -74,13 +74,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Physician",
-					"label": _("Physician"),
+					"name": "Healthcare Practitioner",
+					"label": _("Healthcare Practitioner"),
 				},
 				{
 					"type": "doctype",
-					"name": "Physician Schedule",
-					"label": _("Physician Schedule"),
+					"name": "Practitioner Schedule",
+					"label": _("Practitioner Schedule"),
 				},
 				{
 					"type": "doctype",

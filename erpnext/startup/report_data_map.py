@@ -298,14 +298,14 @@ data_map = {
 		}
 	},
 	"Patient Appointment": {
-		"columns": ["name", "appointment_type", "patient", "physician", "appointment_date", "department", "status", "company"],
+		"columns": ["name", "appointment_type", "patient", "practitioner", "appointment_date", "department", "status", "company"],
 		"order_by": "name",
 		"links": {
-			"physician": ["Physician", "name"],
+			"practitioner": ["Healthcare Practitioner", "name"],
 			"appointment_type": ["Appointment Type", "name"]
 		}
 	},
-	"Physician": {
+	"Healthcare Practitioner": {
 		"columns": ["name", "department"],
 		"order_by": "name",
 		"links": {
