@@ -47,7 +47,7 @@ explore_links = [{
 	"name": "marketplace",
 	"link": "#Hub/Item",
 	"_label": "Marketplace", 
-	"label": '<img class="hub-icon-small" src="assets/erpnext/images/hub_logo.svg">Marketplace'
+	"label": "Marketplace"
 }]
 
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
