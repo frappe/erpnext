@@ -556,6 +556,6 @@ erpnext.patches.v11_0.set_salary_component_properties
 erpnext.patches.v11_0.set_user_permissions_for_department
 erpnext.patches.v11_0.hr_ux_cleanups
 erpnext.patches.v11_0.skip_user_permission_check_for_department
-erpnext.patches.v11_0.set_department_for_doctype
+erpnext.patches.v11_0.set_department_for_doctypes
 erpnext.patches.v11_0.update_allow_transfer_for_manufacture
 erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
