@@ -21,7 +21,7 @@ authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 def get_authorization_url():
 	return oauth.authorization_url(authorization_endpoint)[0]
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
 	code = kwargs.get("code")
