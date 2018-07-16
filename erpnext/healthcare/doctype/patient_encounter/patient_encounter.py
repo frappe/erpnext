@@ -74,7 +74,7 @@ def create_invoice(company, patient, practitioner, encounter_id):
 	create_invoice_items(practitioner, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql("""update tabPatient Encounter set invoice=%s where name=%s""", (sales_invoice.name, encounter_id))
+	frappe.db.sql("""update `tabPatient Encounter` set invoice=%s where name=%s""", (sales_invoice.name, encounter_id))
 	appointment = frappe.db.get_value("Patient Encounter", encounter_id, "appointment")
 	if appointment:
 		frappe.db.set_value("Patient Appointment", appointment, "sales_invoice", sales_invoice.name)

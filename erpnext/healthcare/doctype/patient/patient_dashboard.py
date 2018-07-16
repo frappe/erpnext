@@ -7,7 +7,7 @@ def get_data():
 		'fieldname': 'patient',
 		'transactions': [
 			{
-				'label': _('Appointments and Encounters'),
+				'label': _('Appointments and Patient Encounters'),
 				'items': ['Patient Appointment', 'Patient Encounter']
 			},
 			{

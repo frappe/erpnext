@@ -292,5 +292,5 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
-	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.practitioner, ct.encounter_date from tabEncounter ct,
+	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
 	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))
