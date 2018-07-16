@@ -38,13 +38,17 @@ def get_access_token(code):
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
 def save_customers(customers):
 	for customer in customers:
-		erpcustomer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name" : customer["DisplayName"],
-			"customer_type" : _("Individual"),
-			"customer_group" : _("Commercial"),
-			"territory" : _("All Territories"),
-		}).insert(ignore_permissions=True)
+		try:
+			frappe.get_doc({
+				"doctype": "Customer",
+				"quickbooks_id": customer["Id"],
+				"customer_name" : customer["DisplayName"],
+				"customer_type" : _("Individual"),
+				"customer_group" : _("Commercial"),
+				"territory" : _("All Territories"),
+			}).insert(ignore_permissions=True)
+		except frappe.UniqueValidationError:
+			print("customer exists, skipping, quickbooks_id:{}".format(customer["Id"]))
 
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 10
