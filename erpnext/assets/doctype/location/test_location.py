@@ -27,6 +27,7 @@ class TestLocation(unittest.TestCase):
 
 		formatted_location_string = str(formatted_locations)
 		test_location = frappe.get_doc('Location', 'Test Location Area')
+		test_location.save()
 
 		self.assertEqual(formatted_location_string, str(json.loads(test_location.get('location'))['features']))
 		self.assertEqual(area, test_location.get('area'))
