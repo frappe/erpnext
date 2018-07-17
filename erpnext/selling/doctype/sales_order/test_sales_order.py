@@ -60,6 +60,21 @@ class TestSalesOrder(unittest.TestCase):
 		si1 = make_sales_invoice(so.name)
 		self.assertEquals(len(si1.get("items")), 0)
 
+	def test_so_billed_amount_against_return_entry(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		so = make_sales_order(do_not_submit=True)
+		so.submit()
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		si1 = make_sales_return(si.name)
+		si1.update_billed_amount_in_sales_order = 1
+		si1.submit()
+		so.load_from_db()
+		self.assertEquals(so.per_billed, 0)
+
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
 
