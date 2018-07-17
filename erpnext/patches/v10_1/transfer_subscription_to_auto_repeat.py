@@ -28,3 +28,17 @@ def execute():
 		auto_repeat.db_insert()
 
 	frappe.db.sql('delete from `tabSubscription`')
+	frappe.db.commit()
+	drop_columns_from_subscription()
+
+def drop_columns_from_subscription():
+	fields_to_drop = {'Subscription': []}
+	for field in ['naming_series', 'reference_doctype', 'reference_document', 'start_date',
+		'end_date', 'submit_on_creation', 'disabled', 'frequency', 'repeat_on_day',
+		'next_schedule_date', 'notify_by_email', 'subject', 'recipients', 'print_format',
+		'message', 'status', 'amended_from']:
+
+		if field in frappe.db.get_table_columns("Subscription"):
+			fields_to_drop['Subscription'].append(field)
+
+	frappe.model.delete_fields(fields_to_drop, delete=1)
