@@ -28,10 +28,9 @@ def callback(*args, **kwargs):
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
 	make_custom_fields()
-	print("Enqueing Customer Bulk Fetch Job")
-	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_customers", token=token, company_id=company_id)
-	print("Enqueing Item Bulk Fetch Job")
-	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_items", token=token, company_id=company_id)
+	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
+	frappe.enqueue(fetch_method, doctype="Customer", token=token, company_id=company_id)
+	frappe.enqueue(fetch_method, doctype="Item", token=token, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
@@ -39,24 +38,19 @@ def get_access_token(code):
 	return token
 
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
-def save_customers(customers):
-	for customer in customers:
-		try:
-			erpcustomer = frappe.get_doc({
-				"doctype": "Customer",
-				"quickbooks_id": customer["Id"],
-				"customer_name" : customer["DisplayName"],
-				"customer_type" : _("Individual"),
-				"customer_group" : _("Commercial"),
-				"territory" : _("All Territories"),
-			}).insert(ignore_permissions=True)
-			if "BillAddr" in customer:
-				create_customer_address(erpcustomer, customer["BillAddr"], "Billing")
-			if "ShipAddr" in customer:
-				create_customer_address(erpcustomer, customer["ShipAddr"], "Shipping")
-			frappe.db.commit()
-		except frappe.UniqueValidationError:
-			print("customer exists, skipping, quickbooks_id:{}".format(customer["Id"]))
+def save_customer(customer):
+	erpcustomer = frappe.get_doc({
+		"doctype": "Customer",
+		"quickbooks_id": customer["Id"],
+		"customer_name" : customer["DisplayName"],
+		"customer_type" : _("Individual"),
+		"customer_group" : _("Commercial"),
+		"territory" : _("All Territories"),
+	}).insert(ignore_permissions=True)
+	if "BillAddr" in customer:
+		create_customer_address(erpcustomer, customer["BillAddr"], "Billing")
+	if "ShipAddr" in customer:
+		create_customer_address(erpcustomer, customer["ShipAddr"], "Shipping")
 
 def create_customer_address(customer, address, address_type):
 	try :
@@ -77,30 +71,6 @@ def create_customer_address(customer, address, address_type):
 MAX_RESULT_COUNT = 10
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 
-def fetch_all_customers(token="", company_id=1):
-	query_uri = BASE_QUERY_URL.format(company_id, "query")
-
-	# Count number of customers
-	customer_query_response = requests.get(query_uri,
-		params={
-			"query": """SELECT COUNT(*) FROM Customer"""
-		},
-		headers=get_headers(token)
-	).json()
-	customer_count = customer_query_response["QueryResponse"]["totalCount"]
-
-	# fetch pages and accumulate
-	customers = []
-	for start_position in range(1, customer_count + 1, MAX_RESULT_COUNT):
-		response = requests.get(query_uri,
-			params={
-				"query": """SELECT * FROM Customer STARTPOSITION {} MAXRESULTS {}""".format(start_position, MAX_RESULT_COUNT)
-			},
-			headers=get_headers(token)
-		).json()["QueryResponse"]["Customer"]
-		customers.extend(response)
-	save_customers(customers)
-
 def make_custom_fields():
 	relevant_doctypes = ["Customer", "Address", "Item"]
 	for doctype in relevant_doctypes:
@@ -117,44 +87,52 @@ def make_custom_quickbooks_id_field(doctype):
 			"unique": True
 		}).insert(ignore_permissions=True)
 
-def save_items(items):
-	for item in items:
-		try:
-			frappe.get_doc({
-				"doctype": "Item",
-				"quickbooks_id": item["Id"],
-				"item_code" : item["Name"],
-				"stock_uom": "Unit",
-				"item_group": "All Item Groups", 
-				"item_defaults": [{"company": "Sandbox Actual"}]
-			}).insert(ignore_permissions=True)
-			frappe.db.commit()
-		except:
-			print("item exists, skipping, quickbooks_id:{}".format(item["Id"]))
+def save_item(item):
+	frappe.get_doc({
+		"doctype": "Item",
+		"quickbooks_id": item["Id"],
+		"item_code" : item["Name"],
+		"stock_uom": "Unit",
+		"item_group": "All Item Groups", 
+		"item_defaults": [{"company": "Sandbox Actual"}]
+	}).insert(ignore_permissions=True)
 
-def fetch_all_items(token="", company_id=1):
+save_methods = {
+	"Customer": save_customer,
+	"Item": save_item
+}
+
+def save_entries(doctype, entries):
+	save = save_methods[doctype]
+	for entry in entries:
+		try:
+			save(entry)
+		except:
+			import traceback
+			traceback.print_exc()
+
+def fetch_all_entries(doctype="", token="", company_id=1):
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
-	# Count number of items
-	item_query_response = requests.get(query_uri,
+	# Count number of entries
+	entry_count = requests.get(query_uri,
 		params={
-			"query": """SELECT COUNT(*) FROM Item"""
+			"query": """SELECT COUNT(*) FROM {}""".format(doctype)
 		},
 		headers=get_headers(token)
-	).json()
-	item_count = item_query_response["QueryResponse"]["totalCount"]
+	).json()["QueryResponse"]["totalCount"]
 
 	# fetch pages and accumulate
-	items = []
-	for start_position in range(1, item_count + 1, MAX_RESULT_COUNT):
+	entries = []
+	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
 		response = requests.get(query_uri,
 			params={
-				"query": """SELECT * FROM Item STARTPOSITION {} MAXRESULTS {}""".format(start_position, MAX_RESULT_COUNT)
+				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(doctype, start_position, MAX_RESULT_COUNT)
 			},
 			headers=get_headers(token)
-		).json()["QueryResponse"]["Item"]
-		items.extend(response)
-	save_items(items)
+		).json()["QueryResponse"][doctype]
+		entries.extend(response)
+	save_entries(doctype, entries)
 
 def get_headers(token):
 	return {"Accept": "application/json",
