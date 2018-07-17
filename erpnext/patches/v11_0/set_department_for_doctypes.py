@@ -10,7 +10,8 @@ def execute():
         'Timesheet', 'Sales Person', 'Payroll Employee Detail']
 
     for doctype in doctypes_to_update:
-        frappe.db.sql("""
-            update `tab%s` dt
-            set department=(select department from `tabEmployee` where name=dt.employee)
-        """ % doctype)
+		if frappe.db.table_exists(doctype):
+			frappe.db.sql("""
+				update `tab%s` dt
+				set department=(select department from `tabEmployee` where name=dt.employee)
+			""" % doctype)
