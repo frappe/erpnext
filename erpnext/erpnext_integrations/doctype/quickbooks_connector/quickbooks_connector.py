@@ -29,7 +29,7 @@ def callback(*args, **kwargs):
 	token = get_access_token(code)
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
 	make_custom_fields()
-	relevant_doctypes = ["Customer", "Item"]
+	relevant_doctypes = ["Customer", "Item", "Supplier"]
 	for doctype in relevant_doctypes:
 		frappe.enqueue(fetch_method, doctype=doctype, token=token, company_id=company_id)
 
@@ -48,9 +48,9 @@ def save_customer(customer):
 		"territory" : _("All Territories"),
 	}).insert(ignore_permissions=True)
 	if "BillAddr" in customer:
-		create_customer_address(erpcustomer, customer["BillAddr"], "Billing")
+		create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
 	if "ShipAddr" in customer:
-		create_customer_address(erpcustomer, customer["ShipAddr"], "Shipping")
+		create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
 
 def save_item(item):
 	frappe.get_doc({
@@ -62,17 +62,29 @@ def save_item(item):
 		"item_defaults": [{"company": "Sandbox Actual"}]
 	}).insert(ignore_permissions=True)
 
-def create_customer_address(customer, address, address_type):
+def save_supplier(supplier):
+	erpsupplier = frappe.get_doc({
+		"doctype": "Supplier",
+		"quickbooks_id": supplier["Id"],
+		"supplier_name" : supplier["DisplayName"],
+		"supplier_group" : _("All Supplier Groups"),
+	}).insert(ignore_permissions=True)
+	if "BillAddr" in supplier:
+		create_address(erpsupplier, "Supplier", supplier["BillAddr"], "Billing")
+	if "ShipAddr" in supplier:
+		create_address(erpsupplier, "Supplier",supplier["ShipAddr"], "Shipping")
+
+def create_address(entity, doctype, address, address_type):
 	try :
 		frappe.get_doc({
 			"doctype": "Address",
 			"quickbooks_address_id": address["Id"],
-			"address_title": customer.name,
+			"address_title": entity.name,
 			"address_type": address_type,
 			"address_line1": address["Line1"],
 			"city": address["City"],
 			"gst_state": "Maharashtra",
-			"links": [{"link_doctype": "Customer", "link_name": customer.name}]
+			"links": [{"link_doctype": doctype, "link_name": entity.name}]
 		}).insert()
 	except:
 		print("couldn't create address")
@@ -80,7 +92,7 @@ def create_customer_address(customer, address, address_type):
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Customer", "Address", "Item"]
+	relevant_doctypes = ["Customer", "Address", "Item", "Supplier"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -97,7 +109,8 @@ def make_custom_quickbooks_id_field(doctype):
 
 save_methods = {
 	"Customer": save_customer,
-	"Item": save_item
+	"Item": save_item,
+	"Supplier": save_supplier,
 }
 
 def save_entries(doctype, entries):
@@ -115,6 +128,7 @@ BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 qb_map = {
 	"Customer": "Customer",
 	"Item": "Item",
+	"Supplier": "Vendor",
 }
 
 def fetch_all_entries(doctype="", token="", company_id=1):
