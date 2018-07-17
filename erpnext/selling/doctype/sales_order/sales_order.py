@@ -377,16 +377,26 @@ class SalesOrder(SellingController):
 		return items
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
-														 auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
+
+		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
+			delivery_date = get_next_schedule_date(ref_doc_delivery_date,
+				auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day))
+
+			if delivery_date <= transaction_date:
+				delivery_date_diff = frappe.utils.date_diff(ref_doc_delivery_date, red_doc_transaction_date)
+				delivery_date = frappe.utils.add_days(transaction_date, delivery_date_diff)
+
+			return delivery_date
+
+		self.set("delivery_date", _get_delivery_date(reference_doc.delivery_date,
+			reference_doc.transaction_date, self.transaction_date ))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
-														  auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
-
+			d.set("delivery_date", _get_delivery_date(reference_delivery_date,
+				reference_doc.transaction_date, self.transaction_date))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
