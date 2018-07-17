@@ -242,6 +242,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
+				if(me.frm.supplier_tds) {
+					me.frm.doc.apply_tds = 1;
+					me.frm.set_df_property("apply_tds", "hidden", 0);
+				}
 			})
 	},
 

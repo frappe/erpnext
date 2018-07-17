@@ -65,6 +65,10 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			"allocated_percentage": d.allocated_percentage or None
 		} for d in party.get("sales_team")]
 
+	# supplier tax withholding category
+	if party_type == "Supplier" and party:
+		out["supplier_tds"] = frappe.get_value(party_type, party.name, "tax_withholding_category")
+
 	return out
 
 def set_address_details(out, party, party_type, doctype=None, company=None):
