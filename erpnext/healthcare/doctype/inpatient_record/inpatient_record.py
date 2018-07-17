@@ -10,13 +10,13 @@ from frappe.model.document import Document
 
 class InpatientRecord(Document):
 	def after_insert(self):
-		frappe.db.set_value("Patient", self.patient, "inpatient", "Admission Scheduled")
+		frappe.db.set_value("Patient", self.patient, "inpatient_status", "Admission Scheduled")
 		frappe.db.set_value("Patient", self.patient, "inpatient_record", self.name)
 
 	def validate(self):
 		self.validate_already_scheduled_or_admitted()
 		if self.inpatient == "Discharged":
-			frappe.db.set_value("Patient", self.patient, "inpatient", None)
+			frappe.db.set_value("Patient", self.patient, "inpatient_status", None)
 			frappe.db.set_value("Patient", self.patient, "inpatient_record", None)
 
 	def validate_already_scheduled_or_admitted(self):
@@ -92,7 +92,7 @@ def admit_patient(inpatient_record, bed_location, datetime_in, expected_discharg
 	inpatient_record.set('bed_locations', [])
 	transfer_patient(inpatient_record, bed_location, datetime_in)
 
-	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient", "Admitted")
+	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient_status", "Admitted")
 	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient_record", inpatient_record.name)
 
 def transfer_patient(inpatient_record, bed_location, datetime_in):

@@ -24,11 +24,11 @@ frappe.ui.form.on('Patient Encounter', {
 				method: 'frappe.client.get_value',
 				args: {
 					doctype: 'Patient',
-					fieldname: 'inpatient',
+					fieldname: 'inpatient_status',
 					filters: {name: frm.doc.patient}
 				},
 				callback: function(data) {
-					if(data.message && data.message.inpatient == "Admission Scheduled" || data.message.inpatient == "Admitted"){
+					if(data.message && data.message.inpatient_status == "Admission Scheduled" || data.message.inpatient_status == "Admitted"){
 						frm.add_custom_button(__('Schedule Discharge'), function() {
 							schedule_discharge(frm);
 						});
