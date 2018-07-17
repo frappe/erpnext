@@ -27,17 +27,17 @@ def callback(*args, **kwargs):
 	code = kwargs.get("code")
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
-	make_custom_fields()
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
-	frappe.enqueue(fetch_method, doctype="Customer", token=token, company_id=company_id)
-	frappe.enqueue(fetch_method, doctype="Item", token=token, company_id=company_id)
+	make_custom_fields()
+	relevant_doctypes = ["Customer", "Item"]
+	for doctype in relevant_doctypes:
+		frappe.enqueue(fetch_method, doctype=doctype, token=token, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
 	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)["access_token"]
 	return token
 
-BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
 def save_customer(customer):
 	erpcustomer = frappe.get_doc({
 		"doctype": "Customer",
@@ -51,6 +51,16 @@ def save_customer(customer):
 		create_customer_address(erpcustomer, customer["BillAddr"], "Billing")
 	if "ShipAddr" in customer:
 		create_customer_address(erpcustomer, customer["ShipAddr"], "Shipping")
+
+def save_item(item):
+	frappe.get_doc({
+		"doctype": "Item",
+		"quickbooks_id": item["Id"],
+		"item_code" : item["Name"],
+		"stock_uom": "Unit",
+		"item_group": "All Item Groups",
+		"item_defaults": [{"company": "Sandbox Actual"}]
+	}).insert(ignore_permissions=True)
 
 def create_customer_address(customer, address, address_type):
 	try :
@@ -67,9 +77,7 @@ def create_customer_address(customer, address, address_type):
 	except:
 		print("couldn't create address")
 
-# A quickbooks api contraint
-MAX_RESULT_COUNT = 10
-BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
+
 
 def make_custom_fields():
 	relevant_doctypes = ["Customer", "Address", "Item"]
@@ -87,16 +95,6 @@ def make_custom_quickbooks_id_field(doctype):
 			"unique": True
 		}).insert(ignore_permissions=True)
 
-def save_item(item):
-	frappe.get_doc({
-		"doctype": "Item",
-		"quickbooks_id": item["Id"],
-		"item_code" : item["Name"],
-		"stock_uom": "Unit",
-		"item_group": "All Item Groups", 
-		"item_defaults": [{"company": "Sandbox Actual"}]
-	}).insert(ignore_permissions=True)
-
 save_methods = {
 	"Customer": save_customer,
 	"Item": save_item
@@ -111,13 +109,21 @@ def save_entries(doctype, entries):
 			import traceback
 			traceback.print_exc()
 
+# A quickbooks api contraint
+MAX_RESULT_COUNT = 10
+BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
+qb_map = {
+	"Customer": "Customer",
+	"Item": "Item",
+}
+
 def fetch_all_entries(doctype="", token="", company_id=1):
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of entries
 	entry_count = requests.get(query_uri,
 		params={
-			"query": """SELECT COUNT(*) FROM {}""".format(doctype)
+			"query": """SELECT COUNT(*) FROM {}""".format(qb_map[doctype])
 		},
 		headers=get_headers(token)
 	).json()["QueryResponse"]["totalCount"]
@@ -127,10 +133,10 @@ def fetch_all_entries(doctype="", token="", company_id=1):
 	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
 		response = requests.get(query_uri,
 			params={
-				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(doctype, start_position, MAX_RESULT_COUNT)
+				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(qb_map[doctype], start_position, MAX_RESULT_COUNT)
 			},
 			headers=get_headers(token)
-		).json()["QueryResponse"][doctype]
+		).json()["QueryResponse"][qb_map[doctype]]
 		entries.extend(response)
 	save_entries(doctype, entries)
 
