@@ -288,6 +288,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (callback) {
 					callback();
 				}
+			},
+			error: () => {
+				setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
 			}
 		})
 	},
@@ -1187,7 +1190,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					message: __('Discount amount cannot be greater than 100%')
 				});
 				me.update_discount(item_code, discount);
-			}else{	
+			}else{
 				me.update_discount(item_code, discount);
 				me.update_value();
 			}

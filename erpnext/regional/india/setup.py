@@ -81,7 +81,7 @@ def add_print_formats():
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('GST POS Invoice', 'GST Tax Invoice') """)
 
-def make_custom_fields():
+def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
@@ -241,7 +241,7 @@ def make_custom_fields():
 		]
 	}
 
-	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch)
+	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
 
 def make_fixtures(company=None):
 	docs = []
