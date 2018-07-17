@@ -258,7 +258,7 @@ def make_fixtures(company=None):
 		except frappe.NameError:
 			pass
 
-	# create tds fixtures
+	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
 
 def set_salary_components(docs):
@@ -279,19 +279,17 @@ def set_tax_withholding_category(company):
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	tds = frappe.get_doc({
-		'doctype': 'Tax Withholding Category', 'name': 'TDS',
-		'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
-		'withhold_cumulative_tax_amount': 0, 'accounts': accounts
-	})
+	docs = get_tds_details(accounts)
 
-	try:
-		tds.flags.ignore_permissions = True
-		tds.insert()
-	except frappe.DuplicateEntryError:
-		tds = frappe.get_doc("Tax Withholding Category", tds.get("name"))
-		tds.append("accounts", accounts[0])
-		tds.save()
+	for d in docs:
+		try:
+			doc = frappe.get_doc(d)
+			doc.flags.ignore_permissions = True
+			doc.insert()
+		except frappe.DuplicateEntryError:
+			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
+			doc.append("accounts", accounts[0])
+			doc.save()
 
 def set_tds_account(docs, company):
 	abbr = frappe.get_value("Company", company, "abbr")
@@ -301,3 +299,120 @@ def set_tds_account(docs, company):
 			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
 		}
 	])
+
+def get_tds_details(accounts):
+	# bootstrap default tax withholding sections
+	return [
+		dict(name='TDS - 194C - Company',
+			description='Payment to Contractors (Single / Aggregate)',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=2,
+			single_threshold=30000, cumulative_threshold=100000, accounts=accounts),
+		dict(name='TDS - 194C - Individual',
+			description='Payment to Contractors (Single / Aggregate)',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=1,
+			single_threshold=30000, cumulative_threshold=100000, accounts=accounts),
+		dict(name='TDS - 194C - No PAN / Invalid PAN',
+			description='Payment to Contractors (Single / Aggregate)',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=30000, cumulative_threshold=100000, accounts=accounts),
+		dict(name='TDS - 194D - Company',
+			description='Insurance Commission',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=5,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194D - Company Assessee',
+			description='Insurance Commission',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194D - Individual',
+			description='Insurance Commission',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=5,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194D - No PAN / Invalid PAN',
+			description='Insurance Commission',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194DA - Company',
+			description='Non-exempt payments made under a life insurance policy',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=1,
+			single_threshold=100000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194DA - Individual',
+			description='Non-exempt payments made under a life insurance policy',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=1,
+			single_threshold=100000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194DA - No PAN / Invalid PAN',
+			description='Non-exempt payments made under a life insurance policy',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=100000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194H - Company',
+			description='Commission / Brokerage',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=5,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194H - Individual',
+			description='Commission / Brokerage',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=5,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194H - No PAN / Invalid PAN',
+			description='Commission / Brokerage',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=15000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent - Company',
+			description='Rent',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent - Individual',
+			description='Rent',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent - No PAN / Invalid PAN',
+			description='Rent',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent/Machinery - Company',
+			description='Rent-Plant / Machinery',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=2,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent/Machinery - Individual',
+			description='Rent-Plant / Machinery',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=2,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Rent/Machinery - No PAN / Invalid PAN',
+			description='Rent-Plant / Machinery',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=180000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Professional Fees - Company',
+			description='Professional Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=30000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Professional Fees - Individual',
+			description='Professional Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=30000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Professional Fees - No PAN / Invalid PAN',
+			description='Professional Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=30000, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Director Fees - Company',
+			description='Director Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=0, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Director Fees - Individual',
+			description='Director Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=0, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Director Fees - No PAN / Invalid PAN',
+			description='Director Fees',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=0, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Dividends - Company',
+			description='Dividends',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=2500, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Dividends - Individual',
+			description='Dividends',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=10,
+			single_threshold=2500, cumulative_threshold=0, accounts=accounts),
+		dict(name='TDS - 194I - Dividends - No PAN / Invalid PAN',
+			description='Dividends',
+			doctype='Tax Withholding Category', percent_of_tax_withheld=20,
+			single_threshold=2500, cumulative_threshold=0, accounts=accounts)
+	]
