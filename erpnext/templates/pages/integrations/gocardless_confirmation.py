@@ -36,10 +36,15 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 				"session_token": frappe.session.user
 		})
 
+		confirmation_url = redirect_flow.confirmation_url
+		gocardless_success_page = frappe.get_hooks('gocardless_success_page')
+		if gocardless_success_page:
+			confirmation_url = frappe.get_attr(gocardless_success_page[-1])(reference_doctype, reference_docname)
+
 		data = {
 			"mandate": redirect_flow.links.mandate,
 			"customer": redirect_flow.links.customer,
-			"redirect_to": redirect_flow.confirmation_url,
+			"redirect_to": confirmation_url,
 			"redirect_message": "Mandate successfully created",
 			"reference_doctype": reference_doctype,
 			"reference_docname": reference_docname
@@ -53,7 +58,7 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 		gateway_controller = get_gateway_controller(reference_docname)
 		frappe.get_doc("GoCardless Settings", gateway_controller).create_payment_request(data)
 
-		return {"redirect_to": redirect_flow.confirmation_url}
+		return {"redirect_to": confirmation_url}
 
 	except Exception as e:
 		frappe.log_error(e, "GoCardless Payment Error")

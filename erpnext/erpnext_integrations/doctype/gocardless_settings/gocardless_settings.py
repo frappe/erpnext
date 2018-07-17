@@ -85,7 +85,7 @@ class GoCardlessSettings(Document):
 		return get_url("./integrations/gocardless_checkout?{0}".format(urlencode(kwargs)))
 
 	def create_payment_request(self, data):
-		self.data = frappe._dict(data)
+		self.data = {str(key): str(value) for (key, value) in data.items()}
 
 		try:
 			self.integration_request = create_request_log(self.data, "Host", "GoCardless")
@@ -145,11 +145,11 @@ class GoCardlessSettings(Document):
 
 		if self.flags.status_changed_to == "Completed":
 			status = 'Completed'
-			if self.data.reference_doctype and self.data.reference_docname:
+			if 'reference_doctype' in self.data and 'reference_docname' in self.data:
 				custom_redirect_to = None
 				try:
-					custom_redirect_to = frappe.get_doc(self.data.reference_doctype,
-						self.data.reference_docname).run_method("on_payment_authorized", self.flags.status_changed_to)
+					custom_redirect_to = frappe.get_doc(self.data.get('reference_doctype'),
+						self.data.get('reference_docname')).run_method("on_payment_authorized", self.flags.status_changed_to)
 				except Exception:
 					frappe.log_error(frappe.get_traceback())
 
