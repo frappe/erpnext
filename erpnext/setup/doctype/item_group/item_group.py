@@ -178,12 +178,12 @@ def get_item_group_defaults(item, company):
 	item_group = frappe.db.get_value("Item", item, "item_group")
 	item_group_defaults = frappe.db.sql('''
 		select
-			id.expense_account, id.income_account, id.buying_cost_center, id.default_warehouse,
-			id.selling_cost_center, id.default_supplier
+			expense_account, income_account, buying_cost_center, default_warehouse,
+			selling_cost_center, default_supplier
 		from
-			`tabItem Group` ig, `tabItem Default` id where ig.name = id.parent\
-			and id.parenttype = 'Item Group' and id.company = %s and ig.name = %s
+			`tabItem Default` where company = %s and parent = %s and parenttype = 'Item Group' 
 	''', (company, item_group), as_dict=1)
+
 	if item_group_defaults:
 		return item_group_defaults[0]
 	else:
