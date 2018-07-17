@@ -6,4 +6,6 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc('hr', 'doctype', 'Employee Tax Exemption Declaration')
+	frappe.reload_doc('hr', 'doctype', 'Employee Tax Exemption Proof Submission')
 	make_custom_fields()

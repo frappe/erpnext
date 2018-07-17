@@ -511,6 +511,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if(!r.exc) {
 					if (!this.frm.doc.pos_profile) {
 						frappe.dom.unfreeze();
+						setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
 						frappe.throw(__("POS Profile is required to use Point-of-Sale"));
 					}
 					this.frm.script_manager.trigger("update_stock");
