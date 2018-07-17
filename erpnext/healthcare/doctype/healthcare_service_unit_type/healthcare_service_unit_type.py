@@ -64,7 +64,7 @@ def create_item(doc):
 	"show_in_website": 0,
 	"is_pro_applicable": 0,
 	"disabled": 0,
-	"stock_uom": "Unit"
+	"stock_uom": doc.uom
 	}).insert(ignore_permissions=True)
 
 	#insert item price
