@@ -3,19 +3,19 @@
 
 frappe.ui.form.on('Inpatient Record', {
 	refresh: function(frm) {
-		if(!frm.doc.__islocal && frm.doc.inpatient == "Scheduled"){
+		if(!frm.doc.__islocal && frm.doc.inpatient == "Admission Scheduled"){
 			frm.add_custom_button(__('Admit'), function() {
 				admit_patient_dialog(frm);
 			} );
 			frm.set_df_property("btn_transfer", "hidden", 1);
 		}
-		if(!frm.doc.__islocal && frm.doc.inpatient == "Admitted"){
+		if(!frm.doc.__islocal && frm.doc.inpatient == "Discharge Scheduled"){
 			frm.add_custom_button(__('Discharge'), function() {
 				discharge_patient(frm);
 			} );
 			frm.set_df_property("btn_transfer", "hidden", 0);
 		}
-		if(!frm.doc.__islocal && frm.doc.inpatient == "Discharged"){
+		if(!frm.doc.__islocal && (frm.doc.inpatient == "Discharged" || frm.doc.inpatient == "Discharge Scheduled")){
 			frm.disable_save();
 			frm.set_df_property("btn_transfer", "hidden", 1);
 		}

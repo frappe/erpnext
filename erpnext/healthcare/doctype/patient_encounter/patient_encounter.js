@@ -28,13 +28,13 @@ frappe.ui.form.on('Patient Encounter', {
 					filters: {name: frm.doc.patient}
 				},
 				callback: function(data) {
-					if(data.message && data.message.inpatient == "Scheduled" || data.message.inpatient == "Admitted"){
-						frm.add_custom_button(__('Discharge'), function() {
-							discharge(frm);
+					if(data.message && data.message.inpatient == "Admission Scheduled" || data.message.inpatient == "Admitted"){
+						frm.add_custom_button(__('Schedule Discharge'), function() {
+							schedule_discharge(frm);
 						});
 					}
 					else{
-						frm.add_custom_button(__('Schedule Inpatient'), function() {
+						frm.add_custom_button(__('Schedule Admission'), function() {
 							schedule_inpatient(frm);
 						});
 					}
@@ -125,9 +125,9 @@ var schedule_inpatient = function(frm) {
 	});
 };
 
-var discharge = function(frm) {
+var schedule_discharge = function(frm) {
 	frappe.call({
-		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.discharge_from_encounter",
+		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_discharge",
 		args: {patient: frm.doc.patient},
 		callback: function(data) {
 			if(!data.exc){

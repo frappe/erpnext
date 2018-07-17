@@ -10,17 +10,20 @@ from frappe.model.document import Document
 
 class InpatientRecord(Document):
 	def after_insert(self):
-		frappe.db.set_value("Patient", self.patient, "inpatient", "Scheduled")
+		frappe.db.set_value("Patient", self.patient, "inpatient", "Admission Scheduled")
 		frappe.db.set_value("Patient", self.patient, "inpatient_record", self.name)
 
 	def validate(self):
 		self.validate_already_scheduled_or_admitted()
+		if self.inpatient == "Discharged":
+			frappe.db.set_value("Patient", self.patient, "inpatient", None)
+			frappe.db.set_value("Patient", self.patient, "inpatient_record", None)
 
 	def validate_already_scheduled_or_admitted(self):
 		query = """
 			select name, inpatient
 			from `tabInpatient Record`
-			where (inpatient = 'Admitted' or inpatient = 'Scheduled')
+			where (inpatient = 'Admitted' or inpatient = 'Admission Scheduled')
 			and name != %(name)s and patient = %(patient)s
 			"""
 
@@ -58,28 +61,27 @@ def schedule_inpatient(patient, scheduled_to=None):
 	inpatient_record.mobile = patient_obj.mobile
 	inpatient_record.email = patient_obj.email
 	inpatient_record.phone = patient_obj.phone
-	inpatient_record.inpatient = "Scheduled"
+	inpatient_record.inpatient = "Admission Scheduled"
 	inpatient_record.scheduled_date = today()
 	inpatient_record.save(ignore_permissions = True)
 
 @frappe.whitelist()
-def discharge_from_encounter(patient):
+def schedule_discharge(patient):
 	inpatient_record_id = frappe.db.get_value('Patient', patient, 'inpatient_record')
 	if inpatient_record_id:
-		discharge_patient(frappe.get_doc('Inpatient Record', inpatient_record_id))
+		frappe.db.set_value("Inpatient Record", inpatient_record_id, "inpatient", "Discharge Scheduled")
 
 def discharge_patient(inpatient_record):
-	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient", None)
-	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient_record", None)
-	inpatient_record.discharge_date = today()
-	inpatient_record.inpatient = "Discharged"
-
 	if inpatient_record.bed_locations:
 		for bed_location in inpatient_record.bed_locations:
 			if bed_location.left != 1:
 				bed_location.left = True
 				bed_location.left_datetime = now_datetime()
 				frappe.db.set_value("Healthcare Service Unit", bed_location.bed_location, "occupied", False)
+
+	inpatient_record.discharge_date = today()
+	inpatient_record.inpatient = "Discharged"
+
 	inpatient_record.save(ignore_permissions = True)
 
 def admit_patient(inpatient_record, bed_location, datetime_in, expected_discharge=None):
