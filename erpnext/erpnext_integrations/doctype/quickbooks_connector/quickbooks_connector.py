@@ -27,6 +27,7 @@ def callback(*args, **kwargs):
 	code = kwargs.get("code")
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
+	make_custom_fields()
 	print("Enqueing Customer Bulk Fetch Job")
 	frappe.enqueue("erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_customers", token=token, company_id=company_id)
 	print("Enqueing Item Bulk Fetch Job")
@@ -77,7 +78,6 @@ MAX_RESULT_COUNT = 10
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 
 def fetch_all_customers(token="", company_id=1):
-	make_custom_quickbooksid_field()
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of customers
@@ -101,21 +101,17 @@ def fetch_all_customers(token="", company_id=1):
 		customers.extend(response)
 	save_customers(customers)
 
-def make_custom_quickbooksid_field():
-	if not frappe.get_meta("Customer").has_field("quickbooks_id"):
+def make_custom_fields():
+	relevant_doctypes = ["Customer", "Address", "Item"]
+	for doctype in relevant_doctypes:
+		make_custom_quickbooks_id_field(doctype)
+
+def make_custom_quickbooks_id_field(doctype):
+	if not frappe.get_meta(doctype).has_field("quickbooks_id"):
 		frappe.get_doc({
 			"doctype": "Custom Field",
 			"label": "QuickBooks ID",
-			"dt": "Customer",
-			"fieldname": "quickbooks_id",
-			"fieldtype": "Data",
-			"unique": True
-		}).insert(ignore_permissions=True)
-	if not frappe.get_meta("Address").has_field("quickbooks_id"):
-		frappe.get_doc({
-			"doctype": "Custom Field",
-			"label": "QuickBooks ID",
-			"dt": "Address",
+			"dt": doctype,
 			"fieldname": "quickbooks_id",
 			"fieldtype": "Data",
 			"unique": True
@@ -137,7 +133,6 @@ def save_items(items):
 			print("item exists, skipping, quickbooks_id:{}".format(item["Id"]))
 
 def fetch_all_items(token="", company_id=1):
-	make_custom_item_quickbooksid_field()
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of items
@@ -160,18 +155,6 @@ def fetch_all_items(token="", company_id=1):
 		).json()["QueryResponse"]["Item"]
 		items.extend(response)
 	save_items(items)
-
-def make_custom_item_quickbooksid_field():
-	if frappe.get_meta("Item").has_field("quickbooks_id"):
-		return
-	frappe.get_doc({
-		"doctype": "Custom Field",
-		"label": "QuickBooks ID",
-		"dt": "Item",
-		"fieldname": "quickbooks_id",
-		"fieldtype": "Data",
-		"unique": True
-	}).insert(ignore_permissions=True)
 
 def get_headers(token):
 	return {"Accept": "application/json",
