@@ -4,7 +4,11 @@
   "is_group": 0, 
   "item_group_name": "_Test Item Group", 
   "parent_item_group": "All Item Groups",
-  "default_cost_center": "_Test Cost Center 2 - _TC"
+  "item_group_defaults": [{
+		"company": "_Test Company",
+		"buying_cost_center": "_Test Cost Center 2 - _TC",
+		"selling_cost_center": "_Test Cost Center 2 - _TC"
+	}]
  }, 
  {
   "doctype": "Item Group", 
