@@ -79,6 +79,12 @@ class BuyingController(StockController):
 					{"parent": d.item_code, "company": self.company}, "default_supplier")
 				if supplier:
 					self.supplier = supplier
+				else:
+					item_group = frappe.db.get_value("Item", d.item_code, "item_group")
+					supplier = frappe.db.get_value("Item Default",
+					{"parent": item_group, "company": self.company}, "default_supplier")
+					if supplier:
+						self.supplier = supplier
 					break
 
 	def validate_stock_or_nonstock_items(self):
