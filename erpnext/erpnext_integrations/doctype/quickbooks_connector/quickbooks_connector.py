@@ -41,7 +41,7 @@ BASE_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}/{}"
 def save_customers(customers):
 	for customer in customers:
 		try:
-			frappe.get_doc({
+			erpcustomer = frappe.get_doc({
 				"doctype": "Customer",
 				"quickbooks_id": customer["Id"],
 				"customer_name" : customer["DisplayName"],
@@ -49,9 +49,28 @@ def save_customers(customers):
 				"customer_group" : _("Commercial"),
 				"territory" : _("All Territories"),
 			}).insert(ignore_permissions=True)
+			if "BillAddr" in customer:
+				create_customer_address(erpcustomer, customer["BillAddr"], "Billing")
+			if "ShipAddr" in customer:
+				create_customer_address(erpcustomer, customer["ShipAddr"], "Shipping")
 			frappe.db.commit()
 		except frappe.UniqueValidationError:
 			print("customer exists, skipping, quickbooks_id:{}".format(customer["Id"]))
+
+def create_customer_address(customer, address, address_type):
+	try :
+		frappe.get_doc({
+			"doctype": "Address",
+			"quickbooks_address_id": address["Id"],
+			"address_title": customer.name,
+			"address_type": address_type,
+			"address_line1": address["Line1"],
+			"city": address["City"],
+			"gst_state": "Maharashtra",
+			"links": [{"link_doctype": "Customer", "link_name": customer.name}]
+		}).insert()
+	except:
+		print("couldn't create address")
 
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 10
@@ -83,16 +102,24 @@ def fetch_all_customers(token="", company_id=1):
 	save_customers(customers)
 
 def make_custom_quickbooksid_field():
-	if frappe.get_meta("Customer").has_field("quickbooks_id"):
-		return
-	frappe.get_doc({
-		"doctype": "Custom Field",
-		"label": "QuickBooks ID",
-		"dt": "Customer",
-		"fieldname": "quickbooks_id",
-		"fieldtype": "Data",
-		"unique": True
-	}).insert(ignore_permissions=True)
+	if not frappe.get_meta("Customer").has_field("quickbooks_id"):
+		frappe.get_doc({
+			"doctype": "Custom Field",
+			"label": "QuickBooks ID",
+			"dt": "Customer",
+			"fieldname": "quickbooks_id",
+			"fieldtype": "Data",
+			"unique": True
+		}).insert(ignore_permissions=True)
+	if not frappe.get_meta("Address").has_field("quickbooks_id"):
+		frappe.get_doc({
+			"doctype": "Custom Field",
+			"label": "QuickBooks ID",
+			"dt": "Address",
+			"fieldname": "quickbooks_id",
+			"fieldtype": "Data",
+			"unique": True
+		}).insert(ignore_permissions=True)
 
 def save_items(items):
 	for item in items:
