@@ -34,9 +34,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 					}
 					frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
 						var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-						frappe.query_report_filters_by_name.from_date.set_input(fy.year_start_date);
-						frappe.query_report_filters_by_name.to_date.set_input(fy.year_end_date);
-						query_report.trigger_refresh();
+						frappe.query_report.set_filter_value({
+							from_date: fy.year_start_date,
+							to_date: fy.year_end_date
+						});
 					});
 				}
 			},
@@ -84,7 +85,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			if (!data.account) return;
 
 			frappe.route_options = {
-				"company": frappe.query_report_filters_by_name.company.get_value(),
+				"company": frappe.query_report.get_filter_value('company'),
 				"from_fiscal_year": data.fiscal_year,
 				"to_fiscal_year": data.fiscal_year
 			};
