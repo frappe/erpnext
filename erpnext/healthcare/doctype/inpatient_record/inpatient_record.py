@@ -37,17 +37,17 @@ class InpatientRecord(Document):
 				+ """ <b><a href="#Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
 			frappe.throw(msg)
 
-	def admit(self, bed_location, datetime_in, expected_discharge=None):
-		admit_patient(self, bed_location, datetime_in, expected_discharge)
+	def admit(self, service_unit, check_in, expected_discharge=None):
+		admit_patient(self, service_unit, check_in, expected_discharge)
 
 	def discharge(self):
 		discharge_patient(self)
 
-	def transfer(self, bed_location, datetime_in, leave_from):
+	def transfer(self, service_unit, check_in, leave_from):
 		if leave_from:
-			patient_leave_bed_location(self, datetime_in, leave_from)
-		if bed_location:
-			transfer_patient(self, bed_location, datetime_in)
+			patient_leave_service_unit(self, check_in, leave_from)
+		if service_unit:
+			transfer_patient(self, service_unit, check_in)
 
 @frappe.whitelist()
 def schedule_inpatient(patient, scheduled_to=None):
@@ -72,43 +72,43 @@ def schedule_discharge(patient):
 		frappe.db.set_value("Inpatient Record", inpatient_record_id, "status", "Discharge Scheduled")
 
 def discharge_patient(inpatient_record):
-	if inpatient_record.bed_locations:
-		for bed_location in inpatient_record.bed_locations:
-			if bed_location.left != 1:
-				bed_location.left = True
-				bed_location.left_datetime = now_datetime()
-				frappe.db.set_value("Healthcare Service Unit", bed_location.bed_location, "occupied", False)
+	if inpatient_record.inpatient_occupancies:
+		for inpatient_occupancy in inpatient_record.inpatient_occupancies:
+			if inpatient_occupancy.left != 1:
+				inpatient_occupancy.left = True
+				inpatient_occupancy.check_out = now_datetime()
+				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupied", False)
 
 	inpatient_record.discharge_date = today()
 	inpatient_record.status = "Discharged"
 
 	inpatient_record.save(ignore_permissions = True)
 
-def admit_patient(inpatient_record, bed_location, datetime_in, expected_discharge=None):
-	inpatient_record.admitted_datetime = datetime_in
+def admit_patient(inpatient_record, service_unit, check_in, expected_discharge=None):
+	inpatient_record.admitted_datetime = check_in
 	inpatient_record.status = "Admitted"
 	inpatient_record.expected_discharge = expected_discharge
 
-	inpatient_record.set('bed_locations', [])
-	transfer_patient(inpatient_record, bed_location, datetime_in)
+	inpatient_record.set('inpatient_occupancies', [])
+	transfer_patient(inpatient_record, service_unit, check_in)
 
 	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient_status", "Admitted")
 	frappe.db.set_value("Patient", inpatient_record.patient, "inpatient_record", inpatient_record.name)
 
-def transfer_patient(inpatient_record, bed_location, datetime_in):
-	item_line = inpatient_record.append('bed_locations', {})
-	item_line.bed_location = bed_location
-	item_line.datetime_in = datetime_in
+def transfer_patient(inpatient_record, service_unit, check_in):
+	item_line = inpatient_record.append('inpatient_occupancies', {})
+	item_line.service_unit = service_unit
+	item_line.check_in = check_in
 
 	inpatient_record.save(ignore_permissions = True)
 
-	frappe.db.set_value("Healthcare Service Unit", bed_location, "occupied", True)
+	frappe.db.set_value("Healthcare Service Unit", service_unit, "occupied", True)
 
-def patient_leave_bed_location(inpatient_record, leave_datetime, leave_from):
-	if inpatient_record.bed_locations:
-		for bed_location in inpatient_record.bed_locations:
-			if bed_location.left != 1 and bed_location.bed_location == leave_from:
-				bed_location.left = True
-				bed_location.left_datetime = leave_datetime
-				frappe.db.set_value("Healthcare Service Unit", bed_location.bed_location, "occupied", False)
+def patient_leave_service_unit(inpatient_record, check_out, leave_from):
+	if inpatient_record.inpatient_occupancies:
+		for inpatient_occupancy in inpatient_record.inpatient_occupancies:
+			if inpatient_occupancy.left != 1 and inpatient_occupancy.service_unit == leave_from:
+				inpatient_occupancy.left = True
+				inpatient_occupancy.check_out = check_out
+				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupied", False)
 	inpatient_record.save(ignore_permissions = True)

@@ -46,26 +46,26 @@ var admit_patient_dialog = function(frm){
 		fields: [
 				{fieldtype: "Link", label: "Service Unit Type", fieldname: "service_unit_type", options: "Healthcare Service Unit Type"},
 				{fieldtype: "Link", label: "Service Unit", fieldname: "service_unit", options: "Healthcare Service Unit", reqd: 1},
-				{fieldtype: "Datetime", label: "Date and Time In", fieldname: "datetime_in", reqd: 1},
+				{fieldtype: "Datetime", label: "Admission Datetime", fieldname: "check_in", reqd: 1},
 				{fieldtype: "Date", label: "Expected Discharge", fieldname: "expected_discharge"}
 		],
 		primary_action_label: __("Admit"),
 		primary_action : function(){
 				var service_unit = dialog.get_value('service_unit');
-				var datetime_in = dialog.get_value('datetime_in');
+				var check_in = dialog.get_value('check_in');
 				var expected_discharge = null;
 				if(dialog.get_value('expected_discharge')){
 					expected_discharge = dialog.get_value('expected_discharge');
 				}
-				if(!service_unit && !datetime_in){
+				if(!service_unit && !check_in){
 					return;
 				}
 				frappe.call({
 					doc: frm.doc,
 					method: 'admit',
 					args:{
-						'bed_location': service_unit,
-						'datetime_in': datetime_in,
+						'service_unit': service_unit,
+						'check_in': check_in,
 						'expected_discharge': expected_discharge
 					},
 					callback: function(data) {
@@ -110,12 +110,12 @@ var transfer_patient_dialog = function(frm){
 				{fieldtype: "Link", label: "From", fieldname: "leave_from", options: "Healthcare Service Unit", reqd: 1},
 				{fieldtype: "Link", label: "Service Unit Type", fieldname: "service_unit_type", options: "Healthcare Service Unit Type"},
 				{fieldtype: "Link", label: "To", fieldname: "service_unit", options: "Healthcare Service Unit", reqd: 1},
-				{fieldtype: "Datetime", label: "Date and Time", fieldname: "datetime_in", reqd: 1}
+				{fieldtype: "Datetime", label: "Check In", fieldname: "check_in", reqd: 1}
 		],
 		primary_action_label: __("Transfer"),
 		primary_action : function(){
 				var service_unit = null;
-				var datetime_in = dialog.get_value('datetime_in');
+				var check_in = dialog.get_value('check_in');
 				var leave_from = null;
 				if(dialog.get_value('leave_from')){
 					leave_from = dialog.get_value('leave_from');
@@ -123,15 +123,15 @@ var transfer_patient_dialog = function(frm){
 				if(dialog.get_value('service_unit')){
 					service_unit = dialog.get_value('service_unit');
 				}
-				if(!datetime_in){
+				if(!check_in){
 					return;
 				}
 				frappe.call({
 					doc: frm.doc,
 					method: 'transfer',
 					args:{
-						'bed_location': service_unit,
-						'datetime_in': datetime_in,
+						'service_unit': service_unit,
+						'check_in': check_in,
 						'leave_from': leave_from
 					},
 					callback: function(data) {
@@ -167,13 +167,13 @@ var transfer_patient_dialog = function(frm){
 
 	dialog.show();
 
-	var not_left_bed_location = null;
-	for(let bed_location in frm.doc.bed_locations){
-		if(frm.doc.bed_locations[bed_location].left != 1){
-			not_left_bed_location = frm.doc.bed_locations[bed_location].bed_location
+	var not_left_service_unit = null;
+	for(let inpatient_occupancy in frm.doc.inpatient_occupancies){
+		if(frm.doc.inpatient_occupancies[inpatient_occupancy].left != 1){
+			not_left_service_unit = frm.doc.inpatient_occupancies[inpatient_occupancy].service_unit
 		}
 	}
 	dialog.set_values({
-		'leave_from': not_left_bed_location
+		'leave_from': not_left_service_unit
 	});
 };
