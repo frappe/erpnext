@@ -15,7 +15,6 @@
  "engine": "InnoDB", 
  "fields": [
   {
-<<<<<<< HEAD
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
@@ -5443,7 +5442,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-07-12 13:16:20.918322",
+ "modified": "2018-07-18 13:16:20.918322",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
