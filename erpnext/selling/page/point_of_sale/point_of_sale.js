@@ -1583,9 +1583,41 @@ class Payment {
 		var me = this;
 
 		this.dialog.set_primary_action(__("Submit"), function() {
-			me.dialog.hide();
-			me.events.submit_form();
-		});
+			var company = me.frm.doc.company
+            		var pos_profile = me.frm.doc.pos_profile
+            		var out_amt = me.frm.doc.outstanding_amount;
+            		var write_of_amt_from_pos = me.frm.doc.write_off_amount;
+            		var write_off__amount = me.frm.doc.write_off_amount_of_pos_profile;
+            		var outstanding_amount_has_to_be_0 = me.frm.doc.outstanding_amount_has_to_be_0;
+            		var write_off_amount_can_not_be_more_than_positive_or_negative = 				    					  me.frm.doc.write_off_amount_can_not_be_more_than_positive_or_negative;
+            		var flag = 0;
+            		if (write_off_amount_can_not_be_more_than_positive_or_negative == 1) {
+                		if (write_of_amt_from_pos > write_off__amount) {
+                    			frappe.msgprint(__("write of Amount should be ≤ " + write_off__amount + " And ≥  -" + write_off__amount));
+                    			flag = 1;
+                		} else {
+                    			flag = 0;
+                		}
+                		if (write_of_amt_from_pos < (write_off__amount * -1)) {
+                    			frappe.msgprint(__("write of Amount should be ≤ " + write_off__amount + " And ≥  -" + write_off__amount));
+                    			flag = 1;
+                		}
+            		}
+            	if (outstanding_amount_has_to_be_0 == 1) {
+                	if (out_amt > 0) {
+                    		frappe.msgprint(__("Outstanding Amount cannot be more than 0"));
+                	} else {
+                    		if (flag == 0) {
+                        		me.dialog.hide();
+                        		me.events.submit_form();
+                    		}
+                	}
+            	} else {
+                	if (flag == 0) {
+                    		me.dialog.hide();
+                    		me.events.submit_form();
+                	}
+            	}
 	}
 
 	get_fields() {
