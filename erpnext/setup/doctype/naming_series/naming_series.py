@@ -34,7 +34,14 @@ class NamingSeries(Document):
 			if options:
 				prefixes = prefixes + "\n" + options
 		prefixes.replace("\n\n", "\n")
-		prefixes = "\n".join(sorted(prefixes.split("\n")))
+		prefixes = prefixes.split("\n")
+
+		custom_prefixes = frappe.get_all('DocType', fields=["autoname"],
+			filters={"name": ('not in', doctypes), "autoname":('like', '%.#%'), 'module': ('not in', ['Core'])})
+		if custom_prefixes:
+			prefixes = prefixes + [d.autoname.rsplit('.', 1)[0] for d in custom_prefixes]
+
+		prefixes = "\n".join(sorted(prefixes))
 
 		return {
 			"transactions": "\n".join([''] + sorted(doctypes)),

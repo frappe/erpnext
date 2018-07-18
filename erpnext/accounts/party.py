@@ -21,18 +21,20 @@ from six import iteritems
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True):
 
 	if not party:
 		return {}
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type,
-		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions)
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template)
 
-def _get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True):
+
+	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
 
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = out[party_type.lower()]
@@ -49,6 +51,11 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
+
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
+
+	if fetch_payment_terms_template:
+		out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -282,6 +289,7 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	if (bill_date or posting_date) and party:
 		due_date = bill_date or posting_date
 		template_name = get_pyt_term_template(party, party_type, company)
+
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
 		else:
@@ -315,11 +323,14 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
 	return due_date
 
-def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None):
+def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party, company, bill_date)
+		if not template_name: return
+
+		default_due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
+
 		if not default_due_date:
 			return
 
