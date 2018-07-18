@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import today, cint, flt, getdate
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
 
 class TestLoyaltyProgram(unittest.TestCase):
 	@classmethod
@@ -149,7 +149,7 @@ def get_points_earned(self):
 		""", self.name)
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
-	lp_details = get_loyalty_program_details(self.customer, company=self.company,
+	lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
 	loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
 	if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 		(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
