@@ -266,7 +266,7 @@ def add_healthcare_service_unit_tree_root():
 	record = [
 	 {
 	  "doctype": "Healthcare Service Unit",
-	  "healthcare_service_unit_name": "All Healthcare Service Unit",
+	  "healthcare_service_unit_name": "All Healthcare Service Units",
 	  "is_group": 1
 	 }
 	]
