@@ -21,6 +21,21 @@ def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=N
         show_zero_values=0
     )
     data = get_data(filters)
+
+    result = dict()
+    for d in data:
+        result[d.account] = d
+
+    data = dict()
+
+    for key in result:
+        if not result[key].parent_account:
+            data[key] = key
+        else:
+            if "children" in result[result[key].parent_account]:
+                result[result[key].parent_account]["children"].append(result[key])
+            else:
+                result[result[key].parent_account]["children"] = list(result[key])
     return dict(status=True, account_tree=data)
 
 
@@ -153,8 +168,8 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
     }
 
     total_row = {
-        "account": "'" + _("Total") + "'",
-        "account_name": "'" + _("Total") + "'",
+        "account": "Total",
+        "account_name": "Total",
         "warn_if_negative": True,
         "opening_debit": 0.0,
         "opening_credit": 0.0,
@@ -233,67 +248,6 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
     data.extend([{}, total_row])
 
     return data
-
-
-def get_columns():
-    return [
-        {
-            "fieldname": "account",
-            "label": _("Account"),
-            "fieldtype": "Link",
-            "options": "Account",
-            "width": 300
-        },
-        {
-            "fieldname": "opening_debit",
-            "label": _("Opening (Dr)"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "opening_credit",
-            "label": _("Opening (Cr)"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "debit",
-            "label": _("Debit"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "credit",
-            "label": _("Credit"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "closing_debit",
-            "label": _("Closing (Dr)"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "closing_credit",
-            "label": _("Closing (Cr)"),
-            "fieldtype": "Currency",
-            "options": "currency",
-            "width": 120
-        },
-        {
-            "fieldname": "currency",
-            "label": _("Currency"),
-            "fieldtype": "Link",
-            "options": "Currency",
-            "hidden": 1
-        }
-    ]
 
 
 def prepare_opening_and_closing(d):
