@@ -30,7 +30,7 @@ def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=N
 
     for key in result:
         if not result[key].parent_account:
-            data[key] = key
+            data[key] = result[key]
         else:
             if "children" in result[result[key].parent_account]:
                 result[result[key].parent_account]["children"].append(result[key])
