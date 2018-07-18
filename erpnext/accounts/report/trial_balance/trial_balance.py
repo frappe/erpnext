@@ -162,8 +162,10 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		total_row["credit"] += d["credit"]
 		total_row["opening_debit"] += d["opening_debit"]
 		total_row["opening_credit"] += d["opening_credit"]
-		total_row["closing_debit"] += (d["debit"] - d["credit"]) if (d["debit"] - d["credit"]) > 0 else 0
-		total_row["closing_credit"] += (d["debit"] - d["credit"]) if (d["debit"] - d["credit"]) < 0 else 0
+	
+	total_row["closing_debit"] = (total_row["debit"] - total_row["credit"]) if (total_row["debit"] - total_row["credit"]) > 0 else 0
+	total_row["closing_credit"] = abs(total_row["debit"] - total_row["credit"]) if (total_row["debit"] - total_row["credit"]) < 0 else 0
+	
 
 	return total_row
 
