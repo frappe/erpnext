@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
 import requests
+from erpnext import encode_company_abbr
 
 client_id = "Q02P61JeL3TNEr5HjcWTrXB9bQEab6LhoPaGg3uF2RQ1iKG6nL"
 client_secret = "B1se8GzM4FvfNAbeRjZGF5q2BNyRcV4O2V4fb0ZQ"
@@ -21,6 +22,41 @@ authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 def get_authorization_url():
 	return oauth.authorization_url(authorization_endpoint)[0]
 
+
+"""
+from frappe import delete_doc
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_account_tree_from_existing_company
+from frappe.model.rename_doc import get_link_fields
+
+def delete_compnay_default_accounts(company):
+	company = frappe.get_doc("Company", company)
+
+	account_fields = list(filter(lambda x: x['parent'] == "Company", get_link_fields("Account")
+	account_fields = [_["fieldname"] for _ in account_fields]
+	print(account_fields)
+	print(company.__dict__)
+	for field in account_fields:
+		frappe.db.set_value("Company", company.name, field, None)
+	for field in company.__dict__.keys():
+		if "account" in field:
+			frappe.db.set_value("Company", company.name, field, None)
+	frappe.db.commit()
+	company = frappe.get_doc("Company", company.name)
+	print(company.__dict__)
+
+def traverse(tree):
+	global traverse
+	children = list(filter(lambda x: x not in ("root_type", "account_type", "is_group", "account_number"), tree.keys()))
+	print(children)
+	for child in children:
+		traverse(tree[child])
+		print("Going to delete now", encode_company_abbr(child, "Sandbox Actual"))
+		delete_doc("Account", encode_company_abbr(child, "Sandbox Actual"))
+
+delete_compnay_default_accounts("Sandbox Actual")
+traverse(get_account_tree_from_existing_company("Sandbox Actual"))
+"""
+
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
@@ -29,7 +65,10 @@ def callback(*args, **kwargs):
 	token = get_access_token(code)
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
 	make_custom_fields()
-	relevant_doctypes = ["Customer", "Item", "Supplier"]
+	print("Mkaing roots")
+	make_root_accounts()
+	print("Made roots")
+	relevant_doctypes = ["Account", "Customer", "Item", "Supplier"]
 	for doctype in relevant_doctypes:
 		frappe.enqueue(fetch_method, doctype=doctype, token=token, company_id=company_id)
 
@@ -38,41 +77,106 @@ def get_access_token(code):
 	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)["access_token"]
 	return token
 
+def make_root_accounts():
+	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
+	for root in roots:
+		print("trying", root)
+		try:
+			if not frappe.db.exists("Account", encode_company_abbr("{} - QB".format(root), "Sandbox Actual")):
+				frappe.get_doc({
+					"doctype": "Account",
+					"account_name": "{} - QB".format(root),
+					"root_type": root,
+					"is_group": "1",
+					"company": "Sandbox Actual",
+				}).insert(ignore_permissions=True, ignore_mandatory=True)
+				print("Inserted", root)
+		except:
+			import traceback
+			traceback.print_exc()
+	frappe.db.commit()
+
+mapping = {
+	"Bank": "Asset",
+	"Other Current Asset": "Asset",
+	"Fixed Asset": "Asset",
+	"Other Asset": "Asset",
+	"Accounts Receivable": "Asset",
+
+	"Equity": "Equity",
+
+	"Expense": "Expense",
+	"Other Expense": "Expense",
+	"Cost of Goods Sold": "Expense",
+
+	"Accounts Payable": "Liability",
+	"Credit Card": "Liability",
+	"Long Term Liability": "Liability",
+	"Other Current Liability": "Liability",
+
+	"Income": "Income",
+	"Other Income": "Income",
+}
+
+def save_account(account):
+	# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
+	try:
+		frappe.get_doc({
+			"doctype": "Account",
+			"quickbooks_id": account["Id"],
+			"account_name": "{} - QB".format(account["Name"]),
+			"root_type": mapping[account["AccountType"]],
+			"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), "Sandbox Actual"),
+			"is_group": "0",
+			"company": "Sandbox Actual",
+		}).insert(ignore_permissions=True, ignore_mandatory=True)
+	except:
+		pass
+
 def save_customer(customer):
-	erpcustomer = frappe.get_doc({
-		"doctype": "Customer",
-		"quickbooks_id": customer["Id"],
-		"customer_name" : customer["DisplayName"],
-		"customer_type" : _("Individual"),
-		"customer_group" : _("Commercial"),
-		"territory" : _("All Territories"),
-	}).insert(ignore_permissions=True)
-	if "BillAddr" in customer:
-		create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
-	if "ShipAddr" in customer:
-		create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
+	try:
+		erpcustomer = frappe.get_doc({
+			"doctype": "Customer",
+			"quickbooks_id": customer["Id"],
+			"customer_name" : customer["DisplayName"],
+			"customer_type" : _("Individual"),
+			"customer_group" : _("Commercial"),
+			"territory" : _("All Territories"),
+		}).insert(ignore_permissions=True)
+		if "BillAddr" in customer:
+			create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
+		if "ShipAddr" in customer:
+			create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
+	except:
+		pass
 
 def save_item(item):
-	frappe.get_doc({
-		"doctype": "Item",
-		"quickbooks_id": item["Id"],
-		"item_code" : item["Name"],
-		"stock_uom": "Unit",
-		"item_group": "All Item Groups",
-		"item_defaults": [{"company": "Sandbox Actual"}]
-	}).insert(ignore_permissions=True)
+	try:
+		frappe.get_doc({
+			"doctype": "Item",
+			"quickbooks_id": item["Id"],
+			"item_code" : item["Name"],
+			"stock_uom": "Unit",
+			"item_group": "All Item Groups",
+			"item_defaults": [{"company": "Sandbox Actual"}]
+		}).insert(ignore_permissions=True)
+	except:
+		pass
 
 def save_supplier(supplier):
-	erpsupplier = frappe.get_doc({
-		"doctype": "Supplier",
-		"quickbooks_id": supplier["Id"],
-		"supplier_name" : supplier["DisplayName"],
-		"supplier_group" : _("All Supplier Groups"),
-	}).insert(ignore_permissions=True)
-	if "BillAddr" in supplier:
-		create_address(erpsupplier, "Supplier", supplier["BillAddr"], "Billing")
-	if "ShipAddr" in supplier:
-		create_address(erpsupplier, "Supplier",supplier["ShipAddr"], "Shipping")
+	try:
+		erpsupplier = frappe.get_doc({
+			"doctype": "Supplier",
+			"quickbooks_id": supplier["Id"],
+			"supplier_name" : supplier["DisplayName"],
+			"supplier_group" : _("All Supplier Groups"),
+		}).insert(ignore_permissions=True)
+		if "BillAddr" in supplier:
+			create_address(erpsupplier, "Supplier", supplier["BillAddr"], "Billing")
+		if "ShipAddr" in supplier:
+			create_address(erpsupplier, "Supplier",supplier["ShipAddr"], "Shipping")
+	except:
+		pass
 
 def create_address(entity, doctype, address, address_type):
 	try :
@@ -87,12 +191,11 @@ def create_address(entity, doctype, address, address_type):
 			"links": [{"link_doctype": doctype, "link_name": entity.name}]
 		}).insert()
 	except:
-		print("couldn't create address")
-
+		pass
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Customer", "Address", "Item", "Supplier"]
+	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -108,6 +211,7 @@ def make_custom_quickbooks_id_field(doctype):
 		}).insert(ignore_permissions=True)
 
 save_methods = {
+	"Account": save_account,
 	"Customer": save_customer,
 	"Item": save_item,
 	"Supplier": save_supplier,
@@ -116,16 +220,13 @@ save_methods = {
 def save_entries(doctype, entries):
 	save = save_methods[doctype]
 	for entry in entries:
-		try:
-			save(entry)
-		except:
-			import traceback
-			traceback.print_exc()
+		save(entry)
 
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 10
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 qb_map = {
+	"Account": "Account",
 	"Customer": "Customer",
 	"Item": "Item",
 	"Supplier": "Vendor",
