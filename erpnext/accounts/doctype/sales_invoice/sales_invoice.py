@@ -116,7 +116,7 @@ class SalesInvoice(SellingController):
 
 		self.check_prev_docstatus()
 
-		if self.is_return:
+		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
 			self.status_updater = []
 
@@ -161,7 +161,7 @@ class SalesInvoice(SellingController):
 		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 			unlink_ref_doc_from_payment_entries(self)
 
-		if self.is_return:
+		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
 			self.status_updater = []
 

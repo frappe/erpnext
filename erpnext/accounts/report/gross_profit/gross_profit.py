@@ -171,7 +171,7 @@ class GrossProfitGenerator(object):
 							row.qty += returned_item_row.qty
 							row.base_amount += returned_item_row.base_amount
 						row.buying_amount = row.qty * row.buying_rate
-					if row.qty:
+					if row.qty or row.base_amount:
 						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
 

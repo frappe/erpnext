@@ -36,13 +36,13 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Job Applicant",
-					"description": _("Applicant for a Job."),
+					"name": "Job Opening",
+					"description": _("Opening for a Job."),
 				},
 				{
 					"type": "doctype",
-					"name": "Job Opening",
-					"description": _("Opening for a Job."),
+					"name": "Job Applicant",
+					"description": _("Applicant for a Job."),
 				},
 				{
 					"type": "doctype",
