@@ -267,7 +267,6 @@ erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
 erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
 erpnext.patches.v7_0.update_party_status #2016-09-22
-erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
@@ -560,3 +559,4 @@ erpnext.patches.v11_0.set_department_for_doctypes
 erpnext.patches.v11_0.update_allow_transfer_for_manufacture
 erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
 erpnext.patches.v11_0.add_item_group_defaults
+erpnext.patches.v10_0.update_address_template_for_india
