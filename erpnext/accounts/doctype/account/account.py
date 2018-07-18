@@ -188,7 +188,7 @@ class Account(NestedSet):
 
 		return new_account
 
-	def after_not(self, old, new, merge=False):
+	def after_rename(self, old, new, merge=False):
 		super(Account, self).after_rename(old, new, merge)
 
 		if not merge:
