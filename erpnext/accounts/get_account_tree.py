@@ -17,7 +17,8 @@ def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=N
         company=company_name,
         from_date=from_date,
         to_date=to_date,
-        fiscal_year=fiscal_year
+        fiscal_year=fiscal_year,
+        show_zero_values=0
     )
     data = get_data(filters)
     return dict(status=True, account_tree=data)
@@ -109,11 +110,11 @@ def get_opening_balances(filters):
 
 def get_rootwise_opening_balances(filters, report_type):
     additional_conditions = ""
-    if not filters.get("show_unclosed_fy_pl_balances", True):
+    if not filters.get("show_unclosed_fy_pl_balances", 0):
         additional_conditions = " and posting_date >= %(year_start_date)s" \
             if report_type == "Profit and Loss" else ""
 
-    if not flt(filters.get("with_period_closing_entry", True)):
+    if not flt(filters.get("with_period_closing_entry", 0)):
         additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
 
     gle = frappe.db.sql("""
