@@ -23,6 +23,14 @@ frappe.ui.form.on('Asset', {
 				}
 			};
 		});
+
+		frm.set_query("cost_center", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
