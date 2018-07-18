@@ -37,6 +37,7 @@ def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=N
                 result[result[key]['parent_account']]["children"].append(result[key])
             else:
                 result[result[key]['parent_account']]["children"] = list(result[key])
+
     return dict(status=True, account_tree=data)
 
 
