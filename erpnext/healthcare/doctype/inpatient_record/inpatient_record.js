@@ -91,10 +91,10 @@ var admit_patient_dialog = function(frm){
 	};
 	dialog.fields_dict["service_unit"].get_query = function(){
 		return {
-		filters: {
-			"is_group": 0,
-			"service_unit_type": dialog.get_value("service_unit_type"),
-			"occupied" : 0
+			filters: {
+				"is_group": 0,
+				"service_unit_type": dialog.get_value("service_unit_type"),
+				"occupied" : 0
 			}
 		};
 	};
@@ -157,10 +157,10 @@ var transfer_patient_dialog = function(frm){
 	};
 	dialog.fields_dict["service_unit"].get_query = function(){
 		return {
-		filters: {
-			"is_group": 0,
-			"service_unit_type": dialog.get_value("service_unit_type"),
-			"occupied" : 0
+			filters: {
+				"is_group": 0,
+				"service_unit_type": dialog.get_value("service_unit_type"),
+				"occupied" : 0
 			}
 		};
 	};
