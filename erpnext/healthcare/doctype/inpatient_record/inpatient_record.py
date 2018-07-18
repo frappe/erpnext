@@ -50,7 +50,7 @@ class InpatientRecord(Document):
 			transfer_patient(self, service_unit, check_in)
 
 @frappe.whitelist()
-def schedule_inpatient(patient, scheduled_to=None):
+def schedule_inpatient(patient, encounter_id, practitioner):
 	patient_obj = frappe.get_doc('Patient', patient)
 	inpatient_record = frappe.new_doc('Inpatient Record')
 	inpatient_record.patient = patient
@@ -63,13 +63,20 @@ def schedule_inpatient(patient, scheduled_to=None):
 	inpatient_record.phone = patient_obj.phone
 	inpatient_record.status = "Admission Scheduled"
 	inpatient_record.scheduled_date = today()
+	inpatient_record.admission_practitioner = practitioner
+	inpatient_record.admission_encounter = encounter_id
 	inpatient_record.save(ignore_permissions = True)
 
 @frappe.whitelist()
-def schedule_discharge(patient):
+def schedule_discharge(patient, encounter_id, practitioner):
 	inpatient_record_id = frappe.db.get_value('Patient', patient, 'inpatient_record')
 	if inpatient_record_id:
-		frappe.db.set_value("Inpatient Record", inpatient_record_id, "status", "Discharge Scheduled")
+		inpatient_record = frappe.get_doc("Inpatient Record", inpatient_record_id)
+		inpatient_record.discharge_practitioner = practitioner
+		inpatient_record.discharge_encounter = encounter_id
+		inpatient_record.status = "Discharge Scheduled"
+		inpatient_record.save(ignore_permissions = True)
+	frappe.db.set_value("Patient", patient, "inpatient_status", "Discharge Scheduled")
 
 def discharge_patient(inpatient_record):
 	if inpatient_record.inpatient_occupancies:

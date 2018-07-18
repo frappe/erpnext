@@ -33,7 +33,7 @@ frappe.ui.form.on('Patient Encounter', {
 							schedule_discharge(frm);
 						});
 					}
-					else{
+					else if(data.message.inpatient_status != "Discharge Scheduled"){
 						frm.add_custom_button(__('Schedule Admission'), function() {
 							schedule_inpatient(frm);
 						});
@@ -114,7 +114,7 @@ frappe.ui.form.on('Patient Encounter', {
 var schedule_inpatient = function(frm) {
 	frappe.call({
 		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_inpatient",
-		args: {patient: frm.doc.patient},
+		args: {patient: frm.doc.patient, encounter_id: frm.doc.name, practitioner: frm.doc.practitioner},
 		callback: function(data) {
 			if(!data.exc){
 				frm.reload_doc();
@@ -128,7 +128,7 @@ var schedule_inpatient = function(frm) {
 var schedule_discharge = function(frm) {
 	frappe.call({
 		method: "erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_discharge",
-		args: {patient: frm.doc.patient},
+		args: {patient: frm.doc.patient, encounter_id: frm.doc.name, practitioner: frm.doc.practitioner},
 		callback: function(data) {
 			if(!data.exc){
 				frm.reload_doc();
