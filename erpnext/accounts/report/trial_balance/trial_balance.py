@@ -177,7 +177,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
-	
+	total_row["closing_debit"] = 0
+	total_row["closing_credit"] = 0
 	for d in accounts:
 		has_value = False
 		row = {
@@ -201,6 +202,10 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 
 		row["has_value"] = has_value
 		data.append(row)
+		
+		if not d.parent_account:
+			total_row["closing_debit"] += (d["debit"] - d["credit"]) if (d["debit"] - d["credit"]) > 0 else 0
+			total_row["closing_credit"] += abs(d["debit"] - d["credit"]) if (d["debit"] - d["credit"]) < 0 else 0
 		
 	data.extend([{},total_row])
 
