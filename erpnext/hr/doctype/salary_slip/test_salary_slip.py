@@ -202,7 +202,7 @@ class TestSalarySlip(unittest.TestCase):
 		# No proof sumitted, total tax paid, should not change
 		try:
 			self.assertEqual(tax_paid_amount[0][0], annual_tax)
-		except AssertionError as e:
+		except AssertionError:
 			print("\nTax calculation failed on following case\n", data, "\n")
 			raise
 
@@ -216,7 +216,7 @@ class TestSalarySlip(unittest.TestCase):
 		# total taxable income 150000, at 5% tax slab
 		try:
 			self.assertEqual(tax_paid_amount[0][0], 7500)
-		except AssertionError as e:
+		except AssertionError:
 			print("\nTax calculation failed on following case\n", data, "\n")
 			raise
 
