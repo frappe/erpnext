@@ -100,7 +100,7 @@ var change_item_code = function(frm, doc){
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.healthcare_service_unit_type.healthcare_service_unit_type.change_item_code",
 			"args": {item: doc.item, item_code: item_code, doc_name: doc.name},
-			callback: function (data) {
+			callback: function () {
 				frm.reload_doc();
 			}
 		});
