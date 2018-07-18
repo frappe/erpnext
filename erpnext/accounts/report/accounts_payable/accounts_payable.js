@@ -22,9 +22,9 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Link",
 			"options": "Supplier",
 			on_change: () => {
-				var supplier = frappe.query_report_filters_by_name.supplier.get_value();
+				var supplier = frappe.query_report.get_filter_value('supplier');
 				frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
-					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
 				});
 			}
 		},

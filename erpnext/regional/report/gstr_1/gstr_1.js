@@ -17,7 +17,7 @@ frappe.query_reports["GSTR-1"] = {
 			"fieldtype": "Link",
 			"options": "Address",
 			"get_query": function() {
-				var company = frappe.query_report_filters_by_name.company.get_value();
+				var company = frappe.query_report.get_filter_value('company');
 				if (company) {
 					return {
 						"query": 'frappe.contacts.doctype.address.address.address_query',
