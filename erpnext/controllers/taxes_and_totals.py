@@ -38,6 +38,7 @@ class calculate_taxes_and_totals(object):
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
+		self.calculate_total_net_weight()
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -328,6 +329,13 @@ class calculate_taxes_and_totals(object):
 
 		self.set_rounded_total()
 
+	def calculate_total_net_weight(self):
+		if self.doc.meta.get_field('total_net_weight'):
+			self.doc.total_net_weight = 0.0
+			for d in self.doc.items:
+				if d.total_weight:
+					self.doc.total_net_weight += d.total_weight
+
 	def set_rounded_total(self):
 		if self.doc.meta.get_field("rounded_total"):
 			if self.doc.is_rounded_total_disabled():
@@ -592,16 +600,19 @@ def get_itemised_tax(taxes):
 			for item_code, tax_data in item_tax_map.items():
 				itemised_tax.setdefault(item_code, frappe._dict())
 
+				tax_rate = 0.0
+				tax_amount = 0.0
+
 				if isinstance(tax_data, list):
-					itemised_tax[item_code][tax.description] = frappe._dict(dict(
-						tax_rate=flt(tax_data[0]),
-						tax_amount=flt(tax_data[1])
-					))
+					tax_rate = flt(tax_data[0])
+					tax_amount = flt(tax_data[1])
 				else:
-					itemised_tax[item_code][tax.description] = frappe._dict(dict(
-						tax_rate=flt(tax_data),
-						tax_amount=0.0
-					))
+					tax_rate = flt(tax_data)
+
+				itemised_tax[item_code][tax.description] = frappe._dict(dict(
+					tax_rate = tax_rate,
+					tax_amount = tax_amount
+				))
 
 	return itemised_tax
 

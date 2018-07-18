@@ -85,7 +85,7 @@ frappe.Leaderboard = Class.extend({
 
 		this.$sidebar_list.on('click', 'li', function(e) {
 			let $li = $(this);
-			let doctype = $li.find('span').html();
+			let doctype = $li.find('span').attr("doctype-value");
 
 			me.options.selected_company = frappe.defaults.get_default('company');
 			me.options.selected_doctype = doctype;
@@ -146,7 +146,6 @@ frappe.Leaderboard = Class.extend({
 
 				me.$graph_area.show().empty();
 				let args = {
-					parent: '.leaderboard-graph',
 					data: {
 						datasets: [
 							{
@@ -160,7 +159,7 @@ frappe.Leaderboard = Class.extend({
 					type: 'bar',
 					height: 140
 				};
-				new Chart(args);
+				new frappeChart.Chart('.leaderboard-graph', args);
 
 				notify(me, r, $container);
 			}
@@ -173,7 +172,7 @@ frappe.Leaderboard = Class.extend({
 			$container.find(".leaderboard-list").html(me.render_list_view(res.message));
 		} else {
 			me.$graph_area.hide();
-			me.message = "No items found.";
+			me.message = __("No items found.");
 			$container.find(".leaderboard-list").html(me.render_list_view());
 		}
 	},
@@ -280,7 +279,7 @@ frappe.Leaderboard = Class.extend({
 			fields.map(col => {
 					let val = item[col];
 					if(col=="name") {
-						var formatted_value = `<a class="grey list-id ellipsis" 
+						var formatted_value = `<a class="grey list-id ellipsis"
 							href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
 					} else {
 						var formatted_value = `<span class="text-muted ellipsis">
@@ -302,7 +301,7 @@ frappe.Leaderboard = Class.extend({
 	get_sidebar_item: function(item) {
 		return $(`<li class="strong module-sidebar-item">
 			<a class="module-link">
-			<span>${ item }</span></a>
+			<span doctype-value="${item}">${ __(item) }</span></a>
 		</li>`);
 	}
 });

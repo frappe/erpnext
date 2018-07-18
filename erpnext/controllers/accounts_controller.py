@@ -82,7 +82,8 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
-		if self.doctype in ['Purchase Order', 'Sales Order']:
+		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
+			'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
 				self.group_similar_items()
 
@@ -130,6 +131,8 @@ class AccountsController(TransactionBase):
 					self.meta.get_label(date_field), self)
 
 	def validate_due_date(self):
+		if self.get('is_pos'): return
+
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
 			if not self.due_date:
@@ -663,6 +666,7 @@ class AccountsController(TransactionBase):
 			if item.item_code in group_item_qty:
 				item.qty = group_item_qty[item.item_code]
 				item.amount = group_item_amount[item.item_code]
+				item.rate = flt(flt(item.amount)/flt(item.qty), item.precision("rate"))
 				del group_item_qty[item.item_code]
 			else:
 				duplicate_list.append(item)

@@ -338,12 +338,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
 		// store tax breakup for each item
-		var key = item.item_code || item.item_name;
-		var item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
-		if (tax.item_wise_tax_detail && tax.item_wise_tax_detail[key])
-			item_wise_tax_amount += tax.item_wise_tax_detail[key][1];
+		let tax_detail = tax.item_wise_tax_detail;
+		let key = item.item_code || item.item_name;
 
-		tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount, precision("base_tax_amount", tax))];
+		let item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
+		if (tax_detail && tax_detail[key])
+			item_wise_tax_amount += tax_detail[key][1];
+
+		tax_detail[key] = [tax_rate, flt(item_wise_tax_amount, precision("base_tax_amount", tax))];
 	},
 
 	round_off_totals: function(tax) {

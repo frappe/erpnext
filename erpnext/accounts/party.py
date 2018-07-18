@@ -404,10 +404,21 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
+	fields = 'date(creation), count(name)'
+	after = add_years(None, -1).strftime('%Y-%m-%d')
+	group_by='group by date(creation)'
+
 	data = get_communication_data(doctype, name,
-		fields = 'date(creation), count(name)',
-		after = add_years(None, -1).strftime('%Y-%m-%d'),
-		group_by='group by date(creation)', as_dict=False)
+		fields=fields, after=after, group_by=group_by, as_dict=False)
+
+	# fetch and append data from Activity Log
+	data += frappe.db.sql("""select {fields}
+		from `tabActivity Log`
+		where reference_doctype="{doctype}" and reference_name="{name}"
+		and status!='Success' and creation > {after}
+		{group_by} order by creation desc
+		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,
+			group_by=group_by, after=after), as_dict=False)
 
 	timeline_items = dict(data)
 
