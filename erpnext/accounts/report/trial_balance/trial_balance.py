@@ -162,8 +162,8 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		total_row["credit"] += d["credit"]
 		total_row["opening_debit"] += d["opening_debit"]
 		total_row["opening_credit"] += d["opening_credit"]
-		total_row["closing_debit"] += (d["opening_debit"] + d["debit"])
-		total_row["closing_credit"] += (d["opening_credit"] + d["credit"])
+		total_row["closing_debit"] += max((d["credit"] - d["debit"]), 0)
+		total_row["closing_credit"] += max((d["credit"] - d["debit"]), 0)
 
 	return total_row
 
