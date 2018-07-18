@@ -31,7 +31,7 @@ def get_currency(filters):
 	report_date = filters.get('to_date')
 
 	if not report_date:
-		fiscal_year_to_date = get_from_and_to_date(filters.get('to_fiscal_year')).to_date
+		fiscal_year_to_date = get_from_and_to_date(filters.get('to_fiscal_year'))["to_date"]
 		report_date = formatdate(get_datetime_str(fiscal_year_to_date), "dd-MM-yyyy")
 
 	currency_map = dict(company=company, company_currency=company_currency, presentation_currency=presentation_currency, report_date=report_date)
