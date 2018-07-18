@@ -332,7 +332,7 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency") and args.price_list:
 			validate_conversion_rate(args, meta)
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name)
+		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
 		# insert in database
 		insert_item_price(args)
@@ -343,8 +343,6 @@ def get_price_list_rate(args, item_doc, out):
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
-		if not args.price_list_uom_dependant:
-			out.price_list_rate = flt(out.price_list_rate * (flt(args.conversion_factor) or 1.0))
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -424,49 +422,38 @@ def insert_item_price(args):
 						existing_item_price.save()
 						frappe.msgprint(_("Item Price {0} updated for {1} in Price List {2}")
 							.format(name, args.item_code, args.price_list))
-				
 
 def get_item_price(args, item_code):
-    """
-    	Get name, price_list_rate from Item Price based on conditions
+	"""
+		Get name, price_list_rate from Item Price based on conditions
 			Check if the Derised qty is within the increment of the packing list.
 		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
-		             optional fields min_qty, transaction_date, customer, supplier
+			optional fields min_qty, transaction_date, customer, supplier
 		:param item_code: str, Item Doctype field item_code
-    """
-    args['item_code'] = item_code
-    has_item_price_record = frappe.get_all('Item Price',
-    		filters={'item_code': item_code, 'price_list': args.get('price_list')})
-    if not has_item_price_record:
-    	return
-
-    conditions = """
-		where item_code=%(item_code)s
-		and price_list=%(price_list)s
-		and uom in ('', %(uom)s)
 	"""
-    if args.get('min_qty'):
-        conditions += " and min_qty <= %(min_qty)s"
 
-    if args.get('transaction_date'):
-		conditions += """
-			and (valid_from is null or valid_from <= %(transaction_date)s)
-			and (valid_upto is null or valid_upto  >= %(transaction_date)s)
-		"""
-    if args.get("customer"):
-		conditions += " and customer=%(customer)s"
+	args['item_code'] = item_code
+	conditions = "where (customer is null or customer = '') and (supplier is null or supplier = '')"
+	if args.get("customer"):
+		conditions = "where customer=%(customer)s"
 
-    if args.get("supplier"):
-		conditions += " and supplier=%(supplier)s"
+	if args.get("supplier"):
+		conditions = "where supplier=%(supplier)s"
 
+	conditions += """ and item_code=%(item_code)s
+		and price_list=%(price_list)s
+		and ifnull(uom, '') in ('', %(uom)s)"""
 
-    return frappe.db.sql(
-    	"""
-	    	select name, price_list_rate
-	    	from `tabItem Price` {conditions}
-	    	order by min_qty desc
-		""".format(conditions=conditions),
-		args)
+	if args.get('min_qty'):
+		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
+
+	if args.get('transaction_date'):
+		conditions += """ and %(transaction_date)s between
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+
+	return frappe.db.sql(""" select name, price_list_rate, uom
+		from `tabItem Price` {conditions}
+		order by min_qty desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -482,34 +469,41 @@ def get_price_list_rate_for(args, item_code):
 		:param qty: Derised Qty
 		:param transaction_date: Date of the price
 	"""
-	price_list_rate = get_item_price({
+	item_price_args = {
 			"item_code": args.get('item_code'),
 			"price_list": args.get('price_list'),
 			"customer": args.get('customer'),
-			"suppplier": args.get('supplier'),
+			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
 			"min_qty": args.get('qty'),
 			"transaction_date": args.get('transaction_date'),
-	}, item_code)
+	}
+
+	item_price_data = 0
+	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
 		desired_qty = args.get("qty")
 		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
-			return price_list_rate[0][1]
+			item_price_data = price_list_rate
 	else:
-		values = {'item_code': item_code,
-				  'uom': args.get("uom"),
-				  'price_list': args.get("price_list"),
-				  'transaction_date': args.get("transaction_date", None)}
-		general_price_list_rate = get_item_price({
-				"item_code": args.get('item_code'),
-				"price_list": args.get('price_list'),
-				"uom": args.get('uom'),
-				"transaction_date": args.get('transaction_date'),
-		}, item_code)
+		for field in ["customer", "supplier", "min_qty"]:
+			del item_price_args[field]
+
+		general_price_list_rate = get_item_price(item_price_args, item_code)
+		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
+			item_price_args["args"] = args.get("stock_uom")
+			general_price_list_rate = get_item_price(item_price_args, item_code)
+
 		if general_price_list_rate:
-			return general_price_list_rate[0][1]
+			item_price_data = general_price_list_rate
+
+	if item_price_data:
+		if item_price_data[0][2] == args.get("uom"):
+			return item_price_data[0][1]
+		elif not args.price_list_uom_dependant:
+			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
-			return None
+			return item_price_data[0][1]
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
 	"""
