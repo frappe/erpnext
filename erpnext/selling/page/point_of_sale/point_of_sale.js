@@ -1526,13 +1526,12 @@ class Payment {
 		var me = this;
 
 		this.dialog.set_primary_action(__("Submit"), function() {
-			var company = me.frm.doc.company
             		var pos_profile = me.frm.doc.pos_profile
             		var out_amt = me.frm.doc.outstanding_amount;
             		var write_of_amt_from_pos = me.frm.doc.write_off_amount;
-            		var write_off__amount = me.frm.doc.write_off_amount_of_pos_profile;
+			var write_off__amount = me.frm.doc.write_off_amount_of_pos_profile;
             		var outstanding_amount_has_to_be_0 = me.frm.doc.outstanding_amount_has_to_be_0;
-            		var write_off_amount_can_not_be_more_than_positive_or_negative = 				    					  me.frm.doc.write_off_amount_can_not_be_more_than_positive_or_negative;
+            		var write_off_amount_can_not_be_more_than_positive_or_negative = me.frm.doc.write_off_amount_can_not_be_more_than_positive_or_negative;
             		var flag = 0;
             		if (write_off_amount_can_not_be_more_than_positive_or_negative == 1) {
                 		if (write_of_amt_from_pos > write_off__amount) {
