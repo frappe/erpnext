@@ -107,9 +107,9 @@ var transfer_patient_dialog = function(frm){
 		title: 'Transfer Patient',
 		width: 100,
 		fields: [
-			{fieldtype: "Link", label: "From", fieldname: "leave_from", options: "Healthcare Service Unit", reqd: 1},
+			{fieldtype: "Link", label: "Leave From", fieldname: "leave_from", options: "Healthcare Service Unit", reqd: 1, read_only:1},
 			{fieldtype: "Link", label: "Service Unit Type", fieldname: "service_unit_type", options: "Healthcare Service Unit Type"},
-			{fieldtype: "Link", label: "To", fieldname: "service_unit", options: "Healthcare Service Unit", reqd: 1},
+			{fieldtype: "Link", label: "Transfer To", fieldname: "service_unit", options: "Healthcare Service Unit", reqd: 1},
 			{fieldtype: "Datetime", label: "Check In", fieldname: "check_in", reqd: 1}
 		],
 		primary_action_label: __("Transfer"),
@@ -147,6 +147,12 @@ var transfer_patient_dialog = function(frm){
 		}
 	});
 
+	dialog.fields_dict["leave_from"].get_query = function(){
+		return {
+			query : "erpnext.healthcare.doctype.inpatient_record.inpatient_record.get_leave_from",
+			filters: {docname:frm.doc.name}
+		};
+	};
 	dialog.fields_dict["service_unit_type"].get_query = function(){
 		return {
 			filters: {

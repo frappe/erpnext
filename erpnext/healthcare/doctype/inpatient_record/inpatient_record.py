@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import today, now_datetime
 from frappe.model.document import Document
+from frappe.desk.reportview import get_match_cond
 
 class InpatientRecord(Document):
 	def after_insert(self):
@@ -119,3 +120,23 @@ def patient_leave_service_unit(inpatient_record, check_out, leave_from):
 				inpatient_occupancy.check_out = check_out
 				frappe.db.set_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "occupied", False)
 	inpatient_record.save(ignore_permissions = True)
+
+@frappe.whitelist()
+def get_leave_from(doctype, txt, searchfield, start, page_len, filters):
+	docname = filters['docname']
+
+	query = '''select io.service_unit
+		from `tabInpatient Occupancy` io, `tabInpatient Record` ir
+		where io.parent = '{docname}' and io.parentfield = 'inpatient_occupancies'
+		and io.left!=1 and io.parent = ir.name'''
+
+	return frappe.db.sql(query.format(**{
+		"docname":	docname,
+		"searchfield":	searchfield,
+		"mcond":	get_match_cond(doctype)
+	}), {
+		'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
+		'start': start,
+		'page_len': page_len
+	})
