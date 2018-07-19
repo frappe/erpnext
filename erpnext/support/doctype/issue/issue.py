@@ -135,7 +135,10 @@ def set_multiple_status(names, status):
 		set_status(name, status)
 
 def has_website_permission(doc, ptype, user, verbose=False):
-	return doc.raised_by==user
+	from erpnext.controllers.website_list_for_contact import has_website_permission
+	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
+
+	return permission_based_on_customer or doc.raised_by==user
 
 
 def update_issue(contact, method):
