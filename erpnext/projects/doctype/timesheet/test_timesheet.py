@@ -19,10 +19,10 @@ class TestTimesheet(unittest.TestCase):
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
-		
-		from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component
-		make_earning_salary_component(["Timesheet Component"])
-		
+
+		if not frappe.db.exists("Salary Component", "Timesheet Component"):
+			frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
+
 
 	def test_timesheet_billing_amount(self):
 		make_salary_structure_for_timesheet("_T-Employee-00001")

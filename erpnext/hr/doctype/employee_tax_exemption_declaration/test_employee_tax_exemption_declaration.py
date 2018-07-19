@@ -3,9 +3,9 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 import unittest
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 	def setUp(self):
@@ -39,7 +39,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company": "_Test Company",
+			"company": erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -55,7 +55,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company": "_Test Company",
+			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -70,7 +70,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company": "_Test Company",
+			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -87,10 +87,13 @@ def create_payroll_period():
 		payroll_period = frappe.get_doc(dict(
 			doctype = 'Payroll Period',
 			name = "_Test Payroll Period",
-			company = "_Test Company",
+			company =  erpnext.get_default_company(),
 			start_date = date(date.today().year, 1, 1),
 			end_date = date(date.today().year, 12, 31)
 		)).insert()
+		return payroll_period
+	else:
+		return frappe.get_doc("Payroll Period", "_Test Payroll Period")
 
 def create_exemption_category():
 	if not frappe.db.exists("Employee Tax Exemption Category", "_Test Category"):
