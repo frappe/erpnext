@@ -29,10 +29,19 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.add_fetch("receipt_document", "supplier", "supplier");
 		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
 		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
-
+		this.frm.add_fetch("company", "cost_center", "cost_center");
 	},
 
-	refresh: function(frm) {
+	refresh: function(doc) {
+		this.show_general_ledger();
+
+		if (doc.docstatus===1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
+			var me = this;
+			this.frm.add_custom_button(__('Payment'),
+				function() { me.make_payment_entry(me.frm) }, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+
 		var help_content =
 			`<br><br>
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
@@ -64,6 +73,21 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		set_field_options("landed_cost_help", help_content);
 	},
 
+	make_payment_entry: function(frm) {
+		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
+		return frappe.call({
+			method: method,
+			args: {
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
 	get_items_from_purchase_receipts: function() {
 		var me = this;
 		if(!this.frm.doc.purchase_receipts.length) {
@@ -90,6 +114,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			total_taxes_and_charges += flt(d.amount)
 		});
 		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
+		cur_frm.set_value("outstanding_amount", total_taxes_and_charges);
 	},
 
 	set_applicable_charges_for_item: function() {
@@ -119,8 +144,44 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 	distribute_charges_based_on: function (frm) {
 		this.set_applicable_charges_for_item();
-	}
+	},
 
+	supplier: function() {
+		var me = this;
+		if(me.frm.doc.company) {
+			return frappe.call({
+				method: "erpnext.accounts.party.get_party_account",
+				args: {
+					company: me.frm.doc.company,
+					party_type: "Supplier",
+					party: me.frm.doc.supplier
+				},
+				callback: function(r) {
+					if(!r.exc && r.message) {
+						me.frm.set_value("payable_account", r.message);
+					}
+				}
+			});
+		}
+	},
 });
 
 cur_frm.script_manager.make(erpnext.stock.LandedCostVoucher);
+
+cur_frm.fields_dict["cost_center"].get_query = function() {
+	return {
+		filters: {
+			"company": frm.doc.company
+		}
+	};
+};
+
+cur_frm.fields_dict["payable_account"].get_query = function() {
+	return {
+		filters: {
+			'account_type': 'Payable',
+			'is_group': 0,
+			'company': doc.company
+		}
+	};
+};
