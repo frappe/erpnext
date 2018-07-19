@@ -12,7 +12,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '11.x.x-develop'
-staging_version = '11.x.x'
+staging_version = '11.0.0-beta'
 
 error_report_email = "support@erpnext.com"
 
