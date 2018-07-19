@@ -524,7 +524,6 @@ erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
 erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
-erpnext.patches.v10_1.drop_old_subscription_records
 erpnext.patches.v11_0.update_brand_in_item_price
 erpnext.patches.v11_0.create_default_success_action
 erpnext.patches.v11_0.add_healthcare_service_unit_tree_root
