@@ -711,7 +711,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 
 
 def get_payment_entry(ref_doc, args):
-	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
+	cost_center = ref_doc.get("cost_center") or frappe.db.get_value("Company", ref_doc.company, "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
 		# Modified to include the posting date for which the exchange rate is required.
