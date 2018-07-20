@@ -55,11 +55,18 @@ def get_additional_salary_component(employee, start_date, end_date):
 	if additional_components:
 		additional_components_array = []
 		for additional_component in additional_components:
-			struct_row = {}
-			additional_components_dict = {}
 			additional_component_obj = frappe.get_doc("Additional Salary", additional_component[0])
 			amount = additional_component_obj.get_amount(start_date, end_date)
 			salary_component = frappe.get_doc("Salary Component", additional_component_obj.salary_component)
+			added = False
+			for added_component in additional_components_array:
+				if added_component["struct_row"]["salary_component"] == salary_component.name:
+					added_component["amount"] += amount
+					added = True
+			if added:
+				continue
+			struct_row = {}
+			additional_components_dict = {}
 			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
 			struct_row['salary_component'] = salary_component.name
 			struct_row['abbr'] = salary_component.salary_component_abbr
