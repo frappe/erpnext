@@ -521,3 +521,11 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 	}
 })
+frappe.ui.form.on('Purchase Invoice', {
+	cost_center: function(frm, cdt, cdn) {
+		erpnext.utils.copy_parent_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center", "cost_center");
+		erpnext.utils.copy_parent_value_in_all_row(frm.doc, cdt, cdn, "taxes", "cost_center", "cost_center");
+
+	},
+
+})

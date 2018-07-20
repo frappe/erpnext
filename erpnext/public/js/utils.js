@@ -201,7 +201,18 @@ $.extend(erpnext.utils, {
 		} else {
 			return options[0];
 		}
-	}
+	},
+	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		var d = locals[dt][dn];
+		if(d[fieldname]){
+			var cl = doc[table_fieldname] || [];
+			for(var i = 0; i < cl.length; i++) {
+				cl[i][fieldname] = doc[parent_fieldname];
+			}
+		}
+		refresh_field(table_fieldname);
+	},
+
 });
 
 erpnext.utils.select_alternate_items = function(opts) {

@@ -245,7 +245,8 @@ frappe.ui.form.on('Payment Entry', {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
-					date: frm.doc.posting_date
+					date: frm.doc.posting_date,
+					cost_center: frm.doc.cost_center
 				},
 				callback: function(r, rt) {
 					if(r.message) {
@@ -317,7 +318,8 @@ frappe.ui.form.on('Payment Entry', {
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
 				args: {
 					"account": account,
-					"date": frm.doc.posting_date
+					"date": frm.doc.posting_date,
+					"cost_center": frm.doc.cost_center
 				},
 				callback: function(r, rt) {
 					if(r.message) {
@@ -858,4 +860,11 @@ frappe.ui.form.on('Payment Entry Deduction', {
 	deductions_remove: function(frm) {
 		frm.events.set_unallocated_amount(frm);
 	}
+})
+frappe.ui.form.on('Payment Entry', {
+	cost_center: function(frm){
+		if (frm.doc.paid_from)	frm.trigger("paid_from");
+		if (frm.doc.paid_to)	frm.trigger("paid_to");
+		if (frm.doc.party)	frm.trigger("party");
+	},
 })
