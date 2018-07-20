@@ -77,58 +77,39 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		res = {
 		'items': res
 		}
+		
 	elif display_items_in_stock == 1:
+		query = """select i.name as item_code, i.item_name, i.image as item_image,
+				i.is_stock_item, item_det.price_list_rate, item_det.currency
+				from `tabItem` i LEFT JOIN
+					(select item_code, price_list_rate, currency from
+						`tabItem Price`	where price_list=%(price_list)s) item_det
+				ON
+					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN"""
+
 		if warehouse is not None:
-			res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
-				i.is_stock_item, item_det.price_list_rate, item_det.currency
-				from `tabItem` i LEFT JOIN
-					(select item_code, price_list_rate, currency from
-						`tabItem Price`	where price_list=%(price_list)s) item_det
-				ON
-					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN 
-					(select item_code,actual_qty from 
-					`tabStock Ledger Entry` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se
-				ON
-					((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
-			
-				where
-					i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
-					and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
-		        		and {condition} limit {start}, {page_length}""".format(start=start,page_length=page_length,lft=lft, 						rgt=rgt, condition=condition),
-				{
-					'item_code': item_code,
-					'price_list': price_list,
-					'warehouse': warehouse
-				} , as_dict=1)
-
-			res = {
-			'items': res
-			}
+			query = query +  """ (select item_code,actual_qty from 
+					 `tabStock Ledger Entry` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se"""
 		else:
-			res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
-				i.is_stock_item, item_det.price_list_rate, item_det.currency
-				from `tabItem` i LEFT JOIN
-					(select item_code, price_list_rate, currency from
-						`tabItem Price`	where price_list=%(price_list)s) item_det
-				ON
-					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN 
-					(select item_code,actual_qty from 
-					`tabStock Ledger Entry` where actual_qty > 0 group by item_code) item_se
-				ON
-					((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
-			
-				where
-					i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
-					and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
-		        		and {condition} limit {start}, {page_length}""".format(start=start,page_length=page_length,lft=lft, 						rgt=rgt, condition=condition),
-				{
-					'item_code': item_code,
-					'price_list': price_list
-				} , as_dict=1)
+			query = query +  """ (select item_code,actual_qty from 
+					 `tabStock Ledger Entry` where actual_qty > 0 group by item_code) item_se"""
+		res = frappe.db.sql(query +  """
+			ON
+				((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
+			where
+				i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+				and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
+		        	and {condition} limit {start}, {page_length}""".format
+				(start=start,page_length=page_length,lft=lft, 	rgt=rgt, condition=condition),
+			{
+				'item_code': item_code,
+				'price_list': price_list,
+				'warehouse': warehouse
+			} , as_dict=1)
 
-			res = {
-			'items': res
-			}
+		res = {
+		'items': res
+		}
 
 	if serial_no:
 		res.update({
