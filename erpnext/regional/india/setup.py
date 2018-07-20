@@ -271,7 +271,7 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(docs, company):
 	accounts = []
-	tds_account = frappe.db.get_value("Account", filter={"account_type": "Payable",
+	tds_account = frappe.db.get_value("Account", filters={"account_type": "Payable",
 		"account_name": "TDS", "company": company})
 
 	if company and tds_account:
