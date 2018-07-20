@@ -71,6 +71,23 @@ function get_filters(){
 			"reqd": 1
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center",
+			"get_query": function() {
+				var company = frappe.query_report_filters_by_name.company.get_value();
+				return {
+					"doctype": "Cost Center",
+					"filters": {
+						"company": company,
+					}
+				}
+			}
+
+		},
+
+		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
