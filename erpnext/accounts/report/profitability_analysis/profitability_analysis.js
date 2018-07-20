@@ -73,7 +73,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			if (!data.parent_account && data.based_on != 'project') {
 				value = $(`<span>${value}</span>`);
 				var $value = $(value).css("font-weight", "bold");
-				if (data.warn_if_negative && data[columnDef.df.fieldname] < 0) {
+				if (data.warn_if_negative && data[column.fieldname] < 0) {
 					$value.addClass("text-danger");
 				}
 
