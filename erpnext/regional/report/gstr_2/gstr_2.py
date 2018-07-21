@@ -71,6 +71,7 @@ class Gstr2Report(Gstr1Report):
 			is_igst = True if d[1] in self.gst_accounts.igst_account else False
 			if is_igst and d[0] not in self.igst_invoices:
 				self.igst_invoices.append(d[0])
+				is_igst = False
 			if is_igst:
 				break
 
