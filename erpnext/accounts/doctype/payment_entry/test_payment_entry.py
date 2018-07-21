@@ -526,3 +526,42 @@ class TestPaymentEntry(unittest.TestCase):
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(gle.cost_center, None)
+
+	def test_payment_entry_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.utils import get_balance_on
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
+
+		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=si.cost_center)
+		party_balance = get_balance_on(party_type="Customer", party=si.customer, cost_center=si.cost_center)
+		party_account_balance = get_balance_on(si.debit_to, cost_center=si.cost_center)
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "112211-1"
+		pe.reference_date = nowdate()
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = si.grand_total
+		pe.insert()
+		pe.submit()
+
+		expected_account_balance = account_balance + si.grand_total
+		expected_party_balance = party_balance - si.grand_total
+		expected_party_account_balance = party_account_balance - si.grand_total
+
+		account_balance = get_balance_on(account=pe.paid_to, cost_center=pe.cost_center)
+		party_balance = get_balance_on(party_type="Customer", party=pe.party, cost_center=pe.cost_center)
+		party_account_balance = get_balance_on(account=pe.paid_from, cost_center=pe.cost_center)
+
+		self.assertEqual(pe.cost_center, si.cost_center)
+		self.assertEqual(expected_account_balance, account_balance)
+		self.assertEqual(expected_party_balance, party_balance)
+		self.assertEqual(expected_party_account_balance, party_account_balance)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()

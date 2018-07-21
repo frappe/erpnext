@@ -382,7 +382,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
-		cost_center = "_Test Cost Center - _TC"
 
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
