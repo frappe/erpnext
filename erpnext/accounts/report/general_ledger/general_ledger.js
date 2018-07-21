@@ -80,6 +80,7 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Party"),
 			"fieldtype": "MultiSelect",
 			get_data: function() {
+				if (!frappe.query_report.filters) return;
 				var party_type = frappe.query_report.get_filter_value('party_type');
 				var parties = frappe.query_report.get_filter_value('party');
 				if(!party_type) return;
