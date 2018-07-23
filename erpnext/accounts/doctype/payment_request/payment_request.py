@@ -12,12 +12,15 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
+from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 
 class PaymentRequest(Document):
 	def validate(self):
 		self.validate_reference_document()
 		self.validate_payment_request()
 		self.validate_currency()
+		self.validate_subscription_details()
 
 	def validate_reference_document(self):
 		if not self.reference_doctype or not self.reference_name:
@@ -32,6 +35,21 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if self.payment_account and ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
+
+	def validate_subscription_details(self):
+		if self.is_a_subscription:
+			amount = 0
+			for subscription_plan in self.subscription_plans:
+				payment_gateway = frappe.db.get_value("Subscription Plan", subscription_plan.plan, "payment_gateway")
+				if payment_gateway != self.payment_gateway_account:
+					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(subscription_plan.name)))
+
+				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
+
+				amount += rate
+
+			if amount != self.grand_total:
+				frappe.msgprint(_("The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.".format(self.grand_total, amount)))
 
 	def on_submit(self):
 		send_mail = self.payment_gateway_validation()
@@ -235,6 +253,10 @@ class PaymentRequest(Document):
 
 			return redirect_to
 
+	def create_subscription(self, payment_provider, gateway_controller, data):
+		if payment_provider == "stripe":
+			return create_stripe_subscription(gateway_controller, data)
+
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
@@ -375,3 +397,14 @@ def get_dummy_message(doc):
 
 <p>{{ _("Thank you for your business!") }}</p>
 """, dict(doc=doc, payment_url = '{{ payment_url }}'))
+
+@frappe.whitelist()
+def get_subscription_details(reference_doctype, reference_name):
+	if reference_doctype == "Sales Invoice":
+		subscriptions = frappe.db.sql("""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",reference_name, as_dict=1)
+		subscription_plans = []
+		for subscription in subscriptions:
+			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
+			for plan in plans:
+				subscription_plans.append(plan)
+		return subscription_plans
