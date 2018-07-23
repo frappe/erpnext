@@ -279,7 +279,7 @@ def set_tax_withholding_category(docs, company):
 
 	docs.extend([
 		{
-			'doctype': 'Tax Withholding Category', '__newname': 'TDS',
+			'doctype': 'Tax Withholding Category', 'name': 'TDS',
 			'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
 			'withhold_cumulative_tax_amount': 0, 'accounts': accounts
 		}
