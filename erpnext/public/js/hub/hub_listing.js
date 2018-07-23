@@ -22,7 +22,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		const title = this.page_title;
 		let iconHtml = `<img class="hub-icon" src="assets/erpnext/images/hub_logo.svg">`;
 		let titleHtml = `<span class="hub-page-title">${title}</span>`;
-		this.page.set_title(iconHtml + titleHtml, '', false, title);
+		this.page.set_title(titleHtml, '', false, title);
 	}
 
 	setup_fields() {
@@ -35,6 +35,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 				this.prepareFormFields();
 			});
 	}
+
+	setup_filter_area() { }
 
 	get_meta() {
 		return new Promise(resolve =>
@@ -72,12 +74,12 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	setup_sort_selector() {
-		this.sort_selector = new frappe.ui.SortSelector({
-			parent: this.filter_area.$filter_list_wrapper,
-			doctype: this.doctype,
-			args: this.order_by,
-			onchange: () => this.refresh(true)
-		});
+		// this.sort_selector = new frappe.ui.SortSelector({
+		// 	parent: this.filter_area.$filter_list_wrapper,
+		// 	doctype: this.doctype,
+		// 	args: this.order_by,
+		// 	onchange: () => this.refresh(true)
+		// });
 	}
 
 	setup_view() {
@@ -88,6 +90,21 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 				this.page.fields_dict[field].set_value(value);
 			}
 		}
+
+		const $hub_search = $(`
+			<div class="hub-search-container">
+				<input type="text" class="form-control" placeholder="Search for anything">
+			</div>`
+		);
+		this.$frappe_list.prepend($hub_search);
+		const $search_input = $hub_search.find('input');
+
+		$search_input.on('keydown', frappe.utils.debounce((e) => {
+			if (e.which === frappe.ui.keyCode.ENTER) {
+				this.search_value = $search_input.val();
+				this.refresh();
+			}
+		}, 300));
 	}
 
 	get_args() {
@@ -146,7 +163,10 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		if (this.start === 0) {
 			// ${this.getHeaderHtml()}
 			this.$result.html(`
-				<div class="image-view-container small">
+				<div class="row hub-card-container">
+					<div class="col-md-12 margin-bottom">
+						<b>Recently Published</b>
+					</div>
 					${html}
 				</div>
 			`);
@@ -366,23 +386,23 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	}
 
 	bootstrap_data(response) {
-		let companies = response.companies.map(d => d.name);
-		this.custom_filter_configs = [
-			{
-				fieldtype: 'Autocomplete',
-				label: __('Select Company'),
-				condition: 'like',
-				fieldname: 'company_name',
-				options: companies
-			},
-			{
-				fieldtype: 'Link',
-				label: __('Select Country'),
-				options: 'Country',
-				condition: 'like',
-				fieldname: 'country'
-			}
-		];
+		// let companies = response.companies.map(d => d.name);
+		// this.custom_filter_configs = [
+		// 	{
+		// 		fieldtype: 'Autocomplete',
+		// 		label: __('Select Company'),
+		// 		condition: 'like',
+		// 		fieldname: 'company_name',
+		// 		options: companies
+		// 	},
+		// 	{
+		// 		fieldtype: 'Link',
+		// 		label: __('Select Country'),
+		// 		options: 'Country',
+		// 		condition: 'like',
+		// 		fieldname: 'country'
+		// 	}
+		// ];
 	}
 
 	prepareFormFields() {
@@ -413,6 +433,10 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 
 	setup_side_bar() {
 		super.setup_side_bar();
+
+		this.setup_new_sidebar();
+
+		return;
 
 		let $pitch = $(`<div class="border" style="
 				margin-top: 10px;
@@ -458,22 +482,71 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		}, __("Account"));
 	}
 
+	setup_new_sidebar() {
+		this.sidebar.$sidebar.append(`
+			<ul class="list-unstyled hub-sidebar-group">
+				<li class="hub-sidebar-item bold active">
+					Browse
+				</li>
+				<li class="hub-sidebar-item text-muted">
+					Favorites
+				</li>
+				<li class="hub-sidebar-item text-muted">
+					Become a seller
+				</li>
+			</ul>
+		`);
+
+		frappe.call('erpnext.hub_node.get_categories')
+			.then(r => {
+				const categories = r.message.map(d => d.value).sort();
+				const sidebar_items = [
+					`<li class="hub-sidebar-item bold is-title">
+						Category
+					</li>`,
+					`<li class="hub-sidebar-item active">
+						All
+					</li>`,
+					...categories.map(category => `
+						<li class="hub-sidebar-item text-muted">
+							${category}
+						</li>
+					`)
+				];
+
+				this.sidebar.$sidebar.append(`
+					<ul class="list-unstyled">
+						${sidebar_items.join('')}
+					</ul>
+				`);
+			});
+	}
+
 	update_category(label) {
 		this.current_category = (label=='All Categories') ? undefined : label;
 		this.refresh();
 	}
 
 	get_filters_for_args() {
-		if(!this.filter_area) return;
-		let filters = {};
-		this.filter_area.get().forEach(f => {
-			let field = f[1] !== 'name' ? f[1] : 'item_name';
-			filters[field] = [f[2], f[3]];
-		});
-		if(this.current_category) {
-			filters['hub_category'] = this.current_category;
+		const filter = {};
+
+		if (this.search_value) {
+			filter.item_name = ['like', `%${this.search_value}%`];
 		}
-		return filters;
+
+		filter.image = ['like', 'http%'];
+		return filter;
+
+		// if(!this.filter_area) return;
+		// let filters = {};
+		// this.filter_area.get().forEach(f => {
+		// 	let field = f[1] !== 'name' ? f[1] : 'item_name';
+		// 	filters[field] = [f[2], f[3]];
+		// });
+		// if(this.current_category) {
+		// 	filters['hub_category'] = this.current_category;
+		// }
+		// return filters;
 	}
 
 	update_data(r) {
@@ -485,11 +558,14 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		});
 	}
 
-	item_html(item) {
+	item_html(item, index) {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item[this.meta.title_field || 'name']);
-		const _class = !item[this.imageFieldName] ? 'no-image' : '';
+
+		const img_url = item[this.imageFieldName];
+		const no_image = !img_url;
+		const _class = no_image ? 'no-image' : '';
 		const route = `#Hub/Item/${item.hub_item_code}`;
 		const company_name = item['company_name'];
 
@@ -507,41 +583,66 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 			if(i >= ratingAverage) starClass = 'fa-star-o';
 			ratingHtml += `<i class='fa fa-fw ${starClass} star-icon' data-index=${i}></i>`;
 		}
+		let dot_spacer = '<span aria-hidden="true"> · </span>';
+		let subtitle = '';
+		subtitle += comment_when(item.creation);
+		subtitle += dot_spacer;
+
+		if (ratingAverage > 0) {
+			subtitle += ratingAverage + `<i class='fa fa-fw fa-star-o'></i>`;
+			subtitle += dot_spacer;
+		}
+		subtitle += company_name;
 
 		let item_html = `
-			<div class="image-view-item">
-				<div class="image-view-header">
-					<div class="list-row-col list-subject ellipsis level">
-						<span class="level-item bold ellipsis" title="McGuffin">
-							<a href="${route}">${title}</a>
-						</span>
-					</div>
-					<div class="text-muted small" style="margin: 5px 0px;">
-						${ratingHtml}
-						(${reviewLength})
-					</div>
-					<div class="list-row-col">
-						<a href="${'#Hub/Company/'+company_name+'/Items'}"><p>${ company_name }</p></a>
-					</div>
-				</div>
-				<div class="image-view-body">
-					<a  data-name="${encoded_name}"
-						title="${encoded_name}"
-						href="${route}"
-					>
-						<div class="image-field ${_class}"
-							data-name="${encoded_name}"
-						>
-							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
-								<i class="octicon octicon-eye" data-name="${encoded_name}"></i>
-							</button>
-							<button class="btn btn-default like-button" data-name="${encoded_name}">
-								<i class="octicon octicon-heart" data-name="${encoded_name}"></i>
-							</button>
+			<div class="col-sm-3 col-xs-2">
+				<div class="hub-card">
+					<div class="hub-card-header">
+						<div class="list-row-col list-subject ellipsis level">
+							<span class="level-item bold ellipsis" title="McGuffin">
+								<a href="${route}">${title}</a>
+							</span>
 						</div>
-					</a>
+						<div class="text-muted small" style="margin: 5px 0px;">
+							${ratingHtml}
+							(${reviewLength})
+						</div>
+						<div class="list-row-col">
+							<a href="${'#Hub/Company/'+company_name+'/Items'}"><p>${ company_name }</p></a>
+						</div>
+					</div>
+					<div class="hub-card-body">
+						<a  data-name="${encoded_name}"
+							title="${encoded_name}"
+							href="${route}"
+						>
+							<div class="image-field ${_class}"
+								data-name="${encoded_name}"
+							>
+								<button class="btn btn-default zoom-view" data-name="${encoded_name}">
+									<i class="octicon octicon-eye" data-name="${encoded_name}"></i>
+								</button>
+								<button class="btn btn-default like-button" data-name="${encoded_name}">
+									<i class="octicon octicon-heart" data-name="${encoded_name}"></i>
+								</button>
+							</div>
+						</a>
+					</div>
 				</div>
+			</div>
+		`;
 
+		item_html = `
+			<div class="col-md-3 col-sm-4 col-xs-6">
+				<div class="hub-card">
+					<div class="hub-card-header">
+						<div class="hub-card-title ellipsis bold">${title}</div>
+						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+					</div>
+					<div class="hub-card-body">
+						<img class="hub-card-image ${no_image ? 'no-image' : ''}" src="${img_url}" />
+					</div>
+				</div>
 			</div>
 		`;
 
