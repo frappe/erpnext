@@ -15,6 +15,11 @@ def execute(filters=None):
 	columns = get_columns()
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
+
+	# if no stock ledger entry found return
+	if not sle:
+		return columns, []
+
 	iwb_map = get_item_warehouse_map(filters, sle)
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
