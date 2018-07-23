@@ -186,7 +186,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 		return cur_frm.call({
 			method: "declare_order_lost",
 			doc: cur_frm.doc,
-			args: args.reason,
+			args: args,
 			callback: function(r) {
 				if(r.exc) {
 					frappe.msgprint(__("There were errors."));

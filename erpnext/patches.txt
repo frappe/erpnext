@@ -266,7 +266,6 @@ erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
 erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
 erpnext.patches.v7_0.update_party_status #2016-09-22
-erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
@@ -503,3 +502,4 @@ erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
 erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
 erpnext.patches.v10_0.update_status_in_purchase_receipt
+erpnext.patches.v10_0.update_address_template_for_india

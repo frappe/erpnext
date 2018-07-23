@@ -33,12 +33,6 @@ class PurchaseOrder(BuyingController):
 			'percent_join_field': 'material_request'
 		}]
 
-	def onload(self):
-		super(PurchaseOrder, self).onload()
-
-		self.set_onload('disable_fetch_last_purchase_rate',
-			cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
-
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
@@ -122,7 +116,6 @@ class PurchaseOrder(BuyingController):
 
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
-		if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
 		conversion_rate = flt(self.get('conversion_rate')) or 1.0
 		for d in self.get("items"):
@@ -286,7 +279,6 @@ class PurchaseOrder(BuyingController):
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
-	if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
 	conversion_rate = flt(conversion_rate) or 1.0
 

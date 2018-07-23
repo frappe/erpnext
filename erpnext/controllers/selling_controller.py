@@ -35,6 +35,7 @@ class SellingController(StockController):
 
 	def validate(self):
 		super(SellingController, self).validate()
+		self.validate_items()
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
@@ -51,9 +52,15 @@ class SellingController(StockController):
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
+			fetch_payment_terms_template = False
+			if (self.get("__islocal") or
+				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
+				fetch_payment_terms_template = True
+
 			party_details = _get_party_details(self.customer,
 				ignore_permissions=self.flags.ignore_permissions,
-				doctype=self.doctype, company=self.company)
+				doctype=self.doctype, company=self.company,
+				fetch_payment_terms_template=fetch_payment_terms_template)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 
@@ -336,6 +343,11 @@ class SellingController(StockController):
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
 				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+
+	def validate_items(self):
+		# validate items to see if they have is_sales_item enabled
+		from erpnext.controllers.buying_controller import validate_item_type
+		validate_item_type(self, "is_sales_item", "sales")
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):
