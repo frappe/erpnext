@@ -6,8 +6,71 @@ body[data-route^="Hub/"] {
 		height: 40px;
 	}
 
-	.hub-page-title {
-		margin-left: 10px;
+	.layout-main-section {
+		border: none;
+	}
+
+	.frappe-list {
+		padding-top: 25px;
+		font-size: @text-medium;
+
+		@media (max-width: @screen-xs) {
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+	}
+
+	.hub-card {
+		border: 1px solid @border-color;
+		margin-bottom: 25px;
+		border-radius: 4px;
+		overflow: hidden;
+		cursor: pointer;
+	}
+
+	.hub-card-header {
+		padding: 12px 15px;
+		height: 60px;
+	}
+
+	.hub-card-body {
+		height: 200px;
+	}
+
+	.hub-card-image {
+		min-width: 100%;
+		width: 100%;
+	}
+
+	.hub-search-container {
+		margin-bottom: 20px;
+
+		input {
+			font-size: @text-medium;
+			height: 32px;
+		}
+	}
+
+	.hub-sidebar {
+		padding-top: 25px;
+		padding-right: 15px;
+	}
+
+	.hub-sidebar-group {
+		margin-bottom: 10px;
+	}
+
+	.hub-sidebar-item {
+		padding: 5px 8px;
+		margin-bottom: 3px;
+		border-radius: 4px;
+		border: 1px solid transparent;
+
+		cursor: pointer;
+
+		&.active, &:hover:not(.is-title) {
+			border-color: @border-color;
+		}
 	}
 
 	.img-wrapper {
