@@ -217,8 +217,3 @@ def update_account_number(name, account_name, account_number=None):
 	if name != new_name:
 		frappe.rename_doc("Account", name, new_name, ignore_permissions=1)
 		return new_name
-
-def get_name_with_number(new_account, account_number):
-	if account_number and not new_account[0].isdigit():
-		new_account = account_number + " - " + new_account
-	return new_account
