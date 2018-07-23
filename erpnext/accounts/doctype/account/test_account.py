@@ -21,14 +21,14 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(account_number, "1210")
 		self.assertEqual(account_name, "Debtors")
 
-		frappe.rename_doc("Account", "1210 - Debtors - _TC", "1211 - Debtors 1 - _TC")
+		frappe.rename_doc("Account", "1210 - Debtors - _TC", "1211 - Debtors 1 - _TC", ignore_permissions=1)
 
 		new_acc = frappe.db.get_value("Account", "1211 - Debtors 1 - _TC",
 			["account_name", "account_number"], as_dict=1)
 		self.assertEqual(new_acc.account_name, "Debtors 1")
 		self.assertEqual(new_acc.account_number, "1211")
 
-		frappe.rename_doc("Account", "1211 - Debtors 1 - _TC", "Debtors 2")
+		frappe.rename_doc("Account", "1211 - Debtors 1 - _TC", "Debtors 2", ignore_permissions=1)
 
 		new_acc = frappe.db.get_value("Account", "1211 - Debtors 2 - _TC",
 			["account_name", "account_number"], as_dict=1)

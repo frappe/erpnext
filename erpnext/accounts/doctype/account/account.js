@@ -120,7 +120,7 @@ frappe.ui.form.on('Account', {
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				if(data.account_number === frm.doc.account_number) {
+				if(data.account_number === frm.doc.account_number && data.account_name === frm.doc.account_name) {
 					d.hide();
 					return;
 				}
