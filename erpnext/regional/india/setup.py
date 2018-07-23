@@ -248,8 +248,8 @@ def make_fixtures(company=None):
 	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
 
 	set_salary_components(docs)
-	set_tds_account(docs, company)
-	set_tax_withholding_category(docs, company)
+	# set_tds_account(docs, company)
+	# set_tax_withholding_category(docs, company)
 
 	for d in docs:
 		try:
