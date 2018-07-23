@@ -248,8 +248,7 @@ def make_fixtures(company=None):
 	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
 
 	set_salary_components(docs)
-	# set_tds_account(docs, company)
-	# set_tax_withholding_category(docs, company)
+	set_tds_account(docs, company)
 
 	for d in docs:
 		try:
@@ -258,6 +257,9 @@ def make_fixtures(company=None):
 			doc.insert()
 		except frappe.NameError:
 			pass
+
+	# create tds fixtures
+	set_tax_withholding_category(company)
 
 def set_salary_components(docs):
 	docs.extend([
@@ -269,7 +271,7 @@ def set_salary_components(docs):
 		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
 	])
 
-def set_tax_withholding_category(docs, company):
+def set_tax_withholding_category(company):
 	accounts = []
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
@@ -277,13 +279,19 @@ def set_tax_withholding_category(docs, company):
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	docs.extend([
-		{
-			'doctype': 'Tax Withholding Category', 'name': 'TDS',
-			'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
-			'withhold_cumulative_tax_amount': 0, 'accounts': accounts
-		}
-	])
+	tds = frappe.get_doc({
+		'doctype': 'Tax Withholding Category', 'name': 'TDS',
+		'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
+		'withhold_cumulative_tax_amount': 0, 'accounts': accounts
+	})
+
+	try:
+		tds.flags.ignore_permissions = True
+		tds.insert()
+	except frappe.DuplicateEntryError:
+		tds = frappe.get_doc("Tax Withholding Category", tds.get("name"))
+		tds.append("accounts", accounts[0])
+		tds.save()
 
 def set_tds_account(docs, company):
 	abbr = frappe.get_value("Company", company, "abbr")
