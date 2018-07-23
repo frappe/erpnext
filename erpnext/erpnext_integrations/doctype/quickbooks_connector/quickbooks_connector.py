@@ -68,7 +68,7 @@ def callback(*args, **kwargs):
 	print("Mkaing roots")
 	make_root_accounts()
 	print("Made roots")
-	relevant_doctypes = ["Account", "Customer", "Item", "Supplier"]
+	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice"]
 	for doctype in relevant_doctypes:
 		frappe.enqueue(fetch_method, doctype=doctype, token=token, company_id=company_id)
 
@@ -178,6 +178,61 @@ def save_supplier(supplier):
 	except:
 		pass
 
+def save_si(si):
+	try:
+		erp_si = frappe.get_doc({
+			"doctype": "Sales Invoice",
+			"quickbooks_id": si["Id"],
+			"naming_series": "SINV-",
+
+			# Need to check with someone as to what exactly this field represents
+			# And whether it is equivalent to posting_date
+			"posting_date": si["TxnDate"],
+
+			# Due Date should be calculated from SalesTerm if not provided.
+			# For Now Just setting a default to suppress mandatory errors.
+			"due_date": si.get("DueDate", "2020-01-01"),
+
+			# Shouldn't default to Current Bank Account
+			# Decide using AccountRef from TxnRef
+			# And one more thing, While creating accounts set account_type
+			"debit_to": "Current - QB - SA",
+
+			"customer": frappe.get_all("Customer",
+				filters={
+					"quickbooks_id": si["CustomerRef"]["value"]
+				})[0]["name"],
+			"items": get_items(si["Line"]),
+
+			# Do not change posting_date upon submission
+			"set_posting_time": 1
+		}).insert().submit()
+		frappe.db.commit()
+	except:
+		import traceback
+		traceback.print_exc()
+
+def get_items(lines):
+	items = []
+	for line in lines:
+		if line["DetailType"] == "SalesItemLineDetail":
+			item = frappe.db.get_all("Item",
+				filters={
+					"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"]
+				},
+				fields=["name", "stock_uom"]
+			)[0]
+			items.append({
+				"item_name": item["name"],
+				"conversion_factor": 1,
+				"income_account": "Sales of Product Income - QB - SA",
+				"uom": item["stock_uom"],
+				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
+				"qty": line["SalesItemLineDetail"]["Qty"],
+				"rate": line["SalesItemLineDetail"]["UnitPrice"],
+			})
+	return items
+
 def create_address(entity, doctype, address, address_type):
 	try :
 		frappe.get_doc({
@@ -195,7 +250,7 @@ def create_address(entity, doctype, address, address_type):
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier"]
+	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -215,6 +270,7 @@ save_methods = {
 	"Customer": save_customer,
 	"Item": save_item,
 	"Supplier": save_supplier,
+	"Sales Invoice": save_si,
 }
 
 def save_entries(doctype, entries):
@@ -230,6 +286,7 @@ qb_map = {
 	"Customer": "Customer",
 	"Item": "Item",
 	"Supplier": "Vendor",
+	"Sales Invoice": "Invoice",
 }
 
 def fetch_all_entries(doctype="", token="", company_id=1):
