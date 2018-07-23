@@ -81,6 +81,22 @@ class Issue(Document):
 
 		self.db_set("description", "")
 
+	def split_issue(self, subject, communication_id):
+		# Bug: Pressing enter doesn't send subject
+		from copy import deepcopy
+		replicated_issue = deepcopy(self)
+		replicated_issue.subject = subject
+		frappe.get_doc(replicated_issue).insert()
+		# Replicate linked Communications
+		# todo get all communications in timeline before this, and modify them to append them to new doc
+		comm_to_split_from = frappe.get_doc("Communication", communication_id)
+		communications = frappe.get_all("Communication", filters={"reference_name": 'ISS-00001', "reference_doctype": "Issue", "creation": ('>=', comm_to_split_from.creation)})
+		for communication in communications:
+			doc = frappe.get_doc("Communication", communication.name)
+			doc.reference_name = replicated_issue.name
+			doc.save()
+		return replicated_issue.name
+
 def get_list_context(context=None):
 	return {
 		"title": _("Issues"),
