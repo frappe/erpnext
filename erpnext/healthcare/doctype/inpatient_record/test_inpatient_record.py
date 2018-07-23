@@ -31,6 +31,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertEqual(0, frappe.db.get_value("Healthcare Service Unit", service_unit, "occupied"))
 
 	def test_validate_overlap_admission(self):
+		frappe.db.sql("""delete from `tabInpatient Record`""")
 		patient = get_patient()
 
 		ip_record = create_inpatient(patient)
@@ -42,6 +43,7 @@ class TestInpatientRecord(unittest.TestCase):
 		admit_patient(ip_record, service_unit, now_datetime())
 		ip_record_new = create_inpatient(patient)
 		self.assertRaises(frappe.ValidationError, ip_record_new.save)
+		frappe.db.sql("""delete from `tabInpatient Record`""")
 
 def create_inpatient(patient):
 	patient_obj = frappe.get_doc('Patient', patient)
@@ -77,6 +79,18 @@ def get_healthcare_service_unit():
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
 		service_unit.occupied = 0
+		service_unit.is_group = 0
+		service_unit_parent_name = frappe.db.exists({
+				"doctype": "Healthcare Service Unit",
+				"healthcare_service_unit_name": "All Healthcare Service Units",
+				"is_group": 1
+				})
+		if not service_unit_parent_name:
+			parent_service_unit = frappe.new_doc("Healthcare Service Unit")
+			parent_service_unit.healthcare_service_unit_name = "All Healthcare Service Units"
+			parent_service_unit.is_group = 1
+			parent_service_unit.save(ignore_permissions = True)
+		service_unit.parent_healthcare_service_unit = "All Healthcare Service Units"
 		service_unit.save(ignore_permissions = True)
 		return service_unit.name
 	return service_unit
