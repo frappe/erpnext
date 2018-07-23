@@ -205,12 +205,12 @@ def validate_account_number(name, account_number, company):
 				.format(account_number, account_with_same_number))
 
 @frappe.whitelist()
-def update_account_number(name, account_number, account_name):
+def update_account_number(name, account_name, account_number=None):
 
 	account = frappe.db.get_value("Account", name, ["company"], as_dict=True)
 	validate_account_number(name, account_number, account.company)
-
-	frappe.db.set_value("Account", name, "account_number", account_number.strip())
+	if account_number:
+		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	frappe.db.set_value("Account", name, "account_name", account_name.strip())
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
