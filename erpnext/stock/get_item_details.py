@@ -349,79 +349,35 @@ def get_price_list_rate(args, item_doc, out):
 			out.update(get_last_purchase_details(item_doc.name,
 				args.name, args.conversion_rate))
 
-def get_item_price_name(args):
-	"""Get Item Price name based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates"""
-	conditions = """
-		WHERE item_code = %(item_code)s
-		AND price_list = %(price_list)s
-		AND min_qty <= %(min_qty)s
-		AND uom in ('', %(uom)s)
-	"""
-	if args.get("customer"):
-		conditions += "and customer=%(customer)s"
-
-	if args.get("supplier"):
-		conditions += "and supplier=%(supplier)s"
-
-	if args.get('transaction_date'):
-		conditions += """
-			and (valid_from is null or valid_from <= %(transaction_date)s)
-			and (valid_upto is null or valid_upto >= %(transaction_date)s)
-		"""
-	return frappe.db.sql("""
-		select name
-		from `tabItem Price`
-		{conditions}""".format(conditions=conditions), args)
-
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if frappe.db.get_value("Price List", args.price_list, "currency") == args.currency \
 		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
 		if frappe.has_permission("Item Price", "write"):
-			price_list_rate = 0
-			if args.get('conversion_rate'):
-				if args.get("rate"):
-					price_list_rate = float(args.get("rate")) / float(args.get('conversion_rate'))
-			else:
-				price_list_rate = args.get("rate")
-
+			price_list_rate = (args.rate / args.conversion_factor
+				if args.get("conversion_factor") else args.rate)
 
 			item_price = frappe.get_doc({
 				"doctype": "Item Price",
 				"price_list": args.price_list,
 				"item_code": args.item_code,
 				"currency": args.currency,
-				"price_list_rate": price_list_rate,
-				"customer": args.customer,
-				"supplier": args.supplier,
-				"uom": args.uom,
-				"min_qty": args.qty,
-				"valid_from": args.transaction_date,
+				"price_list_rate": price_list_rate
 			})
-	        # Find if Item Price Exist
-			item_price_search = get_item_price_name({
-				"item_code": args.item_code,
-				"price_list": args.price_list,
-				"customer": args.customer,
-				"suppplier": args.supplier,
-				"uom": args.uom,
-				"min_qty": args.qty,
-				"transaction_date": args.transaction_date
-			})
-			if not item_price_search:
-				if price_list_rate != 0:
-					item_price.insert()
-					frappe.msgprint(_("Item Price {0} added for {1} in Price List {2}")
-						.format(item_price.name, args.item_code, args.price_list))
-			elif cint(frappe.db.get_single_value("Stock Settings", "auto_update_price_list_rate")):
-				name = item_price_search[0][0]
-				existing_item_price = frappe.get_doc('Item Price', name)
-				if price_list_rate != 0:
-					if existing_item_price.price_list_rate != price_list_rate:
-						existing_item_price.price_list_rate = price_list_rate
-						existing_item_price.save()
-						frappe.msgprint(_("Item Price {0} updated for {1} in Price List {2}")
-							.format(name, args.item_code, args.price_list))
+
+			name = frappe.db.get_value('Item Price',
+				{'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
+
+			if name:
+				item_price = frappe.get_doc('Item Price', name)
+				item_price.price_list_rate = price_list_rate
+				item_price.save()
+				frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
+					args.price_list))
+			else:
+				item_price.insert()
+				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
+					args.price_list))
 
 def get_item_price(args, item_code):
 	"""
