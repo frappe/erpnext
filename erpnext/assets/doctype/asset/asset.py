@@ -115,7 +115,7 @@ class Asset(AccountsController):
 
 				from_date = self.available_for_use_date
 				if number_of_pending_depreciations:
-					next_depr_date = getdate(add_months(self.available_for_use_date, 
+					next_depr_date = getdate(add_months(self.available_for_use_date,
 						number_of_pending_depreciations * 12))
 					if  (cint(frappe.db.get_value("Asset Settings", None, "schedule_based_on_fiscal_year")) == 1
 						and getdate(d.depreciation_start_date) < next_depr_date):
@@ -315,14 +315,14 @@ class Asset(AccountsController):
 		elif self.docstatus == 1:
 			status = "Submitted"
 
-			idx = self.get_default_finance_book_idx() or 0
-
-			expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
-			value_after_depreciation = self.finance_books[idx].value_after_depreciation
-
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
 			elif self.finance_books:
+				idx = self.get_default_finance_book_idx() or 0
+
+				expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
+				value_after_depreciation = self.finance_books[idx].value_after_depreciation
+
 				if flt(value_after_depreciation) <= expected_value_after_useful_life:
 					status = "Fully Depreciated"
 				elif flt(value_after_depreciation) < flt(self.gross_purchase_amount):
