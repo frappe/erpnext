@@ -271,16 +271,11 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(docs, company):
 	accounts = []
-	tds_account = frappe.db.get_value("Account", filters={"account_type": "Payable",
-		"account_name": "TDS", "company": company})
+	abbr = frappe.get_value("Company", company, "abbr")
+	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
 	if company and tds_account:
-		accounts = [
-				{
-					'company': company,
-					'account': tds_account
-				}
-			]
+		accounts = [dict(company=company, account=tds_account)]
 
 	docs.extend([
 		{
@@ -291,9 +286,10 @@ def set_tax_withholding_category(docs, company):
 	])
 
 def set_tds_account(docs, company):
+	abbr = frappe.get_value("Company", company, "abbr")
 	docs.extend([
 		{
-			'doctype': 'Account', 'account_name': 'TDS', 'account_type': 'Tax',
-			'parent_account': 'Duties and Taxes', 'company': company
+			"doctype": "Account", "account_name": "TDS Payable", "account_type": "Tax",
+			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
 		}
 	])
