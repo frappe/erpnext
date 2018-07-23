@@ -1,6 +1,32 @@
 frappe.provide('erpnext.hub.pages');
 
-frappe.views.HubFactory = frappe.views.Factory.extend({
+frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.Factory {
+	show() {
+		const page_name = frappe.get_route_str();
+
+		if (frappe.pages.marketplace) {
+			frappe.container.change_to('marketplace');
+			erpnext.hub.marketplace.refresh();
+		} else {
+			this.make('marketplace');
+		}
+	}
+
+	make(page_name) {
+		const assets = [
+			'/assets/erpnext/js/hub/hub_listing.js'
+		];
+
+		frappe.require(assets, () => {
+			erpnext.hub.marketplace = new erpnext.hub.Marketplace({
+				parent: this.make_page(true, page_name)
+			});
+		});
+	}
+}
+
+frappe.views.HubFactory = class HubFactory extends frappe.views.Factory {
+
 	make(route) {
 		const page_name = frappe.get_route_str();
 		const page = route[1];
@@ -60,7 +86,7 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 				window.hub_page = erpnext.hub.pages[page_name];
 			}
 		});
-	},
+	}
 
 	render_offline_card() {
 		let html = `<div class='page-card' style='margin: 140px auto;'>
@@ -77,4 +103,4 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 
 		return;
 	}
-});
+}

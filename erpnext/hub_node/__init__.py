@@ -21,7 +21,7 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 
 	response = connection.get_list(doctype,
 		limit_start=start, limit_page_length=limit,
-		filters=filters, fields=fields)
+		filters=filters, fields=['name'])
 
 	# Bad, need child tables in response
 	listing = []
