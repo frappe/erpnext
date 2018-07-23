@@ -85,7 +85,7 @@ class GoCardlessSettings(Document):
 		return get_url("./integrations/gocardless_checkout?{0}".format(urlencode(kwargs)))
 
 	def create_payment_request(self, data):
-		self.data = {str(key): str(value) for (key, value) in data.items()}
+		self.data = frappe._dict(data)
 
 		try:
 			self.integration_request = create_request_log(self.data, "Host", "GoCardless")
