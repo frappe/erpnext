@@ -25,7 +25,7 @@ class TestAccount(unittest.TestCase):
 		new_account_number = "1211-11-4 - 6 - "
 		new_account_name = "Debtors 1 - Test - "
 
-		update_account_number("1210 - Debtors - _TC", new_account_number, new_account_name)
+		update_account_number("1210 - Debtors - _TC", new_account_name, new_account_number)
 
 		new_acc = frappe.db.get_value("Account", "1211-11-4 - 6 - - Debtors 1 - Test - - _TC",
 			["account_name", "account_number"], as_dict=1)
