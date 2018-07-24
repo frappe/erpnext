@@ -118,11 +118,6 @@ frappe.ui.form.on('Account', {
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				if(data.name === frm.doc.name) {
-					d.hide();
-					return;
-				}
-
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.merge_account",
 					args: {
@@ -135,9 +130,8 @@ frappe.ui.form.on('Account', {
 					callback: function(r) {
 						if(!r.exc) {
 							if(r.message) {
-								delete locals[frm.doc.doctype][frm.doc.name];
 								frappe.set_route("Form", "Account", r.message);
-							} 
+							}
 							d.hide();
 						}
 					}
