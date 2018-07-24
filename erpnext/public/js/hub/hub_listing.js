@@ -25,7 +25,7 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	make_sidebar() {
-		this.$sidebar = this.$parent.find('.layout-side-section');
+		this.$sidebar = this.$parent.find('.layout-side-section').addClass('hidden-xs');
 
 		this.$sidebar.append(`
 			<ul class="list-unstyled hub-sidebar-group">
@@ -237,9 +237,9 @@ erpnext.hub.Category = class Category extends SubPage {
 
 erpnext.hub.Item = class Item extends SubPage {
 	refresh() {
-		const hub_item_code = frappe.get_route()[2];
+		this.hub_item_code = frappe.get_route()[2];
 
-		this.get_item(hub_item_code)
+		this.get_item(this.hub_item_code)
 			.then(item => {
 				this.render(item);
 			});
@@ -285,6 +285,11 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		const html = `
 			<div class="hub-item-container">
+				<div class="row visible-xs">
+					<div class="col-xs-12 margin-bottom">
+						<button class="btn btn-xs btn-default" data-route="marketplace/home">Back to home</button>
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="hub-item-image">
@@ -321,14 +326,129 @@ erpnext.hub.Item = class Item extends SubPage {
 						</p>
 					</div>
 				</div>
+				<!-- review area -->
+				<div class="row hub-item-review-container">
+					<div class="col-md-12 form-footer">
+						<div class="form-comments">
+							<div class="timeline">
+								<div class="timeline-head"></div>
+								<div class="timeline-items"></div>
+							</div>
+						</div>
+						<div class="pull-right scroll-to-top">
+							<a onclick="frappe.utils.scroll_to(0)"><i class="fa fa-chevron-up text-muted"></i></a>
+						</div>
+					</div>
+				</div>
 			</div>
 		`;
 
 		this.$wrapper.html(html);
+
+		this.make_review_area();
+		this.render_reviews(item);
+	}
+
+	make_review_area() {
+		this.comment_area = new frappe.ui.ReviewArea({
+			parent: this.$wrapper.find('.timeline-head').empty(),
+			mentions: [],
+			on_submit: (val) => {
+				val.user = frappe.session.user;
+				val.username = frappe.session.user_fullname;
+
+				frappe.call({
+					method: 'erpnext.hub_node.send_review',
+					args: {
+						hub_item_code: this.hub_item_code,
+						review: val
+					},
+					callback: (r) => {
+						console.log(r);
+						this.render_reviews(r.message);
+						this.comment_area.reset();
+					},
+					freeze: true
+				});
+			}
+		});
+	}
+
+	render_reviews(item) {
+		this.$wrapper.find('.timeline-items').empty();
+		item.reviews.forEach(review => this.render_review(review, item));
+	}
+
+	render_review(review, item) {
+		let username = review.username || review.user || __("Anonymous");
+
+		let image_html = review.user_image
+			? `<div class="avatar-frame" style="background-image: url(${review.user_image})"></div>`
+			: `<div class="standard-image" style="background-color: #fafbfc">${frappe.get_abbr(username)}</div>`
+
+		let edit_html = review.own
+			? `<div class="pull-right hidden-xs close-btn-container">
+				<span class="small text-muted">
+					${'data.delete'}
+				</span>
+			</div>
+			<div class="pull-right edit-btn-container">
+				<span class="small text-muted">
+					${'data.edit'}
+				</span>
+			</div>`
+			: '';
+
+		let rating_html = get_rating_html(item);
+
+		const $timeline_items = this.$wrapper.find('.timeline-items');
+
+		$(this.get_timeline_item(review, image_html, edit_html, rating_html))
+			.appendTo($timeline_items);
+	}
+
+	get_timeline_item(data, image_html, edit_html, rating_html) {
+		return `<div class="media timeline-item user-content" data-doctype="${''}" data-name="${''}">
+			<span class="pull-left avatar avatar-medium hidden-xs" style="margin-top: 1px">
+				${image_html}
+			</span>
+
+			<div class="pull-left media-body">
+				<div class="media-content-wrapper">
+					<div class="action-btns">${edit_html}</div>
+
+					<div class="comment-header clearfix">
+						<span class="pull-left avatar avatar-small visible-xs">
+							${image_html}
+						</span>
+
+						<div class="asset-details">
+							<span class="author-wrap">
+								<i class="octicon octicon-quote hidden-xs fa-fw"></i>
+								<span>${data.username}</span>
+							</span>
+							<a class="text-muted">
+								<span class="text-muted hidden-xs">&ndash;</span>
+								<span class="hidden-xs">${comment_when(data.modified)}</span>
+							</a>
+						</div>
+					</div>
+					<div class="reply timeline-content-show">
+						<div class="timeline-item-content">
+							<p class="text-muted">
+								${rating_html}
+							</p>
+							<h6 class="bold">${data.subject}</h6>
+							<p class="text-muted">
+								${data.content}
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
 	}
 }
-
-
 
 function get_item_card_container_html(items, title) {
 	const html = (items || []).map(item => get_item_card_html(item)).join('');
