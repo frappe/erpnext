@@ -228,13 +228,18 @@ def get_items(lines):
 				fields=["name", "stock_uom"]
 			)[0]
 			items.append({
-				"item_name": item["name"],
+				"item_code": item["name"],
 				"conversion_factor": 1,
 				"income_account": "Sales of Product Income - QB - SA",
 				"uom": item["stock_uom"],
 				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 				"qty": line["SalesItemLineDetail"]["Qty"],
 				"rate": line["SalesItemLineDetail"]["UnitPrice"],
+			})
+		elif line["DetailType"] == "DescriptionOnly":
+			items[-1].update({
+				"margin_type": "Percentage",
+				"margin_rate_or_amount": int(line["Description"].split("%")[0]),
 			})
 	return items
 
