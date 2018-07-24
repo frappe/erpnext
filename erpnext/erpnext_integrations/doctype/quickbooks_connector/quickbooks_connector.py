@@ -185,6 +185,10 @@ def save_si(si):
 			"quickbooks_id": si["Id"],
 			"naming_series": "SINV-",
 
+			# Quickbooks uses ISO 4217 Code
+			# of course this gonna come back to bite me
+			"currency": si["CurrencyRef"]["value"],
+
 			# Need to check with someone as to what exactly this field represents
 			# And whether it is equivalent to posting_date
 			"posting_date": si["TxnDate"],
