@@ -157,6 +157,9 @@ def get_delivery_notes_against_sales_order(item_list):
 
 	return so_dn_map
 
+def get_deducted_taxes():
+	return frappe.db.sql_list("select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'")
+
 def get_tax_accounts(item_list, columns, company_currency,
 		doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
 	import json
@@ -176,9 +179,10 @@ def get_tax_accounts(item_list, columns, company_currency,
 	if doctype == "Purchase Invoice":
 		conditions = " and category in ('Total', 'Valuation and Total') and base_tax_amount_after_discount_amount != 0"
 
+	deducted_tax = get_deducted_taxes()
 	tax_details = frappe.db.sql("""
 		select
-			parent, description, item_wise_tax_detail,
+			name, parent, description, item_wise_tax_detail,
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
@@ -190,7 +194,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
 		tuple([doctype] + invoice_item_row.keys()))
 
-	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+	for name, parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		description = handle_html(description)
 		if description not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
@@ -219,9 +223,13 @@ def get_tax_accounts(item_list, columns, company_currency,
 						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
 							if item_net_amount else 0
 						if item_tax_amount:
+							tax_amount = flt(item_tax_amount, tax_amount_precision)
+							tax_amount = (tax_amount * -1
+								if (doctype == 'Purchase Invoice' and name in deducted_tax) else tax_amount)
+
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 								"tax_rate": tax_rate,
-								"tax_amount": flt(item_tax_amount, tax_amount_precision)
+								"tax_amount": tax_amount
 							})
 
 			except ValueError:
