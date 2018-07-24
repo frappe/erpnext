@@ -203,6 +203,7 @@ def save_si(si):
 					"quickbooks_id": si["CustomerRef"]["value"]
 				})[0]["name"],
 			"items": get_items(si["Line"]),
+			"taxes": get_taxes(si["TxnTaxDetail"]["TaxLine"]),
 
 			# Do not change posting_date upon submission
 			"set_posting_time": 1
@@ -232,6 +233,21 @@ def get_items(lines):
 				"rate": line["SalesItemLineDetail"]["UnitPrice"],
 			})
 	return items
+
+def get_taxes(lines):
+	taxes = []
+	for line in taxes:
+		taxes.append({
+			"charge_type": "Actual",
+
+			# This is wrong will fix later
+			"account_head": "TDS Payable - QB - SA",
+
+			# description c/sould be fetched from TaxLineDetail.TaxRateRef.Description and Name
+			"description": "Added total amount from Invoice",
+			"amount": line["Amount"],
+		})
+	return taxes
 
 def create_address(entity, doctype, address, address_type):
 	try :
