@@ -14,7 +14,10 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -47,12 +50,19 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+<<<<<<< HEAD
    "fieldname": "supplier_group", 
+=======
+   "fieldname": "supplier_type", 
+>>>>>>> upstream/master
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -61,7 +71,11 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
+<<<<<<< HEAD
    "label": "Default Supplier Group", 
+=======
+   "label": "Default Supplier Type", 
+>>>>>>> upstream/master
    "length": 0, 
    "no_copy": 0, 
    "options": "Supplier Group", 
@@ -79,7 +93,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -111,7 +128,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -141,7 +161,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -173,7 +196,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -205,7 +231,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -236,7 +265,10 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+<<<<<<< HEAD
    "allow_in_quick_entry": 0, 
+=======
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -264,6 +296,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "translatable": 0, 
+<<<<<<< HEAD
    "unique": 0
   }, 
   {
@@ -364,6 +397,8 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "translatable": 0, 
+=======
+>>>>>>> upstream/master
    "unique": 0
   }
  ], 
@@ -378,7 +413,11 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2018-06-12 03:41:41.739193", 
+=======
+ "modified": "2018-07-18 07:52:38.062488", 
+>>>>>>> upstream/master
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Buying Settings", 

@@ -1485,8 +1485,12 @@
    "unique": 0
   }, 
   {
+<<<<<<< HEAD
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
+=======
+   "allow_bulk_edit": 1, 
+>>>>>>> upstream/master
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -4456,7 +4460,11 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
+<<<<<<< HEAD
  "modified": "2018-05-30 12:21:32.813414", 
+=======
+ "modified": "2018-07-06 02:38:40.310899",
+>>>>>>> upstream/master
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

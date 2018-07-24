@@ -1344,7 +1344,7 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
+   "allow_bulk_edit": 1, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1382,6 +1382,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+<<<<<<< HEAD
    "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)", 
    "fieldname": "get_last_purchase_rate", 
    "fieldtype": "Button", 
@@ -1446,6 +1447,8 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+=======
+>>>>>>> upstream/master
    "fieldname": "sb_last_purchase", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -3592,7 +3595,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2018-05-17 12:55:20.008156", 
+=======
+ "modified": "2018-07-18 07:49:53.131408", 
+>>>>>>> upstream/master
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

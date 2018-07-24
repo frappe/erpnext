@@ -3,9 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe.utils import cstr, flt
 from frappe import _
+from six import string_types
 from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
 from frappe.model.document import Document
 
@@ -17,12 +18,14 @@ class BOMUpdateTool(Document):
 		updated_bom = []
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
+			bom_obj.get_doc_before_save()
 			updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
 			bom_obj.calculate_cost()
 			bom_obj.update_parent_cost()
 			bom_obj.db_update()
-
-		frappe.msgprint(_("BOM replaced"))
+			if (getattr(bom_obj.meta, 'track_changes', False)
+				and bom_obj._doc_before_save and not bom_obj.flags.ignore_version):
+				bom_obj.save_version()
 
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
@@ -55,6 +58,14 @@ class BOMUpdateTool(Document):
 		return bom_list
 
 @frappe.whitelist()
+def enqueue_replace_bom(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args)
+	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
+
+@frappe.whitelist()
 def enqueue_update_cost():
 	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost")
 	frappe.msgprint(_("Queued for updating latest price in all Bill of Materials. It may take a few minutes."))
@@ -62,6 +73,14 @@ def enqueue_update_cost():
 def update_latest_price_in_all_boms():
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
 		update_cost()
+
+def replace_bom(args):
+	args = frappe._dict(args)
+
+	doc = frappe.get_doc("BOM Update Tool")
+	doc.current_bom = args.current_bom
+	doc.new_bom = args.new_bom
+	doc.replace_bom()
 
 def update_cost():
 	bom_list = get_boms_in_bottom_up_order()

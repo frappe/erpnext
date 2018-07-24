@@ -35,6 +35,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+<<<<<<< HEAD
 					"name": "Leave Period",
 				},
 				{
@@ -48,6 +49,15 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Leave Allocation",
+=======
+					"name": "Job Opening",
+					"description": _("Opening for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+					"description": _("Applicant for a Job."),
+>>>>>>> upstream/master
 				},
 				{
 					"type": "doctype",

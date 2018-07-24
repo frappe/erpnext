@@ -24,7 +24,11 @@ frappe.ui.form.on('Asset', {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query("department", function() {
+=======
+		frm.set_query("cost_center", function() {
+>>>>>>> upstream/master
 			return {
 				"filters": {
 					"company": frm.doc.company,

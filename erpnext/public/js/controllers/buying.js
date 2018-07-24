@@ -225,6 +225,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	tc_name: function() {
 		this.get_terms();
+<<<<<<< HEAD
 	},
 	link_to_mrs: function() {
 		var my_items = [];
@@ -281,6 +282,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				refresh_field("items");
 			}
 		});
+=======
+>>>>>>> upstream/master
 	}
 });
 

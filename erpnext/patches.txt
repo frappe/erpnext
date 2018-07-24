@@ -267,7 +267,6 @@ erpnext.patches.v6_24.map_customer_address_to_shipping_address_on_po
 erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
 erpnext.patches.v7_0.update_party_status #2016-09-22
-erpnext.patches.v7_0.update_item_projected
 erpnext.patches.v7_0.remove_features_setup
 erpnext.patches.v7_0.update_home_page
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
@@ -544,9 +543,13 @@ erpnext.patches.v11_0.refactor_erpnext_shopify
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
 erpnext.patches.v10_0.update_status_in_purchase_receipt
+<<<<<<< HEAD
 erpnext.patches.v11_0.inter_state_field_for_gst
 erpnext.patches.v11_0.rename_members_with_naming_series #04-06-2018
 erpnext.patches.v11_0.set_update_field_and_value_in_workflow_state
 erpnext.patches.v11_0.update_total_qty_field
 erpnext.patches.v11_0.update_sales_partner_type
 erpnext.patches.v11_0.rename_asset_adjustment_doctype
+=======
+erpnext.patches.v10_0.update_address_template_for_india
+>>>>>>> upstream/master
