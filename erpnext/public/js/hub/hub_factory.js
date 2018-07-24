@@ -1,6 +1,6 @@
 frappe.provide('erpnext.hub.pages');
 
-frappe.views.HubFactory = frappe.views.Factory.extend({
+frappe.views.HubFactory = class HubFactory extends frappe.views.Factory({
 	make(route) {
 		const page_name = frappe.get_route_str();
 		const page = route[1];
