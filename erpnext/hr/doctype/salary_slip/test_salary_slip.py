@@ -253,6 +253,7 @@ class TestSalarySlip(unittest.TestCase):
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
+		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
 
 	def make_holiday_list(self):
 		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
