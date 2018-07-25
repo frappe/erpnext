@@ -21,23 +21,24 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
+
     frappe.set_user("Administrator")
-    from_account = frappe.form_dict['from_account']
-    to_account = frappe.form_dict['to_account']
-    credit_amount = float(frappe.form_dict['credit_amount'])
-    debit_amount = float(frappe.form_dict['debit_amount'])
-    statement = frappe.form_dict['statement']
+    from_account = frappe.form_dict.get('from_account', frappe.local.form_dict.get('from_account'))
+    to_account = frappe.form_dict.get('to_account', frappe.local.form_dict.get('to_account'))
+    credit_amount = float(frappe.form_dict.get('credit_amount', frappe.local.form_dict.get('credit_amount')))
+    debit_amount = float(frappe.form_dict.get('debit_amount', frappe.local.form_dict.get('debit_amount')))
+    statement = frappe.form_dict.get('statement', frappe.local.form_dict.get('statement'))
     # operation = frappe.form_dict['operation']
-    contract_id = frappe.form_dict['contract_id']
+    contract_id = frappe.form_dict.get('contract_id', frappe.local.form_dict.get('contract_id'))
     # payment_id = frappe.form_dict['payment_id']
     # property_id = frappe.form_dict['property_id']
     # unit_id = frappe.form_dict['unit_id']
-    user_id = frappe.form_dict['user_id']
-    customer_id = frappe.form_dict['customer_id']
+    user_id = frappe.form_dict.get('user_id', frappe.local.form_dict.get('user_id'))
+    customer_id = frappe.form_dict.get('customer_id', frappe.local.form_dict.get('customer_id'))
     # transaction_id = frappe.form_dict['transaction_id']
-    company_id = frappe.form_dict['company']
-    branch_id = frappe.form_dict.get('branch')
-    vat_amount = float(frappe.form_dict.get('vat_amount'))
+    company_id = frappe.form_dict.get('company', frappe.local.form_dict.get('company'))
+    branch_id = frappe.form_dict.get('branch', frappe.local.form_dict.get('branch'))
+    vat_amount = float(frappe.form_dict.get('vat_amount', frappe.local.form_dict.get('vat_amount')))
 
     if branch_id:
         company_id = branch_id
