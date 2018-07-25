@@ -70,7 +70,7 @@ def callback(*args, **kwargs):
 	print("Made roots")
 	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice"]
 	for doctype in relevant_doctypes:
-		frappe.enqueue(fetch_method, doctype=doctype, token=token, company_id=company_id)
+		fetch_all_entries(doctype=doctype, token=token, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token(code):
