@@ -22,7 +22,6 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-
     try:
         data = frappe.form_dict
 
@@ -42,6 +41,7 @@ def add_transaction():
         company_id = data.get('company')
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount'))
+    
         frappe.set_user("Administrator")
 
         if branch_id:
@@ -135,10 +135,10 @@ def add_transaction():
                 party_type="Customer",
                 party=to_customer.name,
                 exchange_rate=1,
-                debit_in_account_currency=0,
-                debit=0,
-                credit_in_account_currency=abs(credit_amount),
-                credit=abs(credit_amount),
+                debit_in_account_currency=abs(credit_amount),
+                debit=abs(credit_amount),
+                credit_in_account_currency=0,
+                credit=0,
                 project=project,
                 is_advance="No",
                 against_account=to_account,
