@@ -234,7 +234,7 @@ def get_items(lines):
 				"uom": item["stock_uom"],
 				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 				"qty": line["SalesItemLineDetail"]["Qty"],
-				"rate": line["SalesItemLineDetail"]["UnitPrice"],
+				"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
 			})
 		elif line["DetailType"] == "DescriptionOnly":
 			items[-1].update({
