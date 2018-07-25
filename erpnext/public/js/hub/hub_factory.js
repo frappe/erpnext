@@ -77,5 +77,4 @@ frappe.views.HubFactory = class HubFactory extends frappe.views.Factory {
 
 		return;
 	}
-}
-
+};
