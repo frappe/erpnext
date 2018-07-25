@@ -10,9 +10,10 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-hub_url = "https://hubmarket.org"
+# hub_url = "https://hubmarket.org"
 # hub_url = "http://159.89.175.122"
 # hub_url = "http://erpnext.hub:8001"
+hub_url = "http://hub.market:8000"
 
 class OAuth2Session():
 	def __init__(self, headers):
@@ -80,20 +81,20 @@ class HubSettings(Document):
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
 		data = {
-			'email': frappe.session.user
+			'profile': self.as_json()
 		}
 		post_url = hub_url + '/api/method/hub.hub.api.register'
 
-		response = requests.post(post_url, data=data)
+		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
+		
 		response.raise_for_status()
-		message = response.json().get('message')
+		
+		if response.ok:
+			message = response.json().get('message')
+		else:
+			frappe.throw(json.loads(response.text))
 
-		if message and message.get('password'):
-			self.user = frappe.session.user
-			self.create_hub_connector(message)
-			self.company = frappe.defaults.get_user_default('company')
-			self.enabled = 1
-			self.save()
+		return message.get('password') if message else None
 
 	def unregister(self):
 		""" Disable the User on hub.erpnext.org"""
@@ -143,3 +144,16 @@ def reset_hub_settings(last_sync_datetime = ""):
 def sync():
 	hub_settings = frappe.get_doc('Hub Settings')
 	hub_settings.sync()
+
+@frappe.whitelist()
+def register_seller(**kwargs):
+	settings = frappe.get_doc('Hub Settings')
+	settings.update(kwargs)
+	password = settings.register()
+
+	print(password)
+
+	# if password:
+	# 	self.create_hub_connector(message)
+	# 	self.registered = 1
+	# 	self.save()
