@@ -25,8 +25,8 @@ def add_transaction():
     frappe.set_user("Administrator")
     from_account = frappe.form_dict.get('from_account', frappe.local.form_dict.get('from_account'))
     to_account = frappe.form_dict.get('to_account', frappe.local.form_dict.get('to_account'))
-    credit_amount = float(frappe.form_dict.get('credit_amount', frappe.local.form_dict.get('credit_amount')))
-    debit_amount = float(frappe.form_dict.get('debit_amount', frappe.local.form_dict.get('debit_amount')))
+    credit_amount = float(frappe.form_dict.get('credit_amount', frappe.local.form_dict.get('credit_amount', 0)))
+    debit_amount = float(frappe.form_dict.get('debit_amount', frappe.local.form_dict.get('debit_amount', 0)))
     statement = frappe.form_dict.get('statement', frappe.local.form_dict.get('statement'))
     # operation = frappe.form_dict['operation']
     contract_id = frappe.form_dict.get('contract_id', frappe.local.form_dict.get('contract_id'))
@@ -38,7 +38,7 @@ def add_transaction():
     # transaction_id = frappe.form_dict['transaction_id']
     company_id = frappe.form_dict.get('company', frappe.local.form_dict.get('company'))
     branch_id = frappe.form_dict.get('branch', frappe.local.form_dict.get('branch'))
-    vat_amount = float(frappe.form_dict.get('vat_amount', frappe.local.form_dict.get('vat_amount')))
+    vat_amount = float(frappe.form_dict.get('vat_amount', frappe.local.form_dict.get('vat_amount', 0)))
 
     if branch_id:
         company_id = branch_id
