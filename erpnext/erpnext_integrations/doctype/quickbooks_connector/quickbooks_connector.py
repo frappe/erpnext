@@ -66,7 +66,7 @@ def callback(*args, **kwargs):
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
 	make_custom_fields()
 	make_root_accounts()
-	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice"]
+	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry"]
 	for doctype in relevant_doctypes:
 		fetch_all_entries(doctype=doctype, token=token, company_id=company_id)
 
@@ -215,6 +215,41 @@ def save_si(si):
 		import traceback
 		traceback.print_exc()
 
+def save_ge(ge):
+	try:
+		erp_ge = frappe.get_doc({
+			"doctype": "Journal Entry",
+			"quickbooks_id": ge["Id"],
+			"naming_series": "JV-",
+			"company": "Sandbox Actual",
+			"posting_date": ge["TxnDate"],
+			"accounts": get_accounts(ge["Line"]),
+		}).insert().submit()
+		frappe.db.commit()
+	except:
+		import traceback
+		traceback.print_exc()
+
+posting_type_field_mapping = {
+	"Credit": "credit_in_account_currency",
+	"Debit": "debit_in_account_currency",
+}
+def get_accounts(lines):
+	accounts = []
+	for line in lines:
+		if line["DetailType"] == "JournalEntryLineDetail":
+			account_name = frappe.db.get_all("Account",
+				filters={
+					"quickbooks_id": line["JournalEntryLineDetail"]["AccountRef"]["value"]
+				},
+			)[0]["name"]
+			posting_type = line["JournalEntryLineDetail"]["PostingType"]
+			accounts.append({
+				"account": account_name,
+					posting_type_field_mapping[posting_type]: line["Amount"],
+			})
+	return accounts
+
 def get_items(lines):
 	items = []
 	for line in lines:
@@ -273,7 +308,7 @@ def create_address(entity, doctype, address, address_type):
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice"]
+	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -294,6 +329,7 @@ save_methods = {
 	"Item": save_item,
 	"Supplier": save_supplier,
 	"Sales Invoice": save_si,
+	"Journal Entry": save_ge,
 }
 
 def save_entries(doctype, entries):
@@ -310,6 +346,7 @@ qb_map = {
 	"Item": "Item",
 	"Supplier": "Vendor",
 	"Sales Invoice": "Invoice",
+	"Journal Entry": "JournalEntry",
 }
 
 def fetch_all_entries(doctype="", token="", company_id=1):
