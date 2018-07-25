@@ -254,7 +254,7 @@ def get_taxes(lines):
 
 			# description c/sould be fetched from TaxLineDetail.TaxRateRef.Description and Name
 			"description": "Added total amount from Invoice",
-			"amount": line["Amount"],
+			"tax_amount": line["Amount"],
 		})
 	return taxes
 
