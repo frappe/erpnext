@@ -31,6 +31,13 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 
 	return listing
 
+
+
+@frappe.whitelist()
+def get_valid_items():
+	items = frappe.get_list('Item')
+	return items
+
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
 	doctype = 'Hub Item'

@@ -5,11 +5,16 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.$parent = $(parent);
 		this.page = parent.page;
 
-		this.setup_header();
-		this.make_sidebar();
-		this.make_body();
-		this.setup_events();
-		this.refresh();
+		frappe.db.get_doc('Hub Settings')
+			.then(doc => {
+				this.hub_settings = doc;
+				
+				this.setup_header();
+				this.make_sidebar();
+				this.make_body();
+				this.setup_events();
+				this.refresh();
+			});
 	}
 
 	setup_header() {
@@ -35,7 +40,7 @@ erpnext.hub.Marketplace = class Marketplace {
 				<li class="hub-sidebar-item" data-route="marketplace/favourites">
 					${__('Favorites')}
 				</li>
-				<li class="hub-sidebar-item text-muted">
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
 					${__('Become a seller')}
 				</li>
 			</ul>
@@ -109,6 +114,11 @@ erpnext.hub.Marketplace = class Marketplace {
 		if (route[1] === 'item' && route[2] && !this.subpages.item) {
 			this.subpages.item = new erpnext.hub.Item(this.$body);
 		}
+
+		if (route[1] === 'register' && !this.subpages.register) {
+			this.subpages.register = new erpnext.hub.Register(this.$body);
+		}
+
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
 			frappe.show_not_found();
@@ -189,7 +199,7 @@ erpnext.hub.Home = class Home extends SubPage {
 
 	render(items) {
 		const html = get_item_card_container_html(items, __('Recently Published'));
-		this.$wrapper.html(html)
+		this.$wrapper.append(html)
 	}
 }
 
@@ -412,7 +422,6 @@ erpnext.hub.Item = class Item extends SubPage {
 			<span class="pull-left avatar avatar-medium hidden-xs" style="margin-top: 1px">
 				${image_html}
 			</span>
-
 			<div class="pull-left media-body">
 				<div class="media-content-wrapper">
 					<div class="action-btns">${edit_html}</div>
@@ -447,6 +456,176 @@ erpnext.hub.Item = class Item extends SubPage {
 				</div>
 			</div>
 		</div>`;
+	}
+}
+erpnext.hub.Register = class Register extends SubPage {
+	make_wrapper() {
+		super.make_wrapper();
+		this.$register_container = $(`<div class="row register-container">`)
+			.appendTo(this.$wrapper);
+		this.$form_container = $('<div class="col-md-8 col-md-offset-1 form-container">')
+			.appendTo(this.$wrapper);
+		
+		// const title = __('Become a Seller');
+		// this.$register_container.append($(`<h5>${title}</h5>`));
+	}
+
+	refresh() {
+		// company, company_email, logo, description
+		this.render();
+	}
+
+	// make_input() {
+	// 	//
+	// }
+		
+	render() {
+		this.make_field_group();
+	}
+
+	make_field_group() {
+		const fields = [
+			{
+				fieldtype: 'Link',
+				fieldname: 'company',
+				label: __('Company'),
+				options: 'Company',
+				onchange: () => {
+					const value = this.field_group.get_value('company');
+
+					if (value) {
+						frappe.db.get_doc('Company', value)
+							.then(company => {
+								this.field_group.set_values({
+									country: company.country,
+									company_email: company.email,
+									currency: company.default_currency
+								});
+							});
+					}
+				}
+			},
+			{
+				fieldname: 'company_email',
+				label: __('Email'),
+				fieldtype: 'Data'
+			},
+			{
+				fieldname: 'country',
+				label: __('Country'),
+				fieldtype: 'Read Only'
+			},
+			{
+				fieldname: 'currency',
+				label: __('Currency'),
+				fieldtype: 'Read Only'
+			},
+			{
+				fieldtype: 'Text',
+				label: __('About your Company'),
+				fieldname: 'company_description'
+			}
+		];
+
+		this.field_group = new frappe.ui.FieldGroup({
+			parent: this.$form_container,
+			fields
+		});
+
+		this.field_group.make();
+
+		this.$form_container.find('.form-column').append(`
+			<div class="text-right">
+				<button type="submit" class="btn btn-primary btn-register btn-sm">${__('Submit')}</button>
+			</div>
+		`);
+
+		this.$form_container.find('.form-message').removeClass('hidden small').addClass('h4').text(__('Become a Seller'))
+
+		this.$form_container.on('click', '.btn-register', () => {
+			const form_values = this.field_group.get_values();
+			frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller', form_values)
+				.then(() => {
+					// Reload page and things ... but for now
+					frappe.msgprint('Registered successfully.');
+				});
+		});
+	}
+
+	make_form() {
+		const form_html = `<form class="register-form">
+		<div class="register-title margin-bottom margin-top">
+			<b>Become a Seller</b>
+		</div>
+
+		<div class="flex">
+			<div style="flex: 0 0 140px" class="margin-right">
+				<div>			
+					<div class="missing-image attach-missing-image">
+						<i class="octicon octicon-device-camera"></i>
+						</div><div class="img-container" style="display: none;">
+						<img class="img-responsive attach-image-display">
+						<div class="img-overlay">
+							<span class="overlay-text">Change</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div style="flex: 1; font-size: 12px;">
+				<div class="form-group">
+					<input class="form-control" placeholder="Company" name="company" required="required">
+				</div>
+
+				<div class="form-group">
+					<input class="form-control" placeholder="Country" name="country" required="required">
+				</div>
+
+				<div class="form-group">
+					<input class="form-control" placeholder="Company Email" name="company_email" required="required">
+				</div>
+
+				<div class="form-group">
+					<textarea class="form-control" placeholder="About Your Company" name="company_description" required="required">
+					</textarea>
+				</div>
+
+				<div class="text-right">
+					<button type="submit" class="btn btn-primary btn-sm">${__('Submit')}</button>
+				</div>
+			</div>
+		</div>
+		</form>`;
+
+
+
+		this.$form_container.append(form_html);
+
+		this.$form_container.on('submit', (e) => {
+			e.preventDefault();
+
+			const formValues = this.$form_container.find('form').serializeArray();
+
+			console.log(formValues);
+		})
+	}
+}
+
+erpnext.hub.PublishItems = class PublishItems extends SubPage {
+	refresh() {
+		this.get_favourites()
+			.then(r => {
+				this.render(r.message);
+			});
+	}
+
+	render(items) {
+		const html = get_item_card_container_html(items, __(this.category));
+		this.$wrapper.html(html);
+	}
+
+	get_valid_items() {
+		return frappe.call('erpnext.hub_node.get_valid_items');
 	}
 }
 

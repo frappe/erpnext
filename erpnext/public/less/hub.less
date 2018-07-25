@@ -17,6 +17,10 @@ body[data-route^="marketplace/"] {
 		}
 	}
 
+	input, textarea {
+		font-size: @text-medium;
+	}
+
 	.hub-card {
 		border: 1px solid @border-color;
 		margin-bottom: 25px;
@@ -58,7 +62,6 @@ body[data-route^="marketplace/"] {
 		margin-bottom: 20px;
 
 		input {
-			font-size: @text-medium;
 			height: 32px;
 		}
 	}
@@ -100,6 +103,28 @@ body[data-route^="marketplace/"] {
 		height: 50px;
 		border-radius: 4px;
 		border: 1px solid @border-color;
+	}
+
+	.register-title {
+		font-size: @text-regular;
+	}
+
+	.register-form {
+		border: 1px solid @border-color;
+		border-radius: 4px;
+		padding: 15px 25px;
+	}
+
+	.form-container {
+		.frappe-control {
+			max-width: 100% !important;
+		}
+	}
+
+	.form-message {
+		padding-top: 0;
+		padding-bottom: 0;
+		border-bottom: none;
 	}
 }
 
