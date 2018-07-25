@@ -48,7 +48,7 @@ def add_transaction():
         if branch_id:
             company_id = branch_id
 
-        if vat_amount and not vat_amount:
+        if vat_amount and not vat_account:
             return dict(status=False, message="You must specify Vat Account since there is a vat")
         if not credit_amount and not debit_amount:
             return dict(status=False, message="Debit and credit cannot be both zero")
