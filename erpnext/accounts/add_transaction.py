@@ -10,33 +10,33 @@ from frappe.utils import flt
 
 @frappe.whitelist(allow_guest=True)
 def add_transaction():
-    # 'account',
-    # 'amount_type' => 'credit | debit’,
-    # 'amount',
+    # 'from_account',
+    # 'to_account',
+    # 'credit_amount',
+    # 'debit_amount',
     # 'statement',
-    # ‘operation’,
-    # ‘contract_id’,
-    # ‘payment_id’,
-    # ‘property_id’,
-    # ‘unit_id’,
-    # ‘user_id’
-    # ‘customer_id’
-    # ‘transaction_id’
+    # ‘company’
+    # ‘branch’
 
-    account = frappe.form_dict['account']
+    from_account = frappe.form_dict['from_account']
     to_account = frappe.form_dict['to_account']
-    amount_type = frappe.form_dict['amount_type']
-    amount = frappe.form_dict['amount']
-    # statement = frappe.form_dict['statement']
+    credit_amount = frappe.form_dict['credit_amount']
+    debit_amount = frappe.form_dict['debit_amount']
+    statement = frappe.form_dict['statement']
     # operation = frappe.form_dict['operation']
-    contract_id = frappe.form_dict['contract_id']
+    # contract_id = frappe.form_dict['contract_id']
     # payment_id = frappe.form_dict['payment_id']
     # property_id = frappe.form_dict['property_id']
     # unit_id = frappe.form_dict['unit_id']
-    user_id = frappe.form_dict['user_id']
-    customer_id = frappe.form_dict['customer_id']
-    transaction_id = frappe.form_dict['transaction_id']
-
+    # user_id = frappe.form_dict['user_id']
+    # customer_id = frappe.form_dict['customer_id']
+    # transaction_id = frappe.form_dict['transaction_id']
+    company_id = frappe.form_dict['company']
+    branch_id = frappe.form_dict.get('branch")
+    
+    if branch_id:
+        company_id = branch_id
+                                     
     if frappe.db.exists(
             "Customer",
             dict(
@@ -88,12 +88,15 @@ def add_transaction():
                 customer_name=user_id
             )
         )
-    if amount_type == "credit":
+    if credit_amount:
         customer, to_customer = to_customer, customer
         payment_type = "Receive"
-    else:
+        amount = credit_amount
+    elif debit_amount:
         payment_type = "Pay"
-    company_id = frappe.get_value("Company", dict(), "name")
+        amount = debit_amount
+    else:
+        frappe.throw("Debit and credit cannot be both zero")
     payment_entry = frappe.get_doc(
         dict(
             doctype="Payment Entry",
@@ -115,7 +118,7 @@ def add_transaction():
             received_amount=0,
             target_exchange_rate=1,
             base_received_amount=0,
-            reference_no="{0}-{1}".format(transaction_id, contract_id),
+            reference_no="{0}".format(contract_id),
             reference_date=datetime.now().date()
         )
     )
