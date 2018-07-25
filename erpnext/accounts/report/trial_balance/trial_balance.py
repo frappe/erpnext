@@ -270,19 +270,3 @@ def get_columns():
 def prepare_opening_and_closing(d):
 	d["closing_debit"] = d["opening_debit"] + d["debit"]
 	d["closing_credit"] = d["opening_credit"] + d["credit"]
-
-	if d["closing_debit"] > d["closing_credit"]:
-		d["closing_debit"] -= d["closing_credit"]
-		d["closing_credit"] = 0.0
-
-	else:
-		d["closing_credit"] -= d["closing_debit"]
-		d["closing_debit"] = 0.0
-
-	if d["opening_debit"] > d["opening_credit"]:
-		d["opening_debit"] -= d["opening_credit"]
-		d["opening_credit"] = 0.0
-
-	else:
-		d["opening_credit"] -= d["opening_debit"]
-		d["opening_debit"] = 0.0
