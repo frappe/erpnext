@@ -32,7 +32,7 @@ class Attendance(Document):
 				else:
 					self.status = 'On Leave'
 					self.leave_type = d.leave_type
-					frappe.msgprint(_("Employee {0} on Leave on {1}").format(self.employee, self.attendance_date))
+					frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
 
 		if self.status == "On Leave" and not leave_record:
 			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
