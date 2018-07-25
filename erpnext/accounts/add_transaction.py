@@ -21,7 +21,7 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-    frappe.throw(str(frappe.form_dict))
+    frappe.throw(str(frappe.form_dict.get('from_account')))
 
     try:
         frappe.db.begin()
