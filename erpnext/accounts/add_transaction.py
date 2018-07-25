@@ -163,7 +163,7 @@ def add_transaction():
                         account_name=("like", "%vat 5%"),
                         company=company_id
                     ),
-                    "account_name"
+                    "name"
                 )
                 journal_entry.append("accounts", dict(
                     account=vat_account,
@@ -212,7 +212,7 @@ def add_transaction():
                         account_name=("like", "%vat 5%"),
                         company=company_id
                     ),
-                    "account_name"
+                    "name"
                 )
                 journal_entry.append("accounts", dict(
                     account=vat_account,
