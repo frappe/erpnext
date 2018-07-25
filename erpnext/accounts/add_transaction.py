@@ -6,6 +6,7 @@ from datetime import datetime
 import frappe
 from erpnext.accounts.general_ledger import make_gl_entries
 from frappe.utils import flt
+import json
 
 
 @frappe.whitelist(allow_guest=True)
@@ -22,7 +23,7 @@ def add_transaction():
     # ‘contract_id’
     # `vat_amount`
     
-    data = frappe.form_dict
+    data = json.loads(frappe.form_dict)
     try:
         frappe.db.begin()
         frappe.set_user("Administrator")
