@@ -21,6 +21,16 @@ body[data-route^="marketplace/"] {
 		font-size: @text-medium;
 	}
 
+	.btn-primary {
+		background-color: #89da28;
+		border-color: #61ca23;
+	}
+
+	.btn-primary:hover {
+		background-color: #61ca23;
+		border-color: #59b81c;
+	}
+
 	.hub-card {
 		border: 1px solid @border-color;
 		margin-bottom: 25px;
@@ -28,8 +38,18 @@ body[data-route^="marketplace/"] {
 		overflow: hidden;
 		cursor: pointer;
 
-		&:hover .hub-card-overlay {
+		&:hover .overlay {
 			display: block;
+		}
+
+		&.active {
+			.hub-card-header {
+				background-color: #f4ffe5;
+			}
+
+			.octicon-check {
+				display: inline;
+			}
 		}
 	}
 
@@ -37,6 +57,14 @@ body[data-route^="marketplace/"] {
 		padding: 12px 15px;
 		height: 60px;
 		border-bottom: 1px solid @border-color;
+
+		display: flex;
+		justify-content: space-between;
+
+		.octicon-check {
+			display: none;
+			font-size: 20px;
+		}
 	}
 
 	.hub-card-body {
@@ -44,13 +72,21 @@ body[data-route^="marketplace/"] {
 		height: 200px;
 	}
 
-	.hub-card-overlay {
+	.overlay {
 		display: none;
 		position: absolute;
+	}
+
+	.hub-card-overlay {
 		top: 0;
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.1);
+	}
+
+	.button-overlay {
+		top: 155px;
+		left: 15px;
 	}
 
 	.hub-card-image {
