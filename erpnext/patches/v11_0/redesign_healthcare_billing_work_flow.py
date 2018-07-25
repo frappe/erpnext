@@ -19,6 +19,7 @@ def execute():
 
 			if frappe.db.has_column(si_ref_doc, sales_invoice_referenced_doc[si_ref_doc]) \
 			and frappe.db.has_column(si_ref_doc, 'invoiced'):
+				# Set Reference DocType and Reference Docname
 				doc_list = frappe.db.sql("""
 							select name from `tab{0}`
 							where {1} is not null
@@ -26,21 +27,24 @@ def execute():
 				if doc_list:
 					frappe.reload_doc(get_doctype_module("Sales Invoice"), 'doctype', 'sales_invoice')
 					for doc_id in doc_list:
-						invoice_id = frappe.db.get_value(si_ref_doc, doc_id[0][0], sales_invoice_referenced_doc[si_ref_doc])
+						invoice_id = frappe.db.get_value(si_ref_doc, doc_id[0], sales_invoice_referenced_doc[si_ref_doc])
 						invoice = frappe.get_doc("Sales Invoice", invoice_id)
-						if invoice.docstatus == 1 and invoice.items:
+						if invoice.items:
 							marked = False
 							if not marked:
 								for item_line in invoice.items:
 									marked = True
-									item_line.reference_dt = si_ref_doc
-									item_line.reference_dn = doc_id[0][0]
-							invoice.update()
+									frappe.db.sql("""
+												update `tabSales Invoice Item`
+												set reference_dt = '{0}', reference_dn = '{1}'
+												where name = '{2}'
+											""".format(si_ref_doc, doc_id[0], item_line.name))
 
-
+				# Documents mark invoiced for submitted sales invoice
 				frappe.db.sql("""
-							update `tab{0}` set invoiced = 1
-							where {1} is not null
+							update `tab{0}` doc, `tabSales Invoice` si
+							set doc.invoiced = 1
+							where si.docstatus = 1 and doc.{1} = si.name
 						""".format(si_ref_doc, sales_invoice_referenced_doc[si_ref_doc]))
 
 def healthcare_custom_field_in_sales_invoice():
