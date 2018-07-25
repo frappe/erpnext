@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 import frappe
-from erpnext.accounts.general_ledger import make_gl_entries
+# from erpnext.accounts.general_ledger import make_gl_entries
 from frappe.utils import flt
-import json
 
 
 @frappe.whitelist(allow_guest=True)
@@ -22,6 +21,7 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
+    # `vat_account`
     try:
         data = frappe.form_dict
 
@@ -41,11 +41,19 @@ def add_transaction():
         company_id = data.get('company')
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount'))
+        vat_account = float(data.get('vat_account'))
 
         frappe.set_user("Administrator")
 
         if branch_id:
             company_id = branch_id
+
+        if vat_amount and not vat_amount:
+            return dict(status=False, message="You must specify Vat Account since there is a vat")
+        if not credit_amount and not debit_amount:
+            return dict(status=False, message="Debit and credit cannot be both zero")
+        if from_account == to_account:
+            return dict(status=False, message="You cannot transfer within the same account")
 
         if not frappe.db.exists(
                 "Customer",
@@ -105,8 +113,6 @@ def add_transaction():
         # elif debit_amount:
         #     payment_type = "Pay"
         #     amount = debit_amount
-        if not credit_amount and not debit_amount:
-            frappe.throw("Debit and credit cannot be both zero")
 
         journal_entry = frappe.get_doc(
             dict(
@@ -157,14 +163,6 @@ def add_transaction():
                 against_account=from_account,
             ))
             if vat_amount:
-                vat_account = frappe.get_value(
-                    "Account",
-                    dict(
-                        account_name=("like", "%vat 5%"),
-                        company=company_id
-                    ),
-                    "name"
-                )
                 journal_entry.append("accounts", dict(
                     account=vat_account,
                     party_type="Company",
@@ -206,14 +204,6 @@ def add_transaction():
                 against_account=from_account,
             ))
             if vat_amount:
-                vat_account = frappe.get_value(
-                    "Account",
-                    dict(
-                        account_name=("like", "%vat 5%"),
-                        company=company_id
-                    ),
-                    "name"
-                )
                 journal_entry.append("accounts", dict(
                     account=vat_account,
                     party_type="Company",
@@ -267,8 +257,7 @@ def add_transaction():
         #         merge_entries=False)
         frappe.db.commit()
     except Exception as e:
-        import traceback
-        frappe.throw("{0} - {1}".format(str(e), traceback.format_exc()))
+        return dict(status=False, message=str(e))
     return dict(status=True, message="Transactions are added to erpnext successfully")
 
 
