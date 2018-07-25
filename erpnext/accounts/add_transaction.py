@@ -22,11 +22,10 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-    frappe.throw(str(frappe.form_dict))
-    try:
-        data = json.loads(str(frappe.form_dict))
 
-        frappe.set_user("Administrator")
+    try:
+        data = frappe.form_dict
+
         from_account = data.get('from_account')
         to_account = data.get('to_account')
         credit_amount = float(data.get('credit_amount'))
@@ -43,6 +42,7 @@ def add_transaction():
         company_id = data.get('company')
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount'))
+        frappe.set_user("Administrator")
 
         if branch_id:
             company_id = branch_id
