@@ -180,7 +180,7 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 	created = frappe.db.get_value(ref_dt, ref_dn, created_check_field)
 	if created == 1:
 		# Fetch the doc created for the prescription
-		doc_created = frappe.db.get_value(dt, {'prescription': item.reference_dn})
+		doc_created = frappe.db.get_value(dt, {'prescription': ref_dn})
 		frappe.db.set_value(dt, doc_created, 'invoiced', invoiced)
 
 def manage_fee_validity(appointment_name, method, ref_invoice=None):
