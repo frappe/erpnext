@@ -203,7 +203,8 @@ def add_transaction():
             vat_account = frappe.get_value(
                 "Account",
                 dict(
-                    account_name=("like", "%vat%")
+                    account_name=("like", "%vat 5%"),
+                    company=company_id
                 ),
                 "account_name"
             )
