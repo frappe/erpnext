@@ -131,24 +131,15 @@ class LeaveApplication(Document):
 			elif getdate(self.to_date) <= getdate(nowdate()):
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
-					if not date == self.half_day_date:
-						doc = frappe.new_doc("Attendance")
-						doc.employee = self.employee
-						doc.attendance_date = date
-						doc.company = self.company
-						doc.status = "On Leave"
-						doc.leave_type = self.leave_type
-						doc.insert(ignore_permissions=True)
-						doc.submit()
-					else:
-						doc = frappe.new_doc("Attendance")
-						doc.employee = self.employee
-						doc.attendance_date = date
-						doc.company = self.company
-						doc.status = "Half Day"
-						doc.leave_type = self.leave_type
-						doc.insert(ignore_permissions=True)
-						doc.submit()
+					doc = frappe.new_doc("Attendance")
+					doc.employee = self.employee
+					doc.attendance_date = date
+					doc.company = self.company
+					doc.leave_type = self.leave_type
+					doc.status = "Half Day" if date == self.half_day_date else "On Leave"
+					doc.flags.ignore_validate = True
+					doc.insert(ignore_permissions=True)
+					doc.submit()
 
 	def cancel_attendance(self):
 		if self.docstatus == 2:

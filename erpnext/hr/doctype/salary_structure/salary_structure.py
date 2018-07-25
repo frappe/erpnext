@@ -8,12 +8,23 @@ from frappe.utils import flt, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
+from six import iteritems
 
 class SalaryStructure(Document):
 	def validate(self):
+		self.set_missing_values()
 		self.validate_amount()
 		self.strip_condition_and_formula_fields()
 		self.validate_max_benefits_with_flexi()
+
+	def set_missing_values(self):
+		fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		for table in ["earnings", "deductions"]:
+			for d in self.get(table):
+				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component), fields, as_dict=1)
+				for fieldname, value in iteritems(component_default_value):
+					if d.get(fieldname) != value:
+						d[fieldname] = value		
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
