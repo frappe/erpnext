@@ -27,8 +27,8 @@ def add_transaction():
 
         from_account = data.get('from_account')
         to_account = data.get('to_account')
-        credit_amount = float(data.get('credit_amount'))
-        debit_amount = float(data.get('debit_amount'))
+        credit_amount = float(data.get('credit_amount', 0))
+        debit_amount = float(data.get('debit_amount', 0))
         statement = data.get('statement')
         # operation = frappe.form_dict['operation']
         contract_id = data.get('contract_id')
@@ -40,7 +40,7 @@ def add_transaction():
         # transaction_id = frappe.form_dict['transaction_id']
         company_id = data.get('company')
         branch_id = data.get('branch')
-        vat_amount = float(data.get('vat_amount'))
+        vat_amount = float(data.get('vat_amount', 0))
         vat_account = data.get('vat_account')
 
         frappe.set_user("Administrator")
