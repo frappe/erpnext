@@ -304,7 +304,7 @@ def save_entries(doctype, entries):
 		save(entry)
 
 # A quickbooks api contraint
-MAX_RESULT_COUNT = 10
+MAX_RESULT_COUNT = 1000
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
 qb_map = {
 	"Account": "Account",
