@@ -44,7 +44,7 @@ def add_transaction():
         if branch_id:
             company_id = branch_id
 
-        if frappe.db.exists(
+        if not frappe.db.exists(
                 "Customer",
                 dict(
                     customer_name=customer_id
@@ -70,7 +70,7 @@ def add_transaction():
                 )
             )
 
-        if frappe.db.exists(
+        if not frappe.db.exists(
                 "Customer",
                 dict(
                     customer_name=user_id
