@@ -21,27 +21,27 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-    frappe.throw(str(frappe.form_dict.get('from_account')))
-
+    
+    data = frappe.form_dict
     try:
         frappe.db.begin()
         frappe.set_user("Administrator")
-        from_account = frappe.form_dict.get('from_account', frappe.local.form_dict.get('from_account'))
-        to_account = frappe.form_dict.get('to_account', frappe.local.form_dict.get('to_account'))
-        credit_amount = float(frappe.form_dict.get('credit_amount', frappe.local.form_dict.get('credit_amount', 0)))
-        debit_amount = float(frappe.form_dict.get('debit_amount', frappe.local.form_dict.get('debit_amount', 0)))
-        statement = frappe.form_dict.get('statement', frappe.local.form_dict.get('statement'))
+        from_account = data.get('from_account')
+        to_account = data.get('to_account')
+        credit_amount = float(data.get('credit_amount'))
+        debit_amount = float(data.get('debit_amount'))
+        statement = data.get('statement')
         # operation = frappe.form_dict['operation']
-        contract_id = frappe.form_dict.get('contract_id', frappe.local.form_dict.get('contract_id'))
+        contract_id = data.get('contract_id')
         # payment_id = frappe.form_dict['payment_id']
         # property_id = frappe.form_dict['property_id']
         # unit_id = frappe.form_dict['unit_id']
-        user_id = frappe.form_dict.get('user_id', frappe.local.form_dict.get('user_id'))
-        customer_id = frappe.form_dict.get('customer_id', frappe.local.form_dict.get('customer_id'))
+        user_id = data.get('user_id')
+        customer_id = data.get('customer_id')
         # transaction_id = frappe.form_dict['transaction_id']
-        company_id = frappe.form_dict.get('company', frappe.local.form_dict.get('company'))
-        branch_id = frappe.form_dict.get('branch', frappe.local.form_dict.get('branch'))
-        vat_amount = float(frappe.form_dict.get('vat_amount', frappe.local.form_dict.get('vat_amount', 0)))
+        company_id = data.get('company')
+        branch_id = data.get('branch')
+        vat_amount = float(data.get('vat_amount'))
 
         if branch_id:
             company_id = branch_id
