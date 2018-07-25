@@ -245,7 +245,7 @@ def get_items(lines):
 
 def get_taxes(lines):
 	taxes = []
-	for line in taxes:
+	for line in lines:
 		taxes.append({
 			"charge_type": "Actual",
 
