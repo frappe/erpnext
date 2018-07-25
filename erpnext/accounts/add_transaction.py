@@ -35,11 +35,11 @@ def add_transaction():
     customer_id = frappe.form_dict['customer_id']
     # transaction_id = frappe.form_dict['transaction_id']
     company_id = frappe.form_dict['company']
-    branch_id = frappe.form_dict.get('branch")
-    
+    branch_id = frappe.form_dict.get('branch')
+
     if branch_id:
         company_id = branch_id
-                                     
+
     if frappe.db.exists(
             "Customer",
             dict(
@@ -111,7 +111,7 @@ def add_transaction():
             party_type="Customer",
             party=to_customer.name,
             party_name=to_customer.customer_name,
-            paid_from=account,
+            paid_from=from_account,
             paid_from_account_currency="SAR",
             paid_to=to_account,
             paid_to_account_currency="SAR",
