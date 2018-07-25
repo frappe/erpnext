@@ -31,12 +31,18 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 
 	return listing
 
-
-
+#### LOCAL ITEMS
 @frappe.whitelist()
 def get_valid_items():
-	items = frappe.get_list('Item')
-	return items
+	items = frappe.get_list('Item', fields=["*"])
+	valid_items = filter(lambda x: x.image and x.description, items)
+
+	def attach_source_type(item):
+		item.source_type = "local"
+		return item
+
+	valid_items = map(lambda x: attach_source_type(x), valid_items)
+	return valid_items
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):

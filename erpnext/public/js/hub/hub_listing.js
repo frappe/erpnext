@@ -26,6 +26,8 @@ erpnext.hub.Marketplace = class Marketplace {
 			const $target = $(e.currentTarget);
 			const route = $target.data().route;
 			frappe.set_route(route);
+		
+			e.stopPropagation();
 		});
 	}
 
@@ -43,6 +45,12 @@ erpnext.hub.Marketplace = class Marketplace {
 				<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
 					${__('Become a seller')}
 				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
+					${__('Your Profile')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
+					${__('Publish Products')}
+				</li>
 			</ul>
 		`);
 
@@ -59,6 +67,9 @@ erpnext.hub.Marketplace = class Marketplace {
 					</li>`,
 					`<li class="hub-sidebar-item active" data-route="marketplace/home">
 						${__('All')}
+					</li>`,
+					`<li class="hub-sidebar-item" data-route="marketplace/published">
+						${__('Your Products')}
 					</li>`,
 					...categories.map(category => `
 						<li class="hub-sidebar-item text-muted" data-route="marketplace/category/${category}">
@@ -117,6 +128,10 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		if (route[1] === 'register' && !this.subpages.register) {
 			this.subpages.register = new erpnext.hub.Register(this.$body);
+		}
+
+		if (route[1] === 'publish' && !this.subpages.publish) {
+			this.subpages.publish = new erpnext.hub.Publish(this.$body);
 		}
 
 
@@ -217,7 +232,7 @@ erpnext.hub.Favourites = class Favourites extends SubPage {
 
 	render(items) {
 		const html = get_item_card_container_html(items, __('Favourites'));
-		this.$wrapper.html(html)
+		this.$wrapper.append(html)
 	}
 }
 
@@ -241,7 +256,7 @@ erpnext.hub.Category = class Category extends SubPage {
 
 	render(items) {
 		const html = get_item_card_container_html(items, __(this.category));
-		this.$wrapper.html(html)
+		this.$wrapper.append(html)
 	}
 }
 
@@ -551,77 +566,42 @@ erpnext.hub.Register = class Register extends SubPage {
 				});
 		});
 	}
-
-	make_form() {
-		const form_html = `<form class="register-form">
-		<div class="register-title margin-bottom margin-top">
-			<b>Become a Seller</b>
-		</div>
-
-		<div class="flex">
-			<div style="flex: 0 0 140px" class="margin-right">
-				<div>			
-					<div class="missing-image attach-missing-image">
-						<i class="octicon octicon-device-camera"></i>
-						</div><div class="img-container" style="display: none;">
-						<img class="img-responsive attach-image-display">
-						<div class="img-overlay">
-							<span class="overlay-text">Change</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div style="flex: 1; font-size: 12px;">
-				<div class="form-group">
-					<input class="form-control" placeholder="Company" name="company" required="required">
-				</div>
-
-				<div class="form-group">
-					<input class="form-control" placeholder="Country" name="country" required="required">
-				</div>
-
-				<div class="form-group">
-					<input class="form-control" placeholder="Company Email" name="company_email" required="required">
-				</div>
-
-				<div class="form-group">
-					<textarea class="form-control" placeholder="About Your Company" name="company_description" required="required">
-					</textarea>
-				</div>
-
-				<div class="text-right">
-					<button type="submit" class="btn btn-primary btn-sm">${__('Submit')}</button>
-				</div>
-			</div>
-		</div>
-		</form>`;
-
-
-
-		this.$form_container.append(form_html);
-
-		this.$form_container.on('submit', (e) => {
-			e.preventDefault();
-
-			const formValues = this.$form_container.find('form').serializeArray();
-
-			console.log(formValues);
-		})
-	}
 }
 
-erpnext.hub.PublishItems = class PublishItems extends SubPage {
+erpnext.hub.Publish = class Publish extends SubPage {
+	constructor(parent) {
+		super(parent);
+		// this.selected_items = [];
+	}
+
 	refresh() {
-		this.get_favourites()
+		this.get_valid_items()
 			.then(r => {
 				this.render(r.message);
 			});
 	}
 
 	render(items) {
-		const html = get_item_card_container_html(items, __(this.category));
-		this.$wrapper.html(html);
+		const html = get_item_card_container_html(
+			items, 
+
+			__('Select Products to Publish'),
+
+			__(`Only products with an image and description can be published. 
+			Please update them if an item in your inventory does not appear.`),
+
+			`<div class="hub-search-container">
+				<input type="text" class="form-control" placeholder="Search Items">
+			</div>`
+		);
+
+		const container = $(html);
+		container.addClass('static').on('click', '.hub-card', (e) => {
+			const $target = $(e.currentTarget);
+			$target.toggleClass('active');
+		});
+
+		this.$wrapper.append(container);
 	}
 
 	get_valid_items() {
@@ -629,17 +609,23 @@ erpnext.hub.PublishItems = class PublishItems extends SubPage {
 	}
 }
 
-function get_item_card_container_html(items, title) {
-	const html = (items || []).map(item => get_item_card_html(item)).join('');
+function get_item_card_container_html(items, title, subtitle='', search_html='') {
+	const items_html = (items || []).map(item => get_item_card_html(item)).join('');
 
-	return `
-		<div class="row hub-card-container">
-			<div class="col-md-12 margin-bottom">
-				<b>${title}</b>
-			</div>
-			${html}
+	const html = `<div class="row hub-card-container">
+		<div class="col-md-12 margin-bottom">
+			<b>${title}</b>
+
+			<p class="text-muted">${subtitle}</p>
+
+			${search_html}
 		</div>
-	`;
+
+		${items_html}
+
+	</div>`;
+
+	return html;
 }
 
 function get_item_card_html(item) {
@@ -648,8 +634,8 @@ function get_item_card_html(item) {
 
 	const img_url = item.image;
 	const company_name = item.company_name;
-	const route = `marketplace/item/${item.hub_item_code}`;
 
+	// Subtitle
 	let subtitle = [comment_when(item.creation)];
 	const rating = get_rating(item);
 	if (rating > 0) {
@@ -660,16 +646,36 @@ function get_item_card_html(item) {
 	let dot_spacer = '<span aria-hidden="true"> · </span>';
 	subtitle = subtitle.join(dot_spacer);
 
+	// Decide item link
+	const isLocal = item.source_type === "local";
+	const route = !isLocal 
+		? `marketplace/item/${item.hub_item_code}`
+		: `Form/Item/${item.item_name}`;
+
+	const card_route = isLocal ? '' : `data-route='${route}'`;
+
+	const show_local_item_button = isLocal 
+		? `<div class="overlay button-overlay" data-route='${route}' onclick="event.preventDefault();">
+				<button class="btn btn-default zoom-view">
+					<i class="octicon octicon-eye"></i>
+				</button>
+			</div>`
+		: '';
+
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
-			<div class="hub-card" data-route="${route}">
+			<div class="hub-card" ${card_route}>
 				<div class="hub-card-header">
-					<div class="hub-card-title ellipsis bold">${title}</div>
-					<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+					<div class="title">
+						<div class="hub-card-title ellipsis bold">${title}</div>
+						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+					</div>
+					<i class="octicon octicon-check text-success"></i>
 				</div>
 				<div class="hub-card-body">
 					<img class="hub-card-image ${item.image ? '' : 'no-image'}" src="${img_url}" />
-					<div class="hub-card-overlay"></div>
+					<div class="overlay hub-card-overlay"></div>
+					${show_local_item_button}
 				</div>
 			</div>
 		</div>
@@ -904,23 +910,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	renderHeader() {
-		return `<header class="level list-row-head text-muted small">
-			<div class="level-left list-header-subject">
-				<div class="list-row-col list-subject level ">
-					<img title="Riadco%20Group" alt="Riadco Group" src="https://cdn.pbrd.co/images/HdaPxcg.png">
-					<span class="level-item">Products by Blah blah</span>
-				</div>
-			</div>
-			<div class="level-left checkbox-actions">
-				<div class="level list-subject">
-					<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
-					<span class="level-item list-header-meta"></span>
-				</div>
-			</div>
-			<div class="level-right">
-				${''}
-			</div>
-		</header>`;
+		return ``;
 	}
 
 	get_image_html(encoded_name, src, alt_text) {
