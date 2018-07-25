@@ -22,10 +22,11 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-    
+    data = json.loads(str(frappe.form_dict))
+    frappe.throw(data)
     try:
-        data = json.loads(frappe.form_dict)
-        frappe.db.begin()
+        data = json.loads(str(frappe.form_dict))
+        
         frappe.set_user("Administrator")
         from_account = data.get('from_account')
         to_account = data.get('to_account')
