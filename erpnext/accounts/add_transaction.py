@@ -17,6 +17,9 @@ def add_transaction():
     # 'statement',
     # ‘company’
     # ‘branch’
+    # ‘user_id’
+    # ‘customer_id’
+    # ‘contract_id’
 
     from_account = frappe.form_dict['from_account']
     to_account = frappe.form_dict['to_account']
@@ -24,12 +27,12 @@ def add_transaction():
     debit_amount = frappe.form_dict['debit_amount']
     statement = frappe.form_dict['statement']
     # operation = frappe.form_dict['operation']
-    # contract_id = frappe.form_dict['contract_id']
+    contract_id = frappe.form_dict['contract_id']
     # payment_id = frappe.form_dict['payment_id']
     # property_id = frappe.form_dict['property_id']
     # unit_id = frappe.form_dict['unit_id']
-    # user_id = frappe.form_dict['user_id']
-    # customer_id = frappe.form_dict['customer_id']
+    user_id = frappe.form_dict['user_id']
+    customer_id = frappe.form_dict['customer_id']
     # transaction_id = frappe.form_dict['transaction_id']
     company_id = frappe.form_dict['company']
     branch_id = frappe.form_dict.get('branch")
