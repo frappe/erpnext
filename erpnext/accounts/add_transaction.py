@@ -41,7 +41,7 @@ def add_transaction():
         company_id = data.get('company')
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount'))
-        vat_account = float(data.get('vat_account'))
+        vat_account = data.get('vat_account')
 
         frappe.set_user("Administrator")
 
