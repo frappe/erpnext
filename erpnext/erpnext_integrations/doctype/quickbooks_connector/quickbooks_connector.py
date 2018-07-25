@@ -66,7 +66,7 @@ def callback(*args, **kwargs):
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
 	make_custom_fields()
 	make_root_accounts()
-	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry"]
+	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
 	for doctype in relevant_doctypes:
 		fetch_all_entries(doctype=doctype, token=token, company_id=company_id)
 
@@ -230,6 +230,32 @@ def save_ge(ge):
 		import traceback
 		traceback.print_exc()
 
+def save_pi(pi):
+	try:
+		frappe.get_doc({
+			"doctype": "Purchase Invoice",
+			"quickbooks_id": pi["Id"],
+			"naming_series": "PINV-",
+			"currency": pi["CurrencyRef"]["value"],
+			"posting_date": pi["TxnDate"],
+			"due_date": pi.get("DueDate", "2020-01-01"),
+			"credit_to": frappe.get_all("Account",
+				filters={
+					"quickbooks_id": pi["APAccountRef"]["value"]
+				})[0]["name"],
+			"supplier": frappe.get_all("Supplier",
+				filters={
+					"quickbooks_id": pi["VendorRef"]["value"]
+				})[0]["name"],
+			"items": get_pi_items(pi["Line"]),
+			"taxes": get_taxes(pi["TxnTaxDetail"]["TaxLine"]),
+			"set_posting_time": 1
+		}).insert().submit()
+		frappe.db.commit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -276,6 +302,41 @@ def get_items(lines):
 			})
 	return items
 
+def get_pi_items(lines):
+	items = []
+	for line in lines:
+		if line["DetailType"] == "ItemBasedExpenseLineDetail":
+			item = frappe.db.get_all("Item",
+				filters={
+					"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"]
+				},
+				fields=["name", "stock_uom"]
+			)[0]
+			items.append({
+				"item_code": item["name"],
+				"conversion_factor": 1,
+				"expense_account": "Cost of sales - QB - SA",
+				"uom": item["stock_uom"],
+				"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
+				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
+				"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
+			})
+		elif line["DetailType"] == "AccountBasedExpenseLineDetail":
+			items.append({
+				"item_name": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
+				"conversion_factor": 1,
+				"expense_account": frappe.db.get_all("Account",
+						filters={
+							"quickbooks_id": line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]
+						},
+					)[0]["name"],
+				"uom": "Unit",
+				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
+				"qty": 1,
+				"price_list_rate": line["Amount"],
+			})
+	return items
+
 def get_taxes(lines):
 	taxes = []
 	for line in lines:
@@ -308,7 +369,7 @@ def create_address(entity, doctype, address, address_type):
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry"]
+	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -330,6 +391,7 @@ save_methods = {
 	"Supplier": save_supplier,
 	"Sales Invoice": save_si,
 	"Journal Entry": save_ge,
+	"Purchase Invoice": save_pi,
 }
 
 def save_entries(doctype, entries):
@@ -347,6 +409,7 @@ qb_map = {
 	"Supplier": "Vendor",
 	"Sales Invoice": "Invoice",
 	"Journal Entry": "JournalEntry",
+	"Purchase Invoice": "Bill",
 }
 
 def fetch_all_entries(doctype="", token="", company_id=1):
