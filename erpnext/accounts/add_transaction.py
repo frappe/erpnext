@@ -41,7 +41,7 @@ def add_transaction():
         company_id = data.get('company')
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount'))
-    
+
         frappe.set_user("Administrator")
 
         if branch_id:
@@ -73,39 +73,39 @@ def add_transaction():
                 )
             )
 
-        if not frappe.db.exists(
-                "Customer",
-                dict(
-                    customer_name=user_id
-                )
-        ):
-            customer = frappe.get_doc(
-                doctype="Customer",
-                naming_series="CUST-",
-                customer_name=user_id,
-                customer_type="Company",
-                customer_group="Commercial",
-                territory="All Territories",
-                disabled=0,
-                default_currency="SAR",
-                language="ar"
-            )
-            customer.insert(ignore_permissions=True)
-        else:
-            customer = frappe.get_doc(
-                "Customer",
-                dict(
-                    customer_name=user_id
-                )
-            )
-        if credit_amount:
-            customer, to_customer = to_customer, customer
-            payment_type = "Receive"
-            amount = credit_amount
-        elif debit_amount:
-            payment_type = "Pay"
-            amount = debit_amount
-        else:
+        # if not frappe.db.exists(
+        #         "Customer",
+        #         dict(
+        #             customer_name=user_id
+        #         )
+        # ):
+        #     customer = frappe.get_doc(
+        #         doctype="Customer",
+        #         naming_series="CUST-",
+        #         customer_name=user_id,
+        #         customer_type="Company",
+        #         customer_group="Commercial",
+        #         territory="All Territories",
+        #         disabled=0,
+        #         default_currency="SAR",
+        #         language="ar"
+        #     )
+        #     customer.insert(ignore_permissions=True)
+        # else:
+        #     customer = frappe.get_doc(
+        #         "Customer",
+        #         dict(
+        #             customer_name=user_id
+        #         )
+        #     )
+        # if credit_amount:
+        #     customer, to_customer = to_customer, customer
+        #     payment_type = "Receive"
+        #     amount = credit_amount
+        # elif debit_amount:
+        #     payment_type = "Pay"
+        #     amount = debit_amount
+        if not credit_amount and not debit_amount:
             frappe.throw("Debit and credit cannot be both zero")
 
         journal_entry = frappe.get_doc(
