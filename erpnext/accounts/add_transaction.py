@@ -20,11 +20,12 @@ def add_transaction():
     # ‘user_id’
     # ‘customer_id’
     # ‘contract_id’
+    # `vat_amount`
 
     from_account = frappe.form_dict['from_account']
     to_account = frappe.form_dict['to_account']
-    credit_amount = frappe.form_dict['credit_amount']
-    debit_amount = frappe.form_dict['debit_amount']
+    credit_amount = float(frappe.form_dict['credit_amount'])
+    debit_amount = float(frappe.form_dict['debit_amount'])
     statement = frappe.form_dict['statement']
     # operation = frappe.form_dict['operation']
     contract_id = frappe.form_dict['contract_id']
@@ -36,6 +37,7 @@ def add_transaction():
     # transaction_id = frappe.form_dict['transaction_id']
     company_id = frappe.form_dict['company']
     branch_id = frappe.form_dict.get('branch')
+    vat_amount = float(frappe.form_dict.get('vat_amount'))
 
     if branch_id:
         company_id = branch_id
@@ -100,43 +102,162 @@ def add_transaction():
         amount = debit_amount
     else:
         frappe.throw("Debit and credit cannot be both zero")
-    payment_entry = frappe.get_doc(
+
+    journal_entry = frappe.get_doc(
         dict(
-            doctype="Payment Entry",
-            naming_series="PE-",
-            payment_type=payment_type,
-            posting_date=datetime.now().date(),
+            doctype="Journal Entry",
+            title=statement,
+            voucher_type="Journal Entry",
+            naming_series="JV-",
+            posting_date=datetime.now(),
             company=company_id,
-            mode_of_payment="Cash",
-            party_type="Customer",
-            party=to_customer.name,
-            party_name=to_customer.customer_name,
-            paid_from=from_account,
-            paid_from_account_currency="SAR",
-            paid_to=to_account,
-            paid_to_account_currency="SAR",
-            paid_amount=abs(amount),
-            source_exchange_rate=1,
-            base_paid_amount=abs(amount),
-            received_amount=0,
-            target_exchange_rate=1,
-            base_received_amount=0,
-            reference_no="{0}".format(contract_id),
-            reference_date=datetime.now().date()
+            user_remark=statement,
+            total_debit=abs(debit_amount),
+            total_credit=abs(credit_amount),
+            difference=abs(debit_amount - credit_amount),
+            multi_currency=0,
+            remark=statement,
+            bill_no=contract_id,
+            bill_date=datetime.now(),
+            is_opening="No",
+            accounts=[]
         )
     )
-    payment_entry.insert(ignore_permissions=True)
+    project = frappe.get_value("Project", dict(), "name")
+    if credit_amount:
+        journal_entry.append("accounts", dict(
+            account=from_account,
+            party_type="Customer",
+            party=to_customer.name,
+            exchange_rate=1,
+            debit_in_account_currency=0,
+            debit=0,
+            credit_in_account_currency=abs(credit_amount),
+            credit=abs(credit_amount),
+            project=project,
+            is_advance="No",
+            against_account=to_account,
+        ))
+        journal_entry.append("accounts", dict(
+            account=to_account,
+            party_type="Company",
+            party=company_id,
+            exchange_rate=1,
+            debit_in_account_currency=0,
+            debit=0,
+            credit_in_account_currency=abs(credit_amount) - abs(vat_amount),
+            credit=abs(credit_amount) - abs(vat_amount),
+            project=project,
+            is_advance="No",
+            against_account=from_account,
+        ))
+        if vat_amount:
+            vat_account = frappe.get_value(
+                "Account",
+                dict(
+                    account_name=("like", "%vat%")
+                ),
+                "account_name"
+            )
+            journal_entry.append("accounts", dict(
+                account=vat_account,
+                party_type="Company",
+                party=company_id,
+                exchange_rate=1,
+                debit_in_account_currency=0,
+                debit=0,
+                credit_in_account_currency=abs(vat_amount),
+                credit=abs(vat_amount),
+                project=project,
+                is_advance="No",
+                against_account=from_account,
+            ))
+    else:
+        journal_entry.append("accounts", dict(
+            account=from_account,
+            party_type="Customer",
+            party=to_customer.name,
+            exchange_rate=1,
+            debit_in_account_currency=abs(credit_amount),
+            debit=abs(credit_amount),
+            credit_in_account_currency=0,
+            credit=0,
+            project=project,
+            is_advance="No",
+            against_account=to_account,
+        ))
+        journal_entry.append("accounts", dict(
+            account=to_account,
+            party_type="Company",
+            party=company_id,
+            exchange_rate=1,
+            debit_in_account_currency=abs(credit_amount) - abs(vat_amount),
+            debit=abs(credit_amount) - abs(vat_amount),
+            credit_in_account_currency=0,
+            credit=0,
+            project=project,
+            is_advance="No",
+            against_account=from_account,
+        ))
+        if vat_amount:
+            vat_account = frappe.get_value(
+                "Account",
+                dict(
+                    account_name=("like", "%vat%")
+                ),
+                "account_name"
+            )
+            journal_entry.append("accounts", dict(
+                account=vat_account,
+                party_type="Company",
+                party=company_id,
+                exchange_rate=1,
+                debit_in_account_currency=abs(vat_amount),
+                debit=abs(vat_amount),
+                credit_in_account_currency=0,
+                credit=0,
+                project=project,
+                is_advance="No",
+                against_account=from_account,
+            ))
+    journal_entry.insert(ignore_permissions=True)
+    # payment_entry = frappe.get_doc(
+    #     dict(
+    #         doctype="Payment Entry",
+    #         naming_series="PE-",
+    #         payment_type=payment_type,
+    #         posting_date=datetime.now().date(),
+    #         company=company_id,
+    #         mode_of_payment="Cash",
+    #         party_type="Customer",
+    #         party=to_customer.name,
+    #         party_name=to_customer.customer_name,
+    #         paid_from=from_account,
+    #         paid_from_account_currency="SAR",
+    #         paid_to=to_account,
+    #         paid_to_account_currency="SAR",
+    #         paid_amount=abs(amount),
+    #         source_exchange_rate=1,
+    #         base_paid_amount=abs(amount),
+    #         received_amount=0,
+    #         target_exchange_rate=1,
+    #         base_received_amount=0,
+    #         reference_no="{0} - {1}".format(contract_id, statement),
+    #         reference_date=datetime.now().date()
+    #     )
+    # )
+    # payment_entry.insert(ignore_permissions=True)
 
-    gl_entries = get_gl_entries(payment_entry=payment_entry)
+    # gl_entries = get_gl_entries(payment_entry=payment_entry)
 
-    if gl_entries:
-        # if POS and amount is written off, updating outstanding amt after posting all gl entries
-        update_outstanding = "Yes"
-        make_gl_entries(
-            gl_entries,
-            cancel=False,
-            update_outstanding=update_outstanding,
-            merge_entries=False)
+    # if gl_entries:
+    #     # if POS and amount is written off, updating outstanding amt after posting all gl entries
+    #     update_outstanding = "Yes"
+    #     make_gl_entries(
+    #         gl_entries,
+    #         cancel=False,
+    #         update_outstanding=update_outstanding,
+    #         merge_entries=False)
     frappe.db.commit()
     return dict(status=True, message="Transactions are added to erpnext successfully")
 
