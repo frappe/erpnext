@@ -65,9 +65,7 @@ def callback(*args, **kwargs):
 	token = get_access_token(code)
 	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
 	make_custom_fields()
-	print("Mkaing roots")
 	make_root_accounts()
-	print("Made roots")
 	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice"]
 	for doctype in relevant_doctypes:
 		fetch_all_entries(doctype=doctype, token=token, company_id=company_id)
