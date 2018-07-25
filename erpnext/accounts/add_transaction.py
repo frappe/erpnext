@@ -21,6 +21,8 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
+    frappe.throw(str(frappe.form_dict))
+
     try:
         frappe.db.begin()
         frappe.set_user("Administrator")
