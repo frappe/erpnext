@@ -8,7 +8,8 @@ erpnext.hub.Marketplace = class Marketplace {
 		frappe.db.get_doc('Hub Settings')
 			.then(doc => {
 				this.hub_settings = doc;
-				
+				this.registered = doc.registered;
+
 				this.setup_header();
 				this.make_sidebar();
 				this.make_body();
@@ -26,13 +27,25 @@ erpnext.hub.Marketplace = class Marketplace {
 			const $target = $(e.currentTarget);
 			const route = $target.data().route;
 			frappe.set_route(route);
-		
+
 			e.stopPropagation();
 		});
 	}
 
 	make_sidebar() {
 		this.$sidebar = this.$parent.find('.layout-side-section').addClass('hidden-xs');
+
+		const user_specific_items_html = this.registered
+			? `<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
+					${__('Your Profile')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
+					${__('Publish Products')}
+				</li>`
+
+			: `<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
+					${__('Become a seller')}
+				</li>`;
 
 		this.$sidebar.append(`
 			<ul class="list-unstyled hub-sidebar-group">
@@ -42,15 +55,7 @@ erpnext.hub.Marketplace = class Marketplace {
 				<li class="hub-sidebar-item" data-route="marketplace/favourites">
 					${__('Favorites')}
 				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
-					${__('Become a seller')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
-					${__('Your Profile')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
-					${__('Publish Products')}
-				</li>
+				${user_specific_items_html}
 			</ul>
 		`);
 
@@ -68,9 +73,11 @@ erpnext.hub.Marketplace = class Marketplace {
 					`<li class="hub-sidebar-item active" data-route="marketplace/home">
 						${__('All')}
 					</li>`,
-					`<li class="hub-sidebar-item" data-route="marketplace/published">
-						${__('Your Products')}
-					</li>`,
+					...(this.registered
+						? [`<li class="hub-sidebar-item active" data-route="marketplace/my-products">
+							${__('Your Products')}
+						</li>`]
+						: []),
 					...categories.map(category => `
 						<li class="hub-sidebar-item text-muted" data-route="marketplace/category/${category}">
 							${__(category)}
@@ -480,7 +487,7 @@ erpnext.hub.Register = class Register extends SubPage {
 			.appendTo(this.$wrapper);
 		this.$form_container = $('<div class="col-md-8 col-md-offset-1 form-container">')
 			.appendTo(this.$wrapper);
-		
+
 		// const title = __('Become a Seller');
 		// this.$register_container.append($(`<h5>${title}</h5>`));
 	}
@@ -493,7 +500,7 @@ erpnext.hub.Register = class Register extends SubPage {
 	// make_input() {
 	// 	//
 	// }
-		
+
 	render() {
 		this.make_field_group();
 	}
@@ -583,11 +590,11 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 	render(items) {
 		const html = get_item_card_container_html(
-			items, 
+			items,
 
 			__('Select Products to Publish'),
 
-			__(`Only products with an image and description can be published. 
+			__(`Only products with an image and description can be published.
 			Please update them if an item in your inventory does not appear.`),
 
 			`<div class="hub-search-container">
@@ -648,13 +655,13 @@ function get_item_card_html(item) {
 
 	// Decide item link
 	const isLocal = item.source_type === "local";
-	const route = !isLocal 
+	const route = !isLocal
 		? `marketplace/item/${item.hub_item_code}`
 		: `Form/Item/${item.item_name}`;
 
 	const card_route = isLocal ? '' : `data-route='${route}'`;
 
-	const show_local_item_button = isLocal 
+	const show_local_item_button = isLocal
 		? `<div class="overlay button-overlay" data-route='${route}' onclick="event.preventDefault();">
 				<button class="btn btn-default zoom-view">
 					<i class="octicon octicon-eye"></i>
