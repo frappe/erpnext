@@ -147,9 +147,9 @@ def manage_invoice_submit_cancel(doc, method):
 		for item in doc.items:
 			if item.reference_dt and item.reference_dn:
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
-					set_invoiced(item, method)
+					set_invoiced(item, method, doc.name)
 
-def set_invoiced(item, method):
+def set_invoiced(item, method, ref_invoice=None):
 	invoiced = False
 	if(method=="on_submit"):
 		validate_invoiced_on_submit(item)
@@ -160,7 +160,7 @@ def set_invoiced(item, method):
 		if frappe.db.get_value('Patient Appointment', item.reference_dn, 'procedure_template'):
 			dt_from_appointment = "Clinical Procedure"
 		else:
-			manage_fee_validity(item.reference_dn, method)
+			manage_fee_validity(item.reference_dn, method, ref_invoice)
 			dt_from_appointment = "Patient Encounter"
 		manage_doc_for_appoitnment(dt_from_appointment, item.reference_dn, invoiced)
 
@@ -183,7 +183,7 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 		doc_created = frappe.db.get_value(dt, {'prescription': item.reference_dn})
 		frappe.db.set_value(dt, doc_created, 'invoiced', invoiced)
 
-def manage_fee_validity(appointment_name, method):
+def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	appointment_doc = frappe.get_doc("Patient Appointment", appointment_name)
 	validity_exist = validity_exists(appointment_doc.practitioner, appointment_doc.patient)
 	do_not_update = False
@@ -206,10 +206,10 @@ def manage_fee_validity(appointment_name, method):
 				do_not_update = False
 
 		if not do_not_update:
-			fee_validity = update_fee_validity(fee_validity, appointment_doc.appointment_date)
+			fee_validity = update_fee_validity(fee_validity, appointment_doc.appointment_date, ref_invoice)
 			visited = fee_validity.visited
 	else:
-		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date)
+		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date, ref_invoice)
 		visited = fee_validity.visited
 
 	# Mark All Patient Appointment invoiced = True in the validity range do not cross the max visit
