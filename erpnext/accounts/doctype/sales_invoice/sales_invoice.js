@@ -741,11 +741,19 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 	refresh: function(frm) {
 		if (frappe.boot.active_domains.includes("Healthcare")){
+			frm.set_df_property("patient", "hidden", 0);
+			frm.set_df_property("patient_name", "hidden", 0);
+			frm.set_df_property("ref_practitioner", "hidden", 0);
 			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
 				frm.add_custom_button(__('Healthcare Services'), function() {
 					get_healthcare_services_to_invoice(frm);
 				},"Get items from");
 			}
+		}
+		else{
+			frm.set_df_property("patient", "hidden", 1);
+			frm.set_df_property("patient_name", "hidden", 1);
+			frm.set_df_property("ref_practitioner", "hidden", 1);
 		}
 	}
 })
