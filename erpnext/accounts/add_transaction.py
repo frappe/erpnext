@@ -21,7 +21,7 @@ def add_transaction():
     # ‘customer_id’
     # ‘contract_id’
     # `vat_amount`
-
+    frappe.set_user("Administrator")
     from_account = frappe.form_dict['from_account']
     to_account = frappe.form_dict['to_account']
     credit_amount = float(frappe.form_dict['credit_amount'])
