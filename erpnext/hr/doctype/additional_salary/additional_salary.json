@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
  "beta": 0, 
@@ -417,7 +417,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-12 12:05:16.337082", 
+ "modified": "2018-07-26 12:05:16.337082", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Additional Salary", 
