@@ -93,7 +93,6 @@ def get_access_token(code):
 def make_root_accounts():
 	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
 	for root in roots:
-		print("trying", root)
 		try:
 			if not frappe.db.exists("Account", encode_company_abbr("{} - QB".format(root), "Sandbox Actual")):
 				frappe.get_doc({
@@ -103,7 +102,6 @@ def make_root_accounts():
 					"is_group": "1",
 					"company": "Sandbox Actual",
 				}).insert(ignore_permissions=True, ignore_mandatory=True)
-				print("Inserted", root)
 		except:
 			import traceback
 			traceback.print_exc()
