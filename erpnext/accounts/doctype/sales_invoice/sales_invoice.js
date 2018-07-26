@@ -859,6 +859,7 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 	dialog.show();
 }
 
+// Healthcare
 var get_healthcare_services_to_invoice = function(frm) {
 	var me = this;
 	let selected_patient = '';
@@ -962,7 +963,8 @@ var make_list_row= function(result={}) {
 			data-dn= "${result.reference_name}" data-dt= "${result.reference_type}" data-item= "${result.service}"
 			data-rate = ${result.rate}
 			data-income-account = "${result.income_account}"
-			data-qty = ${result.qty}>
+			data-qty = ${result.qty}
+			data-description = "${result.description}">
 			</div>`).append($row);
 	return $row;
 };
@@ -970,32 +972,21 @@ var make_list_row= function(result={}) {
 var set_primary_action= function(frm, dialog, $results) {
 	var me = this;
 	dialog.set_primary_action(__('Add'), function() {
-		// TODO: Get checked items
 		let checked_values = get_checked_values($results);
 		if(checked_values.length > 0){
 			frm.set_value("patient", dialog.fields_dict.patient.input.value);
 			frm.set_value("items", []);
-			for(let i=0; i<checked_values.length; i++){
-				var si_item = frappe.model.add_child(frm.doc, 'Sales Invoice Item', 'items');
-				if(checked_values[i]['item'] == "Consulting Charges"){
-					frappe.model.set_value(si_item.doctype, si_item.name, 'item_name', checked_values[i]['item']);
-					frappe.model.set_value(si_item.doctype, si_item.name, 'description', checked_values[i]['item']);
-					frappe.model.set_value(si_item.doctype, si_item.name, 'rate', checked_values[i]['rate']);
-					frappe.model.set_value(si_item.doctype, si_item.name, 'income_account', checked_values[i]['income_account']);
-					frappe.model.set_value(si_item.doctype, si_item.name, 'uom', 'Nos');
-					frappe.model.set_value(si_item.doctype, si_item.name, 'conversion_factor', 1);
+			frappe.call({
+				doc: frm.doc,
+				method: "set_healthcare_services",
+				args:{
+					checked_values: checked_values
+				},
+				callback: function() {
+					frm.trigger("validate");
+					frm.refresh_fields();
 				}
-				else{
-					frappe.model.set_value(si_item.doctype, si_item.name, 'item_code', checked_values[i]['item']);
-				}
-				frappe.model.set_value(si_item.doctype, si_item.name, 'reference_dt', checked_values[i]['dt']);
-				frappe.model.set_value(si_item.doctype, si_item.name, 'reference_dn', checked_values[i]['dn']);
-				frappe.model.set_value(si_item.doctype, si_item.name, 'qty', 1);
-				if(checked_values[i]['qty'] > 1){
-					frappe.model.set_value(si_item.doctype, si_item.name, 'qty', parseFloat(checked_values[i]['qty']));
-				}
-			}
-			frm.refresh_fields();
+			});
 			dialog.hide();
 		}
 		else{
@@ -1011,14 +1002,29 @@ var get_checked_values= function($results) {
 			checked_values['dn'] = $(this).attr('data-dn');
 			checked_values['dt'] = $(this).attr('data-dt');
 			checked_values['item'] = $(this).attr('data-item');
-			if($(this).attr('data-rate')){
+			if($(this).attr('data-rate') != 'undefined'){
 				checked_values['rate'] = $(this).attr('data-rate');
 			}
-			if($(this).attr('data-income-account')){
+			else{
+				checked_values['rate'] = false;
+			}
+			if($(this).attr('data-income-account') != 'undefined'){
 				checked_values['income_account'] = $(this).attr('data-income-account');
 			}
-			if($(this).attr('data-qty')){
+			else{
+				checked_values['income_account'] = false;
+			}
+			if($(this).attr('data-qty') != 'undefined'){
 				checked_values['qty'] = $(this).attr('data-qty');
+			}
+			else{
+				checked_values['qty'] = false;
+			}
+			if($(this).attr('data-description') != 'undefined'){
+				checked_values['description'] = $(this).attr('data-description');
+			}
+			else{
+				checked_values['description'] = false;
 			}
 			return checked_values;
 		}
