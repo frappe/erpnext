@@ -86,15 +86,20 @@ class HubSettings(Document):
 		post_url = hub_url + '/api/method/hub.hub.api.register'
 
 		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
-		
+
 		response.raise_for_status()
-		
+
 		if response.ok:
 			message = response.json().get('message')
 		else:
 			frappe.throw(json.loads(response.text))
 
-		return message.get('password') if message else None
+		if message.get('email'):
+			self.create_hub_connector(message)
+			self.registered = 1
+			self.save()
+
+		return message or None
 
 	def unregister(self):
 		""" Disable the User on hub.erpnext.org"""
@@ -149,11 +154,6 @@ def sync():
 def register_seller(**kwargs):
 	settings = frappe.get_doc('Hub Settings')
 	settings.update(kwargs)
-	password = settings.register()
+	message = settings.register()
 
-	print(password)
-
-	# if password:
-	# 	self.create_hub_connector(message)
-	# 	self.registered = 1
-	# 	self.save()
+	return message.get('email')
