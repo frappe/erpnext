@@ -12,13 +12,16 @@ class LabTestTemplate(Document):
 		#Item and Price List update --> if (change_in_item)
 		if(self.change_in_item and self.is_billable == 1 and self.item):
 			updating_item(self)
-			if not item_price_exist(self):
+			item_price = item_price_exist(self)
+			if not item_price:
 				if(self.test_rate != 0.0):
 					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
 					if(self.test_rate):
 						make_item_price(self.test_code, price_list_name, self.test_rate)
 					else:
 						make_item_price(self.test_code, price_list_name, 0.0)
+			else:
+				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.test_rate)
 
 			frappe.db.set_value(self.doctype,self.name,"change_in_item",0)
 		elif(self.is_billable == 0 and self.item):
@@ -43,7 +46,7 @@ def item_price_exist(doc):
 	"doctype": "Item Price",
 	"item_code": doc.test_code})
 	if(item_price):
-		return True
+		return item_price[0][0]
 	else:
 		return False
 
