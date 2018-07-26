@@ -186,6 +186,7 @@ erpnext.hub.Home = class Home extends SubPage {
 	}
 
 	get_items_and_render() {
+		this.$wrapper.find('.hub-card-container').empty();
 		this.get_items()
 			.then(r => {
 				erpnext.hub.hub_item_cache = r.message;
@@ -238,6 +239,7 @@ erpnext.hub.Favourites = class Favourites extends SubPage {
 	}
 
 	render(items) {
+		this.$wrapper.find('.hub-card-container').empty();
 		const html = get_item_card_container_html(items, __('Favourites'));
 		this.$wrapper.append(html)
 	}
@@ -253,6 +255,7 @@ erpnext.hub.Category = class Category extends SubPage {
 	}
 
 	get_items_for_category(category) {
+		this.$wrapper.find('.hub-card-container').empty();
 		return frappe.call('erpnext.hub_node.get_list', {
 			doctype: 'Hub Item',
 			filters: {
@@ -490,6 +493,8 @@ erpnext.hub.Register = class Register extends SubPage {
 	}
 
 	refresh() {
+		this.$register_container.empty();
+		this.$form_container.empty();
 		this.render();
 	}
 
@@ -615,13 +620,28 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.$wrapper.find('.deselect-all').on('click', () => {
 			this.$wrapper.find('.hub-card').removeClass('active');
 		});
+
+		const $search_input = this.$wrapper.find('.hub-search-container input');
+		this.search_value = '';
+
+		$search_input.on('keydown', frappe.utils.debounce((e) => {
+			if (e.which === frappe.ui.keyCode.ENTER) {
+				this.search_value = $search_input.val();
+				this.get_items_and_render();
+			}
+		}, 300));
 	}
 
-	refresh() {
+	get_items_and_render() {
+		this.$wrapper.find('.hub-card-container').empty();
 		this.get_valid_items()
 			.then(r => {
 				this.render(r.message);
 			});
+	}
+
+	refresh() {
+		this.get_items_and_render();
 	}
 
 	render(items) {
@@ -635,7 +655,12 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	get_valid_items() {
-		return frappe.call('erpnext.hub_node.get_valid_items');
+		return frappe.call(
+			'erpnext.hub_node.get_valid_items',
+			{
+				search_value: this.search_value
+			}
+		);
 	}
 }
 
