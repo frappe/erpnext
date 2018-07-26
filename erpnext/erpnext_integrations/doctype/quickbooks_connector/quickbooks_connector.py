@@ -79,7 +79,7 @@ def fetch():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
-	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
+	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
 	for doctype in relevant_doctypes:
 		fetch_all_entries(doctype=doctype, company_id=company_id)
 
@@ -269,6 +269,25 @@ def save_pi(pi):
 		import traceback
 		traceback.print_exc()
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+def save_pe(pe):
+	try:
+		# Check if Payment is Linked to an Invoice
+		if pe["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
+			sales_invoice = frappe.get_all("Sales Invoice",
+				filters={
+					"quickbooks_id": pe["Line"][0]["LinkedTxn"][0]["TxnId"]
+				})[0]["name"]
+			erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
+			erp_pe.quickbooks_id = pe["Id"]
+			erp_pe.reference_no = "Reference No"
+			erp_pe.reference_date = pe["TxnDate"]
+			erp_pe.insert().submit()
+			frappe.db.commit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -382,7 +401,7 @@ def create_address(entity, doctype, address, address_type):
 
 
 def make_custom_fields():
-	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
+	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
@@ -405,6 +424,7 @@ save_methods = {
 	"Sales Invoice": save_si,
 	"Journal Entry": save_ge,
 	"Purchase Invoice": save_pi,
+	"Payment Entry": save_pe,
 }
 
 def save_entries(doctype, entries):
@@ -423,6 +443,7 @@ qb_map = {
 	"Sales Invoice": "Invoice",
 	"Journal Entry": "JournalEntry",
 	"Purchase Invoice": "Bill",
+	"Payment Entry": "Payment",
 }
 
 def get(*args, **kwargs):
