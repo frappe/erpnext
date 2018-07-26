@@ -79,9 +79,9 @@ def fetch():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
-	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
-	for doctype in relevant_doctypes:
-		fetch_all_entries(doctype=doctype, company_id=company_id)
+	relevant_entities = ["Account", "Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill"]
+	for entity in relevant_entities:
+		fetch_all_entries(entity=entity, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token():
@@ -174,39 +174,39 @@ def save_item(item):
 	except:
 		pass
 
-def save_supplier(supplier):
+def save_vendor(vendor):
 	try:
 		erpsupplier = frappe.get_doc({
 			"doctype": "Supplier",
-			"quickbooks_id": supplier["Id"],
-			"supplier_name" : supplier["DisplayName"],
+			"quickbooks_id": vendor["Id"],
+			"supplier_name" : vendor["DisplayName"],
 			"supplier_group" : _("All Supplier Groups"),
 		}).insert(ignore_permissions=True)
-		if "BillAddr" in supplier:
-			create_address(erpsupplier, "Supplier", supplier["BillAddr"], "Billing")
-		if "ShipAddr" in supplier:
-			create_address(erpsupplier, "Supplier",supplier["ShipAddr"], "Shipping")
+		if "BillAddr" in vendor:
+			create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
+		if "ShipAddr" in vendor:
+			create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
 	except:
 		pass
 
-def save_si(si):
+def save_invoice(invoice):
 	try:
-		erp_si = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Sales Invoice",
-			"quickbooks_id": si["Id"],
+			"quickbooks_id": invoice["Id"],
 			"naming_series": "SINV-",
 
 			# Quickbooks uses ISO 4217 Code
 			# of course this gonna come back to bite me
-			"currency": si["CurrencyRef"]["value"],
+			"currency": invoice["CurrencyRef"]["value"],
 
 			# Need to check with someone as to what exactly this field represents
 			# And whether it is equivalent to posting_date
-			"posting_date": si["TxnDate"],
+			"posting_date": invoice["TxnDate"],
 
 			# Due Date should be calculated from SalesTerm if not provided.
 			# For Now Just setting a default to suppress mandatory errors.
-			"due_date": si.get("DueDate", "2020-01-01"),
+			"due_date": invoice.get("DueDate", "2020-01-01"),
 
 			# Shouldn't default to Current Bank Account
 			# Decide using AccountRef from TxnRef
@@ -215,10 +215,10 @@ def save_si(si):
 
 			"customer": frappe.get_all("Customer",
 				filters={
-					"quickbooks_id": si["CustomerRef"]["value"]
+					"quickbooks_id": invoice["CustomerRef"]["value"]
 				})[0]["name"],
-			"items": get_items(si["Line"]),
-			"taxes": get_taxes(si["TxnTaxDetail"]["TaxLine"]),
+			"items": get_items(invoice["Line"]),
+			"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"]),
 
 			# Do not change posting_date upon submission
 			"set_posting_time": 1
@@ -228,40 +228,40 @@ def save_si(si):
 		import traceback
 		traceback.print_exc()
 
-def save_ge(ge):
+def save_journal_entry(journal_entry):
 	try:
-		erp_ge = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Journal Entry",
-			"quickbooks_id": ge["Id"],
+			"quickbooks_id": journal_entry["Id"],
 			"naming_series": "JV-",
 			"company": "Sandbox Actual",
-			"posting_date": ge["TxnDate"],
-			"accounts": get_accounts(ge["Line"]),
+			"posting_date": journal_entry["TxnDate"],
+			"accounts": get_accounts(journal_entry["Line"]),
 		}).insert().submit()
 		frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
 
-def save_pi(pi):
+def save_bill(bill):
 	try:
 		frappe.get_doc({
 			"doctype": "Purchase Invoice",
-			"quickbooks_id": pi["Id"],
+			"quickbooks_id": bill["Id"],
 			"naming_series": "PINV-",
-			"currency": pi["CurrencyRef"]["value"],
-			"posting_date": pi["TxnDate"],
-			"due_date": pi.get("DueDate", "2020-01-01"),
+			"currency": bill["CurrencyRef"]["value"],
+			"posting_date": bill["TxnDate"],
+			"due_date": bill.get("DueDate", "2020-01-01"),
 			"credit_to": frappe.get_all("Account",
 				filters={
-					"quickbooks_id": pi["APAccountRef"]["value"]
+					"quickbooks_id": bill["APAccountRef"]["value"]
 				})[0]["name"],
 			"supplier": frappe.get_all("Supplier",
 				filters={
-					"quickbooks_id": pi["VendorRef"]["value"]
+					"quickbooks_id": bill["VendorRef"]["value"]
 				})[0]["name"],
-			"items": get_pi_items(pi["Line"]),
-			"taxes": get_taxes(pi["TxnTaxDetail"]["TaxLine"]),
+			"items": get_pi_items(bill["Line"]),
+			"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
 			"set_posting_time": 1
 		}).insert().submit()
 		frappe.db.commit()
@@ -270,18 +270,18 @@ def save_pi(pi):
 		traceback.print_exc()
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-def save_pe(pe):
+def save_payment(payment):
 	try:
 		# Check if Payment is Linked to an Invoice
-		if pe["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
+		if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
 			sales_invoice = frappe.get_all("Sales Invoice",
 				filters={
-					"quickbooks_id": pe["Line"][0]["LinkedTxn"][0]["TxnId"]
+					"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 				})[0]["name"]
 			erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
-			erp_pe.quickbooks_id = pe["Id"]
+			erp_pe.quickbooks_id = payment["Id"]
 			erp_pe.reference_no = "Reference No"
-			erp_pe.reference_date = pe["TxnDate"]
+			erp_pe.reference_date = payment["TxnDate"]
 			erp_pe.insert().submit()
 			frappe.db.commit()
 	except:
@@ -420,11 +420,11 @@ save_methods = {
 	"Account": save_account,
 	"Customer": save_customer,
 	"Item": save_item,
-	"Supplier": save_supplier,
-	"Sales Invoice": save_si,
-	"Journal Entry": save_ge,
-	"Purchase Invoice": save_pi,
-	"Payment Entry": save_pe,
+	"Vendor": save_vendor,
+	"Invoice": save_invoice,
+	"JournalEntry": save_journal_entry,
+	"Bill": save_bill,
+	"Payment": save_payment,
 }
 
 def save_entries(doctype, entries):
@@ -435,16 +435,6 @@ def save_entries(doctype, entries):
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 1000
 BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
-qb_map = {
-	"Account": "Account",
-	"Customer": "Customer",
-	"Item": "Item",
-	"Supplier": "Vendor",
-	"Sales Invoice": "Invoice",
-	"Journal Entry": "JournalEntry",
-	"Purchase Invoice": "Bill",
-	"Payment Entry": "Payment",
-}
 
 def get(*args, **kwargs):
 	refresh_tokens()
@@ -463,13 +453,13 @@ def refresh_tokens():
 	frappe.cache().set("quickbooks_refresh_token", token["refresh_token"])
 	frappe.cache().set("quickbooks_access_token", token["access_token"])
 
-def fetch_all_entries(doctype="", company_id=1):
+def fetch_all_entries(entity="", company_id=1):
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of entries
 	entry_count = get(query_uri,
 		params={
-			"query": """SELECT COUNT(*) FROM {}""".format(qb_map[doctype])
+			"query": """SELECT COUNT(*) FROM {}""".format(entity)
 		}
 	).json()["QueryResponse"]["totalCount"]
 
@@ -478,11 +468,11 @@ def fetch_all_entries(doctype="", company_id=1):
 	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
 		response = get(query_uri,
 			params={
-				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(qb_map[doctype], start_position, MAX_RESULT_COUNT)
+				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(entity, start_position, MAX_RESULT_COUNT)
 			}
-		).json()["QueryResponse"][qb_map[doctype]]
+		).json()["QueryResponse"][entity]
 		entries.extend(response)
-	save_entries(doctype, entries)
+	save_entries(entity, entries)
 
 def get_headers(token):
 	return {"Accept": "application/json",
