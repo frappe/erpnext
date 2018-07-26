@@ -55,13 +55,15 @@ def get_valid_items(search_value=''):
 
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
-	# for item_code in json.loads(items_to_publish):
-	# 	frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+	for item_code in json.loads(items_to_publish):
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
-	time.sleep(3)
+	# frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
+	# time.sleep(10)
+	# frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
 
-	# hub_settings = frappe.get_doc('Hub Settings')
-	# hub_settings.sync()
+	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings.sync()
 
 	return
 
