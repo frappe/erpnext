@@ -44,8 +44,9 @@ def fetch():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
-	relevant_entities = ["Account", "Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill"]
+	relevant_entities = ["Account", "Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
 	for entity in relevant_entities:
+		print(entity)
 		fetch_all_entries(entity=entity, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
@@ -244,9 +245,27 @@ def save_payment(payment):
 					"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 				})[0]["name"]
 			erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
-			erp_pe.quickbooks_id = payment["Id"]
+			erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
 			erp_pe.reference_no = "Reference No"
 			erp_pe.reference_date = payment["TxnDate"]
+			erp_pe.insert().submit()
+			frappe.db.commit()
+	except:
+		import traceback
+		traceback.print_exc()
+
+def save_bill_payment(bill_payment):
+	try:
+		# Check if Payment is Linked to an Invoice
+		if bill_payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Bill":
+			purchase_invoice = frappe.get_all("Purchase Invoice",
+				filters={
+					"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
+				})[0]["name"]
+			erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice)
+			erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
+			erp_pe.reference_no = "Reference No"
+			erp_pe.reference_date = bill_payment["TxnDate"]
 			erp_pe.insert().submit()
 			frappe.db.commit()
 	except:
@@ -390,6 +409,7 @@ save_methods = {
 	"JournalEntry": save_journal_entry,
 	"Bill": save_bill,
 	"Payment": save_payment,
+	"BillPayment": save_bill_payment,
 }
 
 def save_entries(doctype, entries):
