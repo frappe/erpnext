@@ -145,11 +145,11 @@ class GoCardlessSettings(Document):
 
 		if self.flags.status_changed_to == "Completed":
 			status = 'Completed'
-			if self.data.reference_doctype and self.data.reference_docname:
+			if 'reference_doctype' in self.data and 'reference_docname' in self.data:
 				custom_redirect_to = None
 				try:
-					custom_redirect_to = frappe.get_doc(self.data.reference_doctype,
-						self.data.reference_docname).run_method("on_payment_authorized", self.flags.status_changed_to)
+					custom_redirect_to = frappe.get_doc(self.data.get('reference_doctype'),
+						self.data.get('reference_docname')).run_method("on_payment_authorized", self.flags.status_changed_to)
 				except Exception:
 					frappe.log_error(frappe.get_traceback())
 
