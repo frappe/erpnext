@@ -33,8 +33,13 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 
 #### LOCAL ITEMS
 @frappe.whitelist()
-def get_valid_items():
-	items = frappe.get_list('Item', fields=["*"])
+def get_valid_items(search_value=''):
+	items = frappe.get_list('Item', fields=["*"], filters={
+		'item_name': ['like', '%' + search_value + '%']
+	})
+
+	print([d.item_name for d in items])
+
 	valid_items = filter(lambda x: x.image and x.description, items)
 
 	def attach_source_type(item):
