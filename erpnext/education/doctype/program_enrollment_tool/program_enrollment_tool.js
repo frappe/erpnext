@@ -5,6 +5,14 @@ frappe.ui.form.on("Program Enrollment Tool", {
 	setup: function(frm) {
 		frm.add_fetch("student", "title", "student_name");
 		frm.add_fetch("student_applicant", "title", "student_name");
+		frappe.call({
+			method: "erpnext.education.doctype.program_enrollment_tool.program_enrollment_tool.get_academic_term_mandatory",
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					frm.toggle_reqd("academic_term", true);
+				}
+			}
+		});
 	},
 
 	"refresh": function(frm) {

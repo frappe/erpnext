@@ -86,7 +86,6 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 					"program": filters['program']
 				})
 
-
 @frappe.whitelist()
 def get_students(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("academic_term"):
