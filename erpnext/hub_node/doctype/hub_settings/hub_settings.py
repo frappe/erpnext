@@ -51,7 +51,7 @@ class HubSettings(Document):
 
 		self.sync_in_progress = 1
 		doc.run()
-		self.sync_in_progress = 0
+		# self.sync_in_progress = 0
 
 	def pre_reg(self):
 		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
