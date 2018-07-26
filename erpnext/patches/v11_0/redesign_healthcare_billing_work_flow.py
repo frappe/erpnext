@@ -48,6 +48,8 @@ def execute():
 						""".format(si_ref_doc, sales_invoice_referenced_doc[si_ref_doc]))
 
 def healthcare_custom_field_in_sales_invoice():
+	frappe.reload_doc('healthcare', 'doctype', 'patient')
+	frappe.reload_doc('healthcare', 'doctype', 'healthcare_practitioner')
 	if data['custom_fields']:
 		create_custom_fields(data['custom_fields'])
 
