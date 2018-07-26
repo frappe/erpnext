@@ -15,6 +15,19 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
+def call_hub_method(method, params=None):
+	connection = get_client_connection()
+
+	params = json.loads(params)
+	params.update({
+		'cmd': 'hub.hub.api.' + method
+	})
+
+	response = connection.post_api('hub.hub.api.' + method, params)
+	response = connection.post_request(params)
+	return response
+
+@frappe.whitelist()
 def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=None):
 	connection = get_client_connection()
 	filters = json.loads(filters)
