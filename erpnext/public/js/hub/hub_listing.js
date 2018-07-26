@@ -137,10 +137,13 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages.register = new erpnext.hub.Register(this.$body);
 		}
 
+		if (route[1] === 'profile' && !this.subpages.profile) {
+			this.subpages.profile = new erpnext.hub.Profile(this.$body, this.hub_settings);
+		}
+
 		if (route[1] === 'publish' && !this.subpages.publish) {
 			this.subpages.publish = new erpnext.hub.Publish(this.$body);
 		}
-
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
 			frappe.show_not_found();
@@ -572,6 +575,51 @@ erpnext.hub.Register = class Register extends SubPage {
 	}
 }
 
+erpnext.hub.Profile = class Profile extends SubPage {
+	constructor(parent, profile_data) {
+		super(parent);
+		this.profile_data = profile_data;
+	}
+
+	make_wrapper() {
+		super.make_wrapper();
+		const profile_html = `<div class="hub-item-container">
+			<div class="row visible-xs">
+				<div class="col-xs-12 margin-bottom">
+					<button class="btn btn-xs btn-default" data-route="marketplace/home">Back to home</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3">
+					<div class="hub-item-image">
+						<img src="${'gd'}">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<h2>${'title'}</h2>
+					<div class="text-muted">
+						<p>${'where'}${'dot_spacer'}${'when'}</p>
+						<p>${'rating_html'}${'rating_count'}</p>
+					</div>
+					<hr>
+					<div class="hub-item-description">
+					${'description' ?
+						`<b>${__('Description')}</b>
+						<p>${'description'}</p>
+						` : __('No description')
+					}
+					</div>
+				</div>
+			</div>
+		</div>`;
+
+		this.$wrapper.html(profile_html);
+	}
+
+	refresh() {}
+
+	render() {}
+}
 erpnext.hub.Publish = class Publish extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
@@ -604,9 +652,6 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			</div>
 
 			${search_html}
-
-			${select_all_button}
-			${deselect_all_button}
 		`);
 
 		this.$wrapper.append(subpage_header);
@@ -615,13 +660,13 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	setup_events() {
-		this.$wrapper.find('.select-all').on('click', () => {
-			this.$wrapper.find('.hub-card').addClass('active');
-		});
+		// this.$wrapper.find('.select-all').on('click', () => {
+		// 	this.$wrapper.find('.hub-card').addClass('active');
+		// });
 
-		this.$wrapper.find('.deselect-all').on('click', () => {
-			this.$wrapper.find('.hub-card').removeClass('active');
-		});
+		// this.$wrapper.find('.deselect-all').on('click', () => {
+		// 	this.$wrapper.find('.hub-card').removeClass('active');
+		// });
 
 		this.$wrapper.find('.publish-items').on('click', () => {
 			this.publish_selected_items()

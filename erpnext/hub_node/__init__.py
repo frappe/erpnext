@@ -34,9 +34,14 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 #### LOCAL ITEMS
 @frappe.whitelist()
 def get_valid_items(search_value=''):
-	items = frappe.get_list('Item', fields=["*"], filters={
-		'item_name': ['like', '%' + search_value + '%']
-	})
+	items = frappe.get_list(
+		'Item', fields=["*"],
+		filters={
+			'item_name': ['like', '%' + search_value + '%'],
+			'publish_in_hub': 0
+		},
+		order_by="modified desc"
+	)
 
 	valid_items = filter(lambda x: x.image and x.description, items)
 
@@ -51,9 +56,6 @@ def get_valid_items(search_value=''):
 def publish_selected_items(items_to_publish, items_to_unpublish):
 	for item_code in json.loads(items_to_publish):
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
-
-	for item_code in json.loads(items_to_unpublish):
-		frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
 
 	hub_settings = frappe.get_doc('Hub Settings')
 	hub_settings.sync()
