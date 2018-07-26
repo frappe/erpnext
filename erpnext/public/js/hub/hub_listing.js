@@ -576,11 +576,13 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
 		const title_html = `<b>${__('Select Products to Publish')}</b>`;
-		const subtitle_html = `<p class="text-muted">
-			${__(`Only products with an image and description can be published.
+		const info = `<p class="text-muted">${__("Status decided by the 'Publish in Hub' field in Item.")}</p>`;
+		const subtitle_html = `
+		<p class="text-muted">
+			${__(`Only products with an image, description and category can be published.
 			Please update them if an item in your inventory does not appear.`)}
 		</p>`;
-		const publish_button_html = `<button class="btn btn-primary btn-sm publish-button">
+		const publish_button_html = `<button class="btn btn-primary btn-sm publish-items">
 			<i class="visible-xs octicon octicon-check"></i>
 			<span class="hidden-xs">Publish</span>
 		</button>`;
@@ -619,6 +621,13 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		this.$wrapper.find('.deselect-all').on('click', () => {
 			this.$wrapper.find('.hub-card').removeClass('active');
+		});
+
+		this.$wrapper.find('.publish-items').on('click', () => {
+			this.publish_selected_items()
+				.then(r => {
+					frappe.msgprint('check');
+				});
 		});
 
 		const $search_input = this.$wrapper.find('.hub-search-container input');
@@ -662,6 +671,28 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			}
 		);
 	}
+
+	publish_selected_items() {
+		const items_to_publish = [];
+		const items_to_unpublish = [];
+		this.$wrapper.find('.hub-card').map(function () {
+			const active = $(this).hasClass('active');
+
+			if(active) {
+				items_to_publish.push($(this).attr("data-id"));
+			} else {
+				items_to_unpublish.push($(this).attr("data-id"));
+			}
+		});
+
+		return frappe.call(
+			'erpnext.hub_node.publish_selected_items',
+			{
+				items_to_publish: items_to_publish,
+				items_to_unpublish: items_to_unpublish
+			}
+		);
+	}
 }
 
 function get_item_card_container_html(items, title='') {
@@ -680,9 +711,13 @@ function get_item_card_container_html(items, title='') {
 function get_item_card_html(item) {
 	const item_name = item.item_name || item.name;
 	const title = strip_html(item_name);
-
 	const img_url = item.image;
+
 	const company_name = item.company_name;
+
+	const active = item.publish_in_hub;
+
+	const id = item.hub_item_code || item.item_code;
 
 	// Subtitle
 	let subtitle = [comment_when(item.creation)];
@@ -713,7 +748,7 @@ function get_item_card_html(item) {
 
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
-			<div class="hub-card" ${card_route}>
+			<div class="hub-card ${active ? 'active' : ''}" ${card_route} data-id="${id}">
 				<div class="hub-card-header">
 					<div class="title">
 						<div class="hub-card-title ellipsis bold">${title}</div>

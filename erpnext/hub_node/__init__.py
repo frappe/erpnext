@@ -38,8 +38,6 @@ def get_valid_items(search_value=''):
 		'item_name': ['like', '%' + search_value + '%']
 	})
 
-	print([d.item_name for d in items])
-
 	valid_items = filter(lambda x: x.image and x.description, items)
 
 	def attach_source_type(item):
@@ -48,6 +46,19 @@ def get_valid_items(search_value=''):
 
 	valid_items = map(lambda x: attach_source_type(x), valid_items)
 	return valid_items
+
+@frappe.whitelist()
+def publish_selected_items(items_to_publish, items_to_unpublish):
+	for item_code in json.loads(items_to_publish):
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+
+	for item_code in json.loads(items_to_unpublish):
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+
+	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings.sync()
+
+	return
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
