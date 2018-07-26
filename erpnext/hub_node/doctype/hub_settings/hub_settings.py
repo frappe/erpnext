@@ -49,7 +49,7 @@ class HubSettings(Document):
 			'data_migration_connector': 'Hub Connector',
 		}).insert()
 
-		self.sync_in_progress = 1
+		# self.sync_in_progress = 1
 		doc.run()
 		# self.sync_in_progress = 0
 
