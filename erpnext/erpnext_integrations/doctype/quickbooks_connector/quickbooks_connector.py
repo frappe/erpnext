@@ -20,7 +20,15 @@ oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 @frappe.whitelist()
 def get_authorization_url():
-	return oauth.authorization_url(authorization_endpoint)[0]
+	token = frappe.cache().get("quickbooks_authorization_token")
+	if token:
+		response = {"authenticated": True}
+	else:
+		response = {
+			"authenticated": False,
+			"url": oauth.authorization_url(authorization_endpoint)[0],
+		}
+	return response
 
 
 """
@@ -63,7 +71,14 @@ def callback(*args, **kwargs):
 	code = kwargs.get("code")
 	company_id = kwargs.get("realmId")
 	token = get_access_token(code)
-	fetch_method = "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch_all_entries"
+	frappe.cache().set("quickbooks_authorization_token", token)
+	frappe.cache().set("quickbooks_company_id", company_id)
+	fetch()
+
+@frappe.whitelist()
+def fetch():
+	token = frappe.cache().get("quickbooks_authorization_token").decode()
+	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
 	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
