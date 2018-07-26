@@ -138,11 +138,14 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'profile' && !this.subpages.profile) {
-			this.subpages.profile = new erpnext.hub.Profile(this.$body, this.hub_settings);
+			this.subpages.profile = new erpnext.hub.Profile(this.$body, {data: this.hub_settings});
 		}
 
 		if (route[1] === 'publish' && !this.subpages.publish) {
-			this.subpages.publish = new erpnext.hub.Publish(this.$body);
+			this.subpages.publish = new erpnext.hub.Publish(
+				this.$body,
+				{sync_in_progress: this.hub_settings.sync_in_progress}
+			);
 		}
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
@@ -157,9 +160,9 @@ erpnext.hub.Marketplace = class Marketplace {
 }
 
 class SubPage {
-	constructor(parent) {
+	constructor(parent, options) {
 		this.$parent = $(parent);
-		this.make_wrapper();
+		this.make_wrapper(options);
 	}
 
 	make_wrapper() {
@@ -621,8 +624,14 @@ erpnext.hub.Profile = class Profile extends SubPage {
 	render() {}
 }
 erpnext.hub.Publish = class Publish extends SubPage {
-	make_wrapper() {
+	make_wrapper(options) {
 		super.make_wrapper();
+		this.sync_in_progress = options.sync_in_progress;
+
+		this.load_publish_page();
+	}
+
+	load_publish_page() {
 		const title_html = `<b>${__('Select Products to Publish')}</b>`;
 		const info = `<p class="text-muted">${__("Status decided by the 'Publish in Hub' field in Item.")}</p>`;
 		const subtitle_html = `
@@ -660,17 +669,10 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	setup_events() {
-		// this.$wrapper.find('.select-all').on('click', () => {
-		// 	this.$wrapper.find('.hub-card').addClass('active');
-		// });
-
-		// this.$wrapper.find('.deselect-all').on('click', () => {
-		// 	this.$wrapper.find('.hub-card').removeClass('active');
-		// });
-
 		this.$wrapper.find('.publish-items').on('click', () => {
 			this.publish_selected_items()
 				.then(r => {
+					this.load_publishing_state();
 					frappe.msgprint('check');
 				});
 		});
@@ -687,6 +689,11 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	get_items_and_render() {
+		if(this.sync_in_progress) {
+			this.load_publishing_state();
+			return;
+		}
+
 		this.$wrapper.find('.hub-card-container').empty();
 		this.get_valid_items()
 			.then(r => {
@@ -703,6 +710,18 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		items_container.addClass('static').on('click', '.hub-card', (e) => {
 			const $target = $(e.currentTarget);
 			$target.toggleClass('active');
+
+			// Get total items
+			const total_items = this.$wrapper.find('.hub-card.active').length;
+			const more_than_one = total_items > 1;
+			this.$wrapper.find('.publish-items')
+				.html(__('Publish ' + total_items + ' item' + (more_than_one ? 's' : '')));
+
+			// if($target.hasClass('active')) {
+			// 	$target.addClass('active');
+			// } else {
+			// 	$target.removeClass('active');
+			// }
 		});
 
 		this.$wrapper.append(items_container);
@@ -717,24 +736,22 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		);
 	}
 
+	load_publishing_state() {
+		this.$wrapper.html(`<div>
+			<b>Publishing</b>
+		</div>`);
+	}
+
 	publish_selected_items() {
 		const items_to_publish = [];
-		const items_to_unpublish = [];
-		this.$wrapper.find('.hub-card').map(function () {
-			const active = $(this).hasClass('active');
-
-			if(active) {
-				items_to_publish.push($(this).attr("data-id"));
-			} else {
-				items_to_unpublish.push($(this).attr("data-id"));
-			}
+		this.$wrapper.find('.hub-card.active').map(function () {
+			items_to_publish.push($(this).attr("data-id"));
 		});
 
 		return frappe.call(
 			'erpnext.hub_node.publish_selected_items',
 			{
-				items_to_publish: items_to_publish,
-				items_to_unpublish: items_to_unpublish
+				items_to_publish: items_to_publish
 			}
 		);
 	}
