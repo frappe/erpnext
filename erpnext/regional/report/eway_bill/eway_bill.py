@@ -21,7 +21,7 @@ def get_data(filters):
 
 	data = frappe.db.sql("""
 		SELECT
-			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.transport_mode, dn.distance, dn.transporter_name, dn.transporter_id, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.vehicle_type, dn.company_address, dn.shipping_address_name
+			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.transport_mode, dn.distance, dn.transporter_name, dn.transporter, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.vehicle_type, dn.company_address, dn.shipping_address_name
 		FROM
 			`tabDelivery Note` AS dn join `tabDelivery Note Item` AS dni on (dni.parent = dn.name)
 		WHERE
