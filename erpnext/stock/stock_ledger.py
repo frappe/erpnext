@@ -346,7 +346,11 @@ class update_entries_after(object):
 		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 		stock_qty = sum((flt(batch[0]) for batch in self.stock_queue))
 
-		if stock_qty:
+		if (not incoming_rate and not outgoing_rate and
+			self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)):
+			self.valuation_rate = incoming_rate
+
+		elif stock_qty:
 			self.valuation_rate = stock_value / flt(stock_qty)
 
 		if not self.stock_queue:
