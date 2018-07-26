@@ -223,9 +223,10 @@ class update_entries_after(object):
 				tuple(serial_no))[0][0])
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
+
 		if new_stock_qty > 0:
 			new_stock_value = (self.qty_after_transaction * self.valuation_rate) + stock_value_change
-			if new_stock_value > 0:
+			if new_stock_value >= 0:
 				# calculate new valuation rate only if stock value is positive
 				# else it remains the same as that of previous entry
 				self.valuation_rate = new_stock_value / new_stock_qty
