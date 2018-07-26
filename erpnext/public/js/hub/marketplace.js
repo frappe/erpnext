@@ -166,8 +166,10 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
-			frappe.show_not_found();
-			return;
+			if (!this.subpages.not_found) {
+				this.subpages.not_found = new erpnext.hub.NotFound(this.$body);
+			}
+			route[1] = 'not_found';
 		}
 
 		this.update_sidebar();
@@ -783,10 +785,20 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 }
 
-function get_empty_state(message) {
-	return `<div class="empty-state flex">
+erpnext.hub.NotFound = class NotFound extends SubPage {
+	refresh() {
+		this.$wrapper.html(get_empty_state(
+			__('Sorry! I could not find what you were looking for.'),
+			`<button class="btn btn-default btn-xs" data-route="marketplace/home">${__('Back to home')}</button>`
+		));
+	}
+}
+
+function get_empty_state(message, action) {
+	return `<div class="empty-state flex align-center flex-column justify-center">
 		<p class="text-muted">${message}</p>
-	</div>`
+		${action ? `<p>${action}</p>`: ''}
+	</div>`;
 }
 
 function get_item_card_container_html(items, title='') {
