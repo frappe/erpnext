@@ -46,10 +46,12 @@ class HubSettings(Document):
 		doc = frappe.get_doc({
 			'doctype': 'Data Migration Run',
 			'data_migration_plan': 'Hub Sync',
-			'data_migration_connector': 'Hub Connector'
+			'data_migration_connector': 'Hub Connector',
 		}).insert()
 
+		self.sync_in_progress = 1
 		doc.run()
+		self.sync_in_progress = 0
 
 	def pre_reg(self):
 		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
@@ -86,9 +88,9 @@ class HubSettings(Document):
 		post_url = hub_url + '/api/method/hub.hub.api.register'
 
 		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
-		
+
 		response.raise_for_status()
-		
+
 		if response.ok:
 			message = response.json().get('message')
 		else:

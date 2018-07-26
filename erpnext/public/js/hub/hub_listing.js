@@ -670,9 +670,9 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 	setup_events() {
 		this.$wrapper.find('.publish-items').on('click', () => {
+			this.load_publishing_state();
 			this.publish_selected_items()
 				.then(r => {
-					this.load_publishing_state();
 					frappe.msgprint('check');
 				});
 		});
@@ -716,12 +716,6 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			const more_than_one = total_items > 1;
 			this.$wrapper.find('.publish-items')
 				.html(__('Publish ' + total_items + ' item' + (more_than_one ? 's' : '')));
-
-			// if($target.hasClass('active')) {
-			// 	$target.addClass('active');
-			// } else {
-			// 	$target.removeClass('active');
-			// }
 		});
 
 		this.$wrapper.append(items_container);
@@ -737,9 +731,9 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	load_publishing_state() {
-		this.$wrapper.html(`<div>
-			<b>Publishing</b>
-		</div>`);
+		this.$wrapper.html(get_empty_state(
+			'Publishing items ... You will be notified once published.'
+		));
 	}
 
 	publish_selected_items() {
@@ -755,6 +749,12 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			}
 		);
 	}
+}
+
+function get_empty_state(message) {
+	return `<div class="empty-state flex">
+		<p class="text-muted">${message}</p>
+	</div>`
 }
 
 function get_item_card_container_html(items, title='') {
