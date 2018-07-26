@@ -46,10 +46,12 @@ class HubSettings(Document):
 		doc = frappe.get_doc({
 			'doctype': 'Data Migration Run',
 			'data_migration_plan': 'Hub Sync',
-			'data_migration_connector': 'Hub Connector'
+			'data_migration_connector': 'Hub Connector',
 		}).insert()
 
+		# self.sync_in_progress = 1
 		doc.run()
+		# self.sync_in_progress = 0
 
 	def pre_reg(self):
 		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
