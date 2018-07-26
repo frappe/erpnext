@@ -5,8 +5,15 @@ frappe.ui.form.on('QuickBooks Connector', {
 	fetch_data: function(frm) {
 		frappe.call({
 			method: "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.get_authorization_url",
-			callback: function (url) {
-				window.open(url.message);
+			callback: function (result) {
+				console.log(result)
+				if (result.message.authenticated) {
+					frappe.call({
+						method: "erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.fetch"
+					})
+				} else {
+					window.open(result.message.url);
+				}
 			}
 		});
 	}
