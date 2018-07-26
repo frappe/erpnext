@@ -14,7 +14,7 @@ frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.
 
 	make(page_name) {
 		const assets = [
-			'/assets/erpnext/js/hub/hub_listing.js'
+			'/assets/erpnext/js/hub/marketplace.js'
 		];
 
 		frappe.require(assets, () => {
