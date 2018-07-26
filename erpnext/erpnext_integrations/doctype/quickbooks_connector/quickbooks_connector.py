@@ -20,7 +20,7 @@ oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 @frappe.whitelist()
 def get_authorization_url():
-	token = frappe.cache().get("quickbooks_authorization_token")
+	token = frappe.cache().get("quickbooks_access_token")
 	if token:
 		response = {"authenticated": True}
 	else:
@@ -68,27 +68,27 @@ traverse(get_account_tree_from_existing_company("Sandbox Actual"))
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
-	code = kwargs.get("code")
+	frappe.cache().set("quickbooks_code", kwargs.get("code"))
 	company_id = kwargs.get("realmId")
-	token = get_access_token(code)
-	frappe.cache().set("quickbooks_authorization_token", token)
 	frappe.cache().set("quickbooks_company_id", company_id)
+	get_access_token()
 	fetch()
 
 @frappe.whitelist()
 def fetch():
-	token = frappe.cache().get("quickbooks_authorization_token").decode()
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
 	relevant_doctypes = ["Account", "Customer", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
 	for doctype in relevant_doctypes:
-		fetch_all_entries(doctype=doctype, token=token, company_id=company_id)
+		fetch_all_entries(doctype=doctype, company_id=company_id)
 
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-def get_access_token(code):
-	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)["access_token"]
-	return token
+def get_access_token():
+	code = frappe.cache().get("quickbooks_code").decode()
+	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)
+	frappe.cache().set("quickbooks_access_token", token["access_token"])
+	frappe.cache().set("quickbooks_refresh_token", token["refresh_token"])
 
 def make_root_accounts():
 	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
@@ -425,25 +425,40 @@ qb_map = {
 	"Purchase Invoice": "Bill",
 }
 
-def fetch_all_entries(doctype="", token="", company_id=1):
+def get(*args, **kwargs):
+	refresh_tokens()
+	token = frappe.cache().get("quickbooks_access_token").decode()
+	kwargs["headers"] = get_headers(token)
+	response = requests.get(*args, **kwargs)
+	if response.status_code == 401:
+		refresh_tokens()
+		get(*args, **kwargs)
+	return response
+
+def refresh_tokens():
+	refresh_token = frappe.cache().get("quickbooks_refresh_token").decode()
+	code = frappe.cache().get("quickbooks_code").decode()
+	token = oauth.refresh_token(token_endpoint, client_id=client_id, refresh_token=refresh_token, client_secret=client_secret, code=code)
+	frappe.cache().set("quickbooks_refresh_token", token["refresh_token"])
+	frappe.cache().set("quickbooks_access_token", token["access_token"])
+
+def fetch_all_entries(doctype="", company_id=1):
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
 	# Count number of entries
-	entry_count = requests.get(query_uri,
+	entry_count = get(query_uri,
 		params={
 			"query": """SELECT COUNT(*) FROM {}""".format(qb_map[doctype])
-		},
-		headers=get_headers(token)
+		}
 	).json()["QueryResponse"]["totalCount"]
 
 	# fetch pages and accumulate
 	entries = []
 	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
-		response = requests.get(query_uri,
+		response = get(query_uri,
 			params={
 				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(qb_map[doctype], start_position, MAX_RESULT_COUNT)
-			},
-			headers=get_headers(token)
+			}
 		).json()["QueryResponse"][qb_map[doctype]]
 		entries.extend(response)
 	save_entries(doctype, entries)
