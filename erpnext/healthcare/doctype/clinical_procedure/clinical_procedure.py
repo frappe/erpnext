@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, nowdate, nowtime
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.get_item_details import get_item_details
 
 class ClinicalProcedure(Document):
 	def validate(self):
@@ -17,6 +18,12 @@ class ClinicalProcedure(Document):
 			if not self.warehouse:
 				frappe.throw(("Set warehouse for Procedure {0} ").format(self.name))
 			self.set_actual_qty()
+
+		if self.items:
+			self.invoice_separately_as_consumables = False
+			for item in self.items:
+				if item.invoice_separately_as_consumables == 1:
+					self.invoice_separately_as_consumables = True
 
 	def before_insert(self):
 		if self.consume_stock:
@@ -40,6 +47,36 @@ class ClinicalProcedure(Document):
 			create_stock_entry(self)
 		frappe.db.set_value("Clinical Procedure", self.name, "status", 'Completed')
 
+		if self.items:
+			consumable_total_amount = 0
+			consumption_details = False
+			for item in self.items:
+				if item.invoice_separately_as_consumables:
+					price_list, price_list_currency = frappe.db.get_values("Price List", {"selling": 1}, ['name', 'currency'])[0]
+					args = {
+						'doctype': "Sales Invoice",
+						'item_code': item.item_code,
+						'company': self.company,
+						'warehouse': self.warehouse,
+						'customer': frappe.db.get_value("Patient", self.patient, "customer"),
+						'selling_price_list': price_list,
+						'price_list_currency': price_list_currency,
+						'plc_conversion_rate': 1.0,
+						'conversion_rate': 1.0
+					}
+					item_details = get_item_details(args)
+					item_price = item_details.price_list_rate * item.transfer_qty
+					item_consumption_details = item_details.item_name+"\t"+str(item.qty)+" "+item.uom+"\t"+str(item_price)
+					consumable_total_amount += item_price
+					if not consumption_details:
+						consumption_details = "Clinical Procedure ("+self.name+"):\n\t"+item_consumption_details
+					else:
+						consumption_details += "\n\t"+item_consumption_details
+			if consumable_total_amount > 0:
+				frappe.db.set_value("Clinical Procedure", self.name, "consumable_total_amount", consumable_total_amount)
+				frappe.db.set_value("Clinical Procedure", self.name, "consumption_details", consumption_details)
+
+
 	def start(self):
 		allow_start = self.set_actual_qty()
 		if allow_start:
@@ -54,16 +91,7 @@ class ClinicalProcedure(Document):
 
 		allow_start = True
 		for d in self.get('items'):
-			previous_sle = get_previous_sle({
-				"item_code": d.item_code,
-				"warehouse": self.warehouse,
-				"posting_date": nowdate(),
-				"posting_time": nowtime()
-			})
-
-			# get actual stock at source warehouse
-			d.actual_qty = previous_sle.get("qty_after_transaction") or 0
-
+			d.actual_qty = get_stock_qty(d.item_code, self.warehouse)
 			# validate qty
 			if not allow_negative_stock and d.actual_qty < d.qty:
 				allow_start = False
@@ -93,28 +121,14 @@ class ClinicalProcedure(Document):
 				se_child.expense_account = expense_account
 		return stock_entry.as_dict()
 
-	def get_item_details(self, args=None):
-		item = frappe.db.sql("""select stock_uom, description, image, item_name,
-			expense_account, buying_cost_center, item_group from `tabItem`
-			where name = %s
-				and disabled=0
-				and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)""",
-			(args.get('item_code'), nowdate()), as_dict = 1)
-		if not item:
-			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get('item_code')))
-
-		item = item[0]
-
-		ret = {
-			'uom'			      	: item.stock_uom,
-			'stock_uom'			  	: item.stock_uom,
-			'item_name' 		  	: item.item_name,
-			'quantity'				: 0,
-			'transfer_qty'			: 0,
-			'conversion_factor'		: 1
-		}
-		return ret
-
+@frappe.whitelist()
+def get_stock_qty(item_code, warehouse):
+	return get_previous_sle({
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"posting_date": nowdate(),
+		"posting_time": nowtime()
+	}).get("qty_after_transaction") or 0
 
 @frappe.whitelist()
 def set_stock_items(doc, stock_detail_parent, parenttype):

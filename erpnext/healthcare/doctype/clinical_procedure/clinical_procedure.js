@@ -264,21 +264,20 @@ frappe.ui.form.on('Clinical Procedure Item', {
 		let args = null;
 		if(d.item_code) {
 			args = {
-				'item_code'			: d.item_code,
-				'transfer_qty'		: d.transfer_qty,
-				'company'			: frm.doc.company,
-				'quantity'				: d.qty
+				'doctype' : "Clinical Procedure",
+				'item_code' : d.item_code,
+				'company' : frm.doc.company,
+				'warehouse': frm.doc.warehouse
 			};
 			return frappe.call({
-				doc: frm.doc,
-				method: "get_item_details",
-				args: args,
+				method: "erpnext.stock.get_item_details.get_item_details",
+				args: {args: args},
 				callback: function(r) {
 					if(r.message) {
-						var d = locals[cdt][cdn];
-						$.each(r.message, function(k, v){
-							d[k] = v;
-						});
+						frappe.model.set_value(cdt, cdn, "item_name", r.message.item_name);
+						frappe.model.set_value(cdt, cdn, "stock_uom", r.message.stock_uom);
+						frappe.model.set_value(cdt, cdn, "conversion_factor", r.message.conversion_factor);
+						frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
 						refresh_field("items");
 					}
 				}
