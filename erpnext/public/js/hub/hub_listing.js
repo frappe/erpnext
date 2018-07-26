@@ -487,19 +487,11 @@ erpnext.hub.Register = class Register extends SubPage {
 			.appendTo(this.$wrapper);
 		this.$form_container = $('<div class="col-md-8 col-md-offset-1 form-container">')
 			.appendTo(this.$wrapper);
-
-		// const title = __('Become a Seller');
-		// this.$register_container.append($(`<h5>${title}</h5>`));
 	}
 
 	refresh() {
-		// company, company_email, logo, description
 		this.render();
 	}
-
-	// make_input() {
-	// 	//
-	// }
 
 	render() {
 		this.make_field_group();
@@ -576,9 +568,53 @@ erpnext.hub.Register = class Register extends SubPage {
 }
 
 erpnext.hub.Publish = class Publish extends SubPage {
-	constructor(parent) {
-		super(parent);
-		// this.selected_items = [];
+	make_wrapper() {
+		super.make_wrapper();
+		const title_html = `<b>${__('Select Products to Publish')}</b>`;
+		const subtitle_html = `<p class="text-muted">
+			${__(`Only products with an image and description can be published.
+			Please update them if an item in your inventory does not appear.`)}
+		</p>`;
+		const publish_button_html = `<button class="btn btn-primary btn-sm publish-button">
+			<i class="visible-xs octicon octicon-check"></i>
+			<span class="hidden-xs">Publish</span>
+		</button>`;
+
+		const select_all_button = `<button class="btn btn-secondary btn-default btn-xs margin-right select-all">Select All</button>`;
+		const deselect_all_button = `<button class="btn btn-secondary btn-default btn-xs deselect-all">Deselect All</button>`;
+
+		const search_html = `<div class="hub-search-container">
+			<input type="text" class="form-control" placeholder="Search Items">
+		</div>`;
+
+		const subpage_header = $(`
+			<div class='subpage-title flex'>
+				<div>
+					${title_html}
+					${subtitle_html}
+				</div>
+				${publish_button_html}
+			</div>
+
+			${search_html}
+
+			${select_all_button}
+			${deselect_all_button}
+		`);
+
+		this.$wrapper.append(subpage_header);
+
+		this.setup_events();
+	}
+
+	setup_events() {
+		this.$wrapper.find('.select-all').on('click', () => {
+			this.$wrapper.find('.hub-card').addClass('active');
+		});
+
+		this.$wrapper.find('.deselect-all').on('click', () => {
+			this.$wrapper.find('.hub-card').removeClass('active');
+		});
 	}
 
 	refresh() {
@@ -589,26 +625,13 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	render(items) {
-		const html = get_item_card_container_html(
-			items,
-
-			__('Select Products to Publish'),
-
-			__(`Only products with an image and description can be published.
-			Please update them if an item in your inventory does not appear.`),
-
-			`<div class="hub-search-container">
-				<input type="text" class="form-control" placeholder="Search Items">
-			</div>`
-		);
-
-		const container = $(html);
-		container.addClass('static').on('click', '.hub-card', (e) => {
+		const items_container = $(get_item_card_container_html(items));
+		items_container.addClass('static').on('click', '.hub-card', (e) => {
 			const $target = $(e.currentTarget);
 			$target.toggleClass('active');
 		});
 
-		this.$wrapper.append(container);
+		this.$wrapper.append(items_container);
 	}
 
 	get_valid_items() {
@@ -616,20 +639,14 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 }
 
-function get_item_card_container_html(items, title, subtitle='', search_html='') {
+function get_item_card_container_html(items, title='') {
 	const items_html = (items || []).map(item => get_item_card_html(item)).join('');
 
 	const html = `<div class="row hub-card-container">
-		<div class="col-md-12 margin-bottom">
+		<div class="col-sm-12 margin-bottom">
 			<b>${title}</b>
-
-			<p class="text-muted">${subtitle}</p>
-
-			${search_html}
 		</div>
-
 		${items_html}
-
 	</div>`;
 
 	return html;
