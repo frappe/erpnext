@@ -30,41 +30,6 @@ def get_authorization_url():
 		}
 	return response
 
-
-"""
-from frappe import delete_doc
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_account_tree_from_existing_company
-from frappe.model.rename_doc import get_link_fields
-
-def delete_compnay_default_accounts(company):
-	company = frappe.get_doc("Company", company)
-
-	account_fields = list(filter(lambda x: x['parent'] == "Company", get_link_fields("Account")
-	account_fields = [_["fieldname"] for _ in account_fields]
-	print(account_fields)
-	print(company.__dict__)
-	for field in account_fields:
-		frappe.db.set_value("Company", company.name, field, None)
-	for field in company.__dict__.keys():
-		if "account" in field:
-			frappe.db.set_value("Company", company.name, field, None)
-	frappe.db.commit()
-	company = frappe.get_doc("Company", company.name)
-	print(company.__dict__)
-
-def traverse(tree):
-	global traverse
-	children = list(filter(lambda x: x not in ("root_type", "account_type", "is_group", "account_number"), tree.keys()))
-	print(children)
-	for child in children:
-		traverse(tree[child])
-		print("Going to delete now", encode_company_abbr(child, "Sandbox Actual"))
-		delete_doc("Account", encode_company_abbr(child, "Sandbox Actual"))
-
-delete_compnay_default_accounts("Sandbox Actual")
-traverse(get_account_tree_from_existing_company("Sandbox Actual"))
-"""
-
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
