@@ -105,7 +105,6 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	make_body() {
 		this.$body = this.$parent.find('.layout-main-section');
-
 		this.$body.on('seller-registered', () => {
 			this.registered = 1;
 			this.make_sidebar_nav_buttons();
@@ -136,6 +135,10 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		if (route[1] === 'favourites' && !this.subpages.favourites) {
 			this.subpages.favourites = new erpnext.hub.Favourites(this.$body);
+		}
+
+		if (route[1] === 'search' && route[2] && !this.subpages.search) {
+			this.subpages.search = new erpnext.hub.SearchPage(this.$body);
 		}
 
 		if (route[1] === 'category' && route[2] && !this.subpages.category) {
@@ -182,6 +185,16 @@ class SubPage {
 	constructor(parent, options) {
 		this.$parent = $(parent);
 		this.make_wrapper(options);
+
+		// handle broken images after every render
+		if (this.render) {
+			this._render = this.render.bind(this);
+
+			this.render = (...args) => {
+				this._render(...args);
+				frappe.dom.handle_broken_images(this.$wrapper);
+			}
+		}
 	}
 
 	make_wrapper() {
@@ -203,7 +216,10 @@ class SubPage {
 erpnext.hub.Home = class Home extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
-		this.make_search_bar();
+
+		make_search_bar(this.$wrapper, keyword => {
+			frappe.set_route('marketplace', 'search', keyword);
+		});
 	}
 
 	refresh() {
@@ -222,26 +238,9 @@ erpnext.hub.Home = class Home extends SubPage {
 		return hub.call('get_data_for_homepage');
 	}
 
-	make_search_bar() {
-		const $search = $(`
-			<div class="hub-search-container">
-				<input type="text" class="form-control" placeholder="Search for anything">
-			</div>`
-		);
-		this.$wrapper.append($search);
-		const $search_input = $search.find('input');
-
-		$search_input.on('keydown', frappe.utils.debounce((e) => {
-			if (e.which === frappe.ui.keyCode.ENTER) {
-				this.search_value = $search_input.val();
-				this.get_items_and_render();
-			}
-		}, 300));
-	}
-
 	render(items) {
 		const html = get_item_card_container_html(items, __('Recently Published'));
-		this.$wrapper.append(html)
+		this.$wrapper.append(html);
 	}
 }
 
@@ -286,6 +285,35 @@ erpnext.hub.Category = class Category extends SubPage {
 	render(items) {
 		const html = get_item_card_container_html(items, __(this.category));
 		this.$wrapper.append(html)
+	}
+}
+
+erpnext.hub.SearchPage = class SearchPage extends SubPage {
+	make_wrapper() {
+		super.make_wrapper();
+
+		make_search_bar(this.$wrapper, keyword => {
+			frappe.set_route('marketplace', 'search', keyword);
+		});
+	}
+
+	refresh() {
+		this.keyword = frappe.get_route()[2];
+		this.$wrapper.find('input').val(this.keyword);
+		if (!this.keyword) return;
+
+		this.get_items_by_keyword(this.keyword)
+			.then(items => this.render(items));
+	}
+
+	get_items_by_keyword(keyword) {
+		return hub.call('get_items_by_keyword', { keyword });
+	}
+
+	render(items) {
+		this.$wrapper.find('.hub-card-container').remove();
+		const html = get_item_card_container_html(items, __('Search results for "{0}"', [this.keyword]));
+		this.$wrapper.append(html);
 	}
 }
 
@@ -863,7 +891,7 @@ function get_item_card_html(item) {
 					<i class="octicon octicon-check text-success"></i>
 				</div>
 				<div class="hub-card-body">
-					<img class="hub-card-image ${item.image ? '' : 'no-image'}" src="${img_url}" />
+					<img class="hub-card-image" src="${img_url}" />
 					<div class="overlay hub-card-overlay"></div>
 					${show_local_item_button}
 				</div>
@@ -884,6 +912,25 @@ function get_rating_html(item) {
 	}
 	return rating_html;
 }
+
+function make_search_bar($wrapper, on_search) {
+	const $search = $(`
+		<div class="hub-search-container">
+			<input type="text" class="form-control" placeholder="${__('Search for anything')}">
+		</div>`
+	);
+	$wrapper.append($search);
+	const $search_input = $search.find('input');
+
+	$search_input.on('keydown', frappe.utils.debounce((e) => {
+		if (e.which === frappe.ui.keyCode.ENTER) {
+			const search_value = $search_input.val();
+			on_search(search_value);
+		}
+	}, 300));
+}
+
+// caching
 
 erpnext.hub.cache = {};
 hub.call = function call_hub_method(method, args={}) {
