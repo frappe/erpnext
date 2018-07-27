@@ -143,7 +143,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
-		"currency": company_currency
+		"currency": ""
 	}
 
 	for d in accounts:
@@ -188,7 +188,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
-			"currency": company_currency
+			"currency": ""
 		}
 
 		prepare_opening_and_closing(d)
