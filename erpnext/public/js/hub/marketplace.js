@@ -137,7 +137,7 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages.favourites = new erpnext.hub.Favourites(this.$body);
 		}
 
-		if (route[1] === 'search' && route[2] && !this.subpages.search) {
+		if (route[1] === 'search' && !this.subpages.search) {
 			this.subpages.search = new erpnext.hub.SearchPage(this.$body);
 		}
 
@@ -303,9 +303,8 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 	}
 
 	refresh() {
-		this.keyword = frappe.get_route()[2];
+		this.keyword = frappe.get_route()[2] || '';
 		this.$wrapper.find('input').val(this.keyword);
-		if (!this.keyword) return;
 
 		this.get_items_by_keyword(this.keyword)
 			.then(items => this.render(items));
@@ -317,7 +316,8 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 
 	render(items) {
 		this.$wrapper.find('.hub-card-container').remove();
-		const html = get_item_card_container_html(items, __('Search results for "{0}"', [this.keyword]));
+		const title = this.keyword ? __('Search results for "{0}"', [this.keyword]) : '';
+		const html = get_item_card_container_html(items, title);
 		this.$wrapper.append(html);
 	}
 }
@@ -841,11 +841,14 @@ function get_empty_state(message, action) {
 
 function get_item_card_container_html(items, title='') {
 	const items_html = (items || []).map(item => get_item_card_html(item)).join('');
+	const title_html = title
+		? `<div class="col-sm-12 margin-bottom">
+				<b>${title}</b>
+			</div>`
+		: '';
 
 	const html = `<div class="row hub-card-container">
-		<div class="col-sm-12 margin-bottom">
-			<b>${title}</b>
-		</div>
+		${title_html}
 		${items_html}
 	</div>`;
 
