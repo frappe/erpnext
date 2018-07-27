@@ -150,7 +150,7 @@ def get_points_earned(self):
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
 	lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
-	loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
+		loyalty_program=self.loyalty_program, expiry_date=self.posting_date, include_expired_entry=True)
 	if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 		(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
 		returned_amount = get_returned_amount()
