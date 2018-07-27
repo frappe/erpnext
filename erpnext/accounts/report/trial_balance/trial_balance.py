@@ -218,19 +218,19 @@ def get_columns():
 			"label": _("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 440
+			"width": 300
 		},
 		{
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Float",
-			"width": 80
+			"width": 130
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Float",
-			"width": 80
+			"width": 130
 		},
 		{
 			"fieldname": "debit",
@@ -242,19 +242,19 @@ def get_columns():
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Float",
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
 			"fieldtype": "Float",
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
 			"fieldtype": "Float",
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "currency",
