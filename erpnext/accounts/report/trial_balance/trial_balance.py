@@ -143,7 +143,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
-		"currency": ""
+		"currency": company_currency
 	}
 
 	for d in accounts:
@@ -188,7 +188,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
-			"currency": ""
+			"currency": company_currency
 		}
 
 		prepare_opening_and_closing(d)
@@ -223,43 +223,37 @@ def get_columns():
 		{
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "debit",
 			"label": _("Debit"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
-			"fieldtype": "Currency",
-			"options": "currency",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		{
