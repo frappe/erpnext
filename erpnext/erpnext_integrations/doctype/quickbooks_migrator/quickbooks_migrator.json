@@ -92,7 +92,7 @@
  "modified": "2018-07-10 16:26:44.611515",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
- "name": "QuickBooks Connector",
+ "name": "QuickBooks Migrator",
  "name_case": "",
  "owner": "Administrator",
  "permissions": [

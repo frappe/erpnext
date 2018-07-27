@@ -13,7 +13,7 @@ from erpnext import encode_company_abbr
 client_id = "Q02P61JeL3TNEr5HjcWTrXB9bQEab6LhoPaGg3uF2RQ1iKG6nL"
 client_secret = "B1se8GzM4FvfNAbeRjZGF5q2BNyRcV4O2V4fb0ZQ"
 scope = "com.intuit.quickbooks.accounting"
-redirect_uri = "http://localhost/api/method/erpnext.erpnext_integrations.doctype.quickbooks_connector.quickbooks_connector.callback"
+redirect_uri = "http://erpnext.local/api/method/erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator.callback"
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
@@ -463,5 +463,5 @@ def get_headers(token):
 	return {"Accept": "application/json",
 	"Authorization": "Bearer {}".format(token)}
 
-class QuickBooksConnector(Document):
+class QuickBooksMigrator(Document):
 	pass
