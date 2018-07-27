@@ -8,7 +8,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		frappe.db.get_doc('Hub Settings')
 			.then(doc => {
-				this.hub_settings = doc;
+				hub.settings = doc;
 				this.registered = doc.registered;
 
 				this.setup_header();
@@ -158,14 +158,15 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'profile' && !this.subpages.profile) {
-			this.subpages.profile = new erpnext.hub.Profile(this.$body, {data: this.hub_settings});
+			this.subpages.profile = new erpnext.hub.Profile(this.$body);
 		}
 
 		if (route[1] === 'publish' && !this.subpages.publish) {
-			this.subpages.publish = new erpnext.hub.Publish(
-				this.$body,
-				{sync_in_progress: this.hub_settings.sync_in_progress}
-			);
+			this.subpages.publish = new erpnext.hub.Publish(this.$body);
+		}
+
+		if (route[1] === 'my-products' && !this.subpages['my-products']) {
+			this.subpages['my-products'] = new erpnext.hub.PublishedProducts(this.$body);
 		}
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
@@ -650,13 +651,12 @@ erpnext.hub.Register = class Register extends SubPage {
 }
 
 erpnext.hub.Profile = class Profile extends SubPage {
-	constructor(parent, profile_data) {
-		super(parent);
-		this.profile_data = profile_data;
-	}
-
 	make_wrapper() {
 		super.make_wrapper();
+
+		// Shorthand for profile data;
+		const p = hub.settings;
+
 		const profile_html = `<div class="hub-item-container">
 			<div class="row visible-xs">
 				<div class="col-xs-12 margin-bottom">
@@ -696,21 +696,16 @@ erpnext.hub.Profile = class Profile extends SubPage {
 }
 
 erpnext.hub.Publish = class Publish extends SubPage {
-	make_wrapper(options) {
-		super.make_wrapper();
-		this.sync_in_progress = options.sync_in_progress;
-
-		this.load_publish_page();
-	}
-
 	load_publish_page() {
 		const title_html = `<b>${__('Select Products to Publish')}</b>`;
+
 		const info = `<p class="text-muted">${__("Status decided by the 'Publish in Hub' field in Item.")}</p>`;
-		const subtitle_html = `
-		<p class="text-muted">
+
+		const subtitle_html = `<p class="text-muted">
 			${__(`Only products with an image, description and category can be published.
 			Please update them if an item in your inventory does not appear.`)}
 		</p>`;
+
 		const publish_button_html = `<button class="btn btn-primary btn-sm publish-items">
 			<i class="visible-xs octicon octicon-check"></i>
 			<span class="hidden-xs">Publish</span>
@@ -761,7 +756,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	get_items_and_render() {
-		if(this.sync_in_progress) {
+		if(hub.settings.sync_in_progress) {
 			this.load_publishing_state();
 			return;
 		}
@@ -820,6 +815,27 @@ erpnext.hub.Publish = class Publish extends SubPage {
 				items_to_publish: items_to_publish
 			}
 		);
+	}
+}
+
+erpnext.hub.PublishedProducts = class PublishedProducts extends SubPage {
+	get_items_and_render() {
+		this.$wrapper.find('.hub-card-container').empty();
+		this.get_published_products()
+			.then(items => this.render(items));
+	}
+
+	refresh() {
+		this.get_items_and_render();
+	}
+
+	render(items) {
+		const items_container = $(get_item_card_container_html(items, __('Your Published Products')));
+		this.$wrapper.append(items_container);
+	}
+
+	get_published_products() {
+		return hub.call('get_items_by_seller', { hub_seller: hub.settings.company_email });
 	}
 }
 
@@ -955,9 +971,11 @@ hub.call = function call_hub_method(method, args={}) {
 		}
 
 		// cache invalidation after 5 minutes
+		const timeout = 5 * 60 * 1000;
+
 		setTimeout(() => {
 			delete erpnext.hub.cache[key];
-		}, 5 * 60 * 1000);
+		}, timeout);
 
 		frappe.call({
 			method: 'erpnext.hub_node.call_hub_method',

@@ -15,24 +15,13 @@ from six import string_types
 # hub_url = "http://erpnext.hub:8001"
 hub_url = "http://hub.market:8000"
 
-class OAuth2Session():
-	def __init__(self, headers):
-		self.headers = headers
-	def get(self, url, params, headers, verify):
-		res = requests.get(url, params=params, headers=self.headers, verify=verify)
-		return res
-	def post(self, url, data, verify):
-		res = requests.post(url, data=data, headers=self.headers, verify=verify)
-		return res
-	def put(self, url, data, verify):
-		res = requests.put(url, data=data, headers=self.headers, verify=verify)
-		return res
-
 class HubSetupError(frappe.ValidationError): pass
 
 class HubSettings(Document):
 
 	def validate(self):
+		protocol = 'http://'
+		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
 		if self.publish_pricing and not self.selling_price_list:
 			frappe.throw(_("Please select a Price List to publish pricing"))
 
@@ -53,35 +42,13 @@ class HubSettings(Document):
 		doc.run()
 		# self.sync_in_progress = 0
 
-	def pre_reg(self):
-		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
-		protocol = 'http://'
-		route = '/token'
-		data = {
-			'site_name': site_name,
-			'protocol': protocol,
-			'route': route
-		}
-
-		redirect_url = protocol + site_name + route
-		post_url = hub_url + '/api/method/hub.hub.api.pre_reg'
-
-		response = requests.post(post_url, data=data)
-		response.raise_for_status()
-		message = response.json().get('message')
-
-		if message and message.get('client_id'):
-			print("======CLIENT_ID======")
-			print(message.get('client_id'))
-
-			return {
-				'client_id': message.get('client_id'),
-				'redirect_uri': redirect_url
-			}
-
-
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
+
+		# TODO: site_name for cloud sites
+		protocol = 'http://'
+		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
+
 		data = {
 			'profile': self.as_json()
 		}
@@ -103,18 +70,18 @@ class HubSettings(Document):
 
 		return message or None
 
-	def unregister(self):
-		""" Disable the User on hub.erpnext.org"""
+	# def unregister(self):
+	# 	""" Disable the User on hub.erpnext.org"""
 
-		hub_connector = frappe.get_doc(
-			'Data Migration Connector', 'Hub Connector')
+	# 	hub_connector = frappe.get_doc(
+	# 		'Data Migration Connector', 'Hub Connector')
 
-		connection = hub_connector.get_connection()
-		response_doc = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
+	# 	connection = hub_connector.get_connection()
+	# 	response_doc = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
 
-		if response_doc['enabled'] == 0:
-			self.enabled = 0
-			self.save()
+	# 	if response_doc['enabled'] == 0:
+	# 		self.enabled = 0
+	# 		self.save()
 
 	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
