@@ -10,10 +10,11 @@ from requests_oauthlib import OAuth2Session
 import requests
 from erpnext import encode_company_abbr
 
-client_id = "Q02P61JeL3TNEr5HjcWTrXB9bQEab6LhoPaGg3uF2RQ1iKG6nL"
-client_secret = "B1se8GzM4FvfNAbeRjZGF5q2BNyRcV4O2V4fb0ZQ"
-scope = "com.intuit.quickbooks.accounting"
-redirect_uri = "http://erpnext.local/api/method/erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator.callback"
+
+client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
+client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret")
+scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
+redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
