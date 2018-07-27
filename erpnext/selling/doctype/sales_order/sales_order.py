@@ -40,6 +40,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
+		self.validate_serial_no_based_delivery()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -397,6 +398,16 @@ class SalesOrder(SellingController):
 
 			d.set("delivery_date", _get_delivery_date(reference_delivery_date,
 				reference_doc.transaction_date, self.transaction_date))
+
+	def validate_serial_no_based_delivery(self):
+		for item in self.items:
+			if item.ensure_delivery_based_on_produced_serial_no:
+				if not frappe.db.get_value("Item", item.item_code, "has_serial_no"):
+					frappe.throw(_("Item {0} has no Serial No. Only serilialized items \
+					can have delivery based on Serial No").format(item.item_code))
+				if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
+					frappe.throw(_("No active BOM found for item {0}. Delivery by \
+					Serial No cannot be ensured").format(item.item_code))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
