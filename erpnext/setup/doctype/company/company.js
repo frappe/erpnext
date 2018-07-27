@@ -72,6 +72,11 @@ frappe.ui.form.on("Company", {
 		if(frm.get_field("delete_company_transactions").$input)
 			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 		filterEmployeeDefaultAccount(frm);
+		filterDefaultDepreciationAccount(frm);
+		filterDefaultStockReceivedNotBilledAccount(frm);
+		filterDefaultStockAdjustmentAccount(frm);
+		filterDefaultExpenseAccount(frm);
+		filterDefaultInventoryAccount(frm);
 	},
 
 	country: function(frm) {
@@ -230,6 +235,63 @@ erpnext.company.set_custom_query = function(frm, v) {
 
 function filterEmployeeDefaultAccount(frm) {
     frm.fields_dict['default_employee_advance_account'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
+}
+
+function filterDefaultStockAdjustmentAccount(frm) {
+    frm.fields_dict['stock_adjustment_account'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
+}
+
+function filterDefaultStockReceivedNotBilledAccount(frm) {
+    frm.fields_dict['stock_received_but_not_billed'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
+}
+
+
+function filterDefaultDepreciationAccount(frm) {
+    frm.fields_dict['accumulated_depreciation_account'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
+}
+
+
+function filterDefaultInventoryAccount(frm) {
+    frm.fields_dict['default_inventory_account'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
+}
+
+function filterDefaultExpenseAccount(frm) {
+    frm.fields_dict['depreciation_expense_account'].get_query = function (document) {
         // Filter out accounts for this company only
         return {
             filters: [
