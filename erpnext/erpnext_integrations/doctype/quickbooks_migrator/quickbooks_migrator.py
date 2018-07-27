@@ -15,6 +15,7 @@ client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
 client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret")
 scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
 redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
+company = frappe.db.get_value("Quickbooks Migrator", None, "company")
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
@@ -61,13 +62,13 @@ def make_root_accounts():
 	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
 	for root in roots:
 		try:
-			if not frappe.db.exists("Account", encode_company_abbr("{} - QB".format(root), "Sandbox Actual")):
+			if not frappe.db.exists("Account", encode_company_abbr("{} - QB".format(root), company)):
 				frappe.get_doc({
 					"doctype": "Account",
 					"account_name": "{} - QB".format(root),
 					"root_type": root,
 					"is_group": "1",
-					"company": "Sandbox Actual",
+					"company": company,
 				}).insert(ignore_permissions=True, ignore_mandatory=True)
 		except:
 			import traceback
@@ -104,9 +105,9 @@ def save_account(account):
 			"quickbooks_id": account["Id"],
 			"account_name": "{} - QB".format(account["Name"]),
 			"root_type": mapping[account["AccountType"]],
-			"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), "Sandbox Actual"),
+			"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
 			"is_group": "0",
-			"company": "Sandbox Actual",
+			"company": company,
 		}).insert(ignore_permissions=True, ignore_mandatory=True)
 	except:
 		pass
@@ -136,7 +137,7 @@ def save_item(item):
 			"item_code" : item["Name"],
 			"stock_uom": "Unit",
 			"item_group": "All Item Groups",
-			"item_defaults": [{"company": "Sandbox Actual"}]
+			"item_defaults": [{"company": company}]
 		}).insert(ignore_permissions=True)
 	except:
 		pass
@@ -201,7 +202,7 @@ def save_journal_entry(journal_entry):
 			"doctype": "Journal Entry",
 			"quickbooks_id": journal_entry["Id"],
 			"naming_series": "JV-",
-			"company": "Sandbox Actual",
+			"company": company,
 			"posting_date": journal_entry["TxnDate"],
 			"accounts": get_accounts(journal_entry["Line"]),
 		}).insert().submit()
