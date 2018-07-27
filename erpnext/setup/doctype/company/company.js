@@ -71,6 +71,7 @@ frappe.ui.form.on("Company", {
 	onload_post_render: function(frm) {
 		if(frm.get_field("delete_company_transactions").$input)
 			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
+		filterEmployeeDefaultAccount(frm);
 	},
 
 	country: function(frm) {
@@ -225,4 +226,15 @@ erpnext.company.set_custom_query = function(frm, v) {
 			filters: filters
 		}
 	});
+}
+
+function filterEmployeeDefaultAccount(frm) {
+    frm.fields_dict['default_employee_advance_account'].get_query = function (document) {
+        // Filter out accounts for this company only
+        return {
+            filters: [
+                ['company', '=', document.name]
+	    ]
+        }
+    };
 }
