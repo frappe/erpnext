@@ -23,7 +23,6 @@ def call_hub_method(method, params=None):
 		'cmd': 'hub.hub.api.' + method
 	})
 
-	response = connection.post_api('hub.hub.api.' + method, params)
 	response = connection.post_request(params)
 	return response
 
@@ -153,27 +152,6 @@ def update_category(hub_item_code, category):
 		doctype='Hub Item',
 		hub_category = category
 	)), hub_item_code)
-
-	return response
-
-@frappe.whitelist()
-def send_review(hub_item_code, review):
-	review = json.loads(review)
-	hub_connection = get_hub_connection()
-
-	item_doc = hub_connection.connection.get_doc('Hub Item', hub_item_code)
-	existing_reviews = item_doc.get('reviews')
-
-	reviews = [review]
-	review.setdefault('idx', 0)
-	for r in existing_reviews:
-		if r.get('user') != review.get('user'):
-			reviews.append(r)
-
-	response = hub_connection.update('Hub Item', dict(
-		doctype='Hub Item',
-		reviews = reviews
-	), hub_item_code)
 
 	return response
 

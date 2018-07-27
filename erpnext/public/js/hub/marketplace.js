@@ -228,19 +228,24 @@ erpnext.hub.Home = class Home extends SubPage {
 
 	get_items_and_render() {
 		this.$wrapper.find('.hub-card-container').empty();
-		this.get_items()
-			.then(items => {
-				this.render(items);
+		this.get_data()
+			.then(data => {
+				this.render(data);
 			});
 	}
 
-	get_items() {
-		return hub.call('get_data_for_homepage');
+	get_data() {
+		return hub.call('get_data_for_homepage', { country: frappe.defaults.get_user_default('country') });
 	}
 
-	render(items) {
-		const html = get_item_card_container_html(items, __('Recently Published'));
+	render(data) {
+		let html = get_item_card_container_html(data.random_items, __('Explore'));
 		this.$wrapper.append(html);
+
+		if (data.items_by_country.length) {
+			html = get_item_card_container_html(data.items_by_country, __('Near you'));
+			this.$wrapper.append(html);
+		}
 	}
 }
 
@@ -323,38 +328,23 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		this.get_item(this.hub_item_code)
 			.then(item => {
+				this.item = item;
 				this.render(item);
 			});
 	}
 
 	get_item(hub_item_code) {
-		return new Promise(resolve => {
-			const item = (erpnext.hub.hub_item_cache || []).find(item => item.name === hub_item_code)
-
-			if (item) {
-				resolve(item);
-			} else {
-				frappe.call('erpnext.hub_node.get_list', {
-					doctype: 'Hub Item',
-					filters: {
-						name: hub_item_code
-					}
-				})
-				.then(r => {
-					resolve(r.message[0]);
-				});
-			}
-		});
+		return hub.call('get_item_details', { hub_item_code });
 	}
 
 	render(item) {
 		const title = item.item_name || item.name;
-		const company = item.company_name;
+		const seller = item.company;
 
-		const who = __('Posted By {0}', [company]);
+		const who = __('Posted By {0}', [seller]);
 		const when = comment_when(item.creation);
 
-		const city = item.seller_city ? item.seller_city + ', ' : '';
+		const city = item.city ? item.city + ', ' : '';
 		const country = item.country ? item.country : '';
 		const where = `${city}${country}`;
 
@@ -362,8 +352,8 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		const description = item.description || '';
 
-		const rating_html = get_rating_html(item);
-		const rating_count = item.reviews.length > 0 ? `(${item.reviews.length} reviews)` : '';
+		const rating_html = get_rating_html(item.average_rating);
+		const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
 
 		const html = `
 			<div class="hub-item-container">
@@ -382,7 +372,7 @@ erpnext.hub.Item = class Item extends SubPage {
 						<h2>${title}</h2>
 						<div class="text-muted">
 							<p>${where}${dot_spacer}${when}</p>
-							<p>${rating_html}${rating_count}</p>
+							<p>${rating_html} (${rating_count})</p>
 						</div>
 						<hr>
 						<div class="hub-item-description">
@@ -402,7 +392,7 @@ erpnext.hub.Item = class Item extends SubPage {
 						<img src="https://picsum.photos/200">
 					</div>
 					<div class="col-md-6">
-						<a href="#marketplace/seller/${company}" class="bold">${company}</a>
+						<a href="#marketplace/seller/${seller}" class="bold">${seller}</a>
 						<p class="text-muted">
 							Contact Seller
 						</p>
@@ -428,40 +418,60 @@ erpnext.hub.Item = class Item extends SubPage {
 		this.$wrapper.html(html);
 
 		this.make_review_area();
-		this.render_reviews(item);
+
+		this.get_reviews()
+			.then(reviews => {
+				this.reviews = reviews;
+				this.render_reviews(reviews);
+			});
 	}
 
 	make_review_area() {
 		this.comment_area = new frappe.ui.ReviewArea({
 			parent: this.$wrapper.find('.timeline-head').empty(),
 			mentions: [],
-			on_submit: (val) => {
-				val.user = frappe.session.user;
-				val.username = frappe.session.user_fullname;
+			on_submit: (values) => {
+				values.user = frappe.session.user;
+				values.username = frappe.session.user_fullname;
 
-				frappe.call({
-					method: 'erpnext.hub_node.send_review',
-					args: {
-						hub_item_code: this.hub_item_code,
-						review: val
-					},
-					callback: (r) => {
-						console.log(r);
-						this.render_reviews(r.message);
-						this.comment_area.reset();
-					},
-					freeze: true
+				hub.call('add_item_review', {
+					hub_item_code: this.hub_item_code,
+					review: JSON.stringify(values)
+				})
+				.then(review => {
+					this.reviews = this.reviews || [];
+					this.reviews.push(review);
+					this.render_reviews(this.reviews);
+
+					this.comment_area.reset();
 				});
 			}
 		});
 	}
 
-	render_reviews(item) {
-		this.$wrapper.find('.timeline-items').empty();
-		item.reviews.forEach(review => this.render_review(review, item));
+	get_reviews() {
+		return hub.call('get_item_reviews', { hub_item_code: this.hub_item_code }).catch(() => {});
 	}
 
-	render_review(review, item) {
+	render_reviews(reviews=[]) {
+		this.$wrapper.find('.timeline-items').empty();
+
+		reviews.sort((a, b) => {
+			if (a.modified > b.modified) {
+				return -1;
+			}
+
+			if (a.modified < b.modified) {
+				return 1;
+			}
+
+			return 0;
+		});
+
+		reviews.forEach(review => this.render_review(review));
+	}
+
+	render_review(review) {
 		let username = review.username || review.user || __("Anonymous");
 
 		let image_html = review.user_image
@@ -481,7 +491,7 @@ erpnext.hub.Item = class Item extends SubPage {
 			</div>`
 			: '';
 
-		let rating_html = get_rating_html(item);
+		let rating_html = get_rating_html(review.rating);
 
 		const $timeline_items = this.$wrapper.find('.timeline-items');
 
@@ -847,7 +857,7 @@ function get_item_card_html(item) {
 	const title = strip_html(item_name);
 	const img_url = item.image;
 
-	const company_name = item.company_name;
+	const company_name = item.company;
 
 	const active = item.publish_in_hub;
 
@@ -902,8 +912,7 @@ function get_item_card_html(item) {
 	return item_html;
 }
 
-function get_rating_html(item) {
-	const rating = item.average_rating;
+function get_rating_html(rating) {
 	let rating_html = ``;
 	for (var i = 0; i < 5; i++) {
 		let star_class = 'fa-star';
@@ -956,6 +965,13 @@ hub.call = function call_hub_method(method, args={}) {
 		})
 		.then(r => {
 			if (r.message) {
+				if (r.message.error) {
+					frappe.throw({
+						title: __('Marketplace Error'),
+						message: r.message.error
+					});
+				}
+
 				erpnext.hub.cache[key] = r.message;
 				resolve(r.message)
 			}
