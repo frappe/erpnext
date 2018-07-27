@@ -6,6 +6,7 @@ import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
 from erpnext.accounts.doctype.account.account import update_account_number
+from erpnext.accounts.doctype.account.account import merge_account
 
 class TestAccount(unittest.TestCase):
 	def test_rename_account(self):
@@ -34,6 +35,33 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(new_acc.account_number, "1211-11-4 - 6 -")
 
 		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
+
+	def test_merge_account(self):
+		if not frappe.db.exists("Account", "Securities and Deposits - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Securities and Deposits"
+			acc.parent_account = "Current Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Earnest Money - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Earnest Money"
+			acc.parent_account = "Securities and Deposits - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Cash In Hand - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Cash In Hand"
+			acc.parent_account = "Current Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+
+		doc = frappe.get_doc("Account", "Securities and Deposits - _TC")
+		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
+		self.assertEqual(parent, "Securities and Deposits - _TC")
+		merge_account("Securities and Deposits - _TC", "Cash In Hand - _TC", doc.is_group, doc.root_type, doc.company)
+		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
+		self.assertEqual(parent, "Cash In Hand - _TC")
 
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
