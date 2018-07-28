@@ -217,3 +217,23 @@ def update_account_number(name, account_name, account_number=None):
 	if name != new_name:
 		frappe.rename_doc("Account", name, new_name, ignore_permissions=1)
 		return new_name
+
+@frappe.whitelist()
+def merge_account(old, new, is_group, root_type, company):
+	# Validate properties before merging
+	if not frappe.db.exists("Account", new):
+		throw(_("Account {0} does not exist").format(new))
+
+	val = list(frappe.db.get_value("Account", new,
+		["is_group", "root_type", "company"]))
+
+	if val != [cint(is_group), root_type, company]:
+		throw(_("""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""))
+
+	if is_group and frappe.db.get_value("Account", new, "parent_account") == old:
+		frappe.db.set_value("Account", new, "parent_account",
+			frappe.db.get_value("Account", old, "parent_account"))
+
+	frappe.rename_doc("Account", old, new, merge=1, ignore_permissions=1)
+
+	return new
