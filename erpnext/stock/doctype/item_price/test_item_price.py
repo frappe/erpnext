@@ -75,6 +75,7 @@ class TestItemPrice(unittest.TestCase):
 		args = {
 			"price_list": doc.price_list,
 			"min_qty": doc.min_qty,
+			"customer": "_Test Customer",
 			"uom": "_Test UOM",
 			"transaction_date": '2017-04-18',
 			"qty": 7

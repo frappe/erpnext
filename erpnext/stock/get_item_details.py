@@ -412,7 +412,7 @@ def get_item_price(args, item_code):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by min_qty desc """.format(conditions=conditions), args)
+		order by uom desc, min_qty desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -429,7 +429,7 @@ def get_price_list_rate_for(args, item_code):
 		:param transaction_date: Date of the price
 	"""
 	item_price_args = {
-			"item_code": args.get('item_code'),
+			"item_code": item_code,
 			"price_list": args.get('price_list'),
 			"customer": args.get('customer'),
 			"supplier": args.get('supplier'),
@@ -459,7 +459,7 @@ def get_price_list_rate_for(args, item_code):
 	if item_price_data:
 		if item_price_data[0][2] == args.get("uom"):
 			return item_price_data[0][1]
-		elif not args.price_list_uom_dependant:
+		elif not args.get('price_list_uom_dependant'):
 			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0][1]
