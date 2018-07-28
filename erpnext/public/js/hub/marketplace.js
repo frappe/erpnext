@@ -204,6 +204,10 @@ class SubPage {
 		this.hide();
 	}
 
+	empty() {
+		this.$wrapper.empty();
+	}
+
 	show() {
 		this.refresh();
 		this.$wrapper.show();
@@ -325,6 +329,7 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 
 erpnext.hub.Item = class Item extends SubPage {
 	refresh() {
+		this.show_skeleton();
 		this.hub_item_code = frappe.get_route()[2];
 
 		this.get_item(this.hub_item_code)
@@ -332,6 +337,30 @@ erpnext.hub.Item = class Item extends SubPage {
 				this.item = item;
 				this.render(item);
 			});
+	}
+
+	show_skeleton() {
+		const skeleton = `<div class="hub-item-container">
+			<div class="row">
+				<div class="col-md-3">
+					<div class="hub-item-skeleton-image"></div>
+				</div>
+				<div class="col-md-6">
+					<h2 class="hub-skeleton" style="width: 75%;">Name</h2>
+					<div class="text-muted">
+						<p class="hub-skeleton" style="width: 35%;">Details</p>
+						<p class="hub-skeleton" style="width: 50%;">Ratings</p>
+					</div>
+					<hr>
+					<div class="hub-item-description">
+						<p class="hub-skeleton">Desc</p>
+						<p class="hub-skeleton" style="width: 85%;">Desc</p>
+					</div>
+				</div>
+			</div>
+		</div>`;
+
+		this.$wrapper.html(skeleton);
 	}
 
 	get_item(hub_item_code) {
