@@ -40,25 +40,12 @@ class ItemPrice(Document):
 		self.item_name, self.item_description = frappe.db.get_value("Item",self.item_code,["item_name", "description"])
 
 	def check_duplicates(self):
-		conditions = """
-			where item_code=%(item_code)s
-			and price_list=%(price_list)s
-			and min_qty=%(min_qty)s
-			and price_list_rate=%(price_list_rate)s
-			and valid_from = %(valid_from)s
-			and valid_upto = %(valid_upto)s
-			and packing_unit=%(packing_unit)s
-		"""
+		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"
 
-		if self.uom:
-			conditions += "and uom= %(uom)s"
-
-		if self.customer and not self.supplier:
-			conditions += "and customer= %(customer)s"
-
-		if self.supplier and not self.customer:
-			conditions += "and supplier= %(supplier)s"
-
+		for field in ['uom', 'min_qty', 'valid_from',
+			'valid_upto', 'packing_unit', 'customer', 'supplier']:
+			if self.get(field):
+				conditions += " and {0} = %({1})s".format(field, field)
 
 		price_list_rate = frappe.db.sql("""
 			SELECT price_list_rate
