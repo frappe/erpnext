@@ -1,6 +1,7 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-{% include "erpnext/public/js/controllers/accounts.js" %}
+
+// {% include "erpnext/public/js/controllers/accounts.js" %}
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
@@ -146,7 +147,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("set_exchange_gain_loss",
 			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount &&
 				((frm.doc.paid_from_account_currency != company_currency ||
-					frm.doc.paid_to_account_currency != company_currency) && 
+					frm.doc.paid_to_account_currency != company_currency) &&
 					frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
 
 		frm.refresh_fields();
@@ -208,7 +209,7 @@ frappe.ui.form.on('Payment Entry', {
 			});
 		} else {
 			if(frm.doc.party) {
-				frm.events.party(frm);	
+				frm.events.party(frm);
 			}
 
 			if(frm.doc.mode_of_payment) {
@@ -236,7 +237,7 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("party", "");
 				return ;
 			}
-			
+
 			frm.set_party_account_based_on_party = true;
 
 			return frappe.call({
@@ -301,7 +302,7 @@ frappe.ui.form.on('Payment Entry', {
 							frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
 						}
 						frm.set_value("received_amount", frm.doc.paid_amount);
-						
+
 					} else {
 						frm.events.received_amount(frm);
 					}
@@ -348,7 +349,7 @@ frappe.ui.form.on('Payment Entry', {
 						]);
 					}
 				}
-			});			
+			});
 		}
 	},
 
@@ -400,7 +401,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		})
 	},
-	
+
 	posting_date: function(frm) {
 		frm.events.paid_from_account_currency(frm);
 	},
@@ -413,7 +414,7 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
 				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 			}
-			
+
 			frm.events.set_unallocated_amount(frm);
 		}
 
@@ -423,17 +424,17 @@ frappe.ui.form.on('Payment Entry', {
 
 	target_exchange_rate: function(frm) {
 		frm.set_paid_amount_based_on_received_amount = true;
-		
+
 		if (frm.doc.received_amount) {
 			frm.set_value("base_received_amount",
 				flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
-				
-			if(!frm.doc.source_exchange_rate && 
+
+			if(!frm.doc.source_exchange_rate &&
 					(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
 				frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
 				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 			}
-			
+
 			frm.events.set_unallocated_amount(frm);
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
@@ -466,14 +467,14 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
 		else
 			frm.events.set_unallocated_amount(frm);
-		
+
 		frm.set_paid_amount_based_on_received_amount = false;
 	},
-	
+
 	reset_received_amount: function(frm) {
 		if(!frm.set_paid_amount_based_on_received_amount &&
 				(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
-			
+
 			frm.set_value("received_amount", frm.doc.paid_amount);
 
 			if(frm.doc.source_exchange_rate) {
@@ -481,7 +482,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 		}
-		
+
 		if(frm.doc.payment_type == "Receive")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
 		else
@@ -546,7 +547,7 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier")  ||
 						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student") 
+						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
 							frm.set_value("paid_amount",
@@ -673,48 +674,41 @@ frappe.ui.form.on('Payment Entry', {
 	set_unallocated_amount: function(frm) {
 		var unallocated_amount = 0;
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
-
+			function(d) { return flt(d.amount);}));
 		if(frm.doc.party) {
 			if(frm.doc.payment_type == "Receive"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_received_amount + total_deductions
+				unallocated_amount = (frm.doc.base_received_amount + total_deductions
 						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
 			} else if (frm.doc.payment_type == "Pay"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
+				unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
 						+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
 			}
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
 		frm.trigger("set_difference_amount");
 	},
-	
+
 	set_difference_amount: function(frm) {
-		var difference_amount = 0;
-		var base_unallocated_amount = flt(frm.doc.unallocated_amount) *
-			(frm.doc.payment_type=="Receive" ? frm.doc.source_exchange_rate : frm.doc.target_exchange_rate);
-
-		var base_party_amount = flt(frm.doc.base_total_allocated_amount) + base_unallocated_amount;
-
-		if(frm.doc.payment_type == "Receive") {
-			difference_amount = base_party_amount - flt(frm.doc.base_received_amount);
-		} else if (frm.doc.payment_type == "Pay") {
-			difference_amount = flt(frm.doc.base_paid_amount) - base_party_amount;
+		let difference_amount = 0.0;
+		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [], (d) => {return flt(d.amount);}));
+		if(frm.doc.payment_type == "Receive"){
+			let party_amount = flt(frm.doc.base_total_allocated_amount) + flt(frm.doc.unallocated_amount) * frm.doc.source_exchange_rate;
+			difference_amount = party_amount - (flt(frm.doc.paid_amount) - total_deductions)
+			frm.set_value("difference_amount", difference_amount);
+		} else if(frm.doc.payment_type == "Pay"){
+			let party_amount = flt(frm.doc.base_total_allocated_amount) + flt(frm.doc.unallocated_amount) * frm.doc.target_exchange_rate;
+			difference_amount = party_amount - flt(frm.doc.base_paid_amount);
+			frm.set_value("difference_amount", difference_amount);
 		} else {
-			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
+			frm.set_value("difference_amount", (flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount)));
 		}
-
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
-
-		frm.set_value("difference_amount", difference_amount - total_deductions);
-
+		frm.refresh_field("difference_amount");
 		frm.events.hide_unhide_fields(frm);
 	},
-
 	unallocated_amount: function(frm) {
 		frm.trigger("set_difference_amount");
 	},
@@ -750,7 +744,7 @@ frappe.ui.form.on('Payment Entry', {
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry", [row.idx]));
 				return false;
 			}
-			
+
 			if(frm.doc.party_type=="Employee" &&
 				!in_list(["Expense Claim", "Journal Entry"], row.reference_doctype)
 			) {
@@ -806,56 +800,93 @@ frappe.ui.form.on('Payment Entry', {
 	}
 });
 
-
-frappe.ui.form.on('Payment Entry Reference', {
-	reference_doctype: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		frm.events.validate_reference_document(frm, row);
-	},
-
-	reference_name: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		if (row.reference_name && row.reference_doctype) {
-			return frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_reference_details",
-				args: {
-					reference_doctype: row.reference_doctype,
-					reference_name: row.reference_name,
-					party_account_currency: frm.doc.payment_type=="Receive" ?
-						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						$.each(r.message, function(field, value) {
-							frappe.model.set_value(cdt, cdn, field, value);
-						})
-
-						let allocated_amount = frm.doc.unallocated_amount > row.outstanding_amount ?
-							row.outstanding_amount : frm.doc.unallocated_amount;
-
-						frappe.model.set_value(cdt, cdn, 'allocated_amount', allocated_amount);
-						frm.refresh_fields();
-					}
-				}
-			})
+frappe.ui.form.on("Payment Entry", {
+	paid_to: (frm) => {
+		if(discount_ready(frm)){
+			get_eligible_discount(frm);
 		}
 	},
-
-	allocated_amount: function(frm) {
-		frm.events.set_total_allocated_amount(frm);
+	onload: (frm) => {
+		if(frm.doc.references && frm.doc.paid_to && frm.doc.party && frm.doc.docstatus == 0){
+			get_eligible_discount(frm);
+		}
+		if(frm.doc.docstatus == "1"){
+			get_eligible_discount(frm);
+		}
 	},
-
-	references_remove: function(frm) {
-		frm.events.set_total_allocated_amount(frm);
-	}
-})
-
-frappe.ui.form.on('Payment Entry Deduction', {
-	amount: function(frm) {
-		frm.events.set_unallocated_amount(frm);
+	party: (frm) => {
+		if(discount_ready(frm)){
+			get_eligible_discount(frm);
+		}
 	},
-
-	deductions_remove: function(frm) {
-		frm.events.set_unallocated_amount(frm);
+	paid_amount: (frm) => {
+		if(discount_ready(frm)){
+			get_eligible_discount(frm);
+			frm.trigger("set_difference_amount");
+		}
+	},
+	paid_from: (frm) => {
+		if(discount_ready(frm)){
+			get_eligible_discount(frm);
+		}
 	}
-})
+});
+
+function discount_ready(frm){
+	if(frm.doc.paid_to &&
+    frm.doc.party &&
+    frm.doc.paid_from &&
+    frm.doc.posting_date &&
+    frm.doc.docstatus == 0){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function get_eligible_discount(frm){
+	frappe.call({
+		method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_eligible_discount",
+		args: {"refs": frm.doc.references,
+			"deductions": frm.doc.deductions == undefined ? frm.doc.deductions = []: frm.doc.deductions,
+			"company": frm.doc.company,
+			"posting_date": frm.doc.posting_date,
+			"payment_type": frm.doc.payment_type},
+	}).done((r) => {
+		if(Array.isArray(r.message) && r.message.length){check_discounts(frm, r.message);}
+	}).fail((f) => {
+		console.log("Failed on get_eligible_discount callback", f);
+	});
+}
+
+function check_discounts(frm, eligible_discounts){
+	let total_discount = 0.0;
+	if(!Array.isArray(frm.doc.deductions) && frm.doc.deductions.length){
+		eligible_discounts.forEach(discount => {
+			populate_discount(frm, discount);
+			total_discount += discount.amount;
+		});
+	} else {
+		let deductions = frm.doc.deductions.map(deduction => {return deduction.reference_document;});
+		eligible_discounts.map(discount =>{
+			if(deductions.indexOf(discount.reference_document) < 0){
+				populate_discount(frm, discount);
+				total_discount -= discount.amount;
+			}
+		});
+	}
+	refresh_and_update_discounted_total(frm, total_discount);
+}
+
+function populate_discount(frm, discount){
+	let child = frm.add_child("deductions");
+	frappe.model.set_value(child.doctype, child.name, discount);
+}
+
+function refresh_and_update_discounted_total(frm, total_discount){
+	frm.refresh_field("deductions");
+	frm.refresh_field("references");
+	frm.trigger("set_difference_amount");
+	frm.refresh_field("difference_amount");
+	frm.doc.paid_amount = frm.doc.paid_amount + total_discount;
+}

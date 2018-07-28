@@ -2,7 +2,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-
+import erpnext
+import datetime
 import frappe
 import unittest
 from frappe.utils import flt, nowdate
@@ -365,7 +366,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_payment_entry_exchange_gain_loss(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
@@ -394,3 +395,39 @@ class TestPaymentEntry(unittest.TestCase):
 
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
+
+	def test_customer_payment_terms_discount(self):
+		default_cost_center = frappe.db.get_value("Company", "_Test Company", "cost_center")
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", posting_date="2016-01-01", cost_center=default_cost_center, do_not_save=True)
+		si.payment_terms_template = self.create_test_discount_payment_terms()
+		si.insert()
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-05"
+		pe.posting_date = "2016-01-05"
+		expected_discount = [{u'account': None, u'discount_date': datetime.date(2016, 1, 11),
+			u'discount_eligible_percent': 1.0, u'amount': -1.0, u'cost_center': default_cost_center,
+			u'reference_document': si.name}]
+		discount = erpnext.accounts.doctype.payment_entry.payment_entry.get_eligible_discount(refs=pe.references,
+			deductions=None, company=pe.company, posting_date="2016-01-05", payment_type="Pay")
+		self.assertEqual(discount, expected_discount)
+
+	def create_test_discount_payment_terms(self):
+		if not frappe.db.exists("Payment Terms Template", '_Test Payment Terms Template For Test'):
+			template = frappe.get_doc({
+				'doctype': 'Payment Terms Template',
+				'template_name': '_Test Payment Terms Template For Test',
+				'terms': [{
+					'doctype': 'Payment Terms Template Detail',
+					'invoice_portion': 100.00,
+					'credit_days_based_on': 'Day(s) after invoice date',
+					'credit_days': 30,
+					'discount_eligible_days': 10,
+					'discount_percent': 1
+				}]
+			})
+			template.save()
+			return template.name
+		else:
+			return '_Test Payment Terms Template For Test'
