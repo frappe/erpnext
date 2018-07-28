@@ -67,17 +67,16 @@ def get_valid_items(search_value=''):
 
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
-	for item_code in json.loads(items_to_publish):
-		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
-	# frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
-	# time.sleep(10)
-	# frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
+	items_to_publish = json.loads(items_to_publish)
+
+	for item_code in items_to_publish:
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
 	hub_settings = frappe.get_doc('Hub Settings')
 	hub_settings.sync()
 
-	return
+	return len(items_to_publish)
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
