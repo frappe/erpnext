@@ -28,8 +28,6 @@ erpnext.hub.Marketplace = class Marketplace {
 			const $target = $(e.currentTarget);
 			const route = $target.data().route;
 			frappe.set_route(route);
-
-			e.stopPropagation();
 		});
 	}
 
@@ -218,8 +216,11 @@ erpnext.hub.Home = class Home extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
 
-		make_search_bar(this.$wrapper, keyword => {
-			frappe.set_route('marketplace', 'search', keyword);
+		make_search_bar({
+			wrapper: this.$wrapper,
+			on_search: keyword => {
+				frappe.set_route('marketplace', 'search', keyword);
+			}
 		});
 	}
 
@@ -298,8 +299,11 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
 
-		make_search_bar(this.$wrapper, keyword => {
-			frappe.set_route('marketplace', 'search', keyword);
+		make_search_bar({
+			wrapper: this.$wrapper,
+			on_search: keyword => {
+				frappe.set_route('marketplace', 'search', keyword);
+			}
 		});
 	}
 
@@ -696,6 +700,11 @@ erpnext.hub.Profile = class Profile extends SubPage {
 }
 
 erpnext.hub.Publish = class Publish extends SubPage {
+	make_wrapper() {
+		super.make_wrapper();
+		this.load_publish_page();
+	}
+
 	load_publish_page() {
 		const title_html = `<b>${__('Select Products to Publish')}</b>`;
 
@@ -708,15 +717,11 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		const publish_button_html = `<button class="btn btn-primary btn-sm publish-items">
 			<i class="visible-xs octicon octicon-check"></i>
-			<span class="hidden-xs">Publish</span>
+			<span class="hidden-xs">${__('Publish')}</span>
 		</button>`;
 
-		const select_all_button = `<button class="btn btn-secondary btn-default btn-xs margin-right select-all">Select All</button>`;
-		const deselect_all_button = `<button class="btn btn-secondary btn-default btn-xs deselect-all">Deselect All</button>`;
-
-		const search_html = `<div class="hub-search-container">
-			<input type="text" class="form-control" placeholder="Search Items">
-		</div>`;
+		const select_all_button = `<button class="btn btn-secondary btn-default btn-xs margin-right select-all">${__('Select All')}</button>`;
+		const deselect_all_button = `<button class="btn btn-secondary btn-default btn-xs deselect-all">${__('Deselect All')}</button>`;
 
 		const subpage_header = $(`
 			<div class='subpage-title flex'>
@@ -726,11 +731,18 @@ erpnext.hub.Publish = class Publish extends SubPage {
 				</div>
 				${publish_button_html}
 			</div>
-
-			${search_html}
 		`);
 
 		this.$wrapper.append(subpage_header);
+
+		make_search_bar({
+			wrapper: this.$wrapper,
+			on_search: keyword => {
+				this.search_value = keyword;
+				this.get_items_and_render();
+			},
+			placeholder: __('Search Items')
+		});
 
 		this.setup_events();
 	}
@@ -740,27 +752,32 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			this.load_publishing_state();
 			this.publish_selected_items()
 				.then(r => {
-					frappe.msgprint('check');
+					console.log(`${r.message} items will be published`);
 				});
 		});
 
-		const $search_input = this.$wrapper.find('.hub-search-container input');
-		this.search_value = '';
+		this.$wrapper.on('click', '.hub-card', (e) => {
+			const $target = $(e.currentTarget);
+			$target.toggleClass('active');
 
-		$search_input.on('keydown', frappe.utils.debounce((e) => {
-			if (e.which === frappe.ui.keyCode.ENTER) {
-				this.search_value = $search_input.val();
-				this.get_items_and_render();
+			// Get total items
+			const total_items = this.$wrapper.find('.hub-card.active').length;
+
+			let button_label;
+			if (total_items > 0) {
+				const more_than_one = total_items > 1;
+				button_label = __('Publish {0} item{1}', [total_items, more_than_one ? 's' : '']);
+			} else {
+				button_label = __('Publish');
 			}
-		}, 300));
+
+			this.$wrapper.find('.publish-items')
+				.text(button_label)
+				.prop('disabled', total_items === 0);
+		});
 	}
 
 	get_items_and_render() {
-		if(hub.settings.sync_in_progress) {
-			this.load_publishing_state();
-			return;
-		}
-
 		this.$wrapper.find('.hub-card-container').empty();
 		this.get_valid_items()
 			.then(r => {
@@ -769,22 +786,15 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	refresh() {
-		this.get_items_and_render();
+		if (hub.settings.sync_in_progress) {
+			this.load_publishing_state();
+		} else {
+			this.get_items_and_render();
+		}
 	}
 
 	render(items) {
-		const items_container = $(get_item_card_container_html(items));
-		items_container.addClass('static').on('click', '.hub-card', (e) => {
-			const $target = $(e.currentTarget);
-			$target.toggleClass('active');
-
-			// Get total items
-			const total_items = this.$wrapper.find('.hub-card.active').length;
-			const more_than_one = total_items > 1;
-			this.$wrapper.find('.publish-items')
-				.html(__('Publish ' + total_items + ' item' + (more_than_one ? 's' : '')));
-		});
-
+		const items_container = $(get_item_card_container_html(items, '', get_local_item_card_html));
 		this.$wrapper.append(items_container);
 	}
 
@@ -855,8 +865,8 @@ function get_empty_state(message, action) {
 	</div>`;
 }
 
-function get_item_card_container_html(items, title='') {
-	const items_html = (items || []).map(item => get_item_card_html(item)).join('');
+function get_item_card_container_html(items, title='', get_item_html = get_item_card_html) {
+	const items_html = (items || []).map(item => get_item_html(item)).join('');
 	const title_html = title
 		? `<div class="col-sm-12 margin-bottom">
 				<b>${title}</b>
@@ -875,11 +885,44 @@ function get_item_card_html(item) {
 	const item_name = item.item_name || item.name;
 	const title = strip_html(item_name);
 	const img_url = item.image;
-
 	const company_name = item.company;
 
-	const active = item.publish_in_hub;
+	// Subtitle
+	let subtitle = [comment_when(item.creation)];
+	const rating = item.average_rating;
+	if (rating > 0) {
+		subtitle.push(rating + `<i class='fa fa-fw fa-star-o'></i>`)
+	}
+	subtitle.push(company_name);
 
+	let dot_spacer = '<span aria-hidden="true"> · </span>';
+	subtitle = subtitle.join(dot_spacer);
+
+	const item_html = `
+		<div class="col-md-3 col-sm-4 col-xs-6">
+			<div class="hub-card" data-route="marketplace/item/${item.hub_item_code}">
+				<div class="hub-card-header">
+					<div class="hub-card-title ellipsis bold">${title}</div>
+					<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+				</div>
+				<div class="hub-card-body">
+					<img class="hub-card-image" src="${img_url}" />
+					<div class="overlay hub-card-overlay"></div>
+				</div>
+			</div>
+		</div>
+	`;
+
+	return item_html;
+}
+
+function get_local_item_card_html(item) {
+	const item_name = item.item_name || item.name;
+	const title = strip_html(item_name);
+	const img_url = item.image;
+	const company_name = item.company;
+
+	const is_active = item.publish_in_hub;
 	const id = item.hub_item_code || item.item_code;
 
 	// Subtitle
@@ -893,36 +936,27 @@ function get_item_card_html(item) {
 	let dot_spacer = '<span aria-hidden="true"> · </span>';
 	subtitle = subtitle.join(dot_spacer);
 
-	// Decide item link
-	const is_local = item.source_type === "local";
-	const route = !is_local
-		? `marketplace/item/${item.hub_item_code}`
-		: `Form/Item/${item.item_name}`;
-
-	const card_route = is_local ? '' : `data-route='${route}'`;
-
-	const show_local_item_button = is_local
-		? `<div class="overlay button-overlay" data-route='${route}' onclick="event.preventDefault();">
-				<button class="btn btn-default zoom-view">
-					<i class="octicon octicon-eye"></i>
-				</button>
-			</div>`
-		: '';
+	const edit_item_button = `<div class="hub-card-overlay-button" style="right: 15px; bottom: 15px;" data-route="Form/Item/${item.item_name}">
+		<button class="btn btn-default zoom-view">
+			<i class="octicon octicon-pencil text-muted"></i>
+		</button>
+	</div>`;
 
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
-			<div class="hub-card ${active ? 'active' : ''}" ${card_route} data-id="${id}">
+			<div class="hub-card is-local ${is_active ? 'active' : ''}" data-id="${id}">
 				<div class="hub-card-header">
-					<div class="title">
-						<div class="hub-card-title ellipsis bold">${title}</div>
-						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
-					</div>
+					<div class="hub-card-title ellipsis bold">${title}</div>
+					<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
 					<i class="octicon octicon-check text-success"></i>
 				</div>
 				<div class="hub-card-body">
 					<img class="hub-card-image" src="${img_url}" />
-					<div class="overlay hub-card-overlay"></div>
-					${show_local_item_button}
+					<div class="hub-card-overlay">
+						<div class="hub-card-overlay-body">
+							${edit_item_button}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -930,6 +964,7 @@ function get_item_card_html(item) {
 
 	return item_html;
 }
+
 
 function get_rating_html(rating) {
 	let rating_html = ``;
@@ -941,13 +976,13 @@ function get_rating_html(rating) {
 	return rating_html;
 }
 
-function make_search_bar($wrapper, on_search) {
+function make_search_bar({wrapper, on_search, placeholder = __('Search for anything')}) {
 	const $search = $(`
 		<div class="hub-search-container">
-			<input type="text" class="form-control" placeholder="${__('Search for anything')}">
+			<input type="text" class="form-control" placeholder="${placeholder}">
 		</div>`
 	);
-	$wrapper.append($search);
+	wrapper.append($search);
 	const $search_input = $search.find('input');
 
 	$search_input.on('keydown', frappe.utils.debounce((e) => {
