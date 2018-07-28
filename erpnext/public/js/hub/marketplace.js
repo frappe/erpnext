@@ -332,8 +332,11 @@ erpnext.hub.Item = class Item extends SubPage {
 		this.show_skeleton();
 		this.hub_item_code = frappe.get_route()[2];
 
+		this.own_item = false;
+
 		this.get_item(this.hub_item_code)
 			.then(item => {
+				this.own_item = item.hub_seller === hub.settings.company_email;
 				this.item = item;
 				this.render(item);
 			});
@@ -385,6 +388,15 @@ erpnext.hub.Item = class Item extends SubPage {
 		const rating_html = get_rating_html(item.average_rating);
 		const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
 
+		let edit_buttons_html = '';
+
+		if(this.own_item) {
+			edit_buttons_html = `<div style="margin-top: 20px">
+				<button class="btn btn-secondary btn-default btn-xs margin-right edit-item">Edit Details</button>
+				<button class="btn btn-secondary btn-danger btn-xs unpublish">Unpublish</button>
+			</div>`;
+		}
+
 		const html = `
 			<div class="hub-item-container">
 				<div class="row visible-xs">
@@ -409,9 +421,10 @@ erpnext.hub.Item = class Item extends SubPage {
 						${description ?
 							`<b>${__('Description')}</b>
 							<p>${description}</p>
-							` : __('No description')
+							` : `<p>${__('No description')}<p>`
 						}
 						</div>
+						${edit_buttons_html}
 					</div>
 				</div>
 				<div class="row hub-item-seller">
@@ -447,6 +460,10 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		this.$wrapper.html(html);
 
+		if(this.own_item) {
+			this.bind_edit_buttons();
+		}
+
 		this.make_review_area();
 
 		this.get_reviews()
@@ -454,6 +471,31 @@ erpnext.hub.Item = class Item extends SubPage {
 				this.reviews = reviews;
 				this.render_reviews(reviews);
 			});
+	}
+
+	bind_edit_buttons() {
+		this.edit_dialog = new frappe.ui.Dialog({
+			title: "Edit Your Product",
+			fields: []
+		});
+
+		this.$wrapper.find('.edit-item').on('click', this.on_edit.bind(this));
+		this.$wrapper.find('.unpublish').on('click', this.on_unpublish.bind(this));
+	}
+
+	on_edit() {
+		this.edit_dialog.show();
+	}
+
+	on_unpublish() {
+		if(!this.unpublish_dialog) {
+			this.unpublish_dialog = new frappe.ui.Dialog({
+				title: "Edit Your Product",
+				fields: []
+			});
+		}
+
+		this.unpublish_dialog.show();
 	}
 
 	make_review_area() {
