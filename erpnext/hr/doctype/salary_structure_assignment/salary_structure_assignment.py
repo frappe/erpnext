@@ -38,7 +38,7 @@ def get_assigned_salary_structure(employee, on_date):
 		select salary_structure from `tabSalary Structure Assignment`
 		where employee=%(employee)s
 		and docstatus = 1
-		and %(on_date)s > from_date order by from_date desc limit 1""", {
+		and %(on_date)s >= from_date order by from_date desc limit 1""", {
 			'employee': employee,
 			'on_date': on_date,
 		})

@@ -39,11 +39,10 @@ frappe.ui.form.on('Account', {
 				// credit days and type if customer or supplier
 				frm.set_intro(null);
 				frm.trigger('account_type');
-
 				// show / hide convert buttons
 				frm.trigger('add_toolbar_buttons');
 			}
-			frm.add_custom_button(__('Update Account Number'), function () {
+			frm.add_custom_button(__('Update Account Name / Number'), function () {
 				frm.trigger("update_account_number");
 			});
 		}
@@ -94,30 +93,35 @@ frappe.ui.form.on('Account', {
 
 	update_account_number: function(frm) {
 		var d = new frappe.ui.Dialog({
-			title: __('Update Account Number'),
+			title: __('Update Account Number / Name'),
 			fields: [
+				{
+					"label": "Account Name",
+					"fieldname": "account_name",
+					"fieldtype": "Data",
+					"reqd": 1,
+					"default": frm.doc.account_name
+				},
 				{
 					"label": "Account Number",
 					"fieldname": "account_number",
 					"fieldtype": "Data",
-					"reqd": 1
+					"default": frm.doc.account_number
 				}
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				if(data.account_number === frm.doc.account_number) {
+				if(data.account_number === frm.doc.account_number && data.account_name === frm.doc.account_name) {
 					d.hide();
 					return;
 				}
 
 				frappe.call({
-					method: "erpnext.accounts.utils.update_number_field",
+					method: "erpnext.accounts.doctype.account.account.update_account_number",
 					args: {
-						doctype_name: frm.doc.doctype,
-						name: frm.doc.name,
-						field_name: d.fields[0].fieldname,
-						field_value: data.account_number,
-						company: frm.doc.company,
+						account_number: data.account_number,
+						account_name: data.account_name,
+						name: frm.doc.name
 					},
 					callback: function(r) {
 						if(!r.exc) {
@@ -125,6 +129,7 @@ frappe.ui.form.on('Account', {
 								frappe.set_route("Form", "Account", r.message);
 							} else {
 								frm.set_value("account_number", data.account_number);
+								frm.set_value("account_name", data.account_name);
 							}
 							d.hide();
 						}

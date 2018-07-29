@@ -130,7 +130,6 @@ class SalarySlip(TransactionBase):
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
-
 		if not component_row:
 			self.append(key, {
 				'amount': amount,
@@ -147,6 +146,7 @@ class SalarySlip(TransactionBase):
 				'tax_on_additional_salary': additional_tax
 			})
 		else:
+			component_row.default_amount = amount
 			component_row.amount = amount
 			component_row.tax_on_flexible_benefit = benefit_tax
 			component_row.tax_on_additional_salary = additional_tax
@@ -429,7 +429,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-
+		
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		self.total_deduction = 0
