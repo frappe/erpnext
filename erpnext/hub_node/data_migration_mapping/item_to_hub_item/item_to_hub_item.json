@@ -35,7 +35,7 @@
  "mapping_name": "Item to Hub Item",
  "mapping_type": "Push",
  "migration_id_field": "hub_sync_id",
- "modified": "2018-07-27 21:52:52.383842",
+ "modified": "2018-07-28 22:25:35.289335",
  "modified_by": "cave@aperture.com",
  "name": "Item to Hub Item",
  "owner": "Administrator",
