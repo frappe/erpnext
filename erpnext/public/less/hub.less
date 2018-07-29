@@ -43,10 +43,12 @@ body[data-route^="marketplace/"] {
 		overflow: hidden;
 		cursor: pointer;
 
-		&:hover .overlay {
+		&:hover .hub-card-overlay {
 			display: block;
 		}
+	}
 
+	.hub-card.is-local {
 		&.active {
 			.hub-card-header {
 				background-color: #f4ffe5;
@@ -56,20 +58,22 @@ body[data-route^="marketplace/"] {
 				display: inline;
 			}
 		}
-	}
-
-	.hub-card-header {
-		padding: 12px 15px;
-		height: 60px;
-		border-bottom: 1px solid @border-color;
-
-		display: flex;
-		justify-content: space-between;
 
 		.octicon-check {
 			display: none;
+			position: absolute;
 			font-size: 20px;
+			right: 15px;
+			top: 50%;
+			transform: translateY(-50%);
 		}
+	}
+
+	.hub-card-header {
+		position: relative;
+		padding: 12px 15px;
+		height: 60px;
+		border-bottom: 1px solid @border-color;
 	}
 
 	.hub-card-body {
@@ -77,21 +81,22 @@ body[data-route^="marketplace/"] {
 		height: 200px;
 	}
 
-	.overlay {
+	.hub-card-overlay {
 		display: none;
 		position: absolute;
-	}
-
-	.hub-card-overlay {
 		top: 0;
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.1);
 	}
 
-	.button-overlay {
-		top: 155px;
-		left: 15px;
+	.hub-card-overlay-body {
+		position: relative;
+		height: 100%;
+	}
+
+	.hub-card-overlay-button {
+		position: absolute;
 	}
 
 	.hub-card-image {
@@ -184,6 +189,14 @@ body[data-route^="marketplace/"] {
 		padding-top: 0;
 		padding-bottom: 0;
 		border-bottom: none;
+	}
+
+	.hub-item-container {
+		overflow: hidden;
+	}
+
+	.hub-item-review-container {
+		margin-top: calc(30vh);
 	}
 }
 
