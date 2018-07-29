@@ -93,22 +93,23 @@ def item_sync_preprocess():
 	})
 
 	if response:
-		# frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
+		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
 		return response
 	else:
 		return ''
 
 def item_sync_postprocess(obj):
 	response = call_hub_method('update_activity_for_seller', {
-		'hub_seller': frappe.db.get_value("Hub Settings", "Hub Settings", "company_email"),
-		'name': obj["remote_id"],
-		'status': obj["status"]
+		'hub_seller': frappe.db.get_value('Hub Settings', 'Hub Settings', 'company_email'),
+		'name': obj['remote_id'],
+		'status': obj['status'],
+		'stats': obj['stats']
 	})
 
 	if response:
-		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
+		frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
 	else:
-		frappe.throw("Unable to update remote activity")
+		frappe.throw('Unable to update remote activity')
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
