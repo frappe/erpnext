@@ -17,8 +17,8 @@ def get_cost_center():
         
         company = frappe.get_value("Account", account, "company")
         
-        cost_centers = [temp.const_center_name for temo in frappe.get_list("Cost Center",
-                                       fields=["const_center_name"],
+        cost_centers = [temp.cost_center_name for temo in frappe.get_list("Cost Center",
+                                       fields=["cost_center_name"],
                                        filters=dict(
                                        company=company
                                        ),
