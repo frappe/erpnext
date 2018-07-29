@@ -14,8 +14,18 @@ def get_cost_center():
 
         account = data.get('account')
         frappe.set_user("Administrator")
-
+        
+        company = frappe.get_value("Account", account, "company")
+        
+        cost_centers = [temp.const_center_name for temo in frappe.get_list("Cost Center",
+                                       fields=["const_center_name"],
+                                       filters=dict(
+                                       company=company
+                                       ),
+                                       ignore_permissions=True,
+                                       ignore_ifnull=True)]
+        
     except Exception as e:
         return dict(status=False, message=str(e))
-    return dict(status=True, message="")
+    return dict(status=True, message="Success", cost_centers=cost_centers)
 
