@@ -20,7 +20,8 @@ def get_cost_center():
         cost_centers = [temp.cost_center_name for temp in frappe.get_list("Cost Center",
                                        fields=["cost_center_name"],
                                        filters=dict(
-                                       company=company
+                                           company=company,
+                                           is_group=0
                                        ),
                                        ignore_permissions=True,
                                        ignore_ifnull=True)]
