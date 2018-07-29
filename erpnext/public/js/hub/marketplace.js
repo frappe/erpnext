@@ -767,7 +767,16 @@ erpnext.hub.Profile = class Profile extends SubPage {
 }
 
 erpnext.hub.Publish = class Publish extends SubPage {
-	load_publish_page() {
+	make_wrapper() {
+		super.make_wrapper();
+		if(!hub.settings.sync_in_progress) {
+			this.make_publish_header();
+		} else {
+			this.show_publishing_state();
+		}
+	}
+
+	make_publish_header() {
 		const title_html = `<b>${__('Select Products to Publish')}</b>`;
 
 		const info = `<p class="text-muted">${__("Status decided by the 'Publish in Hub' field in Item.")}</p>`;
@@ -808,7 +817,6 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 	setup_events() {
 		this.$wrapper.find('.publish-items').on('click', () => {
-			this.load_publishing_state();
 			this.publish_selected_items()
 				.then(r => {
 					frappe.msgprint('check');
@@ -828,7 +836,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 	get_items_and_render() {
 		if(hub.settings.sync_in_progress) {
-			this.load_publishing_state();
+			this.show_publishing_state();
 			return;
 		}
 
@@ -868,7 +876,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		);
 	}
 
-	load_publishing_state() {
+	show_publishing_state() {
 		this.$wrapper.html(get_empty_state(
 			'Publishing items ... You will be notified once published.'
 		));
@@ -879,6 +887,8 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.$wrapper.find('.hub-card.active').map(function () {
 			items_to_publish.push($(this).attr("data-id"));
 		});
+
+		this.show_publishing_state();
 
 		return frappe.call(
 			'erpnext.hub_node.publish_selected_items',

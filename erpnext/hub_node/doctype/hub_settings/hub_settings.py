@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json
+import frappe, requests, json, time
 
 from frappe.model.document import Document
 from frappe.utils import add_years, now, get_datetime, get_datetime_str
@@ -28,19 +28,23 @@ class HubSettings(Document):
 	def get_hub_url(self):
 		return hub_url
 
-	def sync(self):
+	def sync(self, remote_id):
 		"""Create and execute Data Migration Run for Hub Sync plan"""
 		frappe.has_permission('Hub Settings', throw=True)
 
-		doc = frappe.get_doc({
-			'doctype': 'Data Migration Run',
-			'data_migration_plan': 'Hub Sync',
-			'data_migration_connector': 'Hub Connector',
-		}).insert()
+		if remote_id:
+			doc = frappe.get_doc({
+				'doctype': 'Data Migration Run',
+				'data_migration_plan': 'Hub Sync',
+				'data_migration_connector': 'Hub Connector',
+				'remote_id': remote_id
+			}).insert()
 
-		# self.sync_in_progress = 1
-		doc.run()
-		# self.sync_in_progress = 0
+			self.sync_in_progress = 1
+			# time.sleep(10)
+			doc.run()
+		else:
+			frappe.throw("No remote ID specified")
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
