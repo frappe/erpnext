@@ -380,11 +380,10 @@ class ReceivablePayableReport(object):
 				values.append(self.filters.get("sales_person"))
 
 		if party_type_field=="supplier":
-   		    if self.filters.get("supplier_type"):
-		        suptype = self.filters.get("supplier_type")
+   		    if self.filters.get("supplier_group"):
     		        conditions.append("""party in (select name from tabSupplier
-		                where supplier_type=%s)""")
-    			values.append(self.filters.get("supplier_type"))
+		                where supplier_group=%s)""")
+    			values.append(self.filters.get("supplier_group"))
 								
 		return " and ".join(conditions), values
 
