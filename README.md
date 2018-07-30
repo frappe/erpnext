@@ -1,10 +1,3 @@
-<div align="center">
-  
-    <h2>ThaiNext</h2>
-    <p align="center">
-        <p>ERP made simple</p>
-    </p>
-</div>
 
 [![Build Status](https://travis-ci.com/frappe/erpnext.png)](https://travis-ci.com/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
