@@ -206,3 +206,9 @@ function get_selected_attributes() {
 	});
 	return attributes;
 }
+
+// For item alternate image
+function changeimage(image_src){
+    document.getElementById("selectimage").src = image_src;
+}
+
