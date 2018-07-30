@@ -5,8 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, cstr
-import json
+from frappe.utils import cstr
 
 class PatientEncounter(Document):
 	def on_update(self):

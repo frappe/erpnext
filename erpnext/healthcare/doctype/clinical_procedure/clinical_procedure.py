@@ -16,7 +16,7 @@ class ClinicalProcedure(Document):
 	def validate(self):
 		if self.consume_stock and not self.status == 'Draft':
 			if not self.warehouse:
-				frappe.throw(("Set warehouse for Procedure {0} ").format(self.name))
+				frappe.throw(_("Set warehouse for Procedure {0} ").format(self.name))
 			self.set_actual_qty()
 
 		if self.items:
