@@ -21,7 +21,8 @@ def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=N
         show_zero_values=0
     )
     data = get_data(filters)
-
+    
+    frappe.set_user("Administrator")
     result = dict()
     for d in data:
         if d.get("account"):
