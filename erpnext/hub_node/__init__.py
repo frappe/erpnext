@@ -73,14 +73,18 @@ def publish_selected_items(items_to_publish):
 	if not len(items_to_publish):
 		return
 
-	for item_code in items_to_publish:
-		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+	# TODO: sync
+	# for item_code in items_to_publish:
+	# 	frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+
+	# hub_settings = frappe.get_doc('Hub Settings')
+	# remote_id = item_sync_preprocess()
+	# hub_settings.sync(remote_id)
+
+	# return remote_id
 
 	hub_settings = frappe.get_doc('Hub Settings')
-	remote_id = item_sync_preprocess()
-	hub_settings.sync(remote_id)
-
-	return remote_id
+	hub_settings.sync('TEST')
 
 def item_sync_preprocess():
 	# Call Hub to make a new activity
@@ -108,6 +112,7 @@ def item_sync_postprocess(obj):
 
 	if response:
 		frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
+		frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
 		frappe.throw('Unable to update remote activity')
 
