@@ -487,9 +487,11 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 	count=0
 	for emp in employees:
 		if emp not in salary_slips_exists_for:
-			ss = frappe.new_doc("Salary Slip")
-			ss.employee = emp
-			ss.update(args)
+			args.update({
+				"doctype": "Salary Slip",
+				"employee": emp
+			})
+			ss = frappe.get_doc(args)
 			ss.insert()
 			count+=1
 			if publish_progress:

@@ -11,10 +11,5 @@ def get_data():
 			{
 				'items': ['Salary Slip', 'Journal Entry']
 			}
-		],
-		'form_links': [
-			{
-				'items': ['Error Log']
-			}
 		]
 	}

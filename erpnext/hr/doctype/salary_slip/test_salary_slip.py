@@ -518,6 +518,6 @@ def create_additional_salary(employee, payroll_period, amount):
 	frappe.get_doc({"doctype": "Additional Salary", "employee": employee,
 					"company": erpnext.get_default_company(),
 					"salary_component": "Perfomance Bonus",
-					"from_date": salary_date, "to_date": salary_date,
+					"payroll_date": salary_date,
 					"amount": amount, "type": "Earning"}).submit()
 	return salary_date
