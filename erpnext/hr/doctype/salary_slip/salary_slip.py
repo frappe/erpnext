@@ -241,10 +241,14 @@ class SalarySlip(TransactionBase):
 		if self.payroll_frequency:
 			cond += """and ss.payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-		st_name = frappe.db.sql("""select sa.salary_structure from `tabSalary Structure Assignment` sa
-			join `tabSalary Structure` ss where sa.salary_structure=ss.name
-			and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
-			order by sa.from_date desc limit 1 """ %cond, {'employee': self.employee, 'start_date': self.start_date,
+		st_name = frappe.db.sql("""
+			select sa.salary_structure
+			from `tabSalary Structure Assignment` sa join `tabSalary Structure` ss
+			where sa.salary_structure=ss.name
+				and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
+			order by sa.from_date desc
+			limit 1
+		""" %cond, {'employee': self.employee, 'start_date': self.start_date,
 			'end_date': self.end_date, 'joining_date': joining_date})
 
 		if st_name:
@@ -480,16 +484,25 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
+			self.update_salary_slip_in_additional_salary()
 			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
+		self.update_salary_slip_in_additional_salary()
 
 	def on_trash(self):
 		from frappe.model.naming import revert_series_if_last
 		revert_series_if_last(self.series, self.name)
+
+	def update_salary_slip_in_additional_salary(self):
+		salary_slip = self.name if self.docstatus==1 else None
+		frappe.db.sql("""
+			update `tabAdditional Salary` set salary_slip=%s
+			where employee=%s and payroll_date between %s and %s and docstatus=1
+		""", (salary_slip, self.employee, self.start_date, self.end_date))
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
