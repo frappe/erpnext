@@ -6,6 +6,7 @@ Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Ma
 
 ### Todo / Roadmap
 
+- [ ] Remove Some Domain Module
 - [ ] Thai Accounting (Vat,Tax,COA)
 - [ ] Financian Report
 - [ ] Docker file for install
