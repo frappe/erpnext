@@ -115,13 +115,13 @@ def validate_invoiced_inpatient(inpatient_record):
 	for doc in docs:
 		doc_name_list = get_inpatient_docs_not_invoiced(doc, inpatient_record)
 		if doc_name_list:
-			pending_invoices = get_doc_pendig(doc, doc_name_list, pending_invoices)
+			pending_invoices = get_pending_doc(doc, doc_name_list, pending_invoices)
 
 	if pending_invoices:
-		frappe.throw(_("Can not mark Inpatient Record Discharged, there are Unpaid Invoices {0}").format(", "
-			.join(map(lambda x: """ <b>{0}</b>""".format(x), pending_invoices))))
+		frappe.throw(_("Can not mark Inpatient Record Discharged, there are Unbilled Invoices {0}").format(", "
+			.join(pending_invoices)))
 
-def get_doc_pendig(doc, doc_name_list, pending_invoices):
+def get_pending_doc(doc, doc_name_list, pending_invoices):
 	if doc_name_list:
 		doc_ids = False
 		for doc_name in doc_name_list:
