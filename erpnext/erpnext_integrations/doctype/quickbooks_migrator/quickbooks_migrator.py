@@ -50,6 +50,7 @@ def fetch_accounts():
 	make_custom_fields()
 	make_root_accounts()
 	fetch_all_entries(entity="Account", company_id=company_id)
+	frappe.clear_messages()
 
 @frappe.whitelist()
 def fetch():
@@ -59,6 +60,7 @@ def fetch():
 	for entity in relevant_entities:
 		print(entity)
 		fetch_all_entries(entity=entity, company_id=company_id)
+	frappe.clear_messages()
 
 def publish(*args, **kwargs):
 	frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
