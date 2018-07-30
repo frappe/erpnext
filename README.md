@@ -1,5 +1,5 @@
 ### ThaiNext
-Fock form ERPNext v10 for thai localrize
+Fock form ERPNext v10 for thai localize
 
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
