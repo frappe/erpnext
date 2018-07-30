@@ -259,6 +259,8 @@ def make_fixtures(company=None):
 			doc.insert()
 		except frappe.NameError:
 			pass
+		except frappe.DuplicateEntryError:
+			pass
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
