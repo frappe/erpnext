@@ -17,10 +17,10 @@ def get_account_tree():
     # 'to_date'
     data = frappe.form_dict
 
-    company_name = data.get('company_name')
-    fiscal_year = data.get('fiscal_year')
-    from_date = data.get('from_date')
-    to_date = data.get('to_date')
+    company_name = data['company_name']
+    fiscal_year = data['fiscal_year']
+    from_date = data['from_date']
+    to_date = data['to_date']
 
     filters = dict(
         company=company_name,
