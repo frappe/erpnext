@@ -3,10 +3,18 @@ Fock form ERPNext v10 for thai localize
 
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
-### Rodemap
-- Thai Accounting (Vat,Tax,COA)
-- Financian Report
-- Docker file for install
+
+### Todo / Roadmap
+
+- [ ] Thai Accounting (Vat,Tax,COA)
+- [ ] Financian Report
+- [ ] Docker file for install
+- [ ] Add Vuejs support to Website
+- [ ] Move from flask to sanic
+- [ ] Add support Microservice
+
+
+-----
 
 ### About ERPNext
 
