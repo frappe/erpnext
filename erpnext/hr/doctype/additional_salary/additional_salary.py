@@ -37,11 +37,12 @@ class AdditionalSalary(Document):
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date):
 	additional_components = frappe.db.sql("""
-		select salary_component, sum(amount) as amount from `tabAdditional Salary`
+		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
 			and payroll_date between %(from_date)s and %(to_date)s
-		group by salary_component
+		group by salary_component, overwrite_salary_structure_amount
+		order by salary_component, overwrite_salary_structure_amount
 	""", {
 		'employee': employee,
 		'from_date': start_date,
@@ -58,6 +59,7 @@ def get_additional_salary_component(employee, start_date, end_date):
 		additional_components_list.append({
 			'amount': d.amount,
 			'type': component.type,
-			'struct_row': struct_row
+			'struct_row': struct_row,
+			'overwrite': d.overwrite_salary_structure_amount
 		})
 	return additional_components_list
