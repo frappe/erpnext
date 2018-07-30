@@ -3194,8 +3194,13 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
+<<<<<<< HEAD
  "modified": "2018-02-09 10:23:49.782500", 
  "modified_by": "Administrator", 
+=======
+ "modified": "2018-07-30 08:36:29.125285",
+ "modified_by": "Administrator",
+>>>>>>> b2e0f649d21608d11c79274451587b51cd1688b5
  "module": "Selling", 
  "name": "Quotation", 
  "owner": "Administrator", 

@@ -232,8 +232,6 @@ def install(country=None):
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
 		{"doctype": "Share Type", "title": _("Preference")},
-
-
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
@@ -269,23 +267,30 @@ def add_uom_data():
 	# add UOMs
 	uoms = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
 	for d in uoms:
-		if not frappe.db.exists('UOM', d.get("uom_name")):
-			uom_doc = frappe.new_doc('UOM')
-			uom_doc.update(d)
-			uom_doc.save(ignore_permissions=True)
+		if not frappe.db.exists('UOM', _(d.get("uom_name"))):
+			uom_doc = frappe.get_doc({
+				"doctype": "UOM",
+				"uom_name": _(d.get("uom_name")),
+				"name": _(d.get("uom_name")),
+				"must_be_whole_number": d.get("must_be_whole_number")
+			}).insert(ignore_permissions=True)
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", d.get("category")):
+		if not frappe.db.exists("UOM Category", _(d.get("category"))):
 			frappe.get_doc({
 				"doctype": "UOM Category",
-				"category_name": d.get("category")
+				"category_name": _(d.get("category"))
 			}).insert(ignore_permissions=True)
 
-		uom_conversion = frappe.new_doc('UOM Conversion Factor')
-		uom_conversion.update(d)
-		uom_conversion.save(ignore_permissions=True)
+		uom_conversion = frappe.get_doc({
+			"doctype": "UOM Conversion Factor",
+			"category": _(d.get("category")),
+			"from_uom": _(d.get("from_uom")),
+			"to_uom": _(d.get("to_uom")),
+			"value": d.get("value")
+		}).insert(ignore_permissions=True)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub
