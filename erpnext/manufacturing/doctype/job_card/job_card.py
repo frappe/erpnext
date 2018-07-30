@@ -28,9 +28,20 @@ class JobCard(Document):
 				child.uom = frappe.db.get_value("Item", d.item_code, 'stock_uom')
 
 	def on_submit(self):
+		self.validate_dates()
 		self.update_work_order()
 
-	def update_work_order(self):
+	def validate_dates(self):
+		if not self.actual_start_date and not self.actual_end_date:
+			frappe.throw(_("Actual start date and actual end date is mandatory"))
+
+		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
+			frappe.throw(_("Actual start date must be less than actual end date"))
+
+	def on_cancel(self):
+		self.update_work_order(cancel=True)
+
+	def update_work_order(self, cancel=False):
 		if not self.work_order:
 			return
 
@@ -38,10 +49,16 @@ class JobCard(Document):
 
 		for data in wo.operations:
 			if data.name == self.operation_id:
-				data.completed_qty = self.for_quantity
-				data.actual_operation_time = time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
-				data.actual_start_time = get_datetime(self.actual_start_date)
-				data.actual_end_time = get_datetime(self.actual_end_date)
+				if cancel:
+					data.completed_qty -= self.for_quantity
+					data.actual_operation_time -= time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
+					data.actual_start_time = None
+					data.actual_end_time = None
+				else:
+					data.completed_qty = self.for_quantity
+					data.actual_operation_time = time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
+					data.actual_start_time = get_datetime(self.actual_start_date)
+					data.actual_end_time = get_datetime(self.actual_end_date)
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
