@@ -10,8 +10,17 @@ from frappe.utils import flt, getdate, formatdate, cstr
 
 
 @frappe.whitelist(allow_guest=True)
-def get_account_tree(company_name, fiscal_year="2018", from_date=None, to_date=None):
+def get_account_tree():
     # 'company_name'
+    # 'fiscal_year'
+    # 'from_date'
+    # 'to_date'
+    data = frappe.form_dict
+
+    company_name = data.get('company_name')
+    fiscal_year = data.get('fiscal_year')
+    from_date = data.get('from_date')
+    to_date = data.get('to_date')
 
     filters = dict(
         company=company_name,
