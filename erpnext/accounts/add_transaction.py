@@ -22,6 +22,7 @@ def add_transaction():
     # ‘contract_id’
     # `vat_amount`
     # `vat_account`
+    # `cost_center`
     try:
         data = frappe.form_dict
 
@@ -42,7 +43,8 @@ def add_transaction():
         branch_id = data.get('branch')
         vat_amount = float(data.get('vat_amount', 0))
         vat_account = data.get('vat_account')
-
+        cost_center = data.get('cost_center')
+        
         frappe.set_user("Administrator")
 
         if branch_id:
@@ -148,6 +150,7 @@ def add_transaction():
                 project=project,
                 is_advance="No",
                 against_account=to_account,
+                cost_center=cost_center
             ))
             journal_entry.append("accounts", dict(
                 account=to_account,
@@ -161,6 +164,7 @@ def add_transaction():
                 project=project,
                 is_advance="No",
                 against_account=from_account,
+                cost_center=cost_center
             ))
             if vat_amount:
                 journal_entry.append("accounts", dict(
@@ -175,6 +179,7 @@ def add_transaction():
                     project=project,
                     is_advance="No",
                     against_account=from_account,
+                    cost_center=cost_center
                 ))
         else:
             journal_entry.append("accounts", dict(
@@ -189,6 +194,7 @@ def add_transaction():
                 project=project,
                 is_advance="No",
                 against_account=to_account,
+                cost_center=cost_center
             ))
             journal_entry.append("accounts", dict(
                 account=to_account,
@@ -202,6 +208,7 @@ def add_transaction():
                 project=project,
                 is_advance="No",
                 against_account=from_account,
+                cost_center=cost_center
             ))
             if vat_amount:
                 journal_entry.append("accounts", dict(
@@ -216,6 +223,7 @@ def add_transaction():
                     project=project,
                     is_advance="No",
                     against_account=from_account,
+                    cost_center=cost_center
                 ))
         journal_entry.insert(ignore_permissions=True)
         # payment_entry = frappe.get_doc(
