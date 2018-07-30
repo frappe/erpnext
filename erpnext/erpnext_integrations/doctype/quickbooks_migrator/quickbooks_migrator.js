@@ -31,5 +31,24 @@ frappe.ui.form.on('QuickBooks Migrator', {
 				}
 			}
 		});
+	},
+	refresh: function(frm){
+		frappe.realtime.on("quickbooks_progress_update", function (data) {
+			 switch (data.event) {
+				case "fetch":
+					frappe.show_progress("Fetching " + data.doctype + "s", data.count, data.total);
+					break;
+				case "save":
+					frappe.show_progress("Saving " + data.doctype + "s", data.count, data.total);
+					break;
+				case "finish":
+					frappe.hide_progress();
+					break;
+				case "message":
+					frappe.hide_msgprint();
+					frappe.show_alert(data.message);
+					break;
+			}
+		});
 	}
 });

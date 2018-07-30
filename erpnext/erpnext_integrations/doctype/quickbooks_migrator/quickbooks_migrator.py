@@ -60,6 +60,9 @@ def fetch():
 		print(entity)
 		fetch_all_entries(entity=entity, company_id=company_id)
 
+def publish(*args, **kwargs):
+	frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
+
 token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token():
 	code = frappe.cache().get("quickbooks_code").decode()
@@ -424,8 +427,10 @@ save_methods = {
 }
 
 def save_entries(doctype, entries):
+	total = len(entries)
 	save = save_methods[doctype]
-	for entry in entries:
+	for index, entry in enumerate(entries):
+		publish({"event": "save", "doctype": doctype, "count": index, "total": total})
 		save(entry)
 
 # A quickbooks api contraint
@@ -462,13 +467,17 @@ def fetch_all_entries(entity="", company_id=1):
 	# fetch pages and accumulate
 	entries = []
 	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
+		publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
 		response = get(query_uri,
 			params={
 				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(entity, start_position, MAX_RESULT_COUNT)
 			}
 		).json()["QueryResponse"][entity]
 		entries.extend(response)
+	publish({"event": "finish"})
 	save_entries(entity, entries)
+	publish({"event": "finish"})
+	publish({"event": "message", "message": "Fetched {}".format(entity)})
 
 def get_headers(token):
 	return {"Accept": "application/json",
