@@ -10,6 +10,28 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
 class JobCard(Document):
+	def validate(self):
+		self.validate_actual_dates()
+
+	def validate_actual_dates(self):
+		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
+			frappe.throw(_("Actual start date must be less than actual end date"))
+
+		if not (self.employee and self.actual_start_date and self.actual_end_date):
+			return
+
+		data = frappe.db.sql(""" select name from `tabJob Card`
+			where
+				((%(actual_start_date)s > actual_start_date and %(actual_start_date)s < actual_end_date) or
+				(%(actual_end_date)s > actual_start_date and %(actual_end_date)s < actual_end_date) or
+				(%(actual_start_date)s <= actual_start_date and %(actual_end_date)s >= actual_end_date)) and
+				name != %(name)s and employee = %(employee)s and docstatus =1
+		""", self.as_dict(), as_dict=1)
+
+		if data:
+			frappe.throw(_("Start date and end date is overlapping with the job card <a href='#Form/Job Card/{0}'>{1}</a>")
+				.format(data[0].name, data[0].name))
+
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
@@ -34,9 +56,6 @@ class JobCard(Document):
 	def validate_dates(self):
 		if not self.actual_start_date and not self.actual_end_date:
 			frappe.throw(_("Actual start date and actual end date is mandatory"))
-
-		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
-			frappe.throw(_("Actual start date must be less than actual end date"))
 
 	def on_cancel(self):
 		self.update_work_order(cancel=True)
