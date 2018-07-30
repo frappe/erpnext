@@ -1,10 +1,13 @@
-
-[![Build Status](https://travis-ci.com/frappe/erpnext.png)](https://travis-ci.com/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[https://erpnext.com](https://erpnext.com)
-
+### ThaiNext
+Fock form ERPNext v10 for thai localrize
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
+### Rodemap
+- Thai Accounting (Vat,Tax,COA)
+- Financian Report
+- Docker file for install
+
+### ERPNext
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
 - [User Guide](https://erpnext.org/docs/user)
