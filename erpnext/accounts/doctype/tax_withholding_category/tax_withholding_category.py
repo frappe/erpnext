@@ -21,7 +21,6 @@ def get_party_tax_withholding_details(ref_doc):
 	tax_details = get_tax_withholding_details(tax_withholding_category, fy[0], ref_doc.company)
 	tds_amount = get_tds_amount(ref_doc, tax_details, fy)
 	tax_row = get_tax_row(tax_details, tds_amount)
-
 	return tax_row
 
 def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
@@ -52,9 +51,9 @@ def get_tax_row(tax_details, tds_amount):
 		"category": "Total",
 		"add_deduct_tax": "Deduct",
 		"charge_type": "Actual",
-		"account_head": tax_details.account,
+		"account_head": tax_details.account_head,
 		"description": tax_details.description,
-		"amount": tds_amount
+		"tax_amount": tds_amount
 	}
 
 def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
@@ -62,35 +61,37 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 	tds_amount = 0
 
 	def _get_tds():
+		tds_amount = 0
 		if not tax_details.threshold or ref_doc.net_total >= tax_details.threshold:
 			tds_amount = ref_doc.net_total * tax_details.rate / 100
 		return tds_amount
 
 	if tax_details.cumulative_threshold:
 		entries = frappe.db.sql("""
-			select voucher_no, sum(credit)
+			select voucher_no, credit
 			from `tabGL Entry`
 			where party=%s and fiscal_year=%s and credit > 0
-			group by party
 		""", (ref_doc.supplier, fiscal_year), as_dict=1)
 
-		supplier_credit_amount = sum([d.credit for d in entries])
+		supplier_credit_amount = flt(sum([d.credit for d in entries]))
 
 		vouchers = [d.voucher_no for d in entries]
 		vouchers += get_advance_vouchers(ref_doc.supplier, fiscal_year)
 
-		tds_deducted = flt(frappe.db.sql("""
-			select sum(credit)
-			from `tabGL Entry`
-			where account=%s and fiscal_year=%s and credit > 0
-				and voucher_no in (%s)
-		""" % ', '.join(['%s'*len(vouchers)]),
-			tuple([tax_details.account_head, fiscal_year] + vouchers))[0][0])
+		tds_deducted = 0
+		if vouchers:
+			tds_deducted = flt(frappe.db.sql("""
+				select sum(credit)
+				from `tabGL Entry`
+				where account=%s and fiscal_year=%s and credit > 0
+					and voucher_no in ({0})
+			""".format(', '.join(["'%s'" % d for d in vouchers])),
+				(tax_details.account_head, fiscal_year))[0][0])
 
 		debit_note_amount = get_debit_note_amount(ref_doc.supplier, year_start_date, year_end_date)
 
-		total_invoiced_amount = supplier_credit_amount + tds_deducted + ref_doc.net_total - debit_note_amount
-
+		total_invoiced_amount = supplier_credit_amount + tds_deducted \
+			+ flt(ref_doc.net_total) - debit_note_amount
 		if total_invoiced_amount >= tax_details.cumulative_threshold:
 			total_applicable_tds = total_invoiced_amount * tax_details.rate / 100
 			tds_amount = min(total_applicable_tds - tds_deducted, ref_doc.net_total)

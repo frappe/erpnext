@@ -43,6 +43,10 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def onload(self):
+		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		self.set_onload("supplier_tds", supplier_tds)
+
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
@@ -778,11 +782,11 @@ class PurchaseInvoice(BuyingController):
 		tax_withholding_details = get_party_tax_withholding_details(self)
 		accounts = []
 		for d in self.taxes:
-			if d.account_head == tax_withholding_details.account_head:
+			if d.account_head == tax_withholding_details.get("account_head"):
 				d.update(tax_withholding_details)
 			accounts.append(d.account_head)
 
-		if not accounts or tax_withholding_details.account_head not in accounts:
+		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
 
 @frappe.whitelist()
