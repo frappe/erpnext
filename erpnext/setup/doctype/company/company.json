@@ -288,7 +288,7 @@
    "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
-   "label": "Parent Comapny", 
+   "label": "Parent Company", 
    "length": 0, 
    "no_copy": 0, 
    "options": "Company", 
@@ -2950,5 +2950,6 @@
  "show_name_in_global_search": 1, 
  "sort_order": "ASC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
