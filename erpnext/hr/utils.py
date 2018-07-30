@@ -170,7 +170,7 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		doc.name = "New "+doc.doctype
 
 	overlap_doc = frappe.db.sql(query.format(doc.doctype),{
-			"employee": doc.employee,
+			"employee": doc.get("employee"),
 			"from_date": from_date,
 			"to_date": to_date,
 			"name": doc.name,

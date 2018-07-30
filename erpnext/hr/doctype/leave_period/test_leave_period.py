@@ -9,7 +9,7 @@ from frappe.utils import today, add_months
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 
-test_dependencies = ["Employee", "Leave Type"]
+test_dependencies = ["Employee", "Leave Type", "Leave Policy"]
 
 class TestLeavePeriod(unittest.TestCase):
 	def setUp(self):
