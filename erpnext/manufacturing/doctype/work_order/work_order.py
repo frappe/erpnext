@@ -367,7 +367,8 @@ class WorkOrder(Document):
 				'wip_warehouse': self.wip_warehouse
 			})
 
-			doc.get_required_items()
+			if self.transfer_material_against_job_card and not self.skip_transfer:
+				doc.get_required_items()
 			doc.flags.ignore_mandatory = True
 			doc.save()
 			card_count += 1
