@@ -31,14 +31,33 @@ body[data-route^="marketplace/"] {
 		border-color: #59b81c;
 	}
 
+	.progress-bar {
+		background-color: #89da28;
+	}
+
 	.subpage-title.flex {
 		align-items: flex-start;
 		justify-content: space-between;
 	}
 
+	.subpage-message {
+		p {
+			padding: 10px 15px;
+			margin-top: 0px;
+			margin-bottom: 15px;
+			background-color: #f9fbf7;
+			justify-content: space-between;
+		}
+
+		.octicon-x {
+			cursor: pointer;
+		}
+	}
+
 	.hub-card {
-		border: 1px solid @border-color;
 		margin-bottom: 25px;
+		position: relative;
+		border: 1px solid @border-color;
 		border-radius: 4px;
 		overflow: hidden;
 		cursor: pointer;
