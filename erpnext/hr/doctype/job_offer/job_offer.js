@@ -13,7 +13,6 @@ frappe.ui.form.on("Job Offer", {
 	},
 
 	refresh: function (frm) {
-		console.log(frm.doc);
 		if ((!frm.doc.__islocal) && (frm.doc.status == 'Accepted')
 			&& (frm.doc.docstatus === 1) && (!frm.doc.__onload.employee)) {
 			frm.add_custom_button(__('Make Employee'),
