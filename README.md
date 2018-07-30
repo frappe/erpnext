@@ -1,5 +1,6 @@
 ### ThaiNext
 Fock form ERPNext v10 for thai localrize
+
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
 ### Rodemap
@@ -7,7 +8,8 @@ Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Ma
 - Financian Report
 - Docker file for install
 
-### ERPNext
+### About ERPNext
+
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
 - [User Guide](https://erpnext.org/docs/user)
