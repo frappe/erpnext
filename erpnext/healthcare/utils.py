@@ -313,3 +313,19 @@ def manage_doc_for_appoitnment(dt_from_appointment, appointment, invoiced):
 	)
 	if dn_from_appointment:
 		frappe.db.set_value(dt_from_appointment, dn_from_appointment, "invoiced", invoiced)
+
+@frappe.whitelist()
+def get_drugs_to_invoice(encounter):
+	encounter = frappe.get_doc("Patient Encounter", encounter)
+	if encounter:
+		patient = frappe.get_doc("Patient", encounter.patient)
+		if patient and patient.customer:
+				item_to_invoice = []
+				for drug_line in encounter.drug_prescription:
+					if drug_line.drug_code:
+						qty = 1
+						if frappe.db.get_value("Item", drug_line.drug_code, "stock_uom") == "Nos":
+							qty = drug_line.get_quantity()
+						item_to_invoice.append({'drug_code': drug_line.drug_code, 'quantity': qty,
+						'description': drug_line.dosage+" for "+drug_line.period})
+				return item_to_invoice
