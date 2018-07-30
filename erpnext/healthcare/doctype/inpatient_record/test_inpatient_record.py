@@ -23,11 +23,11 @@ class TestInpatientRecord(unittest.TestCase):
 		service_unit = get_healthcare_service_unit()
 		admit_patient(ip_record, service_unit, now_datetime())
 		self.assertEqual("Admitted", frappe.db.get_value("Patient", patient, "inpatient_status"))
-		self.assertEqual(1, frappe.db.get_value("Healthcare Service Unit", service_unit, "occupied"))
+		self.assertEqual("Occupied", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		# Discharge
 		schedule_discharge(patient=patient)
-		self.assertEqual(0, frappe.db.get_value("Healthcare Service Unit", service_unit, "occupied"))
+		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		# Validate Pending Invoices
@@ -93,7 +93,7 @@ def get_healthcare_service_unit():
 		service_unit.healthcare_service_unit_name = "Test Service Unit Ip Occupancy"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
-		service_unit.occupied = 0
+		service_unit.occupancy_status = "Vacant"
 		service_unit.is_group = 0
 		service_unit_parent_name = frappe.db.exists({
 				"doctype": "Healthcare Service Unit",
