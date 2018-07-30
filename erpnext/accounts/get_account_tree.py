@@ -27,7 +27,7 @@ def get_account_tree():
         from_date=from_date,
         to_date=to_date,
         fiscal_year=fiscal_year,
-        show_zero_values=0
+        show_zero_values=1
     )
     data = get_data(filters)
     
