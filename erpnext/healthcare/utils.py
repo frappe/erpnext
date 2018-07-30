@@ -152,9 +152,13 @@ def get_healthcare_services_to_invoice(patient):
 def service_item_and_practitioner_charge(doc):
 	is_ip = doc_is_ip(doc)
 	if is_ip:
-		service_item = get_healthcare_service_item("inpatient_visit_charge_item")
+		service_item = get_practitioner_service_item(doc.practitioner, "inpatient_visit_charge_item")
+		if not service_item:
+			service_item = get_healthcare_service_item("inpatient_visit_charge_item")
 	else:
-		service_item = get_healthcare_service_item("op_consulting_charge_item")
+		service_item = get_practitioner_service_item(doc.practitioner, "op_consulting_charge_item")
+		if not service_item:
+			service_item = get_healthcare_service_item("op_consulting_charge_item")
 	if not service_item:
 		throw_config_service_item(is_ip)
 
@@ -181,6 +185,9 @@ def throw_config_practitioner_charge(is_ip, practitioner):
 	msg = _(("Please Configure {0} for Healthcare Practitioner").format(charge_name) \
 		+ """ <b><a href="#Form/Healthcare Practitioner/{0}">{0}</a></b>""".format(practitioner))
 	frappe.throw(msg)
+
+def get_practitioner_service_item(practitioner, service_item_field):
+	return frappe.db.get_value("Healthcare Practitioner", practitioner, service_item_field)
 
 def get_healthcare_service_item(service_item_field):
 	return frappe.db.get_value("Healthcare Settings", None, service_item_field)
