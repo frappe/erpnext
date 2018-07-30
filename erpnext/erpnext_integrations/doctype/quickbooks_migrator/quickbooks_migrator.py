@@ -45,11 +45,17 @@ def callback(*args, **kwargs):
 	fetch()
 
 @frappe.whitelist()
-def fetch():
+def fetch_accounts():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	make_root_accounts()
-	relevant_entities = ["Account", "Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
+	fetch_all_entries(entity="Account", company_id=company_id)
+
+@frappe.whitelist()
+def fetch():
+	company_id = frappe.cache().get("quickbooks_company_id").decode()
+	make_custom_fields()
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
 	for entity in relevant_entities:
 		print(entity)
 		fetch_all_entries(entity=entity, company_id=company_id)
