@@ -112,139 +112,146 @@ mapping = {
 def save_account(account):
 	# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
 	try:
-		frappe.get_doc({
-			"doctype": "Account",
-			"quickbooks_id": account["Id"],
-			"account_name": "{} - QB".format(account["Name"]),
-			"root_type": mapping[account["AccountType"]],
-			"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
-			"is_group": "0",
-			"company": company,
-		}).insert(ignore_permissions=True, ignore_mandatory=True)
+		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"]}):
+			frappe.get_doc({
+				"doctype": "Account",
+				"quickbooks_id": account["Id"],
+				"account_name": "{} - QB".format(account["Name"]),
+				"root_type": mapping[account["AccountType"]],
+				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
+				"is_group": "0",
+				"company": company,
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
 	except:
 		pass
 
 def save_customer(customer):
 	try:
-		erpcustomer = frappe.get_doc({
-			"doctype": "Customer",
-			"quickbooks_id": customer["Id"],
-			"customer_name" : customer["DisplayName"],
-			"customer_type" : _("Individual"),
-			"customer_group" : _("Commercial"),
-			"territory" : _("All Territories"),
-		}).insert(ignore_permissions=True)
-		if "BillAddr" in customer:
-			create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
-		if "ShipAddr" in customer:
-			create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
+		if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"]}):
+			erpcustomer = frappe.get_doc({
+				"doctype": "Customer",
+				"quickbooks_id": customer["Id"],
+				"customer_name" : customer["DisplayName"],
+				"customer_type" : _("Individual"),
+				"customer_group" : _("Commercial"),
+				"territory" : _("All Territories"),
+			}).insert(ignore_permissions=True)
+			if "BillAddr" in customer:
+				create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
+			if "ShipAddr" in customer:
+				create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
 	except:
 		pass
 
 def save_item(item):
 	try:
-		frappe.get_doc({
-			"doctype": "Item",
-			"quickbooks_id": item["Id"],
-			"item_code" : item["Name"],
-			"stock_uom": "Unit",
-			"item_group": "All Item Groups",
-			"item_defaults": [{"company": company}]
-		}).insert(ignore_permissions=True)
+		if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"]}):
+			frappe.get_doc({
+				"doctype": "Item",
+				"quickbooks_id": item["Id"],
+				"item_code" : item["Name"],
+				"stock_uom": "Unit",
+				"item_group": "All Item Groups",
+				"item_defaults": [{"company": company}]
+			}).insert(ignore_permissions=True)
 	except:
 		pass
 
 def save_vendor(vendor):
 	try:
-		erpsupplier = frappe.get_doc({
-			"doctype": "Supplier",
-			"quickbooks_id": vendor["Id"],
-			"supplier_name" : vendor["DisplayName"],
-			"supplier_group" : _("All Supplier Groups"),
-		}).insert(ignore_permissions=True)
-		if "BillAddr" in vendor:
-			create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
-		if "ShipAddr" in vendor:
-			create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
+		if not frappe.db.exists({"doctype": "Supplier", "quickbooks_id": vendor["Id"]}):
+			erpsupplier = frappe.get_doc({
+				"doctype": "Supplier",
+				"quickbooks_id": vendor["Id"],
+				"supplier_name" : vendor["DisplayName"],
+				"supplier_group" : _("All Supplier Groups"),
+			}).insert(ignore_permissions=True)
+			if "BillAddr" in vendor:
+				create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
+			if "ShipAddr" in vendor:
+				create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
 	except:
 		pass
 
 def save_invoice(invoice):
 	try:
-		frappe.get_doc({
-			"doctype": "Sales Invoice",
-			"quickbooks_id": invoice["Id"],
-			"naming_series": "SINV-",
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"]}):
+			frappe.get_doc({
+				"doctype": "Sales Invoice",
+				"quickbooks_id": invoice["Id"],
+				"naming_series": "SINV-",
 
-			# Quickbooks uses ISO 4217 Code
-			# of course this gonna come back to bite me
-			"currency": invoice["CurrencyRef"]["value"],
+				# Quickbooks uses ISO 4217 Code
+				# of course this gonna come back to bite me
+				"currency": invoice["CurrencyRef"]["value"],
 
-			# Need to check with someone as to what exactly this field represents
-			# And whether it is equivalent to posting_date
-			"posting_date": invoice["TxnDate"],
+				# Need to check with someone as to what exactly this field represents
+				# And whether it is equivalent to posting_date
+				"posting_date": invoice["TxnDate"],
 
-			# Due Date should be calculated from SalesTerm if not provided.
-			# For Now Just setting a default to suppress mandatory errors.
-			"due_date": invoice.get("DueDate", "2020-01-01"),
+				# Due Date should be calculated from SalesTerm if not provided.
+				# For Now Just setting a default to suppress mandatory errors.
+				"due_date": invoice.get("DueDate", "2020-01-01"),
 
-			# Shouldn't default to Current Bank Account
-			# Decide using AccountRef from TxnRef
-			# And one more thing, While creating accounts set account_type
+				# Shouldn't default to Current Bank Account
+				# Decide using AccountRef from TxnRef
+				# And one more thing, While creating accounts set account_type
 				"debit_to": receivable_account,
 
-			"customer": frappe.get_all("Customer",
-				filters={
-					"quickbooks_id": invoice["CustomerRef"]["value"]
-				})[0]["name"],
-			"items": get_items(invoice["Line"]),
-			"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"]),
+				"customer": frappe.get_all("Customer",
+					filters={
+						"quickbooks_id": invoice["CustomerRef"]["value"]
+					})[0]["name"],
+				"items": get_items(invoice["Line"]),
+				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"]),
 
-			# Do not change posting_date upon submission
-			"set_posting_time": 1
-		}).insert().submit()
-		frappe.db.commit()
+				# Do not change posting_date upon submission
+				"set_posting_time": 1
+			}).insert().submit()
+			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
 
 def save_journal_entry(journal_entry):
 	try:
-		frappe.get_doc({
-			"doctype": "Journal Entry",
-			"quickbooks_id": journal_entry["Id"],
-			"naming_series": "JV-",
-			"company": company,
-			"posting_date": journal_entry["TxnDate"],
-			"accounts": get_accounts(journal_entry["Line"]),
-		}).insert().submit()
-		frappe.db.commit()
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": journal_entry["Id"]}):
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"quickbooks_id": journal_entry["Id"],
+				"naming_series": "JV-",
+				"company": company,
+				"posting_date": journal_entry["TxnDate"],
+				"accounts": get_accounts(journal_entry["Line"]),
+			}).insert().submit()
+			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
 
 def save_bill(bill):
 	try:
-		frappe.get_doc({
-			"doctype": "Purchase Invoice",
-			"quickbooks_id": bill["Id"],
-			"naming_series": "PINV-",
-			"currency": bill["CurrencyRef"]["value"],
-			"posting_date": bill["TxnDate"],
-			"due_date": bill.get("DueDate", "2020-01-01"),
-			"credit_to": frappe.get_all("Account",
-				filters={
-					"quickbooks_id": bill["APAccountRef"]["value"]
-				})[0]["name"],
-			"supplier": frappe.get_all("Supplier",
-				filters={
-					"quickbooks_id": bill["VendorRef"]["value"]
-				})[0]["name"],
-			"items": get_pi_items(bill["Line"]),
-			"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
-			"set_posting_time": 1
-		}).insert().submit()
-		frappe.db.commit()
+		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"]}):
+			frappe.get_doc({
+				"doctype": "Purchase Invoice",
+				"quickbooks_id": bill["Id"],
+				"naming_series": "PINV-",
+				"currency": bill["CurrencyRef"]["value"],
+				"posting_date": bill["TxnDate"],
+				"due_date": bill.get("DueDate", "2020-01-01"),
+				"credit_to": frappe.get_all("Account",
+					filters={
+						"quickbooks_id": bill["APAccountRef"]["value"]
+					})[0]["name"],
+				"supplier": frappe.get_all("Supplier",
+					filters={
+						"quickbooks_id": bill["VendorRef"]["value"]
+					})[0]["name"],
+				"items": get_pi_items(bill["Line"]),
+				"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
+				"set_posting_time": 1
+			}).insert().submit()
+			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -252,36 +259,38 @@ def save_bill(bill):
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 def save_payment(payment):
 	try:
-		# Check if Payment is Linked to an Invoice
-		if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
-			sales_invoice = frappe.get_all("Sales Invoice",
-				filters={
-					"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
-				})[0]["name"]
-			erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
-			erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
-			erp_pe.reference_no = "Reference No"
-			erp_pe.reference_date = payment["TxnDate"]
-			erp_pe.insert().submit()
-			frappe.db.commit()
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": payment["Id"]}):
+			# Check if Payment is Linked to an Invoice
+			if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
+				sales_invoice = frappe.get_all("Sales Invoice",
+					filters={
+						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
+					})[0]["name"]
+				erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
+				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
+				erp_pe.reference_no = "Reference No"
+				erp_pe.reference_date = payment["TxnDate"]
+				erp_pe.insert().submit()
+				frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
 
 def save_bill_payment(bill_payment):
 	try:
-		# Check if Payment is Linked to an Invoice
-		if bill_payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Bill":
-			purchase_invoice = frappe.get_all("Purchase Invoice",
-				filters={
-					"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
-				})[0]["name"]
-			erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice)
-			erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
-			erp_pe.reference_no = "Reference No"
-			erp_pe.reference_date = bill_payment["TxnDate"]
-			erp_pe.insert().submit()
-			frappe.db.commit()
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": bill_payment["Id"]}):
+			# Check if Payment is Linked to an Invoice
+			if bill_payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Bill":
+				purchase_invoice = frappe.get_all("Purchase Invoice",
+					filters={
+						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
+					})[0]["name"]
+				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice)
+				erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
+				erp_pe.reference_no = "Reference No"
+				erp_pe.reference_date = bill_payment["TxnDate"]
+				erp_pe.insert().submit()
+				frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -384,16 +393,17 @@ def get_taxes(lines):
 
 def create_address(entity, doctype, address, address_type):
 	try :
-		frappe.get_doc({
-			"doctype": "Address",
-			"quickbooks_address_id": address["Id"],
-			"address_title": entity.name,
-			"address_type": address_type,
-			"address_line1": address["Line1"],
-			"city": address["City"],
-			"gst_state": "Maharashtra",
-			"links": [{"link_doctype": doctype, "link_name": entity.name}]
-		}).insert()
+		if not frappe.db.exists({"doctype": "Address", "quickbooks_id": address["Id"]}):
+			frappe.get_doc({
+				"doctype": "Address",
+				"quickbooks_address_id": address["Id"],
+				"address_title": entity.name,
+				"address_type": address_type,
+				"address_line1": address["Line1"],
+				"city": address["City"],
+				"gst_state": "Maharashtra",
+				"links": [{"link_doctype": doctype, "link_name": entity.name}]
+			}).insert()
 	except:
 		pass
 
