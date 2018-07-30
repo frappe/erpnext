@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 import frappe
 import datetime
 from frappe import _
-from frappe.utils import date_diff, getdate
+import math
+from frappe.utils import time_diff_in_hours, rounded
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import validity_exists
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity, update_fee_validity
@@ -139,9 +140,18 @@ def get_healthcare_services_to_invoice(patient):
 					inpatient_occupancy = frappe.get_doc("Inpatient Occupancy", inpatient_service[0])
 					service_unit_type = frappe.get_doc("Healthcare Service Unit Type", frappe.db.get_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "service_unit_type"))
 					if service_unit_type and service_unit_type.is_billable == 1:
-						qty = date_diff(getdate(inpatient_occupancy.check_out), getdate(inpatient_occupancy.check_in))
-						if qty < 1:
-							qty = 1
+						hours_occupied = time_diff_in_hours(inpatient_occupancy.check_out, inpatient_occupancy.check_in)
+						qty = 0.5
+						if hours_occupied > 0:
+							actual_qty = hours_occupied / service_unit_type.no_of_hours
+							floor = math.floor(actual_qty)
+							decimal_part = actual_qty - floor
+							if decimal_part > 0.5:
+								qty = rounded(floor + 1, 1)
+							elif decimal_part < 0.5 and decimal_part > 0:
+								qty = rounded(floor + 0.5, 1)
+							if qty <= 0:
+								qty = 0.5
 						item_to_invoice.append({'reference_type': 'Inpatient Occupancy', 'reference_name': inpatient_occupancy.name,
 						'service': service_unit_type.item, 'qty': qty})
 
