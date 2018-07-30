@@ -379,7 +379,6 @@ erpnext.patches.v7_2.empty_supplied_items_for_non_subcontracted
 erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component
 erpnext.patches.v7_2.rename_att_date_attendance
 erpnext.patches.v7_2.update_attendance_docstatus
-erpnext.patches.v7_2.move_dates_from_salary_structure_to_employee
 erpnext.patches.v7_2.make_all_assessment_group
 erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom
 erpnext.patches.v8_0.addresses_linked_to_lead
@@ -445,7 +444,6 @@ erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
 erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
-erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
