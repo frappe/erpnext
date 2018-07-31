@@ -81,7 +81,7 @@ def create_customer(doc):
 		territory = "Rest Of The World"
 		frappe.msgprint(_("Please set default customer group and territory in Selling Settings"), alert=True)
 	customer = frappe.get_doc({"doctype": "Customer",
-	"customer_name": doc.name,
+	"customer_name": doc.patient_name,
 	"customer_group": customer_group,
 	"territory" : territory,
 	"customer_type": "Individual"

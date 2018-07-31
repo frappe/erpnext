@@ -81,7 +81,7 @@ def add_print_formats():
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('GST POS Invoice', 'GST Tax Invoice') """)
 
-def make_custom_fields():
+def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
@@ -196,8 +196,10 @@ def make_custom_fields():
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
 				fieldtype='Section Break', insert_after='asset_received_but_not_billed'),
-			dict(fieldname='hra_component', label='HRA Component',
+			dict(fieldname='basic_component', label='Basic Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
+			dict(fieldname='hra_component', label='HRA Component',
+				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_component')
 		],
@@ -239,7 +241,7 @@ def make_custom_fields():
 		]
 	}
 
-	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch)
+	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
 
 def make_fixtures(company=None):
 	docs = []
@@ -247,7 +249,6 @@ def make_fixtures(company=None):
 
 	set_salary_components(docs)
 	set_tds_account(docs, company)
-	set_tax_withholding_category(docs, company)
 
 	for d in docs:
 		try:
@@ -256,6 +257,9 @@ def make_fixtures(company=None):
 			doc.insert()
 		except frappe.NameError:
 			pass
+
+	# create tds fixtures
+	set_tax_withholding_category(company)
 
 def set_salary_components(docs):
 	docs.extend([
@@ -267,31 +271,33 @@ def set_salary_components(docs):
 		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
 	])
 
-def set_tax_withholding_category(docs, company):
+def set_tax_withholding_category(company):
 	accounts = []
-	tds_account = frappe.db.get_value("Account", filter={"account_type": "Payable",
-		"account_name": "TDS", "company": company})
+	abbr = frappe.get_value("Company", company, "abbr")
+	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
 	if company and tds_account:
-		accounts = [
-				{
-					'company': company,
-					'account': tds_account
-				}
-			]
+		accounts = [dict(company=company, account=tds_account)]
 
-	docs.extend([
-		{
-			'doctype': 'Tax Withholding Category', '__newname': 'TDS',
-			'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
-			'withhold_cumulative_tax_amount': 0, 'accounts': accounts
-		}
-	])
+	tds = frappe.get_doc({
+		'doctype': 'Tax Withholding Category', 'name': 'TDS',
+		'percent_of_tax_withheld': 10,'threshold': 150000, 'book_on_invoice': 1,
+		'withhold_cumulative_tax_amount': 0, 'accounts': accounts
+	})
+
+	try:
+		tds.flags.ignore_permissions = True
+		tds.insert()
+	except frappe.DuplicateEntryError:
+		tds = frappe.get_doc("Tax Withholding Category", tds.get("name"))
+		tds.append("accounts", accounts[0])
+		tds.save()
 
 def set_tds_account(docs, company):
+	abbr = frappe.get_value("Company", company, "abbr")
 	docs.extend([
 		{
-			'doctype': 'Account', 'account_name': 'TDS', 'account_type': 'Tax',
-			'parent_account': 'Duties and Taxes', 'company': company
+			"doctype": "Account", "account_name": "TDS Payable", "account_type": "Tax",
+			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
 		}
 	])

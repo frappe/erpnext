@@ -29,6 +29,7 @@ class Employee(NestedSet):
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
 			elif naming_method == 'Full Name':
+				self.set_employee_name()
 				self.name = self.employee_name
 
 		self.employee = self.name
@@ -38,6 +39,7 @@ class Employee(NestedSet):
 		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
 
 		self.employee = self.name
+		self.set_employee_name()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -54,6 +56,9 @@ class Employee(NestedSet):
 			if existing_user_id:
 				remove_user_permission(
 					"Employee", self.name, existing_user_id)
+
+	def set_employee_name(self):
+		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)

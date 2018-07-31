@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import flt
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -28,7 +29,8 @@ class BlanketOrder(Document):
 @frappe.whitelist()
 def make_sales_order(source_name):
 	def update_item(source, target, source_parent):
-		target.qty = source.get("qty") - source.get("ordered_qty")
+		target_qty = source.get("qty") - source.get("ordered_qty")
+		target.qty = target_qty if not flt(target_qty) < 0 else 0
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
@@ -53,7 +55,8 @@ def make_sales_order(source_name):
 @frappe.whitelist()
 def make_purchase_order(source_name):
 	def update_item(source, target, source_parent):
-		target.qty = source.get("qty") - source.get("ordered_qty")
+		target_qty = source.get("qty") - source.get("ordered_qty")
+		target.qty = target_qty if not flt(target_qty) < 0 else 0
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")

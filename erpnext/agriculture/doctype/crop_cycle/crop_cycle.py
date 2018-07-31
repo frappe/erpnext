@@ -81,10 +81,10 @@ class CropCycle(Document):
 		for doctype in linked_doctypes:
 			output[doctype] = frappe.get_all(doctype, fields=required_fields)
 
-		output['Land Unit'] = []
+		output['Location'] = []
 
-		for land in self.linked_land_unit:
-			output['Land Unit'].append(frappe.get_doc('Land Unit', land.land_unit))
+		for location in self.linked_location:
+			output['Location'].append(frappe.get_doc('Location', location.location))
 
 		frappe.publish_realtime("List of Linked Docs",
 								output, user=frappe.session.user)
@@ -105,7 +105,7 @@ def get_geometry_type(doc):
 	return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('type')
 
 
-def is_in_land_unit(point, vs):
+def is_in_location(point, vs):
 	x, y = point
 	inside = False
 

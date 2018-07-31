@@ -47,7 +47,7 @@ def make_employee(user):
 		employee = frappe.get_doc({
 			"doctype": "Employee",
 			"naming_series": "EMP-",
-			"employee_name": user,
+			"first_name": user,
 			"company": erpnext.get_default_company(),
 			"user_id": user,
 			"date_of_birth": "1990-05-08",

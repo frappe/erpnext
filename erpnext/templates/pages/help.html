@@ -5,7 +5,7 @@
 {% block header %}<h1>{{ _("Help") }}</h1>
 
 <div style="margin-bottom: 20px;">
-	<form action='/search_help'>
+	<form action="/search_help" style="display: flex;">
 	<input name='q' class='form-control' type='text'
 		style='max-width: 400px; display: inline-block; margin-right: 10px;'
 		value='{{ frappe.form_dict.q or ''}}'

@@ -18,8 +18,8 @@ class TestPayrollEntry(unittest.TestCase):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Loan"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA", "Leave Encashment"])
-		make_deduction_salary_component(["Professional Tax", "TDS"])
+		make_earning_salary_component(setup=True)
+		make_deduction_salary_component(setup=True)
 
 	def test_payroll_entry(self): # pylint: disable=no-self-use
 		company = erpnext.get_default_company()
@@ -107,6 +107,7 @@ def make_payroll_entry(**args):
 	payroll_entry.posting_date = nowdate()
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
+	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status = 1):

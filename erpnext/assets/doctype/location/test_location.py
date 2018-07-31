@@ -3,8 +3,31 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import json
 import unittest
 
+import frappe
+
+test_records = frappe.get_test_records('Location')
+
 class TestLocation(unittest.TestCase):
-	pass
+	def runTest(self):
+		locations = ['Basil Farm', 'Division 1', 'Field 1', 'Block 1']
+		area = 0
+		formatted_locations = []
+
+		for location in locations:
+			doc = frappe.get_doc('Location', location)
+			doc.save()
+			area += doc.area
+			temp = json.loads(doc.location)
+			temp['features'][0]['properties']['child_feature'] = True
+			temp['features'][0]['properties']['feature_of'] = location
+			formatted_locations.extend(temp['features'])
+
+		formatted_location_string = str(formatted_locations)
+		test_location = frappe.get_doc('Location', 'Test Location Area')
+		test_location.save()
+
+		self.assertEqual(formatted_location_string, str(json.loads(test_location.get('location'))['features']))
+		self.assertEqual(area, test_location.get('area'))

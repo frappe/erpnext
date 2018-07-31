@@ -45,7 +45,7 @@ class Item(WebsiteGenerator):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 		if self.is_fixed_asset:
-			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+			asset = self.asset_exists()
 			self.set_onload("asset_exists", True if asset else False)
 
 	def set_asset_naming_series(self):
@@ -113,6 +113,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_has_variants()
 		self.validate_stock_exists_for_template_item()
+		self.validate_asset_exists_for_serialized_asset()
 		self.validate_attributes()
 		self.validate_variant_attributes()
 		self.validate_website_image()
@@ -693,6 +694,18 @@ class Item(WebsiteGenerator):
 					frappe.throw(
 						_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
 
+	def validate_asset_exists_for_serialized_asset(self):
+		if (not self.get("__islocal") and self.asset_exists() and
+			cint(self.has_serial_no) != cint(frappe.db.get_value('Item', self.name, 'has_serial_no'))):
+			frappe.throw(_("Asset is already exists against the item {0}, you cannot change the has serial no value")
+				.format(self.name))
+
+	def asset_exists(self):
+		if not hasattr(self, '_asset_created'):
+			self._asset_created = frappe.db.get_all("Asset",
+				filters={"item_code": self.name, "docstatus": 1}, limit=1)
+		return self._asset_created
+
 	def validate_uom(self):
 		if not self.get("__islocal"):
 			check_stock_uom_with_bin(self.name, self.stock_uom)
@@ -921,15 +934,16 @@ def get_uom_conv_factor(uom, stock_uom):
 
 	for d in uom_details:
 		if d.from_uom == stock_uom and d.to_uom == uom:
-			value = d.value
-		elif d.from_uom == uom and d.to_uom == stock_uom:
 			value = 1/flt(d.value)
-		else:
-			uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-			uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+		elif d.from_uom == uom and d.to_uom == stock_uom:
+			value = d.value
 
-			if uom_stock and uom_row:
-				if uom_stock.from_uom == uom_row.from_uom:
-					value = flt(uom_stock.value) * 1/flt(uom_row.value)
+	if not value:
+		uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
+		uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+
+		if uom_stock and uom_row:
+			if uom_stock.from_uom == uom_row.from_uom:
+				value = flt(uom_stock.value) * 1/flt(uom_row.value)
 
 	return value

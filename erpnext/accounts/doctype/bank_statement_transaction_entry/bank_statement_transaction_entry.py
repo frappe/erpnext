@@ -25,6 +25,7 @@ class BankStatementTransactionEntry(Document):
 		mapper = frappe.new_doc("Bank Statement Settings")
 		mapper.bank = bank
 		mapper.date_format = "%Y-%m-%d"
+		mapper.bank_account = self.bank_account
 		for header in ["Date", "Particulars", "Withdrawals", "Deposits", "Balance"]:
 			header_item = mapper.append("header_items", {})
 			header_item.mapped_header = header_item.stmt_header = header
@@ -39,6 +40,10 @@ class BankStatementTransactionEntry(Document):
 			self.populate_payment_entries()
 		else:
 			self.match_invoice_to_payment()
+
+	def validate(self):
+		if not self.new_transaction_items:
+			self.populate_payment_entries()
 
 	def get_statement_headers(self):
 		if not self.bank_settings:

@@ -77,6 +77,12 @@ frappe.ui.form.on("Customer", {
 		}
 	},
 
+	loyalty_program: function(frm) {
+		if(frm.doc.loyalty_program) {
+			frm.set_value('loyalty_program_tier', null);
+		}
+	},
+
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
@@ -102,6 +108,11 @@ frappe.ui.form.on("Customer", {
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
+
+			//
+			if (frm.doc.__onload.dashboard_info.loyalty_point) {
+				frm.dashboard.add_indicator(__('Loyalty Point: {0}', [frm.doc.__onload.dashboard_info.loyalty_point]), 'blue');
+			}
 
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);

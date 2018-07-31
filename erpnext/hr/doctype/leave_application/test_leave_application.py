@@ -7,7 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate, now_datetime, get_datetime
+from frappe.utils import add_days, nowdate, now_datetime
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -369,7 +369,7 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
 		if not frappe.db.exists('Leave Type', leave_type):
-			leave_type_doc = frappe.get_doc(dict(
+			frappe.get_doc(dict(
 				leave_type_name = leave_type,
 				doctype = 'Leave Type',
 				is_earned_leave = 1,
@@ -421,7 +421,7 @@ def set_leave_approver():
 def get_leave_period():
 	leave_period_name = frappe.db.exists({
 		"doctype": "Leave Period",
-		"name": "Test Leave Period"
+		"company": "_Test Company"
 	})
 	if leave_period_name:
 		return frappe.get_doc("Leave Period", leave_period_name[0][0])

@@ -71,8 +71,8 @@ class EmployeeBoardingController(Document):
 	def on_cancel(self):
 		# delete task project
 		for task in frappe.get_all("Task", filters={"project": self.project}):
-			frappe.delete_doc("Task", task.name)
-		frappe.delete_doc("Project", self.project)
+			frappe.delete_doc("Task", task.name, force=1)
+		frappe.delete_doc("Project", self.project, force=1)
 		self.db_set('project', '')
 		for activity in self.activities:
 			activity.db_set("task", "")
@@ -170,7 +170,7 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		doc.name = "New "+doc.doctype
 
 	overlap_doc = frappe.db.sql(query.format(doc.doctype),{
-			"employee": doc.employee,
+			"employee": doc.get("employee"),
 			"from_date": from_date,
 			"to_date": to_date,
 			"name": doc.name,
@@ -209,10 +209,10 @@ def get_employee_leave_policy(employee):
 			leave_policy = frappe.db.get_value("Employee Grade", employee_grade, "default_leave_policy")
 			if not leave_policy:
 				frappe.throw(_("Employee {0} of grade {1} have no default leave policy").format(employee, employee_grade))
-		else:
-			frappe.throw(_("Employee {0} has no grade to get default leave policy").format(employee))
 	if leave_policy:
 		return frappe.get_doc("Leave Policy", leave_policy)
+	else:
+		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
 
 def validate_tax_declaration(declarations):
 	subcategories = []
@@ -303,9 +303,7 @@ def get_salary_assignment(employee, date):
 		select * from `tabSalary Structure Assignment`
 		where employee=%(employee)s
 		and docstatus = 1
-		and (
-			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
-		)""", {
+		and %(on_date)s >= from_date order by from_date desc limit 1""", {
 			'employee': employee,
 			'on_date': date,
 		}, as_dict=1)
@@ -335,7 +333,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 		'component': component
 	}, as_dict=True)
 
-	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
+	if sum_of_given_benefit and flt(sum_of_given_benefit[0].total_amount) > 0:
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
 
@@ -387,6 +385,6 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 		'end_date': payroll_period.end_date,
 		'component': component
 	}, as_dict=True)
-	if sum_of_claimed_amount and sum_of_claimed_amount[0].total_amount > 0:
+	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount

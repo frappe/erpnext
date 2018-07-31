@@ -17,38 +17,44 @@ def execute(filters=None):
 	columns = get_columns()
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
+
+	# if no stock ledger entry found return
+	if not sle:
+		return columns, []
+
 	iwb_map = get_item_warehouse_map(filters, sle)
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
-		qty_dict = iwb_map[(company, item, warehouse)]
-		item_reorder_level = 0
-		item_reorder_qty = 0
-		if item + warehouse in item_reorder_detail_map:
-			item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
-			item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
+		if item_map.get(item):
+			qty_dict = iwb_map[(company, item, warehouse)]
+			item_reorder_level = 0
+			item_reorder_qty = 0
+			if item + warehouse in item_reorder_detail_map:
+				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
+				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-		report_data = [item, item_map[item]["item_name"],
-			item_map[item]["item_group"],
-			item_map[item]["brand"],
-			item_map[item]["description"], warehouse,
-			item_map[item]["stock_uom"], qty_dict.opening_qty,
-			qty_dict.opening_val, qty_dict.in_qty,
-			qty_dict.in_val, qty_dict.out_qty,
-			qty_dict.out_val, qty_dict.bal_qty,
-			qty_dict.bal_val, qty_dict.val_rate,
-			item_reorder_level,
-			item_reorder_qty,
-			company
-		]
+			report_data = [item, item_map[item]["item_name"],
+				item_map[item]["item_group"],
+				item_map[item]["brand"],
+				item_map[item]["description"], warehouse,
+				item_map[item]["stock_uom"], qty_dict.opening_qty,
+				qty_dict.opening_val, qty_dict.in_qty,
+				qty_dict.in_val, qty_dict.out_qty,
+				qty_dict.out_val, qty_dict.bal_qty,
+				qty_dict.bal_val, qty_dict.val_rate,
+				item_reorder_level,
+				item_reorder_qty,
+				company
+			]
 
-		if filters.get('show_variant_attributes', 0) == 1:
-			variants_attributes = get_variants_attributes()
-			report_data += [item_map[item].get(i) for i in variants_attributes]
+			if filters.get('show_variant_attributes', 0) == 1:
+				variants_attributes = get_variants_attributes()
+				report_data += [item_map[item].get(i) for i in variants_attributes]
 
-		data.append(report_data)
+			data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
@@ -202,12 +208,12 @@ def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
 		items = list(set([d.item_code for d in sle]))
-		
+
 	if items:
 		for item in frappe.db.sql("""
 			select name, item_name, description, item_group, brand, stock_uom
 			from `tabItem`
-			where name in ({0})
+			where name in ({0}) and ifnull(disabled, 0) = 0
 			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
 				item_details.setdefault(item.name, item)
 

@@ -9,7 +9,6 @@ from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 import json
 
-
 class POSClosingVoucher(Document):
 	def get_closing_voucher_details(self):
 		filters = {
@@ -21,7 +20,6 @@ class POSClosingVoucher(Document):
 			'user': self.user,
 			'is_pos': 1
 		}
-		frappe.log_error(filters)
 
 		invoice_list = get_invoices(filters)
 		self.set_invoice_list(invoice_list)
@@ -29,8 +27,9 @@ class POSClosingVoucher(Document):
 		sales_summary = get_sales_summary(invoice_list)
 		self.set_sales_summary_values(sales_summary)
 
-		mop = get_mode_of_payment_details(invoice_list)
-		self.set_mode_of_payments(mop)
+		if not self.get('payment_reconciliation'):
+			mop = get_mode_of_payment_details(invoice_list)
+			self.set_mode_of_payments(mop)
 
 		taxes = get_tax_details(invoice_list)
 		self.set_taxes(taxes)
@@ -67,11 +66,10 @@ class POSClosingVoucher(Document):
 				'amount': tax['amount']
 			})
 
-
 	def get_payment_reconciliation_details(self):
 		currency = get_company_currency(self)
-		return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html", {"data": self, "currency": currency})
-
+		return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html",
+			{"data": self, "currency": currency})
 
 @frappe.whitelist()
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
@@ -151,7 +149,6 @@ def get_tax_details(invoice_list):
 
 	return tax_breakup
 
-
 def get_sales_summary(invoice_list):
 	net_total = sum(item['net_total'] for item in invoice_list)
 	grand_total = sum(item['grand_total'] for item in invoice_list)
@@ -162,7 +159,6 @@ def get_sales_summary(invoice_list):
 def get_company_currency(doc):
 	currency = frappe.db.get_value("Company", doc.company, "default_currency")
 	return frappe.get_doc('Currency', currency)
-
 
 def get_invoices(filters):
 	return frappe.db.sql("""select a.name, a.base_grand_total as grand_total,

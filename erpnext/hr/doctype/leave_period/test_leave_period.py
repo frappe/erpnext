@@ -9,7 +9,7 @@ from frappe.utils import today, add_months
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 
-test_dependencies = ["Employee", "Leave Type"]
+test_dependencies = ["Employee", "Leave Type", "Leave Policy"]
 
 class TestLeavePeriod(unittest.TestCase):
 	def setUp(self):
@@ -31,8 +31,8 @@ class TestLeavePeriod(unittest.TestCase):
 		# create employee and assign the leave period
 		employee = "test_leave_period@employee.com"
 		employee_doc_name = make_employee(employee)
-		frappe.db.set_value("Employee", employee_doc_name, "leave_policy", leave_policy.name) 
-		
+		frappe.db.set_value("Employee", employee_doc_name, "leave_policy", leave_policy.name)
+
 		# clear the already allocated leave
 		frappe.db.sql('''delete from `tabLeave Allocation` where employee=%s''', "test_leave_period@employee.com")
 
@@ -51,7 +51,6 @@ class TestLeavePeriod(unittest.TestCase):
 def create_leave_period(from_date, to_date):
 	leave_period = frappe.get_doc({
 		"doctype": "Leave Period",
-		"name": "_Test Leave Period",
 		"company": erpnext.get_default_company(),
 		"from_date": from_date,
 		"to_date": to_date,
