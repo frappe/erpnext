@@ -22,10 +22,6 @@ def _execute(filters):
 
 def get_columns():
     # return columns
-    columns = [
-        _("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
-        _("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
-    ]
 
     columns = [
         {
@@ -91,7 +87,7 @@ WHERE
     ), as_dict=True)
 
     result += [
-        "VAT", sales_amounts[0][0], "-0.0", sales_amounts[1][0]
+        "VAT", sales_amounts[0].amount, "-0.0", sales_amounts[1].amount
     ]
 
     result += [
@@ -104,9 +100,9 @@ WHERE
 
     result += [
         "Total", "{0} {1}".format(
-            sales_amounts[0][0], currency or "SAR"),
+            sales_amounts[0].amount, currency or "SAR"),
         "-0.0",
-        "{0} {1}".format(sales_amounts[1][0], currency or "SAR")
+        "{0} {1}".format(sales_amounts[1].amount, currency or "SAR")
     ]
 
     result += [
@@ -129,7 +125,7 @@ UNION SELECT
                 WHEN 'Add' THEN SUM(base_tax_amount_after_discount_amount)
                 ELSE SUM(base_tax_amount_after_discount_amount) * - 1
             END,
-            0) AS tax_amount
+            0) AS amount
 FROM
     `tabPurchase Taxes and Charges`
 WHERE
@@ -149,7 +145,7 @@ WHERE
     ]
 
     result += [
-        "VAT", purchases_amounts[0][0], "-0.0", purchases_amounts[1][0]
+        "VAT", purchases_amounts[0].amount, "-0.0", purchases_amounts[1].amount
     ]
 
     result += [
@@ -162,9 +158,9 @@ WHERE
 
     result += [
         "Total", "{0} {1}".format(
-            purchases_amounts[0][0], currency or "SAR"),
+            purchases_amounts[0].amount, currency or "SAR"),
         "-0.0",
-        "{0} {1}".format(purchases_amounts[1][0], currency or "SAR")
+        "{0} {1}".format(purchases_amounts[1].amount, currency or "SAR")
     ]
 
     return result
