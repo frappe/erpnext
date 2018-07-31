@@ -222,7 +222,8 @@ doc_events = {
 scheduler_events = {
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
-		"erpnext.accounts.doctype.subscription.subscription.process_all"
+		"erpnext.accounts.doctype.subscription.subscription.process_all",
+		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -243,7 +244,7 @@ scheduler_events = {
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
 		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
 		"erpnext.projects.doctype.project.project.update_project_sales_billing"
-  ],
+	],
 	"monthly": [
 		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",
 		"erpnext.hr.utils.allocate_earned_leaves"
