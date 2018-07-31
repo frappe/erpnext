@@ -40,7 +40,6 @@ def are_accounts_synced():
 		fields=["count(name) as count"]
 	)[0]["count"])
 
-bool(frappe.get_all("Account", filters=[["quickbooks_id", "not like", ""]], fields=["count(name) as count"])[0]["count"])
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
