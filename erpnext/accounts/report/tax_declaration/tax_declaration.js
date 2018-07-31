@@ -1,4 +1,4 @@
-frappe.query_reports["Sales Register"] = {
+frappe.query_reports["Tax Declaration"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -14,41 +14,11 @@ frappe.query_reports["Sales Register"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"customer",
-			"label": __("Customer"),
-			"fieldtype": "Link",
-			"options": "Customer"
-		},
-		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
-		},
-		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
-			"fieldname":"owner",
-			"label": __("Owner"),
-			"fieldtype": "Link",
-			"options": "User"
-		},
-		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center"
-		},
-		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
 		}
 	]
 }
