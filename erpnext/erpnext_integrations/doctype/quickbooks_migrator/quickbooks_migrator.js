@@ -82,16 +82,36 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		}
 		if (frm.is_authenticated) {
 			frm.remove_custom_button("Connect to Quickbooks");
-			frm.add_custom_button("Fetch Accounts", function () {
-				frm.trigger("fetch_accounts");
-			});
-			if (frm.are_accounts_synced){
-				frm.add_custom_button("Delete Default Accounts", function () {
-					frm.trigger("delete_default_accounts");
+
+			// Show company settings	
+			frm.toggle_display("company_settings", 1);
+			frm.set_df_property("company", "reqd", 1);
+
+			// No further actions until company is set
+			if (frm.fields_dict["company"].value) {
+				frm.add_custom_button("Fetch Accounts", function () {
+					frm.trigger("fetch_accounts");
 				});
-				frm.add_custom_button("Fetch Data", function () {
-					frm.trigger("fetch_data");
-				});
+				if (frm.are_accounts_synced){
+					frm.add_custom_button("Delete Default Accounts", function () {
+						frm.trigger("delete_default_accounts");
+					});
+
+					// Show accounts settings
+					frm.toggle_display("accounts_settings", 1);
+					frm.set_df_property("expense_account", "reqd", 1);
+					frm.set_df_property("income_account", "reqd", 1);
+					frm.set_df_property("receivable_account", "reqd", 1);
+
+					// No further actions until account defaults are set	
+					if (frm.fields_dict["expense_account"].value &&
+					frm.fields_dict["income_account"].value &&
+					frm.fields_dict["receivable_account"].value) {			
+						frm.add_custom_button("Fetch Data", function () {
+							frm.trigger("fetch_data");
+						});
+					}
+				}
 			}
 		}
 	}
