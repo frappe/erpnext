@@ -15,10 +15,10 @@ def get_columns():
     # return columns
 
     return [
-        "{label}:{type}:{width}".format(label=" ", type="Data", width=200),
-        "{label}:{type}:{width}".format(label=_("Balance"), type="Data", width=220),
-        "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=220),
-        "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=220)
+        "{label}:{type}:{width}".format(label=" ", type="Data", width=160),
+        "{label}:{type}:{width}".format(label=_("Balance"), type="Data", width=240),
+        "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=240),
+        "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=240)
     ]
 
 
@@ -27,7 +27,7 @@ def get_data(filters):
 
     result = [
         [
-            "<b>" + _("Tax") + "</b>", 
+            "<b>" + _("Tax") + "</b>",
             "<b>" + _("Sales") + "</b>",
             "<b>" + _("Modification") + "</b>",
             "<b>" + _("Tax") + "</b>"
@@ -76,22 +76,28 @@ WHERE
             )
         ]
     result.append([
-        "VAT", sales_amounts[0]['amount'], "-0.0", sales_amounts[1]['amount']
-    ])
-
-    result.append([
-        "Zero VAT", "0.0", "-0.0", "0.0"
-    ])
-
-    result.append([
-        "Free VAT", "0.0", "-0.0", "0.0"
-    ])
-
-    result.append([
-        "Total", "{0} {1}".format(
-            sales_amounts[0]['amount'], currency or "SAR"),
+        "<b>" + "VAT" + "</b>",
+        sales_amounts[0]['amount'],
         "-0.0",
-        "{0} {1}".format(sales_amounts[1]['amount'], currency or "SAR")
+        sales_amounts[1]['amount']
+    ])
+
+    result.append([
+        "<b>" + "Zero VAT" + "</b>",
+        "0.0", "-0.0", "0.0"
+    ])
+
+    result.append([
+        "<b>" + "Free VAT" + "</b>",
+        "0.0", "-0.0", "0.0"
+    ])
+
+    result.append([
+        "<b>" + "Total" + "</b>",
+        "<b>" + "{0} {1}".format(
+            sales_amounts[0]['amount'], currency or "SAR") + "</b>",
+        "<b>" + "-0.0" + "</b>",
+        "<b>" + "{0} {1}".format(sales_amounts[1]['amount'], currency or "SAR") + "</b>"
     ])
 
     result.append([
@@ -145,26 +151,34 @@ WHERE
             )
         ]
     result.append([
-        _("Tax"), _("Purchases"), _("Modification"), _("Paid Tax")
+        "<b>" + _("Tax") + "</b>",
+        "<b>" + _("Purchases") + "</b>",
+        "<b>" + _("Modification") + "</b>",
+        "<b>" + _("Paid Tax") + "</b>"
     ])
 
     result.append([
-        "VAT", purchases_amounts[0]['amount'], "-0.0", purchases_amounts[1]['amount']
-    ])
-
-    result.append([
-        "Zero VAT", "0.0", "-0.0", "0.0"
-    ])
-
-    result.append([
-        "Free VAT", "0.0", "-0.0", "0.0"
-    ])
-
-    result.append([
-        "Total", "{0} {1}".format(
-            purchases_amounts[0]['amount'], currency or "SAR"),
+        "<b>" + "VAT" + "</b>",
+        purchases_amounts[0]['amount'],
         "-0.0",
-        "{0} {1}".format(purchases_amounts[1]['amount'], currency or "SAR")
+        purchases_amounts[1]['amount']
+    ])
+
+    result.append([
+        "<b>" + "Zero VAT" + "</b>", "0.0", "-0.0", "0.0"
+    ])
+
+    result.append([
+        "<b>" + "Free VAT" + "</b>",
+        "0.0", "-0.0", "0.0"
+    ])
+
+    result.append([
+        "<b>" + "Total" + "</b>",
+        "<b>" + "{0} {1}".format(
+            purchases_amounts[0]['amount'], currency or "SAR") + "</b>",
+        "<b>" + "-0.0" + "</b>",
+        "<b>" + "{0} {1}".format(purchases_amounts[1]['amount'], currency or "SAR") + "</b>"
     ])
 
     return result
