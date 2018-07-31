@@ -73,18 +73,14 @@ def publish_selected_items(items_to_publish):
 	if not len(items_to_publish):
 		return
 
-	# TODO: sync
-	# for item_code in items_to_publish:
-	# 	frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
-
-	# hub_settings = frappe.get_doc('Hub Settings')
-	# remote_id = item_sync_preprocess()
-	# hub_settings.sync(remote_id)
-
-	# return remote_id
+	for item_code in items_to_publish:
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
 	hub_settings = frappe.get_doc('Hub Settings')
-	hub_settings.sync('TEST')
+	remote_id = item_sync_preprocess()
+	hub_settings.sync(remote_id)
+
+	return remote_id
 
 def item_sync_preprocess():
 	# Call Hub to make a new activity
