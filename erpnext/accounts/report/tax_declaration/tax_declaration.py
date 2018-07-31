@@ -173,9 +173,9 @@ WHERE
 def get_conditions(filters):
     conditions = ""
 
-    if filters.get("company"): conditions += " and company=%(company)s"
+    if filters.get("company"): conditions += " and company = '{0}'".format(filters["company"])
 
-    if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
-    if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
+    if filters.get("from_date"): conditions += " and posting_date >= '{0}'".format(filters["from_date"])
+    if filters.get("to_date"): conditions += " and posting_date <= '{0}'".format(filters["to_date"])
 
     return conditions
