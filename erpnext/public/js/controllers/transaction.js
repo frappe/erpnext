@@ -1109,6 +1109,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
+	apply_coupon_price_list: function() {
+		var me = this;
+		if (me.frm.doc.coupon){
+			return this.frm.call({
+				method: "erpnext.accounts.doctype.coupon.coupon.apply_coupon_price_list",
+				args: {	coupon: me.frm.doc.coupon },
+				callback: function(r) {
+					if(r){
+						me.frm.set_value("selling_price_list", r.message);
+					}
+				}
+			});
+		}
+	},
+
 	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;

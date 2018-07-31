@@ -11,16 +11,19 @@
                 {{ show_address(address, doc, "shipping_address_name", select_address) }}
             {% endfor %}
         </div>
-		<a class="btn btn-default btn-sm" href="/addresses">
-			{{ _("Manage Addresses") }}</a>
-	</div>
-	<div class="col-sm-6">
-        <div class="h6 text-uppercase">{{ _("Billing Address") }}</div>
+		<div class="h6 text-uppercase">{{ _("Billing Address") }}</div>
 		<div id="cart-billing-address" class="panel-group"
 			data-fieldname="customer_address">
             {% for address in billing_addresses %}
                 {{ show_address(address, doc, "customer_address", select_address) }}
             {% endfor %}
         </div>
+		<a class="btn btn-default btn-sm" href="/addresses">
+			{{ _("Manage Addresses") }}</a>
+	</div>
+	<div class="col-sm-6" align="right">
+	    <input class="txtcoupon" placeholder="Enter coupon code" name="txtcouponcode" type=text width=25px></input>
+		<a class="btn btn-default btn-sm bt-coupon" style="background-color:powderblue;">
+				<b>{{ _("Apply Coupon Code") }}</b></a>
 	</div>
 </div>

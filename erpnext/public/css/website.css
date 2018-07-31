@@ -268,3 +268,23 @@
 .bom-spec {
   margin-bottom: 20px;
 }
+
+/* For item alternate image */
+div.list_all_images img:hover {
+    border: 2px solid blue;
+}
+.gallery img{
+    height: 300px;
+    width: 300px;
+    -webkit-transition: all 2s ease;
+    -moz-transition: all 2s ease;
+    -ms-transition: all 2s ease;
+    transition: all 2s ease;
+}
+.gallery img:hover {
+    transform: scale(1.5);
+}
+#selectedImage{
+    margin-left: -200px;
+}
+
