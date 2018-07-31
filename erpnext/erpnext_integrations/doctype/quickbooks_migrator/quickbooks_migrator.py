@@ -42,7 +42,6 @@ def callback(*args, **kwargs):
 	company_id = kwargs.get("realmId")
 	frappe.cache().set("quickbooks_company_id", company_id)
 	get_access_token()
-	fetch()
 
 @frappe.whitelist()
 def fetch_accounts():
