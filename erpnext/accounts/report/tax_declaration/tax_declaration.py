@@ -15,10 +15,10 @@ def get_columns():
     # return columns
 
     return [
-        "{label}:{type}:{width}".format(label=" ", type="Data", width=100),
-        "{label}:{type}:{width}".format(label=_("Balance"), type="Data", width=120),
-        "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=120),
-        "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=120)
+        "{label}:{type}:{width}".format(label=" ", type="Data", width=200),
+        "{label}:{type}:{width}".format(label=_("Balance"), type="Data", width=220),
+        "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=220),
+        "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=220)
     ]
 
 
@@ -27,7 +27,10 @@ def get_data(filters):
 
     result = [
         [
-            _("Tax"), _("Sales"), _("Modification"), _("Tax")
+            "<b>" + _("Tax") + "</b>", 
+            "<b>" + _("Sales") + "</b>",
+            "<b>" + _("Modification") + "</b>",
+            "<b>" + _("Tax") + "</b>"
         ]
     ]
 
