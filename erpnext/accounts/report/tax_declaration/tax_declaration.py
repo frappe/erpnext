@@ -26,7 +26,9 @@ def get_data(filters):
     conditions = get_conditions(filters)
 
     result = [
-        _("Tax"), _("Sales"), _("Modification"), _("Tax")
+        [
+            _("Tax"), _("Sales"), _("Modification"), _("Tax")
+        ]
     ]
 
     currency = frappe.get_value("Company", filters.get("company"), "default_currency")
@@ -70,28 +72,28 @@ WHERE
                 amount=0
             )
         ]
-    result += [
+    result.append([
         "VAT", sales_amounts[0]['amount'], "-0.0", sales_amounts[1]['amount']
-    ]
+    ])
 
-    result += [
+    result.append([
         "Zero VAT", "0.0", "-0.0", "0.0"
-    ]
+    ])
 
-    result += [
+    result.append([
         "Free VAT", "0.0", "-0.0", "0.0"
-    ]
+    ])
 
-    result += [
+    result.append([
         "Total", "{0} {1}".format(
             sales_amounts[0]['amount'], currency or "SAR"),
         "-0.0",
         "{0} {1}".format(sales_amounts[1]['amount'], currency or "SAR")
-    ]
+    ])
 
-    result += [
+    result.append([
         " ", " ", " ", " "
-    ]
+    ])
 
     purchases_amounts = frappe.db.sql("""SELECT 
     COALESCE(SUM(base_net_amount), 0) AS amount
@@ -139,28 +141,28 @@ WHERE
                 amount=0
             )
         ]
-    result += [
+    result.append([
         _("Tax"), _("Purchases"), _("Modification"), _("Paid Tax")
-    ]
+    ])
 
-    result += [
+    result.append([
         "VAT", purchases_amounts[0]['amount'], "-0.0", purchases_amounts[1]['amount']
-    ]
+    ])
 
-    result += [
+    result.append([
         "Zero VAT", "0.0", "-0.0", "0.0"
-    ]
+    ])
 
-    result += [
+    result.append([
         "Free VAT", "0.0", "-0.0", "0.0"
-    ]
+    ])
 
-    result += [
+    result.append([
         "Total", "{0} {1}".format(
             purchases_amounts[0]['amount'], currency or "SAR"),
         "-0.0",
         "{0} {1}".format(purchases_amounts[1]['amount'], currency or "SAR")
-    ]
+    ])
 
     return result
 
