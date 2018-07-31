@@ -861,6 +861,21 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.items_to_publish = [];
 		this.unpublished_items = [];
 		this.fetched_items = [];
+
+		frappe.realtime.on("items-sync", (data) => {
+			this.$wrapper.find('.progress-bar').css('width', data.progress_percent+'%');
+
+			if(data.progress_percent === 100 || data.progress_percent === '100') {
+				setTimeout(() => {
+					hub.settings.sync_in_progress = 0;
+					frappe.db.get_doc('Hub Settings')
+						.then(doc => {
+							hub.settings = doc;
+							this.refresh();
+						});
+				}, 500);
+			}
+		});
 	}
 
 	refresh() {
@@ -886,8 +901,8 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		this.setup_publishing_events();
 
-		if(hub.settings.last_sync) {
-			this.show_message(`Last sync was <a href="#marketplace/profile">${hub.settings.last_sync}</a>.
+		if(hub.settings.last_sync_datetime) {
+			this.show_message(`Last sync was <a href="#marketplace/profile">${hub.settings.last_sync_datetime}</a>.
 				<a href="#marketplace/my-products">See your Published Products</a>.`);
 		}
 
@@ -995,7 +1010,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		const $publish_progress = $(`<div class="sync-progress">
 			<p><b>${__(`Syncing ${items_to_publish.length} Products`)}</b></p>
 			<div class="progress">
-				<div class="progress-bar" style="width: 12.875%"></div>
+				<div class="progress-bar" style="width: 1%"></div>
 			</div>
 
 		</div>`);
@@ -1057,18 +1072,29 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		});
 		this.items_to_publish = items_to_publish;
 
+		return this.set_sync(items_to_publish)
+		.then(frappe.call(
+			'erpnext.hub_node.publish_selected_items',
+			{
+				items_to_publish: item_codes_to_publish
+			}
+		));
+	}
+
+	set_sync(items_to_publish) {
+		hub.settings.sync_in_progress = 1;
 		return frappe.db.set_value("Hub Settings", "Hub Settings", {
 			custom_data: JSON.stringify(items_to_publish),
-			// sync_in_progress: 1
-		}).then(() => {
-			hub.settings.sync_in_progress = 1;
+			sync_in_progress: 1
 		})
-		// .then(frappe.call(
-		// 	'erpnext.hub_node.publish_selected_items',
-		// 	{
-		// 		items_to_publish: item_codes_to_publish
-		// 	}
-		// ));
+	}
+
+	reset_sync()  {
+		hub.settings.sync_in_progress = 0;
+		return frappe.db.set_value("Hub Settings", "Hub Settings", {
+			custom_data: '',
+			sync_in_progress: 0
+		})
 	}
 }
 
