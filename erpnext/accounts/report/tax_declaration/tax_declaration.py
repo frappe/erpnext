@@ -85,7 +85,7 @@ WHERE
             docstatus = 1 {conditions});""".format(
         conditions=conditions
     ), as_dict=True)
-    
+
     if len(sales_amounts) == 0:
         sales_amounts = [
             dict(
@@ -148,8 +148,8 @@ WHERE
         AND base_tax_amount_after_discount_amount != 0;""".format(
         conditions=conditions
     ), as_dict=True)
-    
-    if len(sales_amounts) == 0:
+
+    if len(purchases_amounts) == 0:
         purchases_amounts = [
             dict(
                 amount=0
