@@ -6,6 +6,7 @@ import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
 from erpnext.accounts.doctype.account.account import update_account_number
+from erpnext.accounts.doctype.account.account import merge_account
 
 class TestAccount(unittest.TestCase):
 	def test_rename_account(self):
@@ -25,7 +26,7 @@ class TestAccount(unittest.TestCase):
 		new_account_number = "1211-11-4 - 6 - "
 		new_account_name = "Debtors 1 - Test - "
 
-		update_account_number("1210 - Debtors - _TC", new_account_number, new_account_name)
+		update_account_number("1210 - Debtors - _TC", new_account_name, new_account_number)
 
 		new_acc = frappe.db.get_value("Account", "1211-11-4 - 6 - - Debtors 1 - Test - - _TC",
 			["account_name", "account_number"], as_dict=1)
@@ -34,6 +35,67 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(new_acc.account_number, "1211-11-4 - 6 -")
 
 		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
+
+	def test_merge_account(self):
+		if not frappe.db.exists("Account", "Current Assets - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Current Assets"
+			acc.is_group = 1
+			acc.parent_account = "Application of Funds (Assets) - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Securities and Deposits - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Securities and Deposits"
+			acc.parent_account = "Current Assets - _TC"
+			acc.is_group = 1
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Earnest Money - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Earnest Money"
+			acc.parent_account = "Securities and Deposits - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Cash In Hand - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Cash In Hand"
+			acc.is_group = 1
+			acc.parent_account = "Current Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		if not frappe.db.exists("Account", "Accumulated Depreciation - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Accumulated Depreciation"
+			acc.parent_account = "Fixed Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+
+		doc = frappe.get_doc("Account", "Securities and Deposits - _TC")
+		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
+
+		self.assertEqual(parent, "Securities and Deposits - _TC")
+
+		merge_account("Securities and Deposits - _TC", "Cash In Hand - _TC", doc.is_group, doc.root_type, doc.company)
+		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
+
+		# Parent account of the child account changes after merging
+		self.assertEqual(parent, "Cash In Hand - _TC")
+
+		# Old account doesn't exist after merging
+		self.assertFalse(frappe.db.exists("Account", "Securities and Deposits - _TC"))
+
+		doc = frappe.get_doc("Account", "Current Assets - _TC")
+
+		# Raise error as is_group property doesn't match
+		self.assertRaises(frappe.ValidationError, merge_account, "Current Assets - _TC",\
+			"Accumulated Depreciation - _TC", doc.is_group, doc.root_type, doc.company)
+
+		doc = frappe.get_doc("Account", "Capital Stock - _TC")
+
+		# Raise error as root_type property doesn't match
+		self.assertRaises(frappe.ValidationError, merge_account, "Capital Stock - _TC",\
+			"Softwares - _TC", doc.is_group, doc.root_type, doc.company)
 
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
