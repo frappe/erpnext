@@ -379,7 +379,6 @@ erpnext.patches.v7_2.empty_supplied_items_for_non_subcontracted
 erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component
 erpnext.patches.v7_2.rename_att_date_attendance
 erpnext.patches.v7_2.update_attendance_docstatus
-erpnext.patches.v7_2.move_dates_from_salary_structure_to_employee
 erpnext.patches.v7_2.make_all_assessment_group
 erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom
 erpnext.patches.v8_0.addresses_linked_to_lead
@@ -445,7 +444,6 @@ erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
 erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
-erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
@@ -524,7 +522,6 @@ erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
 erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
-erpnext.patches.v10_1.drop_old_subscription_records
 erpnext.patches.v11_0.update_brand_in_item_price
 erpnext.patches.v11_0.create_default_success_action
 erpnext.patches.v11_0.add_healthcare_service_unit_tree_root

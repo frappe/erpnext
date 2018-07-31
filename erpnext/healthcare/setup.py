@@ -14,8 +14,6 @@ def setup_healthcare():
 	create_duration()
 	create_dosage()
 	create_healthcare_item_groups()
-	create_lab_test_items()
-	create_lab_test_template()
 	create_sensitivity()
 	add_healthcare_service_unit_tree_root()
 
@@ -184,73 +182,6 @@ def create_healthcare_item_groups():
 	]
 	insert_record(records)
 
-def create_lab_test_items():
-	records = [
-		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
-	]
-	insert_record(records)
-
-def create_lab_test_template():
-	records = [
-		{"doctype": "Lab Test Template", "name": "MCH","test_name": "MCH","test_code": "MCH",
-		"test_group": _("Laboratory"),"department": _("Haematology"),"item": "MCH",
-		"test_template_type": "Single","is_billable": 1,"test_rate": 0.0,"test_uom": "Microgram",
-		"test_normal_range": "27 - 32 Microgram",
-		"sensitivity": 0,"test_description": "Mean Corpuscular Hemoglobin"},
-		{"doctype": "Lab Test Template", "name": "LDL","test_name": "LDL (Serum)","test_code": "LDL",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "LDL","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "70 - 160 mg/dlLow-density Lipoprotein (LDL)",
-		"sensitivity": 0,"test_description": "Low-density Lipoprotein (LDL)"},
-		{"doctype": "Lab Test Template", "name": "GTT","test_name": "GTT","test_code": "GTT",
-		"test_group": _("Laboratory"),"department": _("Haematology"),
-		"item": "GTT","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "Less than 85 mg/dl",
-		"sensitivity": 0,"test_description": "Glucose Tolerance Test"},
-		{"doctype": "Lab Test Template", "name": "HDL","test_name": "HDL (Serum)","test_code": "HDL",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "HDL","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "35 - 65 mg/dl",
-		"sensitivity": 0,"test_description": "High-density Lipoprotein (HDL)"},
-		{"doctype": "Lab Test Template", "name": "BILT","test_name": "Bilirubin Total","test_code": "BILT",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "BILT","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.2 - 1.2 mg / dl",
-		"sensitivity": 0,"test_description": "Bilirubin Total"},
-		{"doctype": "Lab Test Template", "name": "BILD","test_name": "Bilirubin Direct","test_code": "BILD",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "BILD","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.4 mg / dl",
-		"sensitivity": 0,"test_description": "Bilirubin Direct"},
-
-		{"doctype": "Lab Test Template", "name": "BP","test_name": "Bile Pigment","test_code": "BP",
-		"test_group": _("Laboratory"),"department": _("Pathology"),
-		"item": "BP","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
-		"sensitivity": 0,"test_description": "Bile Pigment"},
-		{"doctype": "Lab Test Template", "name": "BS","test_name": "Bile Salt","test_code": "BS",
-		"test_group": _("Laboratory"),"department": _("Pathology"),
-		"item": "BS","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
-		"sensitivity": 0,"test_description": "Bile Salt"}
-	]
-	insert_record(records)
-
 def create_sensitivity():
 	records = [
 		{"doctype": "Sensitivity", "sensitivity": _("Low Sensitivity")},
@@ -266,7 +197,7 @@ def add_healthcare_service_unit_tree_root():
 	record = [
 	 {
 	  "doctype": "Healthcare Service Unit",
-	  "healthcare_service_unit_name": "All Healthcare Service Unit",
+	  "healthcare_service_unit_name": "All Healthcare Service Units",
 	  "is_group": 1
 	 }
 	]

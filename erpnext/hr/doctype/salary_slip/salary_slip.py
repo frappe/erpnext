@@ -83,10 +83,11 @@ class SalarySlip(TransactionBase):
 			for additional_component in additional_components:
 				additional_component = frappe._dict(additional_component)
 				amount = additional_component.amount
+				overwrite = additional_component.overwrite
 				key = "earnings"
 				if additional_component.type == "Deduction":
 					key = "deductions"
-				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key)
+				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key, overwrite=overwrite)
 
 		self.get_last_payroll_period_benefit()
 
@@ -125,12 +126,11 @@ class SalarySlip(TransactionBase):
 			if benefit_claim_amount:
 				self.update_component_row(struct_row, benefit_claim_amount, "earnings")
 
-	def update_component_row(self, struct_row, amount, key, benefit_tax=None, additional_tax=None):
+	def update_component_row(self, struct_row, amount, key, benefit_tax=None, additional_tax=None, overwrite=1):
 		component_row = None
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
-
 		if not component_row:
 			self.append(key, {
 				'amount': amount,
@@ -147,7 +147,13 @@ class SalarySlip(TransactionBase):
 				'tax_on_additional_salary': additional_tax
 			})
 		else:
-			component_row.amount = amount
+			if overwrite:
+				component_row.default_amount = amount
+				component_row.amount = amount
+			else:
+				component_row.default_amount += amount
+				component_row.amount = component_row.default_amount
+
 			component_row.tax_on_flexible_benefit = benefit_tax
 			component_row.tax_on_additional_salary = additional_tax
 
@@ -241,10 +247,14 @@ class SalarySlip(TransactionBase):
 		if self.payroll_frequency:
 			cond += """and ss.payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
 
-		st_name = frappe.db.sql("""select sa.salary_structure from `tabSalary Structure Assignment` sa
-			join `tabSalary Structure` ss where sa.salary_structure=ss.name
-			and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
-			order by sa.from_date desc limit 1 """ %cond, {'employee': self.employee, 'start_date': self.start_date,
+		st_name = frappe.db.sql("""
+			select sa.salary_structure
+			from `tabSalary Structure Assignment` sa join `tabSalary Structure` ss
+			where sa.salary_structure=ss.name
+				and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
+			order by sa.from_date desc
+			limit 1
+		""" %cond, {'employee': self.employee, 'start_date': self.start_date,
 			'end_date': self.end_date, 'joining_date': joining_date})
 
 		if st_name:
@@ -429,7 +439,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-
+		
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		self.total_deduction = 0
@@ -443,6 +453,9 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
+		
+		if self.net_pay < 0:
+			frappe.throw(_("Net Pay cannnot be negative"))
 
 	def set_loan_repayment(self):
 		self.set('loans', [])
@@ -480,16 +493,25 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
+			self.update_salary_slip_in_additional_salary()
 			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
+		self.update_salary_slip_in_additional_salary()
 
 	def on_trash(self):
 		from frappe.model.naming import revert_series_if_last
 		revert_series_if_last(self.series, self.name)
+
+	def update_salary_slip_in_additional_salary(self):
+		salary_slip = self.name if self.docstatus==1 else None
+		frappe.db.sql("""
+			update `tabAdditional Salary` set salary_slip=%s
+			where employee=%s and payroll_date between %s and %s and docstatus=1
+		""", (salary_slip, self.employee, self.start_date, self.end_date))
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
