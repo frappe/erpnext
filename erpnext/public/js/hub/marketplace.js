@@ -69,9 +69,10 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	make_sidebar_categories() {
-		hub.call('erpnext.hub_node.get_categories')
+		hub.call('get_categories')
 			.then(categories => {
-				const categories = r.message.map(d => d.name);
+				categories = categories.map(d => d.name);
+
 				const sidebar_items = [
 					`<li class="hub-sidebar-item bold is-title">
 						${__('Category')}
@@ -902,7 +903,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.setup_publishing_events();
 
 		if(hub.settings.last_sync_datetime) {
-			this.show_message(`Last sync was <a href="#marketplace/profile">${hub.settings.last_sync_datetime}</a>.
+			this.show_message(`Last sync was <a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>.
 				<a href="#marketplace/my-products">See your Published Products</a>.`);
 		}
 
