@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
 import requests
 from erpnext import encode_company_abbr
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 
 client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
@@ -265,7 +266,6 @@ def save_bill(bill):
 		import traceback
 		traceback.print_exc()
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 def save_payment(payment):
 	try:
 		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": payment["Id"]}):
