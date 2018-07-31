@@ -23,34 +23,13 @@ def _execute(filters):
 def get_columns():
     # return columns
 
-    columns = [
-        {
-            "fieldname": "title",
-            "label": " ",
-            "fieldtype": "Data",
-            "width": 100
-        },
-        {
-            "fieldname": "title",
-            "label": _("Balance"),
-            "fieldtype": "Data",
-            "width": 100
-        },
-        {
-            "fieldname": "modification",
-            "label": _("Modification"),
-            "fieldtype": "Data",
-            "width": 100
-        },
-        {
-            "fieldname": "vat",
-            "label": _("VAT"),
-            "fieldtype": "Data",
-            "width": 100
-        },
+    return [
+        "{label}:{type}:{width}".format(label=" ", type="Data", width=100),
+        "{label}:{type}:{width}".format(label=_("Balance"), type="Data", width=120),
+        "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=120),
+        "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=120)
     ]
 
-    return columns
 
 
 def get_data(filters):
