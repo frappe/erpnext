@@ -1,6 +1,6 @@
 frappe.provide('erpnext.hub.pages');
 
-frappe.views.HubFactory = frappe.views.Factory.extend({
+frappe.views.HubFactory = class HubFactory extends frappe.views.Factory {
 	make(route) {
 		const page_name = frappe.get_route_str();
 		const page = route[1];
@@ -60,7 +60,7 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 				window.hub_page = erpnext.hub.pages[page_name];
 			}
 		});
-	},
+	}
 
 	render_offline_card() {
 		let html = `<div class='page-card' style='margin: 140px auto;'>
@@ -77,4 +77,4 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 
 		return;
 	}
-});
+};

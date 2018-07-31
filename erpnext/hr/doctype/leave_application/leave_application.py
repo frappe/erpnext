@@ -88,15 +88,17 @@ class LeaveApplication(Document):
 			self.validate_back_dated_application()
 
 	def validate_dates_across_allocation(self):
-		def _get_leave_alloction_record(date):
+		if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
+			return
+		def _get_leave_allocation_record(date):
 			allocation = frappe.db.sql("""select name from `tabLeave Allocation`
 				where employee=%s and leave_type=%s and docstatus=1
 				and %s between from_date and to_date""", (self.employee, self.leave_type, date))
 
 			return allocation and allocation[0][0]
 
-		allocation_based_on_from_date = _get_leave_alloction_record(self.from_date)
-		allocation_based_on_to_date = _get_leave_alloction_record(self.to_date)
+		allocation_based_on_from_date = _get_leave_allocation_record(self.from_date)
+		allocation_based_on_to_date = _get_leave_allocation_record(self.to_date)
 
 		if not (allocation_based_on_from_date or allocation_based_on_to_date):
 			frappe.throw(_("Application period cannot be outside leave allocation period"))
@@ -131,24 +133,15 @@ class LeaveApplication(Document):
 			elif getdate(self.to_date) <= getdate(nowdate()):
 				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 					date = dt.strftime("%Y-%m-%d")
-					if not date == self.half_day_date:
-						doc = frappe.new_doc("Attendance")
-						doc.employee = self.employee
-						doc.attendance_date = date
-						doc.company = self.company
-						doc.status = "On Leave"
-						doc.leave_type = self.leave_type
-						doc.insert(ignore_permissions=True)
-						doc.submit()
-					else:
-						doc = frappe.new_doc("Attendance")
-						doc.employee = self.employee
-						doc.attendance_date = date
-						doc.company = self.company
-						doc.status = "Half Day"
-						doc.leave_type = self.leave_type
-						doc.insert(ignore_permissions=True)
-						doc.submit()
+					doc = frappe.new_doc("Attendance")
+					doc.employee = self.employee
+					doc.attendance_date = date
+					doc.company = self.company
+					doc.leave_type = self.leave_type
+					doc.status = "Half Day" if date == self.half_day_date else "On Leave"
+					doc.flags.ignore_validate = True
+					doc.insert(ignore_permissions=True)
+					doc.submit()
 
 	def cancel_attendance(self):
 		if self.docstatus == 2:

@@ -2,20 +2,22 @@ frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
 	"filters": get_filters(),
-	"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
-		if (columnDef.df.fieldname=="account") {
-			value = dataContext.account_name;
+	"formatter": function(value, row, column, data, default_formatter) {
+		if (column.fieldname=="account") {
+			value = data.account_name;
 
-			columnDef.df.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")";
-			columnDef.df.is_tree = true;
+			column.link_onclick =
+				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+			column.is_tree = true;
 		}
 
-		value = default_formatter(row, cell, value, columnDef, dataContext);
+		value = default_formatter(value, row, column, data);
 
-		if (!dataContext.parent_account) {
+		if (!data.parent_account) {
+			value = $(`<span>${value}</span>`);
+
 			var $value = $(value).css("font-weight", "bold");
-			if (dataContext.warn_if_negative && dataContext[columnDef.df.fieldname] < 0) {
+			if (data.warn_if_negative && data[column.fieldname] < 0) {
 				$value.addClass("text-danger");
 			}
 
