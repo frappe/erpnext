@@ -21,11 +21,16 @@ def execute():
 			where ss.name = sse.parent AND ss.is_active='Yes'
 			AND sse.employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')""", as_dict=1)
 	else:
+		cols = ""
+		if "base" in frappe.db.get_table_columns("Salary Structure"):
+			cols = ", base, variable"
+
 		ss_details = frappe.db.sql("""
-			select name as salary_structure, employee, employee_name, from_date, to_date, base, variable, company
+			select name as salary_structure, employee, employee_name, from_date, to_date, company {0}
 			from `tabSalary Structure`
 			where is_active='Yes'
-			AND sse.employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')""", as_dict=1)
+			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
+		""".format(cols), as_dict=1)
 	
 	for d in ss_details:
 		try:
@@ -35,8 +40,8 @@ def execute():
 			s.salary_structure = d.salary_structure
 			s.from_date = d.from_date
 			s.to_date = d.to_date if isinstance(d.to_date, datetime) else None
-			s.base = d.base
-			s.variable = d.variable
+			s.base = d.get("base")
+			s.variable = d.get("variable")
 			s.company = d.company
 
 			# to migrate the data of the old employees
