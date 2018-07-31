@@ -1,22 +1,13 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import msgprint, _
+from frappe import _
 
 
 def execute(filters=None):
-    return _execute(filters)
-
-
-def _execute(filters):
-    if not filters: filters = frappe._dict({})
-
-    data = get_data(filters)
+    if not filters: filters = dict()
     columns = get_columns()
-
-    if not data:
-        msgprint(_("No record found"))
-
+    data = get_data(filters)
     return columns, data
 
 
@@ -29,7 +20,6 @@ def get_columns():
         "{label}:{type}:{width}".format(label=_("Modification"), type="Data", width=120),
         "{label}:{type}:{width}".format(label=_("VAT"), type="Data", width=120)
     ]
-
 
 
 def get_data(filters):
