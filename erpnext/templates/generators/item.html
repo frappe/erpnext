@@ -8,7 +8,7 @@
 
 {% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
-<div class="item-content" style="margin-top:20px;">
+<div class="item-content">
     <div class="product-page-content" itemscope itemtype="http://schema.org/Product">
         <div class="row">
          {%- if slideshow -%}
@@ -83,7 +83,7 @@
                     {% endif %}
                 </div>
                 <br>
-                <div style="min-height: 100px; margin: 10px 0;">
+                <div class="cart-btn">
                     <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                         <h4 class="item-price hide" itemprop="price"></h4>
                         <div class="item-stock hide" itemprop="availability"></div>
@@ -117,7 +117,7 @@
                 </div>
             </div>
          </div>
-        <div class="row item-website-description" style="margin-top:30px; margin-bottom:20px">
+        <div class="row item-website-description">
             <div class="col-md-12">
         <div class="h6 text-uppercase">{{ _("Description") }}</div>
         <div itemprop="description" class="item-desc">
