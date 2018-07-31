@@ -332,6 +332,11 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 }
 
 erpnext.hub.Item = class Item extends SubPage {
+	make_wrapper() {
+		super.make_wrapper();
+		this.setup_events();
+	}
+
 	refresh() {
 		this.show_skeleton();
 		this.hub_item_code = frappe.get_route()[2];
@@ -368,6 +373,29 @@ erpnext.hub.Item = class Item extends SubPage {
 		</div>`;
 
 		this.$wrapper.html(skeleton);
+	}
+
+	setup_events() {
+		this.$wrapper.on('click', '.btn-contact-seller', () => {
+			const d = new frappe.ui.Dialog({
+				title: __('Send a message'),
+				fields: [
+					{
+						fieldname: 'to',
+						fieldtype: 'Read Only',
+						label: __('To'),
+						default: this.item.company
+					},
+					{
+						fieldtype: 'Text',
+						fieldname: 'message',
+						label: __('Message')
+					}
+				]
+			});
+
+			d.show();
+		});
 	}
 
 	get_item(hub_item_code) {
@@ -414,7 +442,7 @@ erpnext.hub.Item = class Item extends SubPage {
 							<img src="${item.image}">
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-8">
 						<h2>${title}</h2>
 						<div class="text-muted">
 							<p>${where}${dot_spacer}${when}</p>
@@ -430,6 +458,11 @@ erpnext.hub.Item = class Item extends SubPage {
 						</div>
 						${edit_buttons_html}
 					</div>
+					<div class="col-md-1">
+						<button class="btn btn-xs btn-default">
+							Menu
+						</button>
+					</div>
 				</div>
 				<div class="row hub-item-seller">
 					<div class="col-md-12 margin-top margin-bottom">
@@ -438,11 +471,11 @@ erpnext.hub.Item = class Item extends SubPage {
 					<div class="col-md-1">
 						<img src="https://picsum.photos/200">
 					</div>
-					<div class="col-md-6">
-						<a href="#marketplace/seller/${seller}" class="bold">${seller}</a>
-						<p class="text-muted">
-							Contact Seller
-						</p>
+					<div class="col-md-8">
+						<div class="margin-bottom"><a href="#marketplace/seller/${seller}" class="bold">${seller}</a></div>
+						<button class="btn btn-xs btn-default text-muted btn-contact-seller">
+							${__('Contact Seller')}
+						</button>
 					</div>
 				</div>
 				<!-- review area -->
