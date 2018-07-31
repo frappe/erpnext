@@ -275,7 +275,12 @@ def save_payment(payment):
 					filters={
 						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 					})[0]["name"]
-				erp_pe = get_payment_entry("Sales Invoice", sales_invoice)
+				deposit_account = frappe.get_all("Account",
+					filters={
+						"quickbooks_id": payment["DepositToAccountRef"]["value"]
+				})[0]["name"]
+				make_bank(deposit_account)
+				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
 				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
 				erp_pe.reference_no = "Reference No"
 				erp_pe.reference_date = payment["TxnDate"]
@@ -294,7 +299,15 @@ def save_bill_payment(bill_payment):
 					filters={
 						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 					})[0]["name"]
-				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice)
+				if bill_payment["PayType"] == "Check":
+					bank_account = frappe.get_all("Account",
+						filters={
+							"quickbooks_id": bill_payment["CheckPayment"]["BankAccountRef"]["value"]
+					})[0]["name"]
+					make_bank(bank_account)
+				else:
+					bank_account = None
+				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice, bank_account=bank_account)
 				erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
 				erp_pe.reference_no = "Reference No"
 				erp_pe.reference_date = bill_payment["TxnDate"]
