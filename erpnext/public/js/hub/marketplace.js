@@ -832,7 +832,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		frappe.realtime.on("items-sync", (data) => {
 			this.$wrapper.find('.progress-bar').css('width', data.progress_percent+'%');
 
-			if(data.progress_percent === 100) {
+			if(data.progress_percent === 100 || data.progress_percent === '100') {
 				setTimeout(() => {
 					hub.settings.sync_in_progress = 0;
 					frappe.db.get_doc('Hub Settings')
@@ -1039,19 +1039,29 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		});
 		this.items_to_publish = items_to_publish;
 
-		return frappe.db.set_value("Hub Settings", "Hub Settings", {
-			custom_data: JSON.stringify(items_to_publish),
-			// TODO: sync
-			// sync_in_progress: 1
-		}).then(() => {
-			hub.settings.sync_in_progress = 1;
-		})
+		return this.set_sync(items_to_publish)
 		.then(frappe.call(
 			'erpnext.hub_node.publish_selected_items',
 			{
 				items_to_publish: item_codes_to_publish
 			}
 		));
+	}
+
+	set_sync(items_to_publish) {
+		hub.settings.sync_in_progress = 1;
+		return frappe.db.set_value("Hub Settings", "Hub Settings", {
+			custom_data: JSON.stringify(items_to_publish),
+			sync_in_progress: 1
+		})
+	}
+
+	reset_sync()  {
+		hub.settings.sync_in_progress = 0;
+		return frappe.db.set_value("Hub Settings", "Hub Settings", {
+			custom_data: '',
+			sync_in_progress: 0
+		})
 	}
 }
 

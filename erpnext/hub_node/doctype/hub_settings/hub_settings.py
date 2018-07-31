@@ -41,27 +41,8 @@ class HubSettings(Document):
 				'trigger_name': 'items-sync'
 			}).insert()
 
-			time.sleep(2)
-			frappe.publish_realtime('items-sync', {"progress_percent": 20})
-			print("=======================")
-
-			time.sleep(2)
-			frappe.publish_realtime('items-sync', {"progress_percent": 40})
-			print("=======================")
-
-			time.sleep(1)
-			frappe.publish_realtime('items-sync', {"progress_percent": 80})
-			print("=======================")
-
-			time.sleep(2)
-			frappe.publish_realtime('items-sync', {"progress_percent": 100})
-			print("=======================")
-
-			frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
-
-			# TODO: sync
-			# self.sync_in_progress = 1
-			# doc.run()
+			self.sync_in_progress = 1
+			doc.run()
 		else:
 			frappe.throw("No remote ID specified")
 
