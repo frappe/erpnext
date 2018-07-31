@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate, cint
 from frappe.utils.nestedset import get_root_of
+from frappe.frappeclient import FrappeClient
 from frappe.contacts.doctype.contact.contact import get_default_contact
 
 @frappe.whitelist()
@@ -16,7 +17,7 @@ def enable_hub():
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
-	connection = get_client_connection()
+	connection = get_hub_connection()
 
 	if type(params) == unicode:
 		params = json.loads(params)
@@ -28,22 +29,6 @@ def call_hub_method(method, params=None):
 	response = connection.post_request(params)
 	return response
 
-@frappe.whitelist()
-def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=None):
-	connection = get_client_connection()
-	filters = json.loads(filters)
-
-	response = connection.get_list(doctype,
-		limit_start=start, limit_page_length=limit,
-		filters=filters, fields=['name'])
-
-	# Bad, need child tables in response
-	listing = []
-	for obj in response:
-		doc = connection.get_doc(doctype, obj['name'])
-		listing.append(doc)
-
-	return listing
 
 #### LOCAL ITEMS
 @frappe.whitelist()
@@ -76,34 +61,44 @@ def publish_selected_items(items_to_publish):
 	for item_code in items_to_publish:
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
-	hub_settings = frappe.get_doc('Hub Settings')
-	remote_id = item_sync_preprocess()
-	hub_settings.sync(remote_id)
-
-	return remote_id
+	try:
+		hub_settings = frappe.get_doc('Hub Settings')
+		item_sync_preprocess()
+		hub_settings.sync()
+	except Exception as e:
+		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
+		frappe.throw(e)
 
 def item_sync_preprocess():
 	# Call Hub to make a new activity
 	# and return an activity ID
 	# that will be used as the remote ID for the Migration Run
 
-	response = call_hub_method('init_new_activity_for_seller', {
-		'hub_seller': frappe.db.get_value("Hub Settings", "Hub Settings", "company_email"),
-		'activity_type': 'Items Publish'
+	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
+
+	response = call_hub_method('add_hub_seller_activity', {
+		'hub_seller': hub_seller,
+		'activity_details': json.dumps({
+			'subject': 'Publishing items',
+			'status': 'Success'
+		})
 	})
 
 	if response:
 		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
 		return response
 	else:
-		return ''
+		frappe.throw('Unable to update remote activity')
 
-def item_sync_postprocess(obj):
-	response = call_hub_method('update_activity_for_seller', {
-		'hub_seller': frappe.db.get_value('Hub Settings', 'Hub Settings', 'company_email'),
-		'name': obj['remote_id'],
-		'status': obj['status'],
-		'stats': obj['stats']
+def item_sync_postprocess(sync_details):
+	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
+
+	response = call_hub_method('add_hub_seller_activity', {
+		'hub_seller': hub_seller,
+		'activity_details': json.dumps({
+			'subject': 'Publishing items:' + sync_details['status'],
+			'content': json.dumps(sync_details['stats'])
+		})
 	})
 
 	if response:
@@ -145,31 +140,6 @@ def update_wishlist_item(item_name, remove=0):
 	hub_settings.custom_data = item_names_str
 	hub_settings.save()
 
-@frappe.whitelist()
-def get_meta(doctype):
-	connection = get_client_connection()
-	meta = connection.get_doc('DocType', doctype)
-	categories = connection.get_list('Hub Category',
-		limit_start=0, limit_page_length=300,
-		filters={}, fields=['name'])
-
-	categories = [d.get('name') for d in categories]
-	return {
-		'meta': meta,
-		'companies': connection.get_list('Hub Company',
-			limit_start=0, limit_page_length=300,
-			filters={}, fields=['name']),
-		'categories': categories
-	}
-
-@frappe.whitelist()
-def get_categories(parent='All Categories'):
-	# get categories info with parent category and stuff
-	connection = get_client_connection()
-	categories = connection.get_list('Hub Category', filters={'parent_hub_category': parent})
-
-	response = [{'value': c.get('name'), 'expandable': c.get('is_group')} for c in categories]
-	return response
 
 @frappe.whitelist()
 def update_category(hub_item_code, category):
@@ -188,28 +158,14 @@ def update_category(hub_item_code, category):
 
 	return response
 
-@frappe.whitelist()
-def get_details(hub_sync_id=None, doctype='Hub Item'):
-	if not hub_sync_id:
-		return
-	connection = get_client_connection()
-	details = connection.get_doc(doctype, hub_sync_id)
-	reviews = details.get('reviews')
-	if reviews and len(reviews):
-		for r in reviews:
-			r.setdefault('pretty_date', frappe.utils.pretty_date(r.get('modified')))
-		details.setdefault('reviews', reviews)
-	return details
-
-def get_client_connection():
-	# frappeclient connection
-	hub_connection = get_hub_connection()
-	return hub_connection.connection
-
 def get_hub_connection():
-	hub_connector = frappe.get_doc(
-		'Data Migration Connector', 'Hub Connector')
-	hub_connection = hub_connector.get_connection()
+	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
+		hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
+		hub_connection = hub_connector.get_connection()
+		return hub_connection.connection
+
+	# read-only connection
+	hub_connection = FrappeClient(frappe.conf.hub_url)
 	return hub_connection
 
 def make_opportunity(buyer_name, email_id):
