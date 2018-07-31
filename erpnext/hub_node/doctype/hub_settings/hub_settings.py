@@ -10,11 +10,6 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-# hub_url = "https://hubmarket.org"
-# hub_url = "http://159.89.175.122"
-# hub_url = "http://erpnext.hub:8001"
-hub_url = "http://hub.market:8000"
-
 class HubSetupError(frappe.ValidationError): pass
 
 class HubSettings(Document):
@@ -26,25 +21,21 @@ class HubSettings(Document):
 			frappe.throw(_("Please select a Price List to publish pricing"))
 
 	def get_hub_url(self):
-		return hub_url
+		return frappe.conf.hub_url
 
-	def sync(self, remote_id):
+	def sync(self):
 		"""Create and execute Data Migration Run for Hub Sync plan"""
 		frappe.has_permission('Hub Settings', throw=True)
 
-		if remote_id:
-			doc = frappe.get_doc({
-				'doctype': 'Data Migration Run',
-				'data_migration_plan': 'Hub Sync',
-				'data_migration_connector': 'Hub Connector',
-				'remote_id': remote_id,
-				'trigger_name': 'items-sync'
-			}).insert()
+		doc = frappe.get_doc({
+			'doctype': 'Data Migration Run',
+			'data_migration_plan': 'Hub Sync',
+			'data_migration_connector': 'Hub Connector',
+			'trigger_name': 'items-sync'
+		}).insert()
 
-			self.sync_in_progress = 1
-			doc.run()
-		else:
-			frappe.throw("No remote ID specified")
+		self.sync_in_progress = 1
+		doc.run()
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
@@ -56,7 +47,7 @@ class HubSettings(Document):
 		data = {
 			'profile': self.as_json()
 		}
-		post_url = hub_url + '/api/method/hub.hub.api.register'
+		post_url = self.get_hub_url() + '/api/method/hub.hub.api.register'
 
 		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
 
@@ -99,7 +90,7 @@ class HubSettings(Document):
 			'doctype': 'Data Migration Connector',
 			'connector_type': 'Frappe',
 			'connector_name': 'Hub Connector',
-			'hostname': hub_url,
+			'hostname': self.get_hub_url(),
 			'username': message['email'],
 			'password': message['password']
 		}).insert()
