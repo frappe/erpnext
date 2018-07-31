@@ -212,7 +212,8 @@ def save_invoice(invoice):
 				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"]),
 
 				# Do not change posting_date upon submission
-				"set_posting_time": 1
+				"set_posting_time": 1,
+				"disable_rounded_total": 1,
 			}).insert().submit()
 			frappe.db.commit()
 	except:
@@ -255,7 +256,8 @@ def save_bill(bill):
 					})[0]["name"],
 				"items": get_pi_items(bill["Line"]),
 				"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
-				"set_posting_time": 1
+				"set_posting_time": 1,
+				"disable_rounded_total": 1,
 			}).insert().submit()
 			frappe.db.commit()
 	except:
