@@ -85,9 +85,18 @@ WHERE
             docstatus = 1 {conditions});""".format(
         conditions=conditions
     ), as_dict=True)
-
+    
+    if len(sales_amounts) == 0:
+        sales_amounts = [
+            dict(
+                amount=0
+            ),
+            dict(
+                amount=0
+            )
+        ]
     result += [
-        "VAT", sales_amounts[0].amount, "-0.0", sales_amounts[1].amount
+        "VAT", sales_amounts[0]['amount'], "-0.0", sales_amounts[1]['amount']
     ]
 
     result += [
@@ -100,9 +109,9 @@ WHERE
 
     result += [
         "Total", "{0} {1}".format(
-            sales_amounts[0].amount, currency or "SAR"),
+            sales_amounts[0]['amount'], currency or "SAR"),
         "-0.0",
-        "{0} {1}".format(sales_amounts[1].amount, currency or "SAR")
+        "{0} {1}".format(sales_amounts[1]['amount'], currency or "SAR")
     ]
 
     result += [
@@ -139,13 +148,22 @@ WHERE
         AND base_tax_amount_after_discount_amount != 0;""".format(
         conditions=conditions
     ), as_dict=True)
-
+    
+    if len(sales_amounts) == 0:
+        purchases_amounts = [
+            dict(
+                amount=0
+            ),
+            dict(
+                amount=0
+            )
+        ]
     result += [
         _("Tax"), _("Purchases"), _("Modification"), _("Paid Tax")
     ]
 
     result += [
-        "VAT", purchases_amounts[0].amount, "-0.0", purchases_amounts[1].amount
+        "VAT", purchases_amounts[0]['amount'], "-0.0", purchases_amounts[1]['amount']
     ]
 
     result += [
@@ -158,9 +176,9 @@ WHERE
 
     result += [
         "Total", "{0} {1}".format(
-            purchases_amounts[0].amount, currency or "SAR"),
+            purchases_amounts[0]['amount'], currency or "SAR"),
         "-0.0",
-        "{0} {1}".format(purchases_amounts[1].amount, currency or "SAR")
+        "{0} {1}".format(purchases_amounts[1]['amount'], currency or "SAR")
     ]
 
     return result
