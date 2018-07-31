@@ -95,6 +95,12 @@ WHERE
                 amount=0
             )
         ]
+    if len(sales_amounts) == 1:
+        sales_amounts += [
+            dict(
+                amount=0
+            )
+        ]
     result += [
         "VAT", sales_amounts[0]['amount'], "-0.0", sales_amounts[1]['amount']
     ]
@@ -154,6 +160,12 @@ WHERE
             dict(
                 amount=0
             ),
+            dict(
+                amount=0
+            )
+        ]
+    if len(purchases_amounts) == 1:
+        purchases_amounts += [
             dict(
                 amount=0
             )
