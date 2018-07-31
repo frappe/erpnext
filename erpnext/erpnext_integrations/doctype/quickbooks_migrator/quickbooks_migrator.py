@@ -238,6 +238,11 @@ def save_journal_entry(journal_entry):
 def save_bill(bill):
 	try:
 		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"]}):
+			credit_to_account = frappe.get_all("Account",
+				filters={
+					"quickbooks_id": bill["APAccountRef"]["value"]
+			})[0]["name"]
+			make_payable(credit_to_account)
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
 				"quickbooks_id": bill["Id"],
@@ -245,10 +250,7 @@ def save_bill(bill):
 				"currency": bill["CurrencyRef"]["value"],
 				"posting_date": bill["TxnDate"],
 				"due_date": bill.get("DueDate", "2020-01-01"),
-				"credit_to": frappe.get_all("Account",
-					filters={
-						"quickbooks_id": bill["APAccountRef"]["value"]
-					})[0]["name"],
+				"credit_to": credit_to_account,
 				"supplier": frappe.get_all("Supplier",
 					filters={
 						"quickbooks_id": bill["VendorRef"]["value"]
@@ -501,4 +503,17 @@ def get_headers(token):
 	"Authorization": "Bearer {}".format(token)}
 
 class QuickBooksMigrator(Document):
-	pass
+	def on_update(self):
+		make_receivable(self.receivable_account)
+
+def make_receivable(account):
+    print("Making", account, "Receivable")
+    frappe.db.set_value("Account", account, "account_type", "Receivable")
+
+def make_payable(account):
+    print("Making", account, "Payable")
+    frappe.db.set_value("Account", account, "account_type", "Payable")
+
+def make_bank(account):
+    print("Making", account, "Bank")
+    frappe.db.set_value("Account", account, "account_type", "Bank")
