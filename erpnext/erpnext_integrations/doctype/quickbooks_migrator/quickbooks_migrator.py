@@ -125,7 +125,8 @@ def save_account(account):
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
 	except:
-		pass
+		import traceback
+		traceback.print_exc()
 
 def save_customer(customer):
 	try:
@@ -143,7 +144,8 @@ def save_customer(customer):
 			if "ShipAddr" in customer:
 				create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
 	except:
-		pass
+		import traceback
+		traceback.print_exc()
 
 def save_item(item):
 	try:
@@ -157,7 +159,8 @@ def save_item(item):
 				"item_defaults": [{"company": company}]
 			}).insert(ignore_permissions=True)
 	except:
-		pass
+		import traceback
+		traceback.print_exc()
 
 def save_vendor(vendor):
 	try:
@@ -173,7 +176,8 @@ def save_vendor(vendor):
 			if "ShipAddr" in vendor:
 				create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
 	except:
-		pass
+		import traceback
+		traceback.print_exc()
 
 def save_invoice(invoice):
 	try:
@@ -407,8 +411,8 @@ def create_address(entity, doctype, address, address_type):
 				"links": [{"link_doctype": doctype, "link_name": entity.name}]
 			}).insert()
 	except:
-		pass
-
+		import traceback
+		traceback.print_exc()
 
 def make_custom_fields():
 	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
