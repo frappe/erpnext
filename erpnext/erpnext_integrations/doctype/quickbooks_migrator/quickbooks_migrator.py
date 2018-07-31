@@ -26,16 +26,21 @@ oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 @frappe.whitelist()
 def get_authorization_url():
-	token = frappe.cache().get("quickbooks_access_token")
-	if token:
-		response = {"authenticated": True}
-	else:
-		response = {
-			"authenticated": False,
-			"url": oauth.authorization_url(authorization_endpoint)[0],
-		}
-	return response
+	return {"url": oauth.authorization_url(authorization_endpoint)[0]}
 
+@frappe.whitelist()
+def is_authenticated():
+	return frappe.cache().exists("quickbooks_refresh_token") and frappe.cache().exists("quickbooks_access_token")
+
+@frappe.whitelist()
+def are_accounts_synced():
+    # Check if there is any existing Account with Quickbooks ID
+	return bool(frappe.get_all("Account",
+		filters=[["quickbooks_id", "not like", ""]],
+		fields=["count(name) as count"]
+	)[0]["count"])
+
+bool(frappe.get_all("Account", filters=[["quickbooks_id", "not like", ""]], fields=["count(name) as count"])[0]["count"])
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
@@ -43,6 +48,7 @@ def callback(*args, **kwargs):
 	company_id = kwargs.get("realmId")
 	frappe.cache().set("quickbooks_company_id", company_id)
 	get_access_token()
+	frappe.publish_realtime("quickbooks_authenticated")
 
 @frappe.whitelist()
 def fetch_accounts():
@@ -51,6 +57,7 @@ def fetch_accounts():
 	make_root_accounts()
 	fetch_all_entries(entity="Account", company_id=company_id)
 	frappe.clear_messages()
+	frappe.publish_realtime("quickbooks_accounts_synced")
 
 @frappe.whitelist()
 def fetch():
