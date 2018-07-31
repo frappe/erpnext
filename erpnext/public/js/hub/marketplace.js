@@ -69,9 +69,9 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	make_sidebar_categories() {
-		frappe.call('erpnext.hub_node.get_categories')
-			.then(r => {
-				const categories = r.message.map(d => d.value).sort();
+		hub.call('erpnext.hub_node.get_categories')
+			.then(categories => {
+				const categories = r.message.map(d => d.name);
 				const sidebar_items = [
 					`<li class="hub-sidebar-item bold is-title">
 						${__('Category')}
@@ -258,13 +258,13 @@ erpnext.hub.Home = class Home extends SubPage {
 erpnext.hub.Favourites = class Favourites extends SubPage {
 	refresh() {
 		this.get_favourites()
-			.then(r => {
-				this.render(r.message);
+			.then(items => {
+				this.render(items);
 			});
 	}
 
 	get_favourites() {
-		return frappe.call('erpnext.hub_node.get_item_favourites');
+		return hub.call('get_item_favourites');
 	}
 
 	render(items) {
@@ -1072,29 +1072,12 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		});
 		this.items_to_publish = items_to_publish;
 
-		return this.set_sync(items_to_publish)
-		.then(frappe.call(
+		return frappe.call(
 			'erpnext.hub_node.publish_selected_items',
 			{
 				items_to_publish: item_codes_to_publish
 			}
-		));
-	}
-
-	set_sync(items_to_publish) {
-		hub.settings.sync_in_progress = 1;
-		return frappe.db.set_value("Hub Settings", "Hub Settings", {
-			custom_data: JSON.stringify(items_to_publish),
-			sync_in_progress: 1
-		})
-	}
-
-	reset_sync()  {
-		hub.settings.sync_in_progress = 0;
-		return frappe.db.set_value("Hub Settings", "Hub Settings", {
-			custom_data: '',
-			sync_in_progress: 0
-		})
+		)
 	}
 }
 
