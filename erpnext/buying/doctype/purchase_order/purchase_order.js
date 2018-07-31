@@ -140,6 +140,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
 			}
+
+			if(flt(doc.per_billed)==0) {
+				this.frm.add_custom_button(__('Payment Request'),
+					function() { me.make_payment_request() }, __("Make"));
+			}
+
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},

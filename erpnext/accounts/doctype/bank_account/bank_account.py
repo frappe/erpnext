@@ -14,3 +14,19 @@ class BankAccount(Document):
 
 	def on_trash(self):
 		delete_contact_and_address('BankAccount', self.name)
+
+	def validate(self):
+		self.validate_company()
+
+	def validate_company(self):
+		if self.is_company_account and not self.company:
+			frappe.throw(_("Company is manadatory for company account"))
+
+@frappe.whitelist()
+def make_bank_account(doctype, docname):
+	doc = frappe.new_doc("Bank Account")
+	doc.party_type = doctype
+	doc.party = docname
+	doc.is_default = 1
+
+	return doc
