@@ -108,6 +108,7 @@ def item_sync_postprocess(obj):
 
 	if response:
 		frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
+		frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
 		frappe.throw('Unable to update remote activity')
 

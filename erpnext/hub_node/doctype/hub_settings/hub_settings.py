@@ -37,11 +37,11 @@ class HubSettings(Document):
 				'doctype': 'Data Migration Run',
 				'data_migration_plan': 'Hub Sync',
 				'data_migration_connector': 'Hub Connector',
-				'remote_id': remote_id
+				'remote_id': remote_id,
+				'trigger_name': 'items-sync'
 			}).insert()
 
 			self.sync_in_progress = 1
-			# time.sleep(10)
 			doc.run()
 		else:
 			frappe.throw("No remote ID specified")
