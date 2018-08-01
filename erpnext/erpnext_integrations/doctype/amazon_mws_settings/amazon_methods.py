@@ -264,7 +264,7 @@ def create_sales_order(order_json,after_date):
 		items = get_order_items(market_place_order_id)
 		delivery_date = dateutil.parser.parse(order_json.LatestShipDate).strftime("%Y-%m-%d")
 		transaction_date = dateutil.parser.parse(order_json.PurchaseDate).strftime("%Y-%m-%d")
-		
+
 		so = frappe.get_doc({
 				"doctype": "Sales Order",
 				"naming_series": "SO-",
