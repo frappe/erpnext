@@ -22,7 +22,7 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 	}
 
 	get_items_by_keyword(keyword) {
-		return hub.call('get_items_by_keyword', { keyword });
+		return hub.call('get_items', { keyword });
 	}
 
 	render(items) {

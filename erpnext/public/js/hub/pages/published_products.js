@@ -18,6 +18,6 @@ erpnext.hub.PublishedProducts = class PublishedProducts extends SubPage {
 	}
 
 	get_published_products() {
-		return hub.call('get_items_by_seller', { hub_seller: hub.settings.company_email });
+		return hub.call('get_items', { hub_seller: hub.settings.company_email });
 	}
 }
