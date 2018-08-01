@@ -3,6 +3,16 @@ export default class SubPage {
 		this.$parent = $(parent);
 		this.make_wrapper(options);
 
+		// generic action handler
+		this.$wrapper.on('click', '[data-action]', e => {
+			const $this = $(e.currentTarget);
+			const action = $this.data().action;
+
+			if (action && this[action]) {
+				this[action].apply(this);
+			}
+		})
+
 		// handle broken images after every render
 		if (this.render) {
 			this._render = this.render.bind(this);

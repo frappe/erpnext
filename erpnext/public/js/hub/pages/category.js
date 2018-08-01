@@ -1,4 +1,4 @@
-import SubPage from './base_page';
+import SubPage from './subpage';
 import { get_item_card_container_html } from '../helpers';
 
 erpnext.hub.Category = class Category extends SubPage {

@@ -1,4 +1,4 @@
-import SubPage from './base_page';
+import SubPage from './subpage';
 
 erpnext.hub.Register = class Register extends SubPage {
 	make_wrapper() {
