@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 test_dependencies = ["Supplier Group"]
@@ -46,7 +45,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices = []
 
 		# create invoices for lower than single threshold tax rate
-		for i in xrange(6):
+		for _ in xrange(6):
 			pi = create_purchase_invoice()
 			pi.submit()
 			invoices.append(pi)
@@ -102,7 +101,7 @@ def create_records():
 	}).insert()
 
 	# create an item
-	item = frappe.get_doc({
+	frappe.get_doc({
 		"doctype": "Item",
 		"item_code": "TDS Item",
 		"item_name": "TDS Item",
