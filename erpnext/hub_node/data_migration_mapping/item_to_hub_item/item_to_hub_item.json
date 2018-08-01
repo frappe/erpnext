@@ -1,45 +1,45 @@
 {
- "condition": "{\"publish_in_hub\": 1}",
- "creation": "2017-09-07 13:27:52.726350",
- "docstatus": 0,
- "doctype": "Data Migration Mapping",
+ "condition": "{\"publish_in_hub\": 1}", 
+ "creation": "2017-09-07 13:27:52.726350", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
  "fields": [
   {
-   "is_child_table": 0,
-   "local_fieldname": "item_code",
+   "is_child_table": 0, 
+   "local_fieldname": "item_code", 
    "remote_fieldname": "item_code"
-  },
+  }, 
   {
-   "is_child_table": 0,
-   "local_fieldname": "item_name",
+   "is_child_table": 0, 
+   "local_fieldname": "item_name", 
    "remote_fieldname": "item_name"
-  },
+  }, 
   {
-   "is_child_table": 0,
-   "local_fieldname": "eval:frappe.db.get_value('Hub Settings' , 'Hub Settings', 'company_email')",
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.db.get_value('Hub Settings' , 'Hub Settings', 'company_email')", 
    "remote_fieldname": "hub_seller"
-  },
+  }, 
   {
-   "is_child_table": 0,
-   "local_fieldname": "image",
+   "is_child_table": 0, 
+   "local_fieldname": "image", 
    "remote_fieldname": "image"
-  },
+  }, 
   {
-   "is_child_table": 0,
-   "local_fieldname": "item_group",
+   "is_child_table": 0, 
+   "local_fieldname": "item_group", 
    "remote_fieldname": "item_group"
   }
- ],
- "idx": 1,
- "local_doctype": "Item",
- "mapping_name": "Item to Hub Item",
- "mapping_type": "Push",
- "migration_id_field": "hub_sync_id",
- "modified": "2018-07-28 22:25:35.289335",
- "modified_by": "cave@aperture.com",
- "name": "Item to Hub Item",
- "owner": "Administrator",
- "page_length": 10,
- "remote_objectname": "Hub Item",
+ ], 
+ "idx": 1, 
+ "local_doctype": "Item", 
+ "mapping_name": "Item to Hub Item", 
+ "mapping_type": "Push", 
+ "migration_id_field": "hub_sync_id", 
+ "modified": "2018-08-01 16:37:09.170546", 
+ "modified_by": "Administrator", 
+ "name": "Item to Hub Item", 
+ "owner": "Administrator", 
+ "page_length": 10, 
+ "remote_objectname": "Hub Item", 
  "remote_primary_key": "item_code"
 }

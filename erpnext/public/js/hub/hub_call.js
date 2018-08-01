@@ -19,7 +19,7 @@ hub.call = function call_hub_method(method, args={}) {
 		}, timeout);
 
 		frappe.call({
-			method: 'erpnext.hub_node.call_hub_method',
+			method: 'erpnext.hub_node.api.call_hub_method',
 			args: {
 				method,
 				params: args
