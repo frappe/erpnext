@@ -15,6 +15,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		create_records()
 
 	def test_loyalty_points_earned_single_tier(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si_original = create_sales_invoice_record()
 		si_original.insert()
@@ -50,6 +51,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_loyalty_points_earned_multiple_tier(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Multiple Loyalty")
 		# assign multiple tier program to the customer
 		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
 		customer.loyalty_program = frappe.get_doc('Loyalty Program', {'loyalty_program_name': 'Test Multiple Loyalty'}).name
@@ -92,6 +94,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 	def test_cancel_sales_invoice(self):
 		''' cancelling the sales invoice should cancel the earned points'''
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si = create_sales_invoice_record()
 		si.insert()
@@ -106,6 +109,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		self.assertEqual(True, (lpe is None))
 
 	def test_sales_invoice_return(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si_original = create_sales_invoice_record(2)
 		si_original.conversion_rate = flt(1)
@@ -167,6 +171,7 @@ def create_sales_invoice_record(qty=1):
 		"company": '_Test Company',
 		"due_date": today(),
 		"posting_date": today(),
+		"currency": "INR",
 		"taxes_and_charges": "",
 		"debit_to": "Debtors - _TC",
 		"taxes": [],
@@ -174,6 +179,7 @@ def create_sales_invoice_record(qty=1):
 			'doctype': 'Sales Invoice Item',
 			'item_code': frappe.get_doc('Item', {'item_name': 'Loyal Item'}).name,
 			'qty': qty,
+			"rate": 10000,
 			'income_account': 'Sales - _TC',
 			'cost_center': 'Main - _TC',
 			'expense_account': 'Cost of Goods Sold - _TC'
