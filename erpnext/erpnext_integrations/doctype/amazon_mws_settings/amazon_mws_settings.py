@@ -20,4 +20,4 @@ def schedule_get_order_details():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
 	if mws_settings.enable_synch:
 		after_date = dateutil.parser.parse(mws_settings.after_date).strftime("%Y-%m-%d")
-		orders = get_orders(after_date = after_date)
+		get_orders(after_date = after_date)

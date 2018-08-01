@@ -307,7 +307,7 @@ def create_customer(order_json):
 		existing_contacts = frappe.get_list("Contact", filters)
 
 		if existing_contacts:
-			existing_contact_name = existing_contacts[0].name
+			pass
 		else:
 			new_contact = frappe.new_doc("Contact")
 			new_contact.first_name = order_customer_name
@@ -317,7 +317,6 @@ def create_customer(order_json):
 				"link_name": existing_customer_name
 			})
 			new_contact.insert()
-			existing_contact_name = new_contact.first_name
 
 		return existing_customer_name
 	else:
