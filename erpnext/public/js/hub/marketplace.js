@@ -8,6 +8,7 @@ import './pages/register';
 import './pages/profile';
 import './pages/publish';
 import './pages/published_products';
+import './pages/messages';
 import './pages/not_found';
 
 // helpers
@@ -62,11 +63,17 @@ erpnext.hub.Marketplace = class Marketplace {
 		$nav_group.empty();
 
 		const user_specific_items_html = this.registered
-			? `<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
+			? `<li class="hub-sidebar-item" data-route="marketplace/favourites">
+					${__('Favorites')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
 					${__('Your Profile')}
 				</li>
 				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
 					${__('Publish Products')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/messages">
+					${__('Messages')}
 				</li>`
 
 			: `<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
@@ -76,9 +83,6 @@ erpnext.hub.Marketplace = class Marketplace {
 		$nav_group.append(`
 			<li class="hub-sidebar-item" data-route="marketplace/home">
 				${__('Browse')}
-			</li>
-			<li class="hub-sidebar-item" data-route="marketplace/favourites">
-				${__('Favorites')}
 			</li>
 			${user_specific_items_html}
 		`);
@@ -148,10 +152,6 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages.home = new erpnext.hub.Home(this.$body);
 		}
 
-		if (route[1] === 'favourites' && !this.subpages.favourites) {
-			this.subpages.favourites = new erpnext.hub.Favourites(this.$body);
-		}
-
 		if (route[1] === 'search' && !this.subpages.search) {
 			this.subpages.search = new erpnext.hub.SearchPage(this.$body);
 		}
@@ -172,6 +172,11 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages.register = new erpnext.hub.Register(this.$body);
 		}
 
+		// registered seller routes
+		if (route[1] === 'favourites' && !this.subpages.favourites) {
+			this.subpages.favourites = new erpnext.hub.Favourites(this.$body);
+		}
+
 		if (route[1] === 'profile' && !this.subpages.profile) {
 			this.subpages.profile = new erpnext.hub.Profile(this.$body);
 		}
@@ -182,6 +187,17 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		if (route[1] === 'my-products' && !this.subpages['my-products']) {
 			this.subpages['my-products'] = new erpnext.hub.PublishedProducts(this.$body);
+		}
+
+		if (route[1] === 'messages' && !this.subpages['messages']) {
+			this.subpages['messages'] = new erpnext.hub.Messages(this.$body);
+		}
+
+		// dont allow unregistered users to access registered routes
+		const registered_routes = ['favourites', 'profile', 'publish', 'my-products', 'messages'];
+		if (!hub.settings.registered && registered_routes.includes(route[1])) {
+			frappe.set_route('marketplace', 'home');
+			return;
 		}
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
