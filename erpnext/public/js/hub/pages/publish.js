@@ -1,4 +1,4 @@
-import SubPage from './base_page';
+import SubPage from './subpage';
 import { make_search_bar, get_item_card_container_html, get_local_item_card_html } from '../helpers';
 
 erpnext.hub.Publish = class Publish extends SubPage {
