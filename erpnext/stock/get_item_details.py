@@ -91,11 +91,13 @@ def get_item_details(args):
 				out.update(actual_batch_qty)
 
 		if out.has_serial_no and args.get('batch_no'):
+			reserved_so = get_so_reservation_for_item(args)
 			out.batch_no = args.get('batch_no')
-			out.serial_no = get_serial_no(out, args.serial_no)
+			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
 
 		elif out.has_serial_no:
-			out.serial_no = get_serial_no(out, args.serial_no)
+			reserved_so = get_so_reservation_for_item(args)
+			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -586,25 +588,32 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 	return pos_profile and pos_profile[0] or None
 
-def get_serial_nos_by_fifo(args):
+def get_serial_nos_by_fifo(args, sales_order=None):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
 		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s
-			order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
+			where item_code=%(item_code)s and warehouse=%(warehouse)s and
+			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
+			order by timestamp(purchase_date, purchase_time)
+			asc limit %(qty)s""",
+			{
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
-				"qty": abs(cint(args.stock_qty))
+				"qty": abs(cint(args.stock_qty)),
+				"sales_order": sales_order
 			}))
 
-def get_serial_no_batchwise(args):
+def get_serial_no_batchwise(args, sales_order=None):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
 		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s and (batch_no=%(batch_no)s or batch_no is NULL)
-			order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
+			where item_code=%(item_code)s and warehouse=%(warehouse)s and
+			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
+			and batch_no=IF(%(batch_no)s IS NULL, batch_no, %(batch_no)s) order
+			by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
 				"batch_no": args.batch_no,
-				"qty": abs(cint(args.stock_qty))
+				"qty": abs(cint(args.stock_qty)),
+				"sales_order": sales_order
 			}))
 
 @frappe.whitelist()
@@ -815,23 +824,21 @@ def get_gross_profit(out):
 	return out
 
 @frappe.whitelist()
-def get_serial_no(args, serial_nos=None):
+def get_serial_no(args, serial_nos=None, sales_order=None):
 	serial_no = None
 	if isinstance(args, string_types):
 		args = json.loads(args)
 		args = frappe._dict(args)
-
 	if args.get('doctype') == 'Sales Invoice' and not args.get('update_stock'):
 		return ""
-
 	if args.get('warehouse') and args.get('stock_qty') and args.get('item_code'):
 		has_serial_no = frappe.get_value('Item', {'item_code': args.item_code}, "has_serial_no")
 		if args.get('batch_no') and has_serial_no == 1:
-			return get_serial_no_batchwise(args)
+			return get_serial_no_batchwise(args, sales_order)
 		elif has_serial_no == 1:
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
 			args = process_args(args)
-			serial_no = get_serial_nos_by_fifo(args)
+			serial_no = get_serial_nos_by_fifo(args, sales_order)
 
 	if not serial_no and serial_nos:
 		# For POS
@@ -871,3 +878,28 @@ def get_blanket_order_details(args):
 
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ''
 	return blanket_order_details
+
+def get_so_reservation_for_item(args):
+	reserved_so = None
+	if args.get('against_sales_order'):
+		if get_reserved_qty_for_so(args.get('against_sales_order'), args.get('item_code')):
+			reserved_so = args.get('against_sales_order')
+	elif args.get('against_sales_invoice'):
+		sales_order = frappe.db.sql("""select sales_order from `tabSales Invoice Item` where
+		parent=%s and item_code=%s""", (args.get('against_sales_invoice'), args.get('item_code')))
+		if sales_order and sales_order[0]:
+			if get_reserved_qty_for_so(sales_order[0][0], args.get('item_code')):
+				reserved_so = sales_order[0]
+	elif args.get("sales_order"):
+		if get_reserved_qty_for_so(args.get('sales_order'), args.get('item_code')):
+			reserved_so = args.get('sales_order')
+	return reserved_so
+
+def get_reserved_qty_for_so(sales_order, item_code):
+	reserved_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item`
+	where parent=%s and item_code=%s and ensure_delivery_based_on_produced_serial_no=1
+	""", (sales_order, item_code))
+	if reserved_qty and reserved_qty[0][0]:
+		return reserved_qty[0][0]
+	else:
+		return 0
