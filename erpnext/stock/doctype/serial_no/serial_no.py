@@ -351,7 +351,8 @@ def auto_make_serial_nos(args):
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
-			if sr.sales_order and not args.get('actual_qty', 0) > 0:
+			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
+				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
