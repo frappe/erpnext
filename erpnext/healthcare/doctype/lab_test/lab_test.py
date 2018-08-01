@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, cstr
 
@@ -58,6 +59,100 @@ def update_status(status, name):
 @frappe.whitelist()
 def update_lab_test_print_sms_email_status(print_sms_email, name):
 	frappe.db.set_value("Lab Test",name,print_sms_email,1)
+
+@frappe.whitelist()
+def create_multiple(doctype, docname):
+	lab_test_created = False
+	if doctype == "Sales Invoice":
+		lab_test_created = create_lab_test_from_invoice(docname)
+	elif doctype == "Patient Encounter":
+		lab_test_created = create_lab_test_from_encounter(docname)
+
+	if lab_test_created:
+		frappe.msgprint(_("Lab Test(s) "+lab_test_created+" created."))
+	else:
+		frappe.msgprint(_("No Lab Test created"))
+
+def create_lab_test_from_encounter(encounter_id):
+	lab_test_created = False
+	encounter = frappe.get_doc("Patient Encounter", encounter_id)
+
+	lab_test_ids = frappe.db.sql("""select lp.name, lp.test_code, lp.invoiced
+	from `tabPatient Encounter` et, `tabLab Prescription` lp
+	where et.patient=%s and lp.parent=%s and
+	lp.parent=et.name and lp.test_created=0 and et.docstatus=1""", (encounter.patient, encounter_id))
+
+	if lab_test_ids:
+		patient = frappe.get_doc("Patient", encounter.patient)
+		for lab_test_id in lab_test_ids:
+			template = get_lab_test_template(lab_test_id[1])
+			if template:
+				lab_test = create_lab_test_doc(lab_test_id[2], encounter.practitioner, patient, template)
+				lab_test.save(ignore_permissions = True)
+				frappe.db.set_value("Lab Prescription", lab_test_id[0], "test_created", 1)
+				if not lab_test_created:
+					lab_test_created = lab_test.name
+				else:
+					lab_test_created += ", "+lab_test.name
+	return lab_test_created
+
+
+def create_lab_test_from_invoice(invoice_name):
+	lab_test_created = False
+	invoice = frappe.get_doc("Sales Invoice", invoice_name)
+	if invoice.patient:
+		patient = frappe.get_doc("Patient", invoice.patient)
+		for item in invoice.items:
+			test_created = 0
+			if item.reference_dt == "Lab Prescription":
+				test_created = frappe.db.get_value("Lab Prescription", item.reference_dn, "test_created")
+			elif item.reference_dt == "Lab Test":
+				test_created = 1
+			if test_created != 1:
+				template = get_lab_test_template(item.item_code)
+				if template:
+					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template)
+					lab_test.save(ignore_permissions = True)
+					frappe.db.set_value("Sales Invoice Item", item.name, "reference_dt", "Lab Test")
+					frappe.db.set_value("Sales Invoice Item", item.name, "reference_dn", lab_test.name)
+					if not lab_test_created:
+						lab_test_created = lab_test.name
+					else:
+						lab_test_created += ", "+lab_test.name
+	return lab_test_created
+
+def get_lab_test_template(item):
+	template_id = check_template_exists(item)
+	if template_id:
+		return frappe.get_doc("Lab Test Template", template_id)
+	return False
+
+def check_template_exists(item):
+	template_exists = frappe.db.exists(
+		"Lab Test Template",
+		{
+			'item': item
+		}
+	)
+	if template_exists:
+		return template_exists
+	return False
+
+def create_lab_test_doc(invoiced, practitioner, patient, template):
+	lab_test = frappe.new_doc("Lab Test")
+	lab_test.invoiced = invoiced
+	lab_test.practitioner = practitioner
+	lab_test.patient = patient.name
+	lab_test.patient_age = patient.get_age()
+	lab_test.patient_sex = patient.sex
+	lab_test.email = patient.email
+	lab_test.mobile = patient.mobile
+	lab_test.department = template.department
+	lab_test.template = template.name
+	lab_test.test_group = template.test_group
+	lab_test.result_date = getdate()
+	lab_test.report_preference = patient.report_preference
+	return lab_test
 
 def create_normals(template, lab_test):
 	lab_test.normal_toggle = "1"
