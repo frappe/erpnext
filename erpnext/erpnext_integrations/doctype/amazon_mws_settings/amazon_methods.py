@@ -225,7 +225,7 @@ def get_orders(after_date):
 				break
 
 			next_token = orders_response.parsed.NextToken
-			orders_response = call_mws(orders.list_orders_by_next_token, next_token)
+			orders_response = call_mws_method(orders.list_orders_by_next_token, next_token)
 
 		return "Success"
 
