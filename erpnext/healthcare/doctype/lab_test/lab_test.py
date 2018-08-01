@@ -112,9 +112,12 @@ def create_lab_test_from_invoice(invoice_name):
 				template = get_lab_test_template(item.item_code)
 				if template:
 					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template)
+					if item.reference_dt == "Lab Prescription":
+						lab_test.prescription = item.reference_dn
 					lab_test.save(ignore_permissions = True)
-					frappe.db.set_value("Sales Invoice Item", item.name, "reference_dt", "Lab Test")
-					frappe.db.set_value("Sales Invoice Item", item.name, "reference_dn", lab_test.name)
+					if item.reference_dt != "Lab Prescription":
+						frappe.db.set_value("Sales Invoice Item", item.name, "reference_dt", "Lab Test")
+						frappe.db.set_value("Sales Invoice Item", item.name, "reference_dn", lab_test.name)
 					if not lab_test_created:
 						lab_test_created = lab_test.name
 					else:
