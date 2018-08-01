@@ -41,8 +41,6 @@ def get_products_details():
 					for sku in skus:
 						create_item_code(product, sku)
 
-		return "Success"
-
 def get_products_instance():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
 	products = mws.Products(
@@ -155,7 +153,7 @@ def create_item_code(amazon_item_json, sku):
 		igroup.insert()
 
 	item.insert(ignore_permissions=True)
-	new_item_price = create_item_price(amazon_item_json, item.item_code)
+	create_item_price(amazon_item_json, item.item_code)
 
 	return item.name
 
@@ -193,8 +191,6 @@ def create_item_price(amazon_item_json, item_code):
 	item_price.item_code = item_code
 	item_price.insert()
 
-	return item_price.price_list_rate
-
 #Get and create Orders
 def get_orders(after_date):
 	try:
@@ -227,8 +223,6 @@ def get_orders(after_date):
 			next_token = orders_response.parsed.NextToken
 			orders_response = call_mws_method(orders.list_orders_by_next_token, next_token)
 
-		return "Success"
-
 	except Exception as e:
 		frappe.log_error(title="get_orders", message=e)
 
@@ -246,8 +240,8 @@ def get_orders_instance():
 	return orders
 
 def create_sales_order(order_json,after_date):
-	customer_name, contact = create_customer(order_json)
-	address = create_address(order_json, customer_name)
+	customer_name = create_customer(order_json)
+	create_address(order_json, customer_name)
 
 	market_place_order_id = order_json.AmazonOrderId
 
@@ -325,7 +319,7 @@ def create_customer(order_json):
 			new_contact.insert()
 			existing_contact_name = new_contact.first_name
 
-		return existing_customer_name, existing_contact_name
+		return existing_customer_name
 	else:
 		mws_customer_settings = frappe.get_doc("Amazon MWS Settings")
 		new_customer = frappe.new_doc("Customer")
@@ -345,7 +339,7 @@ def create_customer(order_json):
 
 		new_contact.insert()
 
-		return new_customer.name, new_contact.name
+		return new_customer.name
 
 def create_address(amazon_order_item_json, customer_name):
 
@@ -390,7 +384,6 @@ def create_address(amazon_order_item_json, customer_name):
 		})
 		make_address.address_type = "Shipping"
 		make_address.insert()
-		return make_address
 
 def get_order_items(market_place_order_id):
 	mws_orders = get_orders_instance()
