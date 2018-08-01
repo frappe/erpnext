@@ -17,7 +17,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	warehouse = ""
 	display_items_in_stock = 0
 	item_code = search_value
-	
+
 	if pos_profile:
 		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
 
@@ -80,8 +80,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 					(item_det.item_code=i.name or item_det.item_code=i.variant_of) INNER JOIN"""
 
 		if warehouse is not None:
-			query = query +  """ (select item_code,actual_qty from 
-					 `tabBin` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se"""
+			query = query +  """ (select item_code,actual_qty from `tabBin` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se"""
 		else:
 			query = query +  """ (select item_code,sum(actual_qty) as actual_qty from `tabBin` group by item_code) item_se"""
 			
