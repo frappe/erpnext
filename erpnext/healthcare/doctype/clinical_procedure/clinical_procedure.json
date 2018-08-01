@@ -66,7 +66,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "PRO-", 
+   "options": "HEA-CPRO-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -714,7 +714,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-12 19:18:30.400534", 
+ "modified": "2018-08-01 16:53:35.693489", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Clinical Procedure", 
@@ -748,5 +748,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

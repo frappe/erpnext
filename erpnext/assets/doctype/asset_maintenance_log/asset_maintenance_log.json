@@ -65,7 +65,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "AML-", 
+   "options": "AST-AML-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -778,7 +778,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-09 23:45:55.492528", 
+ "modified": "2018-08-01 16:53:13.730721", 
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset Maintenance Log", 
@@ -813,5 +813,6 @@
  "sort_order": "DESC", 
  "title_field": "", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }

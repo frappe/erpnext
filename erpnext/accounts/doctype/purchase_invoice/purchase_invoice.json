@@ -66,7 +66,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "PINV-\nPINV-RET-", 
+   "options": "PU-INV-.YYYY.-\nPU-INV-RET-.YYYY.-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
@@ -4559,7 +4559,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-07-31 18:35:17.736855",
+ "modified": "2018-08-01 16:53:07.153745", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -4672,6 +4672,6 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 1, 
- "track_seen": 0,
+ "track_seen": 0, 
  "track_views": 0
 }

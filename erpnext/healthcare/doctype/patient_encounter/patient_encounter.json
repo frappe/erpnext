@@ -97,7 +97,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "C-", 
+   "options": "HEA-PENC-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -1105,7 +1105,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-17 12:51:13.487000", 
+ "modified": "2018-08-01 16:53:05.119054", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Patient Encounter", 
@@ -1142,5 +1142,6 @@
  "sort_order": "DESC", 
  "title_field": "patient", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }
