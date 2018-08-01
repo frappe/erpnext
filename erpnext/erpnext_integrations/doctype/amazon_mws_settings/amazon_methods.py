@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, time, datetime, dateutil, math, csv, StringIO
+import frappe, time, dateutil, math, csv, StringIO
 import amazon_mws_api as mws
 from frappe import _
 
@@ -11,7 +11,7 @@ from frappe import _
 def get_products_details():
 		products = get_products_instance()
 		reports = get_reports_instance()
-		
+
 		mws_settings = frappe.get_doc("Amazon MWS Settings")
 		market_place_list = return_as_list(mws_settings.market_place_id)
 
@@ -76,7 +76,7 @@ def return_as_list(input_value):
 
 def request_and_fetch_report_id(report_type, start_date=None, end_date=None, marketplaceids=None):
 	reports = get_reports_instance()
-	report_response = reports.request_report(report_type=report_type, 
+	report_response = reports.request_report(report_type=report_type,
 			start_date=start_date,
 			end_date=end_date,
 			marketplaceids=marketplaceids)

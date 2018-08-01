@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import dateutil
-from frappe import _
 from amazon_methods import get_products_details, get_orders
 
 class AmazonMWSSettings(Document):
