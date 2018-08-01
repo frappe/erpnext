@@ -12,7 +12,7 @@ erpnext.hub.Category = class Category extends SubPage {
 
 	get_items_for_category(category) {
 		this.$wrapper.find('.hub-card-container').empty();
-		return frappe.call('erpnext.hub_node.get_list', {
+		return frappe.call('erpnext.hub_node.api.get_list', {
 			doctype: 'Hub Item',
 			filters: {
 				hub_category: category

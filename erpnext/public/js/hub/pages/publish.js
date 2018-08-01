@@ -196,7 +196,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			return this.unpublished_items;
 		}
 		return frappe.call(
-			'erpnext.hub_node.get_valid_items',
+			'erpnext.hub_node.api.get_valid_items',
 			{
 				search_value: this.search_value
 			}
@@ -219,7 +219,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.items_to_publish = items_to_publish;
 
 		return frappe.call(
-			'erpnext.hub_node.publish_selected_items',
+			'erpnext.hub_node.api.publish_selected_items',
 			{
 				items_to_publish: item_codes_to_publish
 			}
