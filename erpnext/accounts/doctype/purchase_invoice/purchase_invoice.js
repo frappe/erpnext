@@ -525,7 +525,13 @@ frappe.ui.form.on('Purchase Invoice', {
 	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_parent_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center", "cost_center");
 		erpnext.utils.copy_parent_value_in_all_row(frm.doc, cdt, cdn, "taxes", "cost_center", "cost_center");
-
 	},
-
+})
+frappe.ui.form.on('Purchase Taxes and Charges', {
+	taxes_add: function(frm, cdt, cdn) {
+		if(frm.doc.cost_center){
+			var d = locals[cdt][cdn];
+			d.cost_center = frm.doc.cost_center;
+		}
+	},
 })
