@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
-import requests
+import json, requests
 from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
@@ -483,24 +483,28 @@ def refresh_tokens():
 def fetch_all_entries(entity="", company_id=1):
 	query_uri = BASE_QUERY_URL.format(company_id, "query")
 
-	# Count number of entries
-	entry_count = get(query_uri,
-		params={
-			"query": """SELECT COUNT(*) FROM {}""".format(entity)
-		}
-	).json()["QueryResponse"]["totalCount"]
-
-	# fetch pages and accumulate
-	entries = []
-	for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
-		publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
-		response = get(query_uri,
+	cache_key = "quickbooks-cached-{}".format(entity)
+	if not frappe.cache().exists(cache_key):
+		# Count number of entries
+		entry_count = get(query_uri,
 			params={
-				"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(entity, start_position, MAX_RESULT_COUNT)
+				"query": """SELECT COUNT(*) FROM {}""".format(entity)
 			}
-		).json()["QueryResponse"][entity]
-		entries.extend(response)
-	publish({"event": "finish"})
+		).json()["QueryResponse"]["totalCount"]
+
+		# fetch pages and accumulate
+		entries = []
+		for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
+			publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
+			response = get(query_uri,
+				params={
+					"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(entity, start_position, MAX_RESULT_COUNT)
+				}
+			).json()["QueryResponse"][entity]
+			entries.extend(response)
+		frappe.cache().set(cache_key, json.dumps(entries))
+		publish({"event": "finish"})
+	entries = json.loads(frappe.cache().get(cache_key).decode())
 	save_entries(entity, entries)
 	publish({"event": "finish"})
 	publish({"event": "message", "message": "Fetched {}".format(entity)})
