@@ -59,7 +59,7 @@ def fetch_accounts():
 	frappe.publish_realtime("quickbooks_accounts_synced")
 
 @frappe.whitelist()
-def fetch():
+def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
