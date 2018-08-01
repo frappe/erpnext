@@ -1512,10 +1512,6 @@
  "sort_order": "ASC", 
  "title_field": "supplier_name", 
  "track_changes": 1, 
-<<<<<<< HEAD
- "track_seen": 0,
-=======
  "track_seen": 0, 
->>>>>>> Update existing naming series options with new
  "track_views": 0
 }

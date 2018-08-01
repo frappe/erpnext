@@ -87,7 +87,7 @@ def set_series(doctype, options, default):
 def get_series():
 	series_to_set = {}
 
-	for doctype, new_series in doctype_series_map.items():
+	for doctype in doctype_series_map:
 		if not frappe.db.a_row_exists(doctype):
 			continue
 
