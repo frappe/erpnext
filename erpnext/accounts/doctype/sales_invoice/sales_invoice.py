@@ -22,7 +22,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details, get_loyalty_details, validate_loyalty_points
+	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 
 from six import iteritems
 
@@ -973,12 +973,14 @@ class SalesInvoice(SellingController):
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
-		lp_details = get_loyalty_program_details(self.customer, company=self.company,
-			loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
+		returned_amount = self.get_returned_amount()
+		current_amount = flt(self.grand_total) - cint(self.loyalty_amount)
+		eligible_amount = current_amount - returned_amount
+		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
+			current_transaction_amount=current_amount, loyalty_program=self.loyalty_program,
+			expiry_date=self.posting_date, include_expired_entry=True)
 		if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 			(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
-			returned_amount = self.get_returned_amount()
-			eligible_amount = flt(self.grand_total) - cint(self.loyalty_amount) - returned_amount
 			points_earned = cint(eligible_amount/lp_details.collection_factor)
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
@@ -994,7 +996,7 @@ class SalesInvoice(SellingController):
 			})
 			doc.flags.ignore_permissions = 1
 			doc.save()
-			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+			self.set_loyalty_program_tier()
 
 	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
@@ -1009,9 +1011,12 @@ class SalesInvoice(SellingController):
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where sales_invoice=%s''', (self.name))
 			# Set loyalty program
-			lp_details = get_loyalty_program_details(self.customer, company=self.company,
-				loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
-			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+			self.set_loyalty_program_tier()
+
+	def set_loyalty_program_tier(self):
+		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
+				loyalty_program=self.loyalty_program, include_expired_entry=True)
+		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
 		returned_amount = frappe.db.sql("""
