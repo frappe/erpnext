@@ -11,6 +11,7 @@ from frappe.utils import time_diff_in_hours, rounded
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import validity_exists
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity, update_fee_validity
+from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
 
 @frappe.whitelist()
 def get_healthcare_services_to_invoice(patient):
@@ -223,6 +224,9 @@ def manage_invoice_submit_cancel(doc, method):
 			if item.reference_dt and item.reference_dn:
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
+
+	if method=="on_submit" and frappe.db.get_value("Healthcare Settings", None, "create_test_on_si_submit") == '1':
+		create_multiple("Sales Invoice", doc.name)
 
 def set_invoiced(item, method, ref_invoice=None):
 	invoiced = False
