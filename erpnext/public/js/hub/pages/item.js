@@ -2,11 +2,6 @@ import SubPage from './subpage';
 import { get_rating_html } from '../helpers';
 
 erpnext.hub.Item = class Item extends SubPage {
-	make_wrapper() {
-		super.make_wrapper();
-		this.setup_events();
-	}
-
 	refresh() {
 		this.show_skeleton();
 		this.hub_item_code = frappe.get_route()[2];
@@ -43,29 +38,6 @@ erpnext.hub.Item = class Item extends SubPage {
 		</div>`;
 
 		this.$wrapper.html(skeleton);
-	}
-
-	setup_events() {
-		this.$wrapper.on('click', '.btn-contact-seller', () => {
-			const d = new frappe.ui.Dialog({
-				title: __('Send a message'),
-				fields: [
-					{
-						fieldname: 'to',
-						fieldtype: 'Read Only',
-						label: __('To'),
-						default: this.item.company
-					},
-					{
-						fieldtype: 'Text',
-						fieldname: 'message',
-						label: __('Message')
-					}
-				]
-			});
-
-			d.show();
-		});
 	}
 
 	get_item(hub_item_code) {
@@ -150,7 +122,7 @@ erpnext.hub.Item = class Item extends SubPage {
 					</div>
 					<div class="col-md-8">
 						<div class="margin-bottom"><a href="#marketplace/seller/${seller}" class="bold">${seller}</a></div>
-						<button class="btn btn-xs btn-default text-muted btn-contact-seller">
+						<button class="btn btn-xs btn-default text-muted" data-action="contact_seller">
 							${__('Contact Seller')}
 						</button>
 					</div>
@@ -202,6 +174,30 @@ erpnext.hub.Item = class Item extends SubPage {
 		}
 
 		this.unpublish_dialog.show();
+	}
+
+	contact_seller() {
+		const d = new frappe.ui.Dialog({
+			title: __('Send a message'),
+			fields: [
+				{
+					fieldname: 'to',
+					fieldtype: 'Read Only',
+					label: __('To'),
+					default: this.item.company
+				},
+				{
+					fieldtype: 'Text',
+					fieldname: 'message',
+					label: __('Message')
+				}
+			],
+			primary_action: ({ message }) => {
+				if (!message) return;
+			}
+		});
+
+		d.show();
 	}
 
 	make_review_area() {
