@@ -4526,7 +4526,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-07-19 16:01:00.467054", 
+ "modified": "2018-07-30 08:35:17.736855",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -4639,6 +4639,5 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 1, 
- "track_seen": 0, 
- "track_views": 0
+ "track_seen": 0
 }

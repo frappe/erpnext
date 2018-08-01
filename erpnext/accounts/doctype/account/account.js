@@ -46,6 +46,12 @@ frappe.ui.form.on('Account', {
 				frm.trigger("update_account_number");
 			});
 		}
+
+		if(!frm.doc.__islocal) {
+			frm.add_custom_button(__('Merge Account'), function () {
+				frm.trigger("merge_account");
+			});
+		}
 	},
 	account_type: function (frm) {
 		if (frm.doc.is_group == 0) {
@@ -89,6 +95,44 @@ frappe.ui.form.on('Account', {
 				});
 			});
 		}
+	},
+
+	merge_account: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __('Merge with Existing Account'),
+			fields: [
+				{
+					"label" : "Name",
+					"fieldname": "name",
+					"fieldtype": "Data",
+					"reqd": 1,
+					"default": frm.doc.name
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				frappe.call({
+					method: "erpnext.accounts.doctype.account.account.merge_account",
+					args: {
+						old: frm.doc.name,
+						new: data.name,
+						is_group: frm.doc.is_group,
+						root_type: frm.doc.root_type,
+						company: frm.doc.company
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							if(r.message) {
+								frappe.set_route("Form", "Account", r.message);
+							}
+							d.hide();
+						}
+					}
+				});
+			},
+			primary_action_label: __('Merge')
+		});
+		d.show();
 	},
 
 	update_account_number: function(frm) {
