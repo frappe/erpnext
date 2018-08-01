@@ -62,8 +62,16 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		const description = item.description || '';
 
-		const rating_html = get_rating_html(item.average_rating);
-		const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
+		let stats = __('No views yet');
+		if(item.view_count) {
+			const views_message = __(`${item.view_count} Views`);
+
+			const rating_html = get_rating_html(item.average_rating);
+			const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
+
+			stats = `${views_message}${dot_spacer}${rating_html} (${rating_count})`;
+		}
+
 
 		let menu_items = '';
 
@@ -94,7 +102,7 @@ erpnext.hub.Item = class Item extends SubPage {
 						<h2>${title}</h2>
 						<div class="text-muted">
 							<p>${where}${dot_spacer}${when}</p>
-							<p>${rating_html} (${rating_count})</p>
+							<p>${stats}</p>
 						</div>
 						<hr>
 						<div class="hub-item-description">
