@@ -157,12 +157,12 @@ def save_item(item):
 		if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"]}):
 			if item["Type"] in ("Service", "Inventory"):
 				item_dict = {
-				"doctype": "Item",
-				"quickbooks_id": item["Id"],
-				"item_code" : item["Name"],
-				"stock_uom": "Unit",
-				"item_group": "All Item Groups",
-				"item_defaults": [{"company": company}]
+					"doctype": "Item",
+					"quickbooks_id": item["Id"],
+					"item_code" : item["Name"],
+					"stock_uom": "Unit",
+					"item_group": "All Item Groups",
+					"item_defaults": [{"company": company}]
 				}
 				if "ExpenseAccountRef" in item:
 					expense_account = frappe.get_all("Account",
