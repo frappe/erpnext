@@ -69,7 +69,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		res = {
 		'items': res
 		}
-	
+
 	elif display_items_in_stock == 1:
 		query = """select i.name as item_code, i.item_name, i.image as item_image,
 				i.is_stock_item, item_det.price_list_rate, item_det.currency
