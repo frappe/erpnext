@@ -126,6 +126,7 @@ def save_account(account):
 				"quickbooks_id": account["Id"],
 				"account_name": "{} - QB".format(account["Name"]),
 				"root_type": mapping[account["AccountType"]],
+				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
 				"is_group": "0",
 				"company": company,
