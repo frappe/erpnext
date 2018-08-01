@@ -388,7 +388,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -3917,7 +3917,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-30 08:36:11.652659",
+ "modified": "2018-08-01 08:36:11.652659",
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
