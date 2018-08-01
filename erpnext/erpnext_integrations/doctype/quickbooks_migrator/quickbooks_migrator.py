@@ -17,8 +17,6 @@ client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret"
 scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
 redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
 company = frappe.db.get_value("Quickbooks Migrator", None, "company")
-expense_account = frappe.db.get_value("Quickbooks Migrator", None, "expense_account")
-income_account = frappe.db.get_value("Quickbooks Migrator", None, "income_account")
 receivable_account = frappe.db.get_value("Quickbooks Migrator", None, "receivable_account")
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
@@ -157,14 +155,28 @@ def save_customer(customer):
 def save_item(item):
 	try:
 		if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"]}):
-			frappe.get_doc({
+			if item["Type"] in ("Service", "Inventory"):
+				item_dict = {
 				"doctype": "Item",
 				"quickbooks_id": item["Id"],
 				"item_code" : item["Name"],
 				"stock_uom": "Unit",
 				"item_group": "All Item Groups",
 				"item_defaults": [{"company": company}]
-			}).insert(ignore_permissions=True)
+				}
+				if "ExpenseAccountRef" in item:
+					expense_account = frappe.get_all("Account",
+						filters={
+							"quickbooks_id": item["ExpenseAccountRef"]["value"]
+					})[0]["name"]
+					item_dict["item_defaults"][0]["expense_account"] = expense_account
+				if "IncomeAccountRef" in item:
+					income_account = frappe.get_all("Account",
+						filters={
+							"quickbooks_id": item["IncomeAccountRef"]["value"]
+					})[0]["name"]
+					item_dict["item_defaults"][0]["income_account"] = income_account
+				frappe.get_doc(item_dict).insert(ignore_permissions=True)
 	except:
 		import traceback
 		traceback.print_exc()
@@ -357,7 +369,6 @@ def get_items(lines):
 			items.append({
 				"item_code": item["name"],
 				"conversion_factor": 1,
-				"income_account": income_account,
 				"uom": item["stock_uom"],
 				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 				"qty": line["SalesItemLineDetail"]["Qty"],
@@ -383,7 +394,6 @@ def get_pi_items(lines):
 			items.append({
 				"item_code": item["name"],
 				"conversion_factor": 1,
-				"expense_account": expense_account,
 				"uom": item["stock_uom"],
 				"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
 				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],

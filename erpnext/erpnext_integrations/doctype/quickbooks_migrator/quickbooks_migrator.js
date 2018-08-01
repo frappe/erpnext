@@ -99,14 +99,10 @@ frappe.ui.form.on('QuickBooks Migrator', {
 
 					// Show accounts settings
 					frm.toggle_display("accounts_settings", 1);
-					frm.set_df_property("expense_account", "reqd", 1);
-					frm.set_df_property("income_account", "reqd", 1);
 					frm.set_df_property("receivable_account", "reqd", 1);
 
 					// No further actions until account defaults are set	
-					if (frm.fields_dict["expense_account"].value &&
-					frm.fields_dict["income_account"].value &&
-					frm.fields_dict["receivable_account"].value) {			
+					if (frm.fields_dict["receivable_account"].value) {			
 						frm.add_custom_button("Fetch Data", function () {
 							frm.trigger("fetch_data");
 						});
