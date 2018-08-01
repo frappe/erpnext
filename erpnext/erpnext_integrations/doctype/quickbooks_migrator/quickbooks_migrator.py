@@ -532,3 +532,21 @@ def make_bank(account):
 
 def get_account_name_by_id(quickbooks_id):
 	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id})[0]["name"]
+
+def zen():
+	rise()
+	frappe.db.sql("""DELETE from tabAccount where name like "%QB%" """)
+	frappe.db.commit()
+
+def rise():
+	for doctype in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Sales Invoice"]:
+		for doc in frappe.get_all(doctype, filters=[["quickbooks_id", "not like", ""]]):
+			try: frappe.get_doc(doctype, doc["name"]).cancel()
+			except: pass
+			try: frappe.delete_doc(doctype, doc["name"])
+			except: pass
+
+	for doctype in ["Customer", "Supplier", "Item"]:
+		for doc in frappe.get_all(doctype, filters=[["quickbooks_id", "not like", ""]]):
+			try:frappe.delete_doc(doctype, doc["name"])
+			except: pass
