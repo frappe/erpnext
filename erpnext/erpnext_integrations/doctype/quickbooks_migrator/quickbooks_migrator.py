@@ -278,7 +278,7 @@ def save_bill(bill):
 
 def save_payment(payment):
 	try:
-		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": payment["Id"]}):
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "Payment - {}".format(payment["Id"])}):
 			# Check if Payment is Linked to an Invoice
 			if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
 				sales_invoice = frappe.get_all("Sales Invoice",
@@ -299,7 +299,7 @@ def save_payment(payment):
 
 def save_bill_payment(bill_payment):
 	try:
-		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": bill_payment["Id"]}):
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "BillPayment - {}".format(bill_payment["Id"])}):
 			# Check if Payment is Linked to an Invoice
 			if bill_payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Bill":
 				purchase_invoice = frappe.get_all("Purchase Invoice",
