@@ -1,4 +1,4 @@
-import SubPage from './base_page';
+import SubPage from './subpage';
 import { get_rating_html } from '../helpers';
 
 erpnext.hub.Item = class Item extends SubPage {
@@ -90,20 +90,23 @@ erpnext.hub.Item = class Item extends SubPage {
 		const rating_html = get_rating_html(item.average_rating);
 		const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
 
-		let edit_buttons_html = '';
+		let menu_items = '';
 
 		if(this.own_item) {
-			edit_buttons_html = `<div style="margin-top: 20px">
-				<button class="btn btn-secondary btn-default btn-xs margin-right edit-item">Edit Details</button>
-				<button class="btn btn-secondary btn-danger btn-xs unpublish">Unpublish</button>
-			</div>`;
+			menu_items = `
+				<li><a data-action="edit_details">${__('Edit Details')}</a></li>
+				<li><a data-action="unpublish_item">${__('Unpublish')}</a></li>`;
+		} else {
+			menu_items = `
+				<li><a data-action="report_item">${__('Report this item')}</a></li>
+			`;
 		}
 
 		const html = `
 			<div class="hub-item-container">
 				<div class="row visible-xs">
 					<div class="col-xs-12 margin-bottom">
-						<button class="btn btn-xs btn-default" data-route="marketplace/home">Back to home</button>
+						<button class="btn btn-xs btn-default" data-route="marketplace/home">${__('Back to home')}</button>
 					</div>
 				</div>
 				<div class="row">
@@ -126,7 +129,6 @@ erpnext.hub.Item = class Item extends SubPage {
 							` : `<p>${__('No description')}<p>`
 						}
 						</div>
-						${edit_buttons_html}
 					</div>
 					<div class="col-md-1">
 						<div class="dropdown pull-right hub-item-dropdown">
@@ -134,8 +136,7 @@ erpnext.hub.Item = class Item extends SubPage {
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu dropdown-right" role="menu">
-								<li><a>Edit Details</a></li>
-								<li><a>Unpublish</a></li>
+								${menu_items}
 							</ul>
 						</div>
 					</div>
@@ -173,10 +174,6 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		this.$wrapper.html(html);
 
-		if(this.own_item) {
-			this.bind_edit_buttons();
-		}
-
 		this.make_review_area();
 
 		this.get_reviews()
@@ -186,21 +183,17 @@ erpnext.hub.Item = class Item extends SubPage {
 			});
 	}
 
-	bind_edit_buttons() {
-		this.edit_dialog = new frappe.ui.Dialog({
-			title: "Edit Your Product",
-			fields: []
-		});
-
-		this.$wrapper.find('.edit-item').on('click', this.on_edit.bind(this));
-		this.$wrapper.find('.unpublish').on('click', this.on_unpublish.bind(this));
-	}
-
-	on_edit() {
+	edit_details() {
+		if (!this.edit_dialog) {
+			this.edit_dialog = new frappe.ui.Dialog({
+				title: "Edit Your Product",
+				fields: []
+			});
+		}
 		this.edit_dialog.show();
 	}
 
-	on_unpublish() {
+	unpublish_item() {
 		if(!this.unpublish_dialog) {
 			this.unpublish_dialog = new frappe.ui.Dialog({
 				title: "Edit Your Product",
