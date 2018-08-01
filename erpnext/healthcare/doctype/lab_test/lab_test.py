@@ -59,26 +59,6 @@ def update_status(status, name):
 def update_lab_test_print_sms_email_status(print_sms_email, name):
 	frappe.db.set_value("Lab Test",name,print_sms_email,1)
 
-def create_lab_test_doc(invoice, encounter, patient, template):
-	#create Test Result for template, copy vals from Invoice
-	lab_test = frappe.new_doc("Lab Test")
-	if(invoice):
-		lab_test.invoiced = True
-	if(encounter):
-		lab_test.practitioner = encounter.practitioner
-	lab_test.patient = patient.name
-	lab_test.patient_age = patient.get_age()
-	lab_test.patient_sex = patient.sex
-	lab_test.email = patient.email
-	lab_test.mobile = patient.mobile
-	lab_test.department = template.department
-	lab_test.test_name = template.test_name
-	lab_test.template = template.name
-	lab_test.test_group = template.test_group
-	lab_test.result_date = getdate()
-	lab_test.report_preference = patient.report_preference
-	return lab_test
-
 def create_normals(template, lab_test):
 	lab_test.normal_toggle = "1"
 	normal = lab_test.append("normal_test_items")
@@ -145,24 +125,6 @@ def create_sample_doc(template, patient, invoice):
 
 		return sample_collection
 
-@frappe.whitelist()
-def create_lab_test_from_desk(patient, template, prescription, invoice=None):
-	lab_test_exist = frappe.db.exists({
-		"doctype": "Lab Test",
-		"prescription": prescription
-		})
-	if lab_test_exist:
-		return
-	template = frappe.get_doc("Lab Test Template", template)
-	#skip the loop if there is no test_template for Item
-	if not (template):
-		return
-	patient = frappe.get_doc("Patient", patient)
-	encounter_id = frappe.get_value("Lab Prescription", prescription, "parent")
-	encounter = frappe.get_doc("Patient Encounter", encounter_id)
-	lab_test = create_lab_test(patient, template, prescription, encounter, invoice)
-	return lab_test.name
-
 def create_sample_collection(lab_test, template, patient, invoice):
 	if(frappe.db.get_value("Healthcare Settings", None, "require_sample_collection") == "1"):
 		sample_collection = create_sample_doc(template, patient, invoice)
@@ -213,12 +175,6 @@ def load_result_format(lab_test, template, prescription, invoice):
 				frappe.db.set_value("Lab Prescription", prescription, "invoiced", True)
 		lab_test.save(ignore_permissions=True) # insert the result
 		return lab_test
-
-def create_lab_test(patient, template, prescription,  encounter, invoice):
-	lab_test = create_lab_test_doc(invoice, encounter, patient, template)
-	lab_test = create_sample_collection(lab_test, template, patient, invoice)
-	lab_test = load_result_format(lab_test, template, prescription, invoice)
-	return lab_test
 
 @frappe.whitelist()
 def get_employee_by_user_id(user_id):
