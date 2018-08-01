@@ -334,7 +334,7 @@ def get_accounts(lines):
 			posting_type = line["JournalEntryLineDetail"]["PostingType"]
 			accounts.append({
 				"account": account_name,
-					posting_type_field_mapping[posting_type]: line["Amount"],
+				posting_type_field_mapping[posting_type]: line["Amount"],
 			})
 	return accounts
 
@@ -385,7 +385,7 @@ def get_pi_items(lines):
 			items.append({
 				"item_name": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"conversion_factor": 1,
-				"expense_account": get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"])
+				"expense_account": get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]),
 				"uom": "Unit",
 				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"qty": 1,
