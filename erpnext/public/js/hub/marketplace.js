@@ -4,6 +4,7 @@ import './pages/favourites';
 import './pages/search';
 import './pages/category';
 import './pages/item';
+import './pages/seller';
 import './pages/register';
 import './pages/profile';
 import './pages/publish';
@@ -162,6 +163,10 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		if (route[1] === 'item' && route[2] && !this.subpages.item) {
 			this.subpages.item = new erpnext.hub.Item(this.$body);
+		}
+
+		if (route[1] === 'seller' && !this.subpages['seller']) {
+			this.subpages['seller'] = new erpnext.hub.Seller(this.$body);
 		}
 
 		if (route[1] === 'register' && !this.subpages.register) {
