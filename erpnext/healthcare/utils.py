@@ -91,8 +91,8 @@ def get_healthcare_services_to_invoice(patient):
 						item_to_invoice.append({'reference_type': 'Lab Test', 'reference_name': lab_test_obj.name,
 						'service': frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item")})
 
-			lab_rxs = frappe.db.sql("""select lp.name from `tabPatient Encounter` et,
-			`tabLab Prescription` lp where et.patient=%s and lp.parent=et.name and lp.test_created=0 and lp.invoiced=0""", (patient.name))
+			lab_rxs = frappe.db.sql("""select lp.name from `tabPatient Encounter` et, `tabLab Prescription` lp
+			where et.patient=%s and lp.parent=et.name and lp.test_created=0 and lp.invoiced=0 and et.docstatus = 1""", (patient.name))
 			if lab_rxs:
 				for lab_rx in lab_rxs:
 					rx_obj = frappe.get_doc("Lab Prescription", lab_rx[0])
