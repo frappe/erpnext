@@ -221,4 +221,44 @@ body[data-route^="marketplace/"] {
 	.hub-item-dropdown {
 		margin-top: 20px;
 	}
+
+	/* messages page */
+
+	.message-list-item {
+		display: flex;
+		align-items: center;
+		padding: 8px 12px;
+		cursor: pointer;
+
+		&:not(.active) {
+			filter: grayscale(1);
+			color: @text-muted;
+		}
+
+		&:hover {
+			background-color: @light-bg;
+		}
+
+		.list-item-left {
+			width: 30px;
+			border-radius: 4px;
+			overflow: hidden;
+			margin-right: 15px;
+		}
+
+		.list-item-body {
+			font-weight: bold;
+			padding-bottom: 1px;
+		}
+	}
+
+	.message-list {
+		overflow: scroll;
+	}
+
+	.message-area {
+		border-radius: 4px;
+		justify-content: space-between;
+		height: calc(100vh - 220px);
+	}
 }

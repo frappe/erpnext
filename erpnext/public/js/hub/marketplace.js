@@ -131,12 +131,12 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	update_sidebar() {
-		const route = frappe.get_route_str();
-		const $sidebar_item = this.$sidebar.find(`[data-route="${route}"]`);
+		const route = frappe.get_route();
+		const route_str = route.slice(0, 2).join('/');
+		const $sidebar_item = this.$sidebar.find(`[data-route="${route_str}"]`);
 
 		const $siblings = this.$sidebar.find('[data-route]');
 		$siblings.removeClass('active').addClass('text-muted');
-
 		$sidebar_item.addClass('active').removeClass('text-muted');
 	}
 
