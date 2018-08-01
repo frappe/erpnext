@@ -8,12 +8,14 @@ from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
-from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
+from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
+from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
+
 import json
 
 from six import string_types, itervalues, iteritems
@@ -73,7 +75,6 @@ class StockEntry(StockController):
 
 		self.update_stock_ledger()
 
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
 		self.update_work_order()
 		self.validate_purchase_order()
@@ -81,6 +82,10 @@ class StockEntry(StockController):
 			self.update_purchase_order_supplied_items()
 		self.make_gl_entries()
 		self.update_cost_in_project()
+		self.validate_reserved_serial_no_consumption()
+		if self.work_order and self.purpose == "Manufacture":
+			self.update_so_in_serial_number()
+
 
 	def on_cancel(self):
 
@@ -1045,6 +1050,33 @@ class StockEntry(StockController):
 			reserve_warehouse = item_wh.get(item_code)
 			stock_bin = get_bin(item_code, reserve_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
+
+	def update_so_in_serial_number(self):
+		so_name, item_code = frappe.db.get_value("Work Order", self.work_order, ["sales_order", "production_item"])
+		if so_name and item_code:
+			qty_to_reserve = get_reserved_qty_for_so(so_name, item_code)
+			if qty_to_reserve:
+				reserved_qty = frappe.db.sql("""select count(name) from `tabSerial No` where item_code=%s and
+					sales_order=%s""", (item_code, so_name))
+				if reserved_qty and reserved_qty[0][0]:
+					qty_to_reserve -= reserved_qty[0][0]
+				if qty_to_reserve > 0:
+					for item in self.items:
+						if item.item_code == item_code:
+							serial_nos = (item.serial_no).split("\n")
+							for serial_no in serial_nos:
+								if qty_to_reserve > 0:
+									frappe.db.set_value("Serial No", serial_no, "sales_order", so_name)
+									qty_to_reserve -=1
+
+	def validate_reserved_serial_no_consumption(self):
+		for item in self.items:
+			if item.s_warehouse and not item.t_warehouse and item.serial_no:
+				for sr in get_serial_nos(item.serial_no):
+					sales_order = frappe.db.get_value("Serial No", sr, "sales_order")
+					if sales_order:
+						frappe.throw(_("Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
+						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

@@ -242,6 +242,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
+
+				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
+				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
 			})
 	},
 
@@ -493,6 +496,10 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	onload: function(frm) {
+		if(frm.doc.__onload && !frm.doc.__onload.supplier_tds) {
+			me.frm.set_df_property("apply_tds", "read_only", 1);
+		}
+
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
 				return {
