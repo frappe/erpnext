@@ -161,6 +161,7 @@ def save_item(item):
 					"quickbooks_id": item["Id"],
 					"item_code" : item["Name"],
 					"stock_uom": "Unit",
+					"is_stock_item": 0,
 					"item_group": "All Item Groups",
 					"item_defaults": [{"company": company}]
 				}
