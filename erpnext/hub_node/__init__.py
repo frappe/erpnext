@@ -2,11 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json
-from frappe.utils import now, nowdate, cint
-from frappe.utils.nestedset import get_root_of
-from frappe.frappeclient import FrappeClient
-from frappe.contacts.doctype.contact.contact import get_default_contact
+import frappe
 
 @frappe.whitelist()
 def enable_hub():
