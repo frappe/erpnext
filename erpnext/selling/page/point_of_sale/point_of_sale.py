@@ -19,15 +19,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	item_code = search_value
 	
 	if pos_profile:
-		pos_result = frappe.db.sql("""select 
-        			warehouse,display_items_in_stock 
-    	        		from
-        				`tabPOS Profile`
-    	     			where
-        				name=%s""", pos_profile, as_dict=1) 
-		if len(pos_result)!=0:
-			display_items_in_stock = pos_result[0]['display_items_in_stock']
-			warehouse = pos_result[0]['warehouse']
+		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -89,10 +81,10 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 
 		if warehouse is not None:
 			query = query +  """ (select item_code,actual_qty from 
-					 `tabStock Ledger Entry` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se"""
+					 `tabBin` where warehouse=%(warehouse)s and actual_qty > 0 group by item_code) item_se"""
 		else:
-			query = query +  """ (select item_code,actual_qty from 
-					 `tabStock Ledger Entry` where actual_qty > 0 group by item_code) item_se"""
+			query = query +  """ (select item_code,sum(actual_qty) as actual_qty from `tabBin` group by item_code) item_se"""
+			
 		res = frappe.db.sql(query +  """
 			ON
 				((item_se.item_code=i.name or item_det.item_code=i.variant_of) and item_se.actual_qty>0)
