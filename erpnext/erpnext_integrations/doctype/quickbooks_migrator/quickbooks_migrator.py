@@ -165,16 +165,10 @@ def save_item(item):
 					"item_defaults": [{"company": company}]
 				}
 				if "ExpenseAccountRef" in item:
-					expense_account = frappe.get_all("Account",
-						filters={
-							"quickbooks_id": item["ExpenseAccountRef"]["value"]
-					})[0]["name"]
+					expense_account = get_account_name_by_id(item["ExpenseAccountRef"]["value"])
 					item_dict["item_defaults"][0]["expense_account"] = expense_account
 				if "IncomeAccountRef" in item:
-					income_account = frappe.get_all("Account",
-						filters={
-							"quickbooks_id": item["IncomeAccountRef"]["value"]
-					})[0]["name"]
+					income_account = get_account_name_by_id(item["IncomeAccountRef"]["value"])
 					item_dict["item_defaults"][0]["income_account"] = income_account
 				frappe.get_doc(item_dict).insert(ignore_permissions=True)
 	except:
@@ -258,10 +252,7 @@ def save_journal_entry(journal_entry):
 def save_bill(bill):
 	try:
 		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"]}):
-			credit_to_account = frappe.get_all("Account",
-				filters={
-					"quickbooks_id": bill["APAccountRef"]["value"]
-			})[0]["name"]
+			credit_to_account = get_account_name_by_id(bill["APAccountRef"]["value"])
 			make_payable(credit_to_account)
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
@@ -294,10 +285,7 @@ def save_payment(payment):
 					filters={
 						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 					})[0]["name"]
-				deposit_account = frappe.get_all("Account",
-					filters={
-						"quickbooks_id": payment["DepositToAccountRef"]["value"]
-				})[0]["name"]
+				deposit_account = get_account_name_by_id(payment["DepositToAccountRef"]["value"])
 				make_bank(deposit_account)
 				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
 				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
@@ -319,10 +307,7 @@ def save_bill_payment(bill_payment):
 						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 					})[0]["name"]
 				if bill_payment["PayType"] == "Check":
-					bank_account = frappe.get_all("Account",
-						filters={
-							"quickbooks_id": bill_payment["CheckPayment"]["BankAccountRef"]["value"]
-					})[0]["name"]
+					bank_account = get_account_name_by_id(bill_payment["CheckPayment"]["BankAccountRef"]["value"])
 					make_bank(bank_account)
 				else:
 					bank_account = None
@@ -344,11 +329,7 @@ def get_accounts(lines):
 	accounts = []
 	for line in lines:
 		if line["DetailType"] == "JournalEntryLineDetail":
-			account_name = frappe.db.get_all("Account",
-				filters={
-					"quickbooks_id": line["JournalEntryLineDetail"]["AccountRef"]["value"]
-				},
-			)[0]["name"]
+			account_name = get_account_name_by_id(line["JournalEntryLineDetail"]["AccountRef"]["value"])
 			posting_type = line["JournalEntryLineDetail"]["PostingType"]
 			accounts.append({
 				"account": account_name,
@@ -403,11 +384,7 @@ def get_pi_items(lines):
 			items.append({
 				"item_name": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"conversion_factor": 1,
-				"expense_account": frappe.db.get_all("Account",
-						filters={
-							"quickbooks_id": line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]
-						},
-					)[0]["name"],
+				"expense_account": get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"])
 				"uom": "Unit",
 				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"qty": 1,
@@ -547,3 +524,6 @@ def make_payable(account):
 def make_bank(account):
     print("Making", account, "Bank")
     frappe.db.set_value("Account", account, "account_type", "Bank")
+
+def get_account_name_by_id(quickbooks_id):
+	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id})[0]["name"]
