@@ -460,9 +460,15 @@ erpnext.hub.Item = class Item extends SubPage {
 						${edit_buttons_html}
 					</div>
 					<div class="col-md-1">
-						<button class="btn btn-xs btn-default">
-							Menu
-						</button>
+						<div class="dropdown pull-right hub-item-dropdown">
+							<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu dropdown-right" role="menu">
+								<li><a>Edit Details</a></li>
+								<li><a>Unpublish</a></li>
+							</ul>
+						</div>
 					</div>
 				</div>
 				<div class="row hub-item-seller">
