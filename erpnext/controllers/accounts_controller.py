@@ -85,8 +85,12 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
-		if self.doctype in ['Purchase Invoice', 'Sales Invoice'] and self.is_return:
-			self.validate_qty()
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
+			if cint(self.allocate_advances_automatically):
+				self.set_advances()
+
+			if self.is_return:
+				self.validate_qty()
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -363,23 +367,6 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def set_advances(self):
-		"""Returns list of advances against Account, Party, Reference"""
-
-		res = self.get_advance_entries()
-
-		self.set("advances", [])
-		for d in res:
-			self.append("advances", {
-				"doctype": self.doctype + " Advance",
-				"reference_type": d.reference_type,
-				"reference_name": d.reference_name,
-				"reference_row": d.reference_row,
-				"remarks": d.remarks,
-				"advance_amount": flt(d.amount),
-				"allocated_amount": flt(d.amount) if d.against_order else 0
-			})
-
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
@@ -399,6 +386,30 @@ class AccountsController(TransactionBase):
 					return frappe.get_doc('Address', self.get(fieldname))
 
 		return {}
+
+	def set_advances(self):
+		"""Returns list of advances against Account, Party, Reference"""
+
+		res = self.get_advance_entries()
+
+		self.set("advances", [])
+		advance_allocated = 0
+		for d in res:
+			if d.against_order:
+				allocated_amount = flt(d.amount)
+			else:
+				allocated_amount = min(self.grand_total - advance_allocated, d.amount)
+			advance_allocated += flt(allocated_amount)
+			
+			self.append("advances", {
+				"doctype": self.doctype + " Advance",
+				"reference_type": d.reference_type,
+				"reference_name": d.reference_name,
+				"reference_row": d.reference_row,
+				"remarks": d.remarks,
+				"advance_amount": flt(d.amount),
+				"allocated_amount": allocated_amount
+			})
 
 	def get_advance_entries(self, include_unallocated=True):
 		if self.doctype == "Sales Invoice":
