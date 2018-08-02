@@ -283,18 +283,14 @@ class StatusUpdater(Document):
 		self._update_modified(args, update_modified)
 
 		if args.get('target_parent_field'):
-			frappe.db.sql("""
-			UPDATE `tab%(target_parent_dt)s`
-			SET %(target_parent_field)s = round(ifnull(
-				(
-					SELECT IF(sum(abs(%(target_ref_field)s)) = 0, 100, ifnull(
-						sum(IF(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0
-						)) / IF(sum(abs(%(target_ref_field)s)) = 0, 100, sum(abs(%(target_ref_field)s))) * 100
-					FROM `tab%(target_dt)s`
-					WHERE parent="%(name)s"
-				), 0), 6) %(update_modified)s
-			WHERE name='%(name)s'
-			""" % args)
+			frappe.db.sql("""update `tab%(target_parent_dt)s`
+				set %(target_parent_field)s = round(
+					ifnull((select
+						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
+						/ sum(abs(%(target_ref_field)s)) * 100
+					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
+					%(update_modified)s
+				where name='%(name)s'""" % args)
 
 			# update field
 			if args.get('status_field'):
