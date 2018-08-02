@@ -229,7 +229,6 @@ def save_invoice(invoice):
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 			}).insert().submit()
-			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -245,7 +244,6 @@ def save_journal_entry(journal_entry):
 				"posting_date": journal_entry["TxnDate"],
 				"accounts": get_accounts(journal_entry["Line"]),
 			}).insert().submit()
-			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -272,7 +270,6 @@ def save_bill(bill):
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 			}).insert().submit()
-			frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -293,7 +290,6 @@ def save_payment(payment):
 				erp_pe.reference_no = "Reference No"
 				erp_pe.reference_date = payment["TxnDate"]
 				erp_pe.insert().submit()
-				frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -317,7 +313,6 @@ def save_bill_payment(bill_payment):
 				erp_pe.reference_no = "Reference No"
 				erp_pe.reference_date = bill_payment["TxnDate"]
 				erp_pe.insert().submit()
-				frappe.db.commit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -459,6 +454,7 @@ def save_entries(doctype, entries):
 	for index, entry in enumerate(entries):
 		publish({"event": "save", "doctype": doctype, "count": index, "total": total})
 		save(entry)
+	frappe.db.commit()
 
 # A quickbooks api contraint
 MAX_RESULT_COUNT = 1000
@@ -550,3 +546,4 @@ def rise():
 		for doc in frappe.get_all(doctype, filters=[["quickbooks_id", "not like", ""]]):
 			try:frappe.delete_doc(doctype, doc["name"])
 			except: pass
+	frappe.db.commit()
