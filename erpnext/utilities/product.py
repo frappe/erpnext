@@ -87,7 +87,8 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				"customer_group": customer_group,
 				"company": company,
 				"conversion_rate": 1,
-				"for_shopping_cart": True
+				"for_shopping_cart": True,
+				"currency": frappe.db.get_value("Price List", price_list, "currency")
 			}))
 
 			if pricing_rule:
