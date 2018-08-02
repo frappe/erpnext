@@ -11,46 +11,42 @@
 <div class="item-content">
     <div class="product-page-content" itemscope itemtype="http://schema.org/Product">
         <div class="row">
-         {%- if slideshow -%}
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 {% if slideshow %}
-                    {% include "templates/includes/slideshow.html" %}
-                {% else %}
-                    {{ product_image(website_image, "product-full-image") }}
-                {% endif %}
-            </div>
-        {% else %}
-        <div class="col-md-12">
-                <div class="col-md-3">
-                    {%- for c in frappe.get_list(doctype="Website Slideshow Item", 
-                            fields=["image"],
-                            filters={ "parent":doc.item_zooming}) -%}
-                        <div class="list_all_images">
-                            {% set image_src = c['image'] %}
-                            {% if image_src %}
-                                <p id="image_hover" onmouseover="changeimage('{{image_src}}')">
-                                        <img id="img_one" src="{{ c['image'] }}"
-                                             height="50" weight="50"/>
-                                </p>
+                    <div class="col-md-3">
+                        {%- for c in frappe.get_list(doctype="Website Slideshow Item", 
+                                fields=["image"],
+                                filters={ "parent":doc.item_zooming}) -%}
+                            <div class="list_all_images">
+                                {% set image_src = c['image'] %}
+                                {% if image_src %}
+                                    <p id="image_hover" onmouseover="change_image('{{image_src}}')">
+                                            <img id="img_one" src="{{ c['image'] }}"
+                                                 height="50" weight="50"/>
+                                    </p>
                                 {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-                 <div class="col-md-6" style="padding-left:200px;" >
-                      <div class="gallery">
-                          {%- for image_slice in frappe.get_list(doctype="Website Slideshow Item", 
-                                  fields=["image"],
-                                  filters={ "image":doc.image} )[0:1] -%}
-                           {% set image_src = image_slice['image'] %}
-                           {% if image_src %}
-                               <div class="images">
-                                  <img id="selectimage" width="500px" height="500px" src="{{ image_src }}">
-                               </div>
-                           {% endif %}
-                          {% endfor %}
-                      </div>
-                </div>
-        {% endif %}
+                            </div>
+                         {% endfor %}
+                    </div>
+                     <div class="col-md-6" style="padding-left:200px;" >
+                          <div class="gallery">
+                              {%- for image_slice in frappe.get_list(doctype="Website Slideshow Item", 
+                                      fields=["image"],
+                                      filters={ "image":doc.image} )[0:1] -%}
+                               {% set image_src = image_slice['image'] %}
+                               {% if image_src %}
+                                   <div class="images">
+                                      <img id="selectedimage" width="500px" height="500px" src="{{ image_src }}">
+                                   </div>
+                               {% endif %}
+                              {% endfor %}
+                          </div>
+                    </div>
+                {% else %}
+                    <div class="col-md-6">
+                        {{ product_image(website_image, "product-full-image") }}
+                    </div>
+                {% endif %}
         <div class="col-sm-3" style="padding-left:20px;">
                  <h2 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h2>
                 <p class="text-muted">
@@ -83,7 +79,7 @@
                     {% endif %}
                 </div>
                 <br>
-                <div class="cart-btn">
+                <div class="cartbtnarea">
                     <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                         <h4 class="item-price hide" itemprop="price"></h4>
                         <div class="item-stock hide" itemprop="availability"></div>
@@ -99,7 +95,7 @@
                                     <input class="form-control text-right cart-qty" value="1">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default cart-btn" data-dir="up" style="margin-left:-2px;">
-                                            +</button>
+                                        +</button>
                                     </span>
                                 </div>
                             </span>
@@ -129,6 +125,7 @@
         <div class="row item-website-specification" style="margin-top: 40px">
             <div class="col-md-12">
                 <div class="h6 text-uppercase">{{ _("Specifications") }}</div>
+
                 <table class="table borderless" style="width: 100%">
                 {% for d in website_specifications -%}
                     <tr>

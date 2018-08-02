@@ -208,7 +208,6 @@ function get_selected_attributes() {
 }
 
 // For item alternate image
-function changeimage(image_src){
-    document.getElementById("selectimage").src = image_src;
+function change_image(image_src){
+    document.getElementById("selectedimage").src = image_src;
 }
-
