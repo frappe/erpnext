@@ -95,7 +95,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				if pricing_rule.pricing_rule_for == "Discount Percentage":
 					price[0].price_list_rate = flt(price[0].price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0)))
 
-				if pricing_rule.pricing_rule_for == "Price":
+				if pricing_rule.pricing_rule_for == "Rate":
 					price[0].price_list_rate = pricing_rule.price_list_rate
 
 			price_obj = price[0]
