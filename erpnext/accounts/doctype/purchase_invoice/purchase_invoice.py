@@ -8,7 +8,7 @@ from frappe import _, throw
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.party import get_party_account, get_due_date, get_patry_tax_withholding_details
+from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 from erpnext.stock import get_warehouse_account_map
@@ -21,6 +21,7 @@ from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -42,6 +43,10 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def onload(self):
+		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		self.set_onload("supplier_tds", supplier_tds)
+
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
@@ -54,7 +59,10 @@ class PurchaseInvoice(BuyingController):
 			self.is_opening = 'No'
 
 		self.validate_posting_time()
+
+		# apply tax withholding only if checked and applicable
 		self.set_tax_withholding()
+
 		super(PurchaseInvoice, self).validate()
 
 		if not self.is_return:
@@ -768,14 +776,18 @@ class PurchaseInvoice(BuyingController):
 		self.db_set('release_date', None)
 
 	def set_tax_withholding(self):
-		tax_withholding_details = get_patry_tax_withholding_details(self)
-		for tax_details in tax_withholding_details:
-			if flt(self.get("rounded_total") or self.grand_total) >= flt(tax_details['threshold']):
-				if self.taxes:
-					if tax_details['tax']['description'] not in [tax.description for tax in self.taxes]:
-						self.append('taxes', tax_details['tax'])
-				else:
-					self.append('taxes', tax_details['tax'])
+		if not self.apply_tds:
+			return
+
+		tax_withholding_details = get_party_tax_withholding_details(self)
+		accounts = []
+		for d in self.taxes:
+			if d.account_head == tax_withholding_details.get("account_head"):
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_details.get("account_head") not in accounts:
+			self.append("taxes", tax_withholding_details)
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

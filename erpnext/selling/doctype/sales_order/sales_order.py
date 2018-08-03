@@ -40,6 +40,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
+		self.validate_serial_no_based_delivery()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -105,17 +106,19 @@ class SalesOrder(SellingController):
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
+			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
+			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if not self.delivery_date:
-				delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
-				self.delivery_date = max(delivery_date_list) if delivery_date_list else None
+				self.delivery_date = max_delivery_date
 			if self.delivery_date:
 				for d in self.get("items"):
 					if not d.delivery_date:
 						d.delivery_date = self.delivery_date
-
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
-							indicator='orange', title=_('Warning'))
+							indicator='orange', title=_('Warning'))		
+				if getdate(self.delivery_date) != getdate(max_delivery_date):
+					self.delivery_date = max_delivery_date
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
 
@@ -302,6 +305,7 @@ class SalesOrder(SellingController):
 		self.validate_po()
 		self.validate_drop_ship()
 		self.validate_supplier_after_submit()
+		self.validate_delivery_date()
 
 	def validate_supplier_after_submit(self):
 		"""Check that supplier is the same after submit if PO is already made"""
@@ -397,6 +401,32 @@ class SalesOrder(SellingController):
 
 			d.set("delivery_date", _get_delivery_date(reference_delivery_date,
 				reference_doc.transaction_date, self.transaction_date))
+
+	def validate_serial_no_based_delivery(self):
+		reserved_items = []
+		normal_items = []
+		for item in self.items:
+			if item.ensure_delivery_based_on_produced_serial_no:
+				if item.item_code in normal_items:
+					frappe.throw(_("Cannot ensure delivery by Serial No as \
+					Item {0} is added with and without Ensure Delivery by \
+					Serial No.").format(item.item_code))
+				if item.item_code not in reserved_items:
+					if not frappe.db.get_value("Item", item.item_code, "has_serial_no"):
+						frappe.throw(_("Item {0} has no Serial No. Only serilialized items \
+						can have delivery based on Serial No").format(item.item_code))
+					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
+						frappe.throw(_("No active BOM found for item {0}. Delivery by \
+						Serial No cannot be ensured").format(item.item_code))
+				reserved_items.append(item.item_code)
+			else:
+				normal_items.append(item.item_code)
+
+			if not item.ensure_delivery_based_on_produced_serial_no and \
+				item.item_code in reserved_items:
+				frappe.throw(_("Cannot ensure delivery by Serial No as \
+				Item {0} is added with and without Ensure Delivery by \
+				Serial No.").format(item.item_code))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

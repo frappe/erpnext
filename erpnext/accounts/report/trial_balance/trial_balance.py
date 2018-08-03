@@ -51,7 +51,9 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
+
 	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 	company_currency = erpnext.get_company_currency(filters.company)
 
@@ -162,6 +164,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		d["closing_credit"] = d["opening_credit"] + d["credit"]
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
+
 		if d["root_type"] == "Asset" or d["root_type"] == "Equity" or d["root_type"] == "Expense":
 			d["opening_debit"] -= d["opening_credit"]
 			d["opening_credit"] = 0.0

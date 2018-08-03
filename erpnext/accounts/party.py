@@ -65,6 +65,10 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			"allocated_percentage": d.allocated_percentage or None
 		} for d in party.get("sales_team")]
 
+	# supplier tax withholding category
+	if party_type == "Supplier" and party:
+		out["supplier_tds"] = frappe.get_value(party_type, party.name, "tax_withholding_category")
+
 	return out
 
 def set_address_details(out, party, party_type, doctype=None, company=None):
@@ -507,57 +511,3 @@ def get_party_shipping_address(doctype, name):
 		return out[0][0]
 	else:
 		return ''
-
-def get_patry_tax_withholding_details(ref_doc):
-	supplier = frappe.get_doc("Supplier", ref_doc.supplier)
-	tax_withholding_details = []
-	for tax in supplier.tax_withholding_config:
-		tax_mapper = get_tax_mapper()
-
-		set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=tax.tax_withholding_category)
-
-		if tax.valid_till and date_diff(tax.valid_till, ref_doc.posting_date) > 0:
-			tax_mapper.update({
-				"rate": tax.applicable_percent
-			})
-
-		prepare_tax_withholding_details(tax_mapper, tax_withholding_details)
-
-	return tax_withholding_details
-
-def prepare_tax_withholding_details(tax_mapper, tax_withholding_details):
-	if tax_mapper.get('account_head'):
-		
-		tax_withholding_details.append({
-			"threshold": tax_mapper['threshold'],
-			"tax": tax_mapper
-		})
-
-		del tax_mapper['threshold']
-
-def set_tax_withholding_details(tax_mapper, ref_doc, tax_withholding_category=None, use_default=0):
-	if tax_withholding_category:
-		tax_withholding = frappe.get_doc("Tax Withholding Category", tax_withholding_category)
-
-	if tax_withholding.book_on_invoice and ref_doc.doctype=='Purchase Invoice' \
-		or ref_doc.doctype in ('Payment Entry', 'Journal Entry'):
-
-		for account_detail in tax_withholding.accounts:
-			if ref_doc.company == account_detail.company:
-				tax_mapper.update({
-					"account_head": account_detail.account,
-					"rate": tax_withholding.percent_of_tax_withheld,
-					"threshold": tax_withholding.threshold,
-					"description": tax_withholding.name
-				})
-
-def get_tax_mapper():
-	return {
-		"category": "Total",
-		"add_deduct_tax": "Deduct",
-		"charge_type": "On Net Total",
-		"rate": 0,
-		"description": '',
-		"account_head": '',
-		"threshold": 0.0
-	}

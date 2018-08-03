@@ -244,10 +244,10 @@ class PaymentRequest(Document):
 				success_url = shopping_cart_settings.payment_success_url
 				if success_url:
 					redirect_to = ({
-						"Orders": "orders",
-						"Invoices": "invoices",
-						"My Account": "me"
-					}).get(success_url, "me")
+						"Orders": "/orders",
+						"Invoices": "/invoices",
+						"My Account": "/me"
+					}).get(success_url, "/me")
 				else:
 					redirect_to = get_url("/orders/{0}".format(self.reference_name))
 
