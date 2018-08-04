@@ -7,9 +7,8 @@ import frappe
 import datetime
 from frappe import _
 import math
-from frappe.utils import time_diff_in_hours, rounded
+from frappe.utils import time_diff_in_hours, rounded, getdate, add_days
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import validity_exists
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity, update_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
 
@@ -272,6 +271,12 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 		doc_created = frappe.db.get_value(dt, {'prescription': ref_dn})
 		frappe.db.set_value(dt, doc_created, 'invoiced', invoiced)
 
+def validity_exists(practitioner, patient):
+	return frappe.db.exists({
+			"doctype": "Fee Validity",
+			"practitioner": practitioner,
+			"patient": patient})
+
 def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	appointment_doc = frappe.get_doc("Patient Appointment", appointment_name)
 	validity_exist = validity_exists(appointment_doc.practitioner, appointment_doc.patient)
@@ -282,12 +287,13 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 		# Check if the validity is valid
 		if (fee_validity.valid_till >= appointment_doc.appointment_date):
 			if (method == "on_cancel" and appointment_doc.status != "Closed"):
-				visited = fee_validity.visited - 1
-				if visited < 0:
-					visited = 0
-				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
+				if ref_invoice == fee_validity.ref_invoice:
+					visited = fee_validity.visited - 1
+					if visited < 0:
+						visited = 0
+					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 				do_not_update = True
-			elif (fee_validity.visited < fee_validity.max_visit):
+			elif (method == "on_submit" and fee_validity.visited < fee_validity.max_visit):
 				visited = fee_validity.visited + 1
 				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 				do_not_update = True
@@ -301,29 +307,48 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date, ref_invoice)
 		visited = fee_validity.visited
 
+	print "do_not_update: ", do_not_update
+	print "visited: ", visited
+
 	# Mark All Patient Appointment invoiced = True in the validity range do not cross the max visit
 	if (method == "on_cancel"):
 		invoiced = True
 	else:
 		invoiced = False
-	patient_appointments = frappe.get_list("Patient Appointment",{'patient': fee_validity.patient, 'invoiced': invoiced,
-	'appointment_date':("<=", fee_validity.valid_till), 'practitioner': fee_validity.practitioner}, order_by="appointment_date")
+
+	patient_appointments = appointments_valid_in_fee_validity(appointment_doc, invoiced)
 	if patient_appointments and fee_validity:
 		visit = visited
 		for appointment in patient_appointments:
 			if (method == "on_cancel" and appointment.status != "Closed"):
-				visited = visited - 1
-				if visited < 0:
-					visited = 0
-				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
+				if ref_invoice == fee_validity.ref_invoice:
+					visited = visited - 1
+					if visited < 0:
+						visited = 0
+					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 				frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", False)
 				manage_doc_for_appoitnment("Patient Encounter", appointment.name, False)
-			elif int(fee_validity.max_visit) > visit:
-				visited = visited + 1
-				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
+			elif method == "on_submit" and int(fee_validity.max_visit) > visit:
+				if ref_invoice == fee_validity.ref_invoice:
+					visited = visited + 1
+					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 				frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
 				manage_doc_for_appoitnment("Patient Encounter", appointment.name, True)
-			visit = visit + 1
+			if ref_invoice == fee_validity.ref_invoice:
+				visit = visit + 1
+
+	if method == "on_cancel":
+		ref_invoice_in_fee_validity = frappe.db.get_value("Fee Validity", fee_validity.name, 'ref_invoice')
+		if ref_invoice_in_fee_validity == ref_invoice:
+			frappe.delete_doc("Fee Validity", fee_validity.name)
+
+def appointments_valid_in_fee_validity(appointment, invoiced):
+	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
+	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
+	valid_days_date = add_days(getdate(appointment.appointment_date), int(valid_days))
+	return frappe.get_list("Patient Appointment",{'patient': appointment.patient, 'invoiced': invoiced,
+	'appointment_date':("<=", valid_days_date), 'appointment_date':(">=", getdate(appointment.appointment_date)),
+	'practitioner': appointment.practitioner}, order_by="appointment_date", limit=int(max_visit)-1)
 
 def manage_doc_for_appoitnment(dt_from_appointment, appointment, invoiced):
 	dn_from_appointment = frappe.db.exists(
