@@ -13,6 +13,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
+from erpnext.accounts.party import get_party_account_currency
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -83,6 +84,8 @@ class PurchaseOrder(BuyingController):
 		if warn_po:
 			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
 			frappe.msgprint(_("{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.").format(self.supplier, standing), title=_("Caution"), indicator='orange')
+
+		self.party_account_currency = get_party_account_currency("Supplier", self.supplier, self.company)
 
 	def validate_minimum_order_qty(self):
 		items = list(set([d.item_code for d in self.get("items")]))
