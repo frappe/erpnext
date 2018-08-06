@@ -201,7 +201,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
@@ -927,7 +927,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-30 12:00:20.746580", 
+ "modified": "2018-08-06 16:45:37.899084", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Healthcare Practitioner", 

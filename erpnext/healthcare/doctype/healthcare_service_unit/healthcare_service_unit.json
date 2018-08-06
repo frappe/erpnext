@@ -246,7 +246,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
@@ -461,7 +461,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-01 17:32:53.968441", 
+ "modified": "2018-08-06 16:54:52.727598", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Healthcare Service Unit", 
