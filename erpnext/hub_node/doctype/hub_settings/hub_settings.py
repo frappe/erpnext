@@ -110,11 +110,6 @@ def reset_hub_settings(last_sync_datetime = ""):
 	frappe.msgprint(_("Successfully unregistered."))
 
 @frappe.whitelist()
-def sync():
-	hub_settings = frappe.get_doc('Hub Settings')
-	hub_settings.sync()
-
-@frappe.whitelist()
 def register_seller(**kwargs):
 	settings = frappe.get_doc('Hub Settings')
 	settings.update(kwargs)
