@@ -1678,7 +1678,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Fee Schedule,Fee Structure,מבנה עמלות
 DocType: Timesheet Detail,Costing Amount,סכום תמחיר
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +60,Submit Salary Slip,שלח שכר Slip
-apps/erpnext/erpnext/controllers/selling_controller.py +138,Maxiumm discount for Item {0} is {1}%,ההנחה Maxiumm לפריט {0} {1}% הוא
+apps/erpnext/erpnext/controllers/selling_controller.py +138,Maximum discount for Item {0} is {1}%,ההנחה Maximum לפריט {0} {1}% הוא
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.js +16,Import in Bulk,יבוא בתפזורת
 DocType: Sales Partner,Address & Contacts,כתובת ומגעים
 DocType: SMS Log,Sender Name,שם שולח
