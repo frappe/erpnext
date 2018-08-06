@@ -7,6 +7,9 @@
         "public/js/website_utils.js",
         "public/js/shopping_cart.js"
     ],
+    "js/marketplace.min.js": [
+        "public/js/hub/marketplace.js"
+    ],
     "js/erpnext.min.js": [
         "public/js/conf.js",
         "public/js/utils.js",
