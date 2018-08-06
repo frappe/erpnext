@@ -53,6 +53,7 @@ def fetch_accounts():
 	make_custom_fields()
 	make_root_accounts()
 	fetch_all_entries(entity="Account", company_id=company_id)
+	fetch_all_entries(entity="TaxRate", company_id=company_id)
 	frappe.clear_messages()
 	frappe.publish_realtime("quickbooks_accounts_synced")
 
@@ -126,6 +127,22 @@ def save_account(account):
 				"root_type": mapping[account["AccountType"]],
 				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
+				"is_group": "0",
+				"company": company,
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
+	except:
+		import traceback
+		traceback.print_exc()
+
+def save_tax_rate(tax_rate):
+	try:
+		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": "TaxRate - {}".format(tax_rate["Id"])}):
+			frappe.get_doc({
+				"doctype": "Account",
+				"quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]),
+				"account_name": "{} - QB".format(tax_rate["Name"]),
+				"root_type": "Liability",
+				"parent_account": encode_company_abbr("{} - QB".format("Liability"), company),
 				"is_group": "0",
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
@@ -391,14 +408,14 @@ def get_pi_items(lines):
 def get_taxes(lines):
 	taxes = []
 	for line in lines:
+		account_head = get_account_name_by_id("TaxRate - {}".format(line["TaxLineDetail"]["TaxRateRef"]["value"]))
 		taxes.append({
 			"charge_type": "Actual",
 
-			# This is wrong will fix later
-			"account_head": "TDS Payable - QB - SA",
+			"account_head": account_head,
 
 			# description c/sould be fetched from TaxLineDetail.TaxRateRef.Description and Name
-			"description": "Added total amount from Invoice",
+			"description": account_head,
 			"tax_amount": line["Amount"],
 		})
 	return taxes
@@ -446,6 +463,7 @@ save_methods = {
 	"Bill": save_bill,
 	"Payment": save_payment,
 	"BillPayment": save_bill_payment,
+	"TaxRate": save_tax_rate,
 }
 
 def save_entries(doctype, entries):
