@@ -37,5 +37,15 @@ erpnext.hub.Home = class Home extends SubPage {
 			html = get_item_card_container_html(data.items_by_country, __('Near you'));
 			this.$wrapper.append(html);
 		}
+
+		const category_items = data.category_items;
+
+		if (category_items) {
+			Object.keys(category_items).map(category => {
+				const items = category_items[category];
+				html = get_item_card_container_html(items, __(category));
+				this.$wrapper.append(html);
+			});
+		}
 	}
 }
