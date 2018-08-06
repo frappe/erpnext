@@ -121,15 +121,13 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.update_defaults_from_item_group()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
 					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
-		elif not self.item_defaults:
-			self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
-
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
@@ -661,6 +659,27 @@ class Item(WebsiteGenerator):
 					template_item.flags.dont_update_variants = True
 					template_item.flags.ignore_permissions = True
 					template_item.save()
+
+	def update_defaults_from_item_group(self):
+		"""Get defaults from Item Group"""
+		if self.item_group and not self.item_defaults:
+			item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
+				['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
+				'expense_account','selling_cost_center','income_account'], as_dict = 1)
+			if item_defaults:
+				for item in item_defaults:
+					self.append('item_defaults', {
+						'company': item.company,
+						'default_warehouse': item.default_warehouse,
+						'default_price_list': item.default_price_list,
+						'buying_cost_center': item.buying_cost_center,
+						'default_supplier': item.default_supplier,
+						'expense_account': item.expense_account,
+						'selling_cost_center': item.selling_cost_center,
+						'income_account': item.income_account
+					})
+			else:
+				self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
