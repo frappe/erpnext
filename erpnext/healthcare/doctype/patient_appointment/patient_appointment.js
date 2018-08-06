@@ -84,6 +84,20 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 		}
 		frm.set_df_property("get_procedure_from_encounter", "read_only", frm.doc.__islocal ? 0 : 1);
+		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'manage_appointment_invoice_automatically', (r) => {
+			if(r.manage_appointment_invoice_automatically == 1){
+				frm.set_df_property("mode_of_payment", "hidden", 0);
+				frm.set_df_property("paid_amount", "hidden", 0);
+				frm.set_df_property("mode_of_payment", "reqd", 1);
+				frm.set_df_property("paid_amount", "reqd", 1);
+			}
+			else{
+				frm.set_df_property("mode_of_payment", "hidden", 1);
+				frm.set_df_property("paid_amount", "hidden", 1);
+				frm.set_df_property("mode_of_payment", "reqd", 0);
+				frm.set_df_property("paid_amount", "reqd", 0);
+			}
+		});
 	},
 	check_availability: function(frm) {
 		var { practitioner, appointment_date } = frm.doc;
@@ -335,6 +349,7 @@ frappe.ui.form.on("Patient Appointment", "practitioner", function(frm) {
 			},
 			callback: function (data) {
 				frappe.model.set_value(frm.doctype,frm.docname, "department",data.message.department);
+				frappe.model.set_value(frm.doctype,frm.docname, "paid_amount",data.message.op_consulting_charge);
 			}
 		});
 	}

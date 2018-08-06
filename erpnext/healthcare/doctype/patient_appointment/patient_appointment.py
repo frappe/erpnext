@@ -71,8 +71,8 @@ def invoice_appointment(appointment_doc):
 	item_line.reference_dn = appointment_doc.name
 
 	payments_line = sales_invoice.append("payments")
-	payments_line.mode_of_payment = "Cash"
-	payments_line.amount = practitioner_charge
+	payments_line.mode_of_payment = appointment_doc.mode_of_payment
+	payments_line.amount = appointment_doc.paid_amount
 
 	sales_invoice.set_missing_values(for_validate = True)
 
