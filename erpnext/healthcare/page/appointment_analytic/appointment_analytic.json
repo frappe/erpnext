@@ -1,22 +1,24 @@
 {
- "content": null,
- "creation": "2016-08-18 12:29:52.497819",
- "docstatus": 0,
- "doctype": "Page",
- "idx": 0,
- "modified": "2016-08-18 12:29:52.497819",
- "modified_by": "Administrator",
- "module": "Healthcare",
- "name": "appointment-analytic",
- "owner": "Administrator",
- "page_name": "Appointment Analytics",
+ "content": null, 
+ "creation": "2016-08-18 12:29:52.497819", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-08-06 11:40:53.082863", 
+ "modified_by": "Administrator", 
+ "module": "Healthcare", 
+ "name": "appointment-analytic", 
+ "owner": "Administrator", 
+ "page_name": "Appointment Analytics", 
+ "restrict_to_domain": "Healthcare", 
  "roles": [
   {
    "role": "Physician"
   }
- ],
- "script": null,
- "standard": "Yes",
- "style": null,
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
  "title": "Appointment Analytics"
 }
