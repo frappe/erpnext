@@ -380,17 +380,19 @@ def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")
 
 	results = frappe.db.sql('''
-		select
-			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
-		from
+		SELECT
+			SUM(base_grand_total) AS total,
+			CONCAT(EXTRACT(YEAR FROM `posting_date`), '-', EXTRACT(MONTH FROM `posting_date`)) AS month_year
+		FROM
 			`tabSales Invoice`
-		where
-			date_format(posting_date, '%m-%Y')='{0}'
-			and docstatus = 1
-			and company = {1}
-		group by
+		WHERE
+			CONCAT(EXTRACT(YEAR FROM `posting_date`), '-', EXTRACT(MONTH FROM `posting_date`)) = {current_month_year}
+			AND docstatus = 1
+			AND company = {company}
+		GROUP BY
 			month_year
-	'''.format(current_month_year, frappe.db.escape(company)), as_dict = True)
+	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company)),
+		as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
