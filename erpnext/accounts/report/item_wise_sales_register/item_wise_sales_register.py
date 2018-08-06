@@ -223,13 +223,13 @@ def get_tax_accounts(item_list, columns, company_currency,
 						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
 							if item_net_amount else 0
 						if item_tax_amount:
-							tax_amount = flt(item_tax_amount, tax_amount_precision)
-							tax_amount = (tax_amount * -1
-								if (doctype == 'Purchase Invoice' and name in deducted_tax) else tax_amount)
+							tax_value = flt(item_tax_amount, tax_amount_precision)
+							tax_value = (tax_value * -1
+								if (doctype == 'Purchase Invoice' and name in deducted_tax) else tax_value)
 
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 								"tax_rate": tax_rate,
-								"tax_amount": tax_amount
+								"tax_amount": tax_value
 							})
 
 			except ValueError:
