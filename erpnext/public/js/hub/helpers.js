@@ -9,7 +9,7 @@ function get_item_card_container_html(items, title='', get_item_html = get_item_
 	const items_html = (items || []).map(item => get_item_html(item)).join('');
 	const title_html = title
 		? `<div class="col-sm-12 margin-bottom">
-				<b>${title}</b>
+				<h4>${title}</h4>
 			</div>`
 		: '';
 
