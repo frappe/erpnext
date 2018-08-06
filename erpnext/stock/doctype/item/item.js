@@ -687,14 +687,6 @@ $.extend(erpnext.item, {
 	}
 });
 
-frappe.ui.form.on("Item", {
-	setup: function(frm) {
-		// #13478 : Default Accounts in Item from Item Group
-		cur_frm.add_fetch('item_group', 'default_expense_account', 'expense_account');
-		cur_frm.add_fetch('item_group', 'default_income_account', 'income_account');
-	},
-});
-
 frappe.ui.form.on("UOM Conversion Detail", {
 	uom: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
