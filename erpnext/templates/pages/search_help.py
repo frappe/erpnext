@@ -10,7 +10,9 @@ def get_context(context):
 	context.no_cache = 1
 	if frappe.form_dict.q:
 		query = str(utils.escape(sanitize_html(frappe.form_dict.q)))
-		context.title = _('Help Results for "{0}"').format(query)
+		context.title = _('Help Results for')
+		context.query = query
+		
 		context.route = '/search_help'
 		d = frappe._dict()
 		d.results_sections = get_help_results_sections(query)
