@@ -141,7 +141,7 @@ class SellingController(StockController):
 			discount = flt(frappe.db.get_value("Item", d.item_code, "max_discount"))
 
 			if discount and flt(d.discount_percentage) > discount:
-				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
+				frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
