@@ -2,6 +2,21 @@ from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate
 from frappe.frappeclient import FrappeClient
+from frappe.utils.nestedset import get_root_of
+from frappe.contacts.doctype.contact.contact import get_default_contact
+
+def get_list(doctype, start, limit, fields, filters, order_by):
+	pass
+
+def get_hub_connection():
+	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
+		hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
+		hub_connection = hub_connector.get_connection()
+		return hub_connection.connection
+
+	# read-only connection
+	hub_connection = FrappeClient(frappe.conf.hub_url)
+	return hub_connection
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
