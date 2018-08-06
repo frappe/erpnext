@@ -206,7 +206,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Item Reorder,Re-Order Qty,Reordenar Cantidad
 DocType: Department,Days for which Holidays are blocked for this department.,Días para los que Días Feriados se bloquean para este departamento .
 DocType: Project,Customer Details,Datos del Cliente
-apps/erpnext/erpnext/controllers/selling_controller.py +138,Maxiumm discount for Item {0} is {1}%,Descuento máximo para el elemento {0} es {1}%
+apps/erpnext/erpnext/controllers/selling_controller.py +138,Maximum discount for Item {0} is {1}%,Descuento máximo para el elemento {0} es {1}%
 DocType: Fiscal Year,**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**Año Fiscal** representa un 'Ejercicio Financiero'. Los asientos contables y otras transacciones importantes se registran contra **Año Fiscal**
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +57,Actual Qty is mandatory,Cantidad actual es obligatoria
 DocType: Stock Reconciliation,Stock Reconciliation,Reconciliación de Inventario
