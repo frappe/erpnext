@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { make_search_bar, get_item_card_container_html } from '../helpers';
+import { make_search_bar, get_item_card_container_html, get_item_card_html } from '../helpers';
 
 erpnext.hub.Home = class Home extends SubPage {
 	make_wrapper() {
@@ -43,7 +43,14 @@ erpnext.hub.Home = class Home extends SubPage {
 		if (category_items) {
 			Object.keys(category_items).map(category => {
 				const items = category_items[category];
-				html = get_item_card_container_html(items, __(category));
+				const see_all_link = `<p data-route="marketplace/category/${category}">See All</p>`;
+
+				html = get_item_card_container_html(
+					items,
+					__(category),
+					get_item_card_html,
+					see_all_link
+				);
 				this.$wrapper.append(html);
 			});
 		}

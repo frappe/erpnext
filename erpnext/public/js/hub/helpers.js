@@ -5,11 +5,12 @@ function get_empty_state(message, action) {
 	</div>`;
 }
 
-function get_item_card_container_html(items, title='', get_item_html = get_item_card_html) {
+function get_item_card_container_html(items, title='', get_item_html = get_item_card_html, action='') {
 	const items_html = (items || []).map(item => get_item_html(item)).join('');
 	const title_html = title
-		? `<div class="col-sm-12 margin-bottom">
+		? `<div class="hub-card-container-header col-sm-12 margin-bottom flex">
 				<h4>${title}</h4>
+				${action}
 			</div>`
 		: '';
 
