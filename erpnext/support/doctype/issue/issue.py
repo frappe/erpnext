@@ -90,11 +90,11 @@ class Issue(Document):
 		# Replicate linked Communications
 		# todo get all communications in timeline before this, and modify them to append them to new doc
 		comm_to_split_from = frappe.get_doc("Communication", communication_id)
-		communications = frappe.get_all("Communication", filters={"reference_name": 'ISS-00001', "reference_doctype": "Issue", "creation": ('>=', comm_to_split_from.creation)})
+		communications = frappe.get_all("Communication", filters={"reference_name": comm_to_split_from.reference_name, "reference_doctype": "Issue", "creation": ('>=', comm_to_split_from.creation)})
 		for communication in communications:
 			doc = frappe.get_doc("Communication", communication.name)
 			doc.reference_name = replicated_issue.name
-			doc.save()
+			doc.save(ignore_permissions=True)
 		return replicated_issue.name
 
 def get_list_context(context=None):
