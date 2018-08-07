@@ -570,3 +570,11 @@ def rise():
 			try:frappe.delete_doc(doctype, doc["name"])
 			except: pass
 	frappe.db.commit()
+
+def get_tax_code():
+	tax_codes = json.loads(frappe.cache().get("quickbooks-cached-TaxCode").decode())
+	return {tax_code["Id"]: tax_code for tax_code in tax_codes}
+
+def get_tax_rate():
+	tax_rates = json.loads(frappe.cache().get("quickbooks-cached-TaxRate").decode())
+	return {tax_rate["Id"]: tax_rate for tax_rate in tax_rates}
