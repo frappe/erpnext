@@ -1,4 +1,5 @@
 import SubPage from './subpage';
+import { get_item_card_container_html } from '../helpers';
 
 erpnext.hub.Seller = class Seller extends SubPage {
 	make_wrapper() {
@@ -13,14 +14,8 @@ erpnext.hub.Seller = class Seller extends SubPage {
 	}
 
 	get_hub_seller_profile() {
-		return hub.call('get_hub_seller_profile', { company: this.company });
+		return hub.call('get_hub_seller_page_info', { company: this.company });
 	}
-
-	// get_hub_seller_items(profile) {
-	// 	this.profile = profile;
-	// 	console.log(profile);
-	// 	return hub.call('get_items', { hub_seller: profile.user });
-	// }
 
 	show_skeleton() {
 		const skeleton = `<div class="hub-item-container">
@@ -46,8 +41,8 @@ erpnext.hub.Seller = class Seller extends SubPage {
 		this.$wrapper.html(skeleton);
 	}
 
-	render(profile) {
-		const p = profile;
+	render(data) {
+		const p = data.profile;
 
 		const profile_html = `<div class="hub-item-container">
 			<div class="row visible-xs">
@@ -81,5 +76,8 @@ erpnext.hub.Seller = class Seller extends SubPage {
 		</div>`;
 
 		this.$wrapper.html(profile_html);
+
+		let html = get_item_card_container_html(data.items, __('Products by ' + p.company));
+		this.$wrapper.append(html);
 	}
 }
