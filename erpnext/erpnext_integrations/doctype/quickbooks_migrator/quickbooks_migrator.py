@@ -413,12 +413,13 @@ def get_pi_items(lines):
 def get_item_taxes(tax_code):
 	tax_rates = get_tax_rate()
 	item_taxes = {}
-	sales_tax_rate_list = get_tax_code()[tax_code]["SalesTaxRateList"]["TaxRateDetail"]
-	for sales_tax_rate in sales_tax_rate_list:
-		if sales_tax_rate["TaxTypeApplicable"] == "TaxOnAmount":
-			tax_head = get_account_name_by_id("TaxRate - {}".format(sales_tax_rate["TaxRateRef"]["value"]))
-			tax_rate = tax_rates[sales_tax_rate["TaxRateRef"]["value"]]
-			item_taxes[tax_head] = tax_rate["RateValue"]
+	tax_code = get_tax_code()[tax_code]
+	for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
+		for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+			if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
+				tax_head = get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
+				tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
+				item_taxes[tax_head] = tax_rate["RateValue"]
 	return item_taxes
 
 def get_taxes(lines):
@@ -449,20 +450,22 @@ def get_taxes(lines):
 
 def get_tax_type(tax_rate):
 	for tax_code in get_tax_code().values():
-		for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
-			if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
-				return tax_rate_detail["TaxTypeApplicable"]
+		for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
+			for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+				if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
+					return tax_rate_detail["TaxTypeApplicable"]
 
 def get_parent_tax_rate(tax_rate):
 	parent = None
 	for tax_code in get_tax_code().values():
-		for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
-			if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
-				parent = tax_rate_detail["TaxOnTaxOrder"]
-		if parent:
-			for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
-				if tax_rate_detail["TaxOrder"] == parent:
-					return tax_rate_detail["TaxRateRef"]["value"]
+		for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
+			for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+				if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
+					parent = tax_rate_detail["TaxOnTaxOrder"]
+			if parent:
+				for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+					if tax_rate_detail["TaxOrder"] == parent:
+						return tax_rate_detail["TaxRateRef"]["value"]
 
 def get_parent_row_id(tax_rate, taxes):
 	tax_account = get_account_name_by_id("TaxRate - {}".format(tax_rate))
