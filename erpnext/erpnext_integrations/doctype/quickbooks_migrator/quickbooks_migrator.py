@@ -397,6 +397,7 @@ def get_pi_items(lines):
 				"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
 				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
 				"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
+				"item_tax_rate": json.dumps(get_item_taxes(line["ItemBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
 		elif line["DetailType"] == "AccountBasedExpenseLineDetail":
 			items.append({
@@ -407,6 +408,7 @@ def get_pi_items(lines):
 				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"qty": 1,
 				"price_list_rate": line["Amount"],
+				"item_tax_rate": json.dumps(get_item_taxes(line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
 	return items
 
