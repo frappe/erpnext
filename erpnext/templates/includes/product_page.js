@@ -109,6 +109,13 @@ frappe.ready(function() {
 
 		window.location.href = window.location.pathname + "?variant=" + item_code;
 	});
+
+	// change the item image src when alternate images are hovered
+	$(document.body).on('mouseover', '.item-alternative-image', (e) => {
+		const $alternative_image = $(e.currentTarget);
+		const src = $alternative_image.find('img').prop('src');
+		$('.item-image img').prop('src', src);
+	});
 });
 
 var toggle_update_cart = function(qty) {
@@ -205,9 +212,4 @@ function get_selected_attributes() {
 		attributes[$(this).attr('data-attribute')] = $(this).val();
 	});
 	return attributes;
-}
-
-// For item alternate image
-function change_image(image_src){
-    document.getElementById("selectedimage").src = image_src;
 }
