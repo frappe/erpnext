@@ -26,7 +26,7 @@ class ExpenseClaim(AccountsController):
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
 		set_employee_name(self)
-		self.set_expense_account()
+		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
@@ -226,9 +226,9 @@ class ExpenseClaim(AccountsController):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
-	def set_expense_account(self):
+	def set_expense_account(self, validate=False):
 		for expense in self.expenses:
-			if not expense.default_account:
+			if not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):

@@ -26,6 +26,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			};
 		});
 
+		if (this.frm.doc.__islocal) {
+			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
+		}
+
 		/* eslint-disable */
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {
