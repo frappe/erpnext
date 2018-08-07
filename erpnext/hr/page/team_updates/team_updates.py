@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import frappe
 from email_reply_parser import EmailReplyParser
-from markdown2 import markdown
 
 @frappe.whitelist()
 def get_data(start=0):
@@ -16,6 +15,6 @@ def get_data(start=0):
 		d.sender_name = frappe.db.get_value("Employee", {"user_id": d.sender},
 			"employee_name") or d.sender
 		if d.text_content:
-			d.content = markdown(EmailReplyParser.parse_reply(d.text_content))
+			d.content = frappe.utils.md_to_html(EmailReplyParser.parse_reply(d.text_content))
 
 	return data
