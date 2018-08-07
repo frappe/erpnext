@@ -371,6 +371,7 @@ def get_items(lines):
 				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 				"qty": line["SalesItemLineDetail"]["Qty"],
 				"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
+				"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
 			})
 		elif line["DetailType"] == "DescriptionOnly":
 			items[-1].update({
@@ -409,20 +410,65 @@ def get_pi_items(lines):
 			})
 	return items
 
+def get_item_taxes(tax_code):
+	tax_rates = get_tax_rate()
+	item_taxes = {}
+	sales_tax_rate_list = get_tax_code()[tax_code]["SalesTaxRateList"]["TaxRateDetail"]
+	for sales_tax_rate in sales_tax_rate_list:
+		if sales_tax_rate["TaxTypeApplicable"] == "TaxOnAmount":
+			tax_head = get_account_name_by_id("TaxRate - {}".format(sales_tax_rate["TaxRateRef"]["value"]))
+			tax_rate = tax_rates[sales_tax_rate["TaxRateRef"]["value"]]
+			item_taxes[tax_head] = tax_rate["RateValue"]
+	return item_taxes
+
 def get_taxes(lines):
 	taxes = []
 	for line in lines:
-		account_head = get_account_name_by_id("TaxRate - {}".format(line["TaxLineDetail"]["TaxRateRef"]["value"]))
-		taxes.append({
-			"charge_type": "Actual",
-
-			"account_head": account_head,
-
-			# description c/sould be fetched from TaxLineDetail.TaxRateRef.Description and Name
-			"description": account_head,
-			"tax_amount": line["Amount"],
-		})
+		tax_rate = line["TaxLineDetail"]["TaxRateRef"]["value"]
+		account_head = get_account_name_by_id("TaxRate - {}".format(tax_rate))
+		tax_type_applicable = get_tax_type(tax_rate)
+		if tax_type_applicable == "TaxOnAmount":
+			taxes.append({
+				"charge_type": "On Net Total",
+				"account_head": account_head,
+				"description": account_head,
+				"rate": 0,
+			})
+		else:
+			parent_tax_rate = get_parent_tax_rate(tax_rate)
+			parent_row_id = get_parent_row_id(parent_tax_rate, taxes)
+			taxes.append({
+				"charge_type": "On Previous Row Amount",
+				"row_id": parent_row_id,
+				"account_head": account_head,
+				"description": account_head,
+				"rate": line["TaxLineDetail"]["TaxPercent"],
+			})
+	print(taxes)
 	return taxes
+
+def get_tax_type(tax_rate):
+	for tax_code in get_tax_code().values():
+		for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
+			if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
+				return tax_rate_detail["TaxTypeApplicable"]
+
+def get_parent_tax_rate(tax_rate):
+	parent = None
+	for tax_code in get_tax_code().values():
+		for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
+			if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
+				parent = tax_rate_detail["TaxOnTaxOrder"]
+		if parent:
+			for tax_rate_detail in tax_code["SalesTaxRateList"]["TaxRateDetail"]:
+				if tax_rate_detail["TaxOrder"] == parent:
+					return tax_rate_detail["TaxRateRef"]["value"]
+
+def get_parent_row_id(tax_rate, taxes):
+	tax_account = get_account_name_by_id("TaxRate - {}".format(tax_rate))
+	for index, tax in enumerate(taxes):
+		if tax["account_head"] == tax_account:
+			return index + 1
 
 def create_address(entity, doctype, address, address_type):
 	try :
