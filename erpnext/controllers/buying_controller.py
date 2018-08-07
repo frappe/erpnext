@@ -99,9 +99,16 @@ class BuyingController(StockController):
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(self.base_grand_total, self.company_currency)
+			amount = (self.base_rounded_total
+				if not self.get("disable_rounded_total") else self.base_grand_total)
+
+			self.base_in_words = money_in_words(amount, self.company_currency)
+
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(self.grand_total, self.currency)
+			amount = (self.rounded_total
+				if not self.get("disable_rounded_total") else self.grand_total)
+
+			self.in_words = money_in_words(amount, self.currency)
 
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):

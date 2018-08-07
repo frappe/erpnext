@@ -34,7 +34,7 @@ class LabTestTemplate(Document):
 		# remove template refernce from item and disable item
 		if(self.item):
 			try:
-				frappe.delete_doc("Item",self.item)
+				frappe.delete_doc("Item",self.item, force=True)
 			except Exception:
 				frappe.throw("""Not permitted. Please disable the Test Template""")
 
