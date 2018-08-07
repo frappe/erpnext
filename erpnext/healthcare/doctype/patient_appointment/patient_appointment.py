@@ -292,10 +292,10 @@ def get_events(start, end, filters=None):
 	conditions = get_event_conditions("Patient Appointment", filters)
 	data = frappe.db.sql("""select name, patient, physician, status,
 		duration, timestamp(appointment_date, appointment_time) as
-		'start' from `tabPatient Appointment` where
+		'appointment_date' from `tabPatient Appointment` where
 		(appointment_date between %(start)s and %(end)s)
 		and docstatus < 2 {conditions}""".format(conditions=conditions),
 		{"start": start, "end": end}, as_dict=True, update={"allDay": 0})
 	for item in data:
-		item.end = item.start + datetime.timedelta(minutes = item.duration)
+		item.appointment_datetime = item.appointment_date + datetime.timedelta(minutes = item.duration)
 	return data
