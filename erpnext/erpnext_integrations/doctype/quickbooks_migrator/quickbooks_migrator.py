@@ -54,6 +54,7 @@ def fetch_accounts():
 	make_root_accounts()
 	fetch_all_entries(entity="Account", company_id=company_id)
 	fetch_all_entries(entity="TaxRate", company_id=company_id)
+	fetch_all_entries(entity="TaxCode", company_id=company_id)
 	frappe.clear_messages()
 	frappe.publish_realtime("quickbooks_accounts_synced")
 
@@ -149,6 +150,9 @@ def save_tax_rate(tax_rate):
 	except:
 		import traceback
 		traceback.print_exc()
+
+def save_tax_code(tax_code):
+	pass
 
 def save_customer(customer):
 	try:
@@ -464,6 +468,7 @@ save_methods = {
 	"Payment": save_payment,
 	"BillPayment": save_bill_payment,
 	"TaxRate": save_tax_rate,
+	"TaxCode": save_tax_code,
 }
 
 def save_entries(doctype, entries):
