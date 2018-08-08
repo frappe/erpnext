@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018, Open eTechnologies and contributors
+# Copyright (c) 2018, Frappe Technologies and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -9,37 +9,37 @@ from frappe import _
 
 #Get and Create Products
 def get_products_details():
-		products = get_products_instance()
-		reports = get_reports_instance()
+	products = get_products_instance()
+	reports = get_reports_instance()
 
-		mws_settings = frappe.get_doc("Amazon MWS Settings")
-		market_place_list = return_as_list(mws_settings.market_place_id)
+	mws_settings = frappe.get_doc("Amazon MWS Settings")
+	market_place_list = return_as_list(mws_settings.market_place_id)
 
-		for marketplace in market_place_list:
-			report_id = request_and_fetch_report_id("_GET_FLAT_FILE_OPEN_LISTINGS_DATA_", None, None, market_place_list)
+	for marketplace in market_place_list:
+		report_id = request_and_fetch_report_id("_GET_FLAT_FILE_OPEN_LISTINGS_DATA_", None, None, market_place_list)
 
-			if report_id:
-				listings_response = reports.get_report(report_id=report_id)
+		if report_id:
+			listings_response = reports.get_report(report_id=report_id)
 
-				#Get ASIN Codes
-				string_io = StringIO.StringIO(listings_response.original)
-				csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
-				asin_list = list(set([row[1] for row in csv_rows[1:]]))
+			#Get ASIN Codes
+			string_io = StringIO.StringIO(listings_response.original)
+			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
+			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 
-				#Map ASIN Codes to SKUs
-				sku_asin = [{"asin":row[1],"sku":row[0]} for row in csv_rows[1:]]
+			#Map ASIN Codes to SKUs
+			sku_asin = [{"asin":row[1],"sku":row[0]} for row in csv_rows[1:]]
 
-				#Fetch Products List from ASIN
-				products_response = call_mws_method(products.get_matching_product,marketplaceid=marketplace,
-					asins=asin_list)
+			#Fetch Products List from ASIN
+			products_response = call_mws_method(products.get_matching_product,marketplaceid=marketplace,
+				asins=asin_list)
 
-				matching_products_list = products_response.parsed
+			matching_products_list = products_response.parsed
 
-				for product in matching_products_list:
-					#Get matching sku for ASIN
-					skus = [row["sku"] for row in sku_asin if row["asin"]==product.ASIN]
-					for sku in skus:
-						create_item_code(product, sku)
+			for product in matching_products_list:
+				#Get matching sku for ASIN
+				skus = [row["sku"] for row in sku_asin if row["asin"]==product.ASIN]
+				for sku in skus:
+					create_item_code(product, sku)
 
 def get_products_instance():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
