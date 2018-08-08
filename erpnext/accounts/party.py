@@ -143,7 +143,7 @@ def get_default_price_list(party):
 
 	if party.doctype == "Customer":
 		price_list =  frappe.db.get_value("Customer Group",
-			party.customer_group, "default_price_list")
+			party.customer_group, "default_price_list", cache=True)
 		if price_list:
 			return price_list
 
@@ -162,7 +162,7 @@ def set_price_list(out, party, party_type, given_price_list):
 		price_list = get_default_price_list(party) or given_price_list
 
 	if price_list:
-		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency")
+		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency", cache=True)
 
 	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 

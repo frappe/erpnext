@@ -103,7 +103,7 @@ def update_stock(args, out):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code):
+	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -330,10 +330,17 @@ def get_default_deferred_revenue_account(args, item):
 		return None
 
 def get_default_cost_center(args, item, item_group):
-	return (frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
-		or (item.get("selling_cost_center") if args.get("customer") else item.get("buying_cost_center"))
-		or (item_group.get("selling_cost_center") if args.get("customer") else item_group.get("buying_cost_center"))
-		or args.get("cost_center"))
+	cost_center = None
+	if args.get('project'):
+		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
+	
+	if not cost_center:
+		if args.get('customer'):
+			cost_center = item.get('selling_cost_center') or item_group.get('selling_cost_center')
+		else:
+			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center')
+	
+	return cost_center or args.get("cost_center")
 
 def get_default_supplier(args, item, item_group):
 	return (item.get("default_supplier")
