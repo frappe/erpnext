@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:healthcare_service_unit_name", 
  "beta": 1, 
@@ -461,7 +461,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-06 16:54:52.727598", 
+ "modified": "2018-08-08 12:57:12.709806", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Healthcare Service Unit", 
