@@ -81,8 +81,8 @@ def validate_expense_against_budget(args):
 
 	if args.get('company') and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get('posting_date'), company=args.get('company'))[0]
-		frappe.flags.exception_approver_role = frappe.db.get_value('Company',
-			args.get('company'), 'exception_budget_approver_role')
+		frappe.flags.exception_approver_role = frappe.get_cached_value('Company', 
+			args.get('company'),  'exception_budget_approver_role')
 
 	if not args.account:
 		args.account = args.get("expense_account")
@@ -155,7 +155,7 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 	actual_expense = amount or get_actual_expense(args)
 	if actual_expense > budget_amount:
 		diff = actual_expense - budget_amount
-		currency = frappe.db.get_value('Company', args.company, 'default_currency')
+		currency = frappe.get_cached_value('Company',  args.company,  'default_currency')
 
 		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(
 				_(action_for), frappe.bold(args.account), args.budget_against_field, 

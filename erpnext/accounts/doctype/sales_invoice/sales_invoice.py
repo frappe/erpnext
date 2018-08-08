@@ -345,7 +345,7 @@ class SalesInvoice(SellingController):
 			update_multi_mode_option(self, pos)
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
@@ -501,7 +501,7 @@ class SalesInvoice(SellingController):
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
-			self.write_off_account = frappe.db.get_value('Company', self.company, 'write_off_account')
+			self.write_off_account = frappe.get_cached_value('Company',  self.company,  'write_off_account')
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
@@ -830,7 +830,7 @@ class SalesInvoice(SellingController):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
 			write_off_account_currency = get_account_currency(self.write_off_account)
-			default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
+			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1285,7 +1285,7 @@ def validate_inter_company_invoice(doc, doctype):
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 	company = details.get("company")
-	default_currency = frappe.db.get_value("Company", company, "default_currency")
+	default_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 	if default_currency != doc.currency:
 		frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
 

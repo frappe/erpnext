@@ -39,34 +39,18 @@ def get_item_details(args):
 		}
 	"""
 	args = process_args(args)
-	item_doc = frappe.get_doc("Item", args.item_code)
-	item = item_doc
-
+	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
 	out = get_basic_details(args, item)
 
-	get_party_item_code(args, item_doc, out)
+	get_party_item_code(args, item, out)
 
-	if frappe.db.exists("Product Bundle", args.item_code):
-		valuation_rate = 0.0
-		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
-
-		for bundle_item in bundled_items.items:
-			valuation_rate += \
-				flt(get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get("valuation_rate") \
-					* bundle_item.qty)
-
-		out.update({
-			"valuation_rate": valuation_rate
-		})
-
-	else:
-		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
+	set_valuation_rate(out, args)
 
 	update_party_blanket_order(args, out)
 
-	get_price_list_rate(args, item_doc, out)
+	get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
@@ -80,6 +64,24 @@ def get_item_details(args):
 			args[key] = value
 
 	out.update(get_pricing_rule_for_item(args))
+
+	update_stock(args, out)
+
+	if args.transaction_date and item.lead_time_days:
+		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
+			item.lead_time_days)
+
+	if args.get("is_subcontracted") == "Yes":
+		out.bom = args.get('bom') or get_default_bom(args.item_code)
+
+	get_gross_profit(out)
+	if args.doctype == 'Material Request':
+		out.rate = args.rate or out.price_list_rate
+		out.amount = flt(args.qty * out.rate)
+
+	return out
+
+def update_stock(args, out):
 	if (args.get("doctype") == "Delivery Note" or
 		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
 		and out.warehouse and out.stock_qty > 0:
@@ -99,19 +101,24 @@ def get_item_details(args):
 			reserved_so = get_so_reservation_for_item(args)
 			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
 
-	if args.transaction_date and item.lead_time_days:
-		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
-			item.lead_time_days)
 
-	if args.get("is_subcontracted") == "Yes":
-		out.bom = args.get('bom') or get_default_bom(args.item_code)
+def set_valuation_rate(out, args):
+	if frappe.db.exists("Product Bundle", args.item_code):
+		valuation_rate = 0.0
+		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
-	get_gross_profit(out)
-	if args.doctype == 'Material Request':
-		out.rate = args.rate or out.price_list_rate
-		out.amount = flt(args.qty * out.rate)
+		for bundle_item in bundled_items.items:
+			valuation_rate += \
+				flt(get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get("valuation_rate") \
+					* bundle_item.qty)
 
-	return out
+		out.update({
+			"valuation_rate": valuation_rate
+		})
+
+	else:
+		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
+
 
 def process_args(args):
 	if isinstance(args, string_types):
@@ -215,10 +222,9 @@ def get_basic_details(args, item):
 	warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or\
 		item_group_defaults.get("default_warehouse") or args.warehouse
 
-	material_request_type = ''
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
-			args.get('name'), 'material_request_type')
+			args.get('name'), 'material_request_type', cache=True)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
@@ -297,7 +303,7 @@ def get_basic_details(args, item):
 		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""]]:
 			if not out[d[1]]:
-				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
+				out[d[1]] = frappe.get_cached_value('Company',  args.company,  d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
@@ -319,12 +325,12 @@ def get_default_deferred_revenue_account(args, item):
 	if item.enable_deferred_revenue:
 		return (item.deferred_revenue_account
 			or args.deferred_revenue_account
-			or frappe.db.get_value("Company", args.company, "default_deferred_revenue_account"))
+			or frappe.get_cached_value('Company',  args.company,  "default_deferred_revenue_account"))
 	else:
 		return None
 
 def get_default_cost_center(args, item, item_group):
-	return (frappe.db.get_value("Project", args.get("project"), "cost_center")
+	return (frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
 		or (item.get("selling_cost_center") if args.get("customer") else item.get("buying_cost_center"))
 		or (item_group.get("selling_cost_center") if args.get("customer") else item_group.get("buying_cost_center"))
 		or args.get("cost_center"))
@@ -363,19 +369,11 @@ def get_price_list_rate(args, item_doc, out):
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
-	if frappe.db.get_value("Price List", args.price_list, "currency") == args.currency \
+	if frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency \
 		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (args.rate / args.get('conversion_factor')
 				if args.get("conversion_factor") else args.rate)
-
-			item_price = frappe.get_doc({
-				"doctype": "Item Price",
-				"price_list": args.price_list,
-				"item_code": args.item_code,
-				"currency": args.currency,
-				"price_list_rate": price_list_rate
-			})
 
 			name = frappe.db.get_value('Item Price',
 				{'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
@@ -387,6 +385,13 @@ def insert_item_price(args):
 				frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
 					args.price_list))
 			else:
+				item_price = frappe.get_doc({
+					"doctype": "Item Price",
+					"price_list": args.price_list,
+					"item_code": args.item_code,
+					"currency": args.currency,
+					"price_list_rate": price_list_rate
+				})
 				item_price.insert()
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
 					args.price_list))
@@ -501,7 +506,7 @@ def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
 	if (not args.conversion_rate
-		and args.currency==frappe.db.get_value("Company", args.company, "default_currency")):
+		and args.currency==frappe.get_cached_value('Company',  args.company,  "default_currency")):
 		args.conversion_rate = 1.0
 
 	# validate currency conversion rate
@@ -513,7 +518,7 @@ def validate_conversion_rate(args, meta):
 			frappe._dict({"fields": args})))
 
 	if (not args.plc_conversion_rate
-		and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency")):
+		and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency", cache=True)):
 		args.plc_conversion_rate = 1.0
 
 	# validate price list currency conversion rate
@@ -535,7 +540,7 @@ def get_party_item_code(args, item_doc, out):
 		if customer_item_code:
 			out.customer_item_code = customer_item_code[0].ref_code
 		else:
-			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group")
+			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group", cache=True)
 			customer_group_item_code = item_doc.get("customer_items", {"customer_group": customer_group})
 			if customer_group_item_code and not customer_group_item_code[0].customer_name:
 				out.customer_item_code = customer_group_item_code[0].ref_code
@@ -547,8 +552,8 @@ def get_party_item_code(args, item_doc, out):
 def get_pos_profile_item_details(company, args, pos_profile=None, update_data=False):
 	res = frappe._dict()
 
-	if not pos_profile:
-		pos_profile = get_pos_profile(company, args.get('pos_profile'))
+	if not frappe.flags.pos_profile and not pos_profile:
+		pos_profile = frappe.flags.pos_profile = get_pos_profile(company, args.get('pos_profile'))
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
@@ -564,7 +569,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 @frappe.whitelist()
 def get_pos_profile(company, pos_profile=None, user=None):
 	if pos_profile:
-		return frappe.get_doc('POS Profile', pos_profile)
+		return frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if not user:
 		user = frappe.session['user']
@@ -618,7 +623,7 @@ def get_serial_no_batchwise(args, sales_order=None):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
-	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
+	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
 	filters = {"parent": item_code, "uom": uom}
 	if variant_of:
 		filters["parent"] = ("in", (item_code, variant_of))
@@ -633,7 +638,7 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-			["projected_qty", "actual_qty"], as_dict=True) \
+			["projected_qty", "actual_qty"], as_dict=True, cache=True) \
 			or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()

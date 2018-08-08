@@ -58,7 +58,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"warn_if_negative": True,
-			"currency": frappe.db.get_value("Company", filters.company, "default_currency")
+			"currency": frappe.get_cached_value('Company',  filters.company,  "default_currency")
 		}
 		for company in companies:
 			unclosed[company] = opening_balance
@@ -91,7 +91,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	return data, None, chart
 
 def get_income_expense_data(companies, fiscal_year, filters):
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 	income = get_data(companies, "Income", "Credit", fiscal_year, filters, True)
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
@@ -106,7 +106,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
 
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	for cash_flow_account in cash_flow_accounts:
 		section_data = []
@@ -215,7 +215,7 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	return out
 
 def get_company_currency(filters=None):
-	return frappe.db.get_value("Company", filters.get('company'), "default_currency")
+	return frappe.get_cached_value('Company',  filters.get('company'),  "default_currency")
 
 def calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_year, filters):
 	for entries in gl_entries_by_account.values():
@@ -267,8 +267,8 @@ def get_companies(filters):
 	return all_companies, companies
 
 def get_subsidiary_companies(company):
-	lft, rgt = frappe.db.get_value('Company',
-		company, ["lft", "rgt"])
+	lft, rgt = frappe.get_cached_value('Company', 
+		company,  ["lft", "rgt"])
 
 	return frappe.db.sql_list("""select name from `tabCompany`
 		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(lft, rgt))
@@ -321,8 +321,8 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 	accounts_by_name, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
-	company_lft, company_rgt = frappe.db.get_value('Company',
-		filters.get('company'), ["lft", "rgt"])
+	company_lft, company_rgt = frappe.get_cached_value('Company', 
+		filters.get('company'),  ["lft", "rgt"])
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 

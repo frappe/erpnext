@@ -322,7 +322,7 @@ def get_credit_limit(customer, company):
 			credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit")
 
 	if not credit_limit:
-		credit_limit = frappe.db.get_value("Company", company, "credit_limit")
+		credit_limit = frappe.get_cached_value('Company',  company,  "credit_limit")
 
 	return flt(credit_limit)
 

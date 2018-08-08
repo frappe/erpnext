@@ -8,6 +8,7 @@ from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.doctype.item.item import get_item_defaults, set_item_default
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -40,7 +41,7 @@ class SellingController(StockController):
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
 		self.set_po_nos()
-		check_active_sales_items(self)
+		set_default_income_account_for_item(self)
 
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
@@ -349,24 +350,8 @@ class SellingController(StockController):
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
 
-def check_active_sales_items(obj):
+def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):
 		if d.item_code:
-			item = frappe.db.sql("""select i.docstatus, id.income_account
-				from `tabItem` i, `tabItem Default` id
-				where i.name=%s and id.parent=i.name and id.company=%s""",
-				(d.item_code, obj.company), as_dict=True)
-
 			if getattr(d, "income_account", None):
-				doc = frappe.get_doc("Item", d.item_code)
-				if item and not item[0].income_account:
-					for default in doc.item_defaults:
-						if default.company == obj.company:
-							default.income_account = d.income_account
-							break
-				elif not item:
-					doc.append("item_defaults", {
-						"company": obj.company,
-						"income_account": d.income_account
-					})
-				doc.save(ignore_permissions=True)
+				set_item_default(d.item_code, obj.company, 'income_account', d.income_account)

@@ -133,7 +133,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 			# If group and currency same as company,
 			# always return balance based on debit and credit in company currency
-			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
+			if acc.account_currency == frappe.get_cached_value('Company',  acc.company,  "default_currency"):
 				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
@@ -275,7 +275,7 @@ def add_cc(args=None):
 
 	if args.parent_cost_center == args.company:
 		args.parent_cost_center = "{0} - {1}".format(args.parent_cost_center,
-			frappe.db.get_value('Company', args.company, 'abbr'))
+			frappe.get_cached_value('Company',  args.company,  'abbr'))
 
 	cc = frappe.new_doc("Cost Center")
 	cc.update(args)
@@ -498,7 +498,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):
-	value = frappe.db.get_value("Company", company, fieldname)
+	value = frappe.get_cached_value('Company',  company,  fieldname)
 
 	if not value:
 		throw(_("Please set default {0} in Company {1}")
@@ -570,7 +570,7 @@ def get_stock_rbnb_difference(posting_date, company):
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
 
 	# Balance as per system
-	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("Company", company, "abbr")
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.get_cached_value('Company',  company,  "abbr")
 	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
 
 	# Amount should be credited
@@ -707,7 +707,7 @@ def get_children(doctype, parent, company, is_root=False):
 
 	if doctype == 'Account':
 		sort_accounts(acc, is_root, key="value")
-		company_currency = frappe.db.get_value("Company", company, "default_currency")
+		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
 			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
@@ -809,7 +809,7 @@ def get_autoname_with_number(number_value, doc_title, name, company):
 		name_split=name.split("-")
 		parts = [doc_title.strip(), name_split[len(name_split)-1].strip()]
 	else:
-		abbr = frappe.db.get_value("Company", company, ["abbr"], as_dict=True)
+		abbr = frappe.get_cached_value('Company',  company,  ["abbr"], as_dict=True)
 		parts = [doc_title.strip(), abbr.abbr]
 	if cstr(number_value).strip():
 		parts.insert(0, cstr(number_value).strip())
