@@ -70,7 +70,7 @@ class PricingRule(Document):
 
 	def validate_max_discount(self):
 		if self.rate_or_discount == "Discount Percentage" and self.item_code:
-			max_discount = frappe.db.get_value("Item", self.item_code, "max_discount")
+			max_discount = frappe.get_cached_value("Item", self.item_code, "max_discount")
 			if max_discount and flt(self.discount_percentage) > flt(max_discount):
 				throw(_("Max discount allowed for item: {0} is {1}%").format(self.item_code, max_discount))
 
@@ -158,7 +158,7 @@ def get_pricing_rule_for_item(args):
 
 	if not (args.item_group and args.brand):
 		try:
-			args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+			args.item_group, args.brand = frappe.get_cached_value("Item", args.item_code, ["item_group", "brand"])
 		except TypeError:
 			# invalid item_code
 			return item_details
@@ -284,7 +284,7 @@ def get_pricing_rules(args):
 
 	# load variant of if not defined
 	if "variant_of" not in args:
-		args.variant_of = frappe.db.get_value("Item", args.item_code, "variant_of")
+		args.variant_of = frappe.get_cached_value("Item", args.item_code, "variant_of")
 
 	if args.variant_of:
 		item_variant_condition = ' or item_code=%(variant_of)s '
