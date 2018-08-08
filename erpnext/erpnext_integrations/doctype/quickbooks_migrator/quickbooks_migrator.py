@@ -64,7 +64,6 @@ def fetch_data():
 	make_custom_fields()
 	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
 	for entity in relevant_entities:
-		print(entity)
 		fetch_all_entries(entity=entity, company_id=company_id)
 	frappe.clear_messages()
 
@@ -450,7 +449,6 @@ def get_taxes(lines):
 				"description": account_head,
 				"rate": line["TaxLineDetail"]["TaxPercent"],
 			})
-	print(taxes)
 	return taxes
 
 def get_tax_type(tax_rate):
@@ -592,15 +590,12 @@ class QuickBooksMigrator(Document):
 		make_receivable(self.receivable_account)
 
 def make_receivable(account):
-    print("Making", account, "Receivable")
     frappe.db.set_value("Account", account, "account_type", "Receivable")
 
 def make_payable(account):
-    print("Making", account, "Payable")
     frappe.db.set_value("Account", account, "account_type", "Payable")
 
 def make_bank(account):
-    print("Making", account, "Bank")
     frappe.db.set_value("Account", account, "account_type", "Bank")
 
 def get_account_name_by_id(quickbooks_id):
