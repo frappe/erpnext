@@ -76,7 +76,7 @@ class PricingRule(Document):
 
 	def validate_price_list_with_currency(self):
 		if self.currency and self.for_price_list:
-			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency")
+			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency", True)
 			if not self.currency == price_list_currency:
 				throw(_("Currency should be same as Price List Currency: {0}").format(price_list_currency))
 
@@ -167,14 +167,14 @@ def get_pricing_rule_for_item(args):
 
 	if args.transaction_type=="selling":
 		if args.customer and not (args.customer_group and args.territory):
-			customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
+			customer = frappe.db.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
 			if customer:
 				args.customer_group, args.territory = customer
 
 		args.supplier = args.supplier_group = None
 
 	elif args.supplier and not args.supplier_group:
-		args.supplier_group = frappe.db.get_value("Supplier", args.supplier, "supplier_group")
+		args.supplier_group = frappe.db.get_cached_value("Supplier", args.supplier, "supplier_group")
 		args.customer = args.customer_group = args.territory = None
 
 	pricing_rules = get_pricing_rules(args)
@@ -209,7 +209,7 @@ def get_pricing_rule_for_item(args):
 	return item_details
 
 def remove_pricing_rule_for_item(pricing_rule, item_details):
-	pricing_rule = frappe.db.get_value('Pricing Rule', pricing_rule,
+	pricing_rule = frappe.db.get_cached_value('Pricing Rule', pricing_rule,
 		['price_or_discount', 'margin_type'], as_dict=1)
 	if pricing_rule and pricing_rule.price_or_discount == 'Discount Percentage':
 		item_details.discount_percentage = 0.0
@@ -237,6 +237,12 @@ def remove_pricing_rules(item_list):
 def get_pricing_rules(args):
 	def _get_tree_conditions(parenttype, allow_blank=True):
 		field = frappe.scrub(parenttype)
+		if not frappe.flags.tree_conditions:
+			frappe.flags.tree_conditions = {}
+		key = (parenttype, args[field], )
+		if key in frappe.flags.tree_conditions:
+			return frappe.flags.tree_conditions[key]
+
 		condition = ""
 		if args.get(field):
 			try:
@@ -251,6 +257,8 @@ def get_pricing_rules(args):
 				if allow_blank: parent_groups.append('')
 				condition = " ifnull("+field+", '') in ('" + \
 					"', '".join([frappe.db.escape(d) for d in parent_groups])+"')"
+			frappe.flags.tree_conditions[key] = condition
+
 		return condition
 
 
