@@ -60,7 +60,6 @@ class Project(Document):
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
-		self.load_tasks()
 		self.send_welcome_email()
 
 	def validate_project_name(self):
@@ -82,6 +81,9 @@ class Project(Document):
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
+		if not hasattr(self, "deleted_task_list"):
+			self.set("deleted_task_list", [])
+
 		if self.flags.dont_sync_tasks: return
 		task_names = []
 
@@ -130,7 +132,7 @@ class Project(Document):
 
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
-			frappe.delete_doc("Task", t.name)
+			self.deleted_task_list.append(t.name)
 
 	def update_costing_and_percentage_complete(self):
 		self.update_percent_complete()
@@ -263,8 +265,17 @@ class Project(Document):
 				user.welcome_email_sent=1
 
 	def on_update(self):
+		self.delete_task()
+		self.load_tasks()
 		self.update_costing_and_percentage_complete()
 		self.update_dependencies_on_duplicated_project()
+
+	def delete_task(self):
+		if not self.get('deleted_task_list'): return
+
+		for d in self.deleted_task_list:
+			frappe.delete_doc("Task", d)
+		self.deleted_task_list = []
 
 	def update_dependencies_on_duplicated_project(self):
 		if self.flags.dont_sync_tasks: return
