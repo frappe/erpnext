@@ -141,7 +141,13 @@ class Project(Document):
 	def is_row_updated(self, row, existing_task_data):
 		if self.get("__islocal") or not existing_task_data: return True
 
+		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
+
 		d = existing_task_data.get(row.task_id)
+
+		for field in project_task_custom_fields:
+			if row.get(field) != d.get(field):
+				return True
 
 		if (d and (row.title != d.title or row.status != d.status
 			or getdate(row.start_date) != getdate(d.start_date) or getdate(row.end_date) != getdate(d.end_date)
@@ -273,8 +279,9 @@ class Project(Document):
 	def delete_task(self):
 		if not self.get('deleted_task_list'): return
 
-		for d in self.deleted_task_list:
+		for d in self.get('deleted_task_list'):
 			frappe.delete_doc("Task", d)
+
 		self.deleted_task_list = []
 
 	def update_dependencies_on_duplicated_project(self):
