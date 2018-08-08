@@ -28,42 +28,44 @@ def execute(filters=None):
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
-		if item_map.get(item):
-			qty_dict = iwb_map[(company, item, warehouse)]
-			item_reorder_level = 0
-			item_reorder_qty = 0
-			if item + warehouse in item_reorder_detail_map:
-				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
-				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-			report_data = [item, item_map[item]["item_name"],
-				item_map[item]["item_group"],
-				item_map[item]["brand"],
-				item_map[item]["description"], warehouse,
-				item_map[item]["stock_uom"], qty_dict.opening_qty,
-				qty_dict.opening_val, qty_dict.in_qty,
-				qty_dict.in_val, qty_dict.out_qty,
-				qty_dict.out_val, qty_dict.bal_qty,
-				qty_dict.bal_val, qty_dict.val_rate,
-				item_reorder_level,
-				item_reorder_qty,
-				company
-			]
+		qty_dict = iwb_map[(company, item, warehouse)]
+		item_reorder_level = 0
+		item_reorder_qty = 0
+		if item + warehouse in item_reorder_detail_map:
+			item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
+			item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-			if filters.get('show_variant_attributes', 0) == 1:
-				variants_attributes = get_variants_attributes()
-				report_data += [item_map[item].get(i) for i in variants_attributes]
+		report_data = [item, item_map[item]["item_name"],
+			item_map[item]["item_group"],
+			item_map[item]["brand"],
+			item_map[item]["description"], warehouse,
+			item_map[item]["stock_uom"],
+			qty_dict.opening_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.opening_val, qty_dict.in_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.in_val, qty_dict.out_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.out_val, qty_dict.bal_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.bal_val, qty_dict.val_rate,
+			item_reorder_level,
+			item_reorder_qty,
+			company
+		]
 
-			data.append(report_data)
+		if filters.get('show_variant_attributes', 0) == 1:
+			variants_attributes = get_variants_attributes()
+			report_data += [item_map[item].get(i) for i in variants_attributes]
+
+		data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
 
 	return columns, data
 
-def get_columns():
+def get_columns(filters=None):
 	"""return columns"""
 
+	uom = filters.get('by_uom') or 'Stock UOM'
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
@@ -71,7 +73,7 @@ def get_columns():
 		_("Brand")+":Link/Brand:90",
 		_("Description")+"::140",
 		_("Warehouse")+":Link/Warehouse:100",
-		_("Stock UOM")+":Link/UOM:90",
+		uom + ":Link/UOM:90",
 		_("Opening Qty")+":Float:100",
 		_("Opening Value")+":Float:110",
 		_("In Qty")+":Float:80",
@@ -166,15 +168,15 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		
+
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
-	
+
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
-		
+
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in iteritems(qty_dict):
@@ -182,7 +184,7 @@ def filter_items_with_no_transactions(iwb_map):
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
-		
+
 		if no_transactions:
 			iwb_map.pop((company, item, warehouse))
 

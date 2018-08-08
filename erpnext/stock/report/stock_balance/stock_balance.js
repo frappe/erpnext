@@ -56,5 +56,13 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"
 		},
+		{
+			"fieldname": "by_uom",
+			"lable": __("Select UOM"),
+			"fieldtype": "Select",
+			"width": "80",
+			"options": "Stock UOM\nSales UOM\nPurchase UOM",
+			"default": "Stock UOM"
+		}
 	]
 }
