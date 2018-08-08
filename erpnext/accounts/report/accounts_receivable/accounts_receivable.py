@@ -132,7 +132,7 @@ class ReceivablePayableReport(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
+		company_currency = frappe.get_cached_value('Company',  self.filters.get("company"),  "default_currency")
 
 		return_entries = self.get_return_entries(args.get("party_type"))
 

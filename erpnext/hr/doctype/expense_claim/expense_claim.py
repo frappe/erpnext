@@ -53,11 +53,11 @@ class ExpenseClaim(AccountsController):
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
-			self.payable_account = frappe.db.get_value("Company", self.company, "default_payable_account")
+			self.payable_account = frappe.get_cached_value('Company',  self.company,  "default_payable_account")
 
 	def set_cost_center(self):
 		if not self.cost_center:
-			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
+			self.cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
@@ -311,8 +311,8 @@ def get_advances(employee, advance_id=None):
 @frappe.whitelist()
 def get_expense_claim(
 	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount):
-	default_payable_account = frappe.db.get_value("Company", company, "default_payable_account")
-	default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
+	default_payable_account = frappe.get_cached_value('Company',  company,  "default_payable_account")
+	default_cost_center = frappe.get_cached_value('Company',  company,  'cost_center')
 
 	expense_claim = frappe.new_doc('Expense Claim')
 	expense_claim.company = company

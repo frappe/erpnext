@@ -377,7 +377,7 @@ def make_purchase_receipt(**args):
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": args.uom or "_Test UOM",
-		"cost_center": args.cost_center or frappe.db.get_value('Company', pr.company, 'cost_center'),
+		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),
 		"asset_location": args.location or "Test Location"
 	})
 

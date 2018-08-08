@@ -162,7 +162,7 @@ def get_appropriate_currency(company, filters=None):
 	if filters and filters.get("presentation_currency"):
 		return filters["presentation_currency"]
 	else:
-		return frappe.db.get_value("Company", company, "default_currency")
+		return frappe.get_cached_value('Company',  company,  "default_currency")
 
 
 def calculate_values(

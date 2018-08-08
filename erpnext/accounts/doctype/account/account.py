@@ -119,7 +119,7 @@ class Account(NestedSet):
 
 	def validate_account_currency(self):
 		if not self.account_currency:
-			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			self.account_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
@@ -181,7 +181,7 @@ def get_account_currency(account):
 	def generator():
 		account_currency, company = frappe.db.get_value("Account", account, ["account_currency", "company"])
 		if not account_currency:
-			account_currency = frappe.db.get_value("Company", company, "default_currency")
+			account_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 		return account_currency
 
@@ -192,7 +192,7 @@ def on_doctype_update():
 
 def get_account_autoname(account_number, account_name, company):
 	# first validate if company exists
-	company = frappe.db.get_value("Company", company, ["abbr", "name"], as_dict=True)
+	company = frappe.get_cached_value('Company',  company,  ["abbr", "name"], as_dict=True)
 	if not company:
 		frappe.throw(_('Company {0} does not exist').format(company))
 

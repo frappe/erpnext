@@ -69,8 +69,8 @@ class JournalEntry(AccountsController):
 	def validate_inter_company_accounts(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
 			doc = frappe.get_doc("Journal Entry", self.inter_company_journal_entry_reference)
-			account_currency = frappe.db.get_value("Company", self.company, "default_currency")
-			previous_account_currency = frappe.db.get_value("Company", doc.company, "default_currency")
+			account_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
+			previous_account_currency = frappe.get_cached_value('Company',  doc.company,  "default_currency")
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
@@ -611,7 +611,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 			account (of that type), otherwise return empty dict.
 		'''
 		if account_type=="Bank":
-			account = frappe.db.get_value("Company", company, "default_bank_account")
+			account = frappe.get_cached_value('Company',  company,  "default_bank_account")
 			if not account:
 				account_list = frappe.get_all("Account", filters = {"company": company,
 					"account_type": "Bank", "is_group": 0})
@@ -619,7 +619,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 					account = account_list[0].name
 
 		elif account_type=="Cash":
-			account = frappe.db.get_value("Company", company, "default_cash_account")
+			account = frappe.get_cached_value('Company',  company,  "default_cash_account")
 			if not account:
 				account_list = frappe.get_all("Account", filters = {"company": company,
 					"account_type": "Cash", "is_group": 0})
@@ -711,7 +711,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 
 
 def get_payment_entry(ref_doc, args):
-	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
+	cost_center = frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
 		# Modified to include the posting date for which the exchange rate is required.

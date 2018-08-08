@@ -25,7 +25,7 @@ def get_data(filters, show_party_name):
 	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
 	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], 
 		filters = party_filters, order_by="name")
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 	opening_balances = get_opening_balances(filters)
 	balances_within_period = get_balances_within_period(filters)
 

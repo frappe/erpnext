@@ -400,7 +400,7 @@ class AccountsController(TransactionBase):
 			else:
 				allocated_amount = min(self.grand_total - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
-			
+
 			self.append("advances", {
 				"doctype": self.doctype + " Advance",
 				"reference_type": d.reference_type,
@@ -606,7 +606,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
+			self._abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
 
 		return self._abbr
 
@@ -841,7 +841,7 @@ def get_taxes_and_charges(master_doctype, master_name):
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
 
-	company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
+	company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 	if not conversion_rate:
 		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(

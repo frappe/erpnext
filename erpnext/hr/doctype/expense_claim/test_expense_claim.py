@@ -100,7 +100,7 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEquals(len(gl_entry), 0)
 
 def get_payable_account(company):
-	return frappe.db.get_value('Company', company, 'default_payable_account')
+	return frappe.get_cached_value('Company',  company,  'default_payable_account')
 
 def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
 	expense_claim = frappe.get_doc({

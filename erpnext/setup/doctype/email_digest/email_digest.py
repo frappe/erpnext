@@ -22,7 +22,7 @@ class EmailDigest(Document):
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
+		self.currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 
 	def get_users(self):
 		"""get list of users"""

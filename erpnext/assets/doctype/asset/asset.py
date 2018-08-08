@@ -410,7 +410,7 @@ def get_asset_naming_series():
 def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, posting_date):
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.company = company
-	pi.currency = frappe.db.get_value("Company", company, "default_currency")
+	pi.currency = frappe.get_cached_value('Company',  company,  "default_currency")
 	pi.set_posting_time = 1
 	pi.posting_date = posting_date
 	pi.append("items", {
@@ -429,7 +429,7 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 def make_sales_invoice(asset, item_code, company, serial_no=None):
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
-	si.currency = frappe.db.get_value("Company", company, "default_currency")
+	si.currency = frappe.get_cached_value('Company',  company,  "default_currency")
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
 	si.append("items", {
 		"item_code": item_code,
@@ -504,7 +504,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 				asset_category = asset_category, company = company)
 
 	if not account:
-		account = frappe.db.get_value('Company', company, account_name)
+		account = frappe.get_cached_value('Company',  company,  account_name)
 
 	if not account:
 		frappe.throw(_("Set {0} in asset category {1} or company {2}")

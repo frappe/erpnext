@@ -937,6 +937,20 @@ def get_item_defaults(item_code, company):
 
 	return out
 
+def set_item_default(item_code, company, fieldname, value):
+	item = frappe.get_cached_doc('Item', item_code)
+
+	for d in item.item_defaults:
+		if d.company == company:
+			if not d.get(fieldname):
+				frappe.db.set_value(d.doctype, d.name, fieldname, value)
+			return
+
+	# no row found, add a new row for the company
+	d = item.append('item_defaults', {fieldname: value, company: company})
+	d.db_insert()
+	item.clear_cache()
+
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):
 	uoms = [uom, stock_uom]

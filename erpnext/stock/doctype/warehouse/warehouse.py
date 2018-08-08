@@ -14,7 +14,7 @@ class Warehouse(NestedSet):
 
 	def autoname(self):
 		if self.company:
-			suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
+			suffix = " - " + frappe.get_cached_value('Company',  self.company,  "abbr")
 			if not self.warehouse_name.endswith(suffix):
 				self.name = self.warehouse_name + suffix
 		else:
@@ -87,7 +87,7 @@ class Warehouse(NestedSet):
 			self.recalculate_bin_qty(new_name)
 
 	def get_new_warehouse_name_without_abbr(self, name):
-		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
+		company_abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
 		parts = name.rsplit(" - ", 1)
 
 		if parts[-1].lower() == company_abbr.lower():
