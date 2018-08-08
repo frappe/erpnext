@@ -330,12 +330,12 @@ def get_salary_component_account(sal_comp):
 	sal_comp.save()
 
 def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
+	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
 	if not salary_account:
 		frappe.get_doc({
 		"doctype": "Account",
 		"account_name": "Salary",
-		"parent_account": "Indirect Expenses - " + frappe.db.get_value('Company', company, 'abbr'),
+		"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
 		"company": company
 		}).insert()
 	return salary_account

@@ -210,7 +210,7 @@ def get_party_account(party_type, party, company):
 	if not account and party_type in ['Customer', 'Supplier']:
 		default_account_name = "default_receivable_account" \
 			if party_type=="Customer" else "default_payable_account"
-		account = frappe.db.get_value("Company", company, default_account_name)
+		account = frappe.get_cached_value('Company',  company,  default_account_name)
 
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
@@ -273,8 +273,8 @@ def validate_party_accounts(doc):
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency")
 		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
-		company_default_currency = frappe.db.get_value("Company",
-			frappe.db.get_default("Company"), "default_currency", cache=True)
+		company_default_currency = frappe.get_cached_value('Company',
+			frappe.db.get_default("Company"),  "default_currency")
 
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
 			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
@@ -402,7 +402,7 @@ def get_pyt_term_template(party_name, party_type, company=None):
 			template = frappe.db.get_value("Supplier Group", supplier.supplier_group, fieldname='payment_terms')
 
 	if not template and company:
-		template = frappe.db.get_value("Company", company, fieldname='payment_terms')
+		template = frappe.get_cached_value('Company',  company,  fieldname='payment_terms')
 	return template
 
 def validate_party_frozen_disabled(party_type, party_name):
@@ -454,7 +454,7 @@ def get_dashboard_info(party_type, party):
 	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
 	party_account_currency = get_party_account_currency(party_type, party, company)
 	company_default_currency = get_default_currency() \
-		or frappe.db.get_value('Company', company, 'default_currency')
+		or frappe.get_cached_value('Company',  company,  'default_currency')
 
 	if party_account_currency==company_default_currency:
 		total_field = "base_grand_total"

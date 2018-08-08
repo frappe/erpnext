@@ -9,7 +9,6 @@ from frappe import _
 from email_reply_parser import EmailReplyParser
 from erpnext.hr.doctype.employee.employee import is_holiday
 from frappe.utils import global_date_format
-from markdown2 import markdown
 
 
 class DailyWorkSummary(Document):
@@ -88,7 +87,7 @@ class DailyWorkSummary(Document):
 			if d.sender in did_not_reply:
 				did_not_reply.remove(d.sender)
 			if d.text_content:
-				d.content = markdown(
+				d.content = frappe.utils.md_to_html(
 					EmailReplyParser.parse_reply(d.text_content)
 				)
 

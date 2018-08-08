@@ -124,7 +124,7 @@ class Project(Document):
 						"modified": now()
 					})
 
-					task.validate()
+					task.run_method("validate")
 					task.db_update()
 				else:
 					task.save(ignore_permissions = True)

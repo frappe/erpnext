@@ -85,7 +85,7 @@ class ExchangeRateRevaluation(Document):
 		if self.total_gain_loss == 0:
 			return
 
-		unrealized_exchange_gain_loss_account = frappe.db.get_value("Company", self.company,
+		unrealized_exchange_gain_loss_account = frappe.get_cached_value('Company',  self.company, 
 			"unrealized_exchange_gain_loss_account")
 		if not unrealized_exchange_gain_loss_account:
 			frappe.throw(_("Please set Unrealized Exchange Gain/Loss Account in Company {0}")

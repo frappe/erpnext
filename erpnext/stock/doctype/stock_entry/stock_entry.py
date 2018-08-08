@@ -623,14 +623,14 @@ class StockEntry(StockController):
 			["Cost Center", "cost_center", "cost_center"]]:
 				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
 				if not ret[d[1]] or (company and self.company != company):
-					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
+					ret[d[1]] = frappe.get_cached_value('Company',  self.company,  d[2]) if d[2] else None
 
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
 
 		if not ret["expense_account"]:
-			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+			ret["expense_account"] = frappe.get_cached_value('Company',  self.company,  "stock_adjustment_account")
 
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
@@ -1027,14 +1027,19 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 
 	def validate_batch(self):
-		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"]:
+		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract", "Material Issue"]:
 			for item in self.get("items"):
 				if item.batch_no:
-					expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
-					if expiry_date:
-						if getdate(self.posting_date) > getdate(expiry_date):
-							frappe.throw(_("Batch {0} of Item {1} has expired.")
-								.format(item.batch_no, item.item_code))
+					disabled = frappe.db.get_value("Batch", item.batch_no, "disabled")
+					if disabled == 0:
+						expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
+						if expiry_date:
+							if getdate(self.posting_date) > getdate(expiry_date):
+								frappe.throw(_("Batch {0} of Item {1} has expired.")
+									.format(item.batch_no, item.item_code))
+					else:
+						frappe.throw(_("Batch {0} of Item {1} is disabled.")
+							.format(item.batch_no, item.item_code))
 
 	def update_purchase_order_supplied_items(self):
 		#Get PO Supplied Items Details

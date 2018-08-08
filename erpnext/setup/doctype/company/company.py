@@ -75,7 +75,7 @@ class Company(NestedSet):
 							.format(self.get(field), self.name))
 
 	def validate_currency(self):
-		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
+		self.previous_default_currency = frappe.get_cached_value('Company',  self.name,  "default_currency")
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
@@ -161,7 +161,7 @@ class Company(NestedSet):
 		frappe.flags.country_change = False
 
 		if not self.get('__islocal') and \
-			self.country != frappe.db.get_value('Company', self.name, 'country'):
+			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
 
 	def set_default_accounts(self):
@@ -361,7 +361,7 @@ def replace_abbr(company, old, new):
 
 
 def get_name_with_abbr(name, company):
-	company_abbr = frappe.db.get_value("Company", company, "abbr")
+	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.split(" - ")
 
 	if parts[-1].lower() != company_abbr.lower():
@@ -505,7 +505,7 @@ def get_timeline_data(doctype, name):
 	out = {}
 	date_to_value_dict = {}
 
-	history = frappe.db.get_value("Company", name, "transactions_annual_history")
+	history = frappe.get_cached_value('Company',  name,  "transactions_annual_history")
 
 	try:
 		date_to_value_dict = json.loads(history) if history and '{' in history else None
@@ -514,7 +514,7 @@ def get_timeline_data(doctype, name):
 
 	if date_to_value_dict is None:
 		update_transactions_annual_history(name, True)
-		history = frappe.db.get_value("Company", name, "transactions_annual_history")
+		history = frappe.get_cached_value('Company',  name,  "transactions_annual_history")
 		return json.loads(history) if history and '{' in history else {}
 
 	return date_to_value_dict
