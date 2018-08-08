@@ -44,7 +44,7 @@ class Asset(AccountsController):
 		self.db_set('booked_fixed_asset', 0)
 
 	def validate_item(self):
-		item = frappe.db.get_value("Item", self.item_code,
+		item = frappe.get_cached_value("Item", self.item_code,
 			["is_fixed_asset", "is_stock_item", "disabled"], as_dict=1)
 		if not item:
 			frappe.throw(_("Item {0} does not exist").format(self.item_code))
@@ -61,7 +61,7 @@ class Asset(AccountsController):
 
 	def set_missing_values(self):
 		if not self.asset_category:
-			self.asset_category = frappe.db.get_value("Item", self.item_code, "asset_category")
+			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
 		if self.item_code and not self.get('finance_books'):
 			finance_books = get_item_details(self.item_code, self.asset_category)

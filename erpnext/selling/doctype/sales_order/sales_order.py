@@ -116,7 +116,7 @@ class SalesOrder(SellingController):
 						d.delivery_date = self.delivery_date
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
-							indicator='orange', title=_('Warning'))		
+							indicator='orange', title=_('Warning'))
 				if getdate(self.delivery_date) != getdate(max_delivery_date):
 					self.delivery_date = max_delivery_date
 			else:
@@ -136,7 +136,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_warehouse()
 
 		for d in self.get("items"):
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 or
+			if (frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
@@ -208,7 +208,7 @@ class SalesOrder(SellingController):
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
-		if not cint(frappe.db.get_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order")):
+		if not cint(frappe.get_cached_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order")):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -281,7 +281,7 @@ class SalesOrder(SellingController):
 		item_wh_list = []
 		def _valid_for_reserve(item_code, warehouse):
 			if item_code and warehouse and [item_code, warehouse] not in item_wh_list \
-				and frappe.db.get_value("Item", item_code, "is_stock_item"):
+				and frappe.get_cached_value("Item", item_code, "is_stock_item"):
 					item_wh_list.append([item_code, warehouse])
 
 		for d in self.get("items"):
@@ -412,7 +412,7 @@ class SalesOrder(SellingController):
 					Item {0} is added with and without Ensure Delivery by \
 					Serial No.").format(item.item_code))
 				if item.item_code not in reserved_items:
-					if not frappe.db.get_value("Item", item.item_code, "has_serial_no"):
+					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 						frappe.throw(_("Item {0} has no Serial No. Only serilialized items \
 						can have delivery based on Serial No").format(item.item_code))
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):

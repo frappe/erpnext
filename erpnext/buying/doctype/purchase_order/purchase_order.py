@@ -134,7 +134,7 @@ class PurchaseOrder(BuyingController):
 					d.last_purchase_rate = d.rate
 				else:
 
-					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					item_last_purchase_rate = frappe.get_cached_value("Item", d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
 						d.base_price_list_rate = d.base_rate = d.price_list_rate \
 							= d.rate = d.last_purchase_rate = item_last_purchase_rate
@@ -168,7 +168,7 @@ class PurchaseOrder(BuyingController):
 		for d in self.get("items"):
 			if (not po_item_rows or d.name in po_item_rows) \
 				and [d.item_code, d.warehouse] not in item_wh_list \
-				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
+				and frappe.get_cached_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
 					item_wh_list.append([d.item_code, d.warehouse])
 		for item_code, warehouse in item_wh_list:
@@ -286,7 +286,7 @@ class PurchaseOrder(BuyingController):
 			if d.rm_item_code:
 				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
-	
+
 	def update_receiving_percentage(self):
 		total_qty, received_qty = 0.0, 0.0
 		for item in self.items:
@@ -304,7 +304,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 		last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
 		return last_purchase_rate
 	else:
-		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
+		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
 			return item_last_purchase_rate
 
