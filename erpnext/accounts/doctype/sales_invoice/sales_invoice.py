@@ -25,6 +25,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details, get_loyalty_details, validate_loyalty_points
 
 from six import iteritems
+from erpnext.controllers.selling_controller import calculate_commission_rule
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -161,7 +162,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program 
+		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
 			self.make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
@@ -308,6 +309,7 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
+		calculate_commission_rule(self)
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -1004,7 +1006,7 @@ class SalesInvoice(SellingController):
 			where redeem_against=%s''', (lp_entry.name), as_dict=1)
 		if against_lp_entry:
 			invoice_list = ", ".join([d.sales_invoice for d in against_lp_entry])
-			frappe.throw(_('''Sales Invoice can't be cancelled since the Loyalty Points earned has been redeemed. 
+			frappe.throw(_('''Sales Invoice can't be cancelled since the Loyalty Points earned has been redeemed.
 				First cancel the Sales Invoice No {0}''').format(invoice_list))
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where sales_invoice=%s''', (self.name))

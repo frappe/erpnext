@@ -17,6 +17,7 @@ from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.controllers.selling_controller import calculate_commission_rule
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -296,7 +297,7 @@ class SalesOrder(SellingController):
 			})
 
 	def on_update(self):
-		pass
+		calculate_commission_rule(self)
 
 	def before_update_after_submit(self):
 		self.validate_po()

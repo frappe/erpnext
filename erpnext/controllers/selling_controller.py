@@ -370,3 +370,28 @@ def check_active_sales_items(obj):
 						"income_account": d.income_account
 					})
 				doc.save(ignore_permissions=True)
+
+#Calculate Commission on Rules Defined in Sales Partner
+def calculate_commission_rule(self):
+    if self.sales_partner:
+        sp=frappe.get_doc('Sales Partner',self.sales_partner)
+        commission_brand=0;
+        commission_total=0;
+        done_commission = []
+        for commission_type in sp.get('commission_rule'):
+        	if commission_type.type == "Brand":
+				for item in self.items:
+					if item.item_code not in done_commission and item.brand == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+    		elif commission_type.type == "Item Group":
+				for item in self.items:
+					if item.item_code not in done_commission and item.item_group == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+    		elif commission_type.type == "Item":
+				for item in self.items:
+					if item.item_code not in done_commission and item.item_code == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+    		self.commission_rule_amount=commission_total
