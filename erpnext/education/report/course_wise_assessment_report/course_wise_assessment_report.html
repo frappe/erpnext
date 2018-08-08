@@ -36,7 +36,7 @@
 			<tr>
 				{% for(var i=1, l=report_columns.length; i<l; i++) { %}
 					<td class="text-center">
-						{% var fieldname = report_columns[i].field; %}
+						{% var fieldname = report_columns[i].fieldname; %}
 						{% if (!is_null(row[fieldname])) { %}
 							{%= row[fieldname] %}
 						{% } %}
@@ -47,4 +47,4 @@
 	</tbody>
 </table>
 
-<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
