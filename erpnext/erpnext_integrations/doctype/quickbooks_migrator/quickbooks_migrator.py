@@ -280,7 +280,7 @@ def save_bill(bill):
 				"naming_series": "PINV-",
 				"currency": bill["CurrencyRef"]["value"],
 				"posting_date": bill["TxnDate"],
-				"due_date": bill.get("DueDate", "2020-01-01"),
+				"due_date":  bill["DueDate"],
 				"credit_to": credit_to_account,
 				"supplier": frappe.get_all("Supplier",
 					filters={
@@ -323,13 +323,16 @@ def save_bill_payment(bill_payment):
 				purchase_invoice = frappe.get_all("Purchase Invoice",
 					filters={
 						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
-					})[0]["name"]
+					},
+					fields=["name", "base_grand_total"])[0]
 				if bill_payment["PayType"] == "Check":
 					bank_account = get_account_name_by_id(bill_payment["CheckPayment"]["BankAccountRef"]["value"])
 					make_bank(bank_account)
 				else:
 					bank_account = None
-				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice, bank_account=bank_account)
+				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice["name"],
+					bank_account=bank_account,
+					bank_amount=purchase_invoice["base_grand_total"])
 				erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
 				erp_pe.reference_no = "Reference No"
 				erp_pe.reference_date = bill_payment["TxnDate"]
