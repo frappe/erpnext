@@ -324,6 +324,14 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
+	def set_invoiced_item_tax_amount(self):
+		for d in self.get("items"):
+			invoiced_tax_data = frappe.db.sql("""select sum(item_tax_amount), sum(qty)
+				from `tabPurchase Invoice Item`
+				where docstatus = 1 and pr_detail = %s""", d.name)
+			d.invoiced_item_tax_amount = invoiced_tax_data and invoiced_tax_data[0][0] or 0.0
+			d.invoiced_item_tax_portion = invoiced_tax_data and invoiced_tax_data[0][1] and min(1.0, invoiced_tax_data[0][1]/d.qty) or 0.0
+
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
