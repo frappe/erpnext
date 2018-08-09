@@ -547,7 +547,7 @@ def get_party_item_code(args, item_doc, out):
 		if customer_item_code:
 			out.customer_item_code = customer_item_code[0].ref_code
 		else:
-			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group", cache=True)
+			customer_group = frappe.get_cached_value("Customer", args.customer, "customer_group")
 			customer_group_item_code = item_doc.get("customer_items", {"customer_group": customer_group})
 			if customer_group_item_code and not customer_group_item_code[0].customer_name:
 				out.customer_item_code = customer_group_item_code[0].ref_code

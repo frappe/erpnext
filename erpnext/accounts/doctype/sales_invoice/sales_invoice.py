@@ -259,7 +259,7 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+		bypass_credit_limit_check_at_sales_order = cint(frappe.get_cached_value("Customer", self.customer,
 			"bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
@@ -388,7 +388,7 @@ class SalesInvoice(SellingController):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
 
 	def validate_debit_to_acc(self):
-		account = frappe.db.get_value("Account", self.debit_to,
+		account = frappe.get_cached_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
@@ -460,9 +460,9 @@ class SalesInvoice(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
-			if frappe.db.get_value('Selling Settings', None, dic[i][0]) == 'Yes':
+			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
+					if frappe.get_cached_value('Item', d.item_code, 'is_stock_item') == 1 \
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
@@ -1153,7 +1153,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_invoice_
 		ref_party = doc.supplier if doctype == "Sales Invoice" else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
 			frappe.throw(_("Invalid {0} for Inter Company Invoice.").format(partytype))
-		if not frappe.db.get_value(ref_partytype, {"name": ref_party}, "represents_company") == company:
+		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
 			frappe.throw(_("Invalid Company for Inter Company Invoice."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
@@ -1260,10 +1260,10 @@ def set_account_for_mode_of_payment(self):
 def get_inter_company_details(doc, doctype):
 	if doctype == "Sales Invoice":
 		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
-		company = frappe.db.get_value("Customer", {"name": doc.customer}, "represents_company")
+		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 	else:
 		party = frappe.db.get_value("Customer", {"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company}, "name")
-		company = frappe.db.get_value("Supplier", {"name": doc.supplier}, "represents_company")
+		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
 
 	return {
 		"party": party,
