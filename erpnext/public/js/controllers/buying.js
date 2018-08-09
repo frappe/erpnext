@@ -26,7 +26,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			};
 		});
 
-		if (this.frm.doc.__islocal) {
+		if (this.frm.doc.__islocal
+			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
 			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
 		}
 
