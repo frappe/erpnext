@@ -62,7 +62,7 @@ def fetch_accounts():
 def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase"]
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	frappe.clear_messages()
@@ -385,6 +385,35 @@ def save_purchase(purchase):
 		import traceback
 		traceback.print_exc()
 
+def save_deposit(deposit):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Deposit - {}".format(deposit["Id"])}):
+			# Debit Bank Account
+			accounts = [{
+					"account": get_account_name_by_id(deposit["DepositToAccountRef"]["value"]),
+					"debit_in_account_currency": deposit["TotalAmt"],
+				}]
+
+			# Credit Mentioned Accounts
+			for line in deposit["Line"]:
+				accounts.append({
+					"account": get_account_name_by_id(line["DepositLineDetail"]["AccountRef"]["value"]),
+					"credit_in_account_currency": line["Amount"],
+				})
+
+			# Create and Submit Journal Entry
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"quickbooks_id": "Deposit - {}".format(deposit["Id"]),
+				"naming_series": "JV-",
+				"company": company,
+				"posting_date": deposit["TxnDate"],
+				"accounts": accounts,
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -576,6 +605,7 @@ save_methods = {
 	"TaxRate": save_tax_rate,
 	"TaxCode": save_tax_code,
 	"Purchase": save_purchase,
+	"Deposit": save_deposit,
 }
 
 def save_entries(doctype, entries):
