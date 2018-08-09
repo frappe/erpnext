@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, get_datetime
+from frappe.utils import flt, time_diff_in_hours, get_datetime
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -46,8 +46,14 @@ class JobCard(Document):
 					.format(d.idx, d.item_code))
 
 			if self.get('operation') == d.operation:
-				child = self.append('items', d)
-				child.uom = frappe.db.get_value("Item", d.item_code, 'stock_uom')
+				child = self.append('items', {
+					'item_code': d.item_code,
+					'source_warehouse': d.source_warehouse,
+					'uom': frappe.db.get_value("Item", d.item_code, 'stock_uom'),
+					'item_name': d.item_name,
+					'description': d.description,
+					'required_qty': (d.required_qty * flt(self.for_quantity)) / doc.qty
+				})
 
 	def on_submit(self):
 		self.validate_dates()

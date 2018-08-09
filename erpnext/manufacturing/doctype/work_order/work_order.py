@@ -214,9 +214,6 @@ class WorkOrder(Document):
 		production_plan = frappe.get_doc('Production Plan', self.production_plan)
 		production_plan.run_method("update_produced_qty", self.produced_qty, self.production_plan_item)
 
-	def before_submit(self):
-		self.make_job_card()
-
 	def on_submit(self):
 		if not self.wip_warehouse:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
@@ -228,6 +225,7 @@ class WorkOrder(Document):
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
 		self.update_ordered_qty()
+		self.create_job_card()
 
 	def on_cancel(self):
 		self.validate_cancel()
@@ -239,6 +237,10 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
+
+	def create_job_card(self):
+		for row in self.operations:
+			create_job_card(self, row, auto_create=True)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -339,42 +341,6 @@ class WorkOrder(Document):
 			holidays[holiday_list] = holiday_list_days
 
 		return holidays[holiday_list]
-
-	def make_job_card(self):
-		if not self.operations:
-			return
-
-		workstation_wise_time = {}
-		card_count = 0
-		for d in self.operations:
-			start_date = workstation_wise_time.get(d.workstation) or self.planned_start_date
-			end_date = get_datetime(start_date) + relativedelta(minutes = d.time_in_mins)
-			workstation_wise_time[d.workstation] = end_date
-
-			doc = frappe.get_doc({
-				'doctype': 'Job Card',
-				'work_order': self.name,
-				'operation': d.operation,
-				'workstation': d.workstation,
-				'posting_date': nowdate(),
-				'for_quantity': self.qty,
-				'operation_id': d.name,
-				'estimated_start_date': start_date,
-				'estimated_end_date': end_date,
-				'bom_no': self.bom_no,
-				'project': self.project,
-				'company': self.company,
-				'wip_warehouse': self.wip_warehouse
-			})
-
-			if self.transfer_material_against_job_card and not self.skip_transfer:
-				doc.get_required_items()
-			doc.flags.ignore_mandatory = True
-			doc.save()
-			card_count += 1
-
-		if card_count:
-			frappe.msgprint(_("Total {0} job cards created").format(card_count))
 
 	def update_operation_status(self):
 		for d in self.get("operations"):
@@ -678,3 +644,40 @@ def query_sales_order(production_item):
 	""", (production_item, production_item))
 
 	return out
+
+@frappe.whitelist()
+def make_job_card(work_order, operation, workstation, qty=0):
+	work_order = frappe.get_doc('Work Order', work_order)
+	row = get_work_order_operation_data(work_order, operation, workstation)
+	if row:
+		return create_job_card(work_order, row, qty)
+
+def create_job_card(work_order, row, qty=0, auto_create=False):
+	doc = frappe.new_doc("Job Card")
+	doc.update({
+		'work_order': work_order.name,
+		'operation': row.operation,
+		'workstation': row.workstation,
+		'posting_date': nowdate(),
+		'for_quantity': qty or work_order.get('qty', 0),
+		'operation_id': row.name,
+		'bom_no': work_order.bom_no,
+		'project': work_order.project,
+		'company': work_order.company,
+		'wip_warehouse': work_order.wip_warehouse
+	})
+
+	if work_order.transfer_material_against_job_card and not work_order.skip_transfer:
+		doc.get_required_items()
+
+	if auto_create:
+		doc.flags.ignore_mandatory = True
+		doc.insert()
+		frappe.msgprint(_("Job card {0} created").format(doc.name))
+
+	return doc
+
+def get_work_order_operation_data(work_order, operation, workstation):
+	for d in work_order.operations:
+		if d.operation == operation and d.workstation == workstation:
+			return d
