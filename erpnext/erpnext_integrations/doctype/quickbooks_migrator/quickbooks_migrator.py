@@ -243,7 +243,7 @@ def save_invoice(invoice):
 						"quickbooks_id": invoice["CustomerRef"]["value"]
 					})[0]["name"],
 				"items": get_items(invoice["Line"]),
-				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"]),
+				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"], invoice["Line"]),
 
 				# Do not change posting_date upon submission
 				"set_posting_time": 1,
@@ -359,7 +359,7 @@ def get_accounts(lines):
 def get_items(lines):
 	items = []
 	for line in lines:
-		if line["DetailType"] == "SalesItemLineDetail":
+		if line["DetailType"] == "SalesItemLineDetail" and line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
 			item = frappe.db.get_all("Item",
 				filters={
 					"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"]
@@ -426,8 +426,16 @@ def get_item_taxes(tax_code):
 				item_taxes[tax_head] = tax_rate["RateValue"]
 	return item_taxes
 
-def get_taxes(lines):
+def get_taxes(lines, items=None):
 	taxes = []
+	for item in items or []:
+		if item["DetailType"] == "SalesItemLineDetail" and item["SalesItemLineDetail"]["ItemRef"]["value"] == "SHIPPING_ITEM_ID":
+			taxes.append({
+				"charge_type": "Actual",
+				"account_head": "Shipping Income - QB - SA",
+				"description": "Shipping",
+				"tax_amount": item["Amount"],
+			})
 	for line in lines:
 		tax_rate = line["TaxLineDetail"]["TaxRateRef"]["value"]
 		account_head = get_account_name_by_id("TaxRate - {}".format(tax_rate))
