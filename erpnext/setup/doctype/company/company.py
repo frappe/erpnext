@@ -75,6 +75,8 @@ class Company(NestedSet):
 							.format(self.get(field), self.name))
 
 	def validate_currency(self):
+		if self.is_new():
+			return
 		self.previous_default_currency = frappe.get_cached_value('Company',  self.name,  "default_currency")
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
