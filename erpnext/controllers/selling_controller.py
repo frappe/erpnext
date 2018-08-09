@@ -139,7 +139,7 @@ class SellingController(StockController):
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
-			discount = flt(frappe.db.get_value("Item", d.item_code, "max_discount"))
+			discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
 			if discount and flt(d.discount_percentage) > discount:
 				frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
@@ -166,7 +166,7 @@ class SellingController(StockController):
 			if not it.item_code:
 				continue
 
-			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
+			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
 			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
@@ -283,7 +283,7 @@ class SellingController(StockController):
 
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
 				if flt(d.conversion_factor)==0.0:
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
