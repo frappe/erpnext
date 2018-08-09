@@ -308,6 +308,7 @@ def save_payment(payment):
 				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
 				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
 				erp_pe.reference_no = "Reference No"
+				erp_pe.posting_date = payment["TxnDate"]
 				erp_pe.reference_date = payment["TxnDate"]
 				erp_pe.insert().submit()
 	except:
@@ -334,6 +335,7 @@ def save_bill_payment(bill_payment):
 					bank_amount=purchase_invoice["base_grand_total"])
 				erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
 				erp_pe.reference_no = "Reference No"
+				erp_pe.posting_date = bill_payment["TxnDate"]
 				erp_pe.reference_date = bill_payment["TxnDate"]
 				erp_pe.insert().submit()
 	except:
