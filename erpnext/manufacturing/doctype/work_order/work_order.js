@@ -112,6 +112,12 @@ frappe.ui.form.on("Work Order", {
 			frm.trigger('show_progress');
 		}
 
+		if (frm.doc.docstatus === 1 && frm.doc.operations) {
+			frm.add_custom_button(__('Make Job Card'), () => {
+				frm.trigger("make_job_card")
+			}).addClass('btn-primary');
+		}
+
 		if(frm.doc.required_items && frm.doc.allow_alternative_item) {
 			const has_alternative = frm.doc.required_items.find(i => i.allow_alternative_item === 1);
 			if (frm.doc.docstatus == 0 && has_alternative) {
@@ -136,6 +142,87 @@ frappe.ui.form.on("Work Order", {
 				frm.trigger("make_bom");
 			});
 		}
+	},
+
+	make_job_card: function(frm) {
+		let qty = 0;
+		const fields = [{
+			fieldtype: "Link",
+			fieldname: "operation",
+			options: "Operation",
+			label: __("Operation"),
+			get_query: () => {
+				return {
+					filters: {
+						name: ["in", frm.doc.operations.map(d => d.operation)]
+					}
+				};
+			},
+			reqd: true
+		}, {
+			fieldtype: "Link",
+			fieldname: "workstation",
+			options: "Workstation",
+			label: __("Workstation"),
+			get_query: () => {
+				const operation = dialog.get_value("operation");
+				const filter_workstation = frm.doc.operations.filter(d => {
+					if (d.operation == operation) {
+						return d;
+					}
+				});
+
+				return {
+					filters: {
+						name: ["in", (filter_workstation || []).map(d => d.workstation)]
+					}
+				};
+			},
+			onchange: () => {
+				const operation = dialog.get_value("operation");
+				const workstation = dialog.get_value("workstation");
+				if (operation && workstation) {
+					const row = frm.doc.operations.filter(d => d.operation == operation && d.workstation == workstation)[0];
+					qty = frm.doc.qty - row.completed_qty;
+
+					if (qty > 0) {
+						dialog.set_value("qty", qty);
+					}
+				}
+			},
+			reqd: true
+		}, {
+			fieldtype: "Float",
+			fieldname: "qty",
+			label: __("For Quantity"),
+			reqd: true
+		}];
+
+		const dialog = frappe.prompt(fields, function(data) {
+			if (data.qty > qty) {
+				frappe.throw(__("For Quantity must be less than quantity {0}", [qty]));
+			}
+
+			if (data.qty <= 0) {
+				frappe.throw(__("For Quantity must be greater than zero"));
+			}
+
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
+				args: {
+					work_order: frm.doc.name,
+					operation: data.operation,
+					workstation: data.workstation,
+					qty: data.qty
+				},
+				callback: function(r){
+					if (r.message) {
+						var doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					}
+				}
+			});
+		}, __("For Job Card"));
 	},
 
 	make_bom: function(frm) {
@@ -327,7 +414,7 @@ erpnext.work_order = {
 				}, __("Status"));
 			}
 
-			if(!frm.doc.skip_transfer){
+			if(!frm.doc.skip_transfer && !frm.doc.operations){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
 					&& frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
