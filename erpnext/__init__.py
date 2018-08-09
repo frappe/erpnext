@@ -45,7 +45,7 @@ def get_company_currency(company):
 	if not frappe.flags.company_currency:
 		frappe.flags.company_currency = {}
 	if not company in frappe.flags.company_currency:
-		frappe.flags.company_currency[company] = frappe.get_cached_value('Company',  company,  'default_currency')
+		frappe.flags.company_currency[company] = frappe.db.get_value('Company',  company,  'default_currency', cache=True)
 	return frappe.flags.company_currency[company]
 
 def set_perpetual_inventory(enable=1, company=None):
