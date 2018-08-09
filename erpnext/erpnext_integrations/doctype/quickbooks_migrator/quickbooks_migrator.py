@@ -62,7 +62,7 @@ def fetch_accounts():
 def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment"]
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	frappe.clear_messages()
@@ -342,6 +342,49 @@ def save_bill_payment(bill_payment):
 		import traceback
 		traceback.print_exc()
 
+def save_purchase(purchase):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Purchase - {}".format(purchase["Id"])}):
+			# Credit Bank Account
+			accounts = [{
+					"account": get_account_name_by_id(purchase["AccountRef"]["value"]),
+					"credit_in_account_currency": purchase["TotalAmt"],
+				}]
+
+			# Debit Mentioned Accounts
+			for line in purchase["Line"]:
+				if line["DetailType"] == "AccountBasedExpenseLineDetail":
+					account = get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"])
+				elif line["DetailType"] == "ItemBasedExpenseLineDetail":
+					account = frappe.get_doc("Item",
+						{"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"]}
+					).item_defaults[0].expense_account
+				accounts.append({
+					"account": account,
+					"debit_in_account_currency": line["Amount"],
+				})
+
+			# Debit Tax Accounts
+			if "TxnTaxDetail" in purchase:
+				for line in purchase["TxnTaxDetail"]["TaxLine"]:
+					accounts.append({
+						"account": get_account_name_by_id(line["TaxLineDetail"]["TaxRateRef"]["value"]),
+						"debit_in_account_currency": line["Amount"],
+					})
+
+			# Create and Submit Journal Entry
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"quickbooks_id": "Purchase - {}".format(purchase["Id"]),
+				"naming_series": "JV-",
+				"company": company,
+				"posting_date": purchase["TxnDate"],
+				"accounts": accounts,
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -419,13 +462,14 @@ def get_pi_items(lines):
 def get_item_taxes(tax_code):
 	tax_rates = get_tax_rate()
 	item_taxes = {}
-	tax_code = get_tax_code()[tax_code]
-	for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
-		for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
-			if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
-				tax_head = get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
-				tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
-				item_taxes[tax_head] = tax_rate["RateValue"]
+	if tax_code != "NON":
+		tax_code = get_tax_code()[tax_code]
+		for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
+			for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+				if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
+					tax_head = get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
+					tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
+					item_taxes[tax_head] = tax_rate["RateValue"]
 	return item_taxes
 
 def get_taxes(lines, items=None):
@@ -531,6 +575,7 @@ save_methods = {
 	"BillPayment": save_bill_payment,
 	"TaxRate": save_tax_rate,
 	"TaxCode": save_tax_code,
+	"Purchase": save_purchase,
 }
 
 def save_entries(doctype, entries):
