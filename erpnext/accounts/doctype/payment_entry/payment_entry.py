@@ -552,6 +552,10 @@ def get_outstanding_reference_documents(args):
 		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
+	# Add cost center condition
+	if args.get("cost_center"):
+		condition += " and cost_center='%s'" % args.get("cost_center")
+
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), condition=condition)
 
@@ -576,13 +580,19 @@ def get_outstanding_reference_documents(args):
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 
-def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
+def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency, cost_center=None):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
 	elif party_type == "Supplier":
 		voucher_type = 'Purchase Order'
 	elif party_type == "Employee":
 		voucher_type = None
+
+	# Add cost center condition
+	doc = frappe.get_doc({"doctype": voucher_type})
+	condition = ""
+	if doc and hasattr(doc, 'cost_center'):
+		condition = " and cost_center='%s'" % cost_center
 
 	orders = []
 	if voucher_type:
@@ -602,12 +612,14 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 				and ifnull(status, "") != "Closed"
 				and {ref_field} > advance_paid
 				and abs(100 - per_billed) > 0.01
+				{condition}
 			order by
 				transaction_date, name
 		""".format(**{
 			"ref_field": ref_field,
 			"voucher_type": voucher_type,
-			"party_type": scrub(party_type)
+			"party_type": scrub(party_type),
+			"condition": condition
 		}), party, as_dict=True)
 
 	order_list = []
@@ -619,7 +631,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 
 	return order_list
 
-def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency):
+def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
@@ -650,7 +662,8 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"grand_total_field": grand_total_field,
 			"voucher_type": voucher_type,
 			"party_type": scrub(party_type),
-			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
+			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
+			"cost_center": cost_center
 		}), (party, party_account), as_dict=True)
 
 
@@ -917,3 +930,11 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	""".format(dr_or_cr=dr_or_cr), (dt, dn, party_type, party, account, due_date))
 
 	return paid_amount[0][0] if paid_amount else 0
+
+@frappe.whitelist()
+def get_party_and_account_balance(company, date, paid_from, paid_to=None, ptype=None, pty=None, cost_center=None):
+	return frappe._dict({
+		"party_balance": get_balance_on(party_type=ptype, party=pty, cost_center=cost_center),
+		"paid_from_account_balance": get_balance_on(paid_from, date, cost_center=cost_center),
+		"paid_to_account_balance": get_balance_on(paid_to, date=date, cost_center=cost_center)
+	})

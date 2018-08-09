@@ -507,7 +507,8 @@ frappe.ui.form.on('Payment Entry', {
 					"party_type": frm.doc.party_type,
 					"payment_type": frm.doc.payment_type,
 					"party": frm.doc.party,
-					"party_account": frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to
+					"party_account": frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to,
+					"cost_center": frm.doc.cost_center
 				}
 			},
 			callback: function(r, rt) {
@@ -863,8 +864,36 @@ frappe.ui.form.on('Payment Entry Deduction', {
 })
 frappe.ui.form.on('Payment Entry', {
 	cost_center: function(frm){
-		if (frm.doc.paid_from)	frm.trigger("paid_from");
-		if (frm.doc.paid_to)	frm.trigger("paid_to");
-		if (frm.doc.party)	frm.trigger("party");
+		if (frm.doc.posting_date && (frm.doc.paid_from||frm.doc.paid_to)) {
+			return frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_and_account_balance",
+				args: {
+					company: frm.doc.company,
+					date: frm.doc.posting_date,
+					paid_from: frm.doc.paid_from,
+					paid_to: frm.doc.paid_to,
+					ptype: frm.doc.party_type,
+					pty: frm.doc.party,
+					cost_center: frm.doc.cost_center
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						frappe.run_serially([
+							() => {
+								frm.set_value("paid_from_account_balance", r.message.paid_from_account_balance);
+								frm.set_value("paid_to_account_balance", r.message.paid_to_account_balance);
+								frm.set_value("party_balance", r.message.party_balance);
+							},
+							() => {
+								if(frm.doc.payment_type != "Internal") {
+									frm.events.get_outstanding_documents(frm);
+								}
+							}
+						]);
+
+					}
+				}
+			});
+		}
 	},
 })
