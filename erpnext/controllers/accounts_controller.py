@@ -605,6 +605,7 @@ class AccountsController(TransactionBase):
 
 	@property
 	def company_abbr(self):
+		self._abbr = None
 		if not hasattr(self, "_abbr") and self.company:
 			self._abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
 

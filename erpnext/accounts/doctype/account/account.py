@@ -179,7 +179,7 @@ def get_account_currency(account):
 	if not account:
 		return
 	def generator():
-		account_currency, company = frappe.db.get_value("Account", account, ["account_currency", "company"])
+		account_currency, company = frappe.get_cached_value("Account", account, ["account_currency", "company"])
 		if not account_currency:
 			account_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
