@@ -92,25 +92,28 @@ erpnext.hub.Item = class Item extends SubPage {
 						<button class="btn btn-xs btn-default" data-route="marketplace/home">${__('Back to home')}</button>
 					</div>
 				</div>
-				<div class="row">
+				<div class="row detail-page-section margin-bottom">
 					<div class="col-md-3">
 						<div class="hub-item-image">
 							<img src="${item.image}">
 						</div>
 					</div>
-					<div class="col-md-8">
-						<h2>${title}</h2>
-						<div class="text-muted">
-							<p>${where}${dot_spacer}${when}</p>
-							<p>${stats}</p>
+					<div class="col-md-8 flex flex-column">
+						<div class="detail-page-header">
+							<h2>${title}</h2>
+							<div class="text-muted">
+								<p>${where}${dot_spacer}${when}</p>
+								<p>${stats}</p>
+							</div>
 						</div>
-						<hr>
-						<div class="hub-item-description">
-						${description ?
-							`<b>${__('Description')}</b>
-							<p>${description}</p>
-							` : `<p>${__('No description')}<p>`
-						}
+
+						<div class="page-actions detail-page-actions">
+							<button class="btn btn-default text-muted" data-action="add_to_favourites">
+								${__('Add to Favourites')} <i class="octicon octicon-heart text-extra-muted"></i>
+							</button>
+							<button class="btn btn-primary" data-action="contact_seller">
+								${__('Contact Seller')}
+							</button>
 						</div>
 					</div>
 					<div class="col-md-1">
@@ -124,18 +127,24 @@ erpnext.hub.Item = class Item extends SubPage {
 						</div>
 					</div>
 				</div>
+				<div class="row hub-item-description">
+					<h6 class="col-md-12 margin-top">
+						<b class="text-muted">Product Description</b>
+					</h6>
+					<p class="col-md-12">
+						${description ? description : __('No details')}
+					</p>
+				</div>
 				<div class="row hub-item-seller">
-					<div class="col-md-12 margin-top margin-bottom">
+
+					<h6 class="col-md-12 margin-top margin-bottom">
 						<b class="text-muted">Seller Information</b>
-					</div>
+					</h6>
 					<div class="col-md-1">
 						<img src="https://picsum.photos/200">
 					</div>
 					<div class="col-md-8">
 						<div class="margin-bottom"><a href="#marketplace/seller/${seller}" class="bold">${seller}</a></div>
-						<button class="btn btn-xs btn-default text-muted" data-action="contact_seller">
-							${__('Contact Seller')}
-						</button>
 					</div>
 				</div>
 				<!-- review area -->
