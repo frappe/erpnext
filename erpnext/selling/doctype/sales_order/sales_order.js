@@ -84,8 +84,46 @@ frappe.ui.form.on("Sales Order Item", {
 		if(!frm.doc.delivery_date) {
 			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
 		}
+	},
+	rate: function(frm, cdt, cdn) {
+		frappe.call({
+	    method:"erpnext.selling.doctype.sales_order.sales_order.get_pricing_rule_setting",
+	    args: {
+	        doctype: "Selling Settings",
+					name: "Selling Settings",
+	        fieldname: "pricing_rule_creation_prompt"
+				}
+	    }).done((r) => {
+	    		if(r.message && r.message == 1) {
+						show_pricing_rule_prompt(frm, cdt, cdn);
+					}
+	    }).fail((f) => {
+				console.log("Failed on frappe.client.get_value", f);
+			});
 	}
 });
+
+function show_pricing_rule_prompt(frm, cdt, cdn){
+	let item = locals[cdt][cdn];
+	frappe.model.set_value(item.doctype, item.name, "price_list_rate", item.rate);
+	frappe.model.set_value(item.doctype, item.name, "base_price_list_rate", item.rate);
+	frappe.confirm(__('Would you like to save this item price for ') + frm.doc.customer + '?',
+		() => {
+			frappe.call({
+				method:"erpnext.selling.doctype.sales_order.sales_order.add_pricing_rule",
+				args: {
+					item_code: item.item_code,
+					customer: frm.doc.customer,
+					rate: item.rate,
+					uom_conversion: item.conversion_factor
+				}
+			}).done((r) => {
+				show_alert(__('Created new pricing rule for ') + item.item_code + __(" and ") + frm.doc.customer)
+			}).fail((f) => {
+				console.log("Failed on erpnext.selling.doctype.sales_order.sales_order.add_pricing_rule", f);
+			});
+		});
+}
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
