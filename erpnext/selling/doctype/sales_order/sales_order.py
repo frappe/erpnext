@@ -883,6 +883,41 @@ def make_work_orders(items, sales_order, company, project=None):
 
 	return [p.name for p in out]
 
+
+@frappe.whitelist()
+def add_pricing_rule(item_code, customer, rate, uom_conversion):
+	rate = float(rate) * (1.0 / float(uom_conversion))
+	pricing_rules = frappe.get_all('Pricing Rule',
+		filters={
+			"item_code": item_code,
+			"customer": customer
+		},
+		fields=["name"])
+	if len(pricing_rules):
+		pricing_rule = frappe.get_doc('Pricing Rule', pricing_rules[0]["name"])
+		pricing_rule.rate = rate
+		pricing_rule.save()
+	else:
+		pricing_rule = frappe.new_doc("Pricing Rule")
+		pricing_rule.update({
+			"title": customer + " - " + item_code,
+			"item_code": item_code,
+			"apply_on": "Item Code",
+			"applicable_for": "Customer",
+			"customer": customer,
+			"priority": 2,
+			"rate_or_discount": "Rate",
+			"rate": rate,
+			"selling": 1,
+			"buying": 0
+		})
+		pricing_rule.save()
+	return pricing_rule
+
+@frappe.whitelist()
+def get_pricing_rule_setting(doctype, name, fieldname, as_dict=False):
+	return frappe.get_cached_value(doctype, name, fieldname, as_dict=False)
+
 @frappe.whitelist()
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
