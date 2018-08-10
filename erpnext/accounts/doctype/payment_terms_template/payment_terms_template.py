@@ -15,6 +15,7 @@ class PaymentTermsTemplate(Document):
 		self.validate_invoice_portion()
 		self.validate_credit_days()
 		self.check_duplicate_terms()
+		self.validate_discount_terms()
 
 	def validate_invoice_portion(self):
 		total_portion = 0
