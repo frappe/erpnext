@@ -68,5 +68,32 @@ class TestPaymentTermsTemplate(unittest.TestCase):
 
 			]
 		})
+		self.assertRaises(frappe.ValidationError, template.insert)
 
+	def test_discount_terms(self):
+		template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': '_Test Payment Terms Template For Test',
+			'terms': [{
+				'doctype': 'Payment Terms Template Detail',
+				'invoice_portion': 100.00,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 30,
+				'discount_eligible_days': -1,
+				'discount_percent': 1
+			}]
+		})
+		self.assertRaises(frappe.ValidationError, template.insert)
+		template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': '_Test Payment Terms Template For Test',
+			'terms': [{
+				'doctype': 'Payment Terms Template Detail',
+				'invoice_portion': 100.00,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 30,
+				'discount_eligible_days': 10,
+				'discount_percent': None
+			}]
+		})
 		self.assertRaises(frappe.ValidationError, template.insert)

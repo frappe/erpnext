@@ -6,5 +6,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
+
 class PaymentEntryDeduction(Document):
-	pass
+	def __getitem__(self, key):
+		return self.get(key)
+
+	def __setitem__(self, key, value):
+		self.key = value
