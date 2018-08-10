@@ -237,14 +237,14 @@ def remove_pricing_rules(item_list):
 def get_pricing_rules(args):
 	def _get_tree_conditions(parenttype, allow_blank=True):
 		field = frappe.scrub(parenttype)
-		if not frappe.flags.tree_conditions:
-			frappe.flags.tree_conditions = {}
-		key = (parenttype, args[field], )
-		if key in frappe.flags.tree_conditions:
-			return frappe.flags.tree_conditions[key]
-
 		condition = ""
 		if args.get(field):
+			if not frappe.flags.tree_conditions:
+				frappe.flags.tree_conditions = {}
+			key = (parenttype, args[field], )
+			if key in frappe.flags.tree_conditions:
+				return frappe.flags.tree_conditions[key]
+
 			try:
 				lft, rgt = frappe.db.get_value(parenttype, args[field], ["lft", "rgt"])
 			except TypeError:
