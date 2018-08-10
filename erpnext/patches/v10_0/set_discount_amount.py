@@ -1,8 +1,7 @@
 
-import frappe, time
+import frappe
 
 def execute():
-	start_time = time.time()
 	frappe.reload_doc("accounts", "doctype", "sales_invoice_item")
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_item')
 	frappe.reload_doc('buying', 'doctype', 'purchase_order_item')
@@ -36,18 +35,16 @@ def execute():
 				discount_percentage > 0
 		''' % (doctype), as_dict=True)
 		calculate_discount(doctype, values)
-	end_time = time.time()
-	print('Success: Done in {time}s'.format(time = round(end_time - start_time, 3)))
 
 def calculate_discount(doctype, values):
 	rate = None
 	if not values: return
-
 	for d in values:
 		if d.rate_with_margin and d.rate_with_margin > 0:
 			rate = d.rate_with_margin
 		else:
 			rate = d.price_list_rate
+
 		discount_value = rate * d.get('discount_percentage') / 100
 		frappe.db.sql('''
 			UPDATE
