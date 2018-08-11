@@ -2,7 +2,7 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'purchase_invoice',
+		'fieldname': 'landed_cost_voucher',
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
