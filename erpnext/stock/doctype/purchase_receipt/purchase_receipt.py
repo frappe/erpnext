@@ -65,6 +65,8 @@ class PurchaseReceipt(BuyingController):
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 
+		self.set_title()
+
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
 			"Purchase Order": {
@@ -170,7 +172,9 @@ class PurchaseReceipt(BuyingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		stock_rbnb = self.get("credit_to")
+		if not stock_rbnb:
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
@@ -323,6 +327,12 @@ class PurchaseReceipt(BuyingController):
 			pr_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
+
+	def set_title(self):
+		if self.credit_to and self.credit_to != self.get_company_default("stock_received_but_not_billed"):
+			self.title = self.credit_to
+		else:
+			self.title = self.supplier_name
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
