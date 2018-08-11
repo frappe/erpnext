@@ -134,3 +134,19 @@ class LandedCostVoucher(Document):
 				if serial_nos:
 					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
 						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
+
+@frappe.whitelist()
+def get_landed_cost_voucher(dt, dn):
+	doc = frappe.get_doc(dt, dn)
+
+	lcv = frappe.new_doc("Landed Cost Voucher")
+	lcv.company = doc.company
+	lcv.append("purchase_receipts", {
+		"receipt_document_type": dt,
+		"receipt_document": dn,
+		"supplier": doc.supplier,
+		"grand_total": doc.base_grand_total
+	})
+
+	lcv.get_items_from_purchase_receipts()
+	return lcv
