@@ -24,6 +24,7 @@ def get_columns(filters):
 	"""return columns"""
 
 	uom = filters.get('by_uom') or 'Stock UOM'
+
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
@@ -45,6 +46,9 @@ def get_columns(filters):
 		_("Reorder Qty")+":Float:80",
 		_("Company")+":Link/Company:100"
 	]
+
+	if filters.get('show_variant_attributes'):
+		columns += ["{}:Data:100".format(i.name) for i in frappe.get_all('Item Attribute')]
 
 	return columns
 
@@ -88,7 +92,6 @@ def get_join_condition(filters):
 		return 'inner join `tabUOM Conversion Detail` uom on uom.parent=it.name and \
 		((uom.uom=it.purchase_uom and IFNULL(it.purchase_uom, "") != "") or \
 		(uom.uom=it.stock_uom and IFNULL(it.purchase_uom, "") = "")) '
-
 
 def get_data(filters):
 
@@ -135,4 +138,29 @@ def get_data(filters):
 		HAVING SUM(sle.actual_qty) > 0
 	"""
 
-	return frappe.db.sql(query.format(condition_filter=condition_filter, join_condition=join_condition), filters)
+	data = frappe.db.sql(query.format(condition_filter=condition_filter, join_condition=join_condition), filters, as_list = 1)
+	new_data = data;
+	if filters.get('show_variant_attributes'):
+		variant_map = get_variant_values()
+		attributes = [i.name for i in frappe.get_all('Item Attribute')]
+		new_data = []
+		for row in data:
+			row = list(row)
+			if variant_map.get(row[0]):
+				row += [ variant_map[row[0]].get(attribute) for attribute in attributes]
+			else:
+				row += [None, None, None]
+			new_data.append(row)
+
+	return new_data
+
+
+def get_variant_values():
+	'''Returns variant values for items.'''
+	attribute_map = {}
+	for attr in frappe.db.sql('''select parent, attribute, attribute_value
+		from `tabItem Variant Attribute`''', as_dict=1):
+			attribute_map.setdefault(attr['parent'], {})
+			attribute_map[attr['parent']].update({attr['attribute']: attr['attribute_value']})
+
+	return attribute_map
