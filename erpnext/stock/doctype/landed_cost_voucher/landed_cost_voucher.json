@@ -221,7 +221,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -777,7 +777,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-12 05:00:39.769168", 
+ "modified": "2018-08-12 18:48:01.074566", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Voucher", 
