@@ -5,13 +5,12 @@ def get_data():
 		'fieldname': 'landed_cost_voucher',
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
-			'Payment Entry': 'reference_name',
-			'Payment Request': 'reference_name'
+			'Payment Entry': 'reference_name'
 		},
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
+				'items': ['Payment Entry', 'Journal Entry']
 			},
 		]
 	}

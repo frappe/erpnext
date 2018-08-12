@@ -354,6 +354,13 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 			where pr_detail=%s and docstatus=1""", pr_item.name)
 		billed_amt_agianst_pr = billed_amt_agianst_pr and billed_amt_agianst_pr[0][0] or 0
 
+		# Get billed amount from import bill LCVs
+		billed_amt_against_lcv = frappe.db.sql("""select sum(lcv_item.billable_amt)
+			from `tabLanded Cost Item` as lcv_item, `tabLanded Cost Voucher` as lcv
+			where lcv.name=lcv_item.parent and lcv.is_import_bill=1 and lcv_item.purchase_receipt_item=%s and lcv_item.docstatus=1""", pr_item.name)
+		billed_amt_against_lcv = billed_amt_against_lcv and billed_amt_against_lcv[0][0] or 0
+		billed_amt_agianst_pr += billed_amt_against_lcv
+
 		# Distribute billed amount directly against PO between PRs based on FIFO
 		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
 			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
@@ -369,6 +376,29 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 		updated_pr.append(pr_item.parent)
 
 	return updated_pr
+
+def update_billed_amount_based_on_pr(doc, pr_detail_field, pr_name_field, po_detail_field, update_modified=True):
+	updated_pr = []
+	for d in doc.get("items"):
+		if d.get(pr_detail_field):
+			billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
+				where pr_detail=%s and docstatus=1""", d.get(pr_detail_field))
+			billed_amt = billed_amt and billed_amt[0][0] or 0
+
+			billed_amt_against_lcv = frappe.db.sql("""select sum(lcv_item.billable_amt)
+				from `tabLanded Cost Item` as lcv_item, `tabLanded Cost Voucher` as lcv
+				where lcv.name=lcv_item.parent and lcv.is_import_bill=1 and lcv_item.purchase_receipt_item=%s and lcv_item.docstatus=1""",
+				d.get(pr_detail_field))
+			billed_amt_against_lcv = billed_amt_against_lcv and billed_amt_against_lcv[0][0] or 0
+			billed_amt += billed_amt_against_lcv
+
+			frappe.db.set_value("Purchase Receipt Item", d.get(pr_detail_field), "billed_amt", billed_amt, update_modified=update_modified)
+			updated_pr.append(d.get(pr_name_field))
+		elif po_detail_field and d.get(po_detail_field):
+			updated_pr += update_billed_amount_based_on_po(d.get(po_detail_field), update_modified)
+
+	for pr in set(updated_pr):
+		frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):

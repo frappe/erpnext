@@ -12,12 +12,12 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var me = this;
 		this.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query =
 			function (doc, cdt, cdn) {
-				var d = locals[cdt][cdn]
+				var d = locals[cdt][cdn];
 
 				var filters = [
 					[d.receipt_document_type, 'docstatus', '=', '1'],
 					[d.receipt_document_type, 'company', '=', me.frm.doc.company],
-				]
+				];
 
 				if (d.receipt_document_type == "Purchase Invoice") {
 					filters.push(["Purchase Invoice", "update_stock", "=", "1"])
@@ -32,7 +32,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.fields_dict["credit_to"].get_query = function() {
 			return {
 				filters: {
-					'account_type': 'Payable',
+					'account_type': cint(me.frm.doc.is_import_bill) ? 'Temporary' : 'Payable',
 					'is_group': 0,
 					'company': me.frm.doc.company,
 					'account_currency': erpnext.get_currency(me.frm.doc.company)
@@ -68,10 +68,12 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	refresh: function(doc) {
 		this.show_general_ledger();
 
-		if (doc.docstatus===1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
+		if (doc.docstatus===1 && doc.outstanding_amount != 0 && !cint(doc.is_import_bill) && frappe.model.can_create("Payment Entry")) {
 			cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
+
+		this.hide_unhide_fields();
 
 		var help_content =
 			`<br><br>
@@ -104,6 +106,26 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		set_field_options("landed_cost_help", help_content);
 	},
 
+	hide_unhide_fields: function() {
+		var fields = ['supplier', 'due_date', 'outstanding_amount'];
+
+		if(cint(this.frm.doc.is_import_bill)) {
+			hide_field(fields);
+		} else {
+			unhide_field(fields);
+		}
+	},
+
+	is_import_bill: function() {
+		if(cint(this.frm.doc.is_import_bill)) {
+			this.frm.doc.supplier = null;
+			this.frm.doc.due_date = null;
+		}
+		this.hide_unhide_fields();
+		this.set_total_taxes_and_charges();
+		this.frm.refresh_fields();
+	},
+
 	make_payment_entry: function() {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
@@ -125,7 +147,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		} else {
 			return this.frm.call({
 				doc: me.frm.doc,
-				method: "get_items_from_purchase_receipts"
+				method: "get_items_from_purchase_receipts",
+				callback: function() {
+					me.refresh_field("items");
+				}
 			});
 		}
 	},
@@ -145,7 +170,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			total_taxes_and_charges += flt(d.amount)
 		});
 		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
-		cur_frm.set_value("outstanding_amount", total_taxes_and_charges);
+		cur_frm.set_value("outstanding_amount", cint(me.frm.doc.is_import_bill) ? 0.0 : total_taxes_and_charges);
 	},
 
 	set_applicable_charges_for_item: function() {

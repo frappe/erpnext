@@ -10,7 +10,7 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_pr
 from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
@@ -674,19 +674,7 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}".format(pi)))
 
 	def update_billing_status_in_pr(self, update_modified=True):
-		updated_pr = []
-		for d in self.get("items"):
-			if d.pr_detail:
-				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
-					where pr_detail=%s and docstatus=1""", d.pr_detail)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
-				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt, update_modified=update_modified)
-				updated_pr.append(d.purchase_receipt)
-			elif d.po_detail:
-				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
-
-		for pr in set(updated_pr):
-			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+		update_billed_amount_based_on_pr(self, "pr_detail", "purchase_receipt", "po_detail", update_modified)
 
 	def validate_fixed_asset_account(self):
 		for d in self.get('items'):
