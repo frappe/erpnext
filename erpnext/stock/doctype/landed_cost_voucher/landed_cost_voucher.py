@@ -8,13 +8,16 @@ from frappe.utils import flt
 from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.general_ledger import make_gl_entries
+from frappe.utils.csvutils import getlink
 
-class LandedCostVoucher(Document):
+class LandedCostVoucher(AccountsController):
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
-				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
+				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description, pr_item.total_weight,
 					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name, pr_item.cost_center
 					from `tab{doctype} Item` pr_item where parent = %s
 					and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
@@ -25,6 +28,7 @@ class LandedCostVoucher(Document):
 					item.item_code = d.item_code
 					item.description = d.description
 					item.qty = d.qty
+					item.weight = d.total_weight
 					item.rate = d.base_rate
 					item.cost_center = d.cost_center or \
 						erpnext.get_default_cost_center(self.company)
@@ -34,6 +38,8 @@ class LandedCostVoucher(Document):
 					item.purchase_receipt_item = d.name
 
 	def validate(self):
+		super(LandedCostVoucher, self).validate()
+
 		self.check_mandatory()
 		self.validate_purchase_receipts()
 		self.set_total_taxes_and_charges()
@@ -41,6 +47,7 @@ class LandedCostVoucher(Document):
 			self.get_items_from_purchase_receipts()
 		else:
 			self.validate_applicable_charges_for_item()
+		self.set_status()
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
@@ -71,17 +78,10 @@ class LandedCostVoucher(Document):
 		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
 
 	def validate_applicable_charges_for_item(self):
-		based_on = self.distribute_charges_based_on.lower()
-		
-		total = sum([flt(d.get(based_on)) for d in self.get("items")])
-		
-		if not total:
-			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
-		
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
-		currency=frappe.db.get_value("Company", self.company, "default_currency", cache=True))
+		currency = frappe.db.get_value("Company", self.company, "default_currency", cache=True))
 
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
@@ -91,13 +91,18 @@ class LandedCostVoucher(Document):
 		else:
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
-
+	def set_cost_center(self):
+		if not self.cost_center:
+			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
 		self.update_landed_cost()
+		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_landed_cost()
+		if self.credit_to:
+			self.make_gl_entries(cancel=True)
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -134,6 +139,50 @@ class LandedCostVoucher(Document):
 				if serial_nos:
 					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
 						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
+
+	def validate_account_details(self):
+		if not self.credit_to:
+			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
+
+	def make_gl_entries(self, cancel=False):
+		if flt(self.total_taxes_and_charges) > 0:
+			gl_entries = self.get_gl_entries()
+			make_gl_entries(gl_entries, cancel)
+
+	def get_gl_entries(self):
+		gl_entry = []
+		self.validate_account_details()
+
+		payable_amount = flt(self.total_taxes_and_charges)
+
+		# payable entry
+		if payable_amount:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.credit_to,
+					"credit": payable_amount,
+					"credit_in_account_currency": payable_amount,
+					"against": ",".join([d.account_head for d in self.taxes]),
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
+
+		# expense entries
+		for tax in self.taxes:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": tax.account_head,
+					"debit": tax.amount,
+					"debit_in_account_currency": tax.amount,
+					"against": self.supplier,
+					"cost_center": tax.cost_center
+				})
+			)
+
+		return gl_entry
 
 @frappe.whitelist()
 def get_landed_cost_voucher(dt, dn):

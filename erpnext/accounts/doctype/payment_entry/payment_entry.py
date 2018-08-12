@@ -197,7 +197,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Customer":
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry")
 		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
+			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
 
@@ -701,6 +701,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
+	elif reference_doctype == "Landed Cost Voucher":
+		total_amount = ref_doc.get("total_taxes_and_charges")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
@@ -756,7 +760,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	if dt in ("Sales Invoice", "Sales Order"):
 		party_type = "Customer"
-	elif dt in ("Purchase Invoice", "Purchase Order"):
+	elif dt in ("Purchase Invoice", "Purchase Order", "Landed Cost Voucher"):
 		party_type = "Supplier"
 	elif dt in ("Expense Claim", "Employee Advance"):
 		party_type = "Employee"
@@ -805,6 +809,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)
 	elif dt == "Fees":
 		grand_total = doc.grand_total
+		outstanding_amount = doc.outstanding_amount
+	elif dt == "Landed Cost Voucher":
+		grand_total = doc.total_taxes_and_charges
 		outstanding_amount = doc.outstanding_amount
 	else:
 		if party_account_currency == doc.company_currency:
