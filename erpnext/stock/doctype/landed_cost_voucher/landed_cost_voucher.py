@@ -53,7 +53,6 @@ class LandedCostVoucher(AccountsController):
 		if not self.get("purchase_receipts"):
 			frappe.throw(_("Please enter Receipt Document"))
 
-		
 	def validate_purchase_receipts(self):
 		receipt_documents = []
 		
@@ -140,9 +139,15 @@ class LandedCostVoucher(AccountsController):
 					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
 						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
 
-	def validate_account_details(self):
-		if not self.credit_to:
-			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
+	def validate_credit_to_account(self):
+		account = frappe.db.get_value("Account", self.credit_to,
+			["account_type", "report_type", "account_currency"], as_dict=True)
+
+		if account.report_type != "Balance Sheet":
+			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+
+		if self.supplier and account.account_type != "Payable":
+			frappe.throw(_("Credit To account must be a Payable account"))
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_taxes_and_charges) > 0:
@@ -151,7 +156,7 @@ class LandedCostVoucher(AccountsController):
 
 	def get_gl_entries(self):
 		gl_entry = []
-		self.validate_account_details()
+		self.validate_credit_to_account()
 
 		payable_amount = flt(self.total_taxes_and_charges)
 
