@@ -54,8 +54,8 @@ def get_columns(filters):
 
 def get_conditions(filters):
 	conditions = []
-	if filters.get('brand'):
-		conditions.append(" it.brand = %(brand)s ")
+	if filters.get('item_code'):
+		conditions.append(" it.item_code = %(item_code)s ")
 
 	if filters.get('item_group'):
 		conditions.append(""" it.item_group IN (SELECT ig.name
@@ -109,8 +109,8 @@ def get_data(filters):
 		,it.brand
 		,it.description
 		,sle.warehouse
-		,sle.stock_uom
-		,SUM( IF(sle.posting_date < %(from_date)s, sle.actual_qty, 0)) as opening_qty
+		,uom.uom
+		,SUM( IF(sle.posting_date < %(from_date)s, (sle.actual_qty/COALESCE(uom.conversion_factor, 1)), 0)) as opening_qty
 		,SUM( IF(sle.posting_date < %(from_date)s, sle.stock_value_difference, 0)) as opening_value
 		,SUM( IF(sle.actual_qty > 0 AND sle.posting_date BETWEEN %(from_date)s AND %(to_date)s, (sle.actual_qty/COALESCE(uom.conversion_factor, 1)), 0)) as in_qty
 		,SUM( IF(sle.actual_qty > 0 AND sle.posting_date BETWEEN %(from_date)s AND %(to_date)s, sle.stock_value_difference, 0)) as in_value
