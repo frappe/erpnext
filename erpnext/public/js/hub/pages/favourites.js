@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { get_item_card_container_html } from '../helpers';
+import { get_item_card_container_html } from '../components/items_container';
 
 erpnext.hub.Favourites = class Favourites extends SubPage {
 	refresh() {
@@ -10,7 +10,9 @@ erpnext.hub.Favourites = class Favourites extends SubPage {
 	}
 
 	get_favourites() {
-		return hub.call('get_item_favourites');
+		return hub.call('get_favourite_items_of_seller', {
+			hub_seller: hub.settings.company_email
+		});
 	}
 
 	render(items) {

@@ -1,5 +1,6 @@
 import SubPage from './subpage';
-import { make_search_bar, get_item_card_container_html } from '../helpers';
+import { make_search_bar } from '../components/search_bar';
+import { get_item_card_container_html } from '../components/items_container';
 
 erpnext.hub.SearchPage = class SearchPage extends SubPage {
 	make_wrapper() {

@@ -1,5 +1,7 @@
 import SubPage from './subpage';
-import { get_item_card_container_html } from '../helpers';
+import { get_profile_html } from '../components/detail_view';
+import { get_item_card_container_html } from '../components/items_container';
+import { get_detail_skeleton_html } from '../components/skeleton_state';
 
 erpnext.hub.Seller = class Seller extends SubPage {
 	make_wrapper() {
@@ -18,64 +20,11 @@ erpnext.hub.Seller = class Seller extends SubPage {
 	}
 
 	show_skeleton() {
-		const skeleton = `<div class="hub-item-container">
-			<div class="row">
-				<div class="col-md-3">
-					<div class="hub-item-skeleton-image"></div>
-				</div>
-				<div class="col-md-6">
-					<h2 class="hub-skeleton" style="width: 75%;">Name</h2>
-					<div class="text-muted">
-						<p class="hub-skeleton" style="width: 35%;">Details</p>
-						<p class="hub-skeleton" style="width: 50%;">Ratings</p>
-					</div>
-					<hr>
-					<div class="hub-item-description">
-						<p class="hub-skeleton">Desc</p>
-						<p class="hub-skeleton" style="width: 85%;">Desc</p>
-					</div>
-				</div>
-			</div>
-		</div>`;
-
-		this.$wrapper.html(skeleton);
+		this.$wrapper.html(get_detail_skeleton_html());
 	}
 
 	render(data) {
-		const p = data.profile;
-
-		const profile_html = `<div class="hub-item-container">
-			<div class="row visible-xs">
-				<div class="col-xs-12 margin-bottom">
-					<button class="btn btn-xs btn-default" data-route="marketplace/home">Back to home</button>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-3">
-					<div class="hub-item-image">
-						<img src="${p.logo}">
-					</div>
-				</div>
-				<div class="col-md-6">
-					<h2>${p.company}</h2>
-					<div class="text-muted">
-						<p>${p.country}</p>
-						<p>${p.site_name}</p>
-						<p>${__(`Joined ${comment_when(p.creation)}`)}</p>
-					</div>
-					<hr>
-					<div class="hub-item-description">
-					${'description'
-						? `<p>${p.company_description}</p>`
-						: `<p>__('No description')</p`
-					}
-					</div>
-				</div>
-			</div>
-
-		</div>`;
-
-		this.$wrapper.html(profile_html);
+		this.$wrapper.html(get_profile_html(data.profile));
 
 		let html = get_item_card_container_html(data.items, __('Products by ' + p.company));
 		this.$wrapper.append(html);

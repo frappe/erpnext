@@ -1,4 +1,5 @@
 import SubPage from './subpage';
+import { get_empty_state } from '../components/empty_state';
 
 erpnext.hub.NotFound = class NotFound extends SubPage {
 	refresh() {

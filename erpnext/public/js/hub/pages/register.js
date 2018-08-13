@@ -82,29 +82,33 @@ erpnext.hub.Register = class Register extends SubPage {
 		this.$form_container.find('.form-message').removeClass('hidden small').addClass('h4').text(__('Become a Seller'))
 
 		this.$form_container.on('click', '.btn-register', (e) => {
-			const form_values = this.field_group.get_values();
+			this.register_seller();
+		});
+	}
 
-			let values_filled = true;
-			const mandatory_fields = ['company', 'company_email', 'company_description'];
-			mandatory_fields.forEach(field => {
-				const value = form_values[field];
-				if (!value) {
-					this.field_group.set_df_property(field, 'reqd', 1);
-					values_filled = false;
-				}
-			});
-			if (!values_filled) return;
+	register_seller() {
+		const form_values = this.field_group.get_values();
 
-			frappe.call({
-				method: 'erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller',
-				args: form_values,
-				btn: $(e.currentTarget)
-			}).then(() => {
-				frappe.set_route('marketplace', 'publish');
+		let values_filled = true;
+		const mandatory_fields = ['company', 'company_email', 'company_description'];
+		mandatory_fields.forEach(field => {
+			const value = form_values[field];
+			if (!value) {
+				this.field_group.set_df_property(field, 'reqd', 1);
+				values_filled = false;
+			}
+		});
+		if (!values_filled) return;
 
-				// custom jquery event
-				this.$wrapper.trigger('seller-registered');
-			});
+		frappe.call({
+			method: 'erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller',
+			args: form_values,
+			btn: $(e.currentTarget)
+		}).then(() => {
+			frappe.set_route('marketplace', 'publish');
+
+			// custom jquery event
+			this.$wrapper.trigger('seller-registered');
 		});
 	}
 }

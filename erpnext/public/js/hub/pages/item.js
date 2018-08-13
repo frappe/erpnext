@@ -1,5 +1,7 @@
 import SubPage from './subpage';
-import { get_rating_html } from '../helpers';
+import { get_detail_view_html } from '../components/detail_view';
+import { get_detail_skeleton_html } from '../components/skeleton_state';
+import { get_review_html } from '../components/reviews';
 
 erpnext.hub.Item = class Item extends SubPage {
 	refresh() {
@@ -16,29 +18,11 @@ erpnext.hub.Item = class Item extends SubPage {
 			});
 	}
 
-	show_skeleton() {
-		const skeleton = `<div class="hub-item-container">
-			<div class="row">
-				<div class="col-md-3">
-					<div class="hub-item-skeleton-image"></div>
-				</div>
-				<div class="col-md-6">
-					<h2 class="hub-skeleton" style="width: 75%;">Name</h2>
-					<div class="text-muted">
-						<p class="hub-skeleton" style="width: 35%;">Details</p>
-						<p class="hub-skeleton" style="width: 50%;">Ratings</p>
-					</div>
-					<hr>
-					<div class="hub-item-description">
-						<p class="hub-skeleton">Desc</p>
-						<p class="hub-skeleton" style="width: 85%;">Desc</p>
-					</div>
-				</div>
-			</div>
-		</div>`;
 
-		this.$wrapper.html(skeleton);
+	show_skeleton() {
+		this.$wrapper.html(get_detail_skeleton_html());
 	}
+
 
 	get_item(hub_item_code) {
 		return hub.call('get_item_details', {
@@ -47,123 +31,9 @@ erpnext.hub.Item = class Item extends SubPage {
 		});
 	}
 
+
 	render(item) {
-		const title = item.item_name || item.name;
-		const seller = item.company;
-
-		const who = __('Posted By {0}', [seller]);
-		const when = comment_when(item.creation);
-
-		const city = item.city ? item.city + ', ' : '';
-		const country = item.country ? item.country : '';
-		const where = `${city}${country}`;
-
-		const dot_spacer = '<span aria-hidden="true"> · </span>';
-
-		const description = item.description || '';
-
-		let stats = __('No views yet');
-		if(item.view_count) {
-			const views_message = __(`${item.view_count} Views`);
-
-			const rating_html = get_rating_html(item.average_rating);
-			const rating_count = item.no_of_ratings > 0 ? `${item.no_of_ratings} reviews` : __('No reviews yet');
-
-			stats = `${views_message}${dot_spacer}${rating_html} (${rating_count})`;
-		}
-
-
-		let menu_items = '';
-
-		if(this.own_item) {
-			menu_items = `
-				<li><a data-action="edit_details">${__('Edit Details')}</a></li>
-				<li><a data-action="unpublish_item">${__('Unpublish')}</a></li>`;
-		} else {
-			menu_items = `
-				<li><a data-action="report_item">${__('Report this item')}</a></li>
-			`;
-		}
-
-		const html = `
-			<div class="hub-item-container">
-				<div class="row visible-xs">
-					<div class="col-xs-12 margin-bottom">
-						<button class="btn btn-xs btn-default" data-route="marketplace/home">${__('Back to home')}</button>
-					</div>
-				</div>
-				<div class="row detail-page-section margin-bottom">
-					<div class="col-md-3">
-						<div class="hub-item-image">
-							<img src="${item.image}">
-						</div>
-					</div>
-					<div class="col-md-8 flex flex-column">
-						<div class="detail-page-header">
-							<h2>${title}</h2>
-							<div class="text-muted">
-								<p>${where}${dot_spacer}${when}</p>
-								<p>${stats}</p>
-							</div>
-						</div>
-
-						<div class="page-actions detail-page-actions">
-							<button class="btn btn-default text-muted" data-action="add_to_favourites">
-								${__('Add to Favourites')} <i class="octicon octicon-heart text-extra-muted"></i>
-							</button>
-							<button class="btn btn-primary" data-action="contact_seller">
-								${__('Contact Seller')}
-							</button>
-						</div>
-					</div>
-					<div class="col-md-1">
-						<div class="dropdown pull-right hub-item-dropdown">
-							<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
-								<span class="caret"></span>
-							</a>
-							<ul class="dropdown-menu dropdown-right" role="menu">
-								${menu_items}
-							</ul>
-						</div>
-					</div>
-				</div>
-				<div class="row hub-item-description">
-					<h6 class="col-md-12 margin-top">
-						<b class="text-muted">Product Description</b>
-					</h6>
-					<p class="col-md-12">
-						${description ? description : __('No details')}
-					</p>
-				</div>
-				<div class="row hub-item-seller">
-
-					<h6 class="col-md-12 margin-top margin-bottom">
-						<b class="text-muted">Seller Information</b>
-					</h6>
-					<div class="col-md-1">
-						<img src="https://picsum.photos/200">
-					</div>
-					<div class="col-md-8">
-						<div class="margin-bottom"><a href="#marketplace/seller/${seller}" class="bold">${seller}</a></div>
-					</div>
-				</div>
-				<!-- review area -->
-				<div class="row hub-item-review-container">
-					<div class="col-md-12 form-footer">
-						<div class="form-comments">
-							<div class="timeline">
-								<div class="timeline-head"></div>
-								<div class="timeline-items"></div>
-							</div>
-						</div>
-						<div class="pull-right scroll-to-top">
-							<a onclick="frappe.utils.scroll_to(0)"><i class="fa fa-chevron-up text-muted"></i></a>
-						</div>
-					</div>
-				</div>
-			</div>
-		`;
-
+		const html = get_detail_view_html(item, this.own_item);
 		this.$wrapper.html(html);
 
 		this.make_review_area();
@@ -171,9 +41,10 @@ erpnext.hub.Item = class Item extends SubPage {
 		this.get_reviews()
 			.then(reviews => {
 				this.reviews = reviews;
-				this.render_reviews(reviews);
+				this.render_reviews();
 			});
 	}
+
 
 	edit_details() {
 		if (!this.edit_dialog) {
@@ -185,6 +56,7 @@ erpnext.hub.Item = class Item extends SubPage {
 		this.edit_dialog.show();
 	}
 
+
 	unpublish_item() {
 		if(!this.unpublish_dialog) {
 			this.unpublish_dialog = new frappe.ui.Dialog({
@@ -195,6 +67,16 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		this.unpublish_dialog.show();
 	}
+
+
+	add_to_favourites(favourite_button) {
+		$(favourite_button).html('Added to Favourites').addClass('disabled');
+		return hub.call('remove_item_from_seller_favourites', {
+			hub_item_code: this.hub_item_code,
+			hub_seller: hub.settings.company_email
+		});
+	}
+
 
 	contact_seller() {
 		const d = new frappe.ui.Dialog({
@@ -220,37 +102,48 @@ erpnext.hub.Item = class Item extends SubPage {
 		d.show();
 	}
 
+
 	make_review_area() {
 		this.comment_area = new frappe.ui.ReviewArea({
 			parent: this.$wrapper.find('.timeline-head').empty(),
 			mentions: [],
-			on_submit: (values) => {
-				values.user = frappe.session.user;
-				values.username = frappe.session.user_fullname;
-
-				hub.call('add_item_review', {
-					hub_item_code: this.hub_item_code,
-					review: JSON.stringify(values)
-				})
-				.then(review => {
-					this.reviews = this.reviews || [];
-					this.reviews.push(review);
-					this.render_reviews(this.reviews);
-
-					this.comment_area.reset();
-				});
-			}
+			on_submit: this.on_submit_review.bind(this)
 		});
 	}
+
+
+	on_submit_review(values) {
+		values.user = frappe.session.user;
+		values.username = frappe.session.user_fullname;
+
+		hub.call('add_item_review', {
+			hub_item_code: this.hub_item_code,
+			review: JSON.stringify(values)
+		})
+		.then(this.push_review_in_review_area.bind(this));
+	}
+
+
+	push_review_in_review_area(review) {
+		this.reviews = this.reviews || [];
+		this.reviews.push(review);
+		this.render_reviews();
+
+		this.comment_area.reset();
+	}
+
 
 	get_reviews() {
 		return hub.call('get_item_reviews', { hub_item_code: this.hub_item_code }).catch(() => {});
 	}
 
-	render_reviews(reviews=[]) {
-		this.$wrapper.find('.timeline-items').empty();
 
-		reviews.sort((a, b) => {
+	render_reviews() {
+		const $timeline = this.$wrapper.find('.timeline-items');
+
+		$timeline.empty();
+
+		this.reviews.sort((a, b) => {
 			if (a.modified > b.modified) {
 				return -1;
 			}
@@ -262,75 +155,8 @@ erpnext.hub.Item = class Item extends SubPage {
 			return 0;
 		});
 
-		reviews.forEach(review => this.render_review(review));
-	}
-
-	render_review(review) {
-		let username = review.username || review.user || __("Anonymous");
-
-		let image_html = review.user_image
-			? `<div class="avatar-frame" style="background-image: url(${review.user_image})"></div>`
-			: `<div class="standard-image" style="background-color: #fafbfc">${frappe.get_abbr(username)}</div>`
-
-		let edit_html = review.own
-			? `<div class="pull-right hidden-xs close-btn-container">
-				<span class="small text-muted">
-					${'data.delete'}
-				</span>
-			</div>
-			<div class="pull-right edit-btn-container">
-				<span class="small text-muted">
-					${'data.edit'}
-				</span>
-			</div>`
-			: '';
-
-		let rating_html = get_rating_html(review.rating);
-
-		const $timeline_items = this.$wrapper.find('.timeline-items');
-
-		$(this.get_timeline_item(review, image_html, edit_html, rating_html))
-			.appendTo($timeline_items);
-	}
-
-	get_timeline_item(data, image_html, edit_html, rating_html) {
-		return `<div class="media timeline-item user-content" data-doctype="${''}" data-name="${''}">
-			<span class="pull-left avatar avatar-medium hidden-xs" style="margin-top: 1px">
-				${image_html}
-			</span>
-			<div class="pull-left media-body">
-				<div class="media-content-wrapper">
-					<div class="action-btns">${edit_html}</div>
-
-					<div class="comment-header clearfix">
-						<span class="pull-left avatar avatar-small visible-xs">
-							${image_html}
-						</span>
-
-						<div class="asset-details">
-							<span class="author-wrap">
-								<i class="octicon octicon-quote hidden-xs fa-fw"></i>
-								<span>${data.username}</span>
-							</span>
-							<a class="text-muted">
-								<span class="text-muted hidden-xs">&ndash;</span>
-								<span class="hidden-xs">${comment_when(data.modified)}</span>
-							</a>
-						</div>
-					</div>
-					<div class="reply timeline-content-show">
-						<div class="timeline-item-content">
-							<p class="text-muted">
-								${rating_html}
-							</p>
-							<h6 class="bold">${data.subject}</h6>
-							<p class="text-muted">
-								${data.content}
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>`;
+		this.reviews.forEach(review => {
+			$(get_review_html(review)).appendTo($timeline);
+		});
 	}
 }

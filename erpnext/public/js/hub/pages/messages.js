@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { make_search_bar } from '../helpers';
+import { make_search_bar } from '../components/search_bar';
 
 erpnext.hub.Messages = class Messages extends SubPage {
     make_wrapper() {

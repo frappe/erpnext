@@ -1,5 +1,7 @@
 import SubPage from './subpage';
-import { make_search_bar, get_item_card_container_html, get_local_item_card_html } from '../helpers';
+import { get_item_card_container_html } from '../components/items_container';
+import { get_local_item_card_html } from '../components/item_card';
+import { make_search_bar } from '../components/search_bar';
 
 erpnext.hub.Publish = class Publish extends SubPage {
 	make_wrapper() {
