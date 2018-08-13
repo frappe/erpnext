@@ -1,27 +1,3 @@
-function get_empty_state(message, action) {
-	return `<div class="empty-state flex align-center flex-column justify-center">
-		<p class="text-muted">${message}</p>
-		${action ? `<p>${action}</p>`: ''}
-	</div>`;
-}
-
-function get_item_card_container_html(items, title='', get_item_html = get_item_card_html, action='') {
-	const items_html = (items || []).map(item => get_item_html(item)).join('');
-	const title_html = title
-		? `<div class="hub-card-container-header col-sm-12 margin-bottom flex">
-				<h4>${title}</h4>
-				${action}
-			</div>`
-		: '';
-
-	const html = `<div class="row hub-card-container">
-		${title_html}
-		${items_html}
-	</div>`;
-
-	return html;
-}
-
 function get_item_card_html(item) {
 	const item_name = item.item_name || item.name;
 	const title = strip_html(item_name);
@@ -117,28 +93,8 @@ function get_rating_html(rating) {
 	return rating_html;
 }
 
-function make_search_bar({wrapper, on_search, placeholder = __('Search for anything')}) {
-	const $search = $(`
-		<div class="hub-search-container">
-			<input type="text" class="form-control" placeholder="${placeholder}">
-		</div>`
-	);
-	wrapper.append($search);
-	const $search_input = $search.find('input');
-
-	$search_input.on('keydown', frappe.utils.debounce((e) => {
-		if (e.which === frappe.ui.keyCode.ENTER) {
-			const search_value = $search_input.val();
-			on_search(search_value);
-		}
-	}, 300));
-}
-
 export {
-	get_empty_state,
-	get_item_card_container_html,
 	get_item_card_html,
-	get_local_item_card_html,
-	get_rating_html,
-	make_search_bar,
+    get_local_item_card_html,
+    get_rating_html
 }

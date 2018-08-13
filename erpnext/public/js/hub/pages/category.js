@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { get_item_card_container_html } from '../helpers';
+import { get_item_card_container_html } from '../components/items_container';
 
 erpnext.hub.Category = class Category extends SubPage {
 	refresh() {

@@ -5,11 +5,11 @@ export default class SubPage {
 
 		// generic action handler
 		this.$wrapper.on('click', '[data-action]', e => {
-			const $this = $(e.currentTarget);
-			const action = $this.data().action;
+			const $target = $(e.currentTarget);
+			const action = $target.data().action;
 
 			if (action && this[action]) {
-				this[action].apply(this);
+				this[action].apply(this, $target);
 			}
 		})
 

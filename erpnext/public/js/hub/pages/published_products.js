@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { get_item_card_container_html } from '../helpers';
+import { get_item_card_container_html } from '../components/items_container';
 
 erpnext.hub.PublishedProducts = class PublishedProducts extends SubPage {
 	get_items_and_render() {

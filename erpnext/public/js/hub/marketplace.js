@@ -13,7 +13,6 @@ import './pages/messages';
 import './pages/not_found';
 
 // helpers
-import './helpers';
 import './hub_call';
 
 frappe.provide('hub');
