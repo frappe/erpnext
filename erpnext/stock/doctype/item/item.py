@@ -7,6 +7,7 @@ import itertools
 import json
 import erpnext
 import frappe
+import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
         copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
@@ -933,8 +934,9 @@ def get_item_defaults(item_code, company):
 
 	for d in item.item_defaults:
 		if d.company == company:
-			out.update(d.as_dict())
-
+			row = copy.deepcopy(d.as_dict())
+			row.pop("name")
+			out.update(row)
 	return out
 
 def set_item_default(item_code, company, fieldname, value):
