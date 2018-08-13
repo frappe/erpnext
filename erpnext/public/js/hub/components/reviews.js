@@ -1,5 +1,3 @@
-import { get_rating_html } from './item_card';
-
 function get_review_html(review) {
 	let username = review.username || review.user || __("Anonymous");
 
@@ -66,6 +64,17 @@ function get_timeline_item(data, image_html, edit_html, rating_html) {
 	</div>`;
 }
 
+function get_rating_html(rating) {
+	let rating_html = ``;
+	for (var i = 0; i < 5; i++) {
+		let star_class = 'fa-star';
+		if (i >= rating) star_class = 'fa-star-o';
+		rating_html += `<i class='fa fa-fw ${star_class} star-icon' data-index=${i}></i>`;
+	}
+	return rating_html;
+}
+
 export {
-	get_review_html
+	get_review_html,
+    get_rating_html
 }

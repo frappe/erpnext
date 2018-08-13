@@ -35,9 +35,9 @@ hub.call = function call_hub_method(method, args={}) {
 				}
 
 				erpnext.hub.cache[key] = r.message;
-				resolve(r.message)
+				resolve(r.message);
 			}
-			reject(r)
+			reject(r);
 		})
 		.fail(reject)
 	});

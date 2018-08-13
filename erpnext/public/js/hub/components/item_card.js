@@ -82,19 +82,7 @@ function get_local_item_card_html(item) {
 	return item_html;
 }
 
-
-function get_rating_html(rating) {
-	let rating_html = ``;
-	for (var i = 0; i < 5; i++) {
-		let star_class = 'fa-star';
-		if (i >= rating) star_class = 'fa-star-o';
-		rating_html += `<i class='fa fa-fw ${star_class} star-icon' data-index=${i}></i>`;
-	}
-	return rating_html;
-}
-
 export {
 	get_item_card_html,
-    get_local_item_card_html,
-    get_rating_html
+    get_local_item_card_html
 }
