@@ -339,14 +339,15 @@ class PaymentEntry(AccountsController):
 			total_negative_outstanding = sum([abs(flt(d.outstanding_amount))
 				for d in self.get("references") if flt(d.outstanding_amount) < 0])
 
-			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
+			paid_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
+			additional_charges = sum([flt(d.amount) for d in self.deductions])
 
 			if not total_negative_outstanding:
 				frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
 					.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"),
 						self.party_type), InvalidPaymentEntry)
 
-			elif party_amount > total_negative_outstanding:
+			elif paid_amount - additional_charges > total_negative_outstanding:
 				frappe.throw(_("Paid Amount cannot be greater than total negative outstanding amount {0}")
 					.format(total_negative_outstanding), InvalidPaymentEntry)
 
@@ -747,8 +748,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
+		elif reference_doctype == "Expense Claim":
+			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
+				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
 		elif reference_doctype == "Employee Advance":
 			outstanding_amount = ref_doc.advance_amount - flt(ref_doc.paid_amount)
 		else:

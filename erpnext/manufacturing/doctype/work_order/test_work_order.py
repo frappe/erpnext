@@ -8,10 +8,12 @@ import frappe
 from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.work_order.work_order \
-	import make_stock_entry, ItemHasVariantError, stop_unstop
+	import make_stock_entry, ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.utils import get_bin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
@@ -59,8 +61,6 @@ class TestWorkOrder(unittest.TestCase):
 		return wo_order
 
 	def test_over_production(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
-
 		wo_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
@@ -279,6 +279,99 @@ class TestWorkOrder(unittest.TestCase):
 				self.assertEqual(wo_order_details.scrap_warehouse, item.t_warehouse)
 				self.assertEqual(flt(wo_order_details.qty)*flt(scrap_item_details[item.item_code]), item.qty)
 
+	def test_allow_overproduction(self):
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 3))
+		s.insert()
+		self.assertRaises(StockOverProductionError, s.submit)
+
+		allow_overproduction("overproduction_percentage_for_work_order", 50)
+		s.load_from_db()
+		s.submit()
+		self.assertEqual(s.docstatus, 1)
+
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
+	def test_over_production_for_sales_order(self):
+		so = make_sales_order(item_code="_Test FG Item", qty=2)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+		wo_order = make_wo_order_test_record(planned_start_date=now(),
+			sales_order=so.name, qty=3, do_not_save=True)
+
+		self.assertRaises(OverProductionError, wo_order.save)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 50)
+		wo_order = make_wo_order_test_record(planned_start_date=now(),
+			sales_order=so.name, qty=3)
+
+		wo_order.submit()
+		self.assertEqual(wo_order.docstatus, 1)
+
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+	def test_work_order_with_non_stock_item(self):
+		items = {'Finished Good Test Item For non stock': 1, '_Test FG Item': 1, '_Test FG Non Stock Item': 0}
+		for item, is_stock_item in items.items():
+			make_item(item, {
+				'is_stock_item': is_stock_item
+			})
+
+		if not frappe.db.get_value('Item Price', {'item_code': '_Test FG Non Stock Item'}):
+			frappe.get_doc({
+				'doctype': 'Item Price',
+				'item_code': '_Test FG Non Stock Item',
+				'price_list_rate': 1000,
+				'price_list': 'Standard Buying'
+			}).insert(ignore_permissions=True)
+
+		fg_item = 'Finished Good Test Item For non stock'
+		test_stock_entry.make_stock_entry(item_code="_Test FG Item",
+			target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		if not frappe.db.get_value('BOM', {'item': fg_item}):
+			make_bom(item=fg_item, rate=1000, raw_materials = ['_Test FG Item', '_Test FG Non Stock Item'])
+
+		wo = make_wo_order_test_record(production_item = fg_item)
+		se = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		se.insert()
+		se.submit()
+
+		ste = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		ste.insert()
+		self.assertEqual(len(ste.additional_costs), 1)
+		self.assertEqual(ste.total_additional_costs, 1000)
+
+	def test_work_order_with_non_transfer_item(self):
+		items = {'Finished Good Transfer Item': 1, '_Test FG Item': 1, '_Test FG Item 1': 0}
+		for item, allow_transfer in items.items():
+			make_item(item, {
+				'allow_transfer_for_manufacture': allow_transfer
+			})
+
+		fg_item = 'Finished Good Transfer Item'
+		test_stock_entry.make_stock_entry(item_code="_Test FG Item",
+			target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test FG Item 1",
+			target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		if not frappe.db.get_value('BOM', {'item': fg_item}):
+			make_bom(item=fg_item, raw_materials = ['_Test FG Item', '_Test FG Item 1'])
+
+		wo = make_wo_order_test_record(production_item = fg_item)
+		ste = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		ste.insert()
+		ste.submit()
+		self.assertEqual(len(ste.items), 1)
+		ste1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		self.assertEqual(len(ste1.items), 3)
+
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
 	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
@@ -286,6 +379,13 @@ def get_scrap_item_details(bom_no):
 		scrap_items[item.item_code] = item.stock_qty
 
 	return scrap_items
+
+def allow_overproduction(fieldname, percentage):
+	doc = frappe.get_doc("Manufacturing Settings")
+	doc.update({
+		fieldname: percentage
+	})
+	doc.save()
 
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
@@ -303,6 +403,7 @@ def make_wo_order_test_record(**args):
 	wo_order.use_multi_level_bom=0
 	wo_order.skip_transfer=1
 	wo_order.get_items_and_operations_from_bom()
+	wo_order.sales_order = args.sales_order or None
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):

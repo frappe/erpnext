@@ -60,7 +60,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 					cur_frm.cscript['Declare Order Lost']);
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
@@ -190,7 +190,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 		return cur_frm.call({
 			method: "declare_order_lost",
 			doc: cur_frm.doc,
-			args: args.reason,
+			args: args,
 			callback: function(r) {
 				if(r.exc) {
 					frappe.msgprint(__("There were errors."));

@@ -31,6 +31,12 @@ form_grid_templates = {
 }
 
 class WorkOrder(Document):
+	def onload(self):
+		ms = frappe.get_doc("Manufacturing Settings")
+		self.set_onload("material_consumption", ms.material_consumption)
+		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
+
+
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
@@ -522,7 +528,8 @@ class WorkOrder(Document):
 						'description': item.description,
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
-						'source_warehouse': item.source_warehouse or item.default_warehouse
+						'source_warehouse': item.source_warehouse or item.default_warehouse,
+						'allow_transfer_for_manufacture': item.allow_transfer_for_manufacture
 					})
 
 			self.set_available_qty()

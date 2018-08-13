@@ -39,6 +39,12 @@ frappe.query_reports["Budget Variance Report"] = {
 			options: ["Cost Center", "Project"],
 			default: "Cost Center",
 			reqd: 1
-		}
+		},
+		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "Link",
+			options: "Cost Center"
+		},
 	]
 }

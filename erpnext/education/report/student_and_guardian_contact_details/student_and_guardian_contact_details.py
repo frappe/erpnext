@@ -99,7 +99,7 @@ def get_guardian_map(student_list):
 
 def get_student_roll_no(academic_year, program, batch):
 	student_group = frappe.get_all("Student Group",
-		filters={"academic_year":academic_year, "program":program, "batch":batch})
+		filters={"academic_year":academic_year, "program":program, "batch":batch, "disabled": 0})
 	if student_group:
 		roll_no_dict = dict(frappe.db.sql('''select student, group_roll_number from `tabStudent Group Student` where parent=%s''',
 			(student_group[0].name)))

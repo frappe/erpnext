@@ -573,5 +573,6 @@ def save_invoice(doc, name, name_list):
 			name_list.append(name)
 	except Exception:
 		frappe.log_error(frappe.get_traceback())
+		frappe.db.rollback()
 
 	return name_list

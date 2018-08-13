@@ -81,7 +81,7 @@ class BOM(WebsiteGenerator):
 
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
-			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate
+			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate, allow_transfer_for_manufacture
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		if not item:
@@ -134,8 +134,10 @@ class BOM(WebsiteGenerator):
 			 'rate'			: rate / self.conversion_rate if self.conversion_rate else rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
-			 'base_rate'	: rate
+			 'base_rate'	: rate,
+			 'allow_transfer_for_manufacture': item and args['allow_transfer_for_manufacture'] or 0
 		}
+
 		return ret_item
 
 	def validate_bom_currecny(self, item):
@@ -462,6 +464,7 @@ class BOM(WebsiteGenerator):
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
 					'rate'			: d.base_rate,
+					'allow_transfer_for_manufacture': d.allow_transfer_for_manufacture
 				}))
 
 	def company_currency(self):
@@ -478,7 +481,7 @@ class BOM(WebsiteGenerator):
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
 			bom_item.description, bom_item.source_warehouse,
-			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate,
+			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.allow_transfer_for_manufacture,
 			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
 			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
@@ -492,6 +495,7 @@ class BOM(WebsiteGenerator):
 				'stock_uom'				: d['stock_uom'],
 				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
 				'rate'					: flt(d['rate']),
+				'allow_transfer_for_manufacture': d.get('allow_transfer_for_manufacture', 0)
 			}))
 
 	def add_exploded_items(self):
@@ -565,14 +569,16 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 	if cint(fetch_exploded):
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
-			select_columns = ", bom_item.source_warehouse, (Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx")
+			select_columns = """, bom_item.source_warehouse, bom_item.allow_transfer_for_manufacture,
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx""")
+
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
 		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="",
-			select_columns = ", bom_item.source_warehouse, bom_item.idx")
+			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.allow_transfer_for_manufacture")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
@@ -648,7 +654,6 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 
 		return bom_items
 
-
 def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):
 		return frappe.db.sql_list("""select distinct parent from `tabBOM Item`
@@ -671,3 +676,21 @@ def get_boms_in_bottom_up_order(bom_no=None):
 		count += 1
 
 	return bom_list
+
+def add_additional_cost(stock_entry, work_order):
+	# Add non stock items cost in the additional cost
+	bom = frappe.get_doc('BOM', work_order.bom_no)
+	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+
+	items = {}
+	for d in bom.get(table):
+		items.setdefault(d.item_code, d.rate)
+
+	non_stock_items = frappe.get_all('Item',
+		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+
+	for name in non_stock_items:
+		stock_entry.append('additional_costs', {
+			'description': name[0],
+			'amount': items.get(name[0])
+		})

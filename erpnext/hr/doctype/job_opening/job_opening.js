@@ -18,7 +18,6 @@ frappe.ui.form.on('Job Opening', {
 				args: {
 					company: frm.doc.company,
 					designation: frm.doc.designation,
-					department: frm.doc.department,
 					date: frappe.datetime.now_date() // ToDo - Date in Job Opening?
 				},
 				callback: function (data) {

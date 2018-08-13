@@ -38,6 +38,8 @@ def make_depreciation_entry(asset_name, date=None):
 	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
 		["depreciation_cost_center", "series_for_depreciation_entry"])
 
+	depreciation_cost_center = asset.cost_center or depreciation_cost_center
+
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
 			je = frappe.new_doc("Journal Entry")
@@ -156,6 +158,7 @@ def restore_asset(asset_name):
 def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
+	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset.value_after_depreciation)
 

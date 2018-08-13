@@ -210,14 +210,15 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": _(d.account_name),
 			"account": _(d.name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
 			"currency": company_currency,
-			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1)
+			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
+			"account_name": ('{} - {}'.format(_(d.account_number), _(d.account_name))
+				if d.account_number else _(d.account_name))
 		})
 		for period in period_list:
 			if d.get(period.key) and balance_must_be == "Credit":
@@ -281,8 +282,9 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 
 def get_accounts(company, root_type):
-	return frappe.db.sql(
-		"""select name, parent_account, lft, rgt, root_type, report_type, account_name from `tabAccount`
+	return frappe.db.sql("""
+		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name
+		from `tabAccount`
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
 

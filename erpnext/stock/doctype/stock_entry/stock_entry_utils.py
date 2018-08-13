@@ -20,6 +20,7 @@ def make_stock_entry(**args):
 	:batch_no: Optional
 	:posting_date: Optional
 	:posting_time: Optional
+	:purpose: Optional
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	'''

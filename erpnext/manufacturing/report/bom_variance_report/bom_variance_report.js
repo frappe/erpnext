@@ -16,7 +16,7 @@ frappe.query_reports["BOM Variance Report"] = {
 			"fieldtype": "Link",
 			"options": "Work Order",
 			"get_query": function() {
-				var bom_no = frappe.query_report_filters_by_name.bom_no.get_value();
+				var bom_no = frappe.query_report.get_filter_value('bom_no');
 				return{
 					query: "erpnext.manufacturing.report.bom_variance_report.bom_variance_report.get_work_orders",
 					filters: {

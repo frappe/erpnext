@@ -52,9 +52,15 @@ class SellingController(StockController):
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
+			fetch_payment_terms_template = False
+			if (self.get("__islocal") or
+				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
+				fetch_payment_terms_template = True
+
 			party_details = _get_party_details(self.customer,
 				ignore_permissions=self.flags.ignore_permissions,
-				doctype=self.doctype, company=self.company)
+				doctype=self.doctype, company=self.company,
+				fetch_payment_terms_template=fetch_payment_terms_template)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 
@@ -363,4 +369,30 @@ def check_active_sales_items(obj):
 						"company": obj.company,
 						"income_account": d.income_account
 					})
-				doc.save()
+				doc.save(ignore_permissions=True)
+
+#Calculate Commission on Rules Defined in Sales Partner
+def calculate_commission_rule(self):
+	sp=frappe.get_doc('Sales Partner',self.sales_partner)
+	if self.sales_partner and sp.apply_rule_based_commission and sp:
+		commission_brand=0;
+		commission_total=0;
+		done_commission = []
+		for commission_type in sp.get('commission_rule'):
+			if commission_type.type == "Brand":
+				for item in self.items:
+					if item.item_code not in done_commission and item.brand == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+			elif commission_type.type == "Item Group":
+				for item in self.items:
+					if item.item_code not in done_commission and item.item_group == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+			elif commission_type.type == "Item":
+				for item in self.items:
+					if item.item_code not in done_commission and item.item_code == commission_type.value:
+						done_commission.append(item.item_code)
+						commission_total = commission_total + (item.amount*commission_type.rate/100)
+			self.total_commission=commission_total
+			self.commission_rate=0

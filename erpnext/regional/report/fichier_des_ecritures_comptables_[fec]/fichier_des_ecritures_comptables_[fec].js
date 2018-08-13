@@ -4,35 +4,21 @@
 
 frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 	"filters": [{
-			"fieldname": "company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1
-		},
-		{
-			"fieldname": "fiscal_year",
-			"label": __("Fiscal Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"reqd": 1,
-			"on_change": function(query_report) {
-				var fiscal_year = query_report.get_values().fiscal_year;
-				if (!fiscal_year) {
-					return;
-				}
-				frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
-					var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-					frappe.query_report_filters_by_name.from_date.set_input(fy.year_start_date);
-					frappe.query_report_filters_by_name.to_date.set_input(fy.year_end_date);
-					query_report.trigger_refresh();
-				});
-			}
-		}
-
-	],
+		"fieldname": "company",
+		"label": __("Company"),
+		"fieldtype": "Link",
+		"options": "Company",
+		"default": frappe.defaults.get_user_default("Company"),
+		"reqd": 1
+	},
+	{
+		"fieldname": "fiscal_year",
+		"label": __("Fiscal Year"),
+		"fieldtype": "Link",
+		"options": "Fiscal Year",
+		"default": frappe.defaults.get_user_default("fiscal_year"),
+		"reqd": 1
+	}],
 
 	onload: function(query_report) {
 		query_report.page.add_inner_button(__("Export"), function() {
@@ -51,7 +37,7 @@ frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 				callback: function(data) {
 					var company_data = data.message.siren_number;
 					if (company_data === null || company_data === undefined) {
-						msgprint(__("Please register the SIREN number in the company information file"))
+						frappe.msgprint(__("Please register the SIREN number in the company information file"))
 					} else {
 						frappe.call({
 							method: "frappe.client.get_value",
@@ -83,7 +69,7 @@ frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 
 var downloadify = function(data, roles, title) {
 	if (roles && roles.length && !has_common(roles, roles)) {
-		msgprint(__("Export not allowed. You need {0} role to export.", [frappe.utils.comma_or(roles)]));
+		frappe.msgprint(__("Export not allowed. You need {0} role to export.", [frappe.utils.comma_or(roles)]));
 		return;
 	}
 
@@ -115,9 +101,6 @@ var downloadify = function(data, roles, title) {
 var to_tab_csv = function(data) {
 	var res = [];
 	$.each(data, function(i, row) {
-		row = $.map(row, function(col) {
-			return typeof(col) === "string" ? ('"' + col.replace(/"/g, '""') + '"') : col;
-		});
 		res.push(row.join("\t"));
 	});
 	return res.join("\n");

@@ -35,6 +35,7 @@ class EmployeeBoardingController(Document):
 				"company": self.company
 			}).insert(ignore_permissions=True)
 		self.db_set("project", project.name)
+		self.db_set("boarding_status", "Pending")
 
 		# create the task for the given project and assign to the concerned person
 		for activity in self.activities:
@@ -70,8 +71,8 @@ class EmployeeBoardingController(Document):
 	def on_cancel(self):
 		# delete task project
 		for task in frappe.get_all("Task", filters={"project": self.project}):
-			frappe.delete_doc("Task", task.name)
-		frappe.delete_doc("Project", self.project)
+			frappe.delete_doc("Task", task.name, force=1)
+		frappe.delete_doc("Project", self.project, force=1)
 		self.db_set('project', '')
 		for activity in self.activities:
 			activity.db_set("task", "")
@@ -83,6 +84,17 @@ def get_onboarding_details(parent, parenttype):
 		fields=["activity_name", "role", "user", "required_for_employee_creation", "description"],
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")
+
+@frappe.whitelist()
+def get_boarding_status(project):
+	status = 'Pending'
+	if project:
+		doc = frappe.get_doc('Project', project)
+		if flt(doc.percent_complete) > 0.0 and flt(doc.percent_complete) < 100.0:
+			status = 'In Process'
+		elif flt(doc.percent_complete) == 100.0:
+			status = 'Completed'
+		return status
 
 def set_employee_name(doc):
 	if doc.employee and not doc.employee_name:
@@ -109,8 +121,9 @@ def update_employee(employee, details, date=None, cancel=False):
 def get_employee_fields_label():
 	fields = []
 	for df in frappe.get_meta("Employee").get("fields"):
-		if df.fieldtype in ["Data", "Date", "Datetime", "Float", "Int",
-		"Link", "Percent", "Select", "Small Text"] and df.fieldname not in ["lft", "rgt", "old_parent"]:
+		if df.fieldname in ["salutation", "user_id", "employee_number", "employment_type",
+		"holiday_list", "branch", "department", "designation", "grade",
+		"notice_number_of_days", "reports_to", "leave_policy", "company_email"]:
 			fields.append({"value": df.fieldname, "label": df.label})
 	return fields
 
@@ -157,7 +170,7 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		doc.name = "New "+doc.doctype
 
 	overlap_doc = frappe.db.sql(query.format(doc.doctype),{
-			"employee": doc.employee,
+			"employee": doc.get("employee"),
 			"from_date": from_date,
 			"to_date": to_date,
 			"name": doc.name,
@@ -196,10 +209,10 @@ def get_employee_leave_policy(employee):
 			leave_policy = frappe.db.get_value("Employee Grade", employee_grade, "default_leave_policy")
 			if not leave_policy:
 				frappe.throw(_("Employee {0} of grade {1} have no default leave policy").format(employee, employee_grade))
-		else:
-			frappe.throw(_("Employee {0} has no grade to get default leave policy").format(employee))
 	if leave_policy:
 		return frappe.get_doc("Leave Policy", leave_policy)
+	else:
+		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
 
 def validate_tax_declaration(declarations):
 	subcategories = []
@@ -290,9 +303,7 @@ def get_salary_assignment(employee, date):
 		select * from `tabSalary Structure Assignment`
 		where employee=%(employee)s
 		and docstatus = 1
-		and (
-			(%(on_date)s between from_date and ifnull(to_date, '2199-12-31'))
-		)""", {
+		and %(on_date)s >= from_date order by from_date desc limit 1""", {
 			'employee': employee,
 			'on_date': date,
 		}, as_dict=1)
@@ -322,7 +333,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 		'component': component
 	}, as_dict=True)
 
-	if sum_of_given_benefit and sum_of_given_benefit[0].total_amount > 0:
+	if sum_of_given_benefit and flt(sum_of_given_benefit[0].total_amount) > 0:
 		total_given_benefit_amount = sum_of_given_benefit[0].total_amount
 	return total_given_benefit_amount
 
@@ -353,3 +364,27 @@ def calculate_hra_exemption_for_period(doc):
 	# Don't delete this method, used for localization
 	# Indian HRA Exemption Calculation
 	return {}
+
+def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, component=False):
+	total_claimed_amount = 0
+	query = """
+	select sum(claimed_amount) as 'total_amount'
+	from `tabEmployee Benefit Claim`
+	where employee=%(employee)s
+	and docstatus = 1
+	and (claim_date between %(start_date)s and %(end_date)s)
+	"""
+	if non_pro_rata:
+		query += "and pay_against_benefit_claim = 1"
+	if component:
+		query += "and earning_component = %(component)s"
+
+	sum_of_claimed_amount = frappe.db.sql(query, {
+		'employee': employee,
+		'start_date': payroll_period.start_date,
+		'end_date': payroll_period.end_date,
+		'component': component
+	}, as_dict=True)
+	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
+		total_claimed_amount = sum_of_claimed_amount[0].total_amount
+	return total_claimed_amount

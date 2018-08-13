@@ -53,7 +53,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			delivery_note, d.income_account, d.cost_center, d.stock_qty, d.stock_uom
 		]
 
-		row += [d.base_net_rate/d.stock_qty, d.base_net_amount] \
+		row += [(d.base_net_rate * d.qty)/d.stock_qty, d.base_net_amount] \
 			if d.stock_uom != d.uom else [d.base_net_rate, d.base_net_amount]
 
 		total_tax = 0
@@ -133,7 +133,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_rate,
 			`tabSales Invoice Item`.base_net_amount, `tabSales Invoice`.customer_name,
 			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
-			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom {0}
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 %s %s
@@ -157,6 +157,9 @@ def get_delivery_notes_against_sales_order(item_list):
 
 	return so_dn_map
 
+def get_deducted_taxes():
+	return frappe.db.sql_list("select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'")
+
 def get_tax_accounts(item_list, columns, company_currency,
 		doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
 	import json
@@ -176,9 +179,10 @@ def get_tax_accounts(item_list, columns, company_currency,
 	if doctype == "Purchase Invoice":
 		conditions = " and category in ('Total', 'Valuation and Total') and base_tax_amount_after_discount_amount != 0"
 
+	deducted_tax = get_deducted_taxes()
 	tax_details = frappe.db.sql("""
 		select
-			parent, description, item_wise_tax_detail,
+			name, parent, description, item_wise_tax_detail,
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
@@ -190,7 +194,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
 		tuple([doctype] + list(invoice_item_row)))
 
-	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+	for name, parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		description = handle_html(description)
 		if description not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
@@ -219,9 +223,13 @@ def get_tax_accounts(item_list, columns, company_currency,
 						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
 							if item_net_amount else 0
 						if item_tax_amount:
+							tax_amount = flt(item_tax_amount, tax_amount_precision)
+							tax_amount = (tax_amount * -1
+								if (doctype == 'Purchase Invoice' and name in deducted_tax) else tax_amount)
+
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 								"tax_rate": tax_rate,
-								"tax_amount": flt(item_tax_amount, tax_amount_precision)
+								"tax_amount": tax_amount
 							})
 
 			except ValueError:

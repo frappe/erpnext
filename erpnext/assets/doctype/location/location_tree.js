@@ -1,14 +1,14 @@
 frappe.treeview_settings["Location"] = {
-	ignore_fields:["parent_location"],
+	ignore_fields: ["parent_location"],
 	get_tree_nodes: 'erpnext.assets.doctype.location.location.get_children',
 	add_tree_node: 'erpnext.assets.doctype.location.location.add_node',
 	filters: [
 		{
 			fieldname: "location",
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "Location",
 			label: __("Location"),
-			get_query: function() {
+			get_query: function () {
 				return {
 					filters: [["Location", "is_group", "=", 1]]
 				};
@@ -21,13 +21,13 @@ frappe.treeview_settings["Location"] = {
 	menu_items: [
 		{
 			label: __("New Location"),
-			action: function() {
+			action: function () {
 				frappe.new_doc("Location", true);
 			},
 			condition: 'frappe.boot.user.can_create.indexOf("Location") !== -1'
 		}
 	],
-	onload: function(treeview) {
+	onload: function (treeview) {
 		treeview.make_tree();
 	}
 };

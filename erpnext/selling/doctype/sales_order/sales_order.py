@@ -16,7 +16,8 @@ from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
-
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.controllers.selling_controller import calculate_commission_rule
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -193,13 +194,14 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 	def update_project(self):
-		project_list = []
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
+			return
+
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
 			project.save()
-			project_list.append(self.project)
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -295,7 +297,7 @@ class SalesOrder(SellingController):
 			})
 
 	def on_update(self):
-		pass
+		calculate_commission_rule(self)
 
 	def before_update_after_submit(self):
 		self.validate_po()
@@ -376,16 +378,26 @@ class SalesOrder(SellingController):
 		return items
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
-														 auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
+
+		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
+			delivery_date = get_next_schedule_date(ref_doc_delivery_date,
+				auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day))
+
+			if delivery_date <= transaction_date:
+				delivery_date_diff = frappe.utils.date_diff(ref_doc_delivery_date, red_doc_transaction_date)
+				delivery_date = frappe.utils.add_days(transaction_date, delivery_date_diff)
+
+			return delivery_date
+
+		self.set("delivery_date", _get_delivery_date(reference_doc.delivery_date,
+			reference_doc.transaction_date, self.transaction_date ))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
-														  auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day)))
-
+			d.set("delivery_date", _get_delivery_date(reference_delivery_date,
+				reference_doc.transaction_date, self.transaction_date))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -502,11 +514,12 @@ def make_delivery_note(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 				or item.get("selling_cost_center") \
-				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+				or item_group.get("selling_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -557,6 +570,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
+		# set the redeem loyalty points if provided via shopping cart
+		if source.loyalty_points and source.order_type == "Shopping Cart":
+			target.redeem_loyalty_points = 1
+
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
@@ -566,14 +583,16 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if not target.cost_center and target.item_code:
 			item = get_item_defaults(target.item_code, target.company)
+			item_group = get_item_group_defaults(target.item_code, target.company)
 			target.cost_center = item.get("selling_cost_center") \
-				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+				or item_group.get("selling_cost_center")
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
 			"field_map": {
-				"party_account_currency": "party_account_currency"
+				"party_account_currency": "party_account_currency",
+				"payment_terms_template": "payment_terms_template"
 			},
 			"validation": {
 				"docstatus": ["=", 1]

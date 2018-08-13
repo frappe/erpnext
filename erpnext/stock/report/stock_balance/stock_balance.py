@@ -17,12 +17,18 @@ def execute(filters=None):
 	columns = get_columns()
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
+
+	# if no stock ledger entry found return
+	if not sle:
+		return columns, []
+
 	iwb_map = get_item_warehouse_map(filters, sle)
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
+
 		qty_dict = iwb_map[(company, item, warehouse)]
 		item_reorder_level = 0
 		item_reorder_qty = 0
@@ -204,12 +210,12 @@ def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
 		items = list(set([d.item_code for d in sle]))
-		
+
 	if items:
 		for item in frappe.db.sql("""
 			select name, item_name, description, item_group, brand, stock_uom
 			from `tabItem`
-			where name in ({0})
+			where name in ({0}) and ifnull(disabled, 0) = 0
 			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
 				item_details.setdefault(item.name, item)
 

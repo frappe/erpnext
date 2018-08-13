@@ -261,7 +261,11 @@
 		"must_be_whole_number": 0
 	},
 	{
-		"uom_name": "Hundredweight",
+		"uom_name": "Hundredweight (UK)",
+		"must_be_whole_number": 0
+	},
+	{
+		"uom_name": "Hundredweight (US)",
 		"must_be_whole_number": 0
 	},
 	{
@@ -789,7 +793,7 @@
 		"must_be_whole_number": 0
 	},
 	{
-		"uom_name": "Pound Cubic Yard",
+		"uom_name": "Pound/Cubic Yard",
 		"must_be_whole_number": 0
 	},
 	{

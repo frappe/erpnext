@@ -22,10 +22,10 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 			on_change: () => {
-				var customer = frappe.query_report_filters_by_name.customer.get_value();
+				var customer = frappe.query_report.get_filter_value('customer');
 				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name"], function(value) {
-					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
-					frappe.query_report_filters_by_name.customer_name.set_value(value["customer_name"]);
+					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+					frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
 				});
 			}
 		},

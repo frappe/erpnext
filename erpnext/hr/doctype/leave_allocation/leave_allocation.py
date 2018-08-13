@@ -92,7 +92,7 @@ class LeaveAllocation(Document):
 
 		self.total_leaves_allocated = flt(self.carry_forwarded_leaves) + flt(self.new_leaves_allocated)
 
-		if not self.total_leaves_allocated and not frappe.db.get_value("Leave Type", self.leave_type, "is_earned_leave"):
+		if not self.total_leaves_allocated and not frappe.db.get_value("Leave Type", self.leave_type, "is_earned_leave") and not frappe.db.get_value("Leave Type", self.leave_type, "is_compensatory"):
 			frappe.throw(_("Total leaves allocated is mandatory for Leave Type {0}".format(self.leave_type)))
 
 	def validate_total_leaves_allocated(self):

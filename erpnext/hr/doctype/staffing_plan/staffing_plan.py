@@ -8,6 +8,9 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate, nowdate, cint, flt
 
+class SubsidiaryCompanyError(frappe.ValidationError): pass
+class ParentCompanyError(frappe.ValidationError): pass
+
 class StaffingPlan(Document):
 	def validate(self):
 		# Validate Dates
@@ -53,25 +56,24 @@ class StaffingPlan(Document):
 			return # No parent, nothing to validate
 
 		# Get staffing plan applicable for the company (Parent Company)
-		parent_plan_details = get_active_staffing_plan_details(self.company, staffing_plan_detail.designation)
+		parent_plan_details = get_active_staffing_plan_details(self.company, staffing_plan_detail.designation, self.from_date, self.to_date)
 		if not parent_plan_details:
-			return #no staffing plan for any parent Company in herarchy
+			return #no staffing plan for any parent Company in hierarchy
 
-		# Fetch parent company which owns the staffing plan. NOTE: Parent could be higher up in the heirarchy
+		# Fetch parent company which owns the staffing plan. NOTE: Parent could be higher up in the hierarchy
 		parent_company = frappe.db.get_value("Staffing Plan", parent_plan_details[0].name, "company")
-
 		# Parent plan available, validate with parent, siblings as well as children of staffing plan Company
-		if staffing_plan_detail.vacancies > cint(parent_plan_details[0].vacancies) or \
-			staffing_plan_detail.total_estimated_cost > flt(parent_plan_details[0].total_estimated_cost):
+		if cint(staffing_plan_detail.vacancies) > cint(parent_plan_details[0].vacancies) or \
+			flt(staffing_plan_detail.total_estimated_cost) > flt(parent_plan_details[0].total_estimated_cost):
 			frappe.throw(_("You can only plan for upto {0} vacancies and budget {1} \
-				for {2} as per staffing plan {3} for parent company {4}"
+				for {2} as per staffing plan {3} for parent company {4}."
 				.format(cint(parent_plan_details[0].vacancies),
 					parent_plan_details[0].total_estimated_cost,
 					frappe.bold(staffing_plan_detail.designation),
 					parent_plan_details[0].name,
-					parent_company)))
+					parent_company)), ParentCompanyError)
 
-		#Get vacanices already planned for all companies down the herarchy of Parent Company
+		#Get vacanices already planned for all companies down the hierarchy of Parent Company
 		lft, rgt = frappe.db.get_value("Company", parent_company, ["lft", "rgt"])
 		all_sibling_details = frappe.db.sql("""select sum(spd.vacancies) as vacancies,
 			sum(spd.total_estimated_cost) as total_estimated_cost
@@ -82,11 +84,11 @@ class StaffingPlan(Document):
 		""", (staffing_plan_detail.designation, self.from_date, self.to_date, lft, rgt), as_dict = 1)[0]
 
 		if (cint(parent_plan_details[0].vacancies) < \
-			(staffing_plan_detail.vacancies + cint(all_sibling_details.vacancies))) or \
+			(cint(staffing_plan_detail.vacancies) + cint(all_sibling_details.vacancies))) or \
 			(flt(parent_plan_details[0].total_estimated_cost) < \
-			(staffing_plan_detail.total_estimated_cost + flt(all_sibling_details.total_estimated_cost))):
+			(flt(staffing_plan_detail.total_estimated_cost) + flt(all_sibling_details.total_estimated_cost))):
 			frappe.throw(_("{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. \
-				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}"
+				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}."
 				.format(cint(all_sibling_details.vacancies),
 					all_sibling_details.total_estimated_cost,
 					frappe.bold(staffing_plan_detail.designation),
@@ -106,14 +108,14 @@ class StaffingPlan(Document):
 		""", (staffing_plan_detail.designation, self.from_date, self.to_date, self.company), as_dict = 1)[0]
 
 		if children_details and \
-			staffing_plan_detail.vacancies < cint(children_details.vacancies) or \
-			staffing_plan_detail.total_estimated_cost < flt(children_details.total_estimated_cost):
+			cint(staffing_plan_detail.vacancies) < cint(children_details.vacancies) or \
+			flt(staffing_plan_detail.total_estimated_cost) < flt(children_details.total_estimated_cost):
 			frappe.throw(_("Subsidiary companies have already planned for {1} vacancies at a budget of {2}. \
 				Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies"
 				.format(self.company,
 					cint(children_details.vacancies),
 					children_details.total_estimated_cost,
-					frappe.bold(staffing_plan_detail.designation))))
+					frappe.bold(staffing_plan_detail.designation))), SubsidiaryCompanyError)
 
 @frappe.whitelist()
 def get_designation_counts(designation, company):
@@ -135,28 +137,21 @@ def get_designation_counts(designation, company):
 	return employee_counts_dict
 
 @frappe.whitelist()
-def get_active_staffing_plan_details(company, designation, department=None, date=getdate(nowdate())):
+def get_active_staffing_plan_details(company, designation, from_date=getdate(nowdate()), to_date=getdate(nowdate())):
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
-
-	conditions = ""
-	if(department): #Department is an optional field
-		conditions += " and sp.department='{0}'".format(frappe.db.escape(department))
-
-	if(date): #ToDo: Date should be mandatory?
-		conditions += " and '{0}' between sp.from_date and sp.to_date".format(date)
 
 	staffing_plan = frappe.db.sql("""
 		select sp.name, spd.vacancies, spd.total_estimated_cost
 		from `tabStaffing Plan Detail` spd join `tabStaffing Plan` sp on spd.parent=sp.name
-		where company=%s and spd.designation=%s and sp.docstatus=1 {0}
-	""".format(conditions), (company, designation), as_dict = 1)
+		where company=%s and spd.designation=%s and sp.docstatus=1
+		and to_date >= %s and from_date <= %s """, (company, designation, from_date, to_date), as_dict = 1)
 
 	if not staffing_plan:
 		parent_company = frappe.db.get_value("Company", company, "parent_company")
 		if parent_company:
 			staffing_plan = get_active_staffing_plan_details(parent_company,
-				designation, department, date)
+				designation, from_date, to_date)
 
 	# Only a single staffing plan can be active for a designation on given date
 	return staffing_plan if staffing_plan else None

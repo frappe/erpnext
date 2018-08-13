@@ -15,7 +15,8 @@ $.extend(erpnext, {
 
 	get_presentation_currency_list: () => {
 		const docs = frappe.boot.docs;
-		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		let currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		currency_list.unshift("");
 		return currency_list;
 	},
 
@@ -145,7 +146,7 @@ $.extend(erpnext.utils, {
 
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.subscription.subscription.make_subscription",
+			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -340,6 +341,80 @@ erpnext.utils.select_alternate_items = function(opts) {
 
 	this.data = dialog.fields_dict.alternative_items.df.data;
 	dialog.fields_dict.alternative_items.grid.refresh();
+	dialog.show();
+}
+
+erpnext.utils.update_child_items = function(opts) {
+	const frm = opts.frm;
+
+	this.data = [];
+	const dialog = new frappe.ui.Dialog({
+		title: __("Update Items"),
+		fields: [
+			{fieldtype:'Section Break', label: __('Items')},
+			{
+				fieldname: "trans_items", fieldtype: "Table", cannot_add_rows: true,
+				in_place_edit: true, data: this.data,
+				get_data: () => {
+					return this.data;
+				},
+				fields: [{
+					fieldtype:'Data',
+					fieldname:"docname",
+					hidden: 0,
+				}, {
+					fieldtype:'Link',
+					fieldname:"item_code",
+					options: 'Item',
+					in_list_view: 1,
+					read_only: 1,
+					label: __('Item Code')
+				}, {
+					fieldtype:'Float',
+					fieldname:"qty",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Qty')
+				}, {
+					fieldtype:'Currency',
+					fieldname:"rate",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Rate')
+				}]
+			},
+		],
+		primary_action: function() {
+			const trans_items = this.get_values()["trans_items"];
+			frappe.call({
+				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
+				args: {
+					'parent_doctype': frm.doc.doctype,
+					'trans_items': trans_items,
+					'parent_doctype_name': frm.doc.name
+				},
+				callback: function() {
+					frm.reload_doc();
+				}
+			});
+			this.hide();
+			refresh_field("items");
+		},
+		primary_action_label: __('Update')
+	});
+
+	frm.doc[opts.child_docname].forEach(d => {
+		dialog.fields_dict.trans_items.df.data.push({
+			"docname": d.name,
+			"item_code": d.item_code,
+			"qty": d.qty,
+			"rate": d.rate,
+		});
+		this.data = dialog.fields_dict.trans_items.df.data;
+		dialog.fields_dict.trans_items.grid.refresh();
+	})
 	dialog.show();
 }
 
