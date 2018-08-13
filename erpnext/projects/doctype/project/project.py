@@ -52,7 +52,14 @@ class Project(Document):
 		if self.name is None:
 			return {}
 		else:
-			return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
+			filters = {"project": self.name}
+
+			if self.get("deleted_task_list"):
+				filters.update({
+					'name': ("not in", self.deleted_task_list)
+				})
+
+			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
 
 	def validate(self):
 		self.validate_project_name()
@@ -60,6 +67,7 @@ class Project(Document):
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
+		self.load_tasks()
 		self.send_welcome_email()
 
 	def validate_project_name(self):
@@ -88,8 +96,19 @@ class Project(Document):
 		task_names = []
 
 		existing_task_data = {}
+
+		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"]
+		exclude_fieldtype = ["Button", "Column Break",
+			"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
+
+		custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task",
+			"fieldtype": ("not in", exclude_fieldtype)}, "fieldname")
+
+		for d in custom_fields:
+			fields.append(d.fieldname)
+
 		for d in frappe.get_all('Project Task',
-			fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"],
+			fields = fields,
 			filters = {'parent': self.name}):
 			existing_task_data.setdefault(d.task_id, d)
 
@@ -100,7 +119,7 @@ class Project(Document):
 				task = frappe.new_doc("Task")
 				task.project = self.name
 
-			if not t.task_id or self.is_row_updated(t, existing_task_data):
+			if not t.task_id or self.is_row_updated(t, existing_task_data, fields):
 				task.update({
 					"subject": t.title,
 					"status": t.status,
@@ -138,21 +157,14 @@ class Project(Document):
 		self.update_percent_complete()
 		self.update_costing()
 
-	def is_row_updated(self, row, existing_task_data):
+	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
-
-		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
 
 		d = existing_task_data.get(row.task_id)
 
-		for field in project_task_custom_fields:
+		for field in fields:
 			if row.get(field) != d.get(field):
 				return True
-
-		if (d and (row.title != d.title or row.status != d.status
-			or getdate(row.start_date) != getdate(d.start_date) or getdate(row.end_date) != getdate(d.end_date)
-			or row.description != d.description or row.task_weight != d.task_weight)):
-			return True
 
 	def map_custom_fields(self, source, target):
 		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
