@@ -62,7 +62,7 @@ def fetch_accounts():
 def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit"]
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	frappe.clear_messages()
@@ -253,6 +253,31 @@ def save_invoice(invoice):
 		import traceback
 		traceback.print_exc()
 
+def save_credit_memo(credit_memo):
+	try:
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"])}):
+			frappe.get_doc({
+				"doctype": "Sales Invoice",
+				"quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]),
+				"naming_series": "SINV-",
+				"currency": credit_memo["CurrencyRef"]["value"],
+				"posting_date": credit_memo["TxnDate"],
+				"due_date": credit_memo.get("DueDate", "2020-01-01"),
+				"debit_to": receivable_account,
+				"customer": frappe.get_all("Customer",
+					filters={
+						"quickbooks_id": credit_memo["CustomerRef"]["value"]
+					})[0]["name"],
+				"items": get_items(credit_memo["Line"], is_return=True),
+				"taxes": get_taxes(credit_memo["TxnTaxDetail"]["TaxLine"], credit_memo["Line"]),
+				"set_posting_time": 1,
+				"disable_rounded_total": 1,
+				"is_return": 1,
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 def save_journal_entry(journal_entry):
 	try:
 		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": journal_entry["Id"]}):
@@ -279,7 +304,7 @@ def save_bill(bill):
 				"naming_series": "PINV-",
 				"currency": bill["CurrencyRef"]["value"],
 				"posting_date": bill["TxnDate"],
-				"due_date":  bill["DueDate"],
+				"due_date":  bill["TxnDate"],
 				"credit_to": credit_to_account,
 				"supplier": frappe.get_all("Supplier",
 					filters={
@@ -293,6 +318,34 @@ def save_bill(bill):
 	except:
 		import traceback
 		traceback.print_exc()
+
+def save_vendor_credit(vendor_credit):
+	try:
+		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"])}):
+			credit_to_account = get_account_name_by_id(vendor_credit["APAccountRef"]["value"])
+			make_payable(credit_to_account)
+			frappe.get_doc({
+				"doctype": "Purchase Invoice",
+				"quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"]),
+				"naming_series": "PINV-",
+				"currency": vendor_credit["CurrencyRef"]["value"],
+				"posting_date": vendor_credit["TxnDate"],
+				"due_date":  vendor_credit["TxnDate"],
+				"credit_to": credit_to_account,
+				"supplier": frappe.get_all("Supplier",
+					filters={
+						"quickbooks_id": vendor_credit["VendorRef"]["value"]
+					})[0]["name"],
+				"items": get_pi_items(vendor_credit["Line"], is_return=True),
+				"taxes": get_taxes(vendor_credit["TxnTaxDetail"]["TaxLine"]),
+				"set_posting_time": 1,
+				"disable_rounded_total": 1,
+				"is_return": 1
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 
 def save_payment(payment):
 	try:
@@ -430,7 +483,7 @@ def get_accounts(lines):
 			})
 	return accounts
 
-def get_items(lines):
+def get_items(lines, is_return=False):
 	items = []
 	for line in lines:
 		if line["DetailType"] == "SalesItemLineDetail" and line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
@@ -449,6 +502,8 @@ def get_items(lines):
 				"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
 				"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
 			})
+			if is_return:
+				items[-1]["qty"] *= -1
 		elif line["DetailType"] == "DescriptionOnly":
 			items[-1].update({
 				"margin_type": "Percentage",
@@ -456,7 +511,7 @@ def get_items(lines):
 			})
 	return items
 
-def get_pi_items(lines):
+def get_pi_items(lines, is_return=False):
 	items = []
 	for line in lines:
 		if line["DetailType"] == "ItemBasedExpenseLineDetail":
@@ -486,6 +541,8 @@ def get_pi_items(lines):
 				"price_list_rate": line["Amount"],
 				"item_tax_rate": json.dumps(get_item_taxes(line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
+		if is_return:
+				items[-1]["qty"] *= -1
 	return items
 
 def get_item_taxes(tax_code):
@@ -606,6 +663,8 @@ save_methods = {
 	"TaxCode": save_tax_code,
 	"Purchase": save_purchase,
 	"Deposit": save_deposit,
+	"VendorCredit": save_vendor_credit,
+	"CreditMemo": save_credit_memo,
 }
 
 def save_entries(doctype, entries):
