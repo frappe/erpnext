@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import urllib
+import copy
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
@@ -180,6 +181,8 @@ def get_item_group_defaults(item, company):
 
 	for d in item_group.item_group_defaults or []:
 		if d.company == company:
-			return d.as_dict()
+			row = copy.deepcopy(d.as_dict())
+			row.pop("name")
+			return row
 
 	return frappe._dict()
