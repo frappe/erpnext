@@ -1,3 +1,5 @@
+import { get_rating_html } from './reviews';
+
 function get_detail_view_html(item, allow_edit) {
 	const title = item.item_name || item.name;
 	const seller = item.company;
@@ -23,6 +25,13 @@ function get_detail_view_html(item, allow_edit) {
 		stats = `${views_message}${dot_spacer}${rating_html} (${rating_count})`;
 	}
 
+	let favourite_button = !item.favourited
+		? `<button class="btn btn-default text-muted favourite-button" data-action="add_to_favourites">
+			${__('Save')} <i class="octicon octicon-heart text-extra-muted"></i>
+		</button>`
+		: `<button class="btn btn-default text-muted favourite-button disabled" data-action="add_to_favourites">
+			${__('Saved')}
+		</button>`;
 
 	let menu_items = '';
 
@@ -59,9 +68,7 @@ function get_detail_view_html(item, allow_edit) {
 					</div>
 
 					<div class="page-actions detail-page-actions">
-						<button class="btn btn-default text-muted favourite-button" data-action="add_to_favourites">
-							${__('Add to Favourites')} <i class="octicon octicon-heart text-extra-muted"></i>
-						</button>
+						${favourite_button}
 						<button class="btn btn-primary" data-action="contact_seller">
 							${__('Contact Seller')}
 						</button>

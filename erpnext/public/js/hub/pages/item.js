@@ -70,10 +70,18 @@ erpnext.hub.Item = class Item extends SubPage {
 
 
 	add_to_favourites(favourite_button) {
-		$(favourite_button).html('Added to Favourites').addClass('disabled');
-		return hub.call('remove_item_from_seller_favourites', {
+		$(favourite_button).addClass('disabled');
+
+		hub.call('add_item_to_seller_favourites', {
 			hub_item_code: this.hub_item_code,
 			hub_seller: hub.settings.company_email
+		})
+		.then(() => {
+			$(favourite_button).html('Saved');
+			frappe.show_alert(__('Saved to <b><a href="#marketplace/favourites">Favourites</a></b>'));
+		})
+		.catch(e => {
+			console.log(e);
 		});
 	}
 
@@ -143,7 +151,9 @@ erpnext.hub.Item = class Item extends SubPage {
 
 		$timeline.empty();
 
-		this.reviews.sort((a, b) => {
+		const reviews = this.reviews || [];
+
+		reviews.sort((a, b) => {
 			if (a.modified > b.modified) {
 				return -1;
 			}
@@ -155,7 +165,7 @@ erpnext.hub.Item = class Item extends SubPage {
 			return 0;
 		});
 
-		this.reviews.forEach(review => {
+		reviews.forEach(review => {
 			$(get_review_html(review)).appendTo($timeline);
 		});
 	}
