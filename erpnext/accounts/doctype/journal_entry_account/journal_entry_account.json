@@ -199,7 +199,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "unique": 0
   }, 
@@ -661,7 +661,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
-  },
+  }, 
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
@@ -795,7 +795,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-12-07 19:54:19.851534", 
+ "modified": "2018-08-10 16:35:42.833549", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry Account", 

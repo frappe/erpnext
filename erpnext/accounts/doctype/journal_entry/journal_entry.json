@@ -381,7 +381,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "unique": 0
   }, 
@@ -1443,7 +1443,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-08-31 11:21:09.442695", 
+ "modified": "2018-08-10 16:35:31.361030", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 
