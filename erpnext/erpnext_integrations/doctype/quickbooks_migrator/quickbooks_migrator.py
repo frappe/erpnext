@@ -518,22 +518,35 @@ def get_accounts(lines):
 def get_items(lines, is_return=False):
 	items = []
 	for line in lines:
-		if line["DetailType"] == "SalesItemLineDetail" and line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
-			item = frappe.db.get_all("Item",
-				filters={
-					"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"]
-				},
-				fields=["name", "stock_uom"]
-			)[0]
-			items.append({
-				"item_code": item["name"],
-				"conversion_factor": 1,
-				"uom": item["stock_uom"],
-				"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
-				"qty": line["SalesItemLineDetail"]["Qty"],
-				"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
-				"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
-			})
+		if line["DetailType"] == "SalesItemLineDetail":
+			if line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
+				item = frappe.db.get_all("Item",
+					filters={
+						"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"]
+					},
+					fields=["name", "stock_uom"]
+				)[0]
+				items.append({
+					"item_code": item["name"],
+					"conversion_factor": 1,
+					"uom": item["stock_uom"],
+					"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
+					"qty": line["SalesItemLineDetail"]["Qty"],
+					"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
+					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
+				})
+			else:
+				items.append({
+					"item_name": "Shipping",
+					"conversion_factor": 1,
+					"expense_account": get_account_name_by_id("TaxRate - {}".format(line["SalesItemLineDetail"]["TaxCodeRef"]["value"])),
+					"uom": "Unit",
+					"description": "Shipping",
+					"income_account": "Shipping Income - QB - SA",
+					"qty": 1,
+					"price_list_rate": line["Amount"],
+					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
+				})
 			if is_return:
 				items[-1]["qty"] *= -1
 		elif line["DetailType"] == "DescriptionOnly":
@@ -592,14 +605,6 @@ def get_item_taxes(tax_code):
 
 def get_taxes(lines, items=None):
 	taxes = []
-	for item in items or []:
-		if item["DetailType"] == "SalesItemLineDetail" and item["SalesItemLineDetail"]["ItemRef"]["value"] == "SHIPPING_ITEM_ID":
-			taxes.append({
-				"charge_type": "Actual",
-				"account_head": "Shipping Income - QB - SA",
-				"description": "Shipping",
-				"tax_amount": item["Amount"],
-			})
 	for line in lines:
 		tax_rate = line["TaxLineDetail"]["TaxRateRef"]["value"]
 		account_head = get_account_name_by_id("TaxRate - {}".format(tax_rate))
