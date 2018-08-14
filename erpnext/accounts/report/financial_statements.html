@@ -51,7 +51,7 @@
 				</td>
 				{% for(var i=2, l=report_columns.length; i<l; i++) { %}
 					<td class="text-right">
-						{% var fieldname = report_columns[i].field || report_columns[i].fieldname; %}
+						{% var fieldname = report_columns[i].fieldname; %}
 						{% if (!is_null(row[fieldname])) { %}
 							{%= format_currency(row[fieldname], filters.presentation_currency) %}
 						{% } %}
