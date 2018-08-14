@@ -472,7 +472,7 @@ def save_sales_receipt(sales_receipt):
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"])}):
 			invoice = frappe.get_doc({
 				"doctype": "Sales Invoice",
-				"quickbooks_id": "Cash Memo - {}".format(sales_receipt["Id"]),
+				"quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]),
 				"naming_series": "SINV-",
 				"currency": sales_receipt["CurrencyRef"]["value"],
 				"posting_date": sales_receipt["TxnDate"],
@@ -587,7 +587,7 @@ def get_pi_items(lines, is_return=False):
 				"item_tax_rate": json.dumps(get_item_taxes(line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
 		if is_return:
-				items[-1]["qty"] *= -1
+			items[-1]["qty"] *= -1
 	return items
 
 def get_item_taxes(tax_code):
