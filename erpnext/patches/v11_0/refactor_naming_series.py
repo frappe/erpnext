@@ -113,5 +113,4 @@ def get_series_to_preserve(doctype):
 
 def get_default_series(doctype):
 	default_series = (frappe.get_meta(doctype).get_field("naming_series").default or "")
-	print(default_series)
 	return default_series
