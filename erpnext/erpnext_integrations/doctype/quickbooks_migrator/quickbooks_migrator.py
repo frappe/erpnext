@@ -62,7 +62,7 @@ def fetch_accounts():
 def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo"]
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	frappe.clear_messages()
@@ -467,6 +467,38 @@ def save_deposit(deposit):
 		import traceback
 		traceback.print_exc()
 
+def save_sales_receipt(sales_receipt):
+	try:
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"])}):
+			invoice = frappe.get_doc({
+				"doctype": "Sales Invoice",
+				"quickbooks_id": "Cash Memo - {}".format(sales_receipt["Id"]),
+				"naming_series": "SINV-",
+				"currency": sales_receipt["CurrencyRef"]["value"],
+				"posting_date": sales_receipt["TxnDate"],
+				"due_date": sales_receipt.get("DueDate", "2020-01-01"),
+				"debit_to": receivable_account,
+				"customer": frappe.get_all("Customer",
+					filters={
+						"quickbooks_id": sales_receipt["CustomerRef"]["value"]
+					})[0]["name"],
+				"items": get_items(sales_receipt["Line"]),
+				"taxes": get_taxes(sales_receipt["TxnTaxDetail"]["TaxLine"], sales_receipt["Line"]),
+				"set_posting_time": 1,
+				"disable_rounded_total": 1,
+				"is_pos": 1,
+				"payments": [{
+					"mode_of_payment": sales_receipt["PaymentMethodRef"]["name"],
+					"account": get_account_name_by_id(sales_receipt["DepositToAccountRef"]["value"]),
+					"amount": 0
+				}]
+			}).insert()
+			invoice.payments[0].amount = invoice.grand_total
+			invoice.submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -665,6 +697,7 @@ save_methods = {
 	"Deposit": save_deposit,
 	"VendorCredit": save_vendor_credit,
 	"CreditMemo": save_credit_memo,
+	"SalesReceipt": save_sales_receipt,
 }
 
 def save_entries(doctype, entries):
