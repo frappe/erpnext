@@ -17,15 +17,24 @@ function get_item_card_html(item) {
 
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
-			<div class="hub-card" data-route="marketplace/item/${item.hub_item_code}">
-				<div class="hub-card-header">
-					<div class="hub-card-title ellipsis bold">${title}</div>
-					<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+			<div class="hub-card"
+				data-hub-item-code="${item.hub_item_code}"
+				data-route="marketplace/item/${item.hub_item_code}">
+
+				<div class="hub-card-header level">
+					<div class="ellipsis">
+						<div class="hub-card-title ellipsis bold">${title}</div>
+						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+					</div>
+					<i class="octicon octicon-x text-extra-muted"
+						data-hub-item-code="${item.hub_item_code}">
+					</i>
 				</div>
 				<div class="hub-card-body">
 					<img class="hub-card-image" src="${img_url}" />
 					<div class="overlay hub-card-overlay"></div>
 				</div>
+
 			</div>
 		</div>
 	`;
@@ -62,9 +71,11 @@ function get_local_item_card_html(item) {
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
 			<div class="hub-card is-local ${is_active ? 'active' : ''}" data-id="${id}">
-				<div class="hub-card-header">
-					<div class="hub-card-title ellipsis bold">${title}</div>
-					<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+				<div class="hub-card-header flex">
+					<div>
+						<div class="hub-card-title ellipsis bold">${title}</div>
+						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
+					</div>
 					<i class="octicon octicon-check text-success"></i>
 				</div>
 				<div class="hub-card-body">
