@@ -89,12 +89,11 @@ def set_account_currency(filters):
 				account_currency = gle_currency
 			else:
 				account_currency = (None if filters.party_type in ["Employee", "Student", "Shareholder", "Member"] else
-					frappe.db.get_value(filters.party_type, filters.party, "default_currency"))
+					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency"))
 
 		filters["account_currency"] = account_currency or filters.company_currency
-
 		if filters.account_currency != filters.company_currency:
-			filters["show_in_account_currency"] = 1
+			filters.presentation_currency = filters.account_currency
 
 	return filters
 
@@ -293,15 +292,6 @@ def get_result_as_list(data, filters):
 
 		balance = get_balance(d, balance, 'debit', 'credit')
 		d['balance'] = balance
-
-		if filters.get("show_in_account_currency"):
-			balance_in_account_currency = get_balance(d, balance_in_account_currency,
-				'debit_in_account_currency', 'credit_in_account_currency')
-			d['balance_in_account_currency'] = balance_in_account_currency
-		else:
-			d['debit_in_account_currency'] = d.get('debit', 0)
-			d['credit_in_account_currency'] = d.get('credit', 0)
-			d['balance_in_account_currency'] = d.get('balance')
 
 		d['account_currency'] = filters.account_currency
 		d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
