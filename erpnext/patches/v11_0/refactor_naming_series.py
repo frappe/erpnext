@@ -82,6 +82,7 @@ def execute():
 
 def set_series(doctype, options, default):
 	make_property_setter(doctype, "naming_series", "options", options, "Text")
+	if not default: return
 	make_property_setter(doctype, "naming_series", "default", default, "Text")
 
 def get_series():
@@ -93,11 +94,9 @@ def get_series():
 
 		series_to_preserve = get_series_to_preserve(doctype)
 		default_series = get_default_series(doctype)
-		if not default_series:
-			continue
 		if not series_to_preserve:
 			continue
-		existing_series = frappe.db.get_value('DocField', {'parent': doctype, 'fieldname': 'naming_series'}, 'options').split("\n")
+		existing_series = (frappe.get_meta(doctype).get_field("naming_series").options or "").split("\n")
 		existing_series = filter(None, [d.strip() for d in existing_series])
 
 		# set naming series property setter
@@ -113,9 +112,6 @@ def get_series_to_preserve(doctype):
 	return series_to_preserve
 
 def get_default_series(doctype):
-	default_series = frappe.db.sql("""select naming_series from `tab{doctype}`
-		where creation=(select max(creation) from `tab{doctype}`) order by creation desc limit 1""".format(doctype=doctype))
-
-	if not (default_series and default_series[0][0]):
-		return
-	return default_series[0][0]
+	default_series = (frappe.get_meta(doctype).get_field("naming_series").default or "")
+	print(default_series)
+	return default_series
