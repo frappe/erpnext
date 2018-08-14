@@ -65,6 +65,7 @@ def fetch_data():
 	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
+	fetch_advance_payments(company_id=company_id)
 	frappe.clear_messages()
 
 def publish(*args, **kwargs):
@@ -499,6 +500,40 @@ def save_sales_receipt(sales_receipt):
 		import traceback
 		traceback.print_exc()
 
+def save_advance_payment(advance_payment):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Advance Payment - {}".format(advance_payment["id"])}):
+			accounts = []
+			for line in advance_payment["lines"]:
+				root_type = frappe.get_doc("Account", line["account"]).root_type
+				if root_type in ("Asset", "Income"):
+					if line["amount"] > 0:
+						posting_type = "debit_in_account_currency"
+					else:
+						posting_type = "credit_in_account_currency"
+				else:
+					if line["amount"] > 0:
+						posting_type = "credit_in_account_currency"
+					else:
+						posting_type = "debit_in_account_currency"
+
+				accounts.append({
+					"account": line["account"],
+					posting_type: abs(line["amount"]),
+				})
+
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"quickbooks_id": "Advance Payment - {}".format(advance_payment["id"]),
+				"naming_series": "JV-",
+				"company": company,
+				"posting_date": advance_payment["date"],
+				"accounts": accounts,
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -703,6 +738,7 @@ save_methods = {
 	"VendorCredit": save_vendor_credit,
 	"CreditMemo": save_credit_memo,
 	"SalesReceipt": save_sales_receipt,
+	"AdvancePayment": save_advance_payment,
 }
 
 def save_entries(doctype, entries):
@@ -760,6 +796,33 @@ def fetch_all_entries(entity="", company_id=1):
 		publish({"event": "finish"})
 	entries = json.loads(frappe.cache().get(cache_key).decode())
 	save_entries(entity, entries)
+	publish({"event": "finish"})
+	publish({"event": "message", "message": "Fetched {}".format(entity)})
+
+def fetch_advance_payments(company_id=None):
+	general_ledger = get((BASE_QUERY_URL + "/{}").format(company_id, "reports", "GeneralLedger"), params={
+		"start_date": "1900-01-01",
+		"end_date": "2900-12-12"
+	}).json()
+	advance_payments = {}
+	for section in general_ledger["Rows"]["Row"]:
+		account = get_account_name_by_id(section["Header"]["ColData"][0]["id"])
+		for row in section["Rows"]["Row"]:
+			data = row["ColData"]
+			if data[1]["value"] == "Advance Payment":
+				advance_payment_id = data[1]["id"]
+				if advance_payment_id not in advance_payments:
+					advance_payments[advance_payment_id] = {
+						"id": advance_payment_id,
+						"date": data[0]["value"],
+						"lines": []
+					}
+				advance_payments[advance_payment_id]["lines"].append({
+					"account": account,
+					"amount": frappe.utils.flt(data[6]["value"])
+				})
+	entity = "AdvancePayment"
+	save_entries(entity, advance_payments.values())
 	publish({"event": "finish"})
 	publish({"event": "message", "message": "Fetched {}".format(entity)})
 
