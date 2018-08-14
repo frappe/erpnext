@@ -14,7 +14,7 @@ def setup(domain):
 	setup_fiscal_year()
 	setup_holiday_list()
 	setup_user()
-	setup_employee()
+	#setup_employee()
 	setup_user_roles()
 	setup_role_permissions()
 
