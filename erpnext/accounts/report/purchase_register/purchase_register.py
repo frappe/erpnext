@@ -26,7 +26,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	suppliers = list(set([d.supplier for d in invoice_list]))
 	supplier_details = get_supplier_details(suppliers)
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	data = []
 	for inv in invoice_list:
@@ -42,7 +42,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				row.append(inv.get(col))
 
 		row += [
-			supplier_details.get(inv.supplier), # supplier_type
+			supplier_details.get(inv.supplier), # supplier_group
 			inv.tax_id, inv.credit_to, inv.mode_of_payment, ", ".join(project),
 			inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency
@@ -83,7 +83,7 @@ def get_columns(invoice_list, additional_table_columns):
 		columns += additional_table_columns
 
 	columns += [
-		_("Supplier Type") + ":Link/Supplier Type:120", _("Tax Id") + "::80", _("Payable Account") + ":Link/Account:120",
+		_("Supplier Group") + ":Link/Supplier Group:120", _("Tax Id") + "::80", _("Payable Account") + ":Link/Account:120",
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
 		_("Purchase Order") + ":Link/Purchase Order:100",
@@ -179,7 +179,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in expense_accounts:
-			if invoice_expense_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_expense_map[d.parent]:
 				invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)
@@ -229,8 +229,8 @@ def get_account_details(invoice_list):
 
 def get_supplier_details(suppliers):
 	supplier_details = {}
-	for supp in frappe.db.sql("""select name, supplier_type from `tabSupplier`
+	for supp in frappe.db.sql("""select name, supplier_group from `tabSupplier`
 		where name in (%s)""" % ", ".join(["%s"]*len(suppliers)), tuple(suppliers), as_dict=1):
-			supplier_details.setdefault(supp.name, supp.supplier_type)
+			supplier_details.setdefault(supp.name, supp.supplier_group)
 
 	return supplier_details

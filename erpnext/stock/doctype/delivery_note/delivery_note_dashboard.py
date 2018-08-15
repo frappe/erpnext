@@ -6,7 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Stock Entry': 'delivery_note_no',
 			'Quality Inspection': 'reference_name',
-			'Subscription': 'reference_document',
+			'Auto Repeat': 'reference_document',
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],
@@ -26,7 +26,7 @@ def get_data():
 			},
 			{
 				'label': _('Subscription'),
-				'items': ['Subscription']
+				'items': ['Auto Repeat']
 			},
 		]
 	}

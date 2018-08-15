@@ -1,6 +1,7 @@
 data = {
 	'desktop_icons': [
 		'Restaurant',
+		'Hotels',
 		'Accounts',
 		'Buying',
 		'Stock',
@@ -9,7 +10,9 @@ data = {
 		'ToDo'
 	],
 	'restricted_roles': [
-		'Restaurant Manager'
+		'Restaurant Manager',
+		'Hotel Manager',
+		'Hotel Reservation User'
 	],
 	'custom_fields': {
 		'Sales Invoice': [

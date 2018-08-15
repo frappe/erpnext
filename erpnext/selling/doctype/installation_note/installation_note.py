@@ -33,8 +33,8 @@ class InstallationNote(TransactionBase):
 		self.validate_installation_date()
 		self.check_item_table()
 
-		from erpnext.controllers.selling_controller import check_active_sales_items
-		check_active_sales_items(self)
+		from erpnext.controllers.selling_controller import set_default_income_account_for_item
+		set_default_income_account_for_item(self)
 
 	def is_serial_no_added(self, item_code, serial_no):
 		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")

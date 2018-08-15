@@ -1,6 +1,6 @@
 import frappe
 from frappe.utils import cint
-from erpnext.manufacturing.doctype.production_order.production_order import add_timesheet_detail
+from erpnext.manufacturing.doctype.work_order.work_order import add_timesheet_detail
 from erpnext.patches.v7_0.convert_timelog_to_timesheet import get_timelog_data
 
 def execute():

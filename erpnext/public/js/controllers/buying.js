@@ -98,7 +98,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
+		erpnext.utils.get_party_details(this.frm, null, null, function(){
+			me.apply_price_list();
+		});
 	},
 
 	supplier_address: function() {
@@ -113,8 +115,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		let item_rate = item.price_list_rate;
+		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
+			item_rate = item.blanket_order_rate;
+		}
+		item.rate = flt(item_rate * (1 - item.discount_percentage / 100.0), precision("rate", item));
 
 		this.calculate_taxes_and_totals();
 	},
@@ -241,6 +246,25 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+	},
+
+	update_auto_repeat_reference: function(doc) {
+		if (doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{ 
+					docname: doc.auto_repeat,
+					reference:doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
 	}
 });
 

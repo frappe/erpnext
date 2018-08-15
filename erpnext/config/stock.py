@@ -73,6 +73,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Alternative",
+				},
+				{
+					"type": "doctype",
 					"name": "Product Bundle",
 				},
 				{
@@ -162,6 +166,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Quality Inspection",
+				},
+				{
+					"type": "doctype",
+					"name": "Quality Inspection Template",
 				},
 				{
 					"type": "doctype",

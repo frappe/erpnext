@@ -22,3 +22,5 @@ class Territory(NestedSet):
 		super(Territory, self).on_update()
 		self.validate_one_root()
 
+def on_doctype_update():
+	frappe.db.add_index("Territory", ["lft", "rgt"])

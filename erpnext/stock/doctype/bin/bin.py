@@ -8,18 +8,10 @@ import frappe.defaults
 from frappe.model.document import Document
 
 class Bin(Document):
-	def validate(self):
+	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
-			self.stock_uom = frappe.db.get_value('Item', self.item_code, 'stock_uom')
-
-		self.validate_mandatory()
+			self.stock_uom = frappe.get_cached_value('Item', self.item_code, 'stock_uom')
 		self.set_projected_qty()
-
-	def validate_mandatory(self):
-		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
-		for f in qf:
-			if (not getattr(self, f, None)) or (not self.get(f)):
-				self.set(f, 0.0)
 
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		'''Called from erpnext.stock.utils.update_bin'''
@@ -75,10 +67,10 @@ class Bin(Document):
 
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
-			in open production orders'''
+			in open work orders'''
 		self.reserved_qty_for_production = frappe.db.sql('''
 			select sum(item.required_qty - item.transferred_qty)
-			from `tabProduction Order` pro, `tabProduction Order Item` item
+			from `tabWork Order` pro, `tabWork Order Item` item
 			where
 				item.item_code = %s
 				and item.parent = pro.name
@@ -116,14 +108,14 @@ class Bin(Document):
 				se.docstatus=1
 				and se.purpose='Subcontract'
 				and ifnull(se.purchase_order, '') !=''
-				and sed.item_code = %s
+				and (sed.item_code = %(item)s or sed.original_item = %(item)s)
 				and se.name = sed.parent
 				and se.purchase_order = po.name
 				and po.docstatus = 1
 				and po.is_subcontracted = 'Yes'
 				and po.status != 'Closed'
 				and po.per_received < 100
-		""", (self.item_code))[0][0]
+		""", {'item': self.item_code})[0][0]
 
 		if reserved_qty_for_sub_contract > materials_transferred:
 			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred

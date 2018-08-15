@@ -118,7 +118,7 @@
    "label": "Terms and Conditions Help", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "<h4>Standard Terms and Conditions Example</h4>\n\n<pre>Delivery Terms for Order number {{ name }}\n\n-Order Date : {{ transaction_date }} \n-Expected Delivery Date : {{ delivery_date }}\n</pre>\n\n<h4>How to get fieldnames</h4>\n\n<p>The fieldnames you can use in your standard reply are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n<h4>Templating</h4>\n\n<p>Templates are compiled using the Jinja Templating Langauge. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>", 
+   "options": "<h4>Standard Terms and Conditions Example</h4>\n\n<pre>Delivery Terms for Order number {{ name }}\n\n-Order Date : {{ transaction_date }} \n-Expected Delivery Date : {{ delivery_date }}\n</pre>\n\n<h4>How to get fieldnames</h4>\n\n<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n<h4>Templating</h4>\n\n<p>Templates are compiled using the Jinja Templating Langauge. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -138,7 +138,7 @@
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
+
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 

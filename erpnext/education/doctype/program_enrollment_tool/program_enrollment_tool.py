@@ -68,4 +68,4 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment.academic_term = self.academic_term
 				prog_enrollment.student_batch_name = stud.student_batch_name if stud.student_batch_name else self.new_student_batch
 				prog_enrollment.save()
-		frappe.msgprint("{0} Students have been enrolled.".format(total))
+		frappe.msgprint(_("{0} Students have been enrolled").format(total))

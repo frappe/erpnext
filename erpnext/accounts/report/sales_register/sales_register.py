@@ -25,7 +25,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	#Cost Center & Warehouse Map
 	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
 	data = []
@@ -189,7 +189,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in income_accounts:
-			if invoice_income_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_income_map[d.parent]:
 				invoice_income_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_income_map[d.parent][d.account_head] = flt(d.tax_amount)

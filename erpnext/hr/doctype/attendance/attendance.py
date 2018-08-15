@@ -8,6 +8,7 @@ from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from frappe.utils import cstr
 
 class Attendance(Document):
 	def validate_duplicate_record(self):
@@ -31,7 +32,7 @@ class Attendance(Document):
 				else:
 					self.status = 'On Leave'
 					self.leave_type = d.leave_type
-					frappe.msgprint(_("Employee {0} on Leave on {1}").format(self.employee, self.attendance_date))
+					frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
 
 		if self.status == "On Leave" and not leave_record:
 			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
@@ -56,3 +57,36 @@ class Attendance(Document):
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	events = []
+
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user})
+
+	if not employee:
+		return events
+
+	from frappe.desk.reportview import get_filters_cond
+	conditions = get_filters_cond("Attendance", filters, [])
+	add_attendance(events, start, end, conditions=conditions)
+	return events
+
+def add_attendance(events, start, end, conditions=None):
+	query = """select name, attendance_date, status
+		from `tabAttendance` where
+		attendance_date between %(from_date)s and %(to_date)s
+		and docstatus < 2"""
+	if conditions:
+		query += conditions
+
+	for d in frappe.db.sql(query, {"from_date":start, "to_date":end}, as_dict=True):
+		e = {
+			"name": d.name,
+			"doctype": "Attendance",
+			"date": d.attendance_date,
+			"title": cstr(d.status),
+			"docstatus": d.docstatus
+		}
+		if e not in events:
+			events.append(e)

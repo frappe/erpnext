@@ -38,7 +38,7 @@ class TestDeliveryTrip(unittest.TestCase):
 							 vehicle=delivery_trip.vehicle,
 							 sender_email=sender_email, delivery_notification=delivery_trip.delivery_notification)
 
-			self.assertEquals(delivery_trip.get("delivery_stops")[0].notified_by_email, 0)
+			self.assertEqual(delivery_trip.get("delivery_stops")[0].notified_by_email, 0)
 
 def create_driver():
 	if not frappe.db.exists("Driver", "Newton Scmander"):
@@ -49,9 +49,9 @@ def create_driver():
 		driver.insert()
 
 def create_delivery_notfication():
-	if not frappe.db.exists("Standard Reply", "Delivery Notification"):
+	if not frappe.db.exists("Email Template", "Delivery Notification"):
 		frappe.get_doc({
-			'doctype': 'Standard Reply',
+			'doctype': 'Email Template',
 			'name': 'Delivery Notification',
 			'response': 'Test Delivery Trip',
 			'subject': 'Test Subject',

@@ -1,6 +1,0 @@
-# Tools
-
-
-### Topics
-
-{index}

@@ -50,6 +50,11 @@ def delete_for_doctype(doctype, company_name):
 					(select name from `tab{1}` where `{2}`=%s)""".format(df.options,
 						doctype, company_fieldname), company_name)
 
+		#delete version log
+		frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in
+			(select name from `tab{0}` where `{1}`=%s)""".format(doctype,
+				company_fieldname), (doctype, company_name))
+
 		# delete parent
 		frappe.db.sql("""delete from `tab{0}`
 			where {1}= %s """.format(doctype, company_fieldname), company_name)

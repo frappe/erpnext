@@ -12,6 +12,8 @@ from xml.etree import ElementTree as ET
 from frappe.utils.csvutils import read_csv_content
 import frappe
 
+from six import iteritems
+
 path = "/Users/nabinhait/projects/odoo/addons"
 
 accounts = {}
@@ -137,7 +139,7 @@ def get_account_types(root_list, csv_content, prefix=None):
 
 def make_maps_for_xml(xml_roots, account_types, country_dir):
 	"""make maps for `charts` and `accounts`"""
-	for model, root_list in xml_roots.iteritems():
+	for model, root_list in iteritems(xml_roots):
 		for root in root_list:
 			for node in root[0].findall("record"):
 				if node.get("model")=="account.account.template":
