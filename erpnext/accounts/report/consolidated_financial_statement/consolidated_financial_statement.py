@@ -47,9 +47,10 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
-	
+
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
-		companies, filters.get('company'), True)
+		companies, filters.get('company'), company_currency, True)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
 
