@@ -34,9 +34,21 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Subscription",
-					"label": _("Subscription"),
+					"name": "Auto Repeat",
+					"label": _("Auto Repeat"),
 					"description": _("To make recurring documents")
+				},
+				{
+					"type": "doctype",
+					"name": "Loyalty Program",
+					"label": _("Loyalty Program"),
+					"description": _("To make Customer based incentive schemes.")
+				},
+				{
+					"type": "doctype",
+					"name": "Loyalty Point Entry",
+					"label": _("Loyalty Point Entry"),
+					"description": _("To view logs of Loyalty Points assigned to a Customer.")
 				},
 				{
 					"type": "report",
@@ -128,6 +140,12 @@ def get_data():
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Consolidated Financial Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
 			]
 		},
 		{
@@ -181,6 +199,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Tax Rule",
 					"description": _("Tax Rule for transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Tax Withholding Category",
+					"description": _("Tax Withholding rates to be applied on transactions.")
 				},
 				{
 					"type": "report",
@@ -453,6 +476,62 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sales Payment Summary",
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Address And Contacts",
+					"doctype": "Address"
+				}
+			]
+		},
+		{
+			"label": _("Share Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Shareholder",
+					"description": _("List of available Shareholders with folio numbers")
+				},
+				{
+					"type": "doctype",
+					"name":"Share Transfer",
+					"description": _("List of all share transactions"),
+				},
+				{
+					"type": "report",
+					"name": "Share Ledger",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Share Balance",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				}
+			]
+		},
+		{
+			"label": _("Subscription Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Subscriber",
+				},
+				{
+					"type": "doctype",
+					"name":"Subscription Plan",
+				},
+				{
+					"type": "doctype",
+					"name":"Subscription"
+				},
+				{
+					"type": "doctype",
+					"name": "Subscription Settings"
 				}
 			]
 		},

@@ -1,3 +1,0 @@
-# Setup
-
-{index}

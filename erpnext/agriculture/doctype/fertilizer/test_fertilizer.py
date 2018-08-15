@@ -8,4 +8,4 @@ import unittest
 
 class TestFertilizer(unittest.TestCase):
 	def test_fertilizer_creation(self):
-		self.assertEquals(frappe.db.exists('Fertilizer', 'Urea'), 'Urea')
+		self.assertEqual(frappe.db.exists('Fertilizer', 'Urea'), 'Urea')

@@ -33,7 +33,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
 			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		if(!this.frm.doc.__islocal) {
@@ -75,6 +74,14 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	company_name: function() {
 		if (this.frm.doc.organization_lead == 1) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);
+		}
+	},
+
+	contact_date: function() {
+		if (this.frm.doc.contact_date) {
+			let d = moment(this.frm.doc.contact_date);
+			d.add(1, "hours");
+			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
 		}
 	}
 });

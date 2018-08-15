@@ -31,7 +31,7 @@ def execute():
 		sle_against_companies = frappe.db.sql_list("""select distinct company from `tabStock Ledger Entry`""")
 
 		if len(sle_against_companies) == 1:
-			company = frappe.db.get_value("Company", sle_against_companies[0], 
+			company = frappe.get_cached_value('Company',  sle_against_companies[0],  
 				fieldname=["name", "abbr"], as_dict=1)
 			set_company_to_warehouse(company.name)
 			make_warehouse_nestedset(company)

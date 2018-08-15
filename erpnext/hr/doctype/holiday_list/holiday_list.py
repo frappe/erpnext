@@ -13,6 +13,7 @@ class OverlapError(frappe.ValidationError): pass
 class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
+		self.total_holidays = len(self.holidays)
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
@@ -78,8 +79,7 @@ def get_events(start, end, filters=None):
 		filters.append(['Holiday', 'holiday_date', '>', getdate(start)])
 	if end:
 		filters.append(['Holiday', 'holiday_date', '<', getdate(end)])
-
 	return frappe.get_list('Holiday List',
-		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description'],
+		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
 		filters = filters,
 		update={"allDay": 1})

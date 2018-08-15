@@ -161,7 +161,7 @@ def _make_test_records(verbose):
 def get_inventory_account(company, warehouse=None):
 	account = None
 	if warehouse:
-		account = get_warehouse_account(warehouse, company)
+		account = get_warehouse_account(frappe.get_doc("Warehouse", warehouse))
 	else:
 		account = get_company_default_inventory_account(company)
 

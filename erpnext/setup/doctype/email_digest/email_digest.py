@@ -22,7 +22,7 @@ class EmailDigest(Document):
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
+		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
 	def get_users(self):
 		"""get list of users"""
@@ -53,17 +53,19 @@ class EmailDigest(Document):
 		if recipients:
 			for user_id in recipients:
 				frappe.set_user(user_id)
-				msg_for_this_receipient = self.get_msg_html()
-				if msg_for_this_receipient:
+				frappe.set_user_lang(user_id)
+				msg_for_this_recipient = self.get_msg_html()
+				if msg_for_this_recipient:
 					frappe.sendmail(
 						recipients=user_id,
-						subject=_("{frequency} Digest").format(frequency=self.frequency),
-						message=msg_for_this_receipient,
+						subject=_("{0} Digest").format(self.frequency),
+						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
 
 		frappe.set_user(original_user)
+		frappe.set_user_lang(original_user)
 
 	def get_msg_html(self):
 		"""Build email digest content"""

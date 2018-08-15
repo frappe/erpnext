@@ -14,8 +14,8 @@ class TestRequestforQuotation(unittest.TestCase):
 		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
 		rfq = make_request_for_quotation()
 
-		self.assertEquals(rfq.get('suppliers')[0].quote_status, 'Pending')
-		self.assertEquals(rfq.get('suppliers')[1].quote_status, 'Pending')
+		self.assertEqual(rfq.get('suppliers')[0].quote_status, 'Pending')
+		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'Pending')
 
 		# Submit the first supplier quotation
 		sq = make_supplier_quotation(rfq.name, rfq.get('suppliers')[0].supplier)
@@ -27,8 +27,8 @@ class TestRequestforQuotation(unittest.TestCase):
 
 		rfq.update_rfq_supplier_status() #rfq.get('suppliers')[1].supplier)
 
-		self.assertEquals(rfq.get('suppliers')[0].quote_status, 'Received')
-		self.assertEquals(rfq.get('suppliers')[1].quote_status, 'No Quote')
+		self.assertEqual(rfq.get('suppliers')[0].quote_status, 'Received')
+		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'No Quote')
 
 	def test_make_supplier_quotation(self):
 		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
@@ -40,15 +40,15 @@ class TestRequestforQuotation(unittest.TestCase):
 		sq1 = make_supplier_quotation(rfq.name, rfq.get('suppliers')[1].supplier)
 		sq1.submit()
 
-		self.assertEquals(sq.supplier, rfq.get('suppliers')[0].supplier)
-		self.assertEquals(sq.get('items')[0].request_for_quotation, rfq.name)
-		self.assertEquals(sq.get('items')[0].item_code, "_Test Item")
-		self.assertEquals(sq.get('items')[0].qty, 5)
+		self.assertEqual(sq.supplier, rfq.get('suppliers')[0].supplier)
+		self.assertEqual(sq.get('items')[0].request_for_quotation, rfq.name)
+		self.assertEqual(sq.get('items')[0].item_code, "_Test Item")
+		self.assertEqual(sq.get('items')[0].qty, 5)
 
-		self.assertEquals(sq1.supplier, rfq.get('suppliers')[1].supplier)
-		self.assertEquals(sq1.get('items')[0].request_for_quotation, rfq.name)
-		self.assertEquals(sq1.get('items')[0].item_code, "_Test Item")
-		self.assertEquals(sq1.get('items')[0].qty, 5)
+		self.assertEqual(sq1.supplier, rfq.get('suppliers')[1].supplier)
+		self.assertEqual(sq1.get('items')[0].request_for_quotation, rfq.name)
+		self.assertEqual(sq1.get('items')[0].item_code, "_Test Item")
+		self.assertEqual(sq1.get('items')[0].qty, 5)
 
 	def test_make_supplier_quotation_with_special_characters(self):
 		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
@@ -56,7 +56,7 @@ class TestRequestforQuotation(unittest.TestCase):
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = "_Test Supplier '1"
-		supplier.supplier_type = "_Test Supplier Type"
+		supplier.supplier_group = "_Test Supplier Group"
 		supplier.insert()
 
 		rfq = make_request_for_quotation(supplier_wt_appos)
@@ -84,11 +84,11 @@ class TestRequestforQuotation(unittest.TestCase):
 
 		supplier_quotation_doc = frappe.get_doc('Supplier Quotation', supplier_quotation_name)
 
-		self.assertEquals(supplier_quotation_doc.supplier, rfq.get('suppliers')[0].supplier)
-		self.assertEquals(supplier_quotation_doc.get('items')[0].request_for_quotation, rfq.name)
-		self.assertEquals(supplier_quotation_doc.get('items')[0].item_code, "_Test Item")
-		self.assertEquals(supplier_quotation_doc.get('items')[0].qty, 5)
-		self.assertEquals(supplier_quotation_doc.get('items')[0].amount, 500)
+		self.assertEqual(supplier_quotation_doc.supplier, rfq.get('suppliers')[0].supplier)
+		self.assertEqual(supplier_quotation_doc.get('items')[0].request_for_quotation, rfq.name)
+		self.assertEqual(supplier_quotation_doc.get('items')[0].item_code, "_Test Item")
+		self.assertEqual(supplier_quotation_doc.get('items')[0].qty, 5)
+		self.assertEqual(supplier_quotation_doc.get('items')[0].amount, 500)
 
 
 def make_request_for_quotation(supplier_data=None):

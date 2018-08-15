@@ -13,30 +13,32 @@ import frappe.utils
 class TestDailyWorkSummary(unittest.TestCase):
 	def test_email_trigger(self):
 		self.setup_and_prepare_test()
-		for d in self.employees:
-			# check that email is sent to this employee
-			self.assertTrue(d.user_id in [d.recipient for d in self.emails
-				if self.settings.subject in d.message])
+		for d in self.users:
+			# check that email is sent to users
+			if d.message:
+				self.assertTrue(d.email in [d.recipient for d in self.emails
+					if self.groups.subject in d.message])
 
 	def test_email_trigger_failed(self):
-		hour = '00'
-		if frappe.utils.nowtime().split(':')[0]=='00':
-			hour = '01'
+		hour = '00:00'
+		if frappe.utils.nowtime().split(':')[0] == '00':
+			hour = '01:00'
 
 		self.setup_and_prepare_test(hour)
 
-		for d in self.employees:
-			# check that email is sent to this employee
-			self.assertFalse(d.user_id in [d.recipient for d in self.emails
-				if self.settings.subject in d.message])
+		for d in self.users:
+			# check that email is not sent to users
+			self.assertFalse(d.email in [d.recipient for d in self.emails
+				if self.groups.subject in d.message])
 
 	def test_incoming(self):
 		# get test mail with message-id as in-reply-to
 		self.setup_and_prepare_test()
-
 		with open(os.path.join(os.path.dirname(__file__), "test_data", "test-reply.raw"), "r") as f:
-			test_mails = [f.read().replace('{{ sender }}', self.employees[-1].user_id)\
-				.replace('{{ message_id }}', self.emails[-1].message_id)]
+			if not self.emails: return
+			test_mails = [f.read().replace('{{ sender }}',
+			self.users[-1].email).replace('{{ message_id }}',
+			self.emails[-1].message_id)]
 
 		# pull the mail
 		email_account = frappe.get_doc("Email Account", "_Test Email Account 1")
@@ -55,30 +57,38 @@ class TestDailyWorkSummary(unittest.TestCase):
 		frappe.db.sql('delete from `tabEmail Queue`')
 		frappe.db.sql('delete from `tabEmail Queue Recipient`')
 		frappe.db.sql('delete from `tabCommunication`')
+		frappe.db.sql('delete from `tabDaily Work Summary Group`')
 
-		self.setup_settings(hour)
+		self.users = frappe.get_all('User',
+			fields=['email'],
+			filters=dict(email=('!=', 'test@example.com')))
+		self.setup_groups(hour)
 
-		from erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings \
+		from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group \
 			import trigger_emails
 		trigger_emails()
 
 		# check if emails are created
-		self.employees = frappe.get_all('Employee', fields = ['user_id'],
-			filters=dict(company='_Test Company', status='Active', user_id=('!=', 'test@example.com')))
 
-		self.emails = frappe.db.sql("""select r.recipient, q.message, q.message_id from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r where q.name = r.parent""", as_dict=1)
+		self.emails = frappe.db.sql("""select r.recipient, q.message, q.message_id \
+			from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r \
+			where q.name = r.parent""", as_dict=1)
 
 		frappe.db.commit()
 
-	def setup_settings(self, hour=None):
-		# setup email to trigger at this our
+	def setup_groups(self, hour=None):
+		# setup email to trigger at this hour
 		if not hour:
 			hour = frappe.utils.nowtime().split(':')[0]
-		self.settings = frappe.get_doc('Daily Work Summary Settings')
-		self.settings.companies = []
+			hour = hour+':00'
 
-		self.settings.append('companies', dict(company='_Test Company',
-			send_emails_at=hour + ':00'))
-		self.settings.test_subject = 'this is a subject for testing summary emails'
-		self.settings.save()
+		groups = frappe.get_doc(dict(doctype="Daily Work Summary Group",
+			name="Daily Work Summary",
+			users=self.users,
+			send_emails_at=hour,
+			subject="this is a subject for testing summary emails",
+			message='this is a message for testing summary emails'))
+		groups.insert()
 
+		self.groups = groups
+		self.groups.save()

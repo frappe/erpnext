@@ -1,9 +1,9 @@
 frappe.ui.form.on("Issue", {
-	"onload": function(frm) {
+	onload: function(frm) {
 		frm.email_field = "raised_by";
 	},
 
-	"refresh": function(frm) {
+	refresh: function(frm) {
 		if(frm.doc.status!=="Closed") {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
@@ -32,6 +32,40 @@ frappe.ui.form.on("Issue", {
 					doc.content = content;
 					frappe.set_route('Form', 'Help Article', doc.name);
 				});
+		}
+
+		if (!frm.timeline.wrapper.find('.btn-split-issue').length) {
+			let split_issue = __("Split Issue")
+			$(`<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs btn-split-issue pull-right" style="display:inline-block; margin-right: 15px">
+				${split_issue} 
+			</button>`)
+				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
+			if (!frm.timeline.wrapper.data("split-issue-event-attached")){
+				frm.timeline.wrapper.on('click', '.btn-split-issue', (e) => {
+					var dialog = new frappe.ui.Dialog({
+						title: __("Split Issue"),
+						fields: [
+							{fieldname: 'subject', fieldtype: 'Data', reqd:1, label: __('Subject'), description: __('All communications including and above this shall be moved into the new Issue')}
+						],
+						primary_action_label: __("Split"),
+						primary_action: function() {
+							frm.call("split_issue", {
+								subject: dialog.fields_dict.subject.value,
+								communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
+							}, (r) => {
+								let url = window.location.href
+								let arr = url.split("/");
+								let result = arr[0] + "//" + arr[2]
+								frappe.msgprint(`New issue created: <a href="${result}/desk#Form/Issue/${r.message}">${r.message}</a>`)
+								frm.reload_doc();
+								dialog.hide();
+							});
+						}
+					});
+					dialog.show()
+				})
+				frm.timeline.wrapper.data("split-issue-event-attached", true)
+			}
 		}
 	}
 });

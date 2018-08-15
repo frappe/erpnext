@@ -19,7 +19,7 @@ class TestWarehouse(unittest.TestCase):
 
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
-		self.assertEquals(parent_warehouse.is_group, 1)
+		self.assertEqual(parent_warehouse.is_group, 1)
 
 	def test_warehouse_hierarchy(self):
 		p_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
@@ -28,8 +28,8 @@ class TestWarehouse(unittest.TestCase):
 			where wh.lft > %s and wh.rgt < %s""", (p_warehouse.lft, p_warehouse.rgt), as_dict=1)
 
 		for child_warehouse in child_warehouses:
-			self.assertEquals(p_warehouse.name, child_warehouse.parent_warehouse)
-			self.assertEquals(child_warehouse.is_group, 0)
+			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
+			self.assertEqual(child_warehouse.is_group, 0)
 
 	def test_warehouse_renaming(self):
 		set_perpetual_inventory(1)

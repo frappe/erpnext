@@ -159,7 +159,7 @@ frappe.Leaderboard = Class.extend({
 					type: 'bar',
 					height: 140
 				};
-				new frappeChart.Chart('.leaderboard-graph', args);
+				new Chart('.leaderboard-graph', args);
 
 				notify(me, r, $container);
 			}

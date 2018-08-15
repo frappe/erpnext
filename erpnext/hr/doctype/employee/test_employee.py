@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 
 import frappe
+import erpnext
 import unittest
 import frappe.utils
 
@@ -32,3 +33,33 @@ class TestEmployee(unittest.TestCase):
 		self.assertTrue("Subject: Birthday Reminder for {0}".format(employee.employee_name) \
 			in email_queue[0].message)
 
+def make_employee(user):
+	if not frappe.db.get_value("User", user):
+		frappe.get_doc({
+			"doctype": "User",
+			"email": user,
+			"first_name": user,
+			"new_password": "password",
+			"roles": [{"doctype": "Has Role", "role": "Employee"}]
+		}).insert()
+
+	if not frappe.db.get_value("Employee", {"user_id": user}):
+		employee = frappe.get_doc({
+			"doctype": "Employee",
+			"naming_series": "EMP-",
+			"first_name": user,
+			"company": erpnext.get_default_company(),
+			"user_id": user,
+			"date_of_birth": "1990-05-08",
+			"date_of_joining": "2013-01-01",
+			"department": frappe.get_all("Department", fields="name")[0].name,
+			"gender": "Female",
+			"company_email": user,
+			"prefered_contact_email": "Company Email",
+			"prefered_email": user,
+			"status": "Active",
+			"employment_type": "Intern"
+		}).insert()
+		return employee.name
+	else:
+		return frappe.get_value("Employee", {"employee_name":user}, "name")

@@ -37,7 +37,6 @@ def invite_guardian(guardian):
 		frappe.throw(_("Please set Email Address"))
 	else:
 		guardian_as_user = frappe.get_value('User', dict(email=guardian_doc.email_address))
-		print guardian_as_user
 		if guardian_as_user:
 			frappe.msgprint(_("User {0} already exists").format(getlink("User", guardian_as_user)))
 			return guardian_as_user
