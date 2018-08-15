@@ -51,12 +51,12 @@ def work():
 	# get supplier details
 	supplier = get_random("Supplier")
 
-	company_currency = frappe.db.get_value("Company", "Wind Power LLC", "default_currency")
+	company_currency = frappe.get_cached_value('Company',  "Wind Power LLC",  "default_currency")
 	party_account_currency = get_party_account_currency("Supplier", supplier, "Wind Power LLC")
 	if company_currency == party_account_currency:
 		exchange_rate = 1
 	else:
-		exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+		exchange_rate = get_exchange_rate(party_account_currency, company_currency, args="for_buying")
 
 	# make supplier quotations
 	if random.random() < 0.2:
@@ -116,7 +116,7 @@ def make_material_request(item_code, qty):
 	return mr
 
 def add_suppliers(rfq):
-	for i in xrange(2):
+	for i in range(2):
 		supplier = get_random("Supplier")
 		if supplier not in [d.supplier for d in rfq.get('suppliers')]:
 			rfq.append("suppliers", { "supplier": supplier })

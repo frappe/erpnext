@@ -34,7 +34,7 @@ frappe.ui.form.on("Delivery Note", {
 
 		frm.set_query('transporter_name', function(doc) {
 			return {
-				filters: { 'supplier_type': "transporter" }
+				filters: { 'supplier_group': "transporter" }
 			}
 		});
 
@@ -66,11 +66,6 @@ frappe.ui.form.on("Delivery Note", {
 	},
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
-	},
-	on_submit: function(frm) {
-		if(cint(frappe.boot.notification_settings.delivery_note)) {
-			frm.email_doc(frappe.boot.notification_settings.delivery_note_message);
-		}
 	}
 });
 
@@ -101,6 +96,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Sales Return'), function() {
 					me.make_sales_return() }, __("Make"));
+			}
+
+			if (doc.docstatus==1) {
+				this.frm.add_custom_button(__('Delivery Trip'), function() {
+					me.make_delivery_trip() }, __("Make"));
 			}
 
 			if(doc.docstatus==0 && !doc.__islocal) {
@@ -167,7 +167,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
-		if(doc.docstatus==1 && !doc.subscription) {
+		if(doc.docstatus==1 && !doc.auto_repeat) {
 			cur_frm.add_custom_button(__('Subscription'), function() {
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __("Make"))
@@ -191,6 +191,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_sales_return: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
+			frm: this.frm
+		})
+	},
+
+	make_delivery_trip: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
 			frm: this.frm
 		})
 	},

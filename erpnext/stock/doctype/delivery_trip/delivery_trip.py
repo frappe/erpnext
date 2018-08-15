@@ -82,14 +82,6 @@ def get_contact_display(contact):
 	}
 	return contact_info.html
 
-
-@frappe.whitelist()
-def get_delivery_notes(customer):
-	return frappe.db.get_all("Delivery Note", filters={
-		'customer': customer,
-		'docstatus': 1
-	})
-
 @frappe.whitelist()
 def calculate_time_matrix(name):
 	"""Calucation and round in closest 15 minutes, delivery stops"""
@@ -149,7 +141,6 @@ def calculate_time_matrix(name):
 @frappe.whitelist()
 def notify_customers(docname, date, driver, vehicle, sender_email, delivery_notification):
 	sender_name = get_user_fullname(sender_email)
-	delivery_stops = frappe.get_all('Delivery Stop', {"parent": docname})
 	attachments = []
 
 	parent_doc = frappe.get_doc('Delivery Trip', docname)
@@ -162,23 +153,19 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 		args.update(delivery_stop.as_dict())
 		args.update(contact_info)
 
-		if delivery_stop.delivery_notes:
-			delivery_notes = (delivery_stop.delivery_notes).split(",")
+		if delivery_stop.delivery_note:
 			default_print_format = frappe.get_meta('Delivery Note').default_print_format
-			attachments = []
-			for delivery_note in delivery_notes:
-				attachments.append(
-					frappe.attach_print('Delivery Note',
-	 					 delivery_note,
-						 file_name="Delivery Note",
-						 print_format=default_print_format or "Standard"))
+			attachments = frappe.attach_print('Delivery Note',
+				delivery_stop.delivery_note,
+				file_name="Delivery Note",
+				print_format=default_print_format or "Standard")
 
 		if not delivery_stop.notified_by_email and contact_info.email_id:
 			driver_info = frappe.db.get_value("Driver", driver, ["full_name", "cell_number"], as_dict=1)
 			sender_designation = frappe.db.get_value("Employee", sender_email, ["designation"])
 
 			estimated_arrival = cstr(delivery_stop.estimated_arrival)[:-3]
-			email_template = frappe.get_doc("Standard Reply", delivery_notification)
+			email_template = frappe.get_doc("Email Template", delivery_notification)
 			message = frappe.render_template(email_template.response, args)
 
 			frappe.sendmail(

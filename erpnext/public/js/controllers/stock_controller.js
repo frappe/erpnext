@@ -73,7 +73,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
 					company: me.frm.doc.company,
-					group_by_voucher: false
+					group_by: ""
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));

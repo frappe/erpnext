@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, validate_email_add
+from frappe.utils import cint
 from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
@@ -14,7 +14,7 @@ class Warehouse(NestedSet):
 
 	def autoname(self):
 		if self.company:
-			suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
+			suffix = " - " + frappe.get_cached_value('Company',  self.company,  "abbr")
 			if not self.warehouse_name.endswith(suffix):
 				self.name = self.warehouse_name + suffix
 		else:
@@ -22,7 +22,7 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_warehouse_account(self.name, self.company)
+		account = self.account or get_warehouse_account(self)
 
 		if account:
 			self.set_onload('account', account)
@@ -87,7 +87,7 @@ class Warehouse(NestedSet):
 			self.recalculate_bin_qty(new_name)
 
 	def get_new_warehouse_name_without_abbr(self, name):
-		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
+		company_abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
 		parts = name.rsplit(" - ", 1)
 
 		if parts[-1].lower() == company_abbr.lower():
@@ -139,22 +139,23 @@ class Warehouse(NestedSet):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	from erpnext.stock.utils import get_stock_value_on
+	from erpnext.stock.utils import get_stock_value_from_bin
 
 	if is_root:
 		parent = ""
 
-	warehouses = frappe.db.sql("""select name as value,
-		is_group as expandable
-		from `tabWarehouse`
-		where docstatus < 2
-		and ifnull(`parent_warehouse`,'') = %s
-		and (`company` = %s or company is null or company = '')
-		order by name""", (parent, company), as_dict=1)
+	fields = ['name as value', 'is_group as expandable']
+	filters = [
+		['docstatus', '<', '2'],
+		['ifnull(`parent_warehouse`, "")', '=', parent],
+		['company', 'in', (company, None,'')]
+	]
+
+	warehouses = frappe.get_list(doctype, fields=fields, filters=filters, order_by='name')
 
 	# return warehouses
 	for wh in warehouses:
-		wh["balance"] = get_stock_value_on(warehouse=wh.value)
+		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
 	return warehouses
 
 @frappe.whitelist()

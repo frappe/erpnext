@@ -10,12 +10,12 @@ def execute():
 		frappe.db.sql("""delete from `tabCustom Field` where dt = %s
 			and fieldname in ('port_code', 'shipping_bill_number', 'shipping_bill_date')""", doctype)
 
-	make_custom_fields()
+	make_custom_fields(update=False)
 
 	frappe.db.sql("""
 		update `tabCustom Field`
 		set reqd = 0, `default` = ''
 		where fieldname = 'reason_for_issuing_document'
 	""")
-	
-	
+
+

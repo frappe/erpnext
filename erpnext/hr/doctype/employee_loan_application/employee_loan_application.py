@@ -29,8 +29,13 @@ class EmployeeLoanApplication(Document):
 		if self.repayment_method == "Repay Fixed Amount per Period":
 			monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
 			if monthly_interest_rate:
+				monthly_interest_amount = self.loan_amount * monthly_interest_rate
+				if monthly_interest_amount >= self.repayment_amount:
+					frappe.throw(_("Repayment amount {} should be greater than monthly interest amount {}").
+						format(self.repayment_amount, monthly_interest_amount))
+
 				self.repayment_periods = math.ceil((math.log(self.repayment_amount) - 
-					math.log(self.repayment_amount - (self.loan_amount*monthly_interest_rate))) /
+					math.log(self.repayment_amount - (monthly_interest_amount))) /
 					(math.log(1 + monthly_interest_rate)))
 			else:
 				self.repayment_periods = self.loan_amount / self.repayment_amount

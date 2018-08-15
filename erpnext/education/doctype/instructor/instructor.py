@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 
 class Instructor(Document):
 	def autoname(self):
@@ -15,10 +15,10 @@ class Instructor(Document):
 			frappe.throw(_("Please setup Instructor Naming System in Education > Education Settings"))
 		else:
 			if naming_method == 'Naming Series':
-				self.name = make_autoname(self.naming_series + '.####')
+				set_name_by_naming_series(self)
 			elif naming_method == 'Employee Number':
 				if not self.employee:
-					frappe.throw("Please select Employee")
+					frappe.throw(_("Please select Employee"))
 				self.name = self.employee
 			elif naming_method == 'Full Name':
 				self.name = self.instructor_name

@@ -103,7 +103,7 @@ class Quotation(SellingController):
 			print_lst.append(lst1)
 		return print_lst
 
-	def on_recurring(self, reference_doc, subscription_doc):
+	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
 
 def get_list_context(context=None):

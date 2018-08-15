@@ -60,3 +60,9 @@
 	<p><br><a href="/my-grant?new=1" class='btn btn-primary'>Post a New Grant</a></p>
 	{% endif %}
 {% endblock %}
+{% block style %}
+<link type="text/css" rel="stylesheet" href="/assets/css/non-profits.css">
+<style>
+{% if style is defined %}{{ style }}{% endif %}
+</style>
+{% endblock %}

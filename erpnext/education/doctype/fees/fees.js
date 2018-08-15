@@ -66,6 +66,9 @@ frappe.ui.form.on("Fees", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
+			frm.add_custom_button(__("Payments"), function() {
+				frappe.set_route("List", "Payment Entry", {"Payment Entry Reference.reference_name": frm.doc.name});
+			}, __("View"));
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount>0) {
 			frm.add_custom_button(__("Payment Request"), function() {

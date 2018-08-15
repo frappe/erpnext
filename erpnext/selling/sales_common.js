@@ -96,8 +96,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	customer: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null,
-			function(){ me.apply_pricing_rule() });
+		erpnext.utils.get_party_details(this.frm, null, null, function() {
+			me.apply_price_list();
+		});
 	},
 
 	customer_address: function() {
@@ -186,25 +187,32 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-
-		if(item.item_code && item.warehouse) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_bin_details_and_serial_nos",
-				child: item,
-				args: {
-					item_code: item.item_code,
-					warehouse: item.warehouse,
-					stock_qty: item.stock_qty,
-					serial_no: item.serial_no || ""
-				},
-				callback:function(r){
-					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-					    me.set_batch_number(cdt, cdn);
-						me.batch_no(doc, cdt, cdn);
-					}
-				}
-			});
+		if (item.serial_no && !item.batch_no) {
+			item.serial_no = null;
 		}
+		var has_batch_no;
+		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_batch_no', (r) => {
+			has_batch_no = r && r.has_batch_no;
+			if(item.item_code && item.warehouse) {
+				return this.frm.call({
+					method: "erpnext.stock.get_item_details.get_bin_details_and_serial_nos",
+					child: item,
+					args: {
+						item_code: item.item_code,
+						warehouse: item.warehouse,
+						has_batch_no: has_batch_no,
+						stock_qty: item.stock_qty,
+						serial_no: item.serial_no || "",
+					},
+					callback:function(r){
+						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+							me.set_batch_number(cdt, cdn);
+							me.batch_no(doc, cdt, cdn);
+						}
+					}
+				});
+			}
+		})
 	},
 
 	toggle_editable_price_list_rate: function() {
@@ -245,19 +253,25 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	batch_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-
-		if(item.warehouse && item.item_code && item.batch_no) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_batch_qty",
-				child: item,
-				args: {
-					"batch_no": item.batch_no,
-					"warehouse": item.warehouse,
-					"item_code": item.item_code
-				},
-				"fieldname": "actual_batch_qty"
-			});
-		}
+		item.serial_no = null;
+		var has_serial_no;
+		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_serial_no', (r) => {
+			has_serial_no = r && r.has_serial_no;
+			if(item.warehouse && item.item_code && item.batch_no) {
+				return this.frm.call({
+					method: "erpnext.stock.get_item_details.get_batch_qty_and_serial_no",
+					child: item,
+					args: {
+						"batch_no": item.batch_no,
+						"stock_qty": item.stock_qty,
+						"warehouse": item.warehouse,
+						"item_code": item.item_code,
+						"has_serial_no": has_serial_no
+					},
+					"fieldname": "actual_batch_qty"
+				});
+			}
+		})
 	},
 
 	set_dynamic_labels: function() {
@@ -348,7 +362,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
-	    this._super(doc, cdt, cdn);
+		this._super(doc, cdt, cdn);
 		this.set_batch_number(cdt, cdn);
 	},
 
@@ -376,6 +390,25 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		});
 	},
+
+	update_auto_repeat_reference: function(doc) {
+		if (doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{ 
+					docname: doc.auto_repeat,
+					reference:doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
+	}
 });
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {

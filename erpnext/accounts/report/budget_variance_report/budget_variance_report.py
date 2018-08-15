@@ -8,6 +8,8 @@ from frappe.utils import flt
 from frappe.utils import formatdate
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
+from six import iteritems
+
 def execute(filters=None):
 	if not filters: filters = {}
 	validate_filters(filters)
@@ -24,7 +26,7 @@ def execute(filters=None):
 	for cost_center in cost_centers:
 		cost_center_items = cam_map.get(cost_center)
 		if cost_center_items:
-			for account, monthwise_data in cost_center_items.items():
+			for account, monthwise_data in iteritems(cost_center_items):
 				row = [cost_center, account]
 				totals = [0, 0, 0]
 				for relevant_months in period_month_ranges:
@@ -115,7 +117,7 @@ def get_actual_details(name, filters):
 			and b.{budget_against} = gl.{budget_against}
 			and gl.fiscal_year=%s 
 			and b.{budget_against}=%s
-			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond})
+			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond}) group by gl.name
 	""".format(tab = filters.budget_against, budget_against = budget_against, cond = cond),
 	(filters.fiscal_year, name), as_dict=1)
 

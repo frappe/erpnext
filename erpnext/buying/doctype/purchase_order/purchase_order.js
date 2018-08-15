@@ -13,9 +13,6 @@ frappe.ui.form.on("Purchase Order", {
 			'Stock Entry': 'Material to Supplier'
 		}
 
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
 			return {
 				filters: {
@@ -24,10 +21,37 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			}
 		});
+
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+
+		frm.set_query("blanket_order", "items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"docstatus": 1
+				}
+			}
+		});
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Receive and Bill') {
+			frm.add_custom_button(__('Update Items'), () => {
+				erpnext.utils.update_child_items({
+					frm: frm,
+					child_docname: "items",
+					child_doctype: "Purchase Order Detail",
+				})
+			});
+		}
 	},
 
 	onload: function(frm) {
 		set_schedule_date(frm);
+		if (!frm.doc.transaction_date){
+			frm.set_value('transaction_date', frappe.datetime.get_today())
+		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
@@ -111,7 +135,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
@@ -206,7 +230,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		me.dialog = new frappe.ui.Dialog({
 			title: title, fields: fields
-			});
+		});
 
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {
@@ -448,12 +472,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 			['BOM', 'docstatus', '=', '1'],
 			['BOM', 'company', '=', doc.company]
 		]
-	}
-}
-
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_order)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
 	}
 }
 

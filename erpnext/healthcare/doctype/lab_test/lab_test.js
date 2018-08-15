@@ -30,7 +30,7 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 		if(frm.doc.__islocal){
-			frm.add_custom_button(__('Get from Consultation'), function () {
+			frm.add_custom_button(__('Get from Patient Encounter'), function () {
 				get_lab_test_prescribed(frm);
 			});
 		}
@@ -60,7 +60,7 @@ frappe.ui.form.on('Lab Test', {
 
 	},
 	onload: function (frm) {
-		frm.add_fetch("physician", "department", "department");
+		frm.add_fetch("practitioner", "department", "department");
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",
@@ -101,14 +101,14 @@ frappe.ui.form.on("Lab Test", "patient", function(frm) {
 
 frappe.ui.form.on('Normal Test Items', {
 	normal_test_items_remove: function() {
-		frappe.msgprint("Not permitted, configure Lab Test Template as required");
+		frappe.msgprint(__("Not permitted, configure Lab Test Template as required"));
 		cur_frm.reload_doc();
 	}
 });
 
 frappe.ui.form.on('Special Test Items', {
 	special_test_items_remove: function() {
-		frappe.msgprint("Not permitted, configure Lab Test Template as required");
+		frappe.msgprint(__("Not permitted, configure Lab Test Template as required"));
 		cur_frm.reload_doc();
 	}
 });
@@ -142,7 +142,7 @@ var get_lab_test_prescribed = function(frm){
 		});
 	}
 	else{
-		frappe.msgprint("Please select Patient to get Lab Tests");
+		frappe.msgprint(__("Please select Patient to get Lab Tests"));
 	}
 };
 
@@ -160,21 +160,21 @@ var show_lab_tests = function(frm, result){
 	$.each(result, function(x, y){
 		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
 		<div class="col-xs-2"> %(lab_test)s </div>\
-		<div class="col-xs-2"> %(consultation)s </div>\
-		<div class="col-xs-3"> %(physician)s </div>\
+		<div class="col-xs-2"> %(encounter)s </div>\
+		<div class="col-xs-3"> %(practitioner)s </div>\
 		<div class="col-xs-3"> %(date)s </div>\
 		<div class="col-xs-1">\
 		<a data-name="%(name)s" data-lab-test="%(lab_test)s"\
-		data-consultation="%(consultation)s" data-physician="%(physician)s"\
+		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
 		data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
-		</button></a></div></div>', {name:y[0], lab_test: y[1], consultation:y[2], invoice:y[3], physician:y[4], date:y[5]})).appendTo(html_field);
+		</button></a></div></div>', {name:y[0], lab_test: y[1], encounter:y[2], invoice:y[3], practitioner:y[4], date:y[5]})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.template = $(this).attr("data-lab-test");
 			frm.doc.prescription = $(this).attr("data-name");
-			frm.doc.physician = $(this).attr("data-physician");
+			frm.doc.practitioner = $(this).attr("data-practitioner");
 			frm.set_df_property("template", "read_only", 1);
 			frm.set_df_property("patient", "read_only", 1);
-			frm.set_df_property("physician", "read_only", 1);
+			frm.set_df_property("practitioner", "read_only", 1);
 			if($(this).attr("data-invoice") != 'null'){
 				frm.doc.invoice = $(this).attr("data-invoice");
 				refresh_field("invoice");
@@ -217,7 +217,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.normal_test_items){
 		for(let result in doc.normal_test_items){
 			if(!doc.normal_test_items[result].result_value	&&	doc.normal_test_items[result].require_result_value == 1){
-				frappe.msgprint("Please input all required Result Value(s)");
+				frappe.msgprint(__("Please input all required Result Value(s)"));
 				throw("Error");
 			}
 		}
@@ -225,7 +225,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.special_test_items){
 		for(let result in doc.special_test_items){
 			if(!doc.special_test_items[result].result_value	&&	doc.special_test_items[result].require_result_value == 1){
-				frappe.msgprint("Please input all required Result Value(s)");
+				frappe.msgprint(__("Please input all required Result Value(s)"));
 				throw("Error");
 			}
 		}

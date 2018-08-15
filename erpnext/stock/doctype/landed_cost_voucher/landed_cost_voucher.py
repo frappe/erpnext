@@ -46,10 +46,10 @@ class LandedCostVoucher(Document):
 		if not self.get("purchase_receipts"):
 			frappe.throw(_("Please enter Receipt Document"))
 
-		
+
 	def validate_purchase_receipts(self):
 		receipt_documents = []
-		
+
 		for d in self.get("purchase_receipts"):
 			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
 				frappe.throw(_("Receipt document must be submitted"))
@@ -72,16 +72,16 @@ class LandedCostVoucher(Document):
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
-		
+
 		total = sum([flt(d.get(based_on)) for d in self.get("items")])
-		
+
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
-		
+
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
-		currency=frappe.db.get_value("Company", self.company, "default_currency", cache=True))
+		currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
 
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)

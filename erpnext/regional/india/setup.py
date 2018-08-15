@@ -7,6 +7,8 @@ import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
+from erpnext.accounts.utils import get_fiscal_year
+from frappe.utils import today
 
 def setup(company=None, patch=True):
 	make_custom_fields()
@@ -16,7 +18,7 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	if not patch:
 		update_address_template()
-		make_fixtures()
+		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
@@ -81,7 +83,7 @@ def add_print_formats():
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('GST POS Invoice', 'GST Tax Invoice') """)
 
-def make_custom_fields():
+def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
@@ -113,10 +115,10 @@ def make_custom_fields():
 	purchase_invoice_gst_fields = [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
-				options='supplier_address.gstin', print_hide=1),
+				fetch_from='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
-				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address.gstin', print_hide=1),
+				fieldtype='Data', insert_after='shipping_address_display',
+				fetch_from='shipping_address.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
@@ -136,16 +138,16 @@ def make_custom_fields():
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
 				fieldtype='Data', insert_after='customer_address',
-				options='customer_address.gstin', print_hide=1),
+				fetch_from='customer_address.gstin', print_hide=1),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
-				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address_name.gstin', print_hide=1),
+				fieldtype='Data', insert_after='shipping_address_name',
+				fetch_from='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin',
 				print_hide=1, read_only=0),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				options='company_address.gstin', print_hide=1),
+				fetch_from='company_address.gstin', print_hide=1),
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' "),
@@ -156,6 +158,11 @@ def make_custom_fields():
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' ")
 		]
+
+	inter_state_gst_field = [
+		dict(fieldname='is_inter_state', label='Is Inter State',
+			fieldtype='Check', insert_after='disabled', print_hide=1)
+	]
 
 	custom_fields = {
 		'Address': [
@@ -168,7 +175,9 @@ def make_custom_fields():
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
 		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
-		"Delivery Note": sales_invoice_gst_fields,
+		'Delivery Note': sales_invoice_gst_fields,
+		'Sales Taxes and Charges Template': inter_state_gst_field,
+		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
@@ -180,20 +189,68 @@ def make_custom_fields():
 		'Sales Invoice Item': [hsn_sac_field],
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field]
+		'Purchase Invoice Item': [hsn_sac_field],
+		'Employee': [
+			dict(fieldname='ifsc_code', label='IFSC Code',
+				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
+				depends_on='eval:doc.salary_mode == "Bank"')
+		],
+		'Company': [
+			dict(fieldname='hra_section', label='HRA Settings',
+				fieldtype='Section Break', insert_after='asset_received_but_not_billed'),
+			dict(fieldname='basic_component', label='Basic Component',
+				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
+			dict(fieldname='hra_component', label='HRA Component',
+				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
+			dict(fieldname='arrear_component', label='Arrear Component',
+				fieldtype='Link', options='Salary Component', insert_after='hra_component')
+		],
+		'Employee Tax Exemption Declaration':[
+			dict(fieldname='hra_section', label='HRA Exemption',
+				fieldtype='Section Break', insert_after='declarations'),
+			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
+				fieldtype='Currency', insert_after='hra_section', read_only=1),
+			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
+				fieldtype='Currency', insert_after='salary_structure_hra'),
+			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
+				fieldtype='Check', insert_after='monthly_house_rent'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break',
+				insert_after='rented_in_metro_city'),
+			dict(fieldname='annual_hra_exemption', label='Annual HRA Exemption',
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+			dict(fieldname='monthly_hra_exemption', label='Monthly HRA Exemption',
+				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1)
+		],
+		'Employee Tax Exemption Proof Submission': [
+			dict(fieldname='hra_section', label='HRA Exemption',
+				fieldtype='Section Break', insert_after='tax_exemption_proofs'),
+			dict(fieldname='house_rent_payment_amount', label='House Rent Payment Amount',
+				fieldtype='Currency', insert_after='hra_section'),
+			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
+				fieldtype='Check', insert_after='house_rent_payment_amount'),
+			dict(fieldname='rented_from_date', label='Rented From Date',
+				fieldtype='Date', insert_after='rented_in_metro_city'),
+			dict(fieldname='rented_to_date', label='Rented To Date',
+				fieldtype='Date', insert_after='rented_from_date'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break',
+				insert_after='rented_to_date'),
+			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+			dict(fieldname='monthly_hra_exemption', label='Monthly Eligible Amount',
+				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1),
+			dict(fieldname='total_eligible_hra_exemption', label='Total Eligible HRA Exemption',
+				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1)
+		]
 	}
 
-	create_custom_fields(custom_fields)
+	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
 
-def make_fixtures():
-	docs = [
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
-	]
+def make_fixtures(company=None):
+	docs = []
+	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
+
+	set_salary_components(docs)
+	set_tds_account(docs, company)
 
 	for d in docs:
 		try:
@@ -202,3 +259,199 @@ def make_fixtures():
 			doc.insert()
 		except frappe.NameError:
 			pass
+		except frappe.DuplicateEntryError:
+			pass
+
+	# create records for Tax Withholding Category
+	set_tax_withholding_category(company)
+
+def set_salary_components(docs):
+	docs.extend([
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
+	])
+
+def set_tax_withholding_category(company):
+	accounts = []
+	abbr = frappe.get_value("Company", company, "abbr")
+	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
+
+	if company and tds_account:
+		accounts = [dict(company=company, account=tds_account)]
+
+	fiscal_year = get_fiscal_year(today(), company=accounts[0].get('company'))[0]
+	docs = get_tds_details(accounts, fiscal_year)
+
+	for d in docs:
+		try:
+			doc = frappe.get_doc(d)
+			doc.flags.ignore_permissions = True
+			doc.insert()
+		except frappe.DuplicateEntryError:
+			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
+			doc.append("accounts", accounts[0])
+
+			# if fiscal year don't match with any of the already entered data, append rate row
+			fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
+			if not fy_exist:
+				doc.append("rates", d.get('rates')[0])
+
+			doc.save()
+
+def set_tds_account(docs, company):
+	abbr = frappe.get_value("Company", company, "abbr")
+	docs.extend([
+		{
+			"doctype": "Account", "account_name": "TDS Payable", "account_type": "Tax",
+			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
+		}
+	])
+
+def get_tds_details(accounts, fiscal_year):
+	# bootstrap default tax withholding sections
+	return [
+		dict(name="TDS - 194C - Company",
+			category_name="Payment to Contractors (Single / Aggregate)",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
+			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+		dict(name="TDS - 194C - Individual",
+			category_name="Payment to Contractors (Single / Aggregate)",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
+			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+		dict(name="TDS - 194C - No PAN / Invalid PAN",
+			category_name="Payment to Contractors (Single / Aggregate)",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 30000, "cumulative_threshold": 100000}]),
+		dict(name="TDS - 194D - Company",
+			category_name="Insurance Commission",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194D - Company Assessee",
+			category_name="Insurance Commission",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194D - Individual",
+			category_name="Insurance Commission",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194D - No PAN / Invalid PAN",
+			category_name="Insurance Commission",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194DA - Company",
+			category_name="Non-exempt payments made under a life insurance policy",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
+			"single_threshold": 100000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194DA - Individual",
+			category_name="Non-exempt payments made under a life insurance policy",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 1,
+			"single_threshold": 100000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194DA - No PAN / Invalid PAN",
+			category_name="Non-exempt payments made under a life insurance policy",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 100000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194H - Company",
+			category_name="Commission / Brokerage",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194H - Individual",
+			category_name="Commission / Brokerage",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 5,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194H - No PAN / Invalid PAN",
+			category_name="Commission / Brokerage",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 15000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent - Company",
+			category_name="Rent",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent - Individual",
+			category_name="Rent",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent - No PAN / Invalid PAN",
+			category_name="Rent",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent/Machinery - Company",
+			category_name="Rent-Plant / Machinery",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent/Machinery - Individual",
+			category_name="Rent-Plant / Machinery",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 2,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194I - Rent/Machinery - No PAN / Invalid PAN",
+			category_name="Rent-Plant / Machinery",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 180000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Professional Fees - Company",
+			category_name="Professional Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 30000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Professional Fees - Individual",
+			category_name="Professional Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 30000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Professional Fees - No PAN / Invalid PAN",
+			category_name="Professional Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 30000, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Director Fees - Company",
+			category_name="Director Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 0, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Director Fees - Individual",
+			category_name="Director Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 0, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194J - Director Fees - No PAN / Invalid PAN",
+			category_name="Director Fees",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 0, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194 - Dividends - Company",
+			category_name="Dividends",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 2500, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194 - Dividends - Individual",
+			category_name="Dividends",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 10,
+			"single_threshold": 2500, "cumulative_threshold": 0}]),
+		dict(name="TDS - 194 - Dividends - No PAN / Invalid PAN",
+			category_name="Dividends",
+			doctype="Tax Withholding Category", accounts=accounts,
+			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
+			"single_threshold": 2500, "cumulative_threshold": 0}])
+	]
