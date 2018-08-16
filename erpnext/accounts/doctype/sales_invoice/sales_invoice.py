@@ -872,7 +872,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict({
 					"account": round_off_account,
 					"against": self.customer,
-					"credit_in_account_currency": self.rounding_adjustment,
+					"credit_in_account_currency": self.base_rounding_adjustment,
 					"credit": self.base_rounding_adjustment,
 					"cost_center": self.cost_center or round_off_cost_center,
 				}
