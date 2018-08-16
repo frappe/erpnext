@@ -12,6 +12,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
+from frappe.utils.html_utils import clean_html
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -26,6 +27,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def validate(self):
 		super(ItemGroup, self).validate()
+		self.description = clean_html(self.description)
 		self.make_route()
 
 	def on_update(self):
@@ -133,7 +135,8 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 			lft = ('>', item_group.lft),
 			rgt = ('<', item_group.rgt),
 		),
-		or_filters = search_filters)
+		or_filters = search_filters,
+		order_by = 'weightage desc, name asc')
 
 	return [get_item_for_list_in_html(r) for r in data]
 
