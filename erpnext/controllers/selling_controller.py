@@ -139,10 +139,11 @@ class SellingController(StockController):
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
-			discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
+			if d.item_code:
+				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-			if discount and flt(d.discount_percentage) > discount:
-				frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
+				if discount and flt(d.discount_percentage) > discount:
+					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):

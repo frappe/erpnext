@@ -7,6 +7,7 @@ import itertools
 import json
 import erpnext
 import frappe
+import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
         copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
@@ -308,8 +309,8 @@ class Item(WebsiteGenerator):
 			# load variants
 			# also used in set_attribute_context
 			context.variants = frappe.get_all("Item",
-                                     filters={"variant_of": self.name, "show_variant_in_website": 1},
-                                     order_by="name asc")
+                 filters={"variant_of": self.name, "show_variant_in_website": 1},
+                 order_by="name asc")
 
 			variant = frappe.form_dict.variant
 			if not variant and context.variants:
@@ -343,7 +344,8 @@ class Item(WebsiteGenerator):
 			# load attributes
 			for v in context.variants:
 				v.attributes = frappe.get_all("Item Variant Attribute",
-                                  fields=["attribute", "attribute_value"], filters={"parent": v.name})
+                      fields=["attribute", "attribute_value"],
+					  filters={"parent": v.name})
 
 				for attr in v.attributes:
 					values = attribute_values_available.setdefault(attr.attribute, [])
@@ -364,7 +366,8 @@ class Item(WebsiteGenerator):
 				else:
 					# get list of values defined (for sequence)
 					for attr_value in frappe.db.get_all("Item Attribute Value",
-                                         fields=["attribute_value"], filters={"parent": attr.attribute}, order_by="idx asc"):
+						fields=["attribute_value"],
+						filters={"parent": attr.attribute}, order_by="idx asc"):
 
 						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
 							values.append(attr_value.attribute_value)
@@ -440,7 +443,7 @@ class Item(WebsiteGenerator):
 			for d in template.get("reorder_levels"):
 				n = {}
 				for k in ("warehouse", "warehouse_reorder_level",
-                                        "warehouse_reorder_qty", "material_request_type"):
+					"warehouse_reorder_qty", "material_request_type"):
 					n[k] = d.get(k)
 				self.append("reorder_levels", n)
 
@@ -933,8 +936,9 @@ def get_item_defaults(item_code, company):
 
 	for d in item.item_defaults:
 		if d.company == company:
-			out.update(d.as_dict())
-
+			row = copy.deepcopy(d.as_dict())
+			row.pop("name")
+			out.update(row)
 	return out
 
 def set_item_default(item_code, company, fieldname, value):

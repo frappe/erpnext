@@ -139,11 +139,21 @@ def round_off_debit_credit(gl_map):
 
 def make_round_off_gle(gl_map, debit_credit_diff):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(gl_map[0].company)
-
+	round_off_account_exists = False
 	round_off_gle = frappe._dict()
-	for k in ["voucher_type", "voucher_no", "company",
-		"posting_date", "remarks", "is_opening"]:
-			round_off_gle[k] = gl_map[0][k]
+	for d in gl_map:
+		if d.account == round_off_account:
+			round_off_gle = d
+			if d.debit_in_account_currency:
+				debit_credit_diff -= flt(d.debit_in_account_currency)
+			else:
+				debit_credit_diff += flt(d.credit_in_account_currency)
+			round_off_account_exists = True
+
+	if not round_off_gle:
+		for k in ["voucher_type", "voucher_no", "company",
+			"posting_date", "remarks", "is_opening"]:
+				round_off_gle[k] = gl_map[0][k]
 
 	round_off_gle.update({
 		"account": round_off_account,
@@ -158,7 +168,8 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 		"against_voucher": None
 	})
 
-	gl_map.append(round_off_gle)
+	if not round_off_account_exists:
+		gl_map.append(round_off_gle)
 
 def get_round_off_account_and_cost_center(company):
 	round_off_account, round_off_cost_center = frappe.get_cached_value('Company',  company,
