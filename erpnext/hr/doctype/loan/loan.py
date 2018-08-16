@@ -117,11 +117,11 @@ def update_disbursement_status(doc):
 	if disbursement.disbursed_amount > 0:
 		frappe.db.set_value("Loan", doc.name , "disbursement_date", disbursement.posting_date)
 		frappe.db.set_value("Loan", doc.name , "repayment_start_date", disbursement.posting_date)
-	
+
 def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
 		frappe.throw(_("Please enter Repayment Periods"))
-		
+
 	if repayment_method == "Repay Fixed Amount per Period":
 		if not monthly_repayment_amount:
 			frappe.throw(_("Please enter repayment Amount"))
@@ -148,7 +148,7 @@ def get_loan_application(loan_application):
 def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_type, applicant, \
 	payment_account=None, interest_income_account=None):
 
-	if isinstance(payment_rows, basestring):
+	if isinstance(payment_rows, frappe.string_types):
 		payment_rows_list = json.loads(payment_rows)
 	else:
 		frappe.throw(_("No repayments available for Journal Entry"))
