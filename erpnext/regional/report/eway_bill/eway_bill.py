@@ -18,7 +18,8 @@ def execute(filters=None):
 def get_data(filters):
 	
 	conditions = get_conditions(filters)
-
+	company = frappe.get_all('Company', filters = {'country': 'India'})
+	if not company: return
 	data = frappe.db.sql("""
 		SELECT
 			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.transport_mode, dn.distance, dn.transporter_name, dn.transporter, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.vehicle_type, dn.company_address, dn.shipping_address_name
