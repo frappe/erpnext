@@ -178,7 +178,7 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	if isinstance(args, frappe.string_types):
+	if isinstance(args, string_types):
 		variants = json.loads(args)
 	total_variants = 1
 	for key in variants:
