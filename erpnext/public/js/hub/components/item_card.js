@@ -15,11 +15,16 @@ function get_item_card_html(item) {
 	let dot_spacer = '<span aria-hidden="true"> · </span>';
 	subtitle = subtitle.join(dot_spacer);
 
+	// route
+	if (!item.route) {
+		item.route = `marketplace/item/${item.hub_item_code}`
+	}
+
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6">
 			<div class="hub-card"
 				data-hub-item-code="${item.hub_item_code}"
-				data-route="marketplace/item/${item.hub_item_code}">
+				data-route="${item.route}">
 
 				<div class="hub-card-header level">
 					<div class="ellipsis">
