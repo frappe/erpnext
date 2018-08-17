@@ -105,6 +105,18 @@ erpnext.hub.Item = class Item extends SubPage {
 			],
 			primary_action: ({ message }) => {
 				if (!message) return;
+
+				hub.call('send_message', {
+                    from_seller: hub.settings.company_email,
+					to_seller: this.item.hub_seller,
+					hub_item: this.item.hub_item_code,
+                    message
+				})
+				.then(() => {
+					d.hide();
+					frappe.set_route('marketplace', 'messages');
+					erpnext.hub.trigger('action:send_message')
+				});
 			}
 		});
 

@@ -33,6 +33,12 @@ function get_detail_view_html(item, allow_edit) {
 			${__('Saved')}
 		</button>`;
 
+	const contact_seller_button = item.hub_seller !== hub.settings.company_email
+		? `<button class="btn btn-primary" data-action="contact_seller">
+			${__('Contact Seller')}
+		</button>`
+		: '';
+
 	let menu_items = '';
 
 	if(allow_edit) {
@@ -69,9 +75,7 @@ function get_detail_view_html(item, allow_edit) {
 
 					<div class="page-actions detail-page-actions">
 						${favourite_button}
-						<button class="btn btn-primary" data-action="contact_seller">
-							${__('Contact Seller')}
-						</button>
+						${contact_seller_button}
 					</div>
 				</div>
 				<div class="col-md-1">
