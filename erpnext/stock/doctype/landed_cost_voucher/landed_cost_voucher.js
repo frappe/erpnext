@@ -65,6 +65,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
 	},
 
+	before_submit: function() {
+		this.validate_manual_distribution_totals();
+	},
+
 	refresh: function(doc) {
 		this.show_general_ledger();
 
@@ -74,6 +78,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 
 		this.hide_unhide_fields();
+		this.load_manual_distribution_data();
+		this.update_manual_distribution();
 
 		var help_content =
 			`<br><br>
@@ -145,11 +151,12 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		if(!this.frm.doc.purchase_receipts.length) {
 			frappe.msgprint(__("Please enter Purchase Receipt first"));
 		} else {
-			return this.frm.call({
+			return me.frm.call({
 				doc: me.frm.doc,
 				method: "get_items_from_purchase_receipts",
 				callback: function() {
-					me.refresh_field("items");
+					me.frm.refresh_field("items");
+					me.update_manual_distribution();
 				}
 			});
 		}
@@ -188,37 +195,227 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			});
 
 			var charges_map = [];
-			$.each(me.frm.doc.taxes || [], function(iTax, tax) {
-				charges_map[iTax] = [];
+			var manual_account_heads = new Set;
+			var idx = 0;
+			$.each(me.frm.doc.taxes || [], function(i, tax) {
 				var based_on = tax.distribution_criteria.toLowerCase();
 
-				if (!totals[based_on])
-					frappe.throw(__("Cannot distribute by {0} because total {1} is 0", [based_on, based_on]));
+				if (based_on == "manual") {
+					manual_account_heads.add(tax.account_head);
+				} else {
+					if(!totals[based_on]) {
+						frappe.throw(__("Cannot distribute by {0} because total {1} is 0", [based_on, based_on]));
+					}
 
-				$.each(me.frm.doc.items || [], function(iItem, item) {
-					charges_map[iTax][iItem] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
-					if (!item[based_on])
-						frappe.msgprint(__("Item #{0} has 0 {1}", [iItem+1, based_on]))
-				});
+					charges_map[idx] = [];
+					$.each(me.frm.doc.items || [], function(iItem, item) {
+						charges_map[idx][iItem] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
+						if(!item[based_on])
+							frappe.msgprint(__("Item #{0} has 0 {1}", [item.idx, based_on]))
+					});
+					++idx;
+				}
 			});
+
+			if(manual_account_heads.size)
+				me.validate_manual_distribution_totals();
 
 			var accumulated_taxes = 0.0;
 			$.each(me.frm.doc.items || [], function(iItem, item) {
 				var item_total_tax = 0.0;
-				for (var iTax = 0; iTax < me.frm.doc.taxes.length; ++iTax) {
-					item_total_tax += charges_map[iTax][iItem];
+				for (var i = 0; i < charges_map.length; ++i) {
+					item_total_tax += charges_map[i][iItem];
 				}
+
+				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
+					if(manual_account_heads.has(account_head)) {
+						item_total_tax += flt(item.manual_distribution_data[account_head]);
+					}
+				});
 
 				item.applicable_charges = flt(item_total_tax, precision("applicable_charges", item));
 				accumulated_taxes += item.applicable_charges;
 			});
 
-			if (accumulated_taxes != me.frm.doc.total_taxes_and_charges) {
+			/*if (accumulated_taxes != me.frm.doc.total_taxes_and_charges) {
 				var diff = me.frm.doc.total_taxes_and_charges - flt(accumulated_taxes);
 				me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
-			}
+			}*/
 
 			refresh_field("items");
+		}
+	},
+
+	validate_manual_distribution_totals: function() {
+		var me = this;
+		var tax_account_totals = {};
+		var item_totals = {};
+
+		$.each(me.frm.doc.taxes || [], function(i, tax) {
+			if(tax.distribution_criteria == "Manual" && tax.account_head) {
+				if(!tax_account_totals.hasOwnProperty(tax.account_head)) {
+					tax_account_totals[tax.account_head] = 0.0;
+					item_totals[tax.account_head] = 0.0;
+				}
+				tax_account_totals[tax.account_head] += flt(tax.amount);
+			}
+		});
+
+		$.each(me.frm.doc.items || [], function(i, item) {
+			if(item.item_code) {
+				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
+					if(item_totals.hasOwnProperty(account_head)) {
+						item_totals[account_head] += flt(item.manual_distribution_data[account_head]);
+					}
+				});
+			}
+		});
+		Object.keys(tax_account_totals).forEach(function(account_head) {
+			var currency = erpnext.get_currency(me.frm.doc.company);
+			var digits = precision("total_taxes_and_charges");
+			var diff = flt(tax_account_totals[account_head]) - flt(item_totals[account_head]);
+			diff = flt(diff, digits);
+
+			if(Math.abs(diff) < (2.0 / (10**digits))) {
+				var last = me.frm.doc.items.length - 1;
+				me.frm.doc.items[last].manual_distribution_data[account_head] += diff;
+				me.frm.doc.items[last].manual_distribution = JSON.stringify(me.frm.doc.items[last].manual_distribution_data);
+				me.frm.get_field("items").grid.grid_rows[last].refresh_field("manual_distribution");
+			}
+			else {
+				frappe.msgprint(__("Tax amount for {} ({}) does not match the total in the manual distribution table ({})",
+					[account_head, format_currency(tax_account_totals[account_head], currency, precision), format_currency(item_totals[account_head], currency, precision)]));
+				frappe.validated = false;
+			}
+		});
+	},
+
+	distribution_criteria: function() {
+		this.update_manual_distribution();
+	},
+	account_head: function() {
+		this.update_manual_distribution();
+	},
+	taxes_add: function() {
+		this.update_manual_distribution();
+	},
+	taxes_remove: function() {
+		this.update_manual_distribution();
+	},
+	taxes_move: function() {
+		this.update_manual_distribution();
+	},
+	items_add: function() {
+		this.update_manual_distribution();
+	},
+	items_remove: function() {
+		this.update_manual_distribution();
+	},
+	items_move: function() {
+		this.update_manual_distribution();
+	},
+
+	load_manual_distribution_data: function() {
+		$.each(me.frm.doc.items || [], function(i, item) {
+			item.manual_distribution_data = JSON.parse(item.manual_distribution || "{}");
+		});
+	},
+
+	update_manual_distribution: function() {
+		var me = this;
+
+		//Get manual tax account heads
+		var manual_taxes_cols = new Set;
+		$.each(me.frm.doc.taxes || [], function(i, tax) {
+			if(tax.distribution_criteria == "Manual" && tax.account_head) {
+				manual_taxes_cols.add(tax.account_head);
+			}
+		});
+
+		//Make sure values are set in item.manual_distribution_data
+		$.each(me.frm.doc.items || [], function(i, item) {
+			if (manual_taxes_cols.size == 0) {
+				item.manual_distribution_data = {};
+			} else {
+				manual_taxes_cols.forEach(function(account_head) {
+					if(!item.manual_distribution_data)
+						item.manual_distribution_data = {};
+					if(!item.manual_distribution_data.hasOwnProperty(account_head)) {
+						item.manual_distribution_data[account_head] = 0.0;
+					}
+				});
+			}
+		});
+
+		//Get distribution data from items
+		var account_heads = Array.from(manual_taxes_cols);
+		var rows = [];
+		var items = [];
+		var row_totals = [];
+		var col_totals = [];
+		$.each(me.frm.doc.items || [], function(i, item) {
+			if(item.item_code)
+			{
+				items[i] = item.item_code;
+				row_totals[i] = 0.0;
+
+				var rowdata = [];
+				$.each(account_heads || [], function(j, account_head) {
+					if(j >= col_totals.length)
+						col_totals[j] = 0.0;
+
+					rowdata[j] = item.manual_distribution_data[account_head];
+					row_totals[i] += flt(rowdata[j]);
+					col_totals[j] += flt(rowdata[j]);
+
+					if(!rowdata[j])
+						rowdata[j] = "";
+				});
+				rows[i] = rowdata;
+			}
+		});
+
+		var editable = me.frm.doc.docstatus == 0;
+
+		//Set table HTML
+		if(account_heads.length == 0) {
+			$(me.frm.fields_dict.manual_tax_distribution.wrapper).html("");
+		} else {
+			var html = frappe.render_template('lcv_manual_distribution', {
+				account_heads: account_heads, rows: rows, items: items, row_totals: row_totals, col_totals: col_totals,
+				editable: editable
+			});
+			$(me.frm.fields_dict.manual_tax_distribution.wrapper).html(html);
+		}
+
+		//Listen for changes
+		if(editable) {
+			$("input", me.frm.fields_dict.manual_tax_distribution.wrapper).change(function() {
+				var row = $(this).data("row");
+				var account = $(this).data("account");
+				var row_total = 0.0;
+				var col_total = 0.0;
+
+				var val = flt($(this).val(), precision("applicable_charges", me.frm.doc.items[row]));
+				me.frm.doc.items[row].manual_distribution_data[account] = val;
+				me.frm.doc.items[row].manual_distribution = JSON.stringify(me.frm.doc.items[row].manual_distribution_data);
+				me.frm.get_field("items").grid.grid_rows[row].refresh_field("manual_distribution");
+				me.frm.dirty();
+
+				if(!val)
+					val = "";
+				$(this).val(val);
+
+				$("input[data-row=" + row + "]", me.frm.fields_dict.manual_tax_distribution.wrapper).each(function() {
+					col_total += flt($(this).val());
+				});
+				$("td[data-row=" + row + "][data-account=total]", me.frm.fields_dict.manual_tax_distribution.wrapper).text(col_total);
+
+				$("input[data-account='" + account + "']", me.frm.fields_dict.manual_tax_distribution.wrapper).each(function() {
+					row_total += flt($(this).val());
+				});
+				$("td[data-row=total][data-account='" + account + "']", me.frm.fields_dict.manual_tax_distribution.wrapper).text(row_total);
+			});
 		}
 	},
 

@@ -69,12 +69,11 @@ class LandedCostVoucher(AccountsController):
 		self.validate_purchase_receipts()
 		self.set_values_for_import_bill()
 		self.set_total_taxes_and_charges()
-		if not self.get("items"):
-			self.get_items_from_purchase_receipts()
-		else:
-			self.validate_applicable_charges_for_item()
 		self.set_status()
 		self.set_title()
+
+	def before_submit(self):
+		self.validate_applicable_charges_for_item()
 
 	def set_values_for_import_bill(self):
 		if cint(self.is_import_bill):
@@ -118,7 +117,7 @@ class LandedCostVoucher(AccountsController):
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
-		currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
+			currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
 
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
