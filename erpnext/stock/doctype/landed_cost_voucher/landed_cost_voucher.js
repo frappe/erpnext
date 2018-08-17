@@ -67,6 +67,17 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	before_submit: function() {
 		this.validate_manual_distribution_totals();
+
+		var manual_taxes_cols = new Set;
+		$.each(me.frm.doc.taxes || [], function(i, tax) {
+			if(tax.distribution_criteria == "Manual" && tax.account_head) {
+				manual_taxes_cols.add(tax.account_head);
+			}
+		});
+	},
+
+	validate: function() {
+		this.update_manual_distribution_json();
 	},
 
 	refresh: function(doc) {
@@ -279,8 +290,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			if(Math.abs(diff) < (2.0 / (10**digits))) {
 				var last = me.frm.doc.items.length - 1;
 				me.frm.doc.items[last].manual_distribution_data[account_head] += diff;
-				me.frm.doc.items[last].manual_distribution = JSON.stringify(me.frm.doc.items[last].manual_distribution_data);
-				me.frm.get_field("items").grid.grid_rows[last].refresh_field("manual_distribution");
+				me.update_item_manual_distribution_json(last);
 			}
 			else {
 				frappe.msgprint(__("Tax amount for {} ({}) does not match the total in the manual distribution table ({})",
@@ -319,6 +329,34 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		$.each(me.frm.doc.items || [], function(i, item) {
 			item.manual_distribution_data = JSON.parse(item.manual_distribution || "{}");
 		});
+	},
+
+	update_manual_distribution_json: function() {
+		var me = this;
+		$.each(me.frm.doc.items || [], function(i, item) {
+			me.update_item_manual_distribution_json(i);
+		});
+	},
+
+	update_item_manual_distribution_json: function(iItem) {
+		//Get manual tax account heads
+		var manual_taxes_cols = new Set;
+		$.each(this.frm.doc.taxes || [], function(i, tax) {
+			if(tax.distribution_criteria == "Manual" && tax.account_head) {
+				manual_taxes_cols.add(tax.account_head);
+			}
+		});
+
+		//Remove tax amounts for taxes not in manual tax set
+		var item = this.frm.doc.items[iItem];
+		var data = Object.assign({}, item.manual_distribution_data || {});
+		Object.keys(data).forEach(function(account_head) {
+			if(!manual_taxes_cols.has(account_head))
+				delete data[account_head];
+		});
+
+		item.manual_distribution = JSON.stringify(data);
+		this.frm.get_field("items").grid.grid_rows[iItem].refresh_field("manual_distribution");
 	},
 
 	update_manual_distribution: function() {
@@ -398,8 +436,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 				var val = flt($(this).val(), precision("applicable_charges", me.frm.doc.items[row]));
 				me.frm.doc.items[row].manual_distribution_data[account] = val;
-				me.frm.doc.items[row].manual_distribution = JSON.stringify(me.frm.doc.items[row].manual_distribution_data);
-				me.frm.get_field("items").grid.grid_rows[row].refresh_field("manual_distribution");
+				me.update_item_manual_distribution_json(row);
 				me.frm.dirty();
 
 				if(!val)
