@@ -20,7 +20,7 @@ erpnext.hub.Home = class Home extends SubPage {
 	}
 
 	get_items_and_render() {
-		this.$wrapper.find('.hub-card-container').empty();
+		this.$wrapper.find('.hub-items-container').empty();
 		this.get_data()
 			.then(data => {
 				this.render(data);
