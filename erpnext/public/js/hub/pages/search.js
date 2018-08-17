@@ -27,8 +27,13 @@ erpnext.hub.SearchPage = class SearchPage extends SubPage {
 	}
 
 	render(items) {
-		this.$wrapper.find('.hub-card-container').remove();
-		const title = this.keyword ? __('Search results for "{0}"', [this.keyword]) : '';
+		this.$wrapper.find('.hub-items-container').remove();
+		const title = !items.length
+			? __('No results found')
+			: this.keyword
+				? __('Search results for "{0}"', [this.keyword])
+				: '';
+
 		const html = get_item_card_container_html(items, title);
 		this.$wrapper.append(html);
 	}

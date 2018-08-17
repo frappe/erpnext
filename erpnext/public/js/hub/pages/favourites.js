@@ -32,11 +32,20 @@ erpnext.hub.Favourites = class Favourites extends SubPage {
 	}
 
 	render(items) {
-		this.$wrapper.find('.hub-card-container').empty();
+		this.$wrapper.find('.hub-items-container').empty();
 		const html = get_item_card_container_html(items, __('Favourites'));
-		this.$wrapper.append(html);
-
+		this.$wrapper.html(html);
 		this.$wrapper.find('.hub-card').addClass('closable');
+
+		if (!items.length) {
+			this.render_empty_state();
+		}
+	}
+
+	render_empty_state() {
+		this.$wrapper.find('.hub-items-container').append(`
+			<div class="col-md-12">${__("You don't have any favourites yet.")}</div>
+		`)
 	}
 
 	on_item_remove(hub_item_code, $hub_card = '') {
