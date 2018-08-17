@@ -3,7 +3,7 @@ import { get_item_card_container_html } from '../components/items_container';
 
 erpnext.hub.PublishedProducts = class PublishedProducts extends SubPage {
 	get_items_and_render() {
-		this.$wrapper.find('.hub-card-container').empty();
+		this.$wrapper.find('.hub-items-container').empty();
 		this.get_published_products()
 			.then(items => this.render(items));
 	}

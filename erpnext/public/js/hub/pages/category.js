@@ -11,7 +11,7 @@ erpnext.hub.Category = class Category extends SubPage {
 	}
 
 	get_items_for_category(category) {
-		this.$wrapper.find('.hub-card-container').empty();
+		this.$wrapper.find('.hub-items-container').empty();
 		return hub.call('get_items', {
 			filters: {
 				hub_category: category
