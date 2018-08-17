@@ -14,9 +14,12 @@ import './pages/not_found';
 
 // helpers
 import './hub_call';
+import EventEmitter from './event_emitter';
 
 frappe.provide('hub');
 frappe.provide('erpnext.hub');
+
+$.extend(erpnext.hub, EventEmitter.prototype);
 
 erpnext.hub.Marketplace = class Marketplace {
 	constructor({ parent }) {
