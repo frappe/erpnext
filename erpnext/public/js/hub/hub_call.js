@@ -2,7 +2,7 @@ frappe.provide('hub');
 frappe.provide('erpnext.hub');
 
 erpnext.hub.cache = {};
-hub.call = function call_hub_method(method, args={}) {
+hub.call = function call_hub_method(method, args={}, setup_cache_invalidation = invalidate_after_5_mins) {
 	return new Promise((resolve, reject) => {
 
 		// cache
@@ -11,12 +11,9 @@ hub.call = function call_hub_method(method, args={}) {
 			resolve(erpnext.hub.cache[key]);
 		}
 
-		// cache invalidation after 5 minutes
-		const timeout = 5 * 60 * 1000;
-
-		setTimeout(() => {
-			delete erpnext.hub.cache[key];
-		}, timeout);
+		// cache invalidation
+		const clear_cache = () => delete erpnext.hub.cache[key];
+		setup_cache_invalidation(clear_cache);
 
 		frappe.call({
 			method: 'erpnext.hub_node.api.call_hub_method',
@@ -41,4 +38,13 @@ hub.call = function call_hub_method(method, args={}) {
 		})
 		.fail(reject)
 	});
+}
+
+function invalidate_after_5_mins(clear_cache) {
+	// cache invalidation after 5 minutes
+	const timeout = 5 * 60 * 1000;
+
+	setTimeout(() => {
+		clear_cache();
+	}, timeout);
 }

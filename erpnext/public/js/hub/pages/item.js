@@ -79,9 +79,10 @@ erpnext.hub.Item = class Item extends SubPage {
 		.then(() => {
 			$(favourite_button).html('Saved');
 			frappe.show_alert(__('Saved to <b><a href="#marketplace/favourites">Favourites</a></b>'));
+			erpnext.hub.trigger('action:item_favourite');
 		})
 		.catch(e => {
-			console.log(e);
+			console.error(e);
 		});
 	}
 
