@@ -750,7 +750,7 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}".format(pi)))
 
 	def update_billing_status_in_pr(self, update_modified=True):
-		update_billed_amount_based_on_pr(self, "pr_detail", "purchase_receipt", "po_detail", update_modified)
+		update_billed_amount_based_on_pr(self, "pr_detail", "po_detail", update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None

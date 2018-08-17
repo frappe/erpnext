@@ -33,7 +33,7 @@ class LandedCostVoucher(AccountsController):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
-				if pr.receipt_document_type == "Purchase Invoice Item":
+				if pr.receipt_document_type == "Purchase Invoice":
 					po_detail_field = "po_detail"
 				else:
 					po_detail_field = "purchase_order_item"
@@ -56,11 +56,14 @@ class LandedCostVoucher(AccountsController):
 					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
 					item.amount = d.base_amount
 					item.billable_amt = d.amount
-					item.receipt_document_type = pr.receipt_document_type
-					item.receipt_document = pr.receipt_document
-					item.purchase_receipt_item = d.name
-					item.purchase_order_item = d.get(po_detail_field)
 					item.purchase_order = d.purchase_order
+					item.purchase_order_item = d.get(po_detail_field)
+					if pr.receipt_document_type == "Purchase Receipt":
+						item.purchase_receipt = pr.receipt_document
+						item.purchase_receipt_item = d.name
+					elif pr.receipt_document_type == "Purchase Invoice":
+						item.purchase_invoice = pr.receipt_document
+						item.purchase_invoice_item = d.name
 
 	def validate(self):
 		super(LandedCostVoucher, self).validate()
@@ -99,19 +102,25 @@ class LandedCostVoucher(AccountsController):
 				receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
-			if not item.receipt_document or not item.purchase_receipt_item or (not item.billable_amt and cint(item.is_import_bill)):
+			if (not item.purchase_receipt and not item.purchase_invoice) \
+					or (item.purchase_receipt and item.purchase_invoice) \
+					or (not item.purchase_receipt_item and not item.purchase_invoice_item) \
+					or (item.purchase_receipt_item and item.purchase_invoice_item) \
+					or (not item.billable_amt and cint(item.is_import_bill)):
 				frappe.throw(_("Item must be added using 'Get Items from Purchase Receipts' button"))
-			elif item.receipt_document not in receipt_documents:
-				frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
-					.format(idx=item.idx, doctype=item.receipt_document_type, docname=item.receipt_document))
+
+			if item.purchase_receipt:
+				if item.purchase_receipt not in receipt_documents:
+					frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
+						.format(idx=item.idx, doctype="Purchase Receipt", docname=item.purchase_receipt))
+			elif item.purchase_invoice:
+				if item.purchase_invoice not in receipt_documents:
+					frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
+						.format(idx=item.idx, doctype="Purchase Invoice", docname=item.purchase_invoice))
 
 			if not item.cost_center:
-				frappe.throw(_("Row {0}: Cost center is required for an item {1}")
+				frappe.throw(_("Item Row {0}: Cost center is not set for item {1}")
 					.format(item.idx, item.item_code))
-
-	def set_total_taxes_and_charges(self):
-		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
-		self.outstanding_amount = 0.0 if cint(self.is_import_bill) else self.total_taxes_and_charges
 
 	def validate_applicable_charges_for_item(self):
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
@@ -126,6 +135,26 @@ class LandedCostVoucher(AccountsController):
 			self.items[-1].applicable_charges += diff
 		else:
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
+
+	def validate_credit_to_account(self):
+		account = frappe.db.get_value("Account", self.credit_to,
+			["account_type", "report_type"], as_dict=True)
+
+		if account.report_type != "Balance Sheet":
+			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+
+		if self.supplier and account.account_type != "Payable":
+			frappe.throw(_("Credit To account must be a Payable account"))
+
+	def set_total_taxes_and_charges(self):
+		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
+		self.outstanding_amount = 0.0 if cint(self.is_import_bill) else self.total_taxes_and_charges
+
+	def set_title(self):
+		if cint(self.is_import_bill):
+			self.title = self.credit_to
+		else:
+			self.title = self.supplier_name
 
 	def on_submit(self):
 		if cint(self.is_import_bill):
@@ -143,7 +172,7 @@ class LandedCostVoucher(AccountsController):
 			self.make_gl_entries(cancel=True)
 
 	def update_billing_status_in_pr(self, update_modified=True):
-		update_billed_amount_based_on_pr(self, "purchase_receipt_item", "receipt_document", None, update_modified)
+		update_billed_amount_based_on_pr(self, "purchase_receipt_item", None, update_modified)
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -167,7 +196,6 @@ class LandedCostVoucher(AccountsController):
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries_on_cancel(repost_future_gle=False)
 
-
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
 			doc.update_stock_ledger(via_landed_cost_voucher=True)
@@ -180,16 +208,6 @@ class LandedCostVoucher(AccountsController):
 				if serial_nos:
 					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
 						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
-
-	def validate_credit_to_account(self):
-		account = frappe.db.get_value("Account", self.credit_to,
-			["account_type", "report_type", "account_currency"], as_dict=True)
-
-		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Credit To account must be a Balance Sheet account"))
-
-		if self.supplier and account.account_type != "Payable":
-			frappe.throw(_("Credit To account must be a Payable account"))
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_taxes_and_charges) > 0:
@@ -231,12 +249,6 @@ class LandedCostVoucher(AccountsController):
 			)
 
 		return gl_entry
-
-	def set_title(self):
-		if cint(self.is_import_bill):
-			self.title = self.credit_to
-		else:
-			self.title = self.supplier_name
 
 @frappe.whitelist()
 def get_landed_cost_voucher(dt, dn):

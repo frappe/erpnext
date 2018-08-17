@@ -418,7 +418,7 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 
 	return updated_pr
 
-def update_billed_amount_based_on_pr(doc, pr_detail_field, pr_name_field, po_detail_field, update_modified=True):
+def update_billed_amount_based_on_pr(doc, pr_detail_field, po_detail_field, update_modified=True):
 	updated_pr = []
 	for d in doc.get("items"):
 		if d.get(pr_detail_field):
@@ -434,7 +434,7 @@ def update_billed_amount_based_on_pr(doc, pr_detail_field, pr_name_field, po_det
 			billed_amt += billed_amt_against_lcv
 
 			frappe.db.set_value("Purchase Receipt Item", d.get(pr_detail_field), "billed_amt", billed_amt, update_modified=update_modified)
-			updated_pr.append(d.get(pr_name_field))
+			updated_pr.append(d.purchase_receipt)
 		elif po_detail_field and d.get(po_detail_field):
 			updated_pr += update_billed_amount_based_on_po(d.get(po_detail_field), update_modified)
 
