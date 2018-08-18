@@ -32,7 +32,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.fields_dict["credit_to"].get_query = function() {
 			return {
 				filters: {
-					'account_type': cint(me.frm.doc.is_import_bill) ? 'Temporary' : 'Payable',
+					'account_type': cint(me.frm.doc.is_import_bill) ? 'Letter of Credit' : 'Payable',
 					'is_group': 0,
 					'company': me.frm.doc.company,
 					'account_currency': erpnext.get_currency(me.frm.doc.company)
@@ -50,7 +50,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 
 		this.frm.set_query("account_head", "taxes", function(doc) {
-			var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
+			var account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
 			return {
 				query: "erpnext.controllers.queries.tax_account_query",
 				filters: {
@@ -143,12 +143,35 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.refresh_fields();
 	},
 
+	get_referenced_taxes: function() {
+		var me = this;
+		if(me.frm.doc.credit_to && cint(me.frm.doc.is_import_bill)) {
+			return frappe.call({
+				method: "get_referenced_taxes",
+				doc: me.frm.doc,
+				callback: function(r) {
+					if(r.message) {
+						me.frm.doc.taxes = [];
+						$.each(r.message, function(i, d) {
+							var tax = me.frm.add_child("taxes");
+							tax.description = d.description;
+							tax.account_head = d.account_head;
+							tax.amount = d.amount;
+						});
+						me.frm.refresh_field("taxes");
+						me.set_total_taxes_and_charges();
+					}
+				}
+			});
+		}
+	},
+
 	make_payment_entry: function() {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
-				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name
+				"dt": this.frm.doc.doctype,
+				"dn": this.frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
@@ -187,8 +210,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		$.each(this.frm.doc.taxes || [], function(i, d) {
 			total_taxes_and_charges += flt(d.amount)
 		});
-		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
-		cur_frm.set_value("outstanding_amount", cint(me.frm.doc.is_import_bill) ? 0.0 : total_taxes_and_charges);
+		this.frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
+		this.frm.set_value("outstanding_amount", cint(me.frm.doc.is_import_bill) ? 0.0 : total_taxes_and_charges);
 	},
 
 	set_applicable_charges_for_item: function() {
@@ -416,7 +439,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var editable = me.frm.doc.docstatus == 0;
 
 		//Set table HTML
-		if(account_heads.length == 0) {
+		if(account_heads.length == 0 || rows.length == 0) {
 			$(me.frm.fields_dict.manual_tax_distribution.wrapper).html("");
 		} else {
 			var html = frappe.render_template('lcv_manual_distribution', {

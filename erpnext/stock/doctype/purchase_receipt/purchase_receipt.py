@@ -175,7 +175,7 @@ class PurchaseReceipt(BuyingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		stock_rbnb = self.get("credit_to")
+		stock_rbnb = self.get("lc_account")
 		if not stock_rbnb:
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -370,8 +370,8 @@ class PurchaseReceipt(BuyingController):
 		self.load_from_db()
 
 	def set_title(self):
-		if self.credit_to and self.credit_to != self.get_company_default("stock_received_but_not_billed"):
-			self.title = self.credit_to
+		if self.lc_account and self.lc_account != self.get_company_default("stock_received_but_not_billed"):
+			self.title = self.lc_account
 		else:
 			self.title = self.supplier_name
 

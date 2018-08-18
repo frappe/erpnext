@@ -29,6 +29,56 @@ class LandedCostVoucher(AccountsController):
 			'overflow_type': 'billing'
 		}]
 
+	def validate(self):
+		super(LandedCostVoucher, self).validate()
+		self.check_mandatory()
+		self.validate_purchase_receipts()
+		self.set_values_for_import_bill()
+		self.set_total_taxes_and_charges()
+		self.set_status()
+		self.set_title()
+
+	def before_submit(self):
+		self.validate_applicable_charges_for_item()
+
+	def on_submit(self):
+		if cint(self.is_import_bill):
+			self.update_billing_status_in_pr()
+			self.update_prevdoc_status()
+		self.update_landed_cost()
+		self.make_gl_entries()
+
+	def on_cancel(self):
+		if cint(self.is_import_bill):
+			self.update_billing_status_in_pr()
+			self.update_prevdoc_status()
+		self.update_landed_cost()
+		if self.credit_to:
+			self.make_gl_entries(cancel=True)
+
+	def get_referenced_taxes(self):
+		if self.credit_to and cint(self.is_import_bill):
+			self.set("taxes", [])
+			tax_amounts = frappe.db.sql(
+				"""select je.reference_tax_account as account_head, sum(ge.debit) - sum(ge.credit) as amount
+				from `tabGL Entry` as ge, `tabJournal Entry` as je
+				where ge.account=%s and ge.voucher_type='Journal Entry'
+					and ge.voucher_no=je.name and je.reference_tax_account is not null
+				group by je.reference_tax_account""", self.credit_to, as_dict=True)
+			balance = flt(frappe.db.sql("""select sum(debit) - sum(credit) from `tabGL Entry` where account=%s""",
+				self.credit_to)[0][0])
+
+			total_tax_amounts = sum(tax.amount for tax in tax_amounts)
+			diff = flt(balance - total_tax_amounts, self.precision("amount", "taxes"))
+
+			if diff:
+				tax_amounts.append({
+					'description': _("Remaining account balance"),
+					'amount': diff,
+					'account_head': None})
+
+			return tax_amounts
+
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
@@ -65,19 +115,6 @@ class LandedCostVoucher(AccountsController):
 						item.purchase_invoice = pr.receipt_document
 						item.purchase_invoice_item = d.name
 
-	def validate(self):
-		super(LandedCostVoucher, self).validate()
-
-		self.check_mandatory()
-		self.validate_purchase_receipts()
-		self.set_values_for_import_bill()
-		self.set_total_taxes_and_charges()
-		self.set_status()
-		self.set_title()
-
-	def before_submit(self):
-		self.validate_applicable_charges_for_item()
-
 	def set_values_for_import_bill(self):
 		if cint(self.is_import_bill):
 			self.supplier = None
@@ -93,13 +130,16 @@ class LandedCostVoucher(AccountsController):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			if cint(self.is_import_bill) and d.receipt_document_type != "Purchase Receipt":
-				frappe.throw(_("Receipt document must be a Purchase Receipt"))
-
-			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
+			docstatus, lc_account = frappe.db.get_value(d.receipt_document_type, d.receipt_document, ["docstatus", "lc_account"])
+			if cint(self.is_import_bill):
+				if d.receipt_document_type != "Purchase Receipt":
+					frappe.throw(_("Receipt documents must be Purchase Receipts"))
+				if d.credit_to != lc_account:
+					frappe.throw(_("Receipt document's letter of credit account must be the same as the credit to account"))
+			if docstatus != 1:
 				frappe.throw(_("Receipt document must be submitted"))
-			else:
-				receipt_documents.append(d.receipt_document)
+
+			receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
 			if (not item.purchase_receipt and not item.purchase_invoice) \
@@ -125,9 +165,7 @@ class LandedCostVoucher(AccountsController):
 	def validate_applicable_charges_for_item(self):
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
-		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
-			currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
-
+		precision = self.precision("applicable_charges", "items")
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
 
@@ -155,21 +193,6 @@ class LandedCostVoucher(AccountsController):
 			self.title = self.credit_to
 		else:
 			self.title = self.supplier_name
-
-	def on_submit(self):
-		if cint(self.is_import_bill):
-			self.update_billing_status_in_pr()
-			self.update_prevdoc_status()
-		self.update_landed_cost()
-		self.make_gl_entries()
-
-	def on_cancel(self):
-		if cint(self.is_import_bill):
-			self.update_billing_status_in_pr()
-			self.update_prevdoc_status()
-		self.update_landed_cost()
-		if self.credit_to:
-			self.make_gl_entries(cancel=True)
 
 	def update_billing_status_in_pr(self, update_modified=True):
 		update_billed_amount_based_on_pr(self, "purchase_receipt_item", None, update_modified)
@@ -260,9 +283,13 @@ def get_landed_cost_voucher(dt, dn):
 		"receipt_document_type": dt,
 		"receipt_document": dn,
 		"supplier": doc.supplier,
-		"credit_to": doc.credit_to,
+		"posting_date": doc.posting_date,
 		"grand_total": doc.base_grand_total
 	})
+
+	if dt == "Purchase Receipt" and doc.lc_account:
+		lcv.is_import_bill = 1
+		lcv.credit_to = doc.lc_account
 
 	lcv.get_items_from_purchase_receipts()
 	return lcv

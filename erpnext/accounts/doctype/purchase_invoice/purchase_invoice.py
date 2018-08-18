@@ -208,7 +208,7 @@ class PurchaseInvoice(BuyingController):
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
-			# expense account is "Stock Received But Not Billed" or the Purchase Receipt's credit_to account for a stock item
+			# expense account is "Stock Received But Not Billed" or the Purchase Receipt's lc account for a stock item
 			# except epening entry, drop-ship entry and fixed asset items
 
 			if auto_accounting_for_stock and item.item_code in stock_items \
@@ -219,8 +219,8 @@ class PurchaseInvoice(BuyingController):
 				if self.update_stock:
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
-					pr_credit_to = frappe.db.get_value("Purchase Receipt", item.purchase_receipt, "credit_to")
-					item.expense_account = pr_credit_to if pr_credit_to else stock_not_billed_account
+					pr_lc_account = frappe.db.get_value("Purchase Receipt", item.purchase_receipt, "lc_account")
+					item.expense_account = pr_lc_account if pr_lc_account else stock_not_billed_account
 
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
