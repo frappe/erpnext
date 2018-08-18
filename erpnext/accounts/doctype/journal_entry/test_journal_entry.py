@@ -219,11 +219,6 @@ class TestJournalEntry(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 
-		gl_entries = frappe.db.sql("""select account, cost_center, debit, credit
-			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
-			order by account asc""", jv.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
 		expected_values = {
 			"_Test Cash - _TC": {
 				"cost_center": cost_center
@@ -232,7 +227,14 @@ class TestJournalEntry(unittest.TestCase):
 				"cost_center": cost_center
 			}
 		}
-		for i, gle in enumerate(gl_entries):
+
+		gl_entries = frappe.db.sql("""select account, cost_center, debit, credit
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", jv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0

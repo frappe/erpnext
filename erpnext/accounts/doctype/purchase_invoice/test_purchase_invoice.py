@@ -801,12 +801,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi =  make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
 		self.assertEqual(pi.cost_center, cost_center)
 
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
 		expected_values = {
 			"Creditors - _TC": {
 				"cost_center": cost_center
@@ -815,7 +809,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 				"cost_center": cost_center
 			}
 		}
-		for i, gle in enumerate(gl_entries):
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
@@ -828,12 +830,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		cost_center = "_Test Cost Center - _TC"
 		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
 
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
 		expected_values = {
 			"Creditors - _TC": {
 				"cost_center": None
@@ -842,7 +838,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 				"cost_center": cost_center
 			}
 		}
-		for i, gle in enumerate(gl_entries):
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 

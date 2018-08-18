@@ -90,7 +90,7 @@ function get_filters(){
 					"filters": {
 						"company": company,
 					}
-				}
+				};
 			}
 		},
 		{

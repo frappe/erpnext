@@ -322,7 +322,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		for i, gle in enumerate(gl_entries):
+		for gle in gl_entries:
 			self.assertEqual(expected_gle[gle.account][0], gle.account)
 			self.assertEqual(expected_gle[gle.account][1], gle.debit)
 			self.assertEqual(expected_gle[gle.account][2], gle.credit)
@@ -415,13 +415,6 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.insert()
 		pe.submit()
 
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""", pe.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
-
 		expected_values = {
 			"_Test Bank - _TC": {
 				"cost_center": cost_center
@@ -430,7 +423,15 @@ class TestPaymentEntry(unittest.TestCase):
 				"cost_center": cost_center
 			}
 		}
-		for i, gle in enumerate(gl_entries):
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
@@ -458,7 +459,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		for i, gle in enumerate(gl_entries):
+		for gle in gl_entries:
 			self.assertEqual(gle.cost_center, None)
 
 	def test_payment_entry_against_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
@@ -481,13 +482,6 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.insert()
 		pe.submit()
 
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""", pe.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
-
 		expected_values = {
 			"_Test Bank - _TC": {
 				"cost_center": cost_center
@@ -496,7 +490,15 @@ class TestPaymentEntry(unittest.TestCase):
 				"cost_center": cost_center
 			}
 		}
-		for i, gle in enumerate(gl_entries):
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
@@ -524,7 +526,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		for i, gle in enumerate(gl_entries):
+		for gle in gl_entries:
 			self.assertEqual(gle.cost_center, None)
 
 	def test_payment_entry_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
