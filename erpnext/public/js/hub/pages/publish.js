@@ -10,6 +10,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.items_to_publish = {};
 		this.unpublished_items = [];
 		this.fetched_items = [];
+		this.fetched_items_dict = {};
 
 		this.cache = erpnext.hub.cache.items_to_publish;
 		this.cache = [];
@@ -132,6 +133,13 @@ erpnext.hub.Publish = class Publish extends SubPage {
 						"Sports", "Transportation"
 					],
 					"reqd": 1
+				},
+				{
+					"label": "Images",
+					"fieldname": "image_list",
+					"fieldtype": "MultiSelect",
+					"options": [],
+					"reqd": 1
 				}
 			],
 			primary_action_label: __('Set Details'),
@@ -154,9 +162,17 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	show_publishing_dialog_for_item(item_code) {
 		let item_data = this.items_to_publish[item_code];
 
-		if(!item_data) { item_data = { item_code }; }
+		if(!item_data) { item_data = { item_code }; };
 
 		this.publishing_dialog.clear();
+
+		const item_doc = this.fetched_items_dict[item_code];
+		if(item_doc) {
+			this.publishing_dialog.fields_dict.image_list.set_data(
+				item_doc.attachments.map(attachment => attachment.file_url)
+			);
+		}
+
 		this.publishing_dialog.set_values(item_data);
 		this.publishing_dialog.show();
 	}
@@ -268,6 +284,10 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		const items_container = $(get_item_card_container_html(items, '', get_local_item_card_html));
 		items_container.addClass('results');
 		wrapper.append(items_container);
+
+		items.map(item => {
+			this.fetched_items_dict[item.item_code] = item;
+		})
 	}
 
 	get_valid_items() {
