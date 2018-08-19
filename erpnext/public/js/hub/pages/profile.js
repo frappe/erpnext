@@ -1,17 +1,32 @@
 import SubPage from './subpage';
+import { get_detail_skeleton_html } from '../components/skeleton_state';
 
 erpnext.hub.Profile = class Profile extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
+		this.make_edit_profile_dialog();
 	}
 
 	refresh() {
+		this.show_skeleton();
 		this.get_hub_seller_profile(this.keyword)
 			.then(profile => this.render(profile));
 	}
 
 	get_hub_seller_profile() {
 		return hub.call('get_hub_seller_profile', { hub_seller: hub.settings.company_email });
+	}
+
+	make_edit_profile_dialog() {
+		// this.edit_profile_dialog = new
+	}
+
+	edit_profile() {
+		//
+	}
+
+	show_skeleton() {
+		this.$wrapper.html(get_detail_skeleton_html());
 	}
 
 	render(profile) {
@@ -46,7 +61,7 @@ erpnext.hub.Profile = class Profile extends SubPage {
 						<img src="${p.logo}">
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-8">
 					<h2>${p.company}</h2>
 					<div class="text-muted">
 						<p>${p.country}</p>
@@ -58,6 +73,16 @@ erpnext.hub.Profile = class Profile extends SubPage {
 						? `<p>${p.company_description}</p>`
 						: `<p>__('No description')</p`
 					}
+					</div>
+				</div>
+				<div class="col-md-1">
+					<div class="dropdown pull-right hub-item-dropdown">
+						<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu dropdown-right" role="menu">
+						<li><a data-action="edit_profile">${__('Edit Profile')}</a></li>
+						</ul>
 					</div>
 				</div>
 			</div>
