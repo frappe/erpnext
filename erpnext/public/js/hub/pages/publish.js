@@ -3,12 +3,16 @@ import { get_item_card_container_html } from '../components/items_container';
 import { get_local_item_card_html } from '../components/item_card';
 import { make_search_bar } from '../components/search_bar';
 
+
 erpnext.hub.Publish = class Publish extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
-		this.items_to_publish = [];
+		this.items_to_publish = {};
 		this.unpublished_items = [];
 		this.fetched_items = [];
+
+		this.cache = erpnext.hub.cache.items_to_publish;
+		this.cache = [];
 
 		frappe.realtime.on("items-sync", (data) => {
 			this.$wrapper.find('.progress-bar').css('width', data.progress_percent+'%');
@@ -58,7 +62,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	get_publishing_header() {
-		const title_html = `<b>${__('Select Products to Publish')}</b>`;
+		const title_html = `<h5>${__('Select Products to Publish')}</h5>`;
 
 		const subtitle_html = `<p class="text-muted">
 			${__(`Only products with an image, description and category can be published.
@@ -71,6 +75,9 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		</button>`;
 
 		return $(`
+			<div class="subpage-title flex"><h5>${__('Selected Products')}</h5></div>
+			<div class="row hub-items-container selected-items"></div>
+
 			<div class='subpage-title flex'>
 				<div>
 					${title_html}
@@ -87,25 +94,95 @@ erpnext.hub.Publish = class Publish extends SubPage {
 				.then(this.refresh.bind(this))
 		});
 
+		this.selected_items_container = this.$wrapper.find('.selected-items');
+
+		this.$current_selected_card = null;
+
+		this.make_publishing_dialog();
+
 		this.$wrapper.on('click', '.hub-card', (e) => {
 			const $target = $(e.currentTarget);
-			$target.toggleClass('active');
+			const item_code = $target.attr('data-id');
+			this.show_publishing_dialog_for_item(item_code);
 
-			// Get total items
-			const total_items = this.$wrapper.find('.hub-card.active').length;
+			this.$current_selected_card = $target.parent();
 
-			let button_label;
-			if (total_items > 0) {
-				const more_than_one = total_items > 1;
-				button_label = __('Publish {0} item{1}', [total_items, more_than_one ? 's' : '']);
-			} else {
-				button_label = __('Publish');
-			}
+			this.update_selected_items_count()
 
-			this.$wrapper.find('.publish-items')
-				.text(button_label)
-				.prop('disabled', total_items === 0);
 		});
+	}
+
+	make_publishing_dialog() {
+		this.publishing_dialog = new frappe.ui.Dialog({
+			title: __('Edit Publishing Details'),
+			fields: [
+				{
+					"label": "Item Code",
+					"fieldname": "item_code",
+					"fieldtype": "Data",
+					"read_only": 1
+				},
+				{
+					"label": "Hub Category",
+					"fieldname": "hub_category",
+					"fieldtype": "Autocomplete",
+					"options": ["Agriculture", "Books", "Chemicals", "Clothing",
+						"Electrical", "Electronics", "Energy", "Fashion", "Food and Beverage",
+						"Health", "Home", "Industrial", "Machinery", "Packaging and Printing",
+						"Sports", "Transportation"
+					],
+					"reqd": 1
+				}
+			],
+			primary_action_label: __('Set Details'),
+			primary_action: () => {
+				const values = this.publishing_dialog.get_values(true);
+				this.items_to_publish[values.item_code] = values;
+
+				this.$current_selected_card.appendTo(this.selected_items_container);
+				this.$current_selected_card.find('.hub-card').toggleClass('active');
+
+				this.publishing_dialog.hide();
+			},
+			secondary_action: () => {
+				const values = this.publishing_dialog.get_values(true);
+				this.items_to_publish[values.item_code] = values;
+			}
+		});
+	}
+
+	show_publishing_dialog_for_item(item_code) {
+		let item_data = this.items_to_publish[item_code];
+
+		if(!item_data) { item_data = { item_code }; }
+
+		this.publishing_dialog.clear();
+		this.publishing_dialog.set_values(item_data);
+		this.publishing_dialog.show();
+	}
+
+	update_selected_items_count() {
+		const total_items = this.$wrapper.find('.hub-card.active').length;
+
+		let button_label;
+		if (total_items > 0) {
+			const more_than_one = total_items > 1;
+			button_label = __('Publish {0} item{1}', [total_items, more_than_one ? 's' : '']);
+		} else {
+			button_label = __('Publish');
+		}
+
+		this.$wrapper.find('.publish-items')
+			.text(button_label)
+			.prop('disabled', total_items === 0);
+	}
+
+	add_item_to_publish() {
+		//
+	}
+
+	remove_item_from_publish() {
+		//
 	}
 
 	show_message(message) {
@@ -211,19 +288,22 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			item_codes_to_publish.push($(this).attr("data-id"));
 		});
 
-		this.unpublished_items = this.fetched_items.filter(item => {
-			return !item_codes_to_publish.includes(item.item_code);
-		});
+		// this.unpublished_items = this.fetched_items.filter(item => {
+		// 	return !item_codes_to_publish.includes(item.item_code);
+		// });
 
-		const items_to_publish = this.fetched_items.filter(item => {
-			return item_codes_to_publish.includes(item.item_code);
-		});
-		this.items_to_publish = items_to_publish;
+		// const items_to_publish = this.fetched_items.filter(item => {
+		// 	return item_codes_to_publish.includes(item.item_code);
+		// });
+
+		// this.items_to_publish = items_to_publish;
+
+		const items_data_to_publish = item_codes_to_publish.map(item_code => this.items_to_publish[item_code])
 
 		return frappe.call(
 			'erpnext.hub_node.api.publish_selected_items',
 			{
-				items_to_publish: item_codes_to_publish
+				items_to_publish: items_data_to_publish
 			}
 		)
 	}

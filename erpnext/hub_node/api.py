@@ -42,10 +42,18 @@ def get_valid_items(search_value=''):
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
 	if not len(items_to_publish):
-		return
+		frappe.throw('No items to publish')
 
-	for item_code in items_to_publish:
+	for item in items_to_publish:
+		item_code = item.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+
+		frappe.get_doc({
+			'doctype': 'Hub Tracked Item',
+			'item_code': item_code,
+			'hub_category': item.get('hub_category'),
+			# 'images': item.get('images')
+		}).insert()
 
 	try:
 		hub_settings = frappe.get_doc('Hub Settings')
