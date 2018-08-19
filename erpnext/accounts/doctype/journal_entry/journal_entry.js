@@ -40,7 +40,7 @@ frappe.ui.form.on("Journal Entry", {
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 
 		// hide/unhide reference tax account based on accounts
-		erpnext.journal_entry.hide_unhide_reference_tax(frm);
+		erpnext.journal_entry.hide_unhide_reference_account(frm);
 
 		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_journal_entry_reference)) {
 			frm.add_custom_button(__("Make Inter Company Journal Entry"),
@@ -239,7 +239,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			return out;
 		});
 
-		me.frm.set_query("reference_tax_account", function(doc) {
+		me.frm.set_query("reference_account", function(doc) {
 			var account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
 			return {
 				query: "erpnext.controllers.queries.tax_account_query",
@@ -454,17 +454,17 @@ frappe.ui.form.on("Journal Entry Account", {
 						$.extend(d, r.message);
 						erpnext.journal_entry.set_debit_credit_in_company_currency(frm, dt, dn);
 						refresh_field('accounts');
-						erpnext.journal_entry.hide_unhide_reference_tax(frm);
+						erpnext.journal_entry.hide_unhide_reference_account(frm);
 					}
 				}
 			});
 		} else {
-			erpnext.journal_entry.hide_unhide_reference_tax(frm);
+			erpnext.journal_entry.hide_unhide_reference_account(frm);
 		}
 	},
 
 	account_remove: function() {
-		erpnext.journal_entry.hide_unhide_reference_tax(frm);
+		erpnext.journal_entry.hide_unhide_reference_account(frm);
 	},
 	
 	debit_in_account_currency: function(frm, cdt, cdn) {
@@ -642,19 +642,19 @@ $.extend(erpnext.journal_entry, {
 		return { filters: filters };
 	},
 
-	hide_unhide_reference_tax: function(frm) {
-		if(frm.doc.reference_tax_account) {
-			unhide_field("reference_tax_account");
+	hide_unhide_reference_account: function(frm) {
+		if(frm.doc.reference_account) {
+			unhide_field("reference_account");
 			return;
 		}
 
 		for(var i=0; i < frm.doc.accounts.length; i++) {
 			if(frm.doc.accounts[i].account_type == "Letter of Credit") {
-				unhide_field("reference_tax_account");
+				unhide_field("reference_account");
 				return;
 			}
 		}
-		hide_field("reference_tax_account");
+		hide_field("reference_account");
 	},
 
 	reverse_journal_entry: function(frm) {

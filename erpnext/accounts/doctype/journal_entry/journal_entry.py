@@ -387,6 +387,9 @@ class JournalEntry(AccountsController):
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
 
+		if self.reference_account:
+			r.append(_('Reference Account: {0}').format(self.reference_account))
+
 		for d in self.get('accounts'):
 			if d.reference_type=="Sales Invoice" and d.credit:
 				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \

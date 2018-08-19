@@ -60,11 +60,11 @@ class LandedCostVoucher(AccountsController):
 		if self.credit_to and cint(self.is_import_bill):
 			self.set("taxes", [])
 			tax_amounts = frappe.db.sql(
-				"""select je.reference_tax_account as account_head, sum(ge.debit) - sum(ge.credit) as amount
+				"""select je.reference_account as account_head, sum(ge.debit) - sum(ge.credit) as amount
 				from `tabGL Entry` as ge, `tabJournal Entry` as je
 				where ge.account=%s and ge.voucher_type='Journal Entry'
-					and ge.voucher_no=je.name and je.reference_tax_account is not null
-				group by je.reference_tax_account""", self.credit_to, as_dict=True)
+					and ge.voucher_no=je.name and je.reference_account is not null
+				group by je.reference_account""", self.credit_to, as_dict=True)
 			balance = flt(frappe.db.sql("""select sum(debit) - sum(credit) from `tabGL Entry` where account=%s""",
 				self.credit_to)[0][0])
 
