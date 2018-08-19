@@ -1,4 +1,4 @@
-const ProfileDialog = (title = __('Edit Profile'), action={}) => {
+const ProfileDialog = (title = __('Edit Profile'), action={}, initial_values={}) => {
     const fields = [
         {
             fieldtype: 'Link',
@@ -62,6 +62,8 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
             action.on_submit(form_values);
         }
     });
+
+    dialog.set_values(initial_values);
 
     // Post create
     const default_company = frappe.defaults.get_default('company');

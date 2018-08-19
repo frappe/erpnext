@@ -1,5 +1,6 @@
 import SubPage from './subpage';
 import { get_detail_skeleton_html } from '../components/skeleton_state';
+import { ProfileDialog } from '../components/profile_dialog';
 
 erpnext.hub.Profile = class Profile extends SubPage {
 	make_wrapper() {
@@ -10,19 +11,14 @@ erpnext.hub.Profile = class Profile extends SubPage {
 	refresh() {
 		this.show_skeleton();
 		this.get_hub_seller_profile(this.keyword)
-			.then(profile => this.render(profile));
+			.then(profile => {
+				this.edit_profile_dialog.set_values(profile);
+				this.render(profile);
+			});
 	}
 
 	get_hub_seller_profile() {
 		return hub.call('get_hub_seller_profile', { hub_seller: hub.settings.company_email });
-	}
-
-	make_edit_profile_dialog() {
-		// this.edit_profile_dialog = new
-	}
-
-	edit_profile() {
-		//
 	}
 
 	show_skeleton() {
@@ -96,6 +92,33 @@ erpnext.hub.Profile = class Profile extends SubPage {
 		</div>`;
 
 		this.$wrapper.html(profile_html);
+	}
+
+	make_edit_profile_dialog() {
+		this.edit_profile_dialog = ProfileDialog(
+			__('Edit Profile'),
+			{
+				label: __('Update'),
+				on_submit: this.update_profile.bind(this)
+			}
+		);
+	}
+
+	edit_profile() {
+		this.edit_profile_dialog.set_values({
+			company_email: hub.settings.company_email
+		});
+		this.edit_profile_dialog.show();
+	}
+
+	update_profile(new_values) {
+		hub.call('update_profile', {
+			hub_seller: hub.settings.company_email,
+			updated_profile: new_values
+		}).then(new_profile => {
+				this.edit_profile_dialog.hide();
+				this.render(new_profile);
+			});
 	}
 
 	get_timeline_log_item(pretty_date, message, icon) {

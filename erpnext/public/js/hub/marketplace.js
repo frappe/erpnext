@@ -230,12 +230,15 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	show_register_dialog() {
-		this.profile_dialog = ProfileDialog(__('Become a Seller'), {
-			label: __('Register'),
-			on_submit: this.register_seller.bind(this)
-		});
+		this.register_dialog = ProfileDialog(
+			__('Become a Seller'),
+			{
+				label: __('Register'),
+				on_submit: this.register_seller.bind(this)
+			}
+		);
 
-		this.profile_dialog.show();
+		this.register_dialog.show();
 	}
 
 	register_seller(form_values) {
@@ -244,7 +247,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		    args: form_values,
 		    btn: $(e.currentTarget)
 		}).then(() => {
-			this.profile_dialog.hide();
+			this.register_dialog.hide();
 			frappe.set_route('marketplace', 'publish');
 
 		    // custom jquery event
