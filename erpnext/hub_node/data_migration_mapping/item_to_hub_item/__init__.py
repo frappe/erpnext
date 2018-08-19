@@ -19,6 +19,7 @@ def pre_process(doc):
 
 	if cached_details:
 		doc.hub_category = cached_details.hub_category
+		doc.image_list = cached_details.image_list
 
 	return doc
 
