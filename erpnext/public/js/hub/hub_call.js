@@ -24,16 +24,17 @@ hub.call = function call_hub_method(method, args={}, setup_cache_invalidation = 
 		})
 		.then(r => {
 			if (r.message) {
-				if (r.message.error) {
+				const response = r.message;
+				if (response.error) {
 					frappe.throw({
 						title: __('Marketplace Error'),
-						message: r.message.error
+						message: response.error
 					});
 				}
 
-				erpnext.hub.cache[key] = r.message;
-				erpnext.hub.trigger(`response:${key}`);
-				resolve(r.message);
+				erpnext.hub.cache[key] = response;
+				erpnext.hub.trigger(`response:${key}`, { response });
+				resolve(response);
 			}
 			reject(r);
 		})
