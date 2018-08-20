@@ -290,13 +290,18 @@ body[data-route^="marketplace/"] {
 		}
 	}
 
-	.message-list {
-		overflow: scroll;
+	.message-container {
+		display: flex;
+		flex-direction: column;
+		border: 1px solid @border-color;
+		border-radius: 3px;
+		height: calc(100vh - 300px);
+		justify-content: space-between;
 	}
 
-	.message-area {
-		border-radius: 4px;
-		justify-content: space-between;
-		height: calc(100vh - 220px);
+	.message-list {
+		padding-top: 15px;
+		padding-bottom: 15px;
+		overflow: scroll;
 	}
 }
