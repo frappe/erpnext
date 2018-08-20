@@ -17,7 +17,6 @@ client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret"
 scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
 redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
 company = frappe.db.get_value("Quickbooks Migrator", None, "company")
-receivable_account = frappe.db.get_value("Quickbooks Migrator", None, "receivable_account")
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 

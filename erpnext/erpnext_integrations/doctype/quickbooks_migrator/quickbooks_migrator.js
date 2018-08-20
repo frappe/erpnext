@@ -97,16 +97,9 @@ frappe.ui.form.on('QuickBooks Migrator', {
 						frm.trigger("delete_default_accounts");
 					});
 
-					// Show accounts settings
-					frm.toggle_display("accounts_settings", 1);
-					frm.set_df_property("receivable_account", "reqd", 1);
-
-					// No further actions until account defaults are set	
-					if (frm.fields_dict["receivable_account"].value) {			
-						frm.add_custom_button("Fetch Data", function () {
-							frm.trigger("fetch_data");
-						});
-					}
+					frm.add_custom_button("Fetch Data", function () {
+						frm.trigger("fetch_data");
+					});
 				}
 			}
 		}
