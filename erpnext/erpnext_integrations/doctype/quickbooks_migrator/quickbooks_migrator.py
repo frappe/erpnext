@@ -121,11 +121,13 @@ def save_account(account):
 	# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
 	try:
 		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"]}):
+			account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank"}
 			frappe.get_doc({
 				"doctype": "Account",
 				"quickbooks_id": account["Id"],
 				"account_name": "{} - QB".format(account["Name"]),
 				"root_type": mapping[account["AccountType"]],
+				"account_type": account_type_mapping.get(account["AccountType"]),
 				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
 				"is_group": "0",
