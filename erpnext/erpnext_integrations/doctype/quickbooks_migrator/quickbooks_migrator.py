@@ -262,6 +262,10 @@ def save_invoice(invoice):
 def save_credit_memo(credit_memo):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"])}):
+			receivable_account = frappe.get_all("Account", filters={
+				"account_type": "Receivable",
+				"account_currency": credit_memo["CurrencyRef"]["value"],
+			})[0]["name"]
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]),
@@ -472,6 +476,10 @@ def save_deposit(deposit):
 def save_sales_receipt(sales_receipt):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"])}):
+			receivable_account = frappe.get_all("Account", filters={
+				"account_type": "Receivable",
+				"account_currency": sales_receipt["CurrencyRef"]["value"],
+			})[0]["name"]
 			invoice = frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]),
