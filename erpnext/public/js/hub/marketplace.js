@@ -12,6 +12,9 @@ import './pages/published_products';
 import './pages/messages';
 import './pages/not_found';
 
+// components
+import { ProfileDialog } from './components/profile_dialog';
+
 // helpers
 import './hub_call';
 import EventEmitter from './event_emitter';
@@ -49,6 +52,16 @@ erpnext.hub.Marketplace = class Marketplace {
 			const route = $target.data().route;
 			frappe.set_route(route);
 		});
+
+		// generic action handler
+		this.$parent.on('click', '[data-action]', e => {
+			const $target = $(e.currentTarget);
+			const action = $target.data().action;
+
+			if (action && this[action]) {
+				this[action].apply(this, $target);
+			}
+		})
 	}
 
 	make_sidebar() {
@@ -79,7 +92,7 @@ erpnext.hub.Marketplace = class Marketplace {
 					${__('Messages')}
 				</li>`
 
-			: `<li class="hub-sidebar-item text-muted" data-route="marketplace/register">
+			: `<li class="hub-sidebar-item text-muted" data-action="show_register_dialog">
 					${__('Become a seller')}
 				</li>`;
 
@@ -217,5 +230,31 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.update_sidebar();
 		frappe.utils.scroll_to(0);
 		this.subpages[route[1]].show();
+	}
+
+	show_register_dialog() {
+		this.register_dialog = ProfileDialog(
+			__('Become a Seller'),
+			{
+				label: __('Register'),
+				on_submit: this.register_seller.bind(this)
+			}
+		);
+
+		this.register_dialog.show();
+	}
+
+	register_seller(form_values) {
+		frappe.call({
+		    method: 'erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller',
+		    args: form_values,
+		    btn: $(e.currentTarget)
+		}).then(() => {
+			this.register_dialog.hide();
+			frappe.set_route('marketplace', 'publish');
+
+		    // custom jquery event
+		    this.$body.trigger('seller-registered');
+		});
 	}
 }

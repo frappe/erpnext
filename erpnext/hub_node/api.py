@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now
 from frappe.frappeclient import FrappeClient
+from frappe.desk.form.load import get_attachments
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
@@ -31,21 +32,31 @@ def get_valid_items(search_value=''):
 
 	valid_items = filter(lambda x: x.image and x.description, items)
 
-	def attach_source_type(item):
+	def prepare_item(item):
 		item.source_type = "local"
+		item.attachments = get_attachments('Item', item.item_code)
 		return item
 
-	valid_items = map(lambda x: attach_source_type(x), valid_items)
+	valid_items = map(lambda x: prepare_item(x), valid_items)
+
 	return valid_items
 
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
 	if not len(items_to_publish):
-		return
+		frappe.throw('No items to publish')
 
-	for item_code in items_to_publish:
+	for item in items_to_publish:
+		item_code = item.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
+
+		frappe.get_doc({
+			'doctype': 'Hub Tracked Item',
+			'item_code': item_code,
+			'hub_category': item.get('hub_category'),
+			'image_list': item.get('image_list')
+		}).insert()
 
 	try:
 		hub_settings = frappe.get_doc('Hub Settings')

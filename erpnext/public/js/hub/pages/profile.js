@@ -1,17 +1,28 @@
 import SubPage from './subpage';
+import { get_detail_skeleton_html } from '../components/skeleton_state';
+import { ProfileDialog } from '../components/profile_dialog';
 
 erpnext.hub.Profile = class Profile extends SubPage {
 	make_wrapper() {
 		super.make_wrapper();
+		this.make_edit_profile_dialog();
 	}
 
 	refresh() {
+		this.show_skeleton();
 		this.get_hub_seller_profile(this.keyword)
-			.then(profile => this.render(profile));
+			.then(profile => {
+				this.edit_profile_dialog.set_values(profile);
+				this.render(profile);
+			});
 	}
 
 	get_hub_seller_profile() {
 		return hub.call('get_hub_seller_profile', { hub_seller: hub.settings.company_email });
+	}
+
+	show_skeleton() {
+		this.$wrapper.html(get_detail_skeleton_html());
 	}
 
 	render(profile) {
@@ -46,7 +57,7 @@ erpnext.hub.Profile = class Profile extends SubPage {
 						<img src="${p.logo}">
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-8">
 					<h2>${p.company}</h2>
 					<div class="text-muted">
 						<p>${p.country}</p>
@@ -60,6 +71,16 @@ erpnext.hub.Profile = class Profile extends SubPage {
 					}
 					</div>
 				</div>
+				<div class="col-md-1">
+					<div class="dropdown pull-right hub-item-dropdown">
+						<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu dropdown-right" role="menu">
+						<li><a data-action="edit_profile">${__('Edit Profile')}</a></li>
+						</ul>
+					</div>
+				</div>
 			</div>
 
 			<div class="timeline">
@@ -71,6 +92,33 @@ erpnext.hub.Profile = class Profile extends SubPage {
 		</div>`;
 
 		this.$wrapper.html(profile_html);
+	}
+
+	make_edit_profile_dialog() {
+		this.edit_profile_dialog = ProfileDialog(
+			__('Edit Profile'),
+			{
+				label: __('Update'),
+				on_submit: this.update_profile.bind(this)
+			}
+		);
+	}
+
+	edit_profile() {
+		this.edit_profile_dialog.set_values({
+			company_email: hub.settings.company_email
+		});
+		this.edit_profile_dialog.show();
+	}
+
+	update_profile(new_values) {
+		hub.call('update_profile', {
+			hub_seller: hub.settings.company_email,
+			updated_profile: new_values
+		}).then(new_profile => {
+				this.edit_profile_dialog.hide();
+				this.render(new_profile);
+			});
 	}
 
 	get_timeline_log_item(pretty_date, message, icon) {
