@@ -192,13 +192,14 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# Opening for filtered account
 	data.append(totals.opening)
 
-	if filters.get("group_by") in ["Group by Account", "Group by Party"]:
+	if filters.get("group_by"):
 		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
 				# opening
 				data.append({})
-				data.append(acc_dict.totals.opening)
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.opening)
 
 				data += acc_dict.entries
 
@@ -206,7 +207,8 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 				data.append(acc_dict.totals.total)
 
 				# closing
-				data.append(acc_dict.totals.closing)
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.closing)
 		data.append({})
 
 	else:
@@ -236,10 +238,17 @@ def get_totals_dict():
 		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
 	)
 
+def group_by_field(group_by):
+	if group_by == 'Group by Party':
+		return 'party'
+	elif group_by == 'Group by Voucher':
+		return 'voucher_no'
+	else:
+		return 'account'
 
 def initialize_gle_map(gl_entries, filters):
 	gle_map = frappe._dict()
-	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
+	group_by = group_by_field(filters.get('group_by'))
 
 	for gle in gl_entries:
 		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
@@ -249,7 +258,7 @@ def initialize_gle_map(gl_entries, filters):
 def get_accountwise_gle(filters, gl_entries, gle_map):
 	totals = get_totals_dict()
 	entries = []
-	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
+	group_by = group_by_field(filters.get('group_by'))
 
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += flt(gle.debit)
@@ -270,7 +279,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		elif gle.posting_date <= to_date:
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
 			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by") in ["Group by Account", "Group by Party"]:
+			if filters.get("group_by"):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			else:
 				entries.append(gle)
