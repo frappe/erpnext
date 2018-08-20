@@ -219,6 +219,10 @@ def save_vendor(vendor):
 def save_invoice(invoice):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"]}):
+			receivable_account = frappe.get_all("Account", filters={
+				"account_type": "Receivable",
+				"account_currency": invoice["CurrencyRef"]["value"],
+			})[0]["name"]
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": invoice["Id"],
