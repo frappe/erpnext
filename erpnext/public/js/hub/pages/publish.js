@@ -70,21 +70,27 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			Please update them if an item in your inventory does not appear.`)}
 		</p>`;
 
-		const publish_button_html = `<button class="btn btn-primary btn-sm publish-items">
+		const publish_button_html = `<button class="btn btn-primary btn-sm publish-items" disabled>
 			<i class="visible-xs octicon octicon-check"></i>
 			<span class="hidden-xs">${__('Publish')}</span>
 		</button>`;
 
 		return $(`
-			<div class="subpage-title flex"><h5>${__('Selected Products')}</h5></div>
-			<div class="row hub-items-container selected-items"></div>
+			<div class="publish-area empty">
+				<div class="flex justify-between align-flex-end">
+					${title_html}
+					${publish_button_html}
+				</div>
+				<div class="empty-items-container flex align-center flex-column justify-center">
+					<p class="text-muted">${__('No Items Selected')}</p>
+				</div>
+				<div class="row hub-items-container selected-items"></div>
+			</div>
 
 			<div class='subpage-title flex'>
 				<div>
-					${title_html}
 					${subtitle_html}
 				</div>
-				${publish_button_html}
 			</div>
 		`);
 	}
@@ -107,8 +113,6 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			this.show_publishing_dialog_for_item(item_code);
 
 			this.$current_selected_card = $target.parent();
-
-			this.update_selected_items_count()
 
 		});
 	}
@@ -150,6 +154,8 @@ erpnext.hub.Publish = class Publish extends SubPage {
 				this.$current_selected_card.appendTo(this.selected_items_container);
 				this.$current_selected_card.find('.hub-card').toggleClass('active');
 
+				this.update_selected_items_count();
+
 				this.publishing_dialog.hide();
 			},
 			secondary_action: () => {
@@ -180,6 +186,8 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	update_selected_items_count() {
 		const total_items = this.$wrapper.find('.hub-card.active').length;
 
+		const is_empty = total_items === 0;
+
 		let button_label;
 		if (total_items > 0) {
 			const more_than_one = total_items > 1;
@@ -190,7 +198,10 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		this.$wrapper.find('.publish-items')
 			.text(button_label)
-			.prop('disabled', total_items === 0);
+			.prop('disabled', is_empty);
+
+		this.$wrapper.find('.publish-area').toggleClass('empty', is_empty);
+		this.$wrapper.find('.publish-area').toggleClass('filled', !is_empty);
 	}
 
 	add_item_to_publish() {
@@ -230,7 +241,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		this.$wrapper.append(subtitle_html);
 
-		// Show search list with only desctiption, and don't set any events
+		// Show search list with only description, and don't set any events
 		make_search_bar({
 			wrapper: this.$wrapper,
 			on_search: keyword => {
