@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "RES.######", 
  "beta": 0, 
@@ -662,7 +662,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-01-09 14:14:30.090317", 
+ "modified": "2018-08-20 11:21:19.248393", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Assessment Result", 
