@@ -16,18 +16,18 @@ erpnext.hub.Messages = class Messages extends SubPage {
 		res.then(([buying_items, selling_items]) => {
 			this.empty();
 
-			if (buying_items.length) {
-				buying_items.map(item => {
-					item.route = `marketplace/buy/${item.hub_item_code}`
-				})
-				this.render(buying_items, __('Buying'));
-			}
-
 			if (selling_items.length) {
 				// selling_items.map(item => {
 				// 	item.route = `marketplace/sell/${item.hub_item_code}/${}`
 				// });
 				this.render(selling_items, __('Selling'));
+			}
+
+			if (buying_items.length) {
+				buying_items.map(item => {
+					item.route = `marketplace/buy/${item.hub_item_code}`
+				})
+				this.render(buying_items, __('Buying'));
 			}
 
 			if (!buying_items.length && !selling_items.length) {

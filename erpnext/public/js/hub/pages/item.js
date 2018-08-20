@@ -26,7 +26,6 @@ erpnext.hub.Item = class Item extends SubPage {
 
 	get_item(hub_item_code) {
 		return hub.call('get_item_details', {
-			hub_seller: hub.settings.company_email,
 			hub_item_code
 		});
 	}

@@ -32,6 +32,43 @@ export default class SubPage {
 		this.hide();
 	}
 
+	add_section({ title, body } = {}) {
+		this._sections = this._sections || {};
+
+		if (title && this._sections[title]) {
+			return this._sections[title];
+		}
+
+		const $section = $(`
+			<div class="row hub-section">
+				<div class="col-sm-12 hub-section-header padding-bottom flex">
+					<h4>${title || ''}</h4>
+				</div>
+				<div class="col-sm-12 hub-section-body">
+					${body || ''}
+				</div>
+			</div>
+		`);
+
+		if (title) {
+			this._sections[title] = $section;
+		}
+
+		this.$wrapper.append($section);
+		return $section;
+	}
+
+	add_back_link(title, route) {
+		const $section = this.add_section();
+		this.$wrapper.prepend($section);
+
+		$section.addClass('margin-bottom');
+		$section.find('.hub-section-header').remove()
+		$section.find('.hub-section-body').html(`
+			<button class="btn btn-xs btn-default" data-route="${route}">${title}</button>
+		`);
+	}
+
 	empty() {
 		this.$wrapper.empty();
 	}

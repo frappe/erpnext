@@ -10,6 +10,7 @@ import './pages/profile';
 import './pages/publish';
 import './pages/published_products';
 import './pages/messages';
+import './pages/buying_messages';
 import './pages/not_found';
 
 // components
@@ -140,7 +141,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	make_body() {
 		this.$body = this.$parent.find('.layout-main-section');
-		this.$body.on('seller-registered', () => {
+		erpnext.hub.on('seller-registered', () => {
 			this.registered = 1;
 			this.make_sidebar_nav_buttons();
 		});
@@ -213,6 +214,10 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages['messages'] = new erpnext.hub.Messages(this.$body);
 		}
 
+		if (route[1] === 'buy' && !this.subpages['buy']) {
+			this.subpages['buy'] = new erpnext.hub.BuyingMessages(this.$body);
+		}
+
 		// dont allow unregistered users to access registered routes
 		const registered_routes = ['favourites', 'profile', 'publish', 'my-products', 'messages'];
 		if (!hub.settings.registered && registered_routes.includes(route[1])) {
@@ -253,8 +258,7 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.register_dialog.hide();
 			frappe.set_route('marketplace', 'publish');
 
-		    // custom jquery event
-		    this.$body.trigger('seller-registered');
+		    erpnext.hub.trigger('seller-registered');
 		});
 	}
 }

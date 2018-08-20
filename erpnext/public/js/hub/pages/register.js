@@ -107,8 +107,7 @@ erpnext.hub.Register = class Register extends SubPage {
 		}).then(() => {
 			frappe.set_route('marketplace', 'publish');
 
-			// custom jquery event
-			this.$wrapper.trigger('seller-registered');
+			erpnext.hub.trigger('seller-registered');
 		});
 	}
 }
