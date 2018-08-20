@@ -83,13 +83,10 @@ class Project(Document):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
 
 	def validate_weights(self):
-		sum = 0
 		for task in self.tasks:
-			if task.task_weight > 0:
-				sum = flt(sum + task.task_weight, task.precision('task_weight'))
-		if sum > 0 and sum != 1:
-			frappe.throw(
-				_("Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly"))
+			if task.task_weight is not None:
+				if task.task_weight > 0:
+					frappe.throw(_("Task weight cannot be negative"))
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
@@ -206,13 +203,12 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			if weight_sum == 1:
-				weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
-					project=%s""", self.name, as_dict=1)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * row["task_weight"]
-				self.percent_complete = flt(flt(pct_complete), 2)
+			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+				project=%s""", self.name, as_dict=1)
+			pct_complete = 0
+			for row in weighted_progress:
+				pct_complete += row["progress"] * row["task_weight"] / weight_sum
+			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"
 		elif not self.status == "Cancelled":
