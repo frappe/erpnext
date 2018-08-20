@@ -28,12 +28,22 @@ function ItemPublishDialog(primary_action, secondary_action) {
         secondary_action: secondary_action.fn
     });
 
-    const hub_call_key = 'get_categories{}';
 
-    erpnext.hub.on(`response:${hub_call_key}`, () => {
+    function set_hub_category_options(data) {
         dialog.fields_dict.hub_category.set_data(
-            erpnext.hub.cache[hub_call_key].map(d => d.name)
+            data.map(d => d.name)
         );
+    }
+
+    const hub_call_key = 'get_categories{}';
+    const categories_cache = erpnext.hub.cache[hub_call_key];
+
+    if(categories_cache) {
+        set_hub_category_options(categories_cache);
+    }
+
+    erpnext.hub.on(`response:${hub_call_key}`, (data) => {
+        set_hub_category_options(data.response);
     });
 
     return dialog;
