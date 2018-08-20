@@ -109,28 +109,27 @@ def get_result(filters, account_details):
 
 def get_gl_entries(filters):
 	currency_map = get_currency(filters)
-	select_fields = """, sum(debit_in_account_currency) as debit_in_account_currency,
-		sum(credit_in_account_currency) as credit_in_account_currency""" \
+	select_fields = """, debit_in_account_currency,
+		credit_in_account_currency""" \
 
-	group_by_condition = "group by name"
+	order_by_fields = "posting_date, account"
 	if filters.get("group_by") == "Group by Voucher":
-		group_by_condition = "group by voucher_type, voucher_no, account, cost_center"
+		order_by_fields = "posting_date, voucher_type, voucher_no"
 
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			posting_date, account, party_type, party,
-			sum(debit) as debit, sum(credit) as credit,
+			debit, credit,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
-		{group_by_condition}
-		order by posting_date, account
+		order by {order_by_fields}
 		""".format(
 			select_fields=select_fields, conditions=get_conditions(filters),
-			group_by_condition=group_by_condition
+			order_by_fields=order_by_fields
 		),
 		filters, as_dict=1)
 
