@@ -61,7 +61,7 @@ def fetch_accounts():
 def fetch_data():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
+	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	fetch_advance_payments(company_id=company_id)
@@ -217,6 +217,14 @@ def save_vendor(vendor):
 				create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
 			if "ShipAddr" in vendor:
 				create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
+	except:
+		import traceback
+		traceback.print_exc()
+
+def save_preference(preference):
+	try:
+		shipping_account_id = preference["SalesFormsPrefs"]["DefaultShippingAccount"]
+		frappe.cache().set("quickbooks-cached-shipping-account-id", shipping_account_id)
 	except:
 		import traceback
 		traceback.print_exc()
@@ -734,6 +742,7 @@ save_methods = {
 	"CreditMemo": save_credit_memo,
 	"SalesReceipt": save_sales_receipt,
 	"AdvancePayment": save_advance_payment,
+	"Preferences": save_preference,
 }
 
 def save_entries(doctype, entries):
