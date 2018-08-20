@@ -8,6 +8,8 @@ from frappe.utils import cint
 from frappe import _
 from frappe.desk.notifications import clear_notifications
 
+import functools
+
 @frappe.whitelist()
 def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
@@ -62,7 +64,8 @@ def delete_for_doctype(doctype, company_name):
 		# reset series
 		naming_series = meta.get_field("naming_series")
 		if naming_series and naming_series.options:
-			prefixes = sorted(naming_series.options.split("\n"), lambda a, b: len(b) - len(a))
+			prefixes = sorted(naming_series.options.split("\n"),
+				key=functools.cmp_to_key(lambda a, b: len(b) - len(a)))
 
 			for prefix in prefixes:
 				if prefix:
