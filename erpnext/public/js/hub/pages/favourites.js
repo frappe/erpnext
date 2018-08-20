@@ -26,9 +26,11 @@ erpnext.hub.Favourites = class Favourites extends SubPage {
 	}
 
 	get_favourites() {
-		return hub.call('get_favourite_items_of_seller', {
-			hub_seller: hub.settings.company_email
-		});
+		return hub.call(
+			'get_favourite_items_of_seller',
+			{ hub_seller: hub.settings.company_email },
+			clear_cache => erpnext.hub.on('action:item_favourite', clear_cache)
+		);
 	}
 
 	render(items) {
