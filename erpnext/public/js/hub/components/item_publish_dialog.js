@@ -12,11 +12,7 @@ function ItemPublishDialog(primary_action, secondary_action) {
                 "label": "Hub Category",
                 "fieldname": "hub_category",
                 "fieldtype": "Autocomplete",
-                "options": ["Agriculture", "Books", "Chemicals", "Clothing",
-                    "Electrical", "Electronics", "Energy", "Fashion", "Food and Beverage",
-                    "Health", "Home", "Industrial", "Machinery", "Packaging and Printing",
-                    "Sports", "Transportation"
-                ],
+                "options": [],
                 "reqd": 1
             },
             {
@@ -31,6 +27,15 @@ function ItemPublishDialog(primary_action, secondary_action) {
         primary_action: primary_action.fn,
         secondary_action: secondary_action.fn
     });
+
+    const hub_call_key = 'get_categories{}';
+
+    erpnext.hub.on(`response:${hub_call_key}`, () => {
+        dialog.fields_dict.hub_category.set_data(
+            erpnext.hub.cache[hub_call_key].map(d => d.name)
+        );
+    });
+
     return dialog;
 }
 
