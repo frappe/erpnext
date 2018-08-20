@@ -32,6 +32,7 @@ hub.call = function call_hub_method(method, args={}, setup_cache_invalidation = 
 				}
 
 				erpnext.hub.cache[key] = r.message;
+				erpnext.hub.trigger(`response:${key}`);
 				resolve(r.message);
 			}
 			reject(r);
