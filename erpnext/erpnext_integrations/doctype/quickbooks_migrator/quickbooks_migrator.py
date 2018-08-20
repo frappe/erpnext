@@ -580,7 +580,7 @@ def get_items(lines, is_return=False):
 					"expense_account": get_account_name_by_id("TaxRate - {}".format(line["SalesItemLineDetail"]["TaxCodeRef"]["value"])),
 					"uom": "Unit",
 					"description": "Shipping",
-					"income_account": "Shipping Income - QB - SA",
+					"income_account": get_shipping_account(),
 					"qty": 1,
 					"price_list_rate": line["Amount"],
 					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
@@ -866,3 +866,7 @@ def get_tax_code():
 def get_tax_rate():
 	tax_rates = json.loads(frappe.cache().get("quickbooks-cached-TaxRate").decode())
 	return {tax_rate["Id"]: tax_rate for tax_rate in tax_rates}
+
+def get_shipping_account():
+	shipping_account_id = frappe.cache().get("quickbooks-cached-shipping-account-id").decode()
+	return get_account_name_by_id(shipping_account_id)
