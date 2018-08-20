@@ -83,7 +83,6 @@ class Project(Document):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
 
 	def validate_weights(self):
-		sum = 0
 		for task in self.tasks:
 			if task.task_weight is not None:
 				if task.task_weight > 0:
