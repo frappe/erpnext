@@ -109,28 +109,27 @@ def get_result(filters, account_details):
 
 def get_gl_entries(filters):
 	currency_map = get_currency(filters)
-	select_fields = """, sum(debit_in_account_currency) as debit_in_account_currency,
-		sum(credit_in_account_currency) as credit_in_account_currency""" \
+	select_fields = """, debit_in_account_currency,
+		credit_in_account_currency""" \
 
-	group_by_condition = "group by name"
+	order_by_fields = "posting_date, account"
 	if filters.get("group_by") == "Group by Voucher":
-		group_by_condition = "group by voucher_type, voucher_no, account, cost_center"
+		order_by_fields = "posting_date, voucher_type, voucher_no"
 
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			posting_date, account, party_type, party,
-			sum(debit) as debit, sum(credit) as credit,
+			debit, credit,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
-		{group_by_condition}
-		order by posting_date, account
+		order by {order_by_fields}
 		""".format(
 			select_fields=select_fields, conditions=get_conditions(filters),
-			group_by_condition=group_by_condition
+			order_by_fields=order_by_fields
 		),
 		filters, as_dict=1)
 
@@ -193,13 +192,14 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# Opening for filtered account
 	data.append(totals.opening)
 
-	if filters.get("group_by") in ["Group by Account", "Group by Party"]:
+	if filters.get("group_by"):
 		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
 				# opening
 				data.append({})
-				data.append(acc_dict.totals.opening)
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.opening)
 
 				data += acc_dict.entries
 
@@ -207,7 +207,8 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 				data.append(acc_dict.totals.total)
 
 				# closing
-				data.append(acc_dict.totals.closing)
+				if filters.get("group_by") != "Group by Voucher":
+					data.append(acc_dict.totals.closing)
 		data.append({})
 
 	else:
@@ -237,10 +238,17 @@ def get_totals_dict():
 		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
 	)
 
+def group_by_field(group_by):
+	if group_by == 'Group by Party':
+		return 'party'
+	elif group_by == 'Group by Voucher':
+		return 'voucher_no'
+	else:
+		return 'account'
 
 def initialize_gle_map(gl_entries, filters):
 	gle_map = frappe._dict()
-	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
+	group_by = group_by_field(filters.get('group_by'))
 
 	for gle in gl_entries:
 		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
@@ -250,7 +258,7 @@ def initialize_gle_map(gl_entries, filters):
 def get_accountwise_gle(filters, gl_entries, gle_map):
 	totals = get_totals_dict()
 	entries = []
-	group_by = 'party' if filters.get('group_by') == 'Group by Party' else "account"
+	group_by = group_by_field(filters.get('group_by'))
 
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += flt(gle.debit)
@@ -271,7 +279,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		elif gle.posting_date <= to_date:
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
 			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by") in ["Group by Account", "Group by Party"]:
+			if filters.get("group_by"):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			else:
 				entries.append(gle)
