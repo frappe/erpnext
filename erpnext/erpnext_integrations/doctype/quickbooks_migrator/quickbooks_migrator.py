@@ -303,7 +303,6 @@ def save_bill(bill):
 	try:
 		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"]}):
 			credit_to_account = get_account_name_by_id(bill["APAccountRef"]["value"])
-			make_payable(credit_to_account)
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
 				"quickbooks_id": bill["Id"],
@@ -329,7 +328,6 @@ def save_vendor_credit(vendor_credit):
 	try:
 		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"])}):
 			credit_to_account = get_account_name_by_id(vendor_credit["APAccountRef"]["value"])
-			make_payable(credit_to_account)
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
 				"quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"]),
@@ -363,7 +361,6 @@ def save_payment(payment):
 						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
 					})[0]["name"]
 				deposit_account = get_account_name_by_id(payment["DepositToAccountRef"]["value"])
-				make_bank(deposit_account)
 				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
 				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
 				erp_pe.reference_no = "Reference No"
@@ -386,7 +383,6 @@ def save_bill_payment(bill_payment):
 					fields=["name", "base_grand_total"])[0]
 				if bill_payment["PayType"] == "Check":
 					bank_account = get_account_name_by_id(bill_payment["CheckPayment"]["BankAccountRef"]["value"])
-					make_bank(bank_account)
 				else:
 					bank_account = None
 				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice["name"],
@@ -836,17 +832,7 @@ def get_headers(token):
 	"Authorization": "Bearer {}".format(token)}
 
 class QuickBooksMigrator(Document):
-	def on_update(self):
-		make_receivable(self.receivable_account)
-
-def make_receivable(account):
-    frappe.db.set_value("Account", account, "account_type", "Receivable")
-
-def make_payable(account):
-    frappe.db.set_value("Account", account, "account_type", "Payable")
-
-def make_bank(account):
-    frappe.db.set_value("Account", account, "account_type", "Bank")
+	pass
 
 def get_account_name_by_id(quickbooks_id):
 	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id})[0]["name"]
