@@ -1,3 +1,5 @@
+import { NotificationMessage } from '../components/notification_message';
+
 export default class SubPage {
 	constructor(parent, options) {
 		this.$parent = $(parent);
@@ -41,5 +43,9 @@ export default class SubPage {
 
 	hide() {
 		this.$wrapper.hide();
+	}
+
+	show_message(message) {
+		this.$wrapper.prepend(NotificationMessage(message));
 	}
 }
