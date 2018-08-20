@@ -158,12 +158,18 @@ def save_tax_code(tax_code):
 def save_customer(customer):
 	try:
 		if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"]}):
+			receivable_account = frappe.get_all("Account", filters={
+				"account_type": "Receivable",
+				"account_currency": customer["CurrencyRef"]["value"],
+			})[0]["name"]
 			erpcustomer = frappe.get_doc({
 				"doctype": "Customer",
 				"quickbooks_id": customer["Id"],
 				"customer_name" : customer["DisplayName"],
 				"customer_type" : _("Individual"),
 				"customer_group" : _("Commercial"),
+				"default_currency": customer["CurrencyRef"]["value"],
+				"accounts": [{"company": company, "account": receivable_account}],
 				"territory" : _("All Territories"),
 			}).insert(ignore_permissions=True)
 			if "BillAddr" in customer:
@@ -218,10 +224,6 @@ def save_vendor(vendor):
 def save_invoice(invoice):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"]}):
-			receivable_account = frappe.get_all("Account", filters={
-				"account_type": "Receivable",
-				"account_currency": invoice["CurrencyRef"]["value"],
-			})[0]["name"]
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": invoice["Id"],
@@ -238,12 +240,6 @@ def save_invoice(invoice):
 				# Due Date should be calculated from SalesTerm if not provided.
 				# For Now Just setting a default to suppress mandatory errors.
 				"due_date": invoice.get("DueDate", "2020-01-01"),
-
-				# Shouldn't default to Current Bank Account
-				# Decide using AccountRef from TxnRef
-				# And one more thing, While creating accounts set account_type
-				"debit_to": receivable_account,
-
 				"customer": frappe.get_all("Customer",
 					filters={
 						"quickbooks_id": invoice["CustomerRef"]["value"]
@@ -262,10 +258,6 @@ def save_invoice(invoice):
 def save_credit_memo(credit_memo):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"])}):
-			receivable_account = frappe.get_all("Account", filters={
-				"account_type": "Receivable",
-				"account_currency": credit_memo["CurrencyRef"]["value"],
-			})[0]["name"]
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]),
@@ -273,7 +265,6 @@ def save_credit_memo(credit_memo):
 				"currency": credit_memo["CurrencyRef"]["value"],
 				"posting_date": credit_memo["TxnDate"],
 				"due_date": credit_memo.get("DueDate", "2020-01-01"),
-				"debit_to": receivable_account,
 				"customer": frappe.get_all("Customer",
 					filters={
 						"quickbooks_id": credit_memo["CustomerRef"]["value"]
@@ -476,10 +467,6 @@ def save_deposit(deposit):
 def save_sales_receipt(sales_receipt):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"])}):
-			receivable_account = frappe.get_all("Account", filters={
-				"account_type": "Receivable",
-				"account_currency": sales_receipt["CurrencyRef"]["value"],
-			})[0]["name"]
 			invoice = frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]),
@@ -487,7 +474,6 @@ def save_sales_receipt(sales_receipt):
 				"currency": sales_receipt["CurrencyRef"]["value"],
 				"posting_date": sales_receipt["TxnDate"],
 				"due_date": sales_receipt.get("DueDate", "2020-01-01"),
-				"debit_to": receivable_account,
 				"customer": frappe.get_all("Customer",
 					filters={
 						"quickbooks_id": sales_receipt["CustomerRef"]["value"]
