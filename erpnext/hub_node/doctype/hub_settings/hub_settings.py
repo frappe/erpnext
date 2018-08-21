@@ -23,20 +23,6 @@ class HubSettings(Document):
 	def get_hub_url(self):
 		return frappe.conf.hub_url
 
-	def sync(self):
-		"""Create and execute Data Migration Run for Hub Sync plan"""
-		frappe.has_permission('Hub Settings', throw=True)
-
-		doc = frappe.get_doc({
-			'doctype': 'Data Migration Run',
-			'data_migration_plan': 'Hub Sync',
-			'data_migration_connector': 'Hub Connector',
-			'trigger_name': 'items-sync'
-		}).insert()
-
-		self.sync_in_progress = 1
-		doc.run()
-
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
 
