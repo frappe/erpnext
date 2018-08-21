@@ -187,7 +187,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	show_publish_progress() {
 		const items_to_publish = this.items_data_to_publish.length
 			? this.items_data_to_publish
-			: JSON.parse(hub.settings.custom_data);
+			: JSON.parse(hub.settings.custom_data || '[]');
 
 		const $publish_progress = $(`<div class="sync-progress">
 			<p><b>${__(`Syncing ${items_to_publish.length} Products`)}</b></p>
