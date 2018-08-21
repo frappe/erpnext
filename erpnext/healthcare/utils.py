@@ -429,3 +429,14 @@ def get_children(doctype, parent, company, is_root=False):
 					occupancy_msg = str(occupied) + " Occupied out of " + str(occupancy_total)
 			each["occupied_out_of_vacant"] = occupancy_msg
 	return hc_service_units
+
+@frappe.whitelist()
+def get_patient_vitals(patient, from_date=None, to_date=None):
+	if not patient: return
+	vitals = frappe.db.sql("""select * from `tabVital Signs` where \
+	docstatus=1 and patient=%s order by signs_date, signs_time""", \
+	(patient), as_dict=1)
+	if vitals and vitals[0]:
+		return vitals
+	else:
+		return False
