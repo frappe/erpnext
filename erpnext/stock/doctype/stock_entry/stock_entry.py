@@ -666,8 +666,9 @@ class StockEntry(StockController):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
-				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
-					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
+				elif (self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
+					and not self.pro_doc.skip_transfer and frappe.db.get_single_value("Manufacturing Settings",
+					"backflush_raw_materials_based_on")== "Material Transferred for Manufacture"):
 					self.get_transfered_raw_materials()
 
 				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
