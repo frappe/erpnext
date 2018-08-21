@@ -21,6 +21,8 @@ class HubSettings(Document):
 			frappe.throw(_("Please select a Price List to publish pricing"))
 
 	def get_hub_url(self):
+		if not frappe.conf.hub_url:
+			frappe.throw('hub_url is not set in site_config')
 		return frappe.conf.hub_url
 
 	def register(self):
