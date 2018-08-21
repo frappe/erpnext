@@ -18,6 +18,29 @@ def call_hub_method(method, params=None):
 	response = connection.post_request(params)
 	return response
 
+def map_fields(items):
+	field_mappings = get_field_mappings()
+	table_fields = [d.fieldname for d in frappe.get_meta('Item').get_table_fields()]
+
+	hub_seller = frappe.db.get_value('Hub Settings' , 'Hub Settings', 'company_email')
+
+	for item in items:
+		for fieldname in table_fields:
+			item.pop(fieldname, None)
+
+		for mapping in field_mappings:
+			local_fieldname = mapping.get('local_fieldname')
+			remote_fieldname = mapping.get('remote_fieldname')
+
+			value = item.get(local_fieldname)
+			item.pop(local_fieldname, None)
+			item[remote_fieldname] = value
+
+		item['doctype'] = 'Hub Item'
+		item['hub_seller'] = hub_seller
+
+	return items
+
 @frappe.whitelist()
 def get_valid_items(search_value=''):
 	items = frappe.get_list(
@@ -47,21 +70,37 @@ def publish_selected_items(items_to_publish):
 	if not len(items_to_publish):
 		frappe.throw('No items to publish')
 
-	for item in items_to_publish:
-		item_code = item.get('item_code')
+	publishing_items = []
+
+	for item_additional_info in items_to_publish:
+		item_code = item_additional_info.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
 		frappe.get_doc({
 			'doctype': 'Hub Tracked Item',
 			'item_code': item_code,
-			'hub_category': item.get('hub_category'),
-			'image_list': item.get('image_list')
+			'hub_category': item_additional_info.get('hub_category'),
+			'image_list': item_additional_info.get('image_list')
 		}).insert()
 
+		item_data = frappe.get_doc("Item", item_code).as_dict().update(item_additional_info)
+		publishing_items.append(item_data)
+
+
+	items = map_fields(publishing_items)
+
 	try:
-		hub_settings = frappe.get_doc('Hub Settings')
 		item_sync_preprocess()
-		hub_settings.sync()
+
+		# TODO: Publish Progress
+		connection = get_hub_connection()
+		connection.insert_many(items)
+
+		item_sync_postprocess({
+			'status': 'Success',
+			'stats': len(items)
+		})
+
 	except Exception as e:
 		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
 		frappe.throw(e)
@@ -90,15 +129,16 @@ def item_sync_postprocess(sync_details):
 		'hub_seller': hub_seller,
 		'activity_details': json.dumps({
 			'subject': 'Publishing items:' + sync_details['status'],
-			'content': json.dumps(sync_details['stats'])
+			'content': str(sync_details['stats']) + ' items synced.'
 		})
 	})
 
 	if response:
-		frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
 		frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
 		frappe.throw('Unable to update remote activity')
+
+	frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
 
 def get_hub_connection():
 	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
@@ -109,3 +149,7 @@ def get_hub_connection():
 	# read-only connection
 	hub_connection = FrappeClient(frappe.conf.hub_url)
 	return hub_connection
+
+
+def get_field_mappings():
+	return []
