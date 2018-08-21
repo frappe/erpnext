@@ -56,7 +56,7 @@ def publish_selected_items(items_to_publish):
 			'item_code': item_code,
 			'hub_category': item.get('hub_category'),
 			'image_list': item.get('image_list')
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 	try:
 		hub_settings = frappe.get_doc('Hub Settings')
