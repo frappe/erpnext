@@ -281,9 +281,33 @@ def get_employee_by_user_id(user_id):
 	return employee
 
 def insert_lab_test_to_medical_record(doc):
-	subject = cstr(doc.test_name)
-	if(doc.test_comment):
-		subject += ", \n"+ cstr(doc.test_comment)
+	table_row = False
+	subject = cstr(doc.test_name) +" "+ doc.practitioner
+	if doc.normal_test_items:
+		item = doc.normal_test_items[0]
+		comment = ""
+		if item.test_comment:
+			comment = str(item.test_comment)
+		event = ""
+		if item.test_event:
+			event = test_event
+		table_row = item.test_name +" "+ event +" "+ item.result_value
+		if item.normal_range:
+			table_row += " normal_range("+item.normal_range+")"
+		table_row += " "+comment
+
+	elif doc.special_test_items:
+		item = doc.special_test_items[0]
+		table_row = item.test_particulars +" "+ item.result_value
+
+	elif doc.sensitivity_test_items:
+		item = doc.sensitivity_test_items[0]
+		table_row = item.antibiotic +" "+ item.antibiotic_sensitivity
+
+	if table_row:
+		subject += "<br/>"+table_row
+	if doc.test_comment:
+		subject += "<br/>"+ cstr(doc.test_comment)
 
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
