@@ -220,7 +220,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				tax.tax_amount = -1 * tax.tax_amount
 
 		if doc.get("is_return"):
-    			if doc.doctype == 'Sales Invoice':
+			if doc.doctype == 'Sales Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
    					paid_amount = 0.00
