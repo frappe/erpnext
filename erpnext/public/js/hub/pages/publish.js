@@ -13,9 +13,6 @@ erpnext.hub.Publish = class Publish extends SubPage {
 		this.fetched_items = [];
 		this.fetched_items_dict = {};
 
-		this.cache = erpnext.hub.cache.items_to_publish;
-		this.cache = [];
-
 		frappe.realtime.on("items-sync", (data) => {
 			this.$wrapper.find('.progress-bar').css('width', data.progress_percent+'%');
 
@@ -110,6 +107,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 	}
 
 	update_items_data_to_publish(values) {
+		// Add item additional data
 		this.items_data_to_publish[values.item_code] = values;
 	}
 
@@ -249,6 +247,7 @@ erpnext.hub.Publish = class Publish extends SubPage {
 			item_codes_to_publish.push($(this).attr("data-id"));
 		});
 
+		// Retrieve item data
 		const items_data_to_publish = item_codes_to_publish.map(item_code => this.items_data_to_publish[item_code])
 
 		return frappe.call(

@@ -102,6 +102,8 @@ erpnext.hub.Profile = class Profile extends SubPage {
 				on_submit: this.update_profile.bind(this)
 			}
 		);
+
+		this.edit_profile_dialog.set_df_property('company_email', 'read_only', 1);
 	}
 
 	edit_profile() {
