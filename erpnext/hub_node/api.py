@@ -3,12 +3,13 @@ import frappe, requests, json
 from frappe.utils import now
 from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
+from six import string_types
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
 	connection = get_hub_connection()
 
-	if type(params) == unicode:
+	if isinstance(params, string_types):
 		params = json.loads(params)
 
 	params.update({
