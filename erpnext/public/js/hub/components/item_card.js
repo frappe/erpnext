@@ -21,7 +21,7 @@ function get_item_card_html(item) {
 	}
 
 	const item_html = `
-		<div class="col-md-3 col-sm-4 col-xs-6">
+		<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
 			<div class="hub-card"
 				data-hub-item-code="${item.hub_item_code}"
 				data-route="${item.route}">
@@ -74,7 +74,7 @@ function get_local_item_card_html(item) {
 	</div>`;
 
 	const item_html = `
-		<div class="col-md-3 col-sm-4 col-xs-6">
+		<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
 			<div class="hub-card is-local ${is_active ? 'active' : ''}" data-id="${id}">
 				<div class="hub-card-header flex">
 					<div>

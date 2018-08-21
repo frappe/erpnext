@@ -226,7 +226,14 @@ erpnext.hub.Publish = class Publish extends SubPage {
 
 		items.map(item => {
 			this.fetched_items_dict[item.item_code] = item;
-		})
+		});
+
+		// remove the items which doesn't have a valid image
+		setTimeout(() => {
+			items_container.find('.no-image').each(function() {
+				$(this).closest('.hub-card-container').remove();
+			});
+		}, 1000);
 	}
 
 	get_valid_items() {
