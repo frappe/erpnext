@@ -67,6 +67,7 @@ class HubSettings(Document):
 	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 			hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
+			hub_connector.hostname = self.get_hub_url()
 			hub_connector.username = message['email']
 			hub_connector.password = message['password']
 			hub_connector.save()
