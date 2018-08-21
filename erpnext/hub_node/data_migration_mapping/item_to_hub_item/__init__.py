@@ -1,4 +1,5 @@
-import frappe, io, base64, urllib, os
+import frappe, io, base64, urllib, os, json
+from frappe.utils.file_manager import get_file_path
 
 def pre_process(doc):
 
@@ -9,11 +10,17 @@ def pre_process(doc):
 		url = file_path
 		file_path = os.path.join('/tmp', file_name)
 		urllib.urlretrieve(url, file_path)
+	else:
+		file_path = os.path.abspath(get_file_path(file_path))
 
-	with io.open(file_path, 'rb') as f:
-		doc.image = base64.b64encode(f.read())
-
-	doc.image_file_name = file_name
+	try:
+		with io.open(file_path, 'rb') as f:
+			doc.image = json.dumps({
+				'file_name': file_name,
+				'base64': base64.b64encode(f.read())
+			})
+	except Exception as e:
+		frappe.log_error(title='Hub Sync Error')
 
 	cached_details = frappe.get_doc('Hub Tracked Item', doc.item_code)
 

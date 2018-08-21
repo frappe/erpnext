@@ -113,7 +113,7 @@ erpnext.hub.Item = class Item extends SubPage {
 				})
 				.then(() => {
 					d.hide();
-					frappe.set_route('marketplace', 'messages');
+					frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
 					erpnext.hub.trigger('action:send_message')
 				});
 			}
