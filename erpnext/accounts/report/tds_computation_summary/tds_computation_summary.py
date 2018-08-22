@@ -6,8 +6,6 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 	import get_advance_vouchers, get_debit_note_amount
 
 def execute(filters=None):
-	columns, data = [], []
-
 	validate_filters(filters)
 
 	columns = get_columns()
@@ -30,13 +28,14 @@ def validate_filters(filters):
 def get_result(filters):
 	# if no supplier selected, fetch data for all tds applicable supplier
 	# else fetch relevant data for selected supplier
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
+	fields = ["name", pan+" as pan", "tax_withholding_category", "supplier_type"]
 	if filters.supplier:
 		filters.supplier = frappe.db.get_list('Supplier',\
-			{"name": filters.supplier}, fields=["name", "tax_id", "tax_withholding_category"])
+			{"name": filters.supplier}, fields=fields)
 	else:
 		filters.supplier = frappe.db.get_list('Supplier',\
-			filters={"tax_withholding_category": ["!=", ""]},\
-			fields=["name", "tax_id", "tax_withholding_category"])
+			filters={"tax_withholding_category": ["!=", ""]}, fields=fields)
 
 	out = []
 	for supplier in filters.supplier:
@@ -47,7 +46,7 @@ def get_result(filters):
 		total_invoiced_amount, tds_deducted = get_invoice_and_tds_amount(supplier.name, account,\
 			filters.company, filters.from_date, filters.to_date)
 
-		out.append([supplier.tax_id, supplier.name, tds.name, tds.category_name,\
+		out.append([supplier.pan, supplier.name, tds.name, supplier.supplier_type,\
 			rate, total_invoiced_amount, tds_deducted])
 
 	return out

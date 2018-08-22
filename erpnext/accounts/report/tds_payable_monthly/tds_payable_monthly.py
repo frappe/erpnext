@@ -10,8 +10,6 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 	import get_advance_vouchers, get_debit_note_amount
 
 def execute(filters=None):
-	columns, res = [], []
-
 	filters["invoices"] = frappe.cache().hget("invoices", frappe.session.user)
 	validate_filters(filters)
 	set_filters(filters)
@@ -25,13 +23,6 @@ def validate_filters(filters):
 	''' Validate if dates are properly set '''
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
-
-	from_year = get_fiscal_year(filters.from_date)[0]
-	# to_year = get_fiscal_year(filters.to_date)[0]
-	# if from_year != to_year:
-	# 	frappe.throw(_("From Date and To Date lie in different Fiscal Year"))
-
-	filters["fiscal_year"] = from_year
 
 def set_filters(filters):
 	invoices = []
@@ -75,19 +66,20 @@ def get_result(filters):
 		rate = [i.tax_withholding_rate for i in tds_doc.rates \
 			if i.fiscal_year == gle_map[d][0].fiscal_year][0]
 
-		out.append([supplier.tax_id, supplier.name, tds_doc.name, \
-			tds_doc.category_name, rate, total_amount_credited, tds_deducted, \
-			gle_map[d][0].date, "Purchase Invoice", d])
+		out.append([supplier.pan, supplier.name, tds_doc.name, \
+			supplier.supplier_type, rate, total_amount_credited, tds_deducted, \
+			gle_map[d][0].posting_date, "Purchase Invoice", d])
 
 	return out
 
 def get_supplier_map(filters):
-	# create a supplier_map of the form {"purchase_invoice": {supplier_name, tax_id, tds_name}}
+	# create a supplier_map of the form {"purchase_invoice": {supplier_name, pan, tds_name}}
 	# pre-fetch all distinct applicable tds docs
 	supplier_map, tds_docs = {}, {}
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
 	supplier_detail = frappe.db.get_all('Supplier',\
 		{"name": ["in", [d.supplier for d in filters["invoices"]]]}, \
-		["tax_withholding_category", "name", "tax_id"])
+		["tax_withholding_category", "name", pan+" as pan", "supplier_type"])
 
 	for d in filters["invoices"]:
 		supplier_map[d.get("name")] = [k for k in supplier_detail \
@@ -106,7 +98,7 @@ def get_gle_map(filters):
 	gle_map = {}
 	gle = frappe.db.get_all('GL Entry',\
 		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]]},\
-		["fiscal_year", "credit", "debit", "account", "voucher_no"])
+		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date"])
 
 	for d in gle:
 		if not d.voucher_no in gle_map:
@@ -117,10 +109,11 @@ def get_gle_map(filters):
 	return gle_map
 
 def get_columns():
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
 	columns = [
 		{
-			"label": _("PAN"),
-			"fieldname": "pan",
+			"label": _(frappe.unscrub(pan)),
+			"fieldname": pan,
 			"fieldtype": "Data",
 			"width": 90
 		},
