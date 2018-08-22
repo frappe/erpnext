@@ -62,7 +62,9 @@ function get_local_item_card_html(item) {
 	if (rating > 0) {
 		subtitle.push(rating + `<i class='fa fa-fw fa-star-o'></i>`)
 	}
-	subtitle.push(company_name);
+	if(company_name) {
+		subtitle.push(company_name);
+	}
 
 	let dot_spacer = '<span aria-hidden="true"> · </span>';
 	subtitle = subtitle.join(dot_spacer);
@@ -77,7 +79,7 @@ function get_local_item_card_html(item) {
 		<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
 			<div class="hub-card is-local ${is_active ? 'active' : ''}" data-id="${id}">
 				<div class="hub-card-header flex">
-					<div>
+					<div class="ellipsis">
 						<div class="hub-card-title ellipsis bold">${title}</div>
 						<div class="hub-card-subtitle ellipsis text-muted">${subtitle}</div>
 					</div>
