@@ -157,7 +157,7 @@ def get_sales_summary(invoice_list):
 	return {'net_total': net_total, 'grand_total': grand_total, 'total_qty': total_qty}
 
 def get_company_currency(doc):
-	currency = frappe.db.get_value("Company", doc.company, "default_currency")
+	currency = frappe.get_cached_value('Company',  doc.company,  "default_currency")
 	return frappe.get_doc('Currency', currency)
 
 def get_invoices(filters):

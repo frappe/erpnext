@@ -196,8 +196,8 @@ class PayrollEntry(Document):
 		return account_dict
 
 	def get_default_payroll_payable_account(self):
-		payroll_payable_account = frappe.db.get_value("Company",
-			{"company_name": self.company}, "default_payroll_payable_account")
+		payroll_payable_account = frappe.get_cached_value('Company', 
+			{"company_name": self.company},  "default_payroll_payable_account")
 
 		if not payroll_payable_account:
 			frappe.throw(_("Please set Default Payroll Payable Account in Company {0}")

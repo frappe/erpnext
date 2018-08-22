@@ -16,7 +16,7 @@ def execute(filters=None):
 	emp_map = get_employee_details()
 
 	holiday_list = [emp_map[d]["holiday_list"] for d in emp_map if emp_map[d]["holiday_list"]]
-	default_holiday_list = frappe.db.get_value("Company", filters.get("company"), "default_holiday_list")
+	default_holiday_list = frappe.get_cached_value('Company',  filters.get("company"),  "default_holiday_list")
 	holiday_list.append(default_holiday_list)
 	holiday_list = list(set(holiday_list))
 	holiday_map = get_holiday(holiday_list, filters["month"])

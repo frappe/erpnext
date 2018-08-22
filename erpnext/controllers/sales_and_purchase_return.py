@@ -223,11 +223,16 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if doc.doctype == 'Sales Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
+					paid_amount = 0.00
+					base_paid_amount = 0.00
+					data.base_amount = flt(data.amount*source.conversion_rate, source.precision("base_paid_amount"))
+					paid_amount += data.amount
+					base_paid_amount += data.base_amount
 					doc.append('payments', {
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
-						'amount': -1 * data.amount,
-						'base_amount': -1 * data.base_amount
+						'paid_amount': -1 * paid_amount,
+						'base_paid_amount': -1 * base_paid_amount
 					})
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount

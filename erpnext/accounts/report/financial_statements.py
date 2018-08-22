@@ -162,7 +162,7 @@ def get_appropriate_currency(company, filters=None):
 	if filters and filters.get("presentation_currency"):
 		return filters["presentation_currency"]
 	else:
-		return frappe.db.get_value("Company", company, "default_currency")
+		return frappe.get_cached_value('Company',  company,  "default_currency")
 
 
 def calculate_values(
@@ -217,7 +217,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			"year_end_date": year_end_date,
 			"currency": company_currency,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
-			"account_name": ('{} - {}'.format(_(d.account_number), _(d.account_name))
+			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
 				if d.account_number else _(d.account_name))
 		})
 		for period in period_list:

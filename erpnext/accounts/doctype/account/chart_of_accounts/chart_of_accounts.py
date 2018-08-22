@@ -38,7 +38,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 						"report_type": report_type,
 						"account_number": account_number,
 						"account_type": child.get("account_type"),
-						"account_currency": frappe.db.get_value("Company", company, "default_currency"),
+						"account_currency": frappe.db.get_value('Company',  company,  "default_currency"),
 						"tax_rate": child.get("tax_rate")
 					})
 

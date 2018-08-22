@@ -37,7 +37,7 @@ class JobOpening(WebsiteGenerator):
 
 		if self.staffing_plan and self.planned_vacancies:
 			staffing_plan_company = frappe.db.get_value("Staffing Plan", self.staffing_plan, "company")
-			lft, rgt = frappe.db.get_value("Company", staffing_plan_company, ["lft", "rgt"])
+			lft, rgt = frappe.get_cached_value('Company',  staffing_plan_company,  ["lft", "rgt"])
 
 			designation_counts = get_designation_counts(self.designation, self.company)
 			current_count = designation_counts['employee_count'] + designation_counts['job_openings']

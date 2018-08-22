@@ -133,7 +133,7 @@ def create_item_code(amazon_item_json, sku):
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
 
 	item.item_code = sku
-	item.market_place_item_code = amazon_item_json.ASIN
+	item.amazon_item_code = amazon_item_json.ASIN
 	item.item_group = mws_settings.item_group
 	item.description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 	item.brand = new_brand
@@ -246,7 +246,7 @@ def create_sales_order(order_json,after_date):
 	market_place_order_id = order_json.AmazonOrderId
 
 	so = frappe.db.get_value("Sales Order",
-			filters={"market_place_order_id": market_place_order_id},
+			filters={"amazon_order_id": market_place_order_id},
 			fieldname="name")
 
 	taxes_and_charges = frappe.db.get_value("Amazon MWS Settings", "Amazon MWS Settings", "taxes_charges")
@@ -262,7 +262,7 @@ def create_sales_order(order_json,after_date):
 		so = frappe.get_doc({
 				"doctype": "Sales Order",
 				"naming_series": "SO-",
-				"market_place_order_id": market_place_order_id,
+				"amazon_order_id": market_place_order_id,
 				"marketplace_id": order_json.MarketplaceId,
 				"customer": customer_name,
 				"delivery_date": delivery_date,
@@ -425,7 +425,7 @@ def get_order_items(market_place_order_id):
 
 def get_item_code(order_item):
 	asin = order_item.ASIN
-	item_code = frappe.db.get_value("Item", {"market_place_item_code": asin}, "item_code")
+	item_code = frappe.db.get_value("Item", {"amazon_item_code": asin}, "item_code")
 	if item_code:
 		return item_code
 

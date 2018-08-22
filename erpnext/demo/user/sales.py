@@ -84,7 +84,7 @@ def make_quotation():
 		# get customer, currency and exchange_rate
 		customer = get_random("Customer")
 
-		company_currency = frappe.db.get_value("Company", "Wind Power LLC", "default_currency")
+		company_currency = frappe.get_cached_value('Company',  "Wind Power LLC",  "default_currency")
 		party_account_currency = get_party_account_currency("Customer", customer, "Wind Power LLC")
 		if company_currency == party_account_currency:
 			exchange_rate = 1

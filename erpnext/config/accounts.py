@@ -39,6 +39,18 @@ def get_data():
 					"description": _("To make recurring documents")
 				},
 				{
+					"type": "doctype",
+					"name": "Loyalty Program",
+					"label": _("Loyalty Program"),
+					"description": _("To make Customer based incentive schemes.")
+				},
+				{
+					"type": "doctype",
+					"name": "Loyalty Point Entry",
+					"label": _("Loyalty Point Entry"),
+					"description": _("To view logs of Loyalty Points assigned to a Customer.")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",
@@ -187,6 +199,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Tax Rule",
 					"description": _("Tax Rule for transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Tax Withholding Category",
+					"description": _("Tax Withholding rates to be applied on transactions.")
 				},
 				{
 					"type": "report",
