@@ -137,8 +137,19 @@ body[data-route^="marketplace/"] {
 	}
 
 	.hub-card-image {
-		min-width: 100%;
 		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	.hub-recent-message {
+		padding: 10px;
+		.frappe-timestamp {
+			float: right;
+		}
+		div {
+			padding: 3px
+		}
 	}
 
 	.hub-search-container {
@@ -239,7 +250,7 @@ body[data-route^="marketplace/"] {
 		justify-content: space-between;
 		margin-bottom: 20px;
 	}
-	
+
 	.form-container {
 		.frappe-control {
 			max-width: 100% !important;
