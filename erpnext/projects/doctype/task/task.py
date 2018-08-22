@@ -141,12 +141,13 @@ class Task(NestedSet):
 	def populate_depends_on(self):
 		if self.parent_task:
 			parent = frappe.get_doc('Task', self.parent_task)
-			parent.append("depends_on", {
-				"doctype": "Task Depends On",
-				"task": self.name,
-				"subject": self.subject
-			})
-			parent.save()
+			if not self.name in [row.task for row in parent.depends_on]:
+				parent.append("depends_on", {
+					"doctype": "Task Depends On",
+					"task": self.name,
+					"subject": self.subject
+				})
+				parent.save()
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
