@@ -144,7 +144,7 @@ frappe.ui.form.on("Work Order", {
 	show_progress: function(frm) {
 		// clear progress area
 		frm.dashboard.progress_area.empty();
-		
+
 		var bars = [];
 		var message = '';
 		var added_min = false;
