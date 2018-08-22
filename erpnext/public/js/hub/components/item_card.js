@@ -20,6 +20,24 @@ function get_item_card_html(item) {
 		item.route = `marketplace/item/${item.hub_item_code}`
 	}
 
+	let recent_message_block = ''
+
+	if(item.recent_message) {
+		let message = item.recent_message
+		let sender = message.sender === frappe.session.user ? 'You' : message.sender
+		let content = $('<p>' + message.content + '</p>').text() //https://stackoverflow.com/a/14337611
+		recent_message_block = `
+			<div class="hub-recent-message">
+				<span class='text-muted'>${comment_when(message.creation, true)}</span>
+				<div class='bold ellipsis'>${message.receiver}</div>
+				<div class='ellipsis'>
+					<span>${sender}: </span>
+					<span>${content}</span>
+				</div>
+			</div>
+		`
+	}
+
 	const item_html = `
 		<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
 			<div class="hub-card"
@@ -39,7 +57,7 @@ function get_item_card_html(item) {
 					<img class="hub-card-image" src="${img_url}" />
 					<div class="overlay hub-card-overlay"></div>
 				</div>
-
+				${recent_message_block}
 			</div>
 		</div>
 	`;
