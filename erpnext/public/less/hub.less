@@ -142,16 +142,6 @@ body[data-route^="marketplace/"] {
 		object-fit: contain;
 	}
 
-	.hub-recent-message {
-		padding: 10px;
-		.frappe-timestamp {
-			float: right;
-		}
-		div {
-			padding: 3px
-		}
-	}
-
 	.hub-search-container {
 		margin-bottom: 20px;
 
@@ -249,6 +239,27 @@ body[data-route^="marketplace/"] {
 		display: flex;
 		justify-content: space-between;
 		margin-bottom: 20px;
+	}
+
+	.item-message-card {
+		height: 80px;
+		max-width: 500px;
+		margin-bottom: 10px;
+		padding: 10px;
+		border-radius: 4px;
+		.message-body {
+			margin-left: 60px;
+		}
+		.item-image {
+			float: left;
+			height: 50px;
+			width: 50px;
+			object-fit: contain;
+			// border-radius: 50%
+		}
+		.frappe-timestamp {
+			float: right;
+		}
 	}
 
 	.form-container {
