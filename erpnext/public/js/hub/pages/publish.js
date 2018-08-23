@@ -66,12 +66,12 @@ erpnext.hub.Publish = class Publish {
 		this.get_items_and_render();
 	}
 
-	show_last_sync_message() {
-		if(hub.settings.last_sync_datetime) {
-			this.show_message(`Last sync was <a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>.
-				<a href="#marketplace/my-products">See your Published Products</a>.`);
-		}
-	}
+	// show_last_sync_message() {
+	// 	if(hub.settings.last_sync_datetime) {
+	// 		this.show_message(`Last sync was <a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>.
+	// 			<a href="#marketplace/my-products">See your Published Products</a>.`);
+	// 	}
+	// }
 
 	setup_publishing_events() {
 		this.$wrapper.find('.publish-items').on('click', () => {
