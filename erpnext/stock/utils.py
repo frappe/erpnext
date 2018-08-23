@@ -9,8 +9,7 @@ from frappe.utils import flt, cstr, nowdate, nowtime
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
-def get_stock_value_from_bin (warehouse=None, item_code=None):
-
+def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
 	conditions = ""
 	if warehouse:
@@ -25,7 +24,6 @@ def get_stock_value_from_bin (warehouse=None, item_code=None):
 
 	if item_code:
 		conditions += " and item_code = %(item_code)s"
-
 
 		values['item_code'] = item_code
 
