@@ -20,4 +20,18 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style lang="less" scoped>
+	@import "../../../../../../frappe/frappe/public/less/variables.less";
+
+	.empty-state {
+		height: 500px;
+		margin: 15px 0px;
+	}
+
+	.empty-state.bordered {
+		border-radius: 4px;
+		border: 1px solid @border-color;
+		border-style: dashed;
+	}
+
+</style>

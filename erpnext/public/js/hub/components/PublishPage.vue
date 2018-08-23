@@ -3,6 +3,12 @@
 		class="marketplace-page"
 		:data-page-name="page_name"
 	>
+		<notification-message
+			v-if="last_sync_message"
+			:message="last_sync_message"
+			@remove-message="clear_last_sync_message"
+		></notification-message>
+
 		<div class="flex justify-between align-flex-end">
 			<h5>{{ page_title }}</h5>
 
@@ -41,6 +47,7 @@
 <script>
 import SearchInput from './SearchInput.vue';
 import ItemCardsContainer from './ItemCardsContainer.vue';
+import NotificationMessage from './NotificationMessage.vue';
 
 export default {
 	name: 'publish-page',
@@ -58,12 +65,20 @@ export default {
 				Browse and click on products below to publish.`),
 			valid_products_instruction: __(`Only products with an image, description
 				and category can be published. Please update them if an item in your
-				inventory does not appear.`)
+				inventory does not appear.`),
+			last_sync_message: (hub.settings.last_sync_datetime)
+				? __(`Last sync was
+				<a href="#marketplace/profile">
+					${comment_when(hub.settings.last_sync_datetime)}</a>.
+				<a href="#marketplace/my-products">
+					See your Published Products</a>.`)
+				: ''
 		};
 	},
 	components: {
 		SearchInput,
-		ItemCardsContainer
+		ItemCardsContainer,
+		NotificationMessage
 	},
 	computed: {
 		no_selected_items() {
@@ -96,6 +111,10 @@ export default {
 			.then((r) => {
 				this.valid_items = r.message;
 			})
+		},
+
+		clear_last_sync_message() {
+			this.last_sync_message = '';
 		}
 	}
 }
