@@ -29,7 +29,7 @@ def get_stock_value_from_bin (warehouse=None, item_code=None):
 
 		values['item_code'] = item_code
 
-	query = "select sum(stock_value) from `tabBin` where 1 = 1" + conditions
+	query = "select sum(stock_value) from `tabBin` where 1 = 1 %s" % conditions
 
 	stock_value = frappe.db.sql(query, values)
 
