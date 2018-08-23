@@ -25,21 +25,22 @@ def get_products_details():
 			string_io = StringIO.StringIO(listings_response.original)
 			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
+			#break into chunks of 10
+			asin_chunked_list = list(chunks(asin_list, 10))
 
 			#Map ASIN Codes to SKUs
 			sku_asin = [{"asin":row[1],"sku":row[0]} for row in csv_rows[1:]]
 
 			#Fetch Products List from ASIN
-			products_response = call_mws_method(products.get_matching_product,marketplaceid=marketplace,
-				asins=asin_list)
+			for asin_list in asin_chunked_list:
+				products_response = call_mws_method(products.get_matching_product,marketplaceid=marketplace,
+					asins=asin_list)
 
-			matching_products_list = products_response.parsed
-
-			for product in matching_products_list:
-				#Get matching sku for ASIN
-				skus = [row["sku"] for row in sku_asin if row["asin"]==product.ASIN]
-				for sku in skus:
-					create_item_code(product, sku)
+				matching_products_list = products_response.parsed 
+				for product in matching_products_list:
+					skus = [row["sku"] for row in sku_asin if row["asin"]==product.ASIN]
+					for sku in skus:
+						create_item_code(product, sku)
 
 def get_products_instance():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
@@ -71,6 +72,11 @@ def return_as_list(input_value):
 		return input_value
 	else:
 		return [input_value]
+
+#function to chunk product data
+def chunks(l, n):
+	for i in range(0, len(l), n):
+		yield l[i:i+n]
 
 def request_and_fetch_report_id(report_type, start_date=None, end_date=None, marketplaceids=None):
 	reports = get_reports_instance()
@@ -203,7 +209,7 @@ def get_orders(after_date):
 			fulfillment_channels=["MFN", "AFN"],
 			lastupdatedafter=after_date,
 			orderstatus=statuses,
-			max_results='10')
+			max_results='20')
 
 		while True:
 			orders_list = []
@@ -311,7 +317,6 @@ def create_customer(order_json):
 		else:
 			new_contact = frappe.new_doc("Contact")
 			new_contact.first_name = order_customer_name
-			new_contact.email_id = order_json.BuyerEmail
 			new_contact.append('links', {
 				"link_doctype": "Customer",
 				"link_name": existing_customer_name
@@ -330,7 +335,6 @@ def create_customer(order_json):
 
 		new_contact = frappe.new_doc("Contact")
 		new_contact.first_name = order_customer_name
-		new_contact.email_id = order_json.BuyerEmail
 		new_contact.append('links', {
 			"link_doctype": "Customer",
 			"link_name": new_customer.name
@@ -439,30 +443,31 @@ def get_charges_and_fees(market_place_order_id):
 	shipment_event_list = return_as_list(response.parsed.FinancialEvents.ShipmentEventList)
 
 	for shipment_event in shipment_event_list:
-		shipment_item_list = return_as_list(shipment_event.ShipmentEvent.ShipmentItemList.ShipmentItem)
+		if shipment_event:
+			shipment_item_list = return_as_list(shipment_event.ShipmentEvent.ShipmentItemList.ShipmentItem)
 
-		for shipment_item in shipment_item_list:
-			charges = return_as_list(shipment_item.ItemChargeList.ChargeComponent)
-			fees = return_as_list(shipment_item.ItemFeeList.FeeComponent)
+			for shipment_item in shipment_item_list:
+				charges = return_as_list(shipment_item.ItemChargeList.ChargeComponent)
+				fees = return_as_list(shipment_item.ItemFeeList.FeeComponent)
 
-			for charge in charges:
-				if(charge.ChargeType != "Principal"):
-					charge_account = get_account(charge.ChargeType)
-					charges_fees.get("charges").append({
+				for charge in charges:
+					if(charge.ChargeType != "Principal"):
+						charge_account = get_account(charge.ChargeType)
+						charges_fees.get("charges").append({
+							"charge_type":"Actual",
+							"account_head": charge_account,
+							"tax_amount": charge.ChargeAmount.CurrencyAmount,
+							"description": charge.ChargeType + " for " + shipment_item.SellerSKU
+							})
+
+				for fee in fees:
+					fee_account = get_account(fee.FeeType)
+					charges_fees.get("fees").append({
 						"charge_type":"Actual",
-						"account_head": charge_account,
-						"tax_amount": charge.ChargeAmount.CurrencyAmount,
-						"description": charge.ChargeType + " for " + shipment_item.SellerSKU
+						"account_head": fee_account,
+						"tax_amount": fee.FeeAmount.CurrencyAmount,
+						"description": fee.FeeType + " for " + shipment_item.SellerSKU
 						})
-
-			for fee in fees:
-				fee_account = get_account(fee.FeeType)
-				charges_fees.get("fees").append({
-					"charge_type":"Actual",
-					"account_head": fee_account,
-					"tax_amount": fee.FeeAmount.CurrencyAmount,
-					"description": fee.FeeType + " for " + shipment_item.SellerSKU
-					})
 
 	return charges_fees
 
