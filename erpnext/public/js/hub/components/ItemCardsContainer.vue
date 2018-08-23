@@ -1,5 +1,12 @@
 <template>
 	<div>
+		<empty-state
+			v-if="items.length === 0"
+			:message="empty_state_message"
+			:bordered="true"
+			:height="80"
+		>
+		</empty-state>
 		<item-card
 			v-for="item in items"
 			:key="item[item_id]"
@@ -12,12 +19,21 @@
 
 <script>
 import ItemCard from './ItemCard.vue';
+import EmptyState from './EmptyState.vue';
 
 export default {
 	name: 'item-cards-container',
-	props: ['items', 'is_local'],
+	props: {
+		'items': Array,
+		'is_local': Boolean,
+
+		'empty_state_message': String,
+		'empty_state_height': Number,
+		'empty_state_bordered': Boolean
+	},
 	components: {
-		ItemCard
+		ItemCard,
+		EmptyState
 	},
 	computed: {
 		item_id() {
