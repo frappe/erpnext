@@ -4,6 +4,8 @@ import { get_local_item_card_html } from '../components/item_card';
 import { make_search_bar } from '../components/search_bar';
 import { get_publishing_header } from '../components/publishing_area';
 import { ItemPublishDialog } from '../components/item_publish_dialog';
+
+
 import PublishPage from '../components/PublishPage.vue';
 
 erpnext.hub.Publish = class Publish {
