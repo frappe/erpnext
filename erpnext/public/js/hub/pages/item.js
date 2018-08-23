@@ -57,7 +57,7 @@ erpnext.hub.Item = class Item extends SubPage {
 
 
 	unpublish_item() {
-		if(!this.unpublish_dialog) {
+		if (!this.unpublish_dialog) {
 			this.unpublish_dialog = new frappe.ui.Dialog({
 				title: "Edit Your Product",
 				fields: []
@@ -75,14 +75,14 @@ erpnext.hub.Item = class Item extends SubPage {
 			hub_item_code: this.hub_item_code,
 			hub_seller: hub.settings.company_email
 		})
-		.then(() => {
-			$(favourite_button).html('Saved');
-			frappe.show_alert(__('Saved to <b><a href="#marketplace/favourites">Favourites</a></b>'));
-			erpnext.hub.trigger('action:item_favourite');
-		})
-		.catch(e => {
-			console.error(e);
-		});
+			.then(() => {
+				$(favourite_button).html('Saved');
+				frappe.show_alert(__('Saved to <b><a href="#marketplace/favourites">Favourites</a></b>'));
+				erpnext.hub.trigger('action:item_favourite');
+			})
+			.catch(e => {
+				console.error(e);
+			});
 	}
 
 
@@ -106,16 +106,16 @@ erpnext.hub.Item = class Item extends SubPage {
 				if (!message) return;
 
 				hub.call('send_message', {
-                    from_seller: hub.settings.company_email,
+					from_seller: hub.settings.company_email,
 					to_seller: this.item.hub_seller,
 					hub_item: this.item.hub_item_code,
-                    message
+					message
 				})
-				.then(() => {
-					d.hide();
-					frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
-					erpnext.hub.trigger('action:send_message')
-				});
+					.then(() => {
+						d.hide();
+						frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
+						erpnext.hub.trigger('action:send_message')
+					});
 			}
 		});
 
@@ -124,11 +124,19 @@ erpnext.hub.Item = class Item extends SubPage {
 
 
 	make_review_area() {
-		this.comment_area = new frappe.ui.ReviewArea({
-			parent: this.$wrapper.find('.timeline-head').empty(),
-			mentions: [],
-			on_submit: this.on_submit_review.bind(this)
-		});
+		if (hub.settings.registered) {
+			this.comment_area = new frappe.ui.ReviewArea({
+				parent: this.$wrapper.find('.timeline-head').empty(),
+				mentions: [],
+				on_submit: this.on_submit_review.bind(this)
+			});
+		} else {
+			//TODO: fix UI
+			this.comment_area = this.$wrapper
+				.find('.timeline-head')
+				.empty()
+				.append('<div></div>');
+		}
 	}
 
 
