@@ -21,7 +21,9 @@ def get_feed(name):
 
 	for dict_item in result:
 		if dict_item.reference_doctype != "Vital Signs":
-			dict_item.update({'practitioner': frappe.db.get_value(dict_item.reference_doctype, dict_item.reference_name, 'practitioner')})
+			practitioner = frappe.db.get_value(dict_item.reference_doctype, dict_item.reference_name, 'practitioner')
+			practitioner_user = frappe.db.get_value("Healthcare Practitioner", practitioner, "user_id")
+			dict_item.update({'practitioner': practitioner, 'practitioner_user': practitioner_user})
 
 	return result
 

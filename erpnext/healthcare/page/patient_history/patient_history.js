@@ -107,7 +107,12 @@ var get_documents = function(patient, me){
 							label += "<br/>"+data[i].subject;
 						}
 						data[i] = add_date_separator(data[i])
-						data[i].imgsrc = get_practitioner_image_file_link(data[i].practitioner)
+						if(data[i].practitioner_user){
+							data[i].imgsrc = frappe.utils.get_file_link(frappe.user_info(data[i].practitioner_user).image);
+						}
+						else{
+							data[i].imgsrc = 'https://avatars1.githubusercontent.com/u/3784093?s=64&v=4';
+						}
 						var time_line_heading = `<a>${data[i].practitioner}</a>`;
 						if(data[i].reference_doctype == "Patient Encounter"){
 							time_line_heading += ` done <a>${data[i].reference_doctype}</a> `
@@ -164,16 +169,6 @@ var get_documents = function(patient, me){
 		}
 	});
 };
-
-var get_practitioner_image_file_link = function(practitioner) {
-	let practitioner_user = null; // TODO: get practitioner user
-	if(practitioner_user){
-		return frappe.utils.get_file_link(frappe.user_info(practitioner_user).image);
-	}
-	else{
-		return 'https://avatars1.githubusercontent.com/u/3784093?s=64&v=4';
-	}
-}
 
 var add_date_separator = function(data) {
 	var date = frappe.datetime.str_to_obj(data.creation);
