@@ -13,7 +13,7 @@ function get_publishing_header() {
 
     return $(`
         <div class="publish-area empty">
-            <div class="flex justify-between align-flex-end">
+            <div class="publish-area-head">
                 ${title_html}
                 ${publish_button_html}
             </div>

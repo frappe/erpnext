@@ -80,13 +80,18 @@ erpnext.hub.Publish = class Publish {
 
 		this.make_publishing_dialog();
 
+		this.$wrapper.on('click', '[data-route]', (e) => {
+			e.stopPropagation();
+			const $target = $(e.currentTarget);
+			const route = $target.data().route;
+			frappe.set_route(route);
+		});
+
 		this.$wrapper.on('click', '.hub-card', (e) => {
 			const $target = $(e.currentTarget);
 			const item_code = $target.attr('data-id');
 			this.show_publishing_dialog_for_item(item_code);
-
 			this.$current_selected_card = $target.parent();
-
 		});
 	}
 
