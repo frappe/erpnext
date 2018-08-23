@@ -28,7 +28,10 @@ export default class SubPage {
 
 	make_wrapper() {
 		const page_name = frappe.get_route()[1];
-		this.$wrapper = $(`<div class="marketplace-page" data-page-name="${page_name}">`).appendTo(this.$parent);
+		this.$wrapper = $(`<div class="marketplace-page"
+			data-page-name="${page_name}">`
+		).appendTo(this.$parent);
+
 		this.hide();
 	}
 
