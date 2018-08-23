@@ -127,6 +127,23 @@ frappe.ui.form.on("BOM", {
 				if(!r.exc) frm.refresh_fields();
 			}
 		});
+	},
+
+	routing: function(frm) {
+		if (frm.doc.routing) {
+			frappe.call({
+				doc: frm.doc,
+				method: "get_routing",
+				freeze: true,
+				callback: function(r) {
+					if (!r.exc) {
+						frm.refresh_fields();
+						erpnext.bom.calculate_op_cost(frm.doc);
+						erpnext.bom.calculate_total(frm.doc);
+					}
+				}
+			});
+		}
 	}
 });
 

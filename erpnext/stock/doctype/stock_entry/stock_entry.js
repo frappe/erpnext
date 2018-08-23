@@ -654,7 +654,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	work_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		if(!me.frm.doc.work_order) {
+		if(!me.frm.doc.work_order || me.frm.doc.job_card) {
 			return;
 		}
 

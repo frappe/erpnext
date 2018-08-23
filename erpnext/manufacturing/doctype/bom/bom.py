@@ -89,6 +89,13 @@ class BOM(WebsiteGenerator):
 
 		return item
 
+	def get_routing(self):
+		if self.routing:
+			for d in frappe.get_all("BOM Operation", fields = ["*"],
+				filters = {'parenttype': 'Routing', 'parent': self.routing}):
+				child = self.append('operations', d)
+				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
+
 	def validate_rm_item(self, item):
 		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
 			frappe.throw(_("BOM #{0}: Raw material cannot be same as main Item").format(self.name))
@@ -578,7 +585,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="",
-			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.allow_transfer_for_manufacture")
+			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.allow_transfer_for_manufacture")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
