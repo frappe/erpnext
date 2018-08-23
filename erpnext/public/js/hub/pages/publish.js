@@ -4,29 +4,35 @@ import { get_local_item_card_html } from '../components/item_card';
 import { make_search_bar } from '../components/search_bar';
 import { get_publishing_header } from '../components/publishing_area';
 import { ItemPublishDialog } from '../components/item_publish_dialog';
+import PublishPage from '../components/PublishPage.vue';
 
-erpnext.hub.Publish = class Publish extends SubPage {
-	make_wrapper() {
-		super.make_wrapper();
+erpnext.hub.Publish = class Publish {
+	constructor(parent) {
 		this.items_data_to_publish = {};
 		this.unpublished_items = [];
 		this.fetched_items = [];
 		this.fetched_items_dict = {};
 
-		frappe.realtime.on("items-sync", (data) => {
-			this.$wrapper.find('.progress-bar').css('width', data.progress_percent+'%');
+		this.$wrapper = $(`<div id="vue-area">`).appendTo($(parent));
 
-			if(data.progress_percent === 100 || data.progress_percent === '100') {
-				setTimeout(() => {
-					hub.settings.sync_in_progress = 0;
-					frappe.db.get_doc('Hub Settings')
-						.then(doc => {
-							hub.settings = doc;
-							this.refresh();
-						});
-				}, 500);
-			}
-		});
+		frappe.app = new Vue({
+			render: h => h(PublishPage),
+			mounted() {
+				console.log('Mounted For Publish page');
+			},
+		}).$mount('#vue-area');
+	}
+
+	show() {
+		this.$wrapper.show();
+	}
+
+	hide() {
+		this.$wrapper.hide();
+	}
+
+	show_message(message) {
+		this.$wrapper.prepend(NotificationMessage(message));
 	}
 
 	refresh() {

@@ -17,6 +17,7 @@ function get_publishing_header() {
                 ${title_html}
                 ${publish_button_html}
             </div>
+            <div id="vue-area"></div>
             <div class="empty-items-container flex align-center flex-column justify-center">
                 <p class="text-muted">${__('No Items Selected')}</p>
             </div>
