@@ -23,6 +23,11 @@ export default {
 		item_id() {
 			return this.is_local ? 'item_code' : 'hub_item_code';
 		}
+	},
+	watch: {
+		items() {
+			frappe.dom.handle_broken_images($(this.$el));
+		}
 	}
 }
 </script>

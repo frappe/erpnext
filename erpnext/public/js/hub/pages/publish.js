@@ -8,28 +8,31 @@ import PublishPage from '../components/PublishPage.vue';
 
 erpnext.hub.Publish = class Publish {
 	constructor(parent) {
-		this.items_data_to_publish = {};
-		this.unpublished_items = [];
-		this.fetched_items = [];
-		this.fetched_items_dict = {};
-
 		this.$wrapper = $(`<div id="vue-area">`).appendTo($(parent));
 
-		frappe.app = new Vue({
-			render: h => h(PublishPage),
-			mounted() {
-				console.log('Mounted For Publish page');
-			},
+		new Vue({
+			render: h => h(PublishPage)
 		}).$mount('#vue-area');
 	}
 
 	show() {
-		this.$wrapper.show();
+		$('[data-page-name="publish"]').show();
 	}
 
 	hide() {
-		this.$wrapper.hide();
+		$('[data-page-name="publish"]').hide();
 	}
+
+
+
+
+
+
+	// this.items_data_to_publish = {};
+	// this.unpublished_items = [];
+	// this.fetched_items = [];
+	// this.fetched_items_dict = {};
+
 
 	show_message(message) {
 		this.$wrapper.prepend(NotificationMessage(message));
