@@ -17,9 +17,9 @@ erpnext.hub.BuyingMessages = class BuyingMessages extends SubPage {
 		this.get_item_details(item_code)
 			.then(item_details => {
 				this.item_details = item_details;
+				this.$message_container.find('.hub-section-header h4').text(this.item_details.item_name);
 
 				// make chat area
-				this.$message_container.find('.hub-section-header h4').text(this.item_details.item_name);
 				this.$message_container.find('.hub-section-body').html(`
 					<div class="col-md-7 message-container">
 						<div class="message-list"></div>

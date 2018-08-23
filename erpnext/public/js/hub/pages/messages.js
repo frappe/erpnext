@@ -57,16 +57,6 @@ erpnext.hub.Messages = class Messages extends SubPage {
 	get_interactions() {
 		return hub.call('get_sellers_with_interactions', { for_seller: hub.settings.company_email });
 	}
-
-	get_messages() {
-		const against_seller = frappe.get_route()[2];
-		if (!against_seller) return Promise.resolve([]);
-
-		return hub.call('get_messages', {
-			for_seller: hub.settings.company_email,
-			against_seller: against_seller
-		});
-	}
 }
 
 function get_message_area_html() {
