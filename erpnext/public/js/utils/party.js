@@ -171,7 +171,7 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 }
 
 erpnext.utils.get_shipping_address = function(frm, callback){
-	if (frm.doc.company) {
+	if (frm.doc.company && !frm.doc.shipping_address) {
 		frappe.call({
 			method: "frappe.contacts.doctype.address.address.get_shipping_address",
 			args: {
