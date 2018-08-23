@@ -25,13 +25,16 @@ function get_detail_view_html(item, allow_edit) {
 		stats = `${views_message}${dot_spacer}${rating_html} (${rating_count})`;
 	}
 
-	let favourite_button = !item.favourited
-		? `<button class="btn btn-default text-muted favourite-button" data-action="add_to_favourites">
-			${__('Save')} <i class="octicon octicon-heart text-extra-muted"></i>
-		</button>`
-		: `<button class="btn btn-default text-muted favourite-button disabled" data-action="add_to_favourites">
-			${__('Saved')}
-		</button>`;
+	let favourite_button = ''
+	if (hub.settings.registered) {
+		favourite_button = !item.favourited
+			? `<button class="btn btn-default text-muted favourite-button" data-action="add_to_favourites">
+				${__('Save')} <i class="octicon octicon-heart text-extra-muted"></i>
+			</button>`
+			: `<button class="btn btn-default text-muted favourite-button disabled" data-action="add_to_favourites">
+				${__('Saved')}
+			</button>`;
+	}
 
 	const contact_seller_button = item.hub_seller !== hub.settings.company_email
 		? `<button class="btn btn-primary" data-action="contact_seller">
@@ -114,7 +117,7 @@ function get_detail_view_html(item, allow_edit) {
 				<div class="col-md-12 form-footer">
 					<div class="form-comments">
 						<div class="timeline">
-							<div class="timeline-head"></div>
+							 <div class="timeline-head"></div>
 							<div class="timeline-items"></div>
 						</div>
 					</div>

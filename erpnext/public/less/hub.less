@@ -137,8 +137,9 @@ body[data-route^="marketplace/"] {
 	}
 
 	.hub-card-image {
-		min-width: 100%;
 		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.hub-search-container {
@@ -231,6 +232,33 @@ body[data-route^="marketplace/"] {
 	.publish-area.empty {
 		.hub-items-container {
 			display: none;
+		}
+	}
+
+	.publish-area-head {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20px;
+	}
+
+	.item-message-card {
+		height: 80px;
+		max-width: 500px;
+		margin-bottom: 10px;
+		padding: 10px;
+		border-radius: 4px;
+		.message-body {
+			margin-left: 60px;
+		}
+		.item-image {
+			float: left;
+			height: 50px;
+			width: 50px;
+			object-fit: contain;
+			// border-radius: 50%
+		}
+		.frappe-timestamp {
+			float: right;
 		}
 	}
 

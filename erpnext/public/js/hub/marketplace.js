@@ -254,8 +254,7 @@ erpnext.hub.Marketplace = class Marketplace {
 	register_seller(form_values) {
 		frappe.call({
 		    method: 'erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller',
-		    args: form_values,
-		    btn: $(e.currentTarget)
+		    args: form_values
 		}).then(() => {
 			this.register_dialog.hide();
 			frappe.set_route('marketplace', 'publish');
