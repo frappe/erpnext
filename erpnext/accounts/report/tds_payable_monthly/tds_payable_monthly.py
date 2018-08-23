@@ -4,10 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, flt
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category \
-	import get_advance_vouchers, get_debit_note_amount
+from frappe.utils import getdate
 
 def execute(filters=None):
 	filters["invoices"] = frappe.cache().hget("invoices", frappe.session.user)
@@ -63,12 +60,14 @@ def get_result(filters):
 				tds_deducted = k.credit
 				total_amount_credited += k.credit
 
-		rate = [i.tax_withholding_rate for i in tds_doc.rates \
+		rate = [i.tax_withholding_rate for i in tds_doc.rates
 			if i.fiscal_year == gle_map[d][0].fiscal_year][0]
 
-		out.append([supplier.pan, supplier.name, tds_doc.name, \
-			supplier.supplier_type, rate, total_amount_credited, tds_deducted, \
-			gle_map[d][0].posting_date, "Purchase Invoice", d])
+		if getdate(filters.from_date) <= gle_map[d][0].posting_date \
+			and getdate(filters.to_date) >= gle_map[d][0].posting_date:
+			out.append([supplier.pan, supplier.name, tds_doc.name,
+				supplier.supplier_type, rate, total_amount_credited, tds_deducted,
+				gle_map[d][0].posting_date, "Purchase Invoice", d])
 
 	return out
 
@@ -77,12 +76,12 @@ def get_supplier_map(filters):
 	# pre-fetch all distinct applicable tds docs
 	supplier_map, tds_docs = {}, {}
 	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
-	supplier_detail = frappe.db.get_all('Supplier',\
-		{"name": ["in", [d.supplier for d in filters["invoices"]]]}, \
+	supplier_detail = frappe.db.get_all('Supplier',
+		{"name": ["in", [d.supplier for d in filters["invoices"]]]},
 		["tax_withholding_category", "name", pan+" as pan", "supplier_type"])
 
 	for d in filters["invoices"]:
-		supplier_map[d.get("name")] = [k for k in supplier_detail \
+		supplier_map[d.get("name")] = [k for k in supplier_detail
 			if k.name == d.get("supplier")][0]
 
 	for d in supplier_detail:
@@ -97,7 +96,7 @@ def get_gle_map(filters):
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
 	gle = frappe.db.get_all('GL Entry',\
-		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]]},\
+		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]]},
 		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date"])
 
 	for d in gle:
@@ -180,10 +179,10 @@ def get_columns():
 @frappe.whitelist()
 def get_tds_invoices():
 	# fetch tds applicable supplier and fetch invoices for these suppliers
-	suppliers = [d.name for d in frappe.db.get_list("Supplier",\
+	suppliers = [d.name for d in frappe.db.get_list("Supplier",
 		{"tax_withholding_category": ["!=", ""]}, ["name"])]
 
-	invoices = frappe.db.get_list("Purchase Invoice", 
+	invoices = frappe.db.get_list("Purchase Invoice",
 		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
 	frappe.cache().hset("invoices", frappe.session.user, invoices)
