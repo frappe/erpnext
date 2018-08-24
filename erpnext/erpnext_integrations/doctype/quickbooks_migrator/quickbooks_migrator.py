@@ -267,7 +267,8 @@ def save_invoice(invoice):
 				"due_date": invoice.get("DueDate", "2020-01-01"),
 				"customer": frappe.get_all("Customer",
 					filters={
-						"quickbooks_id": invoice["CustomerRef"]["value"]
+						"quickbooks_id": invoice["CustomerRef"]["value"],
+						"company": company,
 					})[0]["name"],
 				"items": get_items(invoice["Line"]),
 				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"], invoice["Line"]),
@@ -294,7 +295,8 @@ def save_credit_memo(credit_memo):
 				"due_date": credit_memo.get("DueDate", "2020-01-01"),
 				"customer": frappe.get_all("Customer",
 					filters={
-						"quickbooks_id": credit_memo["CustomerRef"]["value"]
+						"quickbooks_id": credit_memo["CustomerRef"]["value"],
+						"company": company,
 					})[0]["name"],
 				"items": get_items(credit_memo["Line"], is_return=True),
 				"taxes": get_taxes(credit_memo["TxnTaxDetail"]["TaxLine"], credit_memo["Line"]),
@@ -337,7 +339,8 @@ def save_bill(bill):
 				"credit_to": credit_to_account,
 				"supplier": frappe.get_all("Supplier",
 					filters={
-						"quickbooks_id": bill["VendorRef"]["value"]
+						"quickbooks_id": bill["VendorRef"]["value"],
+						"company": company,
 					})[0]["name"],
 				"items": get_pi_items(bill["Line"]),
 				"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
@@ -363,7 +366,8 @@ def save_vendor_credit(vendor_credit):
 				"credit_to": credit_to_account,
 				"supplier": frappe.get_all("Supplier",
 					filters={
-						"quickbooks_id": vendor_credit["VendorRef"]["value"]
+						"quickbooks_id": vendor_credit["VendorRef"]["value"],
+						"company": company,
 					})[0]["name"],
 				"items": get_pi_items(vendor_credit["Line"], is_return=True),
 				"taxes": get_taxes(vendor_credit["TxnTaxDetail"]["TaxLine"]),
@@ -440,7 +444,7 @@ def save_purchase(purchase):
 					account = get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"])
 				elif line["DetailType"] == "ItemBasedExpenseLineDetail":
 					account = frappe.get_doc("Item",
-						{"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"]}
+						{"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"], "company": company}
 					).item_defaults[0].expense_account
 				accounts.append({
 					"account": account,
@@ -523,7 +527,8 @@ def save_sales_receipt(sales_receipt):
 				"due_date": sales_receipt.get("DueDate", "2020-01-01"),
 				"customer": frappe.get_all("Customer",
 					filters={
-						"quickbooks_id": sales_receipt["CustomerRef"]["value"]
+						"quickbooks_id": sales_receipt["CustomerRef"]["value"],
+						"company": company,
 					})[0]["name"],
 				"items": get_items(sales_receipt["Line"]),
 				"taxes": get_taxes(sales_receipt["TxnTaxDetail"]["TaxLine"], sales_receipt["Line"]),
@@ -634,7 +639,8 @@ def get_items(lines, is_return=False):
 			if line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
 				item = frappe.db.get_all("Item",
 					filters={
-						"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"]
+						"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"],
+						"company": company,
 					},
 					fields=["name", "stock_uom"]
 				)[0]
@@ -676,7 +682,8 @@ def get_pi_items(lines, is_return=False):
 		if line["DetailType"] == "ItemBasedExpenseLineDetail":
 			item = frappe.db.get_all("Item",
 				filters={
-					"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"]
+					"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"],
+					"company": company
 				},
 				fields=["name", "stock_uom"]
 			)[0]
