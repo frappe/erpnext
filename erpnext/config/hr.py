@@ -27,6 +27,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Checkin",
 				}
 			]
 		},
