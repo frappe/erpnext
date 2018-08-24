@@ -39,6 +39,7 @@ def map_fields(items):
 
 		item['doctype'] = 'Hub Item'
 		item['hub_seller'] = hub_seller
+		item.pop('attachments', None)
 
 	return items
 
@@ -71,24 +72,19 @@ def publish_selected_items(items_to_publish):
 	if not len(items_to_publish):
 		frappe.throw('No items to publish')
 
-	publishing_items = []
-
-	for item_additional_info in items_to_publish:
-		item_code = item_additional_info.get('item_code')
+	for item in items_to_publish:
+		item_code = item.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
 		frappe.get_doc({
 			'doctype': 'Hub Tracked Item',
 			'item_code': item_code,
-			'hub_category': item_additional_info.get('hub_category'),
-			'image_list': item_additional_info.get('image_list')
+			'hub_category': item.get('hub_category'),
+			'image_list': item.get('image_list')
 		}).insert()
 
-		item_data = frappe.get_doc("Item", item_code).as_dict().update(item_additional_info)
-		publishing_items.append(item_data)
 
-
-	items = map_fields(publishing_items)
+	items = map_fields(items_to_publish)
 
 	try:
 		item_sync_preprocess()

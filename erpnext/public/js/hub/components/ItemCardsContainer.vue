@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="item-cards-container">
 		<empty-state
 			v-if="items.length === 0"
 			:message="empty_state_message"
@@ -9,9 +9,12 @@
 		</empty-state>
 		<item-card
 			v-for="item in items"
-			:key="item[item_id]"
+			:key="item[item_id_fieldname]"
 			:item="item"
-			:is_local="is_local"
+			:item_id_fieldname="item_id_fieldname"
+			:on_click="on_click"
+			:allow_clear="editable"
+			@remove-item="$emit('remove-item', item[item_id_fieldname])"
 		>
 		</item-card>
 	</div>
@@ -24,28 +27,31 @@ import EmptyState from './EmptyState.vue';
 export default {
 	name: 'item-cards-container',
 	props: {
-		'items': Array,
-		'is_local': Boolean,
+		items: Array,
+		item_id_fieldname: String,
+		on_click: Function,
+		editable: Boolean,
 
-		'empty_state_message': String,
-		'empty_state_height': Number,
-		'empty_state_bordered': Boolean
+		empty_state_message: String,
+		empty_state_height: Number,
+		empty_state_bordered: Boolean
 	},
 	components: {
 		ItemCard,
 		EmptyState
 	},
-	computed: {
-		item_id() {
-			return this.is_local ? 'item_code' : 'hub_item_code';
-		}
-	},
 	watch: {
 		items() {
+			// TODO: handling doesn't work
 			frappe.dom.handle_broken_images($(this.$el));
 		}
 	}
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+	.item-cards-container {
+		margin: 0 -15px;
+		overflow: overlay;
+	}
+</style>
