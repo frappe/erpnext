@@ -1083,11 +1083,14 @@ class SalesInvoice(SellingController):
 		for item in self.get('items'):
 			last_gl_entry = False
 
+			if item.service_end_date.month > item.service_stop_date.month:
+				continue
+
 			booking_start_date = getdate(add_months(today(), -1))
 			booking_start_date = booking_start_date if booking_start_date>item.service_start_date else item.service_start_date
 
 			booking_end_date = getdate(add_days(today(), -1))
-			if booking_end_date>=item.service_end_date:
+			if booking_end_date>=item.service_end_date or item.service_stop_date<=booking_end_date:
 				last_gl_entry = True
 				booking_end_date = item.service_end_date
 
