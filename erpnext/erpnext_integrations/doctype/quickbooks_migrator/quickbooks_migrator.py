@@ -460,10 +460,16 @@ def save_deposit(deposit):
 
 			# Credit Mentioned Accounts
 			for line in deposit["Line"]:
-				accounts.append({
-					"account": get_account_name_by_id(line["DepositLineDetail"]["AccountRef"]["value"]),
-					"credit_in_account_currency": line["Amount"],
-				})
+				if "LinkedTxn" in line:
+					accounts.append({
+						"account": get_undeposited_funds_account(),
+						"credit_in_account_currency": line["Amount"],
+					})
+				else:
+					accounts.append({
+						"account": get_account_name_by_id(line["DepositLineDetail"]["AccountRef"]["value"]),
+						"credit_in_account_currency": line["Amount"],
+					})
 
 			# Create and Submit Journal Entry
 			frappe.get_doc({
