@@ -135,6 +135,9 @@ def save_account(account):
 				"is_group": "0",
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
+
+			if account["AccountSubType"] == "UndepositedFunds":
+				frappe.cache().set("quickbooks-cached-undeposited-funds-account-id", account["Id"])
 	except:
 		import traceback
 		traceback.print_exc()
@@ -941,6 +944,10 @@ def get_tax_rate():
 def get_shipping_account():
 	shipping_account_id = frappe.cache().get("quickbooks-cached-shipping-account-id").decode()
 	return get_account_name_by_id(shipping_account_id)
+
+def get_undeposited_funds_account():
+	undeposited_funds_account_id = frappe.cache().get("quickbooks-cached-undeposited-funds-account-id").decode()
+	return get_account_name_by_id(undeposited_funds_account_id)
 
 def get_unique_account_name(quickbooks_name):
 	quickbooks_account_name = "{} - QB".format(quickbooks_name)
