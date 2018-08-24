@@ -193,23 +193,54 @@ body[data-route^="marketplace/"] {
 	}
 
 	.item-message-card {
-		height: 80px;
-		max-width: 500px;
-		margin-bottom: 10px;
-		padding: 10px;
-		border-radius: 4px;
+		overflow: auto;
+		max-width: 600px;
+		margin-bottom: 15px;
+		border-radius: 3px;
+		border: 1px solid @border-color;
 		.message-body {
-			margin-left: 60px;
+			padding: 10px;
 		}
 		.item-image {
 			float: left;
 			height: 50px;
 			width: 50px;
 			object-fit: contain;
-			// border-radius: 50%
+			margin: 10px;
 		}
 		.frappe-timestamp {
 			float: right;
+		}
+	}
+
+	.selling-item-message-card {
+		max-width: 500px;
+		margin-bottom: 15px;
+		border-radius: 3px;
+		border: 1px solid @border-color;
+		.selling-item-detail {
+			overflow: auto;
+			.item-image {
+				float: left;
+				height: 80px;
+				width: 80px;
+				object-fit: contain;
+				margin: 5px;
+			}
+			.item-name {
+				margin-left: 10px;
+			}
+		}
+		.received-message-container {
+			clear: left;
+			background-color: @light-bg;
+			.received-message {
+				border-top: 1px solid @border-color;
+				padding: 10px;
+			}
+			.frappe-timestamp {
+				float: right;
+			}
 		}
 	}
 

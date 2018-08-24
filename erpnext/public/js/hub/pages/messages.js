@@ -8,29 +8,17 @@ erpnext.hub.Messages = class Messages extends SubPage {
 	}
 
 	refresh() {
-		const res = Promise.all([
-			this.get_buying_items(),
-			this.get_selling_items()
-		]);
-
-		res.then(([buying_items, selling_items]) => {
+		const messages_of = this.options[0];
+		this.get_items_for_messages(messages_of).then((items) => {
 			this.empty();
-
-			if (selling_items.length) {
-				// selling_items.map(item => {
-				// 	item.route = `marketplace/sell/${item.hub_item_code}/${}`
-				// });
-				this.render(selling_items, __('Selling'));
-			}
-
-			if (buying_items.length) {
-				buying_items.map(item => {
-					item.route = `marketplace/buy/${item.hub_item_code}`
+			if (items.length) {
+				items.map(item => {
+					item.route = `marketplace/${messages_of.toLowerCase()}/${item.hub_item_code}`
 				})
-				this.render(buying_items, __('Buying'));
+				this.render(items, __(messages_of));
 			}
 
-			if (!buying_items.length && !selling_items.length) {
+			if (!items.length && !items.length) {
 				this.render_empty_state();
 			}
 		});
@@ -46,12 +34,14 @@ erpnext.hub.Messages = class Messages extends SubPage {
 		this.$wrapper.html(empty_state);
 	}
 
-	get_buying_items() {
-		return hub.call('get_buying_items_for_messages', {}, 'action:send_message');
-	}
-
-	get_selling_items() {
-		return hub.call('get_selling_items_for_messages');
+	get_items_for_messages(messages_of) {
+		if (messages_of === 'Buying') {
+			return hub.call('get_buying_items_for_messages', {}, 'action:send_message');
+		} else if (messages_of === 'Selling') {
+			return hub.call('get_selling_items_for_messages');
+		} else {
+			frappe.throw('Invalid message type');
+		}
 	}
 
 	get_interactions() {
