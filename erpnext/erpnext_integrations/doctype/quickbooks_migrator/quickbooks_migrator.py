@@ -239,8 +239,9 @@ def save_vendor(vendor):
 
 def save_preference(preference):
 	try:
-		shipping_account_id = preference["SalesFormsPrefs"]["DefaultShippingAccount"]
-		frappe.cache().set("quickbooks-cached-shipping-account-id", shipping_account_id)
+		if preference["SalesFormsPrefs"]["AllowShipping"]:
+			shipping_account_id = preference["SalesFormsPrefs"]["DefaultShippingAccount"]
+			frappe.cache().set("quickbooks-cached-shipping-account-id", shipping_account_id)
 	except:
 		import traceback
 		traceback.print_exc()
