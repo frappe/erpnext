@@ -67,6 +67,7 @@ def fetch_data():
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
 	fetch_advance_payments(company_id=company_id)
+	fetch_tax_payments(company_id=company_id)
 	frappe.clear_messages()
 
 def publish(*args, **kwargs):
@@ -539,6 +540,40 @@ def save_advance_payment(advance_payment):
 		import traceback
 		traceback.print_exc()
 
+def save_tax_payment(tax_payment):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Tax Payment - {}".format(tax_payment["id"]), "company": company}):
+			accounts = []
+			for line in tax_payment["lines"]:
+				root_type = frappe.get_doc("Account", line["account"]).root_type
+				if root_type in ("Asset", "Income"):
+					if line["amount"] > 0:
+						posting_type = "debit_in_account_currency"
+					else:
+						posting_type = "credit_in_account_currency"
+				else:
+					if line["amount"] > 0:
+						posting_type = "credit_in_account_currency"
+					else:
+						posting_type = "debit_in_account_currency"
+
+				accounts.append({
+					"account": line["account"],
+					posting_type: abs(line["amount"]),
+				})
+
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"quickbooks_id": "Tax Payment - {}".format(tax_payment["id"]),
+				"naming_series": "JV-",
+				"company": company,
+				"posting_date": tax_payment["date"],
+				"accounts": accounts,
+			}).insert().submit()
+	except:
+		import traceback
+		traceback.print_exc()
+
 posting_type_field_mapping = {
 	"Credit": "credit_in_account_currency",
 	"Debit": "debit_in_account_currency",
@@ -751,6 +786,7 @@ save_methods = {
 	"SalesReceipt": save_sales_receipt,
 	"AdvancePayment": save_advance_payment,
 	"Preferences": save_preference,
+	"TaxPayment": save_tax_payment,
 }
 
 def save_entries(doctype, entries):
@@ -835,6 +871,33 @@ def fetch_advance_payments(company_id=None):
 				})
 	entity = "AdvancePayment"
 	save_entries(entity, advance_payments.values())
+	publish({"event": "finish"})
+	publish({"event": "message", "message": "Fetched {}".format(entity)})
+
+def fetch_tax_payments(company_id=None):
+	general_ledger = get((BASE_QUERY_URL + "/{}").format(company_id, "reports", "GeneralLedger"), params={
+		"start_date": "1900-01-01",
+		"end_date": "2900-12-12"
+	}).json()
+	tax_payments = {}
+	for section in general_ledger["Rows"]["Row"]:
+		account = get_account_name_by_id(section["Header"]["ColData"][0]["id"])
+		for row in section["Rows"]["Row"]:
+			data = row["ColData"]
+			if data[1]["value"] == "Tax Payment":
+				tax_payment_id = data[1]["id"]
+				if tax_payment_id not in tax_payments:
+					tax_payments[tax_payment_id] = {
+						"id": tax_payment_id,
+						"date": data[0]["value"],
+						"lines": []
+					}
+				tax_payments[tax_payment_id]["lines"].append({
+					"account": account,
+					"amount": frappe.utils.flt(data[6]["value"])
+				})
+	entity = "TaxPayment"
+	save_entries(entity, tax_payments.values())
 	publish({"event": "finish"})
 	publish({"event": "message", "message": "Fetched {}".format(entity)})
 
