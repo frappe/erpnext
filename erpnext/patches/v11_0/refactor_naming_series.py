@@ -87,6 +87,9 @@ def get_series():
 	series_to_set = {}
 
 	for doctype in doctype_series_map:
+		if not frappe.db.exists('DocType', doctype):
+			continue
+
 		if not frappe.db.a_row_exists(doctype):
 			continue
 
