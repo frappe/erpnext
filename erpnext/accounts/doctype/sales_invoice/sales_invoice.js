@@ -740,6 +740,26 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 	}
 })
 
+frappe.ui.form.on('Sales Invoice Item', {
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	}
+})
+
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
