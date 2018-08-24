@@ -246,6 +246,7 @@ def save_invoice(invoice):
 				# Quickbooks uses ISO 4217 Code
 				# of course this gonna come back to bite me
 				"currency": invoice["CurrencyRef"]["value"],
+				"conversion_rate": invoice.get("ExchangeRate", 1),
 
 				# Need to check with someone as to what exactly this field represents
 				# And whether it is equivalent to posting_date
@@ -277,6 +278,7 @@ def save_credit_memo(credit_memo):
 				"quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]),
 				"naming_series": "SINV-",
 				"currency": credit_memo["CurrencyRef"]["value"],
+				"conversion_rate": credit_memo.get("ExchangeRate", 1),
 				"posting_date": credit_memo["TxnDate"],
 				"due_date": credit_memo.get("DueDate", "2020-01-01"),
 				"customer": frappe.get_all("Customer",
@@ -317,6 +319,7 @@ def save_bill(bill):
 				"quickbooks_id": bill["Id"],
 				"naming_series": "PINV-",
 				"currency": bill["CurrencyRef"]["value"],
+				"conversion_rate": bill.get("ExchangeRate", 1),
 				"posting_date": bill["TxnDate"],
 				"due_date":  bill["TxnDate"],
 				"credit_to": credit_to_account,
@@ -342,6 +345,7 @@ def save_vendor_credit(vendor_credit):
 				"quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"]),
 				"naming_series": "PINV-",
 				"currency": vendor_credit["CurrencyRef"]["value"],
+				"conversion_rate": vendor_credit.get("ExchangeRate", 1),
 				"posting_date": vendor_credit["TxnDate"],
 				"due_date":  vendor_credit["TxnDate"],
 				"credit_to": credit_to_account,
@@ -499,6 +503,7 @@ def save_sales_receipt(sales_receipt):
 				"quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]),
 				"naming_series": "SINV-",
 				"currency": sales_receipt["CurrencyRef"]["value"],
+				"conversion_rate": sales_receipt.get("ExchangeRate", 1),
 				"posting_date": sales_receipt["TxnDate"],
 				"due_date": sales_receipt.get("DueDate", "2020-01-01"),
 				"customer": frappe.get_all("Customer",
