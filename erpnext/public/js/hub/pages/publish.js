@@ -1,4 +1,5 @@
 import PublishPage from '../components/PublishPage.vue';
+import Vue from 'vue/dist/vue.js';
 
 erpnext.hub.Publish = class Publish {
 	constructor(parent) {
