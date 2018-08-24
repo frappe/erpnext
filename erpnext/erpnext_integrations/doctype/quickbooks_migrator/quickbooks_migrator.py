@@ -84,7 +84,7 @@ def make_root_accounts():
 	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
 	for root in roots:
 		try:
-			if not frappe.db.exists("Account", encode_company_abbr("{} - QB".format(root), company)):
+			if not frappe.db.exists({"doctype": "Account", "name": encode_company_abbr("{} - QB".format(root), company), "company": company}):
 				frappe.get_doc({
 					"doctype": "Account",
 					"account_name": "{} - QB".format(root),
@@ -122,7 +122,7 @@ mapping = {
 def save_account(account):
 	# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
 	try:
-		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"]}):
+		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"], "company": company}):
 			account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank"}
 			is_child = account["SubAccount"]
 			if is_child:
@@ -150,7 +150,7 @@ def save_account(account):
 
 def save_tax_rate(tax_rate):
 	try:
-		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": "TaxRate - {}".format(tax_rate["Id"])}):
+		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]), "company": company}):
 			frappe.get_doc({
 				"doctype": "Account",
 				"quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]),
@@ -173,6 +173,7 @@ def save_customer(customer):
 			receivable_account = frappe.get_all("Account", filters={
 				"account_type": "Receivable",
 				"account_currency": customer["CurrencyRef"]["value"],
+				"company": company,
 			})[0]["name"]
 			erpcustomer = frappe.get_doc({
 				"doctype": "Customer",
@@ -243,7 +244,7 @@ def save_preference(preference):
 
 def save_invoice(invoice):
 	try:
-		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"]}):
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"], "company": company}):
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": invoice["Id"],
@@ -271,6 +272,7 @@ def save_invoice(invoice):
 				# Do not change posting_date upon submission
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
+				"company": company,
 			}).insert().submit()
 	except:
 		import traceback
@@ -278,7 +280,7 @@ def save_invoice(invoice):
 
 def save_credit_memo(credit_memo):
 	try:
-		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"])}):
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]), "company": company}):
 			frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]),
@@ -296,6 +298,7 @@ def save_credit_memo(credit_memo):
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"is_return": 1,
+				"company": company,
 			}).insert().submit()
 	except:
 		import traceback
@@ -303,7 +306,7 @@ def save_credit_memo(credit_memo):
 
 def save_journal_entry(journal_entry):
 	try:
-		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": journal_entry["Id"]}):
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": journal_entry["Id"], "company": company}):
 			frappe.get_doc({
 				"doctype": "Journal Entry",
 				"quickbooks_id": journal_entry["Id"],
@@ -318,7 +321,7 @@ def save_journal_entry(journal_entry):
 
 def save_bill(bill):
 	try:
-		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"]}):
+		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": bill["Id"], "company": company}):
 			credit_to_account = get_account_name_by_id(bill["APAccountRef"]["value"])
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
@@ -344,7 +347,7 @@ def save_bill(bill):
 
 def save_vendor_credit(vendor_credit):
 	try:
-		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"])}):
+		if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": "Vendor Credit - {}".format(vendor_credit["Id"]), "company": company}):
 			credit_to_account = get_account_name_by_id(vendor_credit["APAccountRef"]["value"])
 			frappe.get_doc({
 				"doctype": "Purchase Invoice",
@@ -363,6 +366,7 @@ def save_vendor_credit(vendor_credit):
 				"taxes": get_taxes(vendor_credit["TxnTaxDetail"]["TaxLine"]),
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
+				"company": company,
 				"is_return": 1
 			}).insert().submit()
 	except:
@@ -372,12 +376,13 @@ def save_vendor_credit(vendor_credit):
 
 def save_payment(payment):
 	try:
-		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "Payment - {}".format(payment["Id"])}):
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "Payment - {}".format(payment["Id"]), "company": company}):
 			# Check if Payment is Linked to an Invoice
 			if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
 				sales_invoice = frappe.get_all("Sales Invoice",
 					filters={
-						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"]
+						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"],
+						"company": company,
 					})[0]["name"]
 				deposit_account = get_account_name_by_id(payment["DepositToAccountRef"]["value"])
 				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
@@ -392,12 +397,13 @@ def save_payment(payment):
 
 def save_bill_payment(bill_payment):
 	try:
-		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "BillPayment - {}".format(bill_payment["Id"])}):
+		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "BillPayment - {}".format(bill_payment["Id"]), "company": company}):
 			# Check if Payment is Linked to an Invoice
 			if bill_payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Bill":
 				purchase_invoice = frappe.get_all("Purchase Invoice",
 					filters={
-						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"]
+						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"],
+						"company": company,
 					},
 					fields=["name", "base_grand_total"])[0]
 				if bill_payment["PayType"] == "Check":
@@ -418,7 +424,7 @@ def save_bill_payment(bill_payment):
 
 def save_purchase(purchase):
 	try:
-		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Purchase - {}".format(purchase["Id"])}):
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Purchase - {}".format(purchase["Id"]), "company": company}):
 			# Credit Bank Account
 			accounts = [{
 					"account": get_account_name_by_id(purchase["AccountRef"]["value"]),
@@ -461,7 +467,7 @@ def save_purchase(purchase):
 
 def save_deposit(deposit):
 	try:
-		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Deposit - {}".format(deposit["Id"])}):
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Deposit - {}".format(deposit["Id"]), "company": company}):
 			# Debit Bank Account
 			accounts = [{
 					"account": get_account_name_by_id(deposit["DepositToAccountRef"]["value"]),
@@ -503,7 +509,7 @@ def save_deposit(deposit):
 
 def save_sales_receipt(sales_receipt):
 	try:
-		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"])}):
+		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]), "company": company}):
 			invoice = frappe.get_doc({
 				"doctype": "Sales Invoice",
 				"quickbooks_id": "Sales Receipt - {}".format(sales_receipt["Id"]),
@@ -521,6 +527,7 @@ def save_sales_receipt(sales_receipt):
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"is_pos": 1,
+				"company": company,
 				"payments": [{
 					"mode_of_payment": sales_receipt["PaymentMethodRef"]["name"],
 					"account": get_account_name_by_id(sales_receipt["DepositToAccountRef"]["value"]),
@@ -535,7 +542,7 @@ def save_sales_receipt(sales_receipt):
 
 def save_advance_payment(advance_payment):
 	try:
-		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Advance Payment - {}".format(advance_payment["id"])}):
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Advance Payment - {}".format(advance_payment["id"]), "company": company}):
 			accounts = []
 			for line in advance_payment["lines"]:
 				root_type = frappe.get_doc("Account", line["account"]).root_type
@@ -936,7 +943,7 @@ class QuickBooksMigrator(Document):
 	pass
 
 def get_account_name_by_id(quickbooks_id):
-	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id})[0]["name"]
+	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id, "company": company})[0]["name"]
 
 def zen():
 	rise()
