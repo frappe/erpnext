@@ -333,6 +333,8 @@ class Company(NestedSet):
 					% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
 
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
+		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
+		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
