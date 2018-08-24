@@ -132,7 +132,7 @@ def save_account(account):
 				"account_type": account_type_mapping.get(account["AccountType"]),
 				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
-				"is_group": "0",
+				"is_group": is_group_account(account["Id"]),
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
 
@@ -966,6 +966,10 @@ def get_shipping_account():
 def get_undeposited_funds_account():
 	undeposited_funds_account_id = frappe.cache().get("quickbooks-cached-undeposited-funds-account-id").decode()
 	return get_account_name_by_id(undeposited_funds_account_id)
+
+def is_group_account(account_id):
+	accounts = json.loads(frappe.cache().get("quickbooks-cached-Account").decode())
+	return any(account["SubAccount"] and account["ParentRef"]["value"] == account_id for account in accounts)
 
 def get_unique_account_name(quickbooks_name):
 	quickbooks_account_name = "{} - QB".format(quickbooks_name)
