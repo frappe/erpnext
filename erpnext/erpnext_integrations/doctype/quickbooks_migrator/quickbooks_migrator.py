@@ -471,6 +471,13 @@ def save_deposit(deposit):
 						"credit_in_account_currency": line["Amount"],
 					})
 
+			# Debit Cashback if mentioned
+			if "CashBack" in deposit:
+				accounts.append({
+					"account": get_account_name_by_id(deposit["CashBack"]["AccountRef"]["value"]),
+					"debit_in_account_currency": deposit["CashBack"]["Amount"],
+				})
+
 			# Create and Submit Journal Entry
 			frappe.get_doc({
 				"doctype": "Journal Entry",
