@@ -1,19 +1,24 @@
 import SubPage from './subpage';
 
-erpnext.hub.BuyingMessages = class BuyingMessages extends SubPage {
+erpnext.hub.MessageList = class BuyingMessages extends SubPage {
 	make_wrapper() {
+		const messages_of = this.options[0];
+		if (messages_of === 'Buying') {
+			this.back_route = 'marketplace/buying-messages'
+		} else {
+			this.back_route = 'marketplace/selling-messages'
+		}
 		super.make_wrapper();
-		this.add_back_link(__('Back to Messages'), 'marketplace/messages');
+		this.add_back_link(__('Back to Messages'), this.back_route);
 		this.$message_container = this.add_section({ title: 'Buy' });
 	}
 
 	refresh() {
 		const item_code = frappe.get_route()[2] || null;
 		if (!item_code) {
-			frappe.set_route('marketplace/messages');
+			frappe.set_route(this.back_route);
 			return;
 		}
-
 		this.get_item_details(item_code)
 			.then(item_details => {
 				this.item_details = item_details;
