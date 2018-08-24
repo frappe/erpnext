@@ -272,7 +272,7 @@ def save_invoice(invoice):
 						"company": company,
 					})[0]["name"],
 				"items": get_items(invoice["Line"]),
-				"taxes": get_taxes(invoice["TxnTaxDetail"]["TaxLine"], invoice["Line"]),
+				"taxes": get_taxes(invoice["TxnTaxDetail"].get("TaxLine", []), invoice["Line"]),
 
 				# Do not change posting_date upon submission
 				"set_posting_time": 1,
