@@ -17,6 +17,7 @@ client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret"
 scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
 redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
 company = frappe.db.get_value("Quickbooks Migrator", None, "company")
+default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
@@ -571,6 +572,7 @@ def get_items(lines, is_return=False):
 					"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 					"qty": line["SalesItemLineDetail"]["Qty"],
 					"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
+					"cost_center": default_cost_center,
 					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
 				})
 			else:
@@ -583,6 +585,7 @@ def get_items(lines, is_return=False):
 					"income_account": get_shipping_account(),
 					"qty": 1,
 					"price_list_rate": line["Amount"],
+					"cost_center": default_cost_center,
 					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
 				})
 			if is_return:
@@ -611,6 +614,7 @@ def get_pi_items(lines, is_return=False):
 				"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
 				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
 				"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
+				"cost_center": default_cost_center,
 				"item_tax_rate": json.dumps(get_item_taxes(line["ItemBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
 		elif line["DetailType"] == "AccountBasedExpenseLineDetail":
@@ -622,6 +626,7 @@ def get_pi_items(lines, is_return=False):
 				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"qty": 1,
 				"price_list_rate": line["Amount"],
+				"cost_center": default_cost_center,
 				"item_tax_rate": json.dumps(get_item_taxes(line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
 			})
 		if is_return:
@@ -652,6 +657,7 @@ def get_taxes(lines, items=None):
 				"charge_type": "On Net Total",
 				"account_head": account_head,
 				"description": account_head,
+				"cost_center": default_cost_center,
 				"rate": 0,
 			})
 		else:
@@ -662,6 +668,7 @@ def get_taxes(lines, items=None):
 				"row_id": parent_row_id,
 				"account_head": account_head,
 				"description": account_head,
+				"cost_center": default_cost_center,
 				"rate": line["TaxLineDetail"]["TaxPercent"],
 			})
 	return taxes
