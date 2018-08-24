@@ -456,7 +456,7 @@ def save_purchase(purchase):
 			if "TxnTaxDetail" in purchase:
 				for line in purchase["TxnTaxDetail"]["TaxLine"]:
 					accounts.append({
-						"account": get_account_name_by_id(line["TaxLineDetail"]["TaxRateRef"]["value"]),
+						"account": get_account_name_by_id("TaxRate - {}".format(line["TaxLineDetail"]["TaxRateRef"]["value"])),
 						"debit_in_account_currency": line["Amount"],
 					})
 
