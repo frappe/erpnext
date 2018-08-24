@@ -27,6 +27,8 @@ doctype_js = {
 	"Communication": "public/js/communication.js",
 }
 
+welcome_email = "erpnext.setup.utils.welcome_email"
+
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
