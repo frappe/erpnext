@@ -13,14 +13,19 @@
 			<h5>{{ page_title }}</h5>
 
 			<button class="btn btn-primary btn-sm publish-items"
-				:disabled="no_selected_items">
+				:disabled="no_selected_items"
+				@click="publish_selected_items"
+			>
 				<span>{{ publish_button_text }}</span>
 			</button>
 		</div>
 
 		<item-cards-container
 			:items="selected_items"
-			:is_local="true"
+			:item_id_fieldname="item_id_fieldname"
+			:editable="true"
+			@remove-item="remove_item_from_selection"
+
 			:empty_state_message="empty_state_message"
 			:empty_state_bordered="true"
 			:empty_state_height="80"
@@ -38,7 +43,8 @@
 
 		<item-cards-container
 			:items="valid_items"
-			:is_local="true"
+			:item_id_fieldname="item_id_fieldname"
+			:on_click="show_publishing_dialog_for_item"
 		>
 		</item-cards-container>
 	</div>
@@ -48,6 +54,7 @@
 import SearchInput from './SearchInput.vue';
 import ItemCardsContainer from './ItemCardsContainer.vue';
 import NotificationMessage from './NotificationMessage.vue';
+import { ItemPublishDialog } from './item_publish_dialog';
 
 export default {
 	name: 'publish-page',
@@ -56,7 +63,9 @@ export default {
 			page_name: frappe.get_route()[1],
 			valid_items: [],
 			selected_items: [],
+			items_data_to_publish: {},
 			search_value: '',
+			item_id_fieldname: 'item_code',
 
 			// Constants
 			page_title: __('Publish Products'),
@@ -95,10 +104,20 @@ export default {
 				text = `Publish ${number} Products`;
 			}
 			return __(text);
-		}
+		},
+
+		items_dict() {
+			let items_dict = {};
+			this.valid_items.map(item => {
+				items_dict[item[this.item_id_fieldname]] = item
+			})
+
+			return items_dict;
+		},
 	},
 	created() {
 		this.get_valid_items();
+		this.make_publishing_dialog();
 	},
 	methods: {
 		get_valid_items() {
@@ -113,8 +132,86 @@ export default {
 			})
 		},
 
+		publish_selected_items() {
+			frappe.call(
+			'erpnext.hub_node.api.publish_selected_items',
+				{
+					items_to_publish: this.selected_items
+				}
+			)
+			.then((r) => {
+				this.selected_items = [];
+				return frappe.db.get_doc('Hub Settings');
+			})
+			.then(doc => {
+				hub.settings = doc;
+				this.add_last_sync_message();
+			});
+		},
+
+		add_last_sync_message() {
+			this.last_sync_message = __(`Last sync was
+				<a href="#marketplace/profile">
+					${comment_when(hub.settings.last_sync_datetime)}</a>.
+				<a href="#marketplace/my-products">
+					See your Published Products</a>.`);
+		},
+
 		clear_last_sync_message() {
 			this.last_sync_message = '';
+		},
+
+		remove_item_from_selection(item_code) {
+			this.selected_items = this.selected_items
+				.filter(item => item.item_code !== item_code);
+		},
+
+		make_publishing_dialog() {
+			this.item_publish_dialog = ItemPublishDialog(
+				{
+					fn: (values) => {
+						this.add_item_to_publish(values);
+						this.item_publish_dialog.hide();
+					}
+				},
+				{
+					fn: () => {
+						const values = this.item_publish_dialog.get_values(true);
+						this.update_items_data_to_publish(values);
+					}
+				}
+			);
+		},
+
+		add_item_to_publish(values) {
+			this.update_items_data_to_publish(values);
+
+			const item_code  = values.item_code;
+			let item_doc = this.items_dict[item_code];
+
+			const item_to_publish = Object.assign({}, item_doc, values);
+			this.selected_items.push(item_to_publish);
+		},
+
+		update_items_data_to_publish(values) {
+			this.items_data_to_publish[values.item_code] = values;
+		},
+
+		show_publishing_dialog_for_item(item_code) {
+			let item_data = this.items_data_to_publish[item_code];
+			if(!item_data) { item_data = { item_code }; };
+
+			this.item_publish_dialog.clear();
+
+			const item_doc = this.items_dict[item_code];
+			if(item_doc) {
+				this.item_publish_dialog.fields_dict.image_list.set_data(
+					item_doc.attachments.map(attachment => attachment.file_url)
+				);
+			}
+
+			this.item_publish_dialog.set_values(item_data);
+			this.item_publish_dialog.show();
 		}
 	}
 }

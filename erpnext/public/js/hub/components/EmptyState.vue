@@ -25,7 +25,7 @@ export default {
 
 	.empty-state {
 		height: 500px;
-		margin: 15px 0px;
+		margin: 15px;
 	}
 
 	.empty-state.bordered {
