@@ -10,6 +10,7 @@ from requests_oauthlib import OAuth2Session
 import json, requests
 from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from frappe.model.naming import append_number_if_name_exists
 
 
 client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
@@ -125,7 +126,7 @@ def save_account(account):
 			frappe.get_doc({
 				"doctype": "Account",
 				"quickbooks_id": account["Id"],
-				"account_name": "{} - QB".format(account["Name"]),
+				"account_name": get_unique_account_name(account["Name"]),
 				"root_type": mapping[account["AccountType"]],
 				"account_type": account_type_mapping.get(account["AccountType"]),
 				"account_currency": account["CurrencyRef"]["value"],
@@ -877,3 +878,19 @@ def get_tax_rate():
 def get_shipping_account():
 	shipping_account_id = frappe.cache().get("quickbooks-cached-shipping-account-id").decode()
 	return get_account_name_by_id(shipping_account_id)
+
+def get_unique_account_name(quickbooks_name):
+	quickbooks_account_name = "{} - QB".format(quickbooks_name)
+	company_encoded_account_name = encode_company_abbr(quickbooks_account_name, company)
+	appended_account_name = append_number_if_name_exists("Account",
+		company_encoded_account_name,
+		filters={"company": company},
+	)
+	# Check for name collision
+	if appended_account_name == company_encoded_account_name:
+		unique_account_name = quickbooks_account_name
+	else:
+		# Remove appended Number and append it to quickbooks_account_name
+		appended_number = frappe.utils.cint(appended_account_name.split("-")[-1])
+		unique_account_name = "{} - {}".format(quickbooks_account_name, appended_number)
+	return unique_account_name
