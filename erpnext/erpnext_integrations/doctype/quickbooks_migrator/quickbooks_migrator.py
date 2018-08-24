@@ -169,7 +169,7 @@ def save_tax_code(tax_code):
 
 def save_customer(customer):
 	try:
-		if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"]}):
+		if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"], "company": company}):
 			receivable_account = frappe.get_all("Account", filters={
 				"account_type": "Receivable",
 				"account_currency": customer["CurrencyRef"]["value"],
@@ -184,6 +184,7 @@ def save_customer(customer):
 				"default_currency": customer["CurrencyRef"]["value"],
 				"accounts": [{"company": company, "account": receivable_account}],
 				"territory" : _("All Territories"),
+				"company": company,
 			}).insert(ignore_permissions=True)
 			if "BillAddr" in customer:
 				create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
@@ -195,7 +196,7 @@ def save_customer(customer):
 
 def save_item(item):
 	try:
-		if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"]}):
+		if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"], "company": company}):
 			if item["Type"] in ("Service", "Inventory"):
 				item_dict = {
 					"doctype": "Item",
@@ -204,6 +205,7 @@ def save_item(item):
 					"stock_uom": "Unit",
 					"is_stock_item": 0,
 					"item_group": "All Item Groups",
+					"company": company,
 					"item_defaults": [{"company": company}]
 				}
 				if "ExpenseAccountRef" in item:
@@ -219,12 +221,13 @@ def save_item(item):
 
 def save_vendor(vendor):
 	try:
-		if not frappe.db.exists({"doctype": "Supplier", "quickbooks_id": vendor["Id"]}):
+		if not frappe.db.exists({"doctype": "Supplier", "quickbooks_id": vendor["Id"], "company": company}):
 			erpsupplier = frappe.get_doc({
 				"doctype": "Supplier",
 				"quickbooks_id": vendor["Id"],
 				"supplier_name" : vendor["DisplayName"],
 				"supplier_group" : _("All Supplier Groups"),
+				"company": company,
 			}).insert(ignore_permissions=True)
 			if "BillAddr" in vendor:
 				create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
@@ -790,6 +793,10 @@ def make_custom_fields():
 	for doctype in relevant_doctypes:
 		make_custom_quickbooks_id_field(doctype)
 
+	relevant_doctypes = ["Customer", "Item", "Supplier"]
+	for doctype in relevant_doctypes:
+		make_custom_company_field(doctype)
+
 def make_custom_quickbooks_id_field(doctype):
 	if not frappe.get_meta(doctype).has_field("quickbooks_id"):
 		frappe.get_doc({
@@ -798,7 +805,17 @@ def make_custom_quickbooks_id_field(doctype):
 			"dt": doctype,
 			"fieldname": "quickbooks_id",
 			"fieldtype": "Data",
-			"unique": True
+		}).insert(ignore_permissions=True)
+
+def make_custom_company_field(doctype):
+	if not frappe.get_meta(doctype).has_field("company"):
+		frappe.get_doc({
+			"doctype": "Custom Field",
+			"label": "Company",
+			"dt": doctype,
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
 		}).insert(ignore_permissions=True)
 
 save_methods = {
