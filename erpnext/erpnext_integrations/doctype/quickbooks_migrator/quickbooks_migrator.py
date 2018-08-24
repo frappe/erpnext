@@ -720,11 +720,12 @@ def get_item_taxes(tax_code):
 	if tax_code != "NON":
 		tax_code = get_tax_code()[tax_code]
 		for rate_list_type in ("SalesTaxRateList", "PurchaseTaxRateList"):
-			for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
-				if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
-					tax_head = get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
-					tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
-					item_taxes[tax_head] = tax_rate["RateValue"]
+			if rate_list_type in tax_code:
+				for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
+					if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
+						tax_head = get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
+						tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
+						item_taxes[tax_head] = tax_rate["RateValue"]
 	return item_taxes
 
 def get_taxes(lines, items=None):
