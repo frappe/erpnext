@@ -124,6 +124,12 @@ def save_account(account):
 	try:
 		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"]}):
 			account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank"}
+			is_child = account["SubAccount"]
+			if is_child:
+				parent_account = get_account_name_by_id(account["ParentRef"]["value"])
+			else:
+				parent_account = encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company)
+
 			frappe.get_doc({
 				"doctype": "Account",
 				"quickbooks_id": account["Id"],
@@ -131,7 +137,7 @@ def save_account(account):
 				"root_type": mapping[account["AccountType"]],
 				"account_type": account_type_mapping.get(account["AccountType"]),
 				"account_currency": account["CurrencyRef"]["value"],
-				"parent_account": encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company),
+				"parent_account": parent_account,
 				"is_group": is_group_account(account["Id"]),
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
