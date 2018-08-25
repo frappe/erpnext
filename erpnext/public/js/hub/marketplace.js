@@ -1,17 +1,20 @@
+import Vue from 'vue/dist/vue.js';
+
 // pages
 import './pages/home';
-import './pages/favourites';
 import './pages/search';
 import './pages/category';
 import './pages/item';
 import './pages/seller';
 import './pages/register';
 import './pages/profile';
-import './pages/publish';
 import './pages/published_products';
 import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
+
+import SavedProducts from './pages/SavedProducts.vue';
+import Publish from './pages/Publish.vue';
 
 // components
 import { ProfileDialog } from './components/profile_dialog';
@@ -197,7 +200,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		// registered seller routes
 		if (route[1] === 'saved-products' && !this.subpages['saved-products']) {
-			this.subpages['saved-products'] = new erpnext.hub.SavedProducts(this.$body);
+			this.subpages['saved-products'] = new erpnext.hub.SavedProductsPage(this.$body);
 		}
 
 		if (route[1] === 'profile' && !this.subpages.profile) {
@@ -205,7 +208,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'publish' && !this.subpages.publish) {
-			this.subpages.publish = new erpnext.hub.Publish(this.$body);
+			this.subpages.publish = new erpnext.hub.PublishPage(this.$body);
 		}
 
 		if (route[1] === 'my-products' && !this.subpages['my-products']) {
@@ -262,4 +265,42 @@ erpnext.hub.Marketplace = class Marketplace {
 		    erpnext.hub.trigger('seller-registered');
 		});
 	}
+}
+
+
+erpnext.hub.SavedProductsPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-saved">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(SavedProducts)
+		}).$mount('#vue-area-saved');
+	}
+
+	show() {
+		$('[data-page-name="saved-products"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="saved-products"]').hide();
+	}
+}
+
+erpnext.hub.PublishPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(Publish)
+		}).$mount('#vue-area');
+	}
+
+	show() {
+		$('[data-page-name="publish"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="publish"]').hide();
+	}
+
 }

@@ -53,10 +53,10 @@
 </template>
 
 <script>
-import SearchInput from './SearchInput.vue';
-import ItemCardsContainer from './ItemCardsContainer.vue';
-import NotificationMessage from './NotificationMessage.vue';
-import { ItemPublishDialog } from './item_publish_dialog';
+import SearchInput from '../components/SearchInput.vue';
+import ItemCardsContainer from '../components/ItemCardsContainer.vue';
+import NotificationMessage from '../components/NotificationMessage.vue';
+import { ItemPublishDialog } from '../components/item_publish_dialog';
 
 export default {
 	name: 'publish-page',
