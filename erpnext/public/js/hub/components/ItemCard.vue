@@ -1,24 +1,24 @@
 <template>
-	<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
-		<div class="hub-card is_local"
+	<div v-if="item.seen" class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
+		<div class="hub-card"
 			@click="on_click(item_id)"
 		>
 			<div class="hub-card-header flex justify-between">
-				<div>
+				<div class="ellipsis" :style="{ width: '85%' }">
 					<div class="hub-card-title ellipsis bold">{{ title }}</div>
 					<div class="hub-card-subtitle ellipsis text-muted" v-html='subtitle'></div>
 				</div>
 				<i v-if="allow_clear"
 					class="octicon octicon-x text-extra-muted"
-					@click="$emit('remove-item', item_id)"
+					@click.stop="$emit('remove-item', item_id)"
 				>
 				</i>
 			</div>
 			<div class="hub-card-body">
 				<img class="hub-card-image" :src="item.image"/>
 				<div class="hub-card-overlay">
-					<div class="hub-card-overlay-body">
-						<div class="hub-card-overlay-button" style="right: 15px; bottom: 15px;">
+					<div v-if="is_local" class="hub-card-overlay-body">
+						<div class="hub-card-overlay-button">
 							<button class="btn btn-default zoom-view">
 								<i class="octicon octicon-pencil text-muted"></i>
 							</button>
@@ -34,13 +34,28 @@
 
 export default {
 	name: 'item-card',
-	props: ['item', 'item_id_fieldname', 'on_click', 'allow_clear'],
+	props: ['item', 'item_id_fieldname', 'is_local', 'on_click', 'allow_clear'],
 	computed: {
 		title() {
-			return this.item.item_name
+			const item_name = this.item.item_name || this.item.name;
+			return strip_html(item_name);
 		},
 		subtitle() {
-			return comment_when(this.item.creation);
+			const dot_spacer = '<span aria-hidden="true"> · </span>';
+			if(this.is_local){
+				return comment_when(this.item.creation);
+			} else {
+				let subtitle_items = [comment_when(this.item.creation)];
+				const rating = this.item.average_rating;
+
+				if (rating > 0) {
+					subtitle_items.push(rating + `<i class='fa fa-fw fa-star-o'></i>`)
+				}
+
+				subtitle_items.push(this.item.company);
+
+				return subtitle_items.join(dot_spacer);
+			}
 		},
 		item_id() {
 			return this.item[this.item_id_fieldname];
@@ -58,6 +73,7 @@ export default {
 		border: 1px solid @border-color;
 		border-radius: 4px;
 		overflow: hidden;
+		cursor: pointer;
 
 		&:hover .hub-card-overlay {
 			display: block;

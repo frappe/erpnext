@@ -12,6 +12,7 @@
 			:key="item[item_id_fieldname]"
 			:item="item"
 			:item_id_fieldname="item_id_fieldname"
+			:is_local="is_local"
 			:on_click="on_click"
 			:allow_clear="editable"
 			@remove-item="$emit('remove-item', item[item_id_fieldname])"
@@ -29,6 +30,7 @@ export default {
 	props: {
 		items: Array,
 		item_id_fieldname: String,
+		is_local: Boolean,
 		on_click: Function,
 		editable: Boolean,
 
