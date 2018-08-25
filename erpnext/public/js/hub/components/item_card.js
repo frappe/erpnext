@@ -1,12 +1,4 @@
 function get_item_card_html(item) {
-	if (item.recent_message) {
-		return get_buying_item_message_card_html(item);
-	}
-
-	if (item.recent_messages) {
-		return get_selling_item_message_card_html(item);
-	}
-
 	const item_name = item.item_name || item.name;
 	const title = strip_html(item_name);
 	const img_url = item.image;
@@ -120,20 +112,23 @@ function get_buying_item_message_card_html(item) {
 	const content = strip_html(message.content)
 
 	// route
-	if (!item.route) {
-		item.route = `marketplace/item/${item.hub_item_code}`
-	}
-
+	item.route = `marketplace/buying/${item.hub_item_code}`
 
 	const item_html = `
-		<div class="item-message-card" data-route="${item.route}">
-			<img class="item-image" src="${item.image}">
-			<div class="message-body">
-				<span class="text-muted">${comment_when(message.creation, true)}</span>
-				<span class="bold">${item_name}</span>
-				<div class="ellipsis">
-					<span>${sender}: </span>
-					<span>${content}</span>
+		<div class="col-md-7">
+			<div class="hub-list-item" data-route="${item.route}">
+				<div class="hub-list-left">
+					<img class="hub-list-image" src="${item.image}">
+					<div class="hub-list-body ellipsis">
+						<div class="hub-list-title">${item_name}</div>
+						<div class="hub-list-subtitle ellipsis">
+							<span>${sender}: </span>
+							<span>${content}</span>
+						</div>
+					</div>
+				</div>
+				<div class="hub-list-right">
+					<span class="text-muted">${comment_when(message.creation, true)}</span>
 				</div>
 			</div>
 		</div>
@@ -152,7 +147,7 @@ function get_selling_item_message_card_html(item) {
 	}
 
 	let received_messages = '';
-	item.recent_messages.forEach(message => {
+	item.received_messages.forEach(message => {
 		const sender = message.sender === frappe.session.user ? 'You' : message.sender
 		const content = strip_html(message.content)
 
@@ -183,5 +178,8 @@ function get_selling_item_message_card_html(item) {
 }
 
 export {
-	get_item_card_html
+	get_item_card_html,
+	get_local_item_card_html,
+	get_buying_item_message_card_html,
+	get_selling_item_message_card_html
 }

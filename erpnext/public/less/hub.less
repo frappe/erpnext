@@ -192,25 +192,45 @@ body[data-route^="marketplace/"] {
 		margin-bottom: 20px;
 	}
 
-	.item-message-card {
-		overflow: auto;
-		max-width: 600px;
+	.hub-list-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border: 1px solid @border-color;
 		margin-bottom: 15px;
 		border-radius: 3px;
-		border: 1px solid @border-color;
-		.message-body {
-			padding: 10px;
+	}
+
+	.hub-list-left {
+		display: flex;
+		align-items: center;
+		max-width: 90%;
+	}
+
+	.hub-list-right {
+		padding-right: 15px;
+	}
+
+	.hub-list-image {
+		width: 58px;
+		height: 58px;
+		border-right: 1px solid @border-color;
+
+		&::after {
+			font-size: 12px;
 		}
-		.item-image {
-			float: left;
-			height: 50px;
-			width: 50px;
-			object-fit: contain;
-			margin: 10px;
-		}
-		.frappe-timestamp {
-			float: right;
-		}
+	}
+
+	.hub-list-body {
+		padding: 12px 15px;
+	}
+
+	.hub-list-title {
+		font-weight: bold;
+	}
+
+	.hub-list-subtitle {
+		color: @text-muted;
 	}
 
 	.selling-item-message-card {
