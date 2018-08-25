@@ -9,7 +9,7 @@
 		</empty-state>
 		<item-card
 			v-for="item in items"
-			:key="item[item_id_fieldname]"
+			:key="container_name + '_' +item[item_id_fieldname]"
 			:item="item"
 			:item_id_fieldname="item_id_fieldname"
 			:is_local="is_local"
@@ -29,6 +29,7 @@ import EmptyState from './EmptyState.vue';
 export default {
 	name: 'item-cards-container',
 	props: {
+		container_name: String,
 		items: Array,
 		item_id_fieldname: String,
 		is_local: Boolean,

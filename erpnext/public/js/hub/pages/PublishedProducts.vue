@@ -6,6 +6,7 @@
 		<h5>{{ page_title }}</h5>
 
 		<item-cards-container
+			:container_name="page_title"
 			:items="items"
 			:item_id_fieldname="item_id_fieldname"
 			:on_click="go_to_item_details_page"

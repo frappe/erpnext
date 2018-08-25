@@ -1,7 +1,6 @@
 import Vue from 'vue/dist/vue.js';
 
 // pages
-import './pages/home';
 import './pages/item';
 import './pages/seller';
 import './pages/profile';
@@ -9,6 +8,7 @@ import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
 
+import Home from './pages/Home.vue';
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
 import Category from './pages/Category.vue';
@@ -170,7 +170,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'home' && !this.subpages.home) {
-			this.subpages.home = new erpnext.hub.Home(this.$body);
+			this.subpages.home = new erpnext.hub.HomePage(this.$body);
 		}
 
 		if (route[1] === 'search' && !this.subpages.search) {
@@ -266,6 +266,23 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 }
 
+erpnext.hub.HomePage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-home">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(Home)
+		}).$mount('#vue-area-home');
+	}
+
+	show() {
+		$('[data-page-name="home"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="home"]').hide();
+	}
+}
 
 erpnext.hub.SavedProductsPage = class {
 	constructor(parent) {
