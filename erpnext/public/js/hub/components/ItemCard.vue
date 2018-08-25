@@ -1,5 +1,5 @@
 <template>
-	<div v-if="item.seen" class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
+	<div v-if="seen" class="col-md-3 col-sm-4 col-xs-6 hub-card-container">
 		<div class="hub-card"
 			@click="on_click(item_id)"
 		>
@@ -34,7 +34,7 @@
 
 export default {
 	name: 'item-card',
-	props: ['item', 'item_id_fieldname', 'is_local', 'on_click', 'allow_clear'],
+	props: ['item', 'item_id_fieldname', 'is_local', 'on_click', 'allow_clear', 'seen'],
 	computed: {
 		title() {
 			const item_name = this.item.item_name || this.item.name;

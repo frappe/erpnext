@@ -15,6 +15,7 @@
 			:is_local="is_local"
 			:on_click="on_click"
 			:allow_clear="editable"
+			:seen="item.hasOwnProperty('seen') ? item.seen : true"
 			@remove-item="$emit('remove-item', item[item_id_fieldname])"
 		>
 		</item-card>

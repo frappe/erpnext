@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import ItemCardsContainer from './ItemCardsContainer.vue';
+import ItemCardsContainer from '../components/ItemCardsContainer.vue';
 
 export default {
 	name: 'saved-products-page',
@@ -50,10 +50,7 @@ export default {
 				'action:item_favourite'
 			)
 			.then((items) => {
-				this.items = items.map(item => {
-					item.seen = true;
-					return item;
-				});
+				this.items = items;
 			})
 		},
 
