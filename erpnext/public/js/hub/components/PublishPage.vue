@@ -23,6 +23,7 @@
 		<item-cards-container
 			:items="selected_items"
 			:item_id_fieldname="item_id_fieldname"
+			:is_local="true"
 			:editable="true"
 			@remove-item="remove_item_from_selection"
 
@@ -44,6 +45,7 @@
 		<item-cards-container
 			:items="valid_items"
 			:item_id_fieldname="item_id_fieldname"
+			:is_local="true"
 			:on_click="show_publishing_dialog_for_item"
 		>
 		</item-cards-container>

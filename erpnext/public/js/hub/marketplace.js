@@ -80,8 +80,8 @@ erpnext.hub.Marketplace = class Marketplace {
 		$nav_group.empty();
 
 		const user_specific_items_html = this.registered
-			? `<li class="hub-sidebar-item" data-route="marketplace/favourites">
-					${__('Favorites')}
+			? `<li class="hub-sidebar-item" data-route="marketplace/saved-products">
+					${__('Saved Products')}
 				</li>
 				<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
 					${__('Your Profile')}
@@ -196,8 +196,8 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		// registered seller routes
-		if (route[1] === 'favourites' && !this.subpages.favourites) {
-			this.subpages.favourites = new erpnext.hub.Favourites(this.$body);
+		if (route[1] === 'saved-products' && !this.subpages['saved-products']) {
+			this.subpages['saved-products'] = new erpnext.hub.SavedProducts(this.$body);
 		}
 
 		if (route[1] === 'profile' && !this.subpages.profile) {
@@ -221,7 +221,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		// dont allow unregistered users to access registered routes
-		const registered_routes = ['favourites', 'profile', 'publish', 'my-products', 'messages'];
+		const registered_routes = ['saved-products', 'profile', 'publish', 'my-products', 'messages'];
 		if (!hub.settings.registered && registered_routes.includes(route[1])) {
 			frappe.set_route('marketplace', 'home');
 			return;
