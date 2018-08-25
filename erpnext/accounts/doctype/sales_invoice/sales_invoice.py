@@ -534,14 +534,22 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def validate_service_stop_date(self):
-		frappe.errprint("here")
+		old_doc = frappe.db.get_all("Sales Invoice Item", {"parent": self.name}, ["name", "service_stop_date"])
+		old_stop_dates = {}
+		for d in old_doc:
+			old_stop_dates[d.name] = d.service_stop_date or ""
+
 		for item in self.items:
-			print(date_diff(item.service_stop_date, item.service_start_date))
 			if item.enable_deferred_revenue:
+				print(vars(item))
 				if date_diff(item.service_stop_date, item.service_start_date) < 0:
 					frappe.throw(_("Service Stop Date cannot be before Service Start Date"))
-				elif date_diff(item.service_stop_date, item.service_end_date) > 0:
+
+				if date_diff(item.service_stop_date, item.service_end_date) > 0:
 					frappe.throw(_("Service Stop Date cannot be after Service End Date"))
+
+				if old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
+					frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 	def update_current_stock(self):
 		for d in self.get('items'):
