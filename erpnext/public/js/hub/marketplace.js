@@ -2,7 +2,6 @@ import Vue from 'vue/dist/vue.js';
 
 // pages
 import './pages/home';
-import './pages/search';
 import './pages/item';
 import './pages/seller';
 import './pages/profile';
@@ -13,6 +12,7 @@ import './pages/not_found';
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
 import Category from './pages/Category.vue';
+import Search from './pages/Search.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
 
 // components
@@ -340,3 +340,20 @@ erpnext.hub.PublishedProductsPage = class {
 	}
 }
 
+erpnext.hub.SearchPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-search">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(Search)
+		}).$mount('#vue-area-search');
+	}
+
+	show() {
+		$('[data-page-name="search"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="search"]').hide();
+	}
+}
