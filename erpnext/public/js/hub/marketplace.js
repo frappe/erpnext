@@ -3,18 +3,17 @@ import Vue from 'vue/dist/vue.js';
 // pages
 import './pages/home';
 import './pages/search';
-import './pages/category';
 import './pages/item';
 import './pages/seller';
-import './pages/register';
 import './pages/profile';
-import './pages/published_products';
 import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
 
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
+import Category from './pages/Category.vue';
+import PublishedProducts from './pages/PublishedProducts.vue';
 
 // components
 import { ProfileDialog } from './components/profile_dialog';
@@ -179,7 +178,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'category' && route[2] && !this.subpages.category) {
-			this.subpages.category = new erpnext.hub.Category(this.$body);
+			this.subpages.category = new erpnext.hub.CategoryPage(this.$body);
 		}
 
 		if (route[1] === 'item' && route[2] && !this.subpages.item) {
@@ -212,7 +211,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'my-products' && !this.subpages['my-products']) {
-			this.subpages['my-products'] = new erpnext.hub.PublishedProducts(this.$body);
+			this.subpages['my-products'] = new erpnext.hub.PublishedProductsPage(this.$body);
 		}
 
 		if (route[1] === 'messages' && !this.subpages['messages']) {
@@ -304,3 +303,40 @@ erpnext.hub.PublishPage = class {
 	}
 
 }
+
+erpnext.hub.CategoryPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-category">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(Category)
+		}).$mount('#vue-area-category');
+	}
+
+	show() {
+		$('[data-page-name="category"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="category"]').hide();
+	}
+}
+
+erpnext.hub.PublishedProductsPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-published-products">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(PublishedProducts)
+		}).$mount('#vue-area-published-products');
+	}
+
+	show() {
+		$('[data-page-name="published-products"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="published-products"]').hide();
+	}
+}
+

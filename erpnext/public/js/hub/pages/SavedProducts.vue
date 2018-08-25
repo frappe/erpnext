@@ -26,7 +26,6 @@ export default {
 		return {
 			page_name: frappe.get_route()[1],
 			items: [],
-			all_items: [],
 			item_id_fieldname: 'hub_item_code',
 
 			// Constants
