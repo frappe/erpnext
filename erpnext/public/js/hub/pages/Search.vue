@@ -5,7 +5,7 @@
 	>
 		<search-input
 			:placeholder="search_placeholder"
-			:on_search="set_route"
+			:on_search="set_route_and_get_items"
 			v-model="search_value"
 		>
 		</search-input>
@@ -13,6 +13,7 @@
 		<h5>{{ page_title }}</h5>
 
 		<item-cards-container
+			container_name="Search"
 			:items="items"
 			:item_id_fieldname="item_id_fieldname"
 			:on_click="go_to_item_details_page"
@@ -62,7 +63,7 @@ export default {
 			})
 		},
 
-		set_route() {
+		set_route_and_get_items() {
 			frappe.set_route('marketplace', 'search', this.search_value);
 			this.get_items();
 		},

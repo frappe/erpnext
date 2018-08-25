@@ -21,6 +21,7 @@
 		</div>
 
 		<item-cards-container
+			:container_name="page_title"
 			:items="selected_items"
 			:item_id_fieldname="item_id_fieldname"
 			:is_local="true"
