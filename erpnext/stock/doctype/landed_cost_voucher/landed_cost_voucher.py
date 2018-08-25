@@ -130,12 +130,12 @@ class LandedCostVoucher(AccountsController):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
+			if cint(self.is_import_bill) and d.receipt_document_type != "Purchase Receipt":
+				frappe.throw(_("Receipt documents must be Purchase Receipts"))
+
 			docstatus, lc_account = frappe.db.get_value(d.receipt_document_type, d.receipt_document, ["docstatus", "lc_account"])
-			if cint(self.is_import_bill):
-				if d.receipt_document_type != "Purchase Receipt":
-					frappe.throw(_("Receipt documents must be Purchase Receipts"))
-				if d.credit_to != lc_account:
-					frappe.throw(_("Receipt document's letter of credit account must be the same as the credit to account"))
+			if cint(self.is_import_bill) and self.credit_to != lc_account:
+				frappe.throw(_("Receipt document's letter of credit account must be the same as the credit to account"))
 			if docstatus != 1:
 				frappe.throw(_("Receipt document must be submitted"))
 
