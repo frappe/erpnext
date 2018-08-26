@@ -450,11 +450,11 @@ def render_docs_as_html(docs):
 		return {'html': docs_html}
 
 @frappe.whitelist()
-def render_doc_as_html(doctype, docname):
+def render_doc_as_html(doctype, docname, exclude_fields = []):
 	#render document as html, three column layout will break
 	doc = frappe.get_doc(doctype, docname)
 	meta = frappe.get_meta(doctype)
-	doc_html = "<div class='col-md-12 col-sm-12 text-muted' id='"+docname+"'><a>"+doctype+"</a>"
+	doc_html = "<div class='col-md-12 col-sm-12'>"
 	section_html = ""
 	section_label = ""
 	html = ""
@@ -464,11 +464,11 @@ def render_doc_as_html(doctype, docname):
 	for df in meta.fields:
 		#on section break append append previous section and html to doc html
 		if df.fieldtype == "Section Break":
-			if has_data and col_on:
+			if has_data and col_on and sec_on:
 				doc_html += section_html + html + "</div>"
-			elif has_data and not col_on:
-				doc_html += "<div class='col-md-12 col-sm-12' style='\
-				padding-bottom:10px;'><div class='col-md-12 col-sm-12'>" \
+			elif has_data and not col_on and sec_on:
+				doc_html += "<div class='col-md-12 col-sm-12'\
+				><div class='col-md-12 col-sm-12'>" \
 				+ section_html + html +"</div></div>"
 			while col_on:
 				doc_html += "</div>"
@@ -484,8 +484,8 @@ def render_doc_as_html(doctype, docname):
 		#on column break append html to section html or doc html
 		if df.fieldtype == "Column Break":
 			if sec_on and has_data:
-				section_html += "<div class='col-md-12 col-sm-12 text-muted' \
-				style='padding-bottom:10px;'><div class='col-md-6 col\
+				section_html += "<div class='col-md-12 col-sm-12'\
+				><div class='col-md-6 col\
 				-sm-6'><b>" + section_label + "</b>" + html + "</div><div \
 				class='col-md-6 col-sm-6'>"
 			elif has_data:
@@ -528,18 +528,17 @@ def render_doc_as_html(doctype, docname):
 				+ table_head +  table_row + '</table>'
 			continue
 		#on other field types add label and value to html
-		if not df.hidden and not df.print_hide and doc.get(df.fieldname):
+		if not df.hidden and not df.print_hide and doc.get(df.fieldname) and df.fieldname not in exclude_fields:
 			html +=  "<br>{0} : {1}".format(df.label or df.fieldname, \
 			doc.get(df.fieldname))
 			if not has_data : has_data = True
 	if sec_on and col_on and has_data:
 		doc_html += section_html + html + "</div></div>"
 	elif sec_on and not col_on and has_data:
-		doc_html += "<div class='col-md-12 col-sm-12' style='\
-		padding-bottom:10px;'><div class='col-md-12 col-sm-12'>" \
+		doc_html += "<div class='col-md-12 col-sm-12'\
+		><div class='col-md-12 col-sm-12'>" \
 		+ section_html + html +"</div></div>"
 	if doc_html:
-		doc_html += "</div>"
-		doc_html = "<div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'>EDIT</a></div>" %(doctype, docname) + doc_html
+		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'>EDIT</a></div>" %(doctype, docname) + doc_html + "</div>"
 
 	return {'html': doc_html}

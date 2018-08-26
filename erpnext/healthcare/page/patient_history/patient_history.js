@@ -17,18 +17,11 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 			options: "Patient",
 			fieldname: "patient",
 			change: function(){
-				get_documents(patient.get_value(), me);
-				show_patient_info(patient.get_value(), me);
-				show_chart_btns_html = "<a class='btn btn-default btn-xs btn-show-chart' \
-				data-show-chart-id='bp' data-pts='mmHg' data-title='Blood Pressure'>Blood Pressure</a>\
-				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='pulse_rate' \
-				data-pts='per Minutes' data-title='Respiratory/Pulse Rate'>Respiratory/Pulse Rate</a>\
-				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='temperature' \
-				data-pts='°C or °F' data-title='Temperature'>Temperature</a>\
-				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='bmi' \
-				data-pts='bmi' data-title='BMI'>BMI</a>"
-				me.page.main.find(".show_chart_btns").html(show_chart_btns_html);
-				show_patient_vital_charts(patient.get_value(), me, "bp", "mmHg", "Blood Pressure");
+				if(patient.get_value()){
+					get_documents(patient.get_value(), me);
+					show_patient_info(patient.get_value(), me);
+					show_patient_vital_charts(patient.get_value(), me, "bp", "mmHg", "Blood Pressure");
+				}
 			}
 		},
 		only_input: true,
@@ -43,12 +36,14 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 
 	this.page.main.on("click", ".btn-more", function() {
 		var	doctype = $(this).attr("data-doctype"), docname = $(this).attr("data-docname");
+		let exclude = ["patient", "patient_name", "practitioner"]
 		if(doctype && docname){
 			frappe.call({
 				method: "erpnext.healthcare.utils.render_doc_as_html",
 				args:{
 					doctype: doctype,
-					docname: docname
+					docname: docname,
+					exclude_fields: exclude
 				},
 				callback: function(r) {
 					if (r.message){
@@ -97,7 +92,7 @@ var get_documents = function(patient, me){
 			var data = r.message;
 			var details = "";
 			var patient_details = "";
-			if(data){
+			if(data.length){
 				details += "<ul class='nav nav-pills nav-stacked'>";
 				var i;
 				for(i=0; i<data.length; i++){
@@ -113,19 +108,8 @@ var get_documents = function(patient, me){
 						else{
 							data[i].imgsrc = 'https://avatars1.githubusercontent.com/u/3784093?s=64&v=4';
 						}
-						var time_line_heading = `<a>${data[i].practitioner}</a>`;
-						if(data[i].reference_doctype == "Patient Encounter"){
-							time_line_heading += ` done <a>${data[i].reference_doctype}</a> `
-						}
-						else if(data[i].reference_doctype == "Vital Signs"){
-							time_line_heading = ` <a>${data[i].reference_doctype}</a> marked`
-						}
-						else if(data[i].reference_doctype == "Lab Test"){
-							time_line_heading += ` rase a <a>${data[i].reference_doctype}</a>`
-						}
-						else if(data[i].reference_doctype == "Clinical Procedure"){
-							time_line_heading += ` done <a>${data[i].reference_doctype}</a> `
-						}
+						var time_line_heading = data[i].practitioner ? `${data[i].practitioner}` : ``
+						time_line_heading += `   <a target='_blank' href='#Form/${data[i].reference_doctype}/${data[i].reference_name}'>${data[i].reference_doctype}</a> `
 						details += `<li data-toggle='pill' class='patient_doc_menu'
 						data-doctype='${data[i].reference_doctype}' data-docname='${data[i].reference_name}'>
 						<div class='col-sm-12 d-flex border-bottom py-3'>
@@ -164,8 +148,10 @@ var get_documents = function(patient, me){
 					}
 				}
 				details += "</ul>";
+				me.page.main.find(".patient_documents_list").html(details);
+			}else{
+				me.page.main.find(".patient_documents_list").html("<div class='text-muted' align='center'><br><br>Nothing to show</div>");
 			}
-			me.page.main.find(".patient_documents_list").html(details);
 		}
 	});
 };
@@ -227,6 +213,15 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 		},
 		callback: function(r) {
 			if (r.message){
+				show_chart_btns_html = "<div style='padding-top:5px;'><a class='btn btn-default btn-xs btn-show-chart' \
+				data-show-chart-id='bp' data-pts='mmHg' data-title='Blood Pressure'>Blood Pressure</a>\
+				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='pulse_rate' \
+				data-pts='per Minutes' data-title='Respiratory/Pulse Rate'>Respiratory/Pulse Rate</a>\
+				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='temperature' \
+				data-pts='°C or °F' data-title='Temperature'>Temperature</a>\
+				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='bmi' \
+				data-pts='bmi' data-title='BMI'>BMI</a></div>"
+				me.page.main.find(".show_chart_btns").html(show_chart_btns_html);
 				var data = r.message;
 				let labels = [], datasets = [];
 				let bp_systolic = [], bp_diastolic = [], temperature = [];
@@ -255,8 +250,8 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 				}
 				if(btn_show_id=="bmi"){
 					datasets.push({name: "BMI", values: bmi, chartType:'line'});
-					datasets.push({name: "Height", values: height, chartType:'bar'});
-					datasets.push({name: "Weight", values: weight, chartType:'bar'});
+					datasets.push({name: "Height", values: height, chartType:'line'});
+					datasets.push({name: "Weight", values: weight, chartType:'line'});
 				}
 				if(btn_show_id=="bp"){
 					datasets.push({name: "BP Systolic", values: bp_systolic, chartType:'line'});
@@ -283,7 +278,8 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 					}
 				});
 			}else{
-				me.page.main.find(".patient_vital_charts").html("<div class='text-muted' align='center'>Nothing to show</div>");
+				me.page.main.find(".patient_vital_charts").html("<div class='text-muted' align='center'><br>Vitals not yet recorded<div>");
+				me.page.main.find(".show_chart_btns").html("");
 			}
 		}
 	});
