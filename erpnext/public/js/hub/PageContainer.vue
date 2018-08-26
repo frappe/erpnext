@@ -12,6 +12,7 @@ import Search from './pages/Search.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
 import Buying from './pages/Buying.vue';
 import BuyingMessages from './pages/BuyingMessages.vue';
+import NotFound from './pages/NotFound.vue';
 
 const route_map = {
 	'marketplace/home': Home,
@@ -72,6 +73,10 @@ export default {
 						weight = route_weight;
 					}
 				}
+			}
+
+			if (!route) {
+				return NotFound;
 			}
 
 			return route_map[route];

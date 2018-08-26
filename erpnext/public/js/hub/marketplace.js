@@ -3,10 +3,9 @@ import './vue-plugins';
 
 // pages
 import './pages/item';
-import './pages/messages';
-import './pages/buying_messages';
 
 import PageContainer from './PageContainer.vue';
+import Sidebar from './Sidebar.vue';
 import Home from './pages/Home.vue';
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
@@ -72,79 +71,10 @@ erpnext.hub.Marketplace = class Marketplace {
 	make_sidebar() {
 		this.$sidebar = this.$parent.find('.layout-side-section').addClass('hidden-xs');
 
-		this.make_sidebar_nav_buttons();
-		this.make_sidebar_categories();
-	}
-
-	make_sidebar_nav_buttons() {
-		let $nav_group = this.$sidebar.find('[data-nav-buttons]');
-		if (!$nav_group.length) {
-			$nav_group = $('<ul class="list-unstyled hub-sidebar-group" data-nav-buttons>').appendTo(this.$sidebar);
-		}
-		$nav_group.empty();
-
-		const user_specific_items_html = this.registered
-			? `<li class="hub-sidebar-item" data-route="marketplace/saved-products">
-					${__('Saved Products')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/profile">
-					${__('Your Profile')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
-					${__('Publish Products')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/selling">
-					${__('Selling')}
-				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/buying">
-					${__('Buying')}
-				</li>
-				`
-
-			: `<li class="hub-sidebar-item text-muted" data-action="show_register_dialog">
-					${__('Become a seller')}
-				</li>`;
-
-		$nav_group.append(`
-			<li class="hub-sidebar-item" data-route="marketplace/home">
-				${__('Browse')}
-			</li>
-			${user_specific_items_html}
-		`);
-	}
-
-	make_sidebar_categories() {
-		hub.call('get_categories')
-			.then(categories => {
-				categories = categories.map(d => d.name);
-
-				const sidebar_items = [
-					`<li class="hub-sidebar-item bold is-title">
-						${__('Category')}
-					</li>`,
-					`<li class="hub-sidebar-item active" data-route="marketplace/home">
-						${__('All')}
-					</li>`,
-					...(this.registered
-						? [`<li class="hub-sidebar-item active" data-route="marketplace/my-products">
-							${__('Your Products')}
-						</li>`]
-						: []),
-					...categories.map(category => `
-						<li class="hub-sidebar-item text-muted" data-route="marketplace/category/${category}">
-							${__(category)}
-						</li>
-					`)
-				];
-
-				this.$sidebar.append(`
-					<ul class="list-unstyled">
-						${sidebar_items.join('')}
-					</ul>
-				`);
-
-				this.update_sidebar();
-			});
+		new Vue({
+			el: $('<div>').appendTo(this.$sidebar)[0],
+			render: h => h(Sidebar)
+		});
 	}
 
 	make_body() {
@@ -160,18 +90,6 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.registered = 1;
 			this.make_sidebar_nav_buttons();
 		});
-	}
-
-	update_sidebar() {
-		const route = frappe.get_route();
-		const route_str = route.join('/');
-		const part_route_str = route.slice(0, 2).join('/');
-		const $sidebar_item = this.$sidebar.find(`[data-route="${route_str}"], [data-route="${part_route_str}"]`);
-
-
-		const $siblings = this.$sidebar.find('[data-route]');
-		$siblings.removeClass('active').addClass('text-muted');
-		$sidebar_item.addClass('active').removeClass('text-muted');
 	}
 
 	refresh() {
