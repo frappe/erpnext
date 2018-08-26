@@ -1,5 +1,5 @@
 import SubPage from './subpage';
-import { get_item_card_container_html } from '../components/items_container';
+// import { get_item_card_container_html } from '../components/items_container';
 import { get_buying_item_message_card_html } from '../components/item_card';
 import { get_selling_item_message_card_html } from '../components/item_card';
 import { get_empty_state } from '../components/empty_state';
@@ -22,7 +22,7 @@ erpnext.hub.Buying = class Buying extends SubPage {
 	}
 
 	render(items = [], title) {
-		const html = get_item_card_container_html(items, title, get_buying_item_message_card_html);
+		// const html = get_item_card_container_html(items, title, get_buying_item_message_card_html);
 		this.$wrapper.append(html);
 	}
 
@@ -54,7 +54,7 @@ erpnext.hub.Selling = class Selling extends SubPage {
 	}
 
 	render(items = [], title) {
-		const html = get_item_card_container_html(items, title, get_selling_item_message_card_html);
+		// const html = get_item_card_container_html(items, title, get_selling_item_message_card_html);
 		this.$wrapper.append(html);
 	}
 
