@@ -218,7 +218,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters.get('customer'):
-		cond = '(`tabProject`.customer = "' + filters['customer'] + '" or ifnull(`tabProject`.customer,"")="") and'
+		cond = """(`tabProject`.customer = '%s' or
+			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
 		where `tabProject`.status not in ("Completed", "Cancelled")
