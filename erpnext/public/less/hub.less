@@ -192,24 +192,75 @@ body[data-route^="marketplace/"] {
 		margin-bottom: 20px;
 	}
 
-	.item-message-card {
-		height: 80px;
+	.hub-list-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border: 1px solid @border-color;
+		margin-bottom: 15px;
+		border-radius: 3px;
+	}
+
+	.hub-list-left {
+		display: flex;
+		align-items: center;
+		max-width: 90%;
+	}
+
+	.hub-list-right {
+		padding-right: 15px;
+	}
+
+	.hub-list-image {
+		width: 58px;
+		height: 58px;
+		border-right: 1px solid @border-color;
+
+		&::after {
+			font-size: 12px;
+		}
+	}
+
+	.hub-list-body {
+		padding: 12px 15px;
+	}
+
+	.hub-list-title {
+		font-weight: bold;
+	}
+
+	.hub-list-subtitle {
+		color: @text-muted;
+	}
+
+	.selling-item-message-card {
 		max-width: 500px;
-		margin-bottom: 10px;
-		padding: 10px;
-		border-radius: 4px;
-		.message-body {
-			margin-left: 60px;
+		margin-bottom: 15px;
+		border-radius: 3px;
+		border: 1px solid @border-color;
+		.selling-item-detail {
+			overflow: auto;
+			.item-image {
+				float: left;
+				height: 80px;
+				width: 80px;
+				object-fit: contain;
+				margin: 5px;
+			}
+			.item-name {
+				margin-left: 10px;
+			}
 		}
-		.item-image {
-			float: left;
-			height: 50px;
-			width: 50px;
-			object-fit: contain;
-			// border-radius: 50%
-		}
-		.frappe-timestamp {
-			float: right;
+		.received-message-container {
+			clear: left;
+			background-color: @light-bg;
+			.received-message {
+				border-top: 1px solid @border-color;
+				padding: 10px;
+			}
+			.frappe-timestamp {
+				float: right;
+			}
 		}
 	}
 
