@@ -5,7 +5,7 @@
 		class="form-control"
 		:placeholder="placeholder"
 		:value="value"
-		@input="on_input">
+		@keydown.enter="on_input">
   </div>
 </template>
 
@@ -20,13 +20,7 @@ export default {
 		on_input(event) {
 			this.$emit('input', event.target.value);
 			this.on_search();
-
-			// TODO: Debouncing doesn't fire search
-			// frappe.utils.debounce(this.on_search, 500);
 		}
 	}
 };
 </script>
-
-<style lang="scss" scoped>
-</style>
