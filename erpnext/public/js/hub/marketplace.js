@@ -4,7 +4,6 @@ import Vue from 'vue/dist/vue.js';
 import './pages/item';
 import './pages/messages';
 import './pages/buying_messages';
-import './pages/not_found';
 
 import PageContainer from './PageContainer.vue';
 import Home from './pages/Home.vue';
@@ -15,6 +14,7 @@ import Search from './pages/Search.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
 import Profile from './pages/Profile.vue';
 import Seller from './pages/Seller.vue';
+import NotFound from './pages/NotFound.vue';
 
 // components
 import { ProfileDialog } from './components/profile_dialog';
@@ -243,7 +243,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		if (!Object.keys(this.subpages).includes(route[1])) {
 			if (!this.subpages.not_found) {
-				this.subpages.not_found = new erpnext.hub.NotFound(this.$body);
+				this.subpages.not_found = new erpnext.hub.NotFoundPage(this.$body);
 			}
 			route[1] = 'not_found';
 		}
@@ -420,6 +420,24 @@ erpnext.hub.SellerPage = class {
 
 	hide() {
 		$('[data-page-name="seller"]').hide();
+	}
+}
+
+erpnext.hub.NotFoundPage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-not-found">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(NotFound)
+		}).$mount('#vue-area-not-found');
+	}
+
+	show() {
+		$('[data-page-name="not-found"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="not-found"]').hide();
 	}
 }
 

@@ -4,6 +4,13 @@
 		:style="{ height: height + 'px' }"
 	>
 		<p class="text-muted">{{ message }}</p>
+		<p v-if="action">
+			<button class="btn btn-default btn-xs"
+				@click="action.on_click"
+			>
+				{{ action.label }}
+			</button>
+		</p>
 	</div>
 </template>
 
@@ -15,7 +22,7 @@ export default {
 		message: String,
 		bordered: Boolean,
 		height: Number,
-		// action: Function
+		action: Object
 	}
 }
 </script>
