@@ -380,6 +380,13 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select parent
 					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
 				values.append(self.filters.get("sales_person"))
+
+		if party_type_field=="supplier":
+			if self.filters.get("supplier_group"):
+				conditions.append("""party in (select name from tabSupplier
+					where supplier_group=%s)""")
+				values.append(self.filters.get("supplier_group"))
+								
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):
