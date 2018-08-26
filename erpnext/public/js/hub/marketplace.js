@@ -8,6 +8,7 @@ import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
 
+import PageContainer from './PageContainer.vue';
 import Home from './pages/Home.vue';
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
@@ -147,6 +148,13 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	make_body() {
 		this.$body = this.$parent.find('.layout-main-section');
+		// this.$page_container = $('<div class="hub-page-container">').appendTo(this.$body);
+
+		// new Vue({
+		// 	el: '.hub-page-container',
+		// 	render: h => h(PageContainer)
+		// });
+
 		erpnext.hub.on('seller-registered', () => {
 			this.registered = 1;
 			this.make_sidebar_nav_buttons();
