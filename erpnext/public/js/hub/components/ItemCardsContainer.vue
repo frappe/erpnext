@@ -5,8 +5,7 @@
 			:message="empty_state_message"
 			:bordered="true"
 			:height="80"
-		>
-		</empty-state>
+		/>
 		<item-card
 			v-for="item in items"
 			:key="container_name + '_' +item[item_id_fieldname]"
