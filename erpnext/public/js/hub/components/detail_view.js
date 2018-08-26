@@ -132,42 +132,6 @@ function get_detail_view_html(item, allow_edit) {
 	return html;
 }
 
-function get_profile_html(profile) {
-	const p = profile;
-	const profile_html = `<div class="hub-item-container">
-		<div class="row visible-xs">
-			<div class="col-xs-12 margin-bottom">
-				<button class="btn btn-xs btn-default" data-route="marketplace/home">Back to home</button>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-3">
-				<div class="hub-item-image">
-					<img src="${p.logo}">
-				</div>
-			</div>
-			<div class="col-md-6">
-				<h2>${p.company}</h2>
-				<div class="text-muted">
-					<p>${p.country}</p>
-					<p>${p.site_name}</p>
-					<p>${__(`Joined ${comment_when(p.creation)}`)}</p>
-				</div>
-				<hr>
-				<div class="hub-item-description">
-				${'description'
-					? `<p>${p.company_description}</p>`
-					: `<p>__('No description')</p`
-				}
-				</div>
-			</div>
-		</div>
-
-	</div>`;
-
-	return profile_html;
-}
-
 export {
 	get_detail_view_html,
 	get_profile_html
