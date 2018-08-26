@@ -2,13 +2,15 @@
 	<div
 		class="marketplace-page"
 		:data-page-name="page_name"
+		v-if="init || profile"
 	>
 
-		<detail-view v-if="profile"
+		<detail-view
 			:title="title"
 			:subtitles="subtitles"
 			:image="image"
 			:sections="sections"
+			:show_skeleton="init"
 		>
 		</detail-view>
 	</div>
@@ -25,6 +27,9 @@ export default {
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
+
+			init: true,
+
 			profile: null,
 			title: null,
 			subtitles: [],
@@ -41,6 +46,8 @@ export default {
 				'get_hub_seller_profile',
 				{ hub_seller: hub.settings.company_email }
 			).then(profile => {
+				this.init = false;
+
 				this.profile = profile;
 				this.title = profile.company;
 				this.subtitles = [

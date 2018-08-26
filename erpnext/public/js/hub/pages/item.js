@@ -1,6 +1,6 @@
 import SubPage from './subpage';
 import { get_detail_view_html } from '../components/detail_view';
-import { get_detail_skeleton_html } from '../components/skeleton_state';
+// import { get_detail_skeleton_html } from '../components/skeleton_state';
 import { get_review_html } from '../components/reviews';
 
 erpnext.hub.Item = class Item extends SubPage {
@@ -20,7 +20,7 @@ erpnext.hub.Item = class Item extends SubPage {
 
 
 	show_skeleton() {
-		this.$wrapper.html(get_detail_skeleton_html());
+		// this.$wrapper.html(get_detail_skeleton_html());
 	}
 
 
