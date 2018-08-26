@@ -91,9 +91,13 @@ erpnext.hub.Marketplace = class Marketplace {
 				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
 					${__('Publish Products')}
 				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/messages">
-					${__('Messages')}
-				</li>`
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/selling">
+					${__('Selling')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/buying">
+					${__('Buying')}
+				</li>
+				`
 
 			: `<li class="hub-sidebar-item text-muted" data-action="show_register_dialog">
 					${__('Become a seller')}
@@ -214,12 +218,12 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages['my-products'] = new erpnext.hub.PublishedProductsPage(this.$body);
 		}
 
-		if (route[1] === 'messages' && !this.subpages['messages']) {
-			this.subpages['messages'] = new erpnext.hub.Messages(this.$body);
+		if (route[1] === 'buying' && !this.subpages['buying']) {
+			this.subpages['buying'] = new erpnext.hub.Buying(this.$body);
 		}
 
-		if (route[1] === 'buy' && !this.subpages['buy']) {
-			this.subpages['buy'] = new erpnext.hub.BuyingMessages(this.$body);
+		if (route[1] === 'selling' && !this.subpages['selling']) {
+			this.subpages['selling'] = new erpnext.hub.Selling(this.$body, 'Selling');
 		}
 
 		// dont allow unregistered users to access registered routes
