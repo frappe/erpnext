@@ -23,7 +23,7 @@
 
 			</div>
 		</div>
-		<div v-for="section in sections" class="row hub-item-description"
+		<div v-for="section in sections" class="row hub-item-description margin-bottom"
 			:key="section.title"
 		>
 			<h6 class="col-md-12 margin-top">

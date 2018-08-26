@@ -11,37 +11,62 @@
 			:sections="sections"
 		>
 		</detail-view>
+
+		<h5>{{ item_container_heading }}</h5>
+		<item-cards-container
+			:container_name="item_container_heading"
+			:items="items"
+			:item_id_fieldname="item_id_fieldname"
+			:on_click="go_to_item_details_page"
+		>
+		</item-cards-container>
 	</div>
 </template>
 
 <script>
 import DetailView from '../components/DetailView.vue';
+import ItemCardsContainer from '../components/ItemCardsContainer.vue';
 
 export default {
-	name: 'profile-page',
+	name: 'seller-page',
 	components: {
-		DetailView
+		DetailView,
+		ItemCardsContainer
 	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
+			seller_company: frappe.get_route()[2],
+
 			profile: null,
+			items:[],
+			item_id_fieldname: 'hub_item_code',
+
 			title: null,
 			subtitles: [],
 			image: null,
-			sections: []
+			sections: [],
 		};
 	},
 	created() {
-		this.get_profile();
+		this.get_seller_profile_and_items();
+	},
+	computed: {
+		item_container_heading() {
+			return __('Products by ' + this.seller_company);
+		}
 	},
 	methods: {
-		get_profile() {
+		get_seller_profile_and_items() {
 			hub.call(
-				'get_hub_seller_profile',
-				{ hub_seller: hub.settings.company_email }
-			).then(profile => {
-				this.profile = profile;
+				'get_hub_seller_page_info',
+				{ company: this.seller_company }
+			).then(data => {
+				this.profile = data.profile;
+				this.items = data.items;
+
+				const profile = this.profile;
+
 				this.title = profile.company;
 				this.subtitles = [
 					__(profile.country),
@@ -58,6 +83,10 @@ export default {
 					}
 				];
 			});
+		},
+
+		go_to_item_details_page(hub_item_code) {
+			frappe.set_route(`marketplace/item/${hub_item_code}`);
 		}
 	}
 }
