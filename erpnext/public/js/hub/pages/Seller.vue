@@ -2,17 +2,18 @@
 	<div
 		class="marketplace-page"
 		:data-page-name="page_name"
+		v-if="init || profile"
 	>
-
-		<detail-view v-if="profile"
+		<detail-view
 			:title="title"
 			:subtitles="subtitles"
 			:image="image"
 			:sections="sections"
+			:show_skeleton="init"
 		>
 		</detail-view>
 
-		<h5>{{ item_container_heading }}</h5>
+		<h5 v-if="profile">{{ item_container_heading }}</h5>
 		<item-cards-container
 			:container_name="item_container_heading"
 			:items="items"
@@ -38,6 +39,8 @@ export default {
 			page_name: frappe.get_route()[1],
 			seller_company: frappe.get_route()[2],
 
+			init: true,
+
 			profile: null,
 			items:[],
 			item_id_fieldname: 'hub_item_code',
@@ -62,6 +65,7 @@ export default {
 				'get_hub_seller_page_info',
 				{ company: this.seller_company }
 			).then(data => {
+				this.init = false;
 				this.profile = data.profile;
 				this.items = data.items;
 
