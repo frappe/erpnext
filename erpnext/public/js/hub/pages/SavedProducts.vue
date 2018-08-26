@@ -71,7 +71,7 @@ export default {
 			}
 
 			alert = frappe.show_alert(__(`<span>${hub_item_code} removed.
-				<a href="#" class="undo-remove" data-action="undo-remove"><b>Undo</b></a></span>`),
+				<a href="#" data-action="undo-remove"><b>Undo</b></a></span>`),
 				grace_period/1000,
 				{
 					'undo-remove': undo_remove.bind(this)
