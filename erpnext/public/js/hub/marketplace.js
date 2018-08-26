@@ -3,7 +3,6 @@ import Vue from 'vue/dist/vue.js';
 // pages
 import './pages/item';
 import './pages/seller';
-import './pages/profile';
 import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
@@ -14,6 +13,7 @@ import Publish from './pages/Publish.vue';
 import Category from './pages/Category.vue';
 import Search from './pages/Search.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
+import Profile from './pages/Profile.vue';
 
 // components
 import { ProfileDialog } from './components/profile_dialog';
@@ -203,7 +203,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'profile' && !this.subpages.profile) {
-			this.subpages.profile = new erpnext.hub.Profile(this.$body);
+			this.subpages.profile = new erpnext.hub.ProfilePage(this.$body);
 		}
 
 		if (route[1] === 'publish' && !this.subpages.publish) {
@@ -372,5 +372,23 @@ erpnext.hub.SearchPage = class {
 
 	hide() {
 		$('[data-page-name="search"]').hide();
+	}
+}
+
+erpnext.hub.ProfilePage = class {
+	constructor(parent) {
+		this.$wrapper = $(`<div id="vue-area-profile">`).appendTo($(parent));
+
+		new Vue({
+			render: h => h(Profile)
+		}).$mount('#vue-area-profile');
+	}
+
+	show() {
+		$('[data-page-name="profile"]').show();
+	}
+
+	hide() {
+		$('[data-page-name="profile"]').hide();
 	}
 }
