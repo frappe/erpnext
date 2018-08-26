@@ -7,36 +7,34 @@
 			:placeholder="search_placeholder"
 			:on_search="set_search_route"
 			v-model="search_value"
-		>
-		</search-input>
+		/>
 
-		<div v-for="section in sections"
-			:key="section.title"
-		>
-			<div class="hub-items-header margin-bottom level">
+		<div v-for="section in sections" :key="section.title">
+
+			<section-header>
 				<h4>{{ section.title }}</h4>
 				<p :data-route="'marketplace/category/' + section.title">{{ 'See All' }}</p>
-			</div>
+			</section-header>
 
 			<item-cards-container
 				:container_name="section.title"
 				:items="section.items"
 				:item_id_fieldname="item_id_fieldname"
 				:on_click="go_to_item_details_page"
-			>
-			</item-cards-container>
+			/>
 		</div>
-
 	</div>
 </template>
 
 <script>
 import SearchInput from '../components/SearchInput.vue';
+import SectionHeader from '../components/SectionHeader.vue';
 import ItemCardsContainer from '../components/ItemCardsContainer.vue';
 
 export default {
 	name: 'home-page',
 	components: {
+		SectionHeader,
 		SearchInput,
 		ItemCardsContainer
 	},
