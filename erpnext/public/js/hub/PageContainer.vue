@@ -10,11 +10,18 @@ import Publish from './pages/Publish.vue';
 import Category from './pages/Category.vue';
 import Search from './pages/Search.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
+import Buying from './pages/Buying.vue';
+import BuyingMessages from './pages/BuyingMessages.vue';
 
 const route_map = {
 	'marketplace/home': Home,
 	'marketplace/saved-products': SavedProducts,
-	'marketplace/publish': Publish
+	'marketplace/my-products': PublishedProducts,
+	'marketplace/publish': Publish,
+	'marketplace/category/:category': Category,
+	'marketplace/search/:keyword': Search,
+	'marketplace/buying': Buying,
+	'marketplace/buying/:item': BuyingMessages
 }
 
 export default {
@@ -33,7 +40,41 @@ export default {
 			this.current_page = this.get_current_page();
 		},
 		get_current_page() {
-			return route_map[frappe.get_route_str()];
+			const curr_route = frappe.get_route_str();
+			let route = Object.keys(route_map).filter(route => route == curr_route)[0];
+
+			if (!route) {
+				// find route by matching it with dynamic part
+				const curr_route_parts = curr_route.split('/');
+				const weighted_routes = Object.keys(route_map)
+					.map(route_str => route_str.split('/'))
+					.filter(route_parts => route_parts.length === curr_route_parts.length)
+					.reduce((obj, route_parts) => {
+						const key = route_parts.join('/');
+						let weight = 0;
+						route_parts.forEach((part, i) => {
+							const curr_route_part = curr_route_parts[i];
+							if (part === curr_route_part || curr_route_part.includes(':')) {
+								weight += 1;
+							}
+						});
+
+						obj[key] = weight;
+						return obj;
+					}, {});
+
+				// get the route with the highest weight
+				let weight = 0
+				for (let key in weighted_routes) {
+					const route_weight = weighted_routes[key];
+					if (route_weight > weight) {
+						route = key;
+						weight = route_weight;
+					}
+				}
+			}
+
+			return route_map[route];
 		}
 	}
 }

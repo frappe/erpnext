@@ -1,4 +1,5 @@
 import Vue from 'vue/dist/vue.js';
+import './vue-plugins';
 
 // pages
 import './pages/item';
@@ -148,12 +149,12 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	make_body() {
 		this.$body = this.$parent.find('.layout-main-section');
-		// this.$page_container = $('<div class="hub-page-container">').appendTo(this.$body);
+		this.$page_container = $('<div class="hub-page-container">').appendTo(this.$body);
 
-		// new Vue({
-		// 	el: '.hub-page-container',
-		// 	render: h => h(PageContainer)
-		// });
+		new Vue({
+			el: '.hub-page-container',
+			render: h => h(PageContainer)
+		});
 
 		erpnext.hub.on('seller-registered', () => {
 			this.registered = 1;
@@ -174,6 +175,10 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	refresh() {
+
+	}
+
+	_refresh() {
 		const route = frappe.get_route();
 		this.subpages = this.subpages || {};
 
