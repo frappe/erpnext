@@ -4,53 +4,84 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
-	columns = get_columns()
+	include_uom = filters.get("include_uom")
+	columns, qty_columns, rate_columns = get_columns(include_uom)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
-	item_details = get_item_details(items, sl_entries)
-	opening_row = get_opening_balance(filters, columns)
+	item_details = get_item_details(items, sl_entries, include_uom)
+	opening_row = get_opening_balance(filters)
+
+	def update_converted_qty_rate(row, conversion_factor):
+		if include_uom and conversion_factor:
+			for c in qty_columns:
+				row[c + "_alt"] = flt(row[c] / conversion_factor)
+			for c in rate_columns:
+				row[c + "_alt"] = flt(row[c] * conversion_factor)
 
 	data = []
 	if opening_row:
+		update_converted_qty_rate(opening_row, item_details[filters.item_code])
 		data.append(opening_row)
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
-		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse,
-			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
-			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
-			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			sle.batch_no, sle.serial_no, sle.project, sle.company])
+		sle.incoming_rate = sle.incoming_rate if sle.actual_qty > 0 else 0.0
+		for col in ['item_name', 'description', 'item_group', 'brand', 'stock_uom']:
+			sle[col] = item_detail[col]
+
+		update_converted_qty_rate(sle, item_detail.conversion_factor)
+		data.append(sle)
 
 	return columns, data
 
-def get_columns():
+def get_columns(include_uom=None):
 	columns = [
-		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
-		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
-		_("Warehouse") + ":Link/Warehouse:100", _("Stock UOM") + ":Link/UOM:100",
-		_("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
+		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50},
+		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100},
 		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
 		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
-		_("Voucher Type") + "::110",
-		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
-		_("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100",
-		_("Project") + ":Link/Project:100",
-		{"label": _("Company"), "fieldtype": "Link", "width": 110,
-			"options": "company", "fieldname": "company"}
+		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
+		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
+		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
+		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
 
-	return columns
+	qty_columns = ["actual_qty", "qty_after_transaction"]
+	rate_columns = ["incoming_rate", "valuation_rate"]
+
+	# Insert alternate uom column for each qty column
+	if include_uom:
+		i = len(columns)-1
+		while i >= 0:
+			if columns[i].get("fieldname") in qty_columns:
+				columns.insert(i+1, dict(columns[i]))
+				columns[i+1]['fieldname'] = columns[i+1]['fieldname'] + "_alt"
+				columns[i+1]['label'] += " ({})".format(include_uom)
+			elif columns[i].get("fieldname") in rate_columns:
+				columns.insert(i+1, dict(columns[i]))
+				columns[i+1]['fieldname'] = columns[i+1]['fieldname'] + "_alt"
+				columns[i+1]['label'] += " (per {})".format(include_uom)
+			i -= 1
+
+	return columns, qty_columns, rate_columns
 
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
@@ -88,7 +119,7 @@ def get_items(filters):
 			.format(" and ".join(conditions)), filters)
 	return items
 
-def get_item_details(items, sl_entries):
+def get_item_details(items, sl_entries, include_uom):
 	item_details = {}
 	if not items:
 		items = list(set([d.item_code for d in sl_entries]))
@@ -102,6 +133,14 @@ def get_item_details(items, sl_entries):
 		where name in ({0})
 		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
 			item_details.setdefault(item.name, item)
+
+	if include_uom:
+		for item in frappe.db.sql("""
+				select item.name, ucd.conversion_factor from `tabItem` item
+				inner join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s
+				where item.name in ({0})
+				""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), include_uom, as_dict=1):
+			item_details[item.name].conversion_factor = item.conversion_factor
 
 	return item_details
 
@@ -120,7 +159,7 @@ def get_sle_conditions(filters):
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
-def get_opening_balance(filters, columns):
+def get_opening_balance(filters):
 	if not (filters.item_code and filters.warehouse and filters.from_date):
 		return
 
@@ -131,10 +170,10 @@ def get_opening_balance(filters, columns):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-	row = [""]*len(columns)
-	row[1] = _("'Opening'")
-	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
-			row[i] = last_entry.get(v, 0)
+	row = frappe._dict()
+	row.item_code = _("'Opening'")
+	for v in ('qty_after_transaction', 'valuation_rate', 'stock_value'):
+		row[v] = last_entry.get(v, 0)
 
 	return row
 

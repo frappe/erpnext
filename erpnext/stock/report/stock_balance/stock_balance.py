@@ -14,7 +14,8 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
-	columns = get_columns()
+	include_uom = filters.get("include_uom")
+	columns, qty_columns, rate_columns = get_columns(include_uom)
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
 
@@ -26,6 +27,13 @@ def execute(filters=None):
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
+	def update_converted_qty_rate(row, conversion_factor):
+		if include_uom and conversion_factor:
+			for c in qty_columns:
+				row[c + "_alt"] = flt(row[c] / conversion_factor)
+			for c in rate_columns:
+				row[c + "_alt"] = flt(row[c] * conversion_factor)
+
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -36,57 +44,70 @@ def execute(filters=None):
 				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
 				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-			report_data = [item, item_map[item]["item_name"],
-				item_map[item]["item_group"],
-				item_map[item]["brand"],
-				item_map[item]["description"], warehouse,
-				item_map[item]["stock_uom"], qty_dict.opening_qty,
-				qty_dict.opening_val, qty_dict.in_qty,
-				qty_dict.in_val, qty_dict.out_qty,
-				qty_dict.out_val, qty_dict.bal_qty,
-				qty_dict.bal_val, qty_dict.val_rate,
-				item_reorder_level,
-				item_reorder_qty,
-				company
-			]
+			report_data = frappe._dict(qty_dict)
+			report_data.company = company
+			report_data.reorder_level = item_reorder_level
+			report_data.reorder_qty = item_reorder_qty
+			report_data.warehouse = warehouse
+			report_data.item_code = item
+			for col in ['item_name', 'description', 'item_group', 'brand', 'stock_uom']:
+				report_data[col] = item_map[item][col]
 
-			if filters.get('show_variant_attributes', 0) == 1:
-				variants_attributes = get_variants_attributes()
-				report_data += [item_map[item].get(i) for i in variants_attributes]
+			update_converted_qty_rate(report_data, item_map[item].get("conversion_factor"))
 
 			data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
+		columns += [{"label": "{}".format(i), "fieldname": "attr_{}".format(i), "fieldtype": "Data", "width": 100}
+			for i in get_variants_attributes()]
 
 	return columns, data
 
-def get_columns():
+def get_columns(include_uom=None):
 	"""return columns"""
 
 	columns = [
-		_("Item")+":Link/Item:100",
-		_("Item Name")+"::150",
-		_("Item Group")+":Link/Item Group:100",
-		_("Brand")+":Link/Brand:90",
-		_("Description")+"::140",
-		_("Warehouse")+":Link/Warehouse:100",
-		_("Stock UOM")+":Link/UOM:90",
-		_("Opening Qty")+":Float:100",
-		_("Opening Value")+":Float:110",
-		_("In Qty")+":Float:80",
-		_("In Value")+":Float:80",
-		_("Out Qty")+":Float:80",
-		_("Out Value")+":Float:80",
-		_("Balance Qty")+":Float:100",
-		_("Balance Value")+":Float:100",
-		_("Valuation Rate")+":Float:90",
-		_("Reorder Level")+":Float:80",
-		_("Reorder Qty")+":Float:80",
-		_("Company")+":Link/Company:100"
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
+		{"label": _("Description"), "fieldname": "description", "width": 140},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
+		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100},
+		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
+		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80},
+		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80},
+		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100,
+			"options": "Company:company:default_currency"},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90,
+			"options": "Company:company:default_currency"},
+		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80},
+		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80},
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
 
-	return columns
+	qty_columns = ["opening_qty", "in_qty", "out_qty", "bal_qty", "reorder_level", "reorder_qty"]
+	rate_columns = ["val_rate"]
+
+	# Insert alternate uom column for each qty column
+	if include_uom:
+		i = len(columns) - 1
+		while i >= 0:
+			if columns[i].get("fieldname") in qty_columns:
+				columns.insert(i + 1, dict(columns[i]))
+				columns[i + 1]['fieldname'] = columns[i + 1]['fieldname'] + "_alt"
+				columns[i + 1]['label'] += " ({})".format(include_uom)
+			elif columns[i].get("fieldname") in rate_columns:
+				columns.insert(i + 1, dict(columns[i]))
+				columns[i + 1]['fieldname'] = columns[i + 1]['fieldname'] + "_alt"
+				columns[i + 1]['label'] += " (per {})".format(include_uom)
+			i -= 1
+
+	return columns, qty_columns, rate_columns
 
 def get_conditions(filters):
 	conditions = ""
@@ -217,9 +238,18 @@ def get_item_details(items, sle, filters):
 			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
 				item_details.setdefault(item.name, item)
 
+	if filters.get("include_uom"):
+		for item in frappe.db.sql("""
+			select item.name, ucd.conversion_factor from `tabItem` item
+			inner join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s
+			where item.name in ({0})
+			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
+			filters.get("include_uom"), as_dict=1):
+				item_details[item.name].conversion_factor = item.conversion_factor
+
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(list(item_details))
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
+		item_details = {item: v.update(variant_values.get(item, {})) for item, v in iteritems(item_details)}
 
 	return item_details
 
@@ -252,6 +282,6 @@ def get_variant_values_for(items):
 		from `tabItem Variant Attribute` where parent in (%s)
 		''' % ", ".join(["%s"] * len(items)), tuple(items), as_dict=1):
 			attribute_map.setdefault(attr['parent'], {})
-			attribute_map[attr['parent']].update({attr['attribute']: attr['attribute_value']})
+			attribute_map[attr['parent']].update({"attr_"+attr['attribute']: attr['attribute_value']})
 
 	return attribute_map
