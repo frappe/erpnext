@@ -1,6 +1,8 @@
 <template>
 	<div v-if="item_details">
-
+		<div>
+			<a class="text-muted" v-route="'marketplace/buying'">← {{ __('Back to Messages') }}</a>
+		</div>
 		<section-header>
 			<div class="flex flex-column margin-bottom">
 				<h4>{{ item_details.item_name }}</h4>
