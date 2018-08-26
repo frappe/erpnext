@@ -1,6 +1,7 @@
 export default class SubPage {
-	constructor(parent, options) {
+	constructor(parent, ...options) {
 		this.$parent = $(parent);
+		this.options = options;
 		this.make_wrapper(options);
 
 		// generic action handler

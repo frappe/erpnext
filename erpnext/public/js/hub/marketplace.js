@@ -7,6 +7,7 @@ import './pages/messages';
 import './pages/buying_messages';
 import './pages/not_found';
 
+import PageContainer from './PageContainer.vue';
 import Home from './pages/Home.vue';
 import SavedProducts from './pages/SavedProducts.vue';
 import Publish from './pages/Publish.vue';
@@ -91,9 +92,13 @@ erpnext.hub.Marketplace = class Marketplace {
 				<li class="hub-sidebar-item text-muted" data-route="marketplace/publish">
 					${__('Publish Products')}
 				</li>
-				<li class="hub-sidebar-item text-muted" data-route="marketplace/messages">
-					${__('Messages')}
-				</li>`
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/selling">
+					${__('Selling')}
+				</li>
+				<li class="hub-sidebar-item text-muted" data-route="marketplace/buying">
+					${__('Buying')}
+				</li>
+				`
 
 			: `<li class="hub-sidebar-item text-muted" data-action="show_register_dialog">
 					${__('Become a seller')}
@@ -143,6 +148,13 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	make_body() {
 		this.$body = this.$parent.find('.layout-main-section');
+		// this.$page_container = $('<div class="hub-page-container">').appendTo(this.$body);
+
+		// new Vue({
+		// 	el: '.hub-page-container',
+		// 	render: h => h(PageContainer)
+		// });
+
 		erpnext.hub.on('seller-registered', () => {
 			this.registered = 1;
 			this.make_sidebar_nav_buttons();
@@ -214,12 +226,12 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.subpages['my-products'] = new erpnext.hub.PublishedProductsPage(this.$body);
 		}
 
-		if (route[1] === 'messages' && !this.subpages['messages']) {
-			this.subpages['messages'] = new erpnext.hub.Messages(this.$body);
+		if (route[1] === 'buying' && !this.subpages['buying']) {
+			this.subpages['buying'] = new erpnext.hub.Buying(this.$body);
 		}
 
-		if (route[1] === 'buy' && !this.subpages['buy']) {
-			this.subpages['buy'] = new erpnext.hub.BuyingMessages(this.$body);
+		if (route[1] === 'selling' && !this.subpages['selling']) {
+			this.subpages['selling'] = new erpnext.hub.Selling(this.$body, 'Selling');
 		}
 
 		// dont allow unregistered users to access registered routes
