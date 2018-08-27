@@ -29,7 +29,7 @@ export default {
 			page_name: frappe.get_route()[1],
 			category: frappe.get_route()[2],
 			items: [],
-			item_id_fieldname: 'hub_item_code',
+			item_id_fieldname: 'name',
 
 			// Constants
 			empty_state_message: __(`No products in this category yet.`)
@@ -55,8 +55,8 @@ export default {
 			})
 		},
 
-		go_to_item_details_page(hub_item_code) {
-			frappe.set_route(`marketplace/item/${hub_item_code}`);
+		go_to_item_details_page(hub_item_name) {
+			frappe.set_route(`marketplace/item/${hub_item_name}`);
 		}
 	}
 }
