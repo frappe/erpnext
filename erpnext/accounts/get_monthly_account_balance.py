@@ -40,7 +40,7 @@ def get_balance(account, filters):
     if len(accounts) == 0:
       frappe.throw("There is no such account")
       
-    company_currency = erpnext.get_company_currency(company)
+    company_currency = erpnext.get_company_currency(filters.get("company"))
 
     accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
