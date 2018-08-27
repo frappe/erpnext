@@ -95,7 +95,7 @@ from `tabGL Entry`
 where
 	company=%(company)s
 	and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-	and account in = %(account)s
+	and account = %(account)s
 group by year(posting_date), month(posting_date);""",
 	{
 	    "company": filters.get("company"),
