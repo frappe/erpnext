@@ -250,3 +250,27 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
             total_row["closing_credit"] += abs(d["debit"] - d["credit"]) if (d["debit"] - d["credit"]) < 0 else 0
 
     data.extend([{}, total_row])
+
+    return data
+
+
+def prepare_opening_and_closing(d):
+    d["closing_debit"] = d["opening_debit"] + d["debit"]
+    d["closing_credit"] = d["opening_credit"] + d["credit"]
+
+    if d["closing_debit"] > d["closing_credit"]:
+        d["closing_debit"] -= d["closing_credit"]
+        d["closing_credit"] = 0.0
+
+    else:
+        d["closing_credit"] -= d["closing_debit"]
+        d["closing_debit"] = 0.0
+
+    if d["opening_debit"] > d["opening_credit"]:
+        d["opening_debit"] -= d["opening_credit"]
+        d["opening_credit"] = 0.0
+
+    else:
+        d["opening_credit"] -= d["opening_debit"]
+        d["opening_debit"] = 0.0
+
