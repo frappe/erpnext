@@ -38,7 +38,7 @@ export default {
 			page_name: frappe.get_route()[1],
 			items: [],
 			search_value: frappe.get_route()[2],
-			item_id_fieldname: 'hub_item_code',
+			item_id_fieldname: 'name',
 
 			// Constants
 			search_placeholder: __('Search for anything ...'),
@@ -68,8 +68,8 @@ export default {
 			this.get_items();
 		},
 
-		go_to_item_details_page(hub_item_code) {
-			frappe.set_route(`marketplace/item/${hub_item_code}`);
+		go_to_item_details_page(hub_item_name) {
+			frappe.set_route(`marketplace/item/${hub_item_name}`);
 		}
 	}
 }
