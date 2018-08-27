@@ -3,7 +3,7 @@
 		<section-header>
 			<h4>{{ __('Selling') }}</h4>
 		</section-header>
-		<div class="row">
+		<div class="row" v-if="items">
 			<div class="col-md-7"
 				style="margin-bottom: 30px;"
 				v-for="item of items"
@@ -32,27 +32,29 @@
 				</div>
 			</div>
 		</div>
+		<empty-state v-else :message="__('This page keeps track of your items in which buyers have showed some interest.')" :centered="false" />
 	</div>
 </template>
 <script>
+import EmptyState from '../components/EmptyState.vue';
 import SectionHeader from '../components/SectionHeader.vue';
 import ItemListCard from '../components/ItemListCard.vue';
 
 export default {
 	components: {
 		SectionHeader,
-		ItemListCard
+		ItemListCard,
+		EmptyState
 	},
 	data() {
 		return {
-			items: []
+			items: null
 		}
 	},
 	created() {
 		this.get_items_for_messages()
 			.then(items => {
 				this.items = items;
-				console.log(items);
 			});
 	},
 	methods: {

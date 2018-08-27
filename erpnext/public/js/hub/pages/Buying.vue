@@ -19,7 +19,7 @@
 				</item-list-card>
 			</div>
 		</div>
-		<empty-state v-else message="This page keeps track of items you want to buy from sellers." :centered="false" />
+		<empty-state v-else :message="__('This page keeps track of items you want to buy from sellers.')" :centered="false" />
 	</div>
 </template>
 <script>
