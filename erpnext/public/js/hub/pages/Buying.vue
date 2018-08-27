@@ -14,7 +14,7 @@
 				>
 					<div slot="subtitle">
 						<span>{{item.recent_message.sender}}: </span>
-						<span>{{item.recent_message.content}}</span>
+						<span>{{item.recent_message.content | striphtml}}</span>
 					</div>
 				</item-list-card>
 			</div>

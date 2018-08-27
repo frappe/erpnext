@@ -9,7 +9,7 @@
 			@remove-message="clear_last_sync_message"
 		></notification-message>
 
-		<div class="flex justify-between align-flex-end">
+		<div class="flex justify-between align-flex-end margin-bottom">
 			<h5>{{ page_title }}</h5>
 
 			<button class="btn btn-primary btn-sm publish-items"
