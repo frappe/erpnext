@@ -1,7 +1,7 @@
 <template>
 	<div v-if="item_details">
 		<div>
-			<a class="text-muted" v-route="'marketplace/buying'">← {{ __('Back to Messages') }}</a>
+			<a class="text-muted" v-route="back_link">← {{ __('Back to Messages') }}</a>
 		</div>
 		<section-header>
 			<div class="flex flex-column margin-bottom">
@@ -40,6 +40,7 @@ export default {
 	},
 	data() {
 		return {
+			message_type: frappe.get_route()[1],
 			item_details: null,
 			messages: []
 		}
@@ -49,11 +50,16 @@ export default {
 		this.get_item_details(hub_item_name)
 			.then(item_details => {
 				this.item_details = item_details;
-				this.get_messages(item_details)
+				this.get_messages()
 					.then(messages => {
 						this.messages = messages;
 					});
 			});
+	},
+	computed: {
+		back_link() {
+			return 'marketplace/' + this.message_type;
+		}
 	},
 	methods: {
 		send_message(message) {
@@ -65,7 +71,7 @@ export default {
 			});
 			hub.call('send_message', {
 				from_seller: hub.settings.company_email,
-				to_seller: this.item_details.hub_seller,
+				to_seller: this.get_against_seller(),
 				hub_item: this.item_details.name,
 				message
 			});
@@ -76,12 +82,23 @@ export default {
 		get_messages() {
 			if (!this.item_details) return [];
 			return hub.call('get_messages', {
-				against_seller: this.item_details.hub_seller,
+				against_seller: this.get_against_seller(),
 				against_item: this.item_details.name
 			});
 		},
+		get_against_seller() {
+			if (this.message_type === 'buying') {
+				return this.item_details.hub_seller;
+			} else if (this.message_type === 'selling') {
+				return frappe.get_route()[2];
+			}
+		},
 		get_hub_item_name() {
-			return frappe.get_route()[2];
+			if (this.message_type === 'buying') {
+				return frappe.get_route()[2];
+			} else if (this.message_type === 'selling') {
+				return frappe.get_route()[3];
+			}
 		}
 	}
 }

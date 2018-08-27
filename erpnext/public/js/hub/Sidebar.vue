@@ -6,6 +6,9 @@
 			</li>
 		</ul>
 		<ul class="list-unstyled hub-sidebar-group" data-categories>
+			<li class="hub-sidebar-item is-title bold text-muted">
+				{{ __('Categories') }}
+			</li>
 			<li class="hub-sidebar-item" v-for="category in categories" :key="category.label" v-route="category.route">
 				{{ category.label }}
 			</li>

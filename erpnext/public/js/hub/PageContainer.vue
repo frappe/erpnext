@@ -15,7 +15,8 @@ import Item from './pages/Item.vue';
 import Seller from './pages/Seller.vue';
 import Publish from './pages/Publish.vue';
 import Buying from './pages/Buying.vue';
-import BuyingMessages from './pages/BuyingMessages.vue';
+import Selling from './pages/Selling.vue';
+import Messages from './pages/Messages.vue';
 import Profile from './pages/Profile.vue';
 import NotFound from './pages/NotFound.vue';
 
@@ -33,7 +34,9 @@ const route_map = {
 	'marketplace/publish': Publish,
 	'marketplace/my-products': PublishedProducts,
 	'marketplace/buying': Buying,
-	'marketplace/buying/:item': BuyingMessages,
+	'marketplace/buying/:item': Messages,
+	'marketplace/selling': Selling,
+	'marketplace/selling/:buyer/:item': Messages
 }
 
 export default {

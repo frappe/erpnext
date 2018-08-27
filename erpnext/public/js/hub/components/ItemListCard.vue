@@ -5,13 +5,11 @@
 			<div class="hub-list-body ellipsis">
 				<div class="hub-list-title">{{item.item_name}}</div>
 				<div class="hub-list-subtitle ellipsis">
-					<span>{{message.sender}}: </span>
-					<span>{{message.content}}</span>
-
+					<slot name="subtitle"></slot>
 				</div>
 			</div>
 		</div>
-		<div class="hub-list-right">
+		<div class="hub-list-right" v-if="message">
 			<span class="text-muted" v-html="frappe.datetime.comment_when(message.creation, true)" />
 		</div>
 	</div>
