@@ -27,7 +27,7 @@ export default {
 		return {
 			page_name: frappe.get_route()[1],
 			items: [],
-			item_id_fieldname: 'hub_item_code',
+			item_id_fieldname: 'name',
 
 			// Constants
 			page_title: __('Saved Products'),
@@ -54,23 +54,23 @@ export default {
 			})
 		},
 
-		go_to_item_details_page(hub_item_code) {
-			frappe.set_route(`marketplace/item/${hub_item_code}`);
+		go_to_item_details_page(hub_item_name) {
+			frappe.set_route(`marketplace/item/${hub_item_name}`);
 		},
 
-		on_item_remove(hub_item_code) {
+		on_item_remove(hub_item_name) {
 			const grace_period = 5000;
 			let reverted = false;
 			let alert;
 
 			const undo_remove = () => {
-				this.toggle_item(hub_item_code);;
+				this.toggle_item(hub_item_name);;
 				reverted = true;
 				alert.hide();
 				return false;
 			}
 
-			alert = frappe.show_alert(__(`<span>${hub_item_code} removed.
+			alert = frappe.show_alert(__(`<span>${hub_item_name} removed.
 				<a href="#" data-action="undo-remove"><b>Undo</b></a></span>`),
 				grace_period/1000,
 				{
@@ -78,19 +78,19 @@ export default {
 				}
 			);
 
-			this.toggle_item(hub_item_code, false);
+			this.toggle_item(hub_item_name, false);
 
 			setTimeout(() => {
 				if(!reverted) {
-					this.remove_item_from_saved_products(hub_item_code);
+					this.remove_item_from_saved_products(hub_item_name);
 				}
 			}, grace_period);
 		},
 
-		remove_item_from_saved_products(hub_item_code) {
+		remove_item_from_saved_products(hub_item_name) {
 			erpnext.hub.trigger('action:item_favourite');
 			hub.call('remove_item_from_seller_favourites', {
-				hub_item_code,
+				hub_item_name,
 				hub_seller: hub.settings.company_email
 			})
 			.then(() => {
@@ -102,9 +102,9 @@ export default {
 		},
 
 		// By default show
-		toggle_item(hub_item_code, show=true) {
+		toggle_item(hub_item_name, show=true) {
 			this.items = this.items.map(item => {
-				if(item.hub_item_code === hub_item_code) {
+				if(item.name === hub_item_name) {
 					item.seen = show;
 				}
 				return item;
