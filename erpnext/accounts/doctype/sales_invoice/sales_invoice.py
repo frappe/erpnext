@@ -22,7 +22,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details, get_loyalty_details, validate_loyalty_points
+	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 
 from six import iteritems
 
@@ -161,7 +161,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program 
+		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
 			self.make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
@@ -259,7 +259,7 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+		bypass_credit_limit_check_at_sales_order = cint(frappe.get_cached_value("Customer", self.customer,
 			"bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
@@ -345,7 +345,7 @@ class SalesInvoice(SellingController):
 			update_multi_mode_option(self, pos)
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
@@ -388,7 +388,7 @@ class SalesInvoice(SellingController):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
 
 	def validate_debit_to_acc(self):
-		account = frappe.db.get_value("Account", self.debit_to,
+		account = frappe.get_cached_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
@@ -460,9 +460,9 @@ class SalesInvoice(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
-			if frappe.db.get_value('Selling Settings', None, dic[i][0]) == 'Yes':
+			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
+					if frappe.get_cached_value('Item', d.item_code, 'is_stock_item') == 1 \
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
@@ -491,7 +491,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
+			if not d.warehouse and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
@@ -501,7 +501,7 @@ class SalesInvoice(SellingController):
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
-			self.write_off_account = frappe.db.get_value('Company', self.company, 'write_off_account')
+			self.write_off_account = frappe.get_cached_value('Company',  self.company,  'write_off_account')
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
@@ -830,7 +830,7 @@ class SalesInvoice(SellingController):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
 			write_off_account_currency = get_account_currency(self.write_off_account)
-			default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
+			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -865,7 +865,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict({
 					"account": round_off_account,
 					"against": self.customer,
-					"credit_in_account_currency": self.rounding_adjustment,
+					"credit_in_account_currency": self.base_rounding_adjustment,
 					"credit": self.base_rounding_adjustment,
 					"cost_center": round_off_cost_center,
 				}
@@ -973,12 +973,14 @@ class SalesInvoice(SellingController):
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
-		lp_details = get_loyalty_program_details(self.customer, company=self.company,
-			loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
+		returned_amount = self.get_returned_amount()
+		current_amount = flt(self.grand_total) - cint(self.loyalty_amount)
+		eligible_amount = current_amount - returned_amount
+		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
+			current_transaction_amount=current_amount, loyalty_program=self.loyalty_program,
+			expiry_date=self.posting_date, include_expired_entry=True)
 		if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 			(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
-			returned_amount = self.get_returned_amount()
-			eligible_amount = flt(self.grand_total) - cint(self.loyalty_amount) - returned_amount
 			points_earned = cint(eligible_amount/lp_details.collection_factor)
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
@@ -994,7 +996,7 @@ class SalesInvoice(SellingController):
 			})
 			doc.flags.ignore_permissions = 1
 			doc.save()
-			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+			self.set_loyalty_program_tier()
 
 	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
@@ -1004,14 +1006,17 @@ class SalesInvoice(SellingController):
 			where redeem_against=%s''', (lp_entry.name), as_dict=1)
 		if against_lp_entry:
 			invoice_list = ", ".join([d.sales_invoice for d in against_lp_entry])
-			frappe.throw(_('''Sales Invoice can't be cancelled since the Loyalty Points earned has been redeemed. 
+			frappe.throw(_('''Sales Invoice can't be cancelled since the Loyalty Points earned has been redeemed.
 				First cancel the Sales Invoice No {0}''').format(invoice_list))
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where sales_invoice=%s''', (self.name))
 			# Set loyalty program
-			lp_details = get_loyalty_program_details(self.customer, company=self.company,
-				loyalty_program=self.loyalty_program, expiry_date=self.posting_date)
-			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+			self.set_loyalty_program_tier()
+
+	def set_loyalty_program_tier(self):
+		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
+				loyalty_program=self.loyalty_program, include_expired_entry=True)
+		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
 		returned_amount = frappe.db.sql("""
@@ -1148,7 +1153,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_invoice_
 		ref_party = doc.supplier if doctype == "Sales Invoice" else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
 			frappe.throw(_("Invalid {0} for Inter Company Invoice.").format(partytype))
-		if not frappe.db.get_value(ref_partytype, {"name": ref_party}, "represents_company") == company:
+		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
 			frappe.throw(_("Invalid Company for Inter Company Invoice."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
@@ -1255,10 +1260,10 @@ def set_account_for_mode_of_payment(self):
 def get_inter_company_details(doc, doctype):
 	if doctype == "Sales Invoice":
 		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
-		company = frappe.db.get_value("Customer", {"name": doc.customer}, "represents_company")
+		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 	else:
 		party = frappe.db.get_value("Customer", {"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company}, "name")
-		company = frappe.db.get_value("Supplier", {"name": doc.supplier}, "represents_company")
+		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
 
 	return {
 		"party": party,
@@ -1280,7 +1285,7 @@ def validate_inter_company_invoice(doc, doctype):
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 	company = details.get("company")
-	default_currency = frappe.db.get_value("Company", company, "default_currency")
+	default_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 	if default_currency != doc.currency:
 		frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
 

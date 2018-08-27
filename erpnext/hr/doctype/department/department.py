@@ -25,7 +25,7 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if not frappe.db.get_value('Company', self.company, 'abbr') in new:
+		if not frappe.get_cached_value('Company',  self.company,  'abbr') in new:
 			new = get_abbreviated_name(new, self.company)
 
 		return new
@@ -41,7 +41,7 @@ def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
 
 def get_abbreviated_name(name, company):
-	abbr = frappe.db.get_value('Company', company, 'abbr')
+	abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	new_name = '{0} - {1}'.format(name, abbr)
 	return new_name
 

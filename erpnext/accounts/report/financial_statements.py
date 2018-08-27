@@ -162,7 +162,7 @@ def get_appropriate_currency(company, filters=None):
 	if filters and filters.get("presentation_currency"):
 		return filters["presentation_currency"]
 	else:
-		return frappe.db.get_value("Company", company, "default_currency")
+		return frappe.get_cached_value('Company',  company,  "default_currency")
 
 
 def calculate_values(
@@ -210,14 +210,15 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": _(d.account_name),
 			"account": _(d.name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
 			"currency": company_currency,
-			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1)
+			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
+			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
+				if d.account_number else _(d.account_name))
 		})
 		for period in period_list:
 			if d.get(period.key) and balance_must_be == "Credit":
@@ -281,8 +282,9 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 
 def get_accounts(company, root_type):
-	return frappe.db.sql(
-		"""select name, parent_account, lft, rgt, root_type, report_type, account_name from `tabAccount`
+	return frappe.db.sql("""
+		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name
+		from `tabAccount`
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
 
@@ -373,8 +375,15 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 	if filters:
 		if filters.get("project"):
+			if not isinstance(filters.get("project"), list):
+				projects = str(filters.get("project")).strip()
+				filters.project = [d.strip() for d in projects.split(',') if d]
 			additional_conditions.append("project = '%s'" % (frappe.db.escape(filters.get("project"))))
+
 		if filters.get("cost_center"):
+			if not isinstance(filters.get("cost_center"), list):
+				cost_centers = str(filters.get("cost_center")).strip()
+				filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
 			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
 
 		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
@@ -390,9 +399,12 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 
 def get_cost_center_cond(cost_center):
-	lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
-	return """ cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)""" % (lft, rgt)
+	cost_centers = frappe.db.get_all("Cost Center", {"name": ["in", cost_center]},
+		["name", "lft", "rgt"])
 
+	lft_rgt = " or ".join(["(lft >=%s and rgt <=%s)" % (d.lft, d.rgt) for d in cost_centers])
+
+	return """ cost_center in (select name from `tabCost Center` where %s)""" % (lft_rgt)
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{

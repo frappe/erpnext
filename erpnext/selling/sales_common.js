@@ -96,8 +96,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	customer: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null,
-			function(){ me.apply_pricing_rule() });
+		erpnext.utils.get_party_details(this.frm, null, null, function() {
+			me.apply_price_list();
+		});
 	},
 
 	customer_address: function() {

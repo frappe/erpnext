@@ -28,7 +28,7 @@ class PeriodClosingVoucher(AccountsController):
 				.format(self.closing_account_head))
 
 		account_currency = get_account_currency(self.closing_account_head)
-		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
+		company_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 		if account_currency != company_currency:
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 

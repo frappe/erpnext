@@ -320,12 +320,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
 			asset_item = item_data.item_code
 
-		if not frappe.db.exists('Location', 'Test Location'):
-			frappe.get_doc({
-				'doctype': 'Location',
-				'location_name': 'Test Location'
-			}).insert()
-
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
 		asset_movement = frappe.db.get_value('Asset Movement', {'reference_name': pr.name}, 'name')
@@ -348,6 +342,12 @@ def get_gl_entries(voucher_type, voucher_no):
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 
 def make_purchase_receipt(**args):
+	if not frappe.db.exists('Location', 'Test Location'):
+		frappe.get_doc({
+			'doctype': 'Location',
+			'location_name': 'Test Location'
+		}).insert()
+
 	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
@@ -377,7 +377,7 @@ def make_purchase_receipt(**args):
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": args.uom or "_Test UOM",
-		"cost_center": args.cost_center or frappe.db.get_value('Company', pr.company, 'cost_center'),
+		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),
 		"asset_location": args.location or "Test Location"
 	})
 
@@ -388,5 +388,5 @@ def make_purchase_receipt(**args):
 	return pr
 
 
-test_dependencies = ["BOM", "Item Price"]
+test_dependencies = ["BOM", "Item Price", "Location"]
 test_records = frappe.get_test_records('Purchase Receipt')

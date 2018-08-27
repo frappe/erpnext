@@ -37,8 +37,7 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		# create the leave period and assign the leaves
 		leave_period = create_leave_period(add_months(today(), -3), add_months(today(), 3))
-		leave_period.employee = employee
-		leave_period.grant_leave_allocation()
+		leave_period.grant_leave_allocation(employee=employee)
 
 		leave_encashment = frappe.get_doc(dict(
 			doctype = 'Leave Encashment',

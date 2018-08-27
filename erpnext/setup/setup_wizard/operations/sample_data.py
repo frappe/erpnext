@@ -8,7 +8,6 @@ from frappe.utils.make_random import add_random_children
 import frappe.utils
 import random, os, json
 from frappe import _
-from markdown2 import markdown
 
 def make_sample_data(domains, make_dependent = False):
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
@@ -152,7 +151,7 @@ def make_projects(domains):
 
 	for t in tasks:
 		with open (os.path.join(os.path.dirname(__file__), "tasks", t['file'])) as f:
-			t['description'] = markdown(f.read())
+			t['description'] = frappe.utils.md_to_html(f.read())
 			del t['file']
 
 		project.append('tasks', t)
