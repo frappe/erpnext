@@ -7,7 +7,6 @@
 
 		<detail-view
 			:title="title"
-			:subtitles="subtitles"
 			:image="image"
 			:sections="sections"
 			:show_skeleton="init"
