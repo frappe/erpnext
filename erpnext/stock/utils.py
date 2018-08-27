@@ -248,3 +248,35 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+
+def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_cols = {}
+	for iCol in reversed(range(0, len(columns))):
+		col = columns[iCol]
+		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
+			convertible_cols[iCol] = col['convertible']
+			del col['convertible']
+			columns.insert(iCol+1, col.copy())
+			columns[iCol+1]['fieldname'] += "_alt"
+			if convertible_cols[iCol] == 'rate':
+				columns[iCol+1]['label'] += " (per {})".format(include_uom)
+			else:
+				columns[iCol+1]['label'] += " ({})".format(include_uom)
+
+	for iRow, row in enumerate(result):
+		new_row = []
+		for iCol, d in enumerate(row):
+			new_row.append(d)
+			if iCol in convertible_cols:
+				if conversion_factors[iRow]:
+					if convertible_cols[iCol] == 'rate':
+						new_row.append(flt(d) * conversion_factors[iRow])
+					else:
+						new_row.append(flt(d) / conversion_factors[iRow])
+				else:
+					new_row.append(None)
+
+		result[iRow] = new_row
