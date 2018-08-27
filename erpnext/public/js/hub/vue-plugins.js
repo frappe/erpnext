@@ -60,3 +60,7 @@ Vue.directive('img-src', {
 		handleImage(el, binding.value);
 	}
 });
+
+Vue.filter('striphtml', function (text) {
+	return strip_html(text);
+});
