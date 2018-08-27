@@ -45,8 +45,8 @@ export default {
 		}
 	},
 	created() {
-		const hub_item_code = this.get_hub_item_code();
-		this.get_item_details(hub_item_code)
+		const hub_item_name = this.get_hub_item_name();
+		this.get_item_details(hub_item_name)
 			.then(item_details => {
 				this.item_details = item_details;
 				this.get_messages(item_details)
@@ -66,21 +66,21 @@ export default {
 			hub.call('send_message', {
 				from_seller: hub.settings.company_email,
 				to_seller: this.item_details.hub_seller,
-				hub_item: this.item_details.hub_item_code,
+				hub_item: this.item_details.name,
 				message
 			});
 		},
-		get_item_details(hub_item_code) {
-			return hub.call('get_item_details', { hub_item_code })
+		get_item_details(hub_item_name) {
+			return hub.call('get_item_details', { hub_item_name })
 		},
 		get_messages() {
 			if (!this.item_details) return [];
 			return hub.call('get_messages', {
 				against_seller: this.item_details.hub_seller,
-				against_item: this.item_details.hub_item_code
+				against_item: this.item_details.name
 			});
 		},
-		get_hub_item_code() {
+		get_hub_item_name() {
 			return frappe.get_route()[2];
 		}
 	}

@@ -45,7 +45,7 @@ export default {
 
 			profile: null,
 			items:[],
-			item_id_fieldname: 'hub_item_code',
+			item_id_fieldname: 'name',
 
 			title: null,
 			image: null,
@@ -94,8 +94,8 @@ export default {
 			});
 		},
 
-		go_to_item_details_page(hub_item_code) {
-			frappe.set_route(`marketplace/item/${hub_item_code}`);
+		go_to_item_details_page(hub_item_name) {
+			frappe.set_route(`marketplace/item/${hub_item_name}`);
 		}
 	}
 }
