@@ -7,7 +7,7 @@ function get_buying_item_message_card_html(item) {
 	const content = strip_html(message.content)
 
 	// route
-	item.route = `marketplace/buying/${item.hub_item_code}`
+	item.route = `marketplace/buying/${item.name}`
 
 	const item_html = `
 		<div class="col-md-7">
@@ -38,7 +38,7 @@ function get_selling_item_message_card_html(item) {
 
 	// route
 	if (!item.route) {
-		item.route = `marketplace/item/${item.hub_item_code}`
+		item.route = `marketplace/item/${item.name}`
 	}
 
 	let received_messages = '';

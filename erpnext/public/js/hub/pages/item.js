@@ -6,11 +6,11 @@ import { get_review_html } from '../components/reviews';
 erpnext.hub.Item = class Item extends SubPage {
 	refresh() {
 		this.show_skeleton();
-		this.hub_item_code = frappe.get_route()[2];
+		this.hub_item_name = frappe.get_route()[2];
 
 		this.own_item = false;
 
-		this.get_item(this.hub_item_code)
+		this.get_item(this.hub_item_name)
 			.then(item => {
 				this.own_item = item.hub_seller === hub.settings.company_email;
 				this.item = item;
@@ -24,9 +24,9 @@ erpnext.hub.Item = class Item extends SubPage {
 	}
 
 
-	get_item(hub_item_code) {
+	get_item(hub_item_name) {
 		return hub.call('get_item_details', {
-			hub_item_code
+			hub_item_name
 		});
 	}
 
@@ -72,7 +72,7 @@ erpnext.hub.Item = class Item extends SubPage {
 		$(favourite_button).addClass('disabled');
 
 		hub.call('add_item_to_seller_favourites', {
-			hub_item_code: this.hub_item_code,
+			hub_item_name: this.hub_item_name,
 			hub_seller: hub.settings.company_email
 		})
 			.then(() => {
@@ -108,12 +108,12 @@ erpnext.hub.Item = class Item extends SubPage {
 				hub.call('send_message', {
 					from_seller: hub.settings.company_email,
 					to_seller: this.item.hub_seller,
-					hub_item: this.item.hub_item_code,
+					hub_item: this.item.hub_item_name,
 					message
 				})
 					.then(() => {
 						d.hide();
-						frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
+						frappe.set_route('marketplace', 'buy', this.item.hub_item_name);
 						erpnext.hub.trigger('action:send_message')
 					});
 			}
@@ -145,7 +145,7 @@ erpnext.hub.Item = class Item extends SubPage {
 		values.username = frappe.session.user_fullname;
 
 		hub.call('add_item_review', {
-			hub_item_code: this.hub_item_code,
+			hub_item_name: this.hub_item_name,
 			review: JSON.stringify(values)
 		})
 		.then(this.push_review_in_review_area.bind(this));
@@ -162,7 +162,7 @@ erpnext.hub.Item = class Item extends SubPage {
 
 
 	get_reviews() {
-		return hub.call('get_item_reviews', { hub_item_code: this.hub_item_code }).catch(() => {});
+		return hub.call('get_item_reviews', { hub_item_name: this.hub_item_name }).catch(() => {});
 	}
 
 
