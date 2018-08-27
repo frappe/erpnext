@@ -3,32 +3,39 @@
 		<section-header>
 			<h4>{{ __('Buying') }}</h4>
 		</section-header>
-		<div class="row">
-			<div class="col-md-7"
+		<div class="row" v-if="items">
+			<div class="col-md-7 margin-bottom"
 				v-for="item of items"
 				:key="item.name"
 			>
 				<item-list-card
 					:item="item"
-					:message="item.recent_message"
 					v-route="'marketplace/buying/' + item.name"
-				/>
+				>
+					<div slot="subtitle">
+						<span>{{item.recent_message.sender}}: </span>
+						<span>{{item.recent_message.content}}</span>
+					</div>
+				</item-list-card>
 			</div>
 		</div>
+		<empty-state v-else message="This page keeps track of items you want to buy from sellers." :centered="false" />
 	</div>
 </template>
 <script>
+import EmptyState from '../components/EmptyState.vue';
 import SectionHeader from '../components/SectionHeader.vue';
 import ItemListCard from '../components/ItemListCard.vue';
 
 export default {
 	components: {
 		SectionHeader,
-		ItemListCard
+		ItemListCard,
+		EmptyState
 	},
 	data() {
 		return {
-			items: []
+			items: null
 		}
 	},
 	created() {

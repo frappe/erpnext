@@ -1,6 +1,6 @@
 <template>
-	<div class="empty-state flex align-center flex-column justify-center"
-		:class="{ bordered: bordered }"
+	<div class="empty-state flex flex-column"
+		:class="{ 'bordered': bordered, 'align-center': centered, 'justify-center': centered }"
 		:style="{ height: height + 'px' }"
 	>
 		<p class="text-muted">{{ message }}</p>
@@ -22,17 +22,20 @@ export default {
 		message: String,
 		bordered: Boolean,
 		height: Number,
-		action: Object
+		action: Object,
+		centered: {
+			type: Boolean,
+			default: true
+		}
 	}
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 	@import "../../../../../../frappe/frappe/public/less/variables.less";
 
 	.empty-state {
 		height: 500px;
-		margin: 15px;
 	}
 
 	.empty-state.bordered {

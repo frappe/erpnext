@@ -20,7 +20,7 @@
 			></detail-header-item>
 
 			<button slot="detail-header-item"
-				class="btn btn-primary margin-top"
+				class="btn btn-primary btn-sm margin-top"
 				@click="primary_action.action"
 			>
 				{{ primary_action.label }}
@@ -28,7 +28,7 @@
 
 		</detail-view>
 
-		<!-- <review-area :hub_item_code="hub_item_code"></review-area> -->
+		<!-- <review-area :hub_item_name="hub_item_name"></review-area> -->
 	</div>
 </template>
 
@@ -44,7 +44,7 @@ export default {
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
-			hub_item_code: frappe.get_route()[2],
+			hub_item_name: frappe.get_route()[2],
 
 			init: true,
 
@@ -131,7 +131,7 @@ export default {
 	},
 	methods: {
 		get_profile() {
-			hub.call('get_item_details',{ hub_item_code: this.hub_item_code })
+			hub.call('get_item_details', { hub_item_name: this.hub_item_name })
 				.then(item => {
 				this.init = false;
 				this.item = item;
@@ -185,12 +185,12 @@ export default {
 					hub.call('send_message', {
 						from_seller: hub.settings.company_email,
 						to_seller: this.item.hub_seller,
-						hub_item: this.item.hub_item_code,
+						hub_item: this.item.name,
 						message
 					})
 						.then(() => {
 							d.hide();
-							frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
+							frappe.set_route('marketplace', 'buying', this.item.name);
 							erpnext.hub.trigger('action:send_message')
 						});
 				}
