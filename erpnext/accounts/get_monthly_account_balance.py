@@ -31,10 +31,10 @@ def get_monthly_account_balance():
         )
 	validate_filters(filters)
         account_info = get_balance(account, filters)
-      
+      	openings = get_rootwise_opening_balances(account, filters)
     except Exception as e:
         return dict(status=False, message=str(e))
-    return dict(status=True, message="Success", account_info=account_info)
+    return dict(status=True, message="Success", account_info=account_info, openings=openings)
 
 
 def validate_filters(filters):
@@ -87,29 +87,20 @@ def get_balance(account, filters):
       frappe.throw("There is no such account")
       
     company_currency = erpnext.get_company_currency(filters.get("company"))
-    report_type = "Balance Sheet"
-    additional_conditions = ""
-    if not filters.get("show_unclosed_fy_pl_balances", 0):
-        additional_conditions = " and posting_date >= %(year_start_date)s" \
-            if report_type == "Profit and Loss" else ""
-
-    if not flt(filters.get("with_period_closing_entry", 0)):
-        additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
-
+    
     gle = frappe.db.sql("""
 select
-	account, sum(debit) as opening_debit, sum(credit) as opening_credit
+	monthname(posting_date) as `month`, account, sum(debit) as opening_debit, sum(credit) as opening_credit
 from `tabGL Entry`
 where
 	company=%(company)s
-	{additional_conditions}
 	and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-	and account in (select name from `tabAccount` where report_type=%(report_type)s)
-group by year(posting_date), month(posting_date);""".format(additional_conditions=additional_conditions),
+	and account in = %(account)s
+group by year(posting_date), month(posting_date);""",
 	{
 	    "company": filters.get("company"),
 	    "from_date": filters.get("from_date"),
-	    "report_type": report_type,
+	    "account": account,
 	    "year_start_date": filters.get("year_start_date")
 	},
 	as_dict=True)
@@ -117,14 +108,7 @@ group by year(posting_date), month(posting_date);""".format(additional_condition
     return gle
 
 
-def get_rootwise_opening_balances(filters, report_type="Balance Sheet"):
-    additional_conditions = ""
-    if not filters.get("show_unclosed_fy_pl_balances", 0):
-        additional_conditions = " and posting_date >= %(year_start_date)s" \
-            if report_type == "Profit and Loss" else ""
-
-    if not flt(filters.get("with_period_closing_entry", 0)):
-        additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+def get_rootwise_opening_balances(account, filters):
 
     gle = frappe.db.sql("""
 select
@@ -132,14 +116,13 @@ select
 from `tabGL Entry`
 where
 	company=%(company)s
-	{additional_conditions}
 	and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-	and account in (select name from `tabAccount` where report_type=%(report_type)s)
-group by year(posting_date), month(posting_date);""".format(additional_conditions=additional_conditions),
+	and account = %(account)s
+group by year(posting_date), month(posting_date);""",
                         {
                             "company": filters.get("company"),
                             "from_date": filters.get("from_date"),
-                            "report_type": report_type,
+                            "account": account,
                             "year_start_date": filters.get("year_start_date")
                         },
                         as_dict=True)
@@ -149,24 +132,4 @@ group by year(posting_date), month(posting_date);""".format(additional_condition
         opening.setdefault(d.month, d)
 
     return opening
-
-
-def prepare_data(accounts, filters, company_currency):
-    data = []
-
-    for d in accounts:
-        has_value = False
-        row = {
-            "account_name": d.account_name,
-            "account": d.name,
-            "parent_account": d.parent_account,
-            "indent": d.indent,
-            "from_date": filters.get("from_date"),
-            "to_date": filters.get("to_date"),
-            "currency": company_currency
-        }
-
-        data.append(row)
-
-    return data
 
