@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
+from frappe.utils.data import date_diff, add_days
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
@@ -13,8 +14,8 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
-
 from six import string_types, iteritems
+
 
 class InvalidPaymentEntry(ValidationError):
 	pass
@@ -299,12 +300,12 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.base_received_amount + total_deductions - 
+					self.unallocated_amount = (self.base_received_amount + total_deductions -
 						self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
@@ -911,5 +912,44 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 			and due_date = %s
 			and {dr_or_cr} > 0
 	""".format(dr_or_cr=dr_or_cr), (dt, dn, party_type, party, account, due_date))
-
 	return paid_amount[0][0] if paid_amount else 0
+
+# returns a list of eligible discounts in the format expected by frm.doc.deductions
+@frappe.whitelist()
+def get_eligible_discount(refs, deductions, company, posting_date, payment_type):
+	discount_account = frappe.db.get_value("Company", company, ["default_sales_discount_account", "default_purchase_discount_account"])
+	discount_account = discount_account[0] if payment_type == "Pay" else discount_account[1]
+	default_cost_center = frappe.db.get_value("Company", company, "cost_center")
+	refs = json.loads(refs) if isinstance(refs, basestring) else list(refs)
+	if deductions:
+		deductions = json.loads(deductions) if isinstance(refs, basestring) else list(deductions)
+	return filter(lambda x: x is not None, [check_eligible_discount(ref, deductions,
+	discount_account, default_cost_center, posting_date) for ref in refs])
+
+
+@frappe.whitelist()
+def check_eligible_discount(ref, deductions, discount_account, default_cost_center, posting_date):
+	date, doc, ptt = get_ref(ref["reference_doctype"], ref["reference_name"])
+	for term in ptt.terms:
+		if(date_diff(posting_date, add_days(doc[date], term.discount_eligible_days)) <= 0):
+			discount_amount = doc["grand_total"] * (term.discount_percent / 100) if doc["apply_discount_on"] == "Grand Total" \
+				else doc["net_total"] * (term.discount_percent / 100)
+			return {"account": discount_account,
+				"cost_center": default_cost_center,
+				"amount": -(abs(discount_amount)),
+				"reference_document": ref["reference_name"],
+				"discount_eligible_percent": term.discount_percent,
+				"discount_date": add_days(doc[date], term.discount_eligible_days)}
+
+@frappe.whitelist()
+def get_ref(ref_doctype, ref_doc):
+	date = "posting_date" if ref_doctype in ["Sales Invoice", "Purchase Invoice", "Journal Entry"] else "transaction_date"
+	if ref_doctype is not "Journal Entry":
+		doc = frappe.get_value(ref_doctype, ref_doc, [date, "payment_terms_template", "grand_total",
+		"apply_discount_on", "net_total"], as_dict=True)
+	else:
+		je = frappe.get_value(ref_doctype, ref_doc, [date, "payment_terms_template", "total_debit"], as_dict=True)
+		doc["grand_total"] = je["total_debit"]
+		doc["net_total"] = je["total_debit"]
+		doc["apply_discount_on"] = "Grand Total"
+	return date, doc, frappe.get_doc("Payment Terms Template", doc["payment_terms_template"])

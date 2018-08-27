@@ -56,5 +56,22 @@
         }
     ],
     "template_name":"_Test Payment Term Template 3"
+  },
+  {
+    "doctype":"Payment Terms Template",
+    "terms":[
+          {
+            "doctype":"Payment Terms Template Detail",
+            "due_date_based_on":"Day(s) after invoice date",
+            "idx":1,
+            "description":"_Test 2/10 Net 30",
+            "invoice_portion":100,
+            "credit_days":30,
+            "credit_months":0,
+            "discount_eligible_days": 10,
+            "discount_percent": 2.0
+        }
+    ],
+    "template_name":"_Test 2/10 Net 30"
   }
 ]
