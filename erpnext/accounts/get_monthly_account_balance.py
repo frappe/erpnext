@@ -44,6 +44,15 @@ def get_balance(account, filters):
       frappe.throw("There is no such account")
       
     company_currency = erpnext.get_company_currency(filters.get("company"))
+
+    additional_conditions = ""
+    if not filters.get("show_unclosed_fy_pl_balances", 0):
+        additional_conditions = " and posting_date >= %(year_start_date)s" \
+            if report_type == "Profit and Loss" else ""
+
+    if not flt(filters.get("with_period_closing_entry", 0)):
+        additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+
     gle = frappe.db.sql("""
 select
 	account, sum(debit) as opening_debit, sum(credit) as opening_credit
