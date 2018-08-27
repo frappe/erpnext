@@ -20,21 +20,64 @@ def get_monthly_account_balance():
         company = data.get('company_name')
         from_date = data.get('from_date')
         to_date = data.get('end_time')
+        fiscal_year = data.get('fiscal_year')
         frappe.set_user("Administrator")
-        
-        account_info = get_balance(account, dict(
+        filters = dict(
             from_date=from_date,
             to_date=to_date,
             company=company,
-            show_zero_values=1
-        ))
+            show_zero_values=1,
+	    fiscal_year=fiscal_year
+        )
+	validate_filters(filters)
+        account_info = get_balance(account, filters)
       
     except Exception as e:
         return dict(status=False, message=str(e))
     return dict(status=True, message="Success", account_info=account_info)
 
-value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
-  
+
+def validate_filters(filters):
+    if not filters.get("fiscal_year"):
+        frappe.throw(_("Fiscal Year {0} is required").format(filters.get("fiscal_year")))
+
+    fiscal_year = frappe.db.get_value(
+        "Fiscal Year",
+        filters.get("fiscal_year"),
+        ["year_start_date", "year_end_date"],
+        as_dict=True
+    )
+    if not fiscal_year:
+        frappe.throw(_("Fiscal Year {0} does not exist").format(filters.get("fiscal_year")))
+    else:
+        filters["year_start_date"] = getdate(fiscal_year.year_start_date)
+        filters["year_end_date"] = getdate(fiscal_year.year_end_date)
+
+    if not filters.get("from_date"):
+        filters["from_date"] = filters.get("year_start_date")
+
+    if not filters.get("to_date"):
+        filters["to_date"] = filters.get("year_end_date")
+
+    filters["from_date"] = getdate(filters.get("from_date"))
+    filters["to_date"] = getdate(filters.get("to_date"))
+
+    if filters.get("from_date") > filters.get("to_date"):
+        frappe.throw(_("From Date cannot be greater than To Date"))
+
+    if (filters.get("from_date") < filters.get("year_start_date")) or (
+        filters.get("from_date") > filters.get("year_end_date")):
+        frappe.msgprint(_("From Date should be within the Fiscal Year. Assuming From Date = {0}") \
+                        .format(formatdate(filters.year_start_date)))
+
+        filters["from_date"] = filters.get("year_start_date")
+
+    if (filters.get("to_date") < filters.get("year_start_date")) or (
+        filters.get("to_date") > filters.get("year_end_date")):
+        frappe.msgprint(_("To Date should be within the Fiscal Year. Assuming To Date = {0}") \
+                        .format(formatdate(filters.get("year_end_date"))))
+        filters["to_date"] = filters.get("year_end_date")
+
   
 def get_balance(account, filters):
     accounts = frappe.db.sql("""select name, company, parent_account, account_name, root_type, report_type, lft, rgt
