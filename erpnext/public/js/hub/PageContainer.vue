@@ -3,25 +3,37 @@
 		<component :is="current_page"></component>
 	</div>
 </template>
+
 <script>
+
 import Home from './pages/Home.vue';
-import SavedProducts from './pages/SavedProducts.vue';
-import Publish from './pages/Publish.vue';
-import Category from './pages/Category.vue';
 import Search from './pages/Search.vue';
+import Category from './pages/Category.vue';
+import SavedProducts from './pages/SavedProducts.vue';
 import PublishedProducts from './pages/PublishedProducts.vue';
+import Item from './pages/Item.vue';
+import Seller from './pages/Seller.vue';
+import Publish from './pages/Publish.vue';
 import Buying from './pages/Buying.vue';
 import BuyingMessages from './pages/BuyingMessages.vue';
+import Profile from './pages/Profile.vue';
+import NotFound from './pages/NotFound.vue';
 
 const route_map = {
 	'marketplace/home': Home,
-	'marketplace/saved-products': SavedProducts,
-	'marketplace/my-products': PublishedProducts,
-	'marketplace/publish': Publish,
-	'marketplace/category/:category': Category,
 	'marketplace/search/:keyword': Search,
+	'marketplace/category/:category': Category,
+	'marketplace/item/:item': Item,
+	'marketplace/seller/:seller': Seller,
+	'marketplace/not-found': NotFound,
+
+	// Registered seller routes
+	'marketplace/profile': Profile,
+	'marketplace/saved-products': SavedProducts,
+	'marketplace/publish': Publish,
+	'marketplace/my-products': PublishedProducts,
 	'marketplace/buying': Buying,
-	'marketplace/buying/:item': BuyingMessages
+	'marketplace/buying/:item': BuyingMessages,
 }
 
 export default {

@@ -27,17 +27,8 @@
 </template>
 
 <script>
-import SearchInput from '../components/SearchInput.vue';
-import SectionHeader from '../components/SectionHeader.vue';
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
-
 export default {
 	name: 'home-page',
-	components: {
-		SectionHeader,
-		SearchInput,
-		ItemCardsContainer
-	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],

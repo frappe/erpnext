@@ -31,16 +31,31 @@
 						<img :src="image">
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-8">
 					<h2>{{ title }}</h2>
 					<div class="text-muted">
-						<p v-for="subtitle in subtitles"
-							:key="subtitle"
-							v-html="subtitle"
-						>
-						</p>
+						<slot name="subtitle"></slot>
 					</div>
 
+					<button v-if="primary_action" class="btn btn-primary" @click="primary_action.action">
+						{{ primary_action.label }}
+					</button>
+				</div>
+
+				<div v-if="menu_items" class="col-md-1">
+					<div class="dropdown pull-right hub-item-dropdown">
+						<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu dropdown-right" role="menu">
+							<li v-for="menu_item in menu_items"
+								v-if="menu_item.condition"
+								:key="menu_item.label"
+							>
+								<a @click="menu_item.action">{{ menu_item.label }}</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 			<div v-for="section in sections" class="row hub-item-description margin-bottom"
@@ -61,7 +76,7 @@
 
 export default {
 	name: 'detail-view',
-	props: ['title', 'subtitles', 'image', 'sections', 'show_skeleton'],
+	props: ['title', 'subtitles', 'image', 'sections', 'show_skeleton', 'menu_items', 'primary_action'],
 	data() {
 		return {
 			back_to_home_text: __('Back to Home')

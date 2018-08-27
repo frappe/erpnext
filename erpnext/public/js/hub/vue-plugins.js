@@ -1,6 +1,22 @@
 import Vue from 'vue/dist/vue.js';
+
+// Global components
+import ItemCardsContainer from './components/ItemCardsContainer.vue';
+import SectionHeader from './components/SectionHeader.vue';
+import SearchInput from './components/SearchInput.vue';
+import DetailView from './components/DetailView.vue';
+import DetailHeaderItem from './components/DetailHeaderItem.vue';
+import EmptyState from './components/EmptyState.vue';
+
 Vue.prototype.__ = window.__;
 Vue.prototype.frappe = window.frappe;
+
+Vue.component('item-cards-container', ItemCardsContainer);
+Vue.component('section-header', SectionHeader);
+Vue.component('search-input', SearchInput);
+Vue.component('detail-view', DetailView);
+Vue.component('detail-header-item', DetailHeaderItem);
+Vue.component('empty-state', EmptyState);
 
 Vue.directive('route', {
 	bind(el, binding) {

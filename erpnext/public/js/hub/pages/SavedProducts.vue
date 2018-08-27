@@ -19,8 +19,6 @@
 </template>
 
 <script>
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
-
 export default {
 	name: 'saved-products-page',
 	data() {
@@ -33,9 +31,6 @@ export default {
 			page_title: __('Saved Products'),
 			empty_state_message: __(`You haven't favourited any items yet.`)
 		};
-	},
-	components: {
-		ItemCardsContainer
 	},
 	created() {
 		this.get_items();

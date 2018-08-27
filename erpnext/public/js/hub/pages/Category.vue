@@ -17,13 +17,8 @@
 </template>
 
 <script>
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
-
 export default {
 	name: 'saved-products-page',
-	components: {
-		ItemCardsContainer
-	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],

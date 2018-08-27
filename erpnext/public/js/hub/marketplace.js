@@ -2,20 +2,10 @@ import Vue from 'vue/dist/vue.js';
 import './vue-plugins';
 
 // pages
-import './pages/item';
 import './pages/messages';
 import './pages/buying_messages';
 
 import PageContainer from './PageContainer.vue';
-import Home from './pages/Home.vue';
-import SavedProducts from './pages/SavedProducts.vue';
-import Publish from './pages/Publish.vue';
-import Category from './pages/Category.vue';
-import Search from './pages/Search.vue';
-import PublishedProducts from './pages/PublishedProducts.vue';
-import Profile from './pages/Profile.vue';
-import Seller from './pages/Seller.vue';
-import NotFound from './pages/NotFound.vue';
 
 // components
 import { ProfileDialog } from './components/profile_dialog';
@@ -199,7 +189,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		}
 
 		if (route[1] === 'item' && route[2] && !this.subpages.item) {
-			this.subpages.item = new erpnext.hub.Item(this.$body);
+			this.subpages.item = new erpnext.hub.ItemPage(this.$body);
 		}
 
 		if (route[1] === 'seller' && !this.subpages['seller']) {
@@ -282,167 +272,3 @@ erpnext.hub.Marketplace = class Marketplace {
 		});
 	}
 }
-
-erpnext.hub.HomePage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-home">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Home)
-		}).$mount('#vue-area-home');
-	}
-
-	show() {
-		$('[data-page-name="home"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="home"]').hide();
-	}
-}
-
-erpnext.hub.SavedProductsPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-saved">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(SavedProducts)
-		}).$mount('#vue-area-saved');
-	}
-
-	show() {
-		$('[data-page-name="saved-products"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="saved-products"]').hide();
-	}
-}
-
-erpnext.hub.PublishPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Publish)
-		}).$mount('#vue-area');
-	}
-
-	show() {
-		$('[data-page-name="publish"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="publish"]').hide();
-	}
-
-}
-
-erpnext.hub.CategoryPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-category">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Category)
-		}).$mount('#vue-area-category');
-	}
-
-	show() {
-		$('[data-page-name="category"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="category"]').hide();
-	}
-}
-
-erpnext.hub.PublishedProductsPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-published-products">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(PublishedProducts)
-		}).$mount('#vue-area-published-products');
-	}
-
-	show() {
-		$('[data-page-name="published-products"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="published-products"]').hide();
-	}
-}
-
-erpnext.hub.SearchPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-search">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Search)
-		}).$mount('#vue-area-search');
-	}
-
-	show() {
-		$('[data-page-name="search"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="search"]').hide();
-	}
-}
-
-erpnext.hub.ProfilePage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-profile">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Profile)
-		}).$mount('#vue-area-profile');
-	}
-
-	show() {
-		$('[data-page-name="profile"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="profile"]').hide();
-	}
-}
-
-erpnext.hub.SellerPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-seller">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(Seller)
-		}).$mount('#vue-area-seller');
-	}
-
-	show() {
-		$('[data-page-name="seller"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="seller"]').hide();
-	}
-}
-
-erpnext.hub.NotFoundPage = class {
-	constructor(parent) {
-		this.$wrapper = $(`<div id="vue-area-not-found">`).appendTo($(parent));
-
-		new Vue({
-			render: h => h(NotFound)
-		}).$mount('#vue-area-not-found');
-	}
-
-	show() {
-		$('[data-page-name="not-found"]').show();
-	}
-
-	hide() {
-		$('[data-page-name="not-found"]').hide();
-	}
-}
-

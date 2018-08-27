@@ -24,15 +24,8 @@
 </template>
 
 <script>
-import SearchInput from '../components/SearchInput.vue';
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
-
 export default {
 	name: 'saved-products-page',
-	components: {
-		SearchInput,
-		ItemCardsContainer
-	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
