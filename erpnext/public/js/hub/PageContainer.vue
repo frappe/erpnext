@@ -86,6 +86,10 @@ export default {
 				}
 			}
 
+			if (!route) {
+				return NotFound;
+			}
+
 			return route_map[route];
 		}
 	}

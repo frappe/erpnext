@@ -21,7 +21,9 @@ Vue.component('empty-state', EmptyState);
 Vue.directive('route', {
 	bind(el, binding) {
 		const route = binding.value;
+		if (!route) return;
 		el.classList.add('cursor-pointer');
+		el.dataset.route = route;
 		el.addEventListener('click', () => frappe.set_route(route));
 	},
 	unbind(el) {
