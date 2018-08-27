@@ -17,7 +17,7 @@ def get_monthly_account_balance():
         data = frappe.form_dict
 
         account = data.get('account')
-        company_name = data['company_name']
+        company = data['company_name']
         fiscal_year = str(data['fiscal_year'])
         from_date = data.get('from_date')
         to_date = data.get('to_date')
