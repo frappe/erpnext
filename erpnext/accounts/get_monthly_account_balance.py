@@ -71,7 +71,7 @@ group by year(posting_date), month(posting_date);""".format(additional_condition
 	},
 	as_dict=True)
 
-    return data
+    return gle
 
 
 def get_rootwise_opening_balances(filters, report_type="Balance Sheet"):
