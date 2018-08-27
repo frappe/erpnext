@@ -1,16 +1,23 @@
-<div align="center">
-    <img src="https://github.com/frappe/design/blob/master/logos/erpnext-logo.svg" height="128">
-    <h2>ERPNext</h2>
-    <p align="center">
-        <p>ERP made simple</p>
-    </p>
-</div>
-
-[![Build Status](https://travis-ci.com/frappe/erpnext.png)](https://travis-ci.com/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[https://erpnext.com](https://erpnext.com)
+### ThaiNext
+Fock form ERPNext v10 for thai localize
 
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
+
+
+### Todo / Roadmap
+
+- [ ] Remove Some Domain Module
+- [ ] Thai Accounting (Vat,Tax,COA)
+- [ ] Financian Report
+- [ ] Docker file for install
+- [ ] Add Vuejs support to Website
+- [ ] Move from flask to sanic
+- [ ] Add support Microservice
+
+
+-----
+
+### About ERPNext
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
