@@ -93,7 +93,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item Price",
-					"route": "Report/Item Price"
 				},
 				{
 					"type": "doctype",
