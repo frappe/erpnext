@@ -38,6 +38,7 @@ def add_transaction():
         # unit_id = frappe.form_dict['unit_id']
         user_id = data.get('user_id')
         customer_id = data.get('customer_id')
+        customer_name = data.get('customer_name')
         # transaction_id = frappe.form_dict['transaction_id']
         company_id = data.get('company')
         branch_id = data.get('branch')
@@ -60,13 +61,13 @@ def add_transaction():
         if not frappe.db.exists(
                 "Customer",
                 dict(
-                    customer_name=customer_id
+                    customer_name=("like", "%@{0}".format(customer_id)
                 )
         ):
             to_customer = frappe.get_doc(
                 doctype="Customer",
                 naming_series="CUST-",
-                customer_name=customer_id,
+                customer_name="{0}@{1}".format(customer_name, customer_id),
                 customer_type="Individual",
                 customer_group="Individual",
                 territory="All Territories",
@@ -79,7 +80,7 @@ def add_transaction():
             to_customer = frappe.get_doc(
                 "Customer",
                 dict(
-                    customer_name=customer_id
+                    customer_name=("like", "%@{0}".format(customer_id)
                 )
             )
 
