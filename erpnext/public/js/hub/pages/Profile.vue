@@ -17,13 +17,8 @@
 </template>
 
 <script>
-import DetailView from '../components/DetailView.vue';
-
 export default {
 	name: 'profile-page',
-	components: {
-		DetailView
-	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],

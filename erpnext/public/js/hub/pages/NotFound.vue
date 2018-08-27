@@ -14,13 +14,8 @@
 </template>
 
 <script>
-import EmptyState from '../components/EmptyState.vue';
-
 export default {
 	name: 'not-found-page',
-	components: {
-		EmptyState
-	},
 	data() {
 		return {
 			page_name: 'not-found',

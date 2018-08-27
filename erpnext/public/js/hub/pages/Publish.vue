@@ -54,13 +54,14 @@
 </template>
 
 <script>
-import SearchInput from '../components/SearchInput.vue';
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
 import NotificationMessage from '../components/NotificationMessage.vue';
 import { ItemPublishDialog } from '../components/item_publish_dialog';
 
 export default {
 	name: 'publish-page',
+	components: {
+		NotificationMessage
+	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -86,11 +87,6 @@ export default {
 					See your Published Products</a>.`)
 				: ''
 		};
-	},
-	components: {
-		SearchInput,
-		ItemCardsContainer,
-		NotificationMessage
 	},
 	computed: {
 		no_selected_items() {

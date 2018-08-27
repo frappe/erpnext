@@ -2,7 +2,7 @@ import SubPage from './subpage';
 // import { get_item_card_container_html } from '../components/items_container';
 import { get_buying_item_message_card_html } from '../components/item_card';
 import { get_selling_item_message_card_html } from '../components/item_card';
-import { get_empty_state } from '../components/empty_state';
+// import { get_empty_state } from '../components/empty_state';
 
 erpnext.hub.Buying = class Buying extends SubPage {
 	refresh() {
@@ -27,8 +27,8 @@ erpnext.hub.Buying = class Buying extends SubPage {
 	}
 
 	render_empty_state() {
-		const empty_state = get_empty_state(__('You haven\'t interacted with any seller yet.'));
-		this.$wrapper.html(empty_state);
+		// const empty_state = get_empty_state(__('You haven\'t interacted with any seller yet.'));
+		// this.$wrapper.html(empty_state);
 	}
 
 	get_items_for_messages() {

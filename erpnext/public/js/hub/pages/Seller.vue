@@ -25,15 +25,8 @@
 </template>
 
 <script>
-import DetailView from '../components/DetailView.vue';
-import ItemCardsContainer from '../components/ItemCardsContainer.vue';
-
 export default {
 	name: 'seller-page',
-	components: {
-		DetailView,
-		ItemCardsContainer
-	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
