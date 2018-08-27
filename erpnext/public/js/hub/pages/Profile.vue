@@ -12,6 +12,17 @@
 			:sections="sections"
 			:show_skeleton="init"
 		>
+
+			<detail-header-item slot="detail-header-item"
+				:value="country"
+			></detail-header-item>
+			<detail-header-item slot="detail-header-item"
+				:value="site_name"
+			></detail-header-item>
+			<detail-header-item slot="detail-header-item"
+				:value="joined_when"
+			></detail-header-item>
+
 		</detail-view>
 	</div>
 </template>
@@ -27,9 +38,12 @@ export default {
 
 			profile: null,
 			title: null,
-			subtitles: [],
 			image: null,
-			sections: []
+			sections: [],
+
+			country: '',
+			site_name: '',
+			joined_when: '',
 		};
 	},
 	created() {
@@ -45,11 +59,11 @@ export default {
 
 				this.profile = profile;
 				this.title = profile.company;
-				this.subtitles = [
-					__(profile.country),
-					__(profile.site_name),
-					__(`Joined ${comment_when(profile.creation)}`)
-				];
+
+				this.country = __(profile.country);
+				this.site_name = __(profile.site_name);
+				this.joined_when = __(`Joined ${comment_when(profile.creation)}`);
+
 				this.image = profile.logo;
 				this.sections = [
 					{

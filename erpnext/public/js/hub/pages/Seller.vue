@@ -6,11 +6,20 @@
 	>
 		<detail-view
 			:title="title"
-			:subtitles="subtitles"
 			:image="image"
 			:sections="sections"
 			:show_skeleton="init"
 		>
+			<detail-header-item slot="detail-header-item"
+				:value="country"
+			></detail-header-item>
+			<detail-header-item slot="detail-header-item"
+				:value="site_name"
+			></detail-header-item>
+			<detail-header-item slot="detail-header-item"
+				:value="joined_when"
+			></detail-header-item>
+
 		</detail-view>
 
 		<h5 v-if="profile">{{ item_container_heading }}</h5>
@@ -39,9 +48,12 @@ export default {
 			item_id_fieldname: 'hub_item_code',
 
 			title: null,
-			subtitles: [],
 			image: null,
 			sections: [],
+
+			country: '',
+			site_name: '',
+			joined_when: '',
 		};
 	},
 	created() {
@@ -65,11 +77,11 @@ export default {
 				const profile = this.profile;
 
 				this.title = profile.company;
-				this.subtitles = [
-					__(profile.country),
-					__(profile.site_name),
-					__(`Joined ${comment_when(profile.creation)}`)
-				];
+
+				this.country = __(profile.country);
+				this.site_name = __(profile.site_name);
+				this.joined_when = __(`Joined ${comment_when(profile.creation)}`);
+
 				this.image = profile.logo;
 				this.sections = [
 					{

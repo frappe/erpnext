@@ -1,13 +1,8 @@
 import Vue from 'vue/dist/vue.js';
 import './vue-plugins';
 
-// pages
-import './pages/messages';
-import './pages/buying_messages';
-
-import PageContainer from './PageContainer.vue';
-
 // components
+import PageContainer from './PageContainer.vue';
 import { ProfileDialog } from './components/profile_dialog';
 
 // helpers
