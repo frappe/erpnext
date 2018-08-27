@@ -36,7 +36,7 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Receive and Bill') {
+		if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
 					frm: frm,
