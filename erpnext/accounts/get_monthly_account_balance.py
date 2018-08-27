@@ -44,7 +44,7 @@ def get_balance(account, filters):
       frappe.throw("There is no such account")
       
     company_currency = erpnext.get_company_currency(filters.get("company"))
-
+    report_type = "Balance Sheet"
     additional_conditions = ""
     if not filters.get("show_unclosed_fy_pl_balances", 0):
         additional_conditions = " and posting_date >= %(year_start_date)s" \
@@ -74,7 +74,7 @@ group by year(posting_date), month(posting_date);""".format(additional_condition
     return data
 
 
-def get_rootwise_opening_balances(filters, report_type):
+def get_rootwise_opening_balances(filters, report_type="Balance Sheet"):
     additional_conditions = ""
     if not filters.get("show_unclosed_fy_pl_balances", 0):
         additional_conditions = " and posting_date >= %(year_start_date)s" \
