@@ -7,27 +7,40 @@
 
 		<detail-view
 			:title="title"
-			:subtitles="subtitles"
 			:image="image"
 			:sections="sections"
 			:menu_items="menu_items"
 			:show_skeleton="init"
 		>
-			<detail-header-item slot="subtitle"
+			<detail-header-item slot="detail-header-item"
 				:value="item_subtitle"
 			></detail-header-item>
-			<detail-header-item slot="subtitle"
+			<detail-header-item slot="detail-header-item"
 				:value="item_views_and_ratings"
 			></detail-header-item>
+
+			<button slot="detail-header-item"
+				class="btn btn-primary margin-top"
+				@click="primary_action.action"
+			>
+				{{ primary_action.label }}
+			</button>
+
 		</detail-view>
+
+		<!-- <review-area :hub_item_code="hub_item_code"></review-area> -->
 	</div>
 </template>
 
 <script>
+import ReviewArea from '../components/ReviewArea.vue';
 import { get_rating_html } from '../components/reviews';
 
 export default {
 	name: 'item-page',
+	components: {
+		ReviewArea
+	},
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -37,7 +50,6 @@ export default {
 
 			item: null,
 			title: null,
-			subtitles: [],
 			image: null,
 			sections: [],
 
@@ -105,6 +117,13 @@ export default {
 			}
 
 			return stats;
+		},
+
+		primary_action() {
+			return {
+				label: __('Contact Seller'),
+				action: this.contact_seller.bind(this)
+			}
 		}
 	},
 	created() {
@@ -140,8 +159,44 @@ export default {
 			];
 		},
 
-		report_item(){
+		report_item() {
 			//
+		},
+
+		contact_seller() {
+			const d = new frappe.ui.Dialog({
+				title: __('Send a message'),
+				fields: [
+					{
+						fieldname: 'to',
+						fieldtype: 'Read Only',
+						label: __('To'),
+						default: this.item.company
+					},
+					{
+						fieldtype: 'Text',
+						fieldname: 'message',
+						label: __('Message')
+					}
+				],
+				primary_action: ({ message }) => {
+					if (!message) return;
+
+					hub.call('send_message', {
+						from_seller: hub.settings.company_email,
+						to_seller: this.item.hub_seller,
+						hub_item: this.item.hub_item_code,
+						message
+					})
+						.then(() => {
+							d.hide();
+							frappe.set_route('marketplace', 'buy', this.item.hub_item_code);
+							erpnext.hub.trigger('action:send_message')
+						});
+				}
+			});
+
+			d.show();
 		}
 	}
 }

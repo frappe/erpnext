@@ -34,12 +34,8 @@
 				<div class="col-md-8">
 					<h2>{{ title }}</h2>
 					<div class="text-muted">
-						<slot name="subtitle"></slot>
+						<slot name="detail-header-item"></slot>
 					</div>
-
-					<button v-if="primary_action" class="btn btn-primary" @click="primary_action.action">
-						{{ primary_action.label }}
-					</button>
 				</div>
 
 				<div v-if="menu_items" class="col-md-1">
@@ -76,7 +72,7 @@
 
 export default {
 	name: 'detail-view',
-	props: ['title', 'subtitles', 'image', 'sections', 'show_skeleton', 'menu_items', 'primary_action'],
+	props: ['title', 'image', 'sections', 'show_skeleton', 'menu_items'],
 	data() {
 		return {
 			back_to_home_text: __('Back to Home')

@@ -7,7 +7,7 @@
 const spacer = '<span aria-hidden="true"> · </span>';
 
 export default {
-	name: 'header-item',
+	name: 'detail-header-item',
 	props: ['value'],
 	data() {
 		return {

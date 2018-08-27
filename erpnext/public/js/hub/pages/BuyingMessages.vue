@@ -28,13 +28,11 @@
 	</div>
 </template>
 <script>
-import SectionHeader from '../components/SectionHeader.vue';
 import CommentInput from '../components/CommentInput.vue';
 import ItemListCard from '../components/ItemListCard.vue';
 
 export default {
 	components: {
-		SectionHeader,
 		CommentInput,
 		ItemListCard
 	},
