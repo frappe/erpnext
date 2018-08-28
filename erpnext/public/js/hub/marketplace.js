@@ -21,15 +21,17 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.page = parent.page;
 
 		frappe.db.get_doc('Hub Settings')
-			.then(doc => {
+		.then(doc => {
 				hub.settings = doc;
-				this.registered = doc.registered;
-
+				const is_registered = hub.settings.registered
 				this.setup_header();
 				this.make_sidebar();
 				this.make_body();
 				this.setup_events();
 				this.refresh();
+				if (!is_registered) {
+					this.page.set_primary_action('Become A Seller', this.show_register_dialog.bind(this))
+				}
 			});
 	}
 
@@ -74,93 +76,15 @@ erpnext.hub.Marketplace = class Marketplace {
 		});
 
 		erpnext.hub.on('seller-registered', () => {
-			this.registered = 1;
-			this.make_sidebar_nav_buttons();
+			this.page.clear_primary_action()
+			frappe.db.get_doc('Hub Settings').then((doc)=> {
+				hub.settings = doc;
+			});
 		});
 	}
 
 	refresh() {
 
-	}
-
-	_refresh() {
-		const route = frappe.get_route();
-		this.subpages = this.subpages || {};
-
-		for (let page in this.subpages) {
-			this.subpages[page].hide();
-		}
-
-		if (route[1] === 'home' && !this.subpages.home) {
-			this.subpages.home = new erpnext.hub.HomePage(this.$body);
-		}
-
-		if (route[1] === 'search' && !this.subpages.search) {
-			this.subpages.search = new erpnext.hub.SearchPage(this.$body);
-		}
-
-		if (route[1] === 'category' && route[2] && !this.subpages.category) {
-			this.subpages.category = new erpnext.hub.CategoryPage(this.$body);
-		}
-
-		if (route[1] === 'item' && route[2] && !this.subpages.item) {
-			this.subpages.item = new erpnext.hub.ItemPage(this.$body);
-		}
-
-		if (route[1] === 'seller' && !this.subpages['seller']) {
-			this.subpages['seller'] = new erpnext.hub.SellerPage(this.$body);
-		}
-
-		if (route[1] === 'register' && !this.subpages.register) {
-			if (this.registered) {
-				frappe.set_route('marketplace', 'home');
-				return;
-			}
-			this.subpages.register = new erpnext.hub.Register(this.$body);
-		}
-
-		// registered seller routes
-		if (route[1] === 'saved-products' && !this.subpages['saved-products']) {
-			this.subpages['saved-products'] = new erpnext.hub.SavedProductsPage(this.$body);
-		}
-
-		if (route[1] === 'profile' && !this.subpages.profile) {
-			this.subpages.profile = new erpnext.hub.ProfilePage(this.$body);
-		}
-
-		if (route[1] === 'publish' && !this.subpages.publish) {
-			this.subpages.publish = new erpnext.hub.PublishPage(this.$body);
-		}
-
-		if (route[1] === 'my-products' && !this.subpages['my-products']) {
-			this.subpages['my-products'] = new erpnext.hub.PublishedProductsPage(this.$body);
-		}
-
-		if (route[1] === 'buying' && !this.subpages['buying']) {
-			this.subpages['buying'] = new erpnext.hub.Buying(this.$body);
-		}
-
-		if (route[1] === 'selling' && !this.subpages['selling']) {
-			this.subpages['selling'] = new erpnext.hub.Selling(this.$body, 'Selling');
-		}
-
-		// dont allow unregistered users to access registered routes
-		const registered_routes = ['saved-products', 'profile', 'publish', 'my-products', 'messages'];
-		if (!hub.settings.registered && registered_routes.includes(route[1])) {
-			frappe.set_route('marketplace', 'home');
-			return;
-		}
-
-		if (!Object.keys(this.subpages).includes(route[1])) {
-			if (!this.subpages.not_found) {
-				this.subpages.not_found = new erpnext.hub.NotFoundPage(this.$body);
-			}
-			route[1] = 'not_found';
-		}
-
-		this.update_sidebar();
-		frappe.utils.scroll_to(0);
-		this.subpages[route[1]].show();
 	}
 
 	show_register_dialog() {
@@ -186,4 +110,5 @@ erpnext.hub.Marketplace = class Marketplace {
 		    erpnext.hub.trigger('seller-registered');
 		});
 	}
+
 }
