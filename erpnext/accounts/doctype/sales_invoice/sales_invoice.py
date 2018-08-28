@@ -1081,7 +1081,7 @@ class SalesInvoice(SellingController):
 			if points_to_redeem < 1: # since points_to_redeem is integer
 				break
 
-	def book_income_for_deferred_revenue(self):
+	def book_income_for_deferred_revenue(self, start_date=None, end_date=None):
 		# book the income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 		# start_date: 1st of the last month or the start date
 		# end_date: end_date or today-1
@@ -1114,6 +1114,11 @@ class SalesInvoice(SellingController):
 			elif item.service_stop_date<=booking_end_date:
 				last_gl_entry = True
 				booking_end_date = item.service_stop_date
+
+			if start_date and end_date:
+				# if start and end date are already provided
+				booking_start_date = start_date
+				booking_end_date = end_date
 
 			total_days = date_diff(item.service_end_date, item.service_start_date)
 			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
@@ -1166,17 +1171,17 @@ class SalesInvoice(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
 
 
-def booked_deferred_revenue():
+def booked_deferred_revenue(start_date=None, end_date=None):
 	# check for the sales invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
 		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
 		and enable_deferred_revenue = 1 and docstatus = 1
-	''', (today(), add_months(today(), -1)))
+	''', (start_date or today(), end_date or add_months(today(), -1)))
 
 	# ToDo also find the list on the basic of the GL entry, and make another list
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
-		doc.book_income_for_deferred_revenue()
+		doc.book_income_for_deferred_revenue(start_date, end_date)
 
 
 def validate_inter_company_party(doctype, party, company, inter_company_invoice_reference):
