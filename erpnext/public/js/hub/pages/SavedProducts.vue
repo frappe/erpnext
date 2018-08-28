@@ -38,11 +38,8 @@ export default {
 	methods: {
 		get_items() {
 			hub.call(
-				'get_favourite_items_of_seller',
-				{
-					hub_seller: hub.settings.company_email
-				},
-				'action:item_favourite'
+				'get_saved_items_of_seller', {},
+				'action:item_save'
 			)
 			.then((items) => {
 				this.items = items;
@@ -65,7 +62,9 @@ export default {
 				return false;
 			}
 
-			alert = frappe.show_alert(__(`<span>${hub_item_name} removed.
+			const item_name = this.items.filter(item => item.hub_item_name === hub_item_name);
+
+			alert = frappe.show_alert(__(`<span>${item_name} removed.
 				<a href="#" data-action="undo-remove"><b>Undo</b></a></span>`),
 				grace_period/1000,
 				{
@@ -83,8 +82,8 @@ export default {
 		},
 
 		remove_item_from_saved_products(hub_item_name) {
-			erpnext.hub.trigger('action:item_favourite');
-			hub.call('remove_item_from_seller_favourites', {
+			erpnext.hub.trigger('action:item_save');
+			hub.call('remove_item_from_seller_saved_items', {
 				hub_item_name,
 				hub_seller: hub.settings.company_email
 			})
