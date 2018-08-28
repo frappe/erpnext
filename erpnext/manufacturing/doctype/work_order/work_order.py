@@ -190,15 +190,13 @@ class WorkOrder(Document):
 
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
+			if (purpose == 'Material Transfer for Manufacture' and
+				self.operations and self.transfer_material_against_job_card):
+				continue
 
-			if self.transfer_material_against_job_card and purpose == 'Material Transfer for Manufacture':
-				qty = flt(frappe.db.sql("""select sum(for_quantity)
-					from `tabJob Card` where work_order=%s and docstatus=1""", (self.name))[0][0])
-				qty = qty / len(self.operations)
-			else:
-				qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-					from `tabStock Entry` where work_order=%s and docstatus=1
-					and purpose=%s""", (self.name, purpose))[0][0])
+			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
+				from `tabStock Entry` where work_order=%s and docstatus=1
+				and purpose=%s""", (self.name, purpose))[0][0])
 
 			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
 			if qty > completed_qty:
@@ -240,6 +238,10 @@ class WorkOrder(Document):
 
 	def create_job_card(self):
 		for row in self.operations:
+			if not row.workstation:
+				frappe.throw(_("Row {0}: select the workstation against the operation {1}")
+					.format(row.idx, row.operation))
+
 			create_job_card(self, row, auto_create=True)
 
 	def validate_cancel(self):
@@ -319,6 +321,17 @@ class WorkOrder(Document):
 		"""	% ", ".join(["%s"]*len(bom_list)), tuple(bom_list), as_dict=1)
 
 		self.set('operations', operations)
+
+		if self.use_multi_level_bom and self.get('operations') and self.get('items'):
+			raw_material_operations = [d.operation for d in self.get('items')]
+			operations = [d.operation for d in self.get('operations')]
+
+			for operation in raw_material_operations:
+				if operation not in operations:
+					self.append('operations', {
+						'operation': operation
+					})
+
 		self.calculate_time()
 
 	def calculate_time(self):

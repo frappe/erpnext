@@ -465,6 +465,7 @@ class BOM(WebsiteGenerator):
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'		: d.item_code,
 					'item_name'		: d.item_name,
+					'operation'		: d.operation,
 					'source_warehouse': d.source_warehouse,
 					'description'	: d.description,
 					'image'			: d.image,
@@ -487,7 +488,7 @@ class BOM(WebsiteGenerator):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
-			bom_item.description, bom_item.source_warehouse,
+			bom_item.description, bom_item.source_warehouse, bom_item.operation,
 			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.allow_transfer_for_manufacture,
 			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
@@ -498,6 +499,7 @@ class BOM(WebsiteGenerator):
 				'item_code'				: d['item_code'],
 				'item_name'				: d['item_name'],
 				'source_warehouse'		: d['source_warehouse'],
+				'operation'				: d['operation'],
 				'description'			: d['description'],
 				'stock_uom'				: d['stock_uom'],
 				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
@@ -576,7 +578,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 	if cint(fetch_exploded):
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
-			select_columns = """, bom_item.source_warehouse, bom_item.allow_transfer_for_manufacture,
+			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.allow_transfer_for_manufacture,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)

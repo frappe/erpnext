@@ -593,7 +593,8 @@ class StockEntry(StockController):
 				frappe.throw(_("Transaction not allowed against stopped Work Order {0}").format(self.work_order))
 
 		if self.job_card:
-			frappe.db.set_value('JOB Card', self.job_card, 'for_quantity', self.fg_completed_qty)
+			job_doc = frappe.get_doc('Job Card', self.job_card)
+			job_doc.set_transferred_qty()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

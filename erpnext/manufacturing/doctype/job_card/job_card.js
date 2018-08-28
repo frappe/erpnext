@@ -4,13 +4,13 @@
 frappe.ui.form.on('Job Card', {
 	refresh: function(frm) {
 		if (frm.doc.items && frm.doc.docstatus==1) {
-			if (!frm.doc.material_request) {
+			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
 				frm.add_custom_button(__("Material Request"), () => {
 					frm.trigger("make_material_request");
 				});
 			}
 
-			if (!frm.doc.stock_entry) {
+			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
 				frm.add_custom_button(__("Material Transfer"), () => {
 					frm.trigger("make_stock_entry");
 				});
@@ -78,6 +78,17 @@ frappe.ui.form.on('Job Card', {
 				return currentIncrement;
 			}
 		}
+	},
+
+	for_quantity: function(frm) {
+		frm.doc.items = [];
+		frm.call({
+			method: "get_required_items",
+			doc: frm.doc,
+			callback: function() {
+				refresh_field("items");
+			}
+		})
 	},
 
 	make_material_request: function(frm) {

@@ -11,7 +11,9 @@ from frappe.model.document import Document
 
 class JobCard(Document):
 	def validate(self):
+		self.status = 'Open'
 		self.validate_actual_dates()
+		self.set_time_in_mins()
 
 	def validate_actual_dates(self):
 		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
@@ -32,12 +34,16 @@ class JobCard(Document):
 			frappe.throw(_("Start date and end date is overlapping with the job card <a href='#Form/Job Card/{0}'>{1}</a>")
 				.format(data[0].name, data[0].name))
 
+	def set_time_in_mins(self):
+		if self.actual_start_date and self.actual_end_date:
+			self.time_in_mins = time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
+
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
 
 		doc = frappe.get_doc('Work Order', self.get('work_order'))
-		if not doc.transfer_material_against_job_card:
+		if not doc.transfer_material_against_job_card and doc.skip_transfer:
 			return
 
 		for d in doc.required_items:
@@ -58,38 +64,77 @@ class JobCard(Document):
 	def on_submit(self):
 		self.validate_dates()
 		self.update_work_order()
+		self.set_transferred_qty()
 
 	def validate_dates(self):
 		if not self.actual_start_date and not self.actual_end_date:
 			frappe.throw(_("Actual start date and actual end date is mandatory"))
 
 	def on_cancel(self):
-		self.update_work_order(cancel=True)
+		self.update_work_order()
+		self.set_transferred_qty()
 
-	def update_work_order(self, cancel=False):
+	def update_work_order(self):
 		if not self.work_order:
 			return
 
-		wo = frappe.get_doc('Work Order', self.work_order)
+		data = frappe.db.get_value("Job Card", {'docstatus': 1, 'operation_id': self.operation_id},
+			['sum(time_in_mins)', 'min(actual_start_date)', 'max(actual_end_date)', 'sum(for_quantity)'])
 
-		for data in wo.operations:
-			if data.name == self.operation_id:
-				if cancel:
-					data.completed_qty -= self.for_quantity
-					data.actual_operation_time -= time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
-					data.actual_start_time = None
-					data.actual_end_time = None
-				else:
-					data.completed_qty = self.for_quantity
-					data.actual_operation_time = time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
-					data.actual_start_time = get_datetime(self.actual_start_date)
-					data.actual_end_time = get_datetime(self.actual_end_date)
+		if data:
+			time_in_mins, actual_start_date, actual_end_date, for_quantity = data
 
-		wo.flags.ignore_validate_update_after_submit = True
-		wo.update_operation_status()
-		wo.calculate_operating_cost()
-		wo.set_actual_dates()
-		wo.save()
+			wo = frappe.get_doc('Work Order', self.work_order)
+
+			for data in wo.operations:
+				if data.name == self.operation_id:
+					data.completed_qty = for_quantity
+					data.actual_operation_time = time_in_mins
+					data.actual_start_time = actual_start_date
+					data.actual_end_time = actual_end_date
+
+			wo.flags.ignore_validate_update_after_submit = True
+			wo.update_operation_status()
+			wo.calculate_operating_cost()
+			wo.set_actual_dates()
+			wo.save()
+
+	def set_transferred_qty(self):
+		if not self.items:
+			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
+
+		if self.items:
+			self.transferred_qty = frappe.db.get_value('Stock Entry', {'job_card': self.name,
+				'work_order': self.work_order, 'docstatus': 1}, 'sum(fg_completed_qty)')
+
+		self.db_set("transferred_qty", self.transferred_qty)
+
+		qty = 0
+		if self.work_order:
+			doc = frappe.get_doc('Work Order', self.work_order)
+			if doc.transfer_material_against_job_card and not doc.skip_transfer:
+				completed = True
+				for d in doc.operations:
+					if d.status != 'Completed':
+						completed = False
+						break
+
+				if completed:
+					job_cards = frappe.get_all('Job Card', filters = {'work_order': self.work_order, 
+						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
+					qty = min([d.qty for d in job_cards])
+
+			doc.db_set('material_transferred_for_manufacturing', qty)
+
+		self.set_status()
+
+	def set_status(self):
+		status = 'Cancelled' if self.docstatus == 2 else 'Work In Progress'
+
+		if self.for_quantity == self.transferred_qty:
+			status = 'Completed'
+
+		self.db_set('status', status)
 
 def update_job_card_reference(name, fieldname, value):
 	frappe.db.set_value('Job Card', name, fieldname, value)
@@ -132,6 +177,7 @@ def make_stock_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
+		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
 
