@@ -26,7 +26,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	suppliers = list(set([d.supplier for d in invoice_list]))
 	supplier_details = get_supplier_details(suppliers)
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	data = []
 	for inv in invoice_list:

@@ -55,6 +55,11 @@ export default {
 
 			menu_items: [
 				{
+					label: __('Save Item'),
+					condition: !this.is_own_item,
+					action: this.add_to_saved_items
+				},
+				{
 					label: __('Report this Product'),
 					condition: !this.is_own_item,
 					action: this.report_item
@@ -127,11 +132,29 @@ export default {
 		}
 	},
 	created() {
-		this.get_profile();
+		this.get_item_details();
+	},
+	mounted() {
+		// To record a single view per session, (later)
+		// erpnext.hub.item_view_cache = erpnext.hub.item_view_cache || [];
+		// if (erpnext.hub.item_view_cache.includes(this.hub_item_name)) {
+		// 	return;
+		// }
+
+		this.item_received.then(() => {
+			setTimeout(() => {
+				hub.call('add_item_view', {
+					hub_item_name: this.hub_item_name
+				})
+				// .then(() => {
+				// 	erpnext.hub.item_view_cache.push(this.hub_item_name);
+				// });
+			}, 5000);
+		});
 	},
 	methods: {
-		get_profile() {
-			hub.call('get_item_details', { hub_item_name: this.hub_item_name })
+		get_item_details() {
+			this.item_received = hub.call('get_item_details', { hub_item_name: this.hub_item_name })
 				.then(item => {
 				this.init = false;
 				this.item = item;
@@ -161,6 +184,21 @@ export default {
 
 		report_item() {
 			//
+		},
+
+		add_to_saved_items() {
+			hub.call('add_item_to_seller_saved_items', {
+				hub_item_name: this.hub_item_name,
+				hub_seller: hub.settings.company_email
+			})
+			.then(() => {
+				const saved_items_link = `<b><a href="#marketplace/saved-products">${__('Saved')}</a></b>`
+				frappe.show_alert(saved_items_link);
+				erpnext.hub.trigger('action:item_save');
+			})
+			.catch(e => {
+				console.error(e);
+			});
 		},
 
 		contact_seller() {

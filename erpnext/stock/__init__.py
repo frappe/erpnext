@@ -45,10 +45,10 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 
 			account = account[0][0] if account else None
 
-	if not account:
+	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)
 
 	return account
 	
 def get_company_default_inventory_account(company):
-	return frappe.db.get_value('Company', company, 'default_inventory_account')
+	return frappe.get_cached_value('Company',  company,  'default_inventory_account')

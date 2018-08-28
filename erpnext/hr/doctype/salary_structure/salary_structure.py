@@ -22,9 +22,10 @@ class SalaryStructure(Document):
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
 				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component), fields, as_dict=1)
-				for fieldname, value in iteritems(component_default_value):
-					if d.get(fieldname) != value:
-						d[fieldname] = value		
+				if component_default_value:
+					for fieldname, value in iteritems(component_default_value):
+						if d.get(fieldname) != value:
+							d[fieldname] = value		
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:

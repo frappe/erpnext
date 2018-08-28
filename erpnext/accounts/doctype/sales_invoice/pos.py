@@ -495,7 +495,7 @@ def make_address(args, customer):
 		address = frappe.get_doc('Address', name)
 	else:
 		address = frappe.new_doc('Address')
-		address.country = frappe.db.get_value('Company', args.get('company'), 'country')
+		address.country = frappe.get_cached_value('Company',  args.get('company'),  'country')
 		address.append('links', {
 			'link_doctype': 'Customer',
 			'link_name': customer
