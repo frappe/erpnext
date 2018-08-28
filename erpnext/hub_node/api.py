@@ -81,13 +81,14 @@ def publish_selected_items(items_to_publish):
 			'item_code': item_code,
 			'hub_category': item.get('hub_category'),
 			'image_list': item.get('image_list')
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 
 	items = map_fields(items_to_publish)
 
 	try:
 		item_sync_preprocess()
+		load_base64_image_from_items(items)
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
@@ -97,10 +98,8 @@ def publish_selected_items(items_to_publish):
 			'status': 'Success',
 			'stats': len(items)
 		})
-
 	except Exception as e:
-		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 0)
-		frappe.throw(e)
+		frappe.log_error(title='Hub Sync Error')
 
 def item_sync_preprocess():
 	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
@@ -136,6 +135,31 @@ def item_sync_postprocess(sync_details):
 		frappe.throw('Unable to update remote activity')
 
 	frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
+
+
+def load_base64_image_from_items(items):
+	import io, base64, urllib, os
+	from frappe.utils.file_manager import get_file_path
+
+	for item in items:
+		file_path = item['image']
+		file_name = os.path.basename(file_path)
+
+		if file_path.startswith('http'):
+			url = file_path
+			file_path = os.path.join('/tmp', file_name)
+			urllib.urlretrieve(url, file_path)
+		else:
+			file_path = os.path.abspath(get_file_path(file_path))
+
+		with io.open(file_path, 'rb') as f:
+			image_data = json.dumps({
+				'file_name': file_name,
+				'base64': base64.b64encode(f.read())
+			})
+
+		item['image'] = image_data
+
 
 def get_hub_connection():
 	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
