@@ -235,7 +235,7 @@ $.extend(erpnext.item, {
 		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {
-				filters: { 
+				filters: {
 					"is_group": 0,
 					"company": row.company
 				}
@@ -441,11 +441,18 @@ $.extend(erpnext.item, {
 						"item": frm.doc.name,
 						"args": selected_attributes
 					},
-					callback: function() {
-						frappe.show_alert({
-							message: __("Variant creation has been queued."),
-							indicator: 'orange'
-						});
+					callback: function(r) {
+						if (r.message==='queued') {
+							frappe.show_alert({
+								message: __("Variant creation has been queued."),
+								indicator: 'orange'
+							});
+						} else {
+							frappe.show_alert({
+								message: __("{0} variants created.", [r.message]),
+								indicator: 'green'
+							});
+						}
 					}
 				});
 			});
@@ -685,14 +692,6 @@ $.extend(erpnext.item, {
 		}
 		frm.layout.refresh_sections();
 	}
-});
-
-frappe.ui.form.on("Item", {
-	setup: function(frm) {
-		// #13478 : Default Accounts in Item from Item Group
-		cur_frm.add_fetch('item_group', 'default_expense_account', 'expense_account');
-		cur_frm.add_fetch('item_group', 'default_income_account', 'income_account');
-	},
 });
 
 frappe.ui.form.on("UOM Conversion Detail", {

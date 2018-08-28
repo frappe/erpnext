@@ -11,7 +11,7 @@ def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.periodicity, company=filters.company)
 
-	currency = filters.presentation_currency or frappe.db.get_value("Company", filters.company, "default_currency")
+	currency = filters.presentation_currency or frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	asset = get_data(filters.company, "Asset", "Debit", period_list,
 		only_current_fiscal_year=False, filters=filters,
@@ -65,7 +65,7 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company, 
 	total_row = {}
 	if asset and (liability or equity):
 		total = total_row_total=0
-		currency = currency or frappe.db.get_value("Company", company, "default_currency")
+		currency = currency or frappe.get_cached_value('Company',  company,  "default_currency")
 		total_row = {
 			"account_name": "'" + _("Total (Credit)") + "'",
 			"account": "'" + _("Total (Credit)") + "'",

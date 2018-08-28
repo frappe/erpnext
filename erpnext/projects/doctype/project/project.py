@@ -55,7 +55,14 @@ class Project(Document):
 		if self.name is None:
 			return {}
 		else:
-			return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
+			filters = {"project": self.name}
+
+			if self.get("deleted_task_list"):
+				filters.update({
+					'name': ("not in", self.deleted_task_list)
+				})
+
+			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
 
 	def validate(self):
 		self.validate_project_name()
@@ -76,22 +83,33 @@ class Project(Document):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
 
 	def validate_weights(self):
-		sum = 0
 		for task in self.tasks:
-			if task.task_weight > 0:
-				sum = flt(sum + task.task_weight, task.precision('task_weight'))
-		if sum > 0 and sum != 1:
-			frappe.throw(
-				_("Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly"))
+			if task.task_weight is not None:
+				if task.task_weight > 0:
+					frappe.throw(_("Task weight cannot be negative"))
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
+		if not hasattr(self, "deleted_task_list"):
+			self.set("deleted_task_list", [])
+
 		if self.flags.dont_sync_tasks: return
 		task_names = []
 
 		existing_task_data = {}
+
+		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"]
+		exclude_fieldtype = ["Button", "Column Break",
+			"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
+
+		custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task",
+			"fieldtype": ("not in", exclude_fieldtype)}, "fieldname")
+
+		for d in custom_fields:
+			fields.append(d.fieldname)
+
 		for d in frappe.get_all('Project Task',
-			fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"],
+			fields = fields,
 			filters = {'parent': self.name}):
 			existing_task_data.setdefault(d.task_id, d)
 
@@ -102,7 +120,7 @@ class Project(Document):
 				task = frappe.new_doc("Task")
 				task.project = self.name
 
-			if not t.task_id or self.is_row_updated(t, existing_task_data):
+			if not t.task_id or self.is_row_updated(t, existing_task_data, fields):
 				task.update({
 					"subject": t.title,
 					"status": t.status,
@@ -124,7 +142,7 @@ class Project(Document):
 						"modified": now()
 					})
 
-					task.validate()
+					task.run_method("validate")
 					task.db_update()
 				else:
 					task.save(ignore_permissions = True)
@@ -134,21 +152,20 @@ class Project(Document):
 
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
-			frappe.delete_doc("Task", t.name)
+			self.deleted_task_list.append(t.name)
 
 	def update_costing_and_percentage_complete(self):
 		self.update_percent_complete()
 		self.update_costing()
 
-	def is_row_updated(self, row, existing_task_data):
+	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
 		d = existing_task_data.get(row.task_id)
 
-		if (d and (row.title != d.title or row.status != d.status
-			or getdate(row.start_date) != getdate(d.start_date) or getdate(row.end_date) != getdate(d.end_date)
-			or row.description != d.description or row.task_weight != d.task_weight)):
-			return True
+		for field in fields:
+			if row.get(field) != d.get(field):
+				return True
 
 	def map_custom_fields(self, source, target):
 		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
@@ -186,13 +203,12 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			if weight_sum == 1:
-				weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
-					project=%s""", self.name, as_dict=1)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * row["task_weight"]
-				self.percent_complete = flt(flt(pct_complete), 2)
+			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+				project=%s""", self.name, as_dict=1)
+			pct_complete = 0
+			for row in weighted_progress:
+				pct_complete += row["progress"] * row["task_weight"] / weight_sum
+			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"
 		elif not self.status == "Cancelled":
@@ -272,8 +288,18 @@ class Project(Document):
 				user.welcome_email_sent = 1
 
 	def on_update(self):
+		self.delete_task()
+		self.load_tasks()
 		self.update_costing_and_percentage_complete()
 		self.update_dependencies_on_duplicated_project()
+
+	def delete_task(self):
+		if not self.get('deleted_task_list'): return
+
+		for d in self.get('deleted_task_list'):
+			frappe.delete_doc("Task", d)
+
+		self.deleted_task_list = []
 
 	def update_dependencies_on_duplicated_project(self):
 		if self.flags.dont_sync_tasks: return

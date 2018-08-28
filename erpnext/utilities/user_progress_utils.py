@@ -234,6 +234,6 @@ def create_users(args_data):
 
 @frappe.whitelist()
 def update_default_domain_actions_and_get_state():
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	update_domain_actions(domain)
 	return get_domain_actions_state(domain)

@@ -86,7 +86,7 @@ class ClinicalProcedure(Document):
 				# in stock uom
 				se_child.transfer_qty = flt(item.transfer_qty)
 				se_child.conversion_factor = flt(item.conversion_factor)
-				cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
+				cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 				se_child.cost_center = cost_center
 				se_child.expense_account = expense_account
 		return stock_entry.as_dict()
@@ -146,7 +146,7 @@ def create_stock_entry(doc):
 	expense_account = get_account(None, "expense_account", "Healthcare Settings", doc.company)
 
 	for item_line in stock_entry.items:
-		cost_center = frappe.db.get_value('Company', doc.company, 'cost_center')
+		cost_center = frappe.get_cached_value('Company',  doc.company,  'cost_center')
 		#item_line.s_warehouse = warehouse #deaful source warehouse set, stock entry to copy to lines
 		item_line.cost_center = cost_center
 		#if not expense_account:

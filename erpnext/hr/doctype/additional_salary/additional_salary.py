@@ -17,11 +17,9 @@ class AdditionalSalary(Document):
 	def validate_dates(self):
  		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
- 		if getdate(self.from_date) > getdate(self.to_date):
- 			frappe.throw(_("To date can not be less than from date"))
- 		elif date_of_joining and getdate(self.from_date) < getdate(date_of_joining):
- 			frappe.throw(_("From date can not be less than employee's joining date"))
- 		elif relieving_date and getdate(self.to_date) > getdate(relieving_date):
+ 		if date_of_joining and getdate(self.payroll_date) < getdate(date_of_joining):
+ 			frappe.throw(_("Payroll date can not be less than employee's joining date"))
+ 		elif relieving_date and getdate(self.payroll_date) > getdate(relieving_date):
  			frappe.throw(_("To date can not greater than employee's relieving date"))
 
 	def get_amount(self, sal_start_date, sal_end_date):
@@ -39,46 +37,29 @@ class AdditionalSalary(Document):
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date):
 	additional_components = frappe.db.sql("""
-	select name from `tabAdditional Salary`
-	where employee=%(employee)s
-	and docstatus = 1
-	and (
-		(%(from_date)s between from_date and to_date)
-		or (%(to_date)s between from_date and to_date)
-		or (from_date between %(from_date)s and %(to_date)s)
-	)""", {
+		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount from `tabAdditional Salary`
+		where employee=%(employee)s
+			and docstatus = 1
+			and payroll_date between %(from_date)s and %(to_date)s
+		group by salary_component, overwrite_salary_structure_amount
+		order by salary_component, overwrite_salary_structure_amount
+	""", {
 		'employee': employee,
 		'from_date': start_date,
 		'to_date': end_date
-	})
+	}, as_dict=1)
 
-	if additional_components:
-		additional_components_array = []
-		for additional_component in additional_components:
-			additional_component_obj = frappe.get_doc("Additional Salary", additional_component[0])
-			amount = additional_component_obj.get_amount(start_date, end_date)
-			salary_component = frappe.get_doc("Salary Component", additional_component_obj.salary_component)
-			added = False
-			for added_component in additional_components_array:
-				if added_component["struct_row"]["salary_component"] == salary_component.name:
-					added_component["amount"] += amount
-					added = True
-			if added:
-				continue
-			struct_row = {}
-			additional_components_dict = {}
-			struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
-			struct_row['salary_component'] = salary_component.name
-			struct_row['abbr'] = salary_component.salary_component_abbr
-			struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
-			struct_row['is_tax_applicable'] = salary_component.is_tax_applicable
-			struct_row['variable_based_on_taxable_salary'] = salary_component.variable_based_on_taxable_salary
-			struct_row['is_additional_component'] = salary_component.is_additional_component
-			additional_components_dict['amount'] = amount
-			additional_components_dict['struct_row'] = struct_row
-			additional_components_dict['type'] = salary_component.type
-			additional_components_array.append(additional_components_dict)
+	additional_components_list = []
+	for d in additional_components:
+		component = frappe.get_doc("Salary Component", d.salary_component)
+		struct_row = {'salary_component': d.salary_component}
+		for field in ["depends_on_lwp", "abbr", "is_tax_applicable", "variable_based_on_taxable_salary", "is_additional_component"]:
+			struct_row[field] = component.get(field)
 
-		if len(additional_components_array) > 0:
-			return additional_components_array
-	return False
+		additional_components_list.append({
+			'amount': d.amount,
+			'type': component.type,
+			'struct_row': struct_row,
+			'overwrite': d.overwrite_salary_structure_amount
+		})
+	return additional_components_list

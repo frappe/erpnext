@@ -78,7 +78,7 @@ def make_stock_entry_from_pro(pro_id, purpose):
 		st.posting_date = frappe.flags.current_date
 		st.fiscal_year = str(frappe.flags.current_date.year)
 		for d in st.get("items"):
-			d.cost_center = "Main - " + frappe.db.get_value('Company', st.company, 'abbr')
+			d.cost_center = "Main - " + frappe.get_cached_value('Company',  st.company,  'abbr')
 		st.insert()
 		frappe.db.commit()
 		st.submit()

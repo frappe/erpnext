@@ -6,6 +6,8 @@ import frappe
 
 from frappe.model.naming import make_autoname
 from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
+from erpnext.stock.get_item_details import get_reserved_qty_for_so
+
 from frappe import _, ValidationError
 
 from erpnext.controllers.stock_controller import StockController
@@ -241,12 +243,54 @@ def validate_serial_no(sle, item_det):
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
 
+							# if Sales Order reference in Serial No validate the Delivery Note or Invoice is against the same
+							if sr.sales_order:
+								if sle.voucher_type == "Sales Invoice":
+									if not frappe.db.exists("Sales Invoice Item", {"parent": sle.voucher_no,
+										"item_code": sle.item_code, "sales_order": sr.sales_order}):
+										frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved \
+											to fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+								elif sle.voucher_type == "Delivery Note":
+									if not frappe.db.exists("Delivery Note Item", {"parent": sle.voucher_no,
+										"item_code": sle.item_code, "against_sales_order": sr.sales_order}):
+										invoice = frappe.db.get_value("Delivery Note Item", {"parent": sle.voucher_no,
+											"item_code": sle.item_code}, "against_sales_invoice")
+										if not invoice or frappe.db.exists("Sales Invoice Item",
+											{"parent": invoice, "item_code": sle.item_code,
+											"sales_order": sr.sales_order}):
+											frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved to \
+												fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+							# if Sales Order reference in Delivery Note or Invoice validate SO reservations for item
+							if sle.voucher_type == "Sales Invoice":
+								sales_order = frappe.db.get_value("Sales Invoice Item", {"parent": sle.voucher_no,
+									"item_code": sle.item_code}, "sales_order")
+								if sales_order and get_reserved_qty_for_so(sales_order, sle.item_code):
+									validate_so_serial_no(sr, sales_order)
+							elif sle.voucher_type == "Delivery Note":
+								sales_order = frappe.get_value("Delivery Note Item", {"parent": sle.voucher_no,
+									"item_code": sle.item_code}, "against_sales_order")
+								if sales_order and get_reserved_qty_for_so(sales_order, sle.item_code):
+									validate_so_serial_no(sr, sales_order)
+								else:
+									sales_invoice = frappe.get_value("Delivery Note Item", {"parent": sle.voucher_no,
+										"item_code": sle.item_code}, "against_sales_invoice")
+									if sales_invoice:
+										sales_order = frappe.db.get_value("Sales Invoice Item", {
+											"parent": sales_invoice, "item_code": sle.item_code}, "sales_order")
+										if sales_order and get_reserved_qty_for_so(sales_order, sle.item_code):
+											validate_so_serial_no(sr, sales_order)
 				elif sle.actual_qty < 0:
 					# transfer out
 					frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
+
+def validate_so_serial_no(sr, sales_order,):
+	if not sr.sales_order or sr.sales_order!= sales_order:
+		frappe.throw(_("""Sales Order {0} has reservation for item {1}, you can
+		only deliver reserved {1} against {0}. Serial No {2} cannot
+		be delivered""").format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
 	if sn.warehouse:
@@ -287,7 +331,6 @@ def update_serial_nos(sle, item_det):
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
 		frappe.db.set(sle, "serial_no", serial_nos)
 		validate_serial_no(sle, item_det)
-
 	if sle.serial_no:
 		auto_make_serial_nos(sle)
 
@@ -308,6 +351,9 @@ def auto_make_serial_nos(args):
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
+			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
+				and not args.get('actual_qty', 0) > 0:
+				sr.sales_order = None
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
 			make_serial_no(serial_no, args)
@@ -354,7 +400,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 	if not stock_ledger_entries: return
 
 	for d in controller.get(parentfield):
-		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice") 
+		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice")
 			and d.rejected_qty) else False
 		accepted_serial_nos_updated = False
 		if controller.doctype == "Stock Entry":

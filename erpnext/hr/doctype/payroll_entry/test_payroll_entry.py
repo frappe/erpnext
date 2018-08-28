@@ -107,6 +107,7 @@ def make_payroll_entry(**args):
 	payroll_entry.posting_date = nowdate()
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
+	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status = 1):
