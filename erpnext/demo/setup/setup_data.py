@@ -14,7 +14,7 @@ def setup(domain):
 	setup_fiscal_year()
 	setup_holiday_list()
 	setup_user()
-	setup_employee()
+	#setup_employee()
 	setup_user_roles()
 	setup_role_permissions()
 
@@ -293,7 +293,7 @@ def setup_currency_exchange():
 	}).insert()
 
 def setup_mode_of_payment():
-	company_abbr = frappe.db.get_value("Company", erpnext.get_default_company(), "abbr")
+	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
 	account_dict = {'Cash': 'Cash - '+ company_abbr , 'Bank': 'National Bank - '+ company_abbr}
 	for payment_mode in frappe.get_all('Mode of Payment', fields = ["name", "type"]):
 		if payment_mode.type:
@@ -317,7 +317,7 @@ def setup_account():
 	frappe.flags.in_import = False
 
 def setup_account_to_expense_type():
-	company_abbr = frappe.db.get_value("Company", erpnext.get_default_company(), "abbr")
+	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
 	expense_types = [{'name': _('Calls'), "account": "Sales Expenses - "+ company_abbr},
 		{'name': _('Food'), "account": "Entertainment Expenses - "+ company_abbr},
 		{'name': _('Medical'), "account": "Utility Expenses - "+ company_abbr},
@@ -354,7 +354,7 @@ def setup_budget():
 		budget.submit()
 
 def setup_pos_profile():
-	company_abbr = frappe.db.get_value("Company", erpnext.get_default_company(), "abbr")
+	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
 	pos = frappe.new_doc('POS Profile')
 	pos.user = frappe.db.get_global('demo_accounts_user')
 	pos.pos_profile_name = "Demo POS Profile"

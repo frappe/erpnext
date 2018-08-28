@@ -9,7 +9,7 @@ from frappe.utils import today, add_months
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 
-test_dependencies = ["Employee", "Leave Type"]
+test_dependencies = ["Employee", "Leave Type", "Leave Policy"]
 
 class TestLeavePeriod(unittest.TestCase):
 	def setUp(self):
@@ -40,13 +40,8 @@ class TestLeavePeriod(unittest.TestCase):
 		leave_period = create_leave_period(add_months(today(), -3), add_months(today(), 3))
 
 		# test leave_allocation
-		leave_period.employee = employee_doc_name
-		leave_period.grant_leave_allocation()
+		leave_period.grant_leave_allocation(employee=employee_doc_name)
 		self.assertEqual(get_leave_balance_on(employee_doc_name, leave_type, today()), 20)
-
-		# leave_period.grant_leave_alloc(employee_doc_name)
-		self.assertRaises(frappe.ValidationError, leave_period.grant_leave_allocation)
-
 
 def create_leave_period(from_date, to_date):
 	leave_period = frappe.get_doc({

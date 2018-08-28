@@ -275,10 +275,10 @@ class TestSalesOrder(unittest.TestCase):
 		make_sales_invoice(so.name)
 
 		existing_reserved_qty = get_reserved_qty()
-		
+
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': so.items[0].name}])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
-		
+
 		so.reload()
 		self.assertEqual(so.get("items")[0].rate, 200)
 		self.assertEqual(so.get("items")[0].qty, 7)
@@ -583,6 +583,107 @@ class TestSalesOrder(unittest.TestCase):
 		for item in so_item_name:
 			wo_qty = frappe.db.sql("select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
 			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
+
+	def test_serial_no_based_delivery(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		frappe.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
+		item = make_item("_Reserved_Serialized_Item", {"is_stock_item": 1,
+					"maintain_stock": 1,
+					"has_serial_no": 1,
+					"serial_no_series": "SI.####",
+					"valuation_rate": 500,
+					"item_defaults": [
+						{
+							"default_warehouse": "_Test Warehouse - _TC",
+							"company": "_Test Company"
+						}]
+					})
+		frappe.db.sql("""delete from `tabSerial No` where item_code=%s""", (item.item_code))
+		make_item("_Test Item A", {"maintain_stock": 1,
+					"valuation_rate": 100,
+					"item_defaults": [
+						{
+							"default_warehouse": "_Test Warehouse - _TC",
+							"company": "_Test Company"
+						}]
+					})
+		make_item("_Test Item B", {"maintain_stock": 1,
+					"valuation_rate": 200,
+					"item_defaults": [
+						{
+							"default_warehouse": "_Test Warehouse - _TC",
+							"company": "_Test Company"
+						}]
+					})
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		make_bom(item=item.item_code, rate=1000,
+			raw_materials = ['_Test Item A', '_Test Item B'])
+
+		so = make_sales_order(**{
+			"item_list": [{
+				"item_code": item.item_code,
+				"ensure_delivery_based_on_produced_serial_no": 1,
+				"qty": 1,
+				"rate":1000
+			}]
+		})
+		so.submit()
+		from erpnext.manufacturing.doctype.work_order.test_work_order import \
+			make_wo_order_test_record
+		work_order = make_wo_order_test_record(item=item.item_code,
+			qty=1, do_not_save=True)
+		work_order.fg_warehouse = "_Test Warehouse - _TC"
+		work_order.sales_order = so.name
+		work_order.submit()
+		make_stock_entry(item_code=item.item_code, target="_Test Warehouse - _TC", qty=1)
+		item_serial_no = frappe.get_doc("Serial No", {"item_code": item.item_code})
+		from erpnext.manufacturing.doctype.work_order.work_order import \
+			make_stock_entry as make_production_stock_entry
+		se = frappe.get_doc(make_production_stock_entry(work_order.name, "Manufacture", 1))
+		se.submit()
+		reserved_serial_no = se.get("items")[2].serial_no
+		serial_no_so = frappe.get_value("Serial No", reserved_serial_no, "sales_order")
+		self.assertEqual(serial_no_so, so.name)
+		dn = make_delivery_note(so.name)
+		dn.save()
+		self.assertEqual(reserved_serial_no, dn.get("items")[0].serial_no)
+		item_line = dn.get("items")[0]
+		item_line.serial_no = item_serial_no.name
+		self.assertRaises(frappe.ValidationError, dn.submit)
+		item_line = dn.get("items")[0]
+		item_line.serial_no =  reserved_serial_no
+		self.assertTrue(dn.submit)
+		dn.load_from_db()
+		dn.cancel()
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.save()
+		self.assertEqual(si.get("items")[0].serial_no, reserved_serial_no)
+		item_line = si.get("items")[0]
+		item_line.serial_no = item_serial_no.name
+		self.assertRaises(frappe.ValidationError, dn.submit)
+		item_line = si.get("items")[0]
+		item_line.serial_no = reserved_serial_no
+		self.assertTrue(si.submit)
+		si.submit()
+		si.load_from_db()
+		si.cancel()
+		si = make_sales_invoice(so.name)
+		si.update_stock = 0
+		si.submit()
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import \
+			make_delivery_note as make_delivery_note_from_invoice
+		dn = make_delivery_note_from_invoice(si.name)
+		dn.save()
+		dn.submit()
+		self.assertEqual(dn.get("items")[0].serial_no, reserved_serial_no)
+		dn.load_from_db()
+		dn.cancel()
+		si.load_from_db()
+		si.cancel()
+		se.load_from_db()
+		se.cancel()
+		self.assertFalse(frappe.db.exists("Serial No", {"sales_order": so.name}))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

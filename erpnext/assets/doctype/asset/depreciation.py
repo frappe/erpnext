@@ -35,7 +35,7 @@ def make_depreciation_entry(asset_name, date=None):
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
 
-	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
+	depreciation_cost_center, depreciation_series = frappe.get_cached_value('Company',  asset.company, 
 		["depreciation_cost_center", "series_for_depreciation_entry"])
 
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
@@ -93,7 +93,7 @@ def get_depreciation_accounts(asset):
 		depreciation_expense_account = accounts.depreciation_expense_account
 		
 	if not accumulated_depreciation_account or not depreciation_expense_account:
-		accounts = frappe.db.get_value("Company", asset.company,
+		accounts = frappe.get_cached_value('Company',  asset.company, 
 			["accumulated_depreciation_account", "depreciation_expense_account"])
 		
 		if not accumulated_depreciation_account:
@@ -116,7 +116,7 @@ def scrap_asset(asset_name):
 	elif asset.status in ("Cancelled", "Sold", "Scrapped"):
 		frappe.throw(_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status))
 
-	depreciation_series = frappe.db.get_value("Company", asset.company, "series_for_depreciation_entry")
+	depreciation_series = frappe.get_cached_value('Company',  asset.company,  "series_for_depreciation_entry")
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
@@ -189,7 +189,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 
 @frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
-	disposal_account, depreciation_cost_center = frappe.db.get_value("Company", company,
+	disposal_account, depreciation_cost_center = frappe.get_cached_value('Company',  company, 
 		["disposal_account", "depreciation_cost_center"])
 
 	if not disposal_account:

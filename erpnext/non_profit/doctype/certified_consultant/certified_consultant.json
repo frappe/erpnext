@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "CC-.YY.-.####", 
+ "autoname": "NPO-CONS-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-06-13 17:27:19.838334", 
  "custom": 0, 
@@ -664,7 +664,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-18 19:16:01.634153", 
+ "modified": "2018-08-21 16:15:52.082520", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Certified Consultant", 
@@ -717,5 +717,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

@@ -282,7 +282,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				from `tabStock Ledger Entry` sle
 				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 				where
-					sle.item_code = %(item_code)s
+					batch.disabled = 0
+					and sle.item_code = %(item_code)s
 					and sle.warehouse = %(warehouse)s
 					and (sle.batch_no like %(txt)s
 					or batch.manufacturing_date like %(txt)s)
@@ -297,7 +298,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		return batch_nos
 	else:
 		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
-			where item = %(item_code)s
+			where batch.disabled = 0
+			and item = %(item_code)s
 			and (name like %(txt)s
 			or manufacturing_date like %(txt)s)
 			and docstatus < 2
@@ -425,7 +427,8 @@ def get_doctype_wise_filters(filters):
 @frappe.whitelist()
 def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	query = """select batch_id from `tabBatch`
-			where (expiry_date >= CURDATE() or expiry_date IS NULL)
+			where disabled = 0
+			and (expiry_date >= CURDATE() or expiry_date IS NULL)
 			and name like '{txt}'""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('item'):

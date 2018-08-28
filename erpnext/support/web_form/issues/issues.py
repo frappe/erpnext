@@ -4,5 +4,4 @@ import frappe
 
 def get_context(context):
 	# do your magic here
-	if context.doc:
-		context.read_only = 1
+	pass

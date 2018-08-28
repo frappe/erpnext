@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "EP.#####", 
+ "autoname": "HR-EMP-PRO-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-04-13 18:33:59.476562", 
  "custom": 0, 
@@ -319,7 +319,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-22 11:28:04.754534", 
+ "modified": "2018-08-21 16:15:40.284987", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Promotion", 
@@ -392,5 +392,6 @@
  "sort_order": "DESC", 
  "title_field": "employee_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

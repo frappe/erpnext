@@ -29,7 +29,7 @@ def execute(filters=None):
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 	
 	for cash_flow_account in cash_flow_accounts:
 		section_data = []

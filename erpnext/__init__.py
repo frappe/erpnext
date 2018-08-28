@@ -5,7 +5,7 @@ import frappe
 from erpnext.hooks import regional_overrides
 from frappe.utils import getdate
 
-__version__ = '10.1.43'
+__version__ = '10.1.48'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -27,7 +27,7 @@ def get_default_currency():
 	'''Returns the currency of the default company'''
 	company = get_default_company()
 	if company:
-		return frappe.db.get_value('Company', company, 'default_currency')
+		return frappe.get_cached_value('Company',  company,  'default_currency')
 
 def get_default_cost_center(company):
 	'''Returns the default cost center of the company'''
@@ -37,7 +37,7 @@ def get_default_cost_center(company):
 	if not frappe.flags.company_cost_center:
 		frappe.flags.company_cost_center = {}
 	if not company in frappe.flags.company_cost_center:
-		frappe.flags.company_cost_center[company] = frappe.db.get_value('Company', company, 'cost_center')
+		frappe.flags.company_cost_center[company] = frappe.get_cached_value('Company',  company,  'cost_center')
 	return frappe.flags.company_cost_center[company]
 
 def get_company_currency(company):
@@ -45,7 +45,7 @@ def get_company_currency(company):
 	if not frappe.flags.company_currency:
 		frappe.flags.company_currency = {}
 	if not company in frappe.flags.company_currency:
-		frappe.flags.company_currency[company] = frappe.db.get_value('Company', company, 'default_currency')
+		frappe.flags.company_currency[company] = frappe.db.get_value('Company',  company,  'default_currency', cache=True)
 	return frappe.flags.company_currency[company]
 
 def set_perpetual_inventory(enable=1, company=None):
@@ -58,7 +58,7 @@ def set_perpetual_inventory(enable=1, company=None):
 
 def encode_company_abbr(name, company):
 	'''Returns name encoded with company abbreviation'''
-	company_abbr = frappe.db.get_value("Company", company, "abbr")
+	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.rsplit(" - ", 1)
 
 	if parts[-1].lower() != company_abbr.lower():
@@ -74,8 +74,8 @@ def is_perpetual_inventory_enabled(company):
 		frappe.local.enable_perpetual_inventory = {}
 
 	if not company in frappe.local.enable_perpetual_inventory:
-		frappe.local.enable_perpetual_inventory[company] = frappe.db.get_value("Company",
-			company, "enable_perpetual_inventory") or 0
+		frappe.local.enable_perpetual_inventory[company] = frappe.get_cached_value('Company', 
+			company,  "enable_perpetual_inventory") or 0
 
 	return frappe.local.enable_perpetual_inventory[company]
 
@@ -87,8 +87,8 @@ def get_default_finance_book(company=None):
 		frappe.local.default_finance_book = {}
 
 	if not company in frappe.local.default_finance_book:
-		frappe.local.default_finance_book[company] = frappe.db.get_value("Company",
-			company, "default_finance_book")
+		frappe.local.default_finance_book[company] = frappe.get_cached_value('Company', 
+			company,  "default_finance_book")
 
 	return frappe.local.default_finance_book[company]
 
@@ -108,8 +108,8 @@ def get_region(company=None):
 	You can also set global company flag in `frappe.flags.company`
 	'''
 	if company or frappe.flags.company:
-		return frappe.db.get_value('Company',
-			company or frappe.flags.company, 'country')
+		return frappe.get_cached_value('Company', 
+			company or frappe.flags.company,  'country')
 	elif frappe.flags.country:
 		return frappe.flags.country
 	else:
