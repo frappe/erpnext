@@ -28,7 +28,7 @@
 			<div class="row margin-bottom">
 				<div class="col-md-3">
 					<div class="hub-item-image">
-						<img :src="image">
+						<img v-img-src="image">
 					</div>
 				</div>
 				<div class="col-md-8">
