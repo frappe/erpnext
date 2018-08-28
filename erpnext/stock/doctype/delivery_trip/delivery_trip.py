@@ -8,10 +8,7 @@ import frappe
 import googlemaps
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.user import get_user_fullname
 from frappe.utils import getdate, cstr
-from frappe.integrations.doctype.google_maps.google_maps import round_timedelta
-from frappe.integrations.doctype.google_maps.google_maps import format_address
 
 class DeliveryTrip(Document):
 	pass
@@ -59,6 +56,20 @@ def get_default_address(out, name):
 	else:
 		return None
 
+def round_timedelta(td, period):
+	"""Round timedelta"""
+	period_seconds = period.total_seconds()
+	half_period_seconds = period_seconds / 2
+	remainder = td.total_seconds() % period_seconds
+	if remainder >= half_period_seconds:
+		return datetime.timedelta(seconds=td.total_seconds() + (period_seconds - remainder))
+	else:
+		return datetime.timedelta(seconds=td.total_seconds() - remainder)
+
+def format_address(address):
+	"""Customer Address format """
+	address = frappe.get_doc('Address', address)
+	return '{}, {}, {}, {}'.format(address.address_line1, address.city, address.pincode, address.country)
 
 @frappe.whitelist()
 def get_contact_and_address(name):
@@ -140,7 +151,6 @@ def calculate_time_matrix(name):
 
 @frappe.whitelist()
 def notify_customers(docname, date, driver, vehicle, sender_email, delivery_notification):
-	sender_name = get_user_fullname(sender_email)
 	attachments = []
 
 	parent_doc = frappe.get_doc('Delivery Trip', docname)
@@ -161,9 +171,6 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 				print_format=default_print_format or "Standard")
 
 		if not delivery_stop.notified_by_email and contact_info.email_id:
-			driver_info = frappe.db.get_value("Driver", driver, ["full_name", "cell_number"], as_dict=1)
-			sender_designation = frappe.db.get_value("Employee", sender_email, ["designation"])
-
 			estimated_arrival = cstr(delivery_stop.estimated_arrival)[:-3]
 			email_template = frappe.get_doc("Email Template", delivery_notification)
 			message = frappe.render_template(email_template.response, args)
