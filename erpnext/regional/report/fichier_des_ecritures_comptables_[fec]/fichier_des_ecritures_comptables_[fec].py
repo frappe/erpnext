@@ -33,7 +33,7 @@ def validate_filters(filters, account_details):
 
 def set_account_currency(filters):
 
-	filters["company_currency"] = frappe.db.get_value("Company", filters.company, "default_currency")
+	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	return filters
 
@@ -100,7 +100,7 @@ def get_gl_entries(filters):
 def get_result_as_list(data, filters):
 	result = []
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 	accounts = frappe.get_all("Account", filters={"Company": filters.company}, fields=["name", "account_number"])
 
 	for d in data:

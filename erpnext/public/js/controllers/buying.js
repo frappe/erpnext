@@ -26,6 +26,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			};
 		});
 
+		if (this.frm.doc.__islocal
+			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
+			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
+		}
+
 		/* eslint-disable */
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {
@@ -93,7 +98,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
+		erpnext.utils.get_party_details(this.frm, null, null, function(){
+			me.apply_price_list();
+		});
 	},
 
 	supplier_address: function() {

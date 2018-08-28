@@ -217,7 +217,7 @@ def make_quotation(source_name, target_doc=None):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
 
-		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
+		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
 		party_account_currency = get_party_account_currency("Customer", quotation.customer,
 			quotation.company) if quotation.customer else company_currency
 

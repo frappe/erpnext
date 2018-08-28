@@ -52,7 +52,19 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	taxes_on_form_rendered: function(frm) {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.open_grid_row());
-	}
+	},
+
+	allocate_advances_automatically: function(frm) {
+		if(frm.doc.allocate_advances_automatically) {
+			frappe.call({
+				doc: frm.doc,
+				method: "set_advances",
+				callback: function(r, rt) {
+					refresh_field("advances");
+				}
+			})
+		}
+	}	
 });
 
 frappe.ui.form.on('Sales Invoice Payment', {
@@ -128,7 +140,6 @@ var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 		}
 	});
 }
-
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

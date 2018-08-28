@@ -159,25 +159,25 @@ frappe.ui.form.on('Patient Appointment', {
 				slot_html = slot_html + `<br/>` + slot_detail['avail_slot'].map(slot => {
 					let disabled = '';
 					let start_str = slot.from_time;
-					let start_time = moment(slot.from_time, 'HH:mm:ss');
-					let to_time = moment(slot.to_time, 'HH:mm:ss');
-					let interval = (to_time - start_time)/60000 | 0;
+					let slot_start_time = moment(slot.from_time, 'HH:mm:ss');
+					let slot_to_time = moment(slot.to_time, 'HH:mm:ss');
+					let interval = (slot_to_time - slot_start_time)/60000 | 0;
 					// iterate in all booked appointments, update the start time and duration
 					slot_detail['appointments'].forEach(function(booked) {
 						let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
-						if(booked_moment.isSame(start_time) || booked_moment.isBetween(start_time, to_time)){
+						let end_time = booked_moment.clone().add(booked.duration, 'minutes');
+						// Deal with 0 duration appointments
+						if(booked_moment.isSame(slot_start_time) || booked_moment.isBetween(slot_start_time, slot_to_time)){
 							if(booked.duration == 0){
 								disabled = 'disabled="disabled"';
 								return false;
 							}
-							start_time = booked_moment;
-							let end_time = booked_moment.add(booked.duration, 'minutes');
-							if(end_time.isSameOrAfter(to_time) || end_time.add(duration).isAfter(to_time)){
-								disabled = 'disabled="disabled"';
-								return false;
-							}else{
-								start_str = end_time.format('HH:mm:ss');
-							}
+						}
+						// Check for overlaps considering appointment duration
+						if(slot_start_time.isBefore(end_time) && slot_to_time.isAfter(booked_moment)){
+							// There is an overlap
+							disabled = 'disabled="disabled"';
+							return false;
 						}
 					});
 

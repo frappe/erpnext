@@ -174,51 +174,86 @@ class TestSalarySlip(unittest.TestCase):
 		payroll_period = create_payroll_period()
 		create_tax_slab(payroll_period)
 		employee = make_employee("test_tax@salary.slip")
-		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
-		frappe.db.sql("""delete from `tabEmployee Tax Exemption Declaration` where employee=%s""", (employee))
-		frappe.db.sql("""delete from `tabEmployee Tax Exemption Proof Submission` where employee=%s""", (employee))
-		from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
-		salary_structure = make_salary_structure("Stucture to test tax", "Monthly", test_tax=True)
-		create_salary_structure_assignment(employee, salary_structure.name, payroll_period.start_date)
+		delete_docs = ["Salary Slip", "Additional Salary",
+						"Employee Tax Exemption Declaration",
+						"Employee Tax Exemption Proof Submission",
+						"Employee Benefit Claim", "Salary Structure Assignment"]
+		for doc in delete_docs:
+			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
 
-		# create salary slip for whole period deducting tax only on last period to find the total tax amount paid
-		create_salary_slips_for_payroll_period(employee, salary_structure.name, payroll_period)
-		tax_paid_amount = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join `tabSalary Slip` ss where
-		ss.name=sd.parent and ss.employee=%s and ss.docstatus=1 and sd.salary_component='TDS'""", (employee))
+		from erpnext.hr.doctype.salary_structure.test_salary_structure import \
+			make_salary_structure, create_salary_structure_assignment
+		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
+			other_details={"max_benefits": 100000}, test_tax=True)
+		create_salary_structure_assignment(employee, salary_structure.name,
+			payroll_period.start_date)
 
-		# total taxable income 236000, at 5% tax slab
-		annual_tax = 11800
-		self.assertEqual(tax_paid_amount[0][0], annual_tax)
+		# create salary slip for whole period deducting tax only on last period
+		# to find the total tax amount paid
+		create_salary_slips_for_payroll_period(employee, salary_structure.name,
+			payroll_period, deduct_random=False)
+		tax_paid = get_tax_paid_in_period(employee)
+
+		# total taxable income 586000, 250000 @ 5%, 86000 @ 20% ie. 12500 + 17200
+		annual_tax = 29700
+		try:
+			self.assertEqual(tax_paid, annual_tax)
+		except AssertionError:
+			print("\nSalary Slip - Annual tax calculation failed\n")
+			raise
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
 
 		# create exemption declaration so the tax amount varies
 		create_exemption_declaration(employee, payroll_period.name)
 
 		# create for payroll deducting in random months
-		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee, salary_structure.name, payroll_period, deduct_random=True)
-		tax_paid_amount = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join `tabSalary Slip` ss where
-		ss.name=sd.parent and ss.employee=%s and ss.docstatus=1 and sd.salary_component='TDS'""", (employee))
+		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee,
+			salary_structure.name, payroll_period)
+		tax_paid = get_tax_paid_in_period(employee)
 
-		# No proof sumitted, total tax paid, should not change
+		# No proof, benefit claim sumitted, total tax paid, should not change
 		try:
-			self.assertEqual(tax_paid_amount[0][0], annual_tax)
+			self.assertEqual(tax_paid, annual_tax)
 		except AssertionError:
-			print("\nTax calculation failed on following case\n", data, "\n")
+			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
 
-		# Submit proof for total 86000
-		data["proof"] = [create_proof_submission(employee, payroll_period, 50000), 50000]
-		data["proof1"] = [create_proof_submission(employee, payroll_period, 36000), 36000]
+		# Submit proof for total 120000
+		data["proof-1"] = create_proof_submission(employee, payroll_period, 50000)
+		data["proof-2"] = create_proof_submission(employee, payroll_period, 70000)
+
+		# Submit benefit claim for total 50000
+		data["benefit-1"] = create_benefit_claim(employee, payroll_period, 15000, "Medical Allowance")
+		data["benefit-2"] = create_benefit_claim(employee, payroll_period, 35000, "Leave Travel Allowance")
+
+
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
-		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee, salary_structure.name, payroll_period, deduct_random=True)
-		tax_paid_amount = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join `tabSalary Slip` ss where
-		ss.name=sd.parent and ss.employee=%s and ss.docstatus=1 and sd.salary_component='TDS'""", (employee))
-		# total taxable income 150000, at 5% tax slab
+		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee,
+			salary_structure.name, payroll_period)
+		tax_paid = get_tax_paid_in_period(employee)
+
+		# total taxable income 416000, 166000 @ 5% ie. 8300
 		try:
-			self.assertEqual(tax_paid_amount[0][0], 7500)
+			self.assertEqual(tax_paid, 8300)
 		except AssertionError:
-			print("\nTax calculation failed on following case\n", data, "\n")
+			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
+
+		# create additional salary of 150000
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
+		data["additional-1"] = create_additional_salary(employee, payroll_period, 50000)
+		data["additional-2"] = create_additional_salary(employee, payroll_period, 100000)
+		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee,
+			salary_structure.name, payroll_period)
+
+		# total taxable income 566000, 250000 @ 5%, 66000 @ 20%, 12500 + 13200
+		tax_paid = get_tax_paid_in_period(employee)
+		try:
+			self.assertEqual(tax_paid, 25700)
+		except AssertionError:
+			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
+			raise
+		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
 
 	def make_holiday_list(self):
 		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
@@ -295,12 +330,12 @@ def get_salary_component_account(sal_comp):
 	sal_comp.save()
 
 def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
+	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
 	if not salary_account:
 		frappe.get_doc({
 		"doctype": "Account",
 		"account_name": "Salary",
-		"parent_account": "Indirect Expenses - " + frappe.db.get_value('Company', company, 'abbr'),
+		"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
 		"company": company
 		}).insert()
 	return salary_account
@@ -334,6 +369,31 @@ def make_earning_salary_component(setup=False, test_tax=False):
 				"type": "Earning"
 			}
 		]
+	if test_tax:
+		data.extend([
+						{
+							"salary_component": "Leave Travel Allowance",
+							"abbr": 'B',
+							"is_flexible_benefit": 1,
+							"type": "Earning",
+							"pay_against_benefit_claim": 1,
+							"max_benefit_amount": 100000
+						},
+						{
+							"salary_component": "Medical Allowance",
+							"abbr": 'B',
+							"is_flexible_benefit": 1,
+							"pay_against_benefit_claim": 0,
+							"type": "Earning",
+							"max_benefit_amount": 15000
+						},
+						{
+							"salary_component": "Perfomance Bonus",
+							"abbr": 'B',
+							"is_additional_component": 1,
+							"type": "Earning"
+						}
+					])
 	if setup or test_tax:
 		make_salary_component(data, test_tax)
 	data.append({
@@ -374,6 +434,12 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 
 	return data
 
+def get_tax_paid_in_period(employee):
+	tax_paid_amount = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail`
+		sd join `tabSalary Slip` ss where ss.name=sd.parent and ss.employee=%s
+		and ss.docstatus=1 and sd.salary_component='TDS'""", (employee))
+	return tax_paid_amount[0][0]
+
 def create_exemption_declaration(employee, payroll_period):
 	create_exemption_category()
 	declaration = frappe.get_doc({"doctype": "Employee Tax Exemption Declaration",
@@ -392,10 +458,16 @@ def create_proof_submission(employee, payroll_period, amount):
 									"payroll_period": payroll_period.name,
 									"submission_date": submission_date})
 	proof_submission.append("tax_exemption_proofs", {"exemption_sub_category": "_Test Sub Category",
-							"exemption_category": "_Test Category", "type_of_proof": "Test",
-							"amount": amount})
+				"exemption_category": "_Test Category", "type_of_proof": "Test", "amount": amount})
 	proof_submission.submit()
 	return submission_date
+
+def create_benefit_claim(employee, payroll_period, amount, component):
+	claim_date = add_months(payroll_period.start_date, random.randint(0, 11))
+	frappe.get_doc({"doctype": "Employee Benefit Claim", "employee": employee,
+		"claimed_amount": amount, "claim_date": claim_date, "earning_component":
+		component}).submit()
+	return claim_date
 
 def create_tax_slab(payroll_period):
 	data = [{
@@ -417,7 +489,7 @@ def create_tax_slab(payroll_period):
 		payroll_period.append("taxable_salary_slabs", item)
 	payroll_period.save()
 
-def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=False):
+def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True):
 	deducted_dates = []
 	i = 0
 	while i < 12:
@@ -440,3 +512,12 @@ def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_p
 		doc.submit()
 		i += 1
 	return deducted_dates
+
+def create_additional_salary(employee, payroll_period, amount):
+	salary_date = add_months(payroll_period.start_date, random.randint(0, 11))
+	frappe.get_doc({"doctype": "Additional Salary", "employee": employee,
+					"company": erpnext.get_default_company(),
+					"salary_component": "Perfomance Bonus",
+					"payroll_date": salary_date,
+					"amount": amount, "type": "Earning"}).submit()
+	return salary_date

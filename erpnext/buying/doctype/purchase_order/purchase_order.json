@@ -84,6 +84,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -98,7 +99,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "PO-", 
+   "options": "PUR-ORD-.YYYY.-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
@@ -3671,7 +3672,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-18 07:49:53.131408", 
+ "modified": "2018-08-27 08:35:10.345286",
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
@@ -3764,5 +3765,6 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
