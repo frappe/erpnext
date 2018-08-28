@@ -136,7 +136,7 @@ def make_property_setter(doctype, property_name, value):
 		property_setter.flags.validate_fields_for_doctype = True
 		try:
 			property_setter.insert()
-		except DuplicateEntryError:
+		except frappe.DuplicateEntryError:
 			name = "{0}-{1}-{2}-1".format(doctype, fieldname, property)
 			property_setter.name = name
 			property_setter.insert()
