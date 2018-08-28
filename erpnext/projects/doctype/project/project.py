@@ -69,6 +69,7 @@ class Project(Document):
 		self.tasks = []
 		self.load_tasks()
 		self.send_welcome_email()
+		self.update_percent_complete()
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
