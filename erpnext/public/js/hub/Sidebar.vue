@@ -19,48 +19,44 @@
 export default {
 	data() {
 		return {
+			hub_registered: hub.settings.registered,
 			items: [
 				{
 					label: __('Browse'),
 					route: 'marketplace/home'
 				},
 				{
-					label: __('Become a Seller'),
-					action: this.show_register_dialog,
-					condition: () => !hub.settings.registered
-				},
-				{
 					label: __('Saved Products'),
 					route: 'marketplace/saved-products',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 				{
 					label: __('Your Profile'),
 					route: 'marketplace/profile',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 				{
 					label: __('Your Products'),
 					route: 'marketplace/my-products',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 				{
 					label: __('Publish Products'),
 					route: 'marketplace/publish',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 				{
 					label: __('Selling'),
 					route: 'marketplace/selling',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 				{
 					label: __('Buying'),
 					route: 'marketplace/buying',
-					condition: () => hub.settings.registered
+					condition: () => this.hub_registered
 				},
 			],
-			categories: []
+			categories: [],
 		}
 	},
 	created() {
@@ -80,6 +76,10 @@ export default {
 					this.update_sidebar_state();
 				});
 			});
+
+		erpnext.hub.on('seller-registered', () => {
+			this.hub_registered = true;
+		})
 	},
 	mounted() {
 		this.update_sidebar_state();
@@ -99,7 +99,7 @@ export default {
 			const $siblings = container.find('[data-route]');
 			$siblings.removeClass('active').addClass('text-muted');
 			$sidebar_item.addClass('active').removeClass('text-muted');
-		}
+		},
 	}
 }
 </script>
