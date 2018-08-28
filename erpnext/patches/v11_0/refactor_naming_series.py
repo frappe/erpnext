@@ -4,7 +4,6 @@
 from __future__ import print_function, unicode_literals
 
 import frappe
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 doctype_series_map = {
 	'Additional Salary': 'HR-ADS-.YY.-.MM.-',
@@ -79,17 +78,9 @@ def execute():
 		set_series(doctype, opts["options"], opts["default"])
 
 def set_series(doctype, options, default):
-	def _make_property_setter(property_name, value):
-		property_setter = frappe.db.exists('Property Setter',
-			{'doc_type': doctype, 'field_name': 'naming_series', 'property': property_name})
-		if property_setter:
-			frappe.db.set_value('Property Setter', property_setter, 'value', value)
-		else:
-			make_property_setter(doctype, "naming_series", "options", value, "Text")
-
-	_make_property_setter("options", options)
+	make_property_setter(doctype, "options", options)
 	if default:
-		_make_property_setter("default", default)
+		make_property_setter(doctype, "default", default)
 
 def get_series():
 	series_to_set = {}
@@ -125,3 +116,27 @@ def get_series_to_preserve(doctype):
 def get_default_series(doctype):
 	default_series = (frappe.get_meta(doctype).get_field("naming_series").default or "")
 	return default_series
+
+def make_property_setter(doctype, property_name, value):
+	property_setter = frappe.db.exists('Property Setter',
+			{'doc_type': doctype, 'field_name': 'naming_series', 'property': property_name})
+	if property_setter:
+			frappe.db.set_value('Property Setter', property_setter, 'value', value)
+	else:
+		property_setter = frappe.get_doc({
+			"doctype":"Property Setter",
+			"doctype_or_field": "DocField",
+			"doc_type": doctype,
+			"field_name": 'naming_series',
+			"property": property_name,
+			"value": value,
+			"property_type": "Text"
+		})
+		property_setter.flags.ignore_permissions = True
+		property_setter.flags.validate_fields_for_doctype = True
+		try:
+			property_setter.insert()
+		except DuplicateEntryError:
+			name = "{0}-{1}-{2}-1".format(doctype, fieldname, property)
+			property_setter.name = name
+			property_setter.insert()
