@@ -112,6 +112,11 @@ class SalesInvoice(SellingController):
 		self.set_status()
 		if self.is_pos and not self.is_return:
 			self.verify_payment_amount_is_positive()
+
+		#validate amount in mode of payments for returned invoices for pos must be negative
+		if self.is_pos and self.is_return:
+			self.verify_payment_amount_is_negative()
+			
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
@@ -970,6 +975,11 @@ class SalesInvoice(SellingController):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
+
+	def verify_payment_amount_is_negative(self):			
+		for entry in self.payments:
+    			if entry.amount > 0:
+				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))				
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
