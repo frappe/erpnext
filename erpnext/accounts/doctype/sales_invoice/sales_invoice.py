@@ -1093,6 +1093,18 @@ class SalesInvoice(SellingController):
 			booking_start_date = getdate(add_months(today(), -1))
 			booking_start_date = booking_start_date if booking_start_date>item.service_start_date else item.service_start_date
 
+			if item.service_start_date < booking_start_date:
+				prev_gl_entry = frappe.db.sql('''
+					select name, posting_date from `tabGL Entry` where company=%s and account=%s and
+					voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
+					order by posting_date desc limit 1
+				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
+
+				if not prev_gl_entry:
+					booking_start_date = item.service_start_date
+				else:
+					booking_start_date = getdate(add_days(prev_gl_entry.posting_date, 1))
+
 			booking_end_date = getdate(add_days(today(), -1))
 			if booking_end_date.month > item.service_stop_date.month:
 				continue
