@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.user import get_user_fullname
 from frappe.utils import getdate, cstr
+from frappe.integrations.doctype.google_maps.google_maps_settings import round_timedelta, format_address
 
 class DeliveryTrip(Document):
 	pass
@@ -19,7 +20,7 @@ def get_default_contact(out, name):
 		"""
 			select parent,
 				(select is_primary_contact from tabContact c where c.name = dl.parent)
-			 	as is_primary_contact
+				as is_primary_contact
 			from
 				`tabDynamic Link` dl
 			where
