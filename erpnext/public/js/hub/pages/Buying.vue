@@ -3,7 +3,7 @@
 		<section-header>
 			<h4>{{ __('Buying') }}</h4>
 		</section-header>
-		<div class="row" v-if="items">
+		<div class="row" v-if="items && items.length">
 			<div class="col-md-7 margin-bottom"
 				v-for="item of items"
 				:key="item.name"
