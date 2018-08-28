@@ -10,8 +10,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.user import get_user_fullname
 from frappe.utils import getdate, cstr
-from frappe.integrations.doctype.google_maps.google_maps import round_timedelta
-from frappe.integrations.doctype.google_maps.google_maps import format_address
 
 class DeliveryTrip(Document):
 	pass
@@ -180,3 +178,18 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 			frappe.db.set_value("Delivery Stop", delivery_stop.name,
 				"email_sent_to", contact_info.email_id)
 			frappe.msgprint(_("Email sent to {0}").format(contact_info.email_id))
+
+def round_timedelta(td, period):
+	"""Round timedelta"""
+	period_seconds = period.total_seconds()
+	half_period_seconds = period_seconds / 2
+	remainder = td.total_seconds() % period_seconds
+	if remainder >= half_period_seconds:
+		return datetime.timedelta(seconds=td.total_seconds() + (period_seconds - remainder))
+	else:
+		return datetime.timedelta(seconds=td.total_seconds() - remainder)
+
+def format_address(address):
+	"""Customer Address format """
+	address = frappe.get_doc('Address', address)
+	return '{}, {}, {}, {}'.format(address.address_line1, address.city, address.pincode, address.country)
