@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "autoname": "ITEM-PRICE-.#####", 
+ "autoname": "", 
  "beta": 0, 
  "creation": "2013-05-02 16:29:48", 
  "custom": 0, 
@@ -895,7 +895,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-15 16:36:50.162766", 
+ "modified": "2018-08-21 16:15:46.600472", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 
@@ -948,5 +948,6 @@
  "sort_order": "ASC", 
  "title_field": "item_code", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
