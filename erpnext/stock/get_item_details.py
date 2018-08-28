@@ -274,11 +274,12 @@ def get_basic_details(args, item):
 	})
 
 	if item.enable_deferred_revenue:
-		service_end_date = add_months(args.transaction_date, item.no_of_months)
+		service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
+		service_end_date = add_months(service_start_date, item.no_of_months)
 		out.update({
 			"enable_deferred_revenue": item.enable_deferred_revenue,
 			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
-			"service_start_date": args.transaction_date,
+			"service_start_date": service_start_date,
 			"service_end_date": service_end_date
 		})
 

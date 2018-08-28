@@ -757,6 +757,13 @@ frappe.ui.form.on('Sales Invoice Item', {
 				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
 			}
 		}
+	},
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.model.set_value(cdt, cdn, "service_end_date", "");
+		}
 	}
 })
 
