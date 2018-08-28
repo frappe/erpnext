@@ -5,6 +5,7 @@ def get_data():
 		'fieldname': 'job_card',
 		'transactions': [
 			{
+				'label': _('Transactions'),
 				'items': ['Material Request', 'Stock Entry']
 			}
 		]

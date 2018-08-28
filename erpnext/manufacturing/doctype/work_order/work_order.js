@@ -112,7 +112,8 @@ frappe.ui.form.on("Work Order", {
 			frm.trigger('show_progress');
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.operations) {
+		if (frm.doc.docstatus === 1 && frm.doc.operations
+			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
 			frm.add_custom_button(__('Make Job Card'), () => {
 				frm.trigger("make_job_card")
 			}).addClass('btn-primary');
@@ -152,9 +153,15 @@ frappe.ui.form.on("Work Order", {
 			options: "Operation",
 			label: __("Operation"),
 			get_query: () => {
+				const filter_workstation = frm.doc.operations.filter(d => {
+					if (d.status != "Completed") {
+						return d;
+					}
+				});
+
 				return {
 					filters: {
-						name: ["in", frm.doc.operations.map(d => d.operation)]
+						name: ["in", (filter_workstation || []).map(d => d.operation)]
 					}
 				};
 			},
@@ -333,6 +340,9 @@ frappe.ui.form.on("Work Order", {
 	before_submit: function(frm) {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
+		if (frm.doc.operations) {
+			frm.fields_dict.operations.grid.toggle_reqd("workstation", true);
+		}
 	},
 
 	set_sales_order: function(frm) {
@@ -414,7 +424,10 @@ erpnext.work_order = {
 				}, __("Status"));
 			}
 
-			if(!frm.doc.skip_transfer && !frm.doc.operations){
+			const show_start_btn = (frm.doc.skip_transfer
+				|| frm.doc.transfer_material_against_job_card) ? 0 : 1;
+
+			if (show_start_btn){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
 					&& frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
