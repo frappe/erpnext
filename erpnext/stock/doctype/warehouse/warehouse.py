@@ -139,7 +139,7 @@ class Warehouse(NestedSet):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	from erpnext.stock.utils import get_stock_value_on
+	from erpnext.stock.utils import get_stock_value_from_bin
 
 	if is_root:
 		parent = ""
@@ -154,7 +154,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 
 	# return warehouses
 	for wh in warehouses:
-		wh["balance"] = get_stock_value_on(warehouse=wh.value)
+		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
 	return warehouses
 
 @frappe.whitelist()
