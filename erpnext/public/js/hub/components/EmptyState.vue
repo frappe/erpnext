@@ -42,6 +42,9 @@ export default {
 		border-radius: 4px;
 		border: 1px solid @border-color;
 		border-style: dashed;
+
+		// bad, due to item card column layout, that is inner 15px margin
+		margin: 0 15px;
 	}
 
 </style>
