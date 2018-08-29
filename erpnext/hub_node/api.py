@@ -137,25 +137,29 @@ def item_sync_postprocess(sync_details):
 
 
 def load_base64_image_from_items(items):
-	import io, base64, urllib, os
+	import io, base64, urllib, os, requests, tempfile
 	from frappe.utils.file_manager import get_file_path
 
 	for item in items:
 		file_path = item['image']
 		file_name = os.path.basename(file_path)
+		base64content = None
 
 		if file_path.startswith('http'):
+			# fetch content and then base64 it
 			url = file_path
-			file_path = os.path.join('/tmp', file_name)
-			urllib.urlretrieve(url, file_path)
+			response = requests.get(url)
+			base64content = base64.b64encode(response.content)
 		else:
+			# read file then base64 it
 			file_path = os.path.abspath(get_file_path(file_path))
+			with io.open(file_path, 'rb') as f:
+				base64content = base64.b64encode(f.read())
 
-		with io.open(file_path, 'rb') as f:
-			image_data = json.dumps({
-				'file_name': file_name,
-				'base64': base64.b64encode(f.read())
-			})
+		image_data = json.dumps({
+			'file_name': file_name,
+			'base64': base64content
+		})
 
 		item['image'] = image_data
 
