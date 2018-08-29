@@ -58,6 +58,7 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
+		self.validate_fg_completed_qty()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -184,6 +185,13 @@ class StockEntry(StockController):
 						if req_items:
 							if stock_qty > trans_qty:
 								item_code.append(item.item_code)
+
+	def validate_fg_completed_qty(self):
+		if self.purpose == "Manufacture" and self.work_order:
+			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
+			for item in self.items:
+				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different").format(item.qty, self.fg_completed_qty))
 
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
