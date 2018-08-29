@@ -207,7 +207,7 @@ class Project(Document):
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
-				pct_complete += row["progress"] * frappe.utils.safemath_div(row["task_weight"], weight_sum)
+				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"
