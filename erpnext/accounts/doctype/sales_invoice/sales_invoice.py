@@ -547,7 +547,7 @@ class SalesInvoice(SellingController):
 				if date_diff(item.service_stop_date, item.service_end_date) > 0:
 					frappe.throw(_("Service Stop Date cannot be after Service End Date"))
 
-				if old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
+				if old_stop_dates and old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
 					frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 	def update_current_stock(self):
@@ -1090,7 +1090,7 @@ class SalesInvoice(SellingController):
 		for item in self.get('items'):
 			last_gl_entry = False
 
-			booking_start_date = getdate(add_months(today(), -1))
+			booking_start_date = getdate(add_months(today(), -1)) if not start_date else start_date
 			booking_start_date = booking_start_date if booking_start_date>item.service_start_date else item.service_start_date
 
 			if item.service_start_date < booking_start_date:
@@ -1105,20 +1105,15 @@ class SalesInvoice(SellingController):
 				else:
 					booking_start_date = getdate(add_days(prev_gl_entry.posting_date, 1))
 
-			booking_end_date = getdate(add_days(today(), -1))
-			if booking_end_date.month > item.service_stop_date.month:
+			booking_end_date = getdate(add_days(today(), -1)) if not end_date else end_date
+			if item.service_stop_date and booking_end_date.month > item.service_stop_date.month:
 				continue
 			elif booking_end_date>=item.service_end_date:
 				last_gl_entry = True
 				booking_end_date = item.service_end_date
-			elif item.service_stop_date<=booking_end_date:
+			elif item.service_stop_date and item.service_stop_date<=booking_end_date:
 				last_gl_entry = True
 				booking_end_date = item.service_stop_date
-
-			if start_date and end_date:
-				# if start and end date are already provided
-				booking_start_date = start_date
-				booking_end_date = end_date
 
 			total_days = date_diff(item.service_end_date, item.service_start_date)
 			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
@@ -1176,7 +1171,7 @@ def booked_deferred_revenue(start_date=None, end_date=None):
 	invoices = frappe.db.sql_list('''
 		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
 		and enable_deferred_revenue = 1 and docstatus = 1
-	''', (start_date or today(), end_date or add_months(today(), -1)))
+	''', (end_date or today(), start_date or add_months(today(), -1)))
 
 	# ToDo also find the list on the basic of the GL entry, and make another list
 	for invoice in invoices:

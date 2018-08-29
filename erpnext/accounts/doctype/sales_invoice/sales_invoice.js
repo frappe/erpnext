@@ -762,7 +762,13 @@ frappe.ui.form.on('Sales Invoice Item', {
 		var child = locals[cdt][cdn];
 
 		if(child.service_start_date) {
-			frappe.model.set_value(cdt, cdn, "service_end_date", "");
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
+				}
+			})
 		}
 	}
 })
