@@ -21,12 +21,12 @@ frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.
 			});
 		});
 	}
-}
+};
 
 $(document).on('toolbar_setup', () => {
 	$('#toolbar-user .navbar-reload').after(`
 		<li>
 			<a href="#marketplace/home">${__('Marketplace')}
 		</li>
-	`)
-})
+	`);
+});
