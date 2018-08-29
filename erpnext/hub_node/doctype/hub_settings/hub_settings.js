@@ -1,22 +1,11 @@
 frappe.ui.form.on("Hub Settings", {
 	refresh: function(frm) {
 		frm.disable_save();
-		frm.add_custom_button(__('Logs'),
-			() => frappe.set_route('List', 'Data Migration Run', {
-				data_migration_plan: 'Hub Sync'
-			}));
-
-		if (frm.doc.enabled) {
-			frm.add_custom_button(__('Sync'),
-				() => frm.call('sync'));
-		}
 	},
-	onload: function(frm) { },
+	
 	onload_post_render: function(frm) {
 		if(frm.get_field("unregister_from_hub").$input)
 			frm.get_field("unregister_from_hub").$input.addClass("btn-danger");
-	},
-	on_update: function(frm) {
 	},
 
 	hub_user_email: function(frm) {

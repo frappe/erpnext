@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-import frappe, requests, json
-from frappe.utils import now, nowdate
+import frappe, json
+from frappe.utils import nowdate
 from frappe.frappeclient import FrappeClient
 from frappe.utils.nestedset import get_root_of
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -17,56 +17,6 @@ def get_hub_connection():
 	# read-only connection
 	hub_connection = FrappeClient(frappe.conf.hub_url)
 	return hub_connection
-
-@frappe.whitelist()
-def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
-	doctype = 'Hub Item'
-	hub_settings = frappe.get_doc('Hub Settings')
-	item_names_str = hub_settings.get('custom_data') or '[]'
-	item_names = json.loads(item_names_str)
-	filters = json.dumps({
-		'hub_item_code': ['in', item_names]
-	})
-	return get_list(doctype, start, limit, fields, filters, order_by)
-
-@frappe.whitelist()
-def update_wishlist_item(item_name, remove=0):
-	remove = int(remove)
-	hub_settings = frappe.get_doc('Hub Settings')
-	data = hub_settings.get('custom_data')
-	if not data or not json.loads(data):
-		data = '[]'
-		hub_settings.custom_data = data
-		hub_settings.save()
-
-	item_names_str = data
-	item_names = json.loads(item_names_str)
-	if not remove and item_name not in item_names:
-		item_names.append(item_name)
-	if remove and item_name in item_names:
-		item_names.remove(item_name)
-
-	item_names_str = json.dumps(item_names)
-
-	hub_settings.custom_data = item_names_str
-	hub_settings.save()
-
-@frappe.whitelist()
-def update_category(hub_item_code, category):
-	connection = get_hub_connection()
-
-	# args = frappe._dict(dict(
-	# 	doctype='Hub Category',
-	# 	hub_category_name=category
-	# ))
-	# response = connection.insert('Hub Category', args)
-
-	response = connection.update('Hub Item', frappe._dict(dict(
-		doctype='Hub Item',
-		hub_category = category
-	)), hub_item_code)
-
-	return response
 
 def make_opportunity(buyer_name, email_id):
 	buyer_name = "HUB-" + buyer_name

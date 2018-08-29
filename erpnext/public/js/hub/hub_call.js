@@ -2,7 +2,7 @@ frappe.provide('hub');
 frappe.provide('erpnext.hub');
 
 erpnext.hub.cache = {};
-hub.call = function call_hub_method(method, args={}, clear_cache_on_event) {
+hub.call = function call_hub_method(method, args={}, clear_cache_on_event) { // eslint-disable-line
 	return new Promise((resolve, reject) => {
 
 		// cache
@@ -18,7 +18,7 @@ hub.call = function call_hub_method(method, args={}, clear_cache_on_event) {
 			invalidate_after_5_mins(clear_cache);
 		} else {
 			erpnext.hub.on(clear_cache_on_event, () => {
-				clear_cache(key)
+				clear_cache(key);
 			});
 		}
 
@@ -28,8 +28,7 @@ hub.call = function call_hub_method(method, args={}, clear_cache_on_event) {
 				method,
 				params: args
 			}
-		})
-		.then(r => {
+		}).then(r => {
 			if (r.message) {
 				const response = r.message;
 				if (response.error) {
@@ -44,10 +43,10 @@ hub.call = function call_hub_method(method, args={}, clear_cache_on_event) {
 				resolve(response);
 			}
 			reject(r);
-		})
-		.fail(reject)
+
+		}).fail(reject);
 	});
-}
+};
 
 function invalidate_after_5_mins(clear_cache) {
 	// cache invalidation after 5 minutes
