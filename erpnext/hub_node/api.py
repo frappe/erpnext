@@ -180,9 +180,9 @@ def get_hub_connection():
 
 	# read-only connection
 	if read_only:
-		hub_connection = FrappeClient(frappe.conf.hub_url)
+		hub_url = frappe.db.get_single_value('Hub Settings', 'hub_url')
+		hub_connection = FrappeClient(hub_url)
 		return hub_connection
-
 
 def get_field_mappings():
 	return []
