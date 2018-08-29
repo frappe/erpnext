@@ -15,22 +15,19 @@ class HubSetupError(frappe.ValidationError): pass
 class HubSettings(Document):
 
 	def validate(self):
-		protocol = 'http://'
-		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
-		if self.publish_pricing and not self.selling_price_list:
-			frappe.throw(_("Please select a Price List to publish pricing"))
+		self.site_name = frappe.utils.get_url()
 
 	def get_hub_url(self):
-		if not frappe.conf.hub_url:
-			frappe.throw('hub_url is not set in site_config')
-		return frappe.conf.hub_url
+		return self.hub_url
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
 
+		if 'System Manager' not in frappe.get_roles():
+			frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
+
 		# TODO: site_name for cloud sites
-		protocol = 'http://'
-		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
+		self.site_name = frappe.utils.get_url()
 
 		data = {
 			'profile': self.as_json()
