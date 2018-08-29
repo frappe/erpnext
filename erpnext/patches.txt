@@ -559,3 +559,4 @@ erpnext.patches.v11_0.add_item_group_defaults
 erpnext.patches.v10_0.update_address_template_for_india
 execute:frappe.delete_doc("Page", "hub")
 erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
+erpnext.patches.v11_0.update_hub_url

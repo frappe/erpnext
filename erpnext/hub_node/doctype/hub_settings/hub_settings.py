@@ -18,9 +18,7 @@ class HubSettings(Document):
 		self.site_name = frappe.utils.get_url()
 
 	def get_hub_url(self):
-		if not frappe.conf.hub_url:
-			frappe.throw('hub_url is not set in site_config')
-		return frappe.conf.hub_url
+		return self.hub_url
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
