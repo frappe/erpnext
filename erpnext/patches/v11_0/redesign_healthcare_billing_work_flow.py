@@ -13,6 +13,7 @@ sales_invoice_referenced_doc = {
 
 def execute():
 	healthcare_custom_field_in_sales_invoice()
+	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_item')
 	for si_ref_doc in sales_invoice_referenced_doc:
 		if frappe.db.exists('DocType', si_ref_doc):
 			frappe.reload_doc(get_doctype_module(si_ref_doc), 'doctype', scrub(si_ref_doc))
