@@ -503,3 +503,5 @@ erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
 erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
 erpnext.patches.v10_0.update_status_in_purchase_receipt
 erpnext.patches.v10_0.update_address_template_for_india
+erpnext.patches.v10_0.set_discount_amount
+erpnext.patches.v10_0.recalculate_gross_margin_for_project
