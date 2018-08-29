@@ -162,14 +162,23 @@ def load_base64_image_from_items(items):
 
 
 def get_hub_connection():
+	read_only = True
+
 	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 		hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
-		hub_connection = hub_connector.get_connection()
-		return hub_connection.connection
+
+		# full rights to user who registered as hub_seller
+		if hub_connector.username == frappe.session.user:
+			read_only = False
+
+		if not read_only:
+			hub_connection = hub_connector.get_connection()
+			return hub_connection.connection
 
 	# read-only connection
-	hub_connection = FrappeClient(frappe.conf.hub_url)
-	return hub_connection
+	if read_only:
+		hub_connection = FrappeClient(frappe.conf.hub_url)
+		return hub_connection
 
 
 def get_field_mappings():

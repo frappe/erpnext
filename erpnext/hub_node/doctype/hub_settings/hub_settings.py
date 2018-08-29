@@ -28,6 +28,9 @@ class HubSettings(Document):
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
 
+		if 'System Manager' not in frappe.get_roles():
+			frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
+
 		# TODO: site_name for cloud sites
 		protocol = 'http://'
 		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
