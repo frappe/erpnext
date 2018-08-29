@@ -29,8 +29,8 @@ erpnext.hub.Marketplace = class Marketplace {
 				this.make_body();
 				this.setup_events();
 				this.refresh();
-				if (!is_registered) {
-					this.page.set_primary_action('Become A Seller', this.show_register_dialog.bind(this))
+				if (!is_registered && frappe.user_roles.includes('System Manager')) {
+					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
 				}
 			});
 	}

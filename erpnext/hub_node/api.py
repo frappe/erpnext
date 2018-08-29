@@ -119,39 +119,52 @@ def item_sync_postprocess():
 
 
 def load_base64_image_from_items(items):
-	import io, base64, urllib, os
+	import io, base64, urllib, os, requests, tempfile
 	from frappe.utils.file_manager import get_file_path
 
 	for item in items:
 		file_path = item['image']
 		file_name = os.path.basename(file_path)
+		base64content = None
 
 		if file_path.startswith('http'):
+			# fetch content and then base64 it
 			url = file_path
-			file_path = os.path.join('/tmp', file_name)
-			urllib.urlretrieve(url, file_path)
+			response = requests.get(url)
+			base64content = base64.b64encode(response.content)
 		else:
+			# read file then base64 it
 			file_path = os.path.abspath(get_file_path(file_path))
+			with io.open(file_path, 'rb') as f:
+				base64content = base64.b64encode(f.read())
 
-		with io.open(file_path, 'rb') as f:
-			image_data = json.dumps({
-				'file_name': file_name,
-				'base64': base64.b64encode(f.read())
-			})
+		image_data = json.dumps({
+			'file_name': file_name,
+			'base64': base64content
+		})
 
 		item['image'] = image_data
 
 
 def get_hub_connection():
+	read_only = True
+
 	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 		hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
-		hub_connection = hub_connector.get_connection()
-		return hub_connection.connection
+
+		# full rights to user who registered as hub_seller
+		if hub_connector.username == frappe.session.user:
+			read_only = False
+
+		if not read_only:
+			hub_connection = hub_connector.get_connection()
+			return hub_connection.connection
 
 	# read-only connection
-	hub_connection = FrappeClient(frappe.conf.hub_url)
-	return hub_connection
-
+	if read_only:
+		hub_url = frappe.db.get_single_value('Hub Settings', 'hub_url')
+		hub_connection = FrappeClient(hub_url)
+		return hub_connection
 
 def get_field_mappings():
 	return []

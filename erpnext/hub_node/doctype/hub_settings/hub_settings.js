@@ -1,8 +1,4 @@
 frappe.ui.form.on("Hub Settings", {
-	refresh: function(frm) {
-		frm.disable_save();
-	},
-	
 	onload_post_render: function(frm) {
 		if(frm.get_field("unregister_from_hub").$input)
 			frm.get_field("unregister_from_hub").$input.addClass("btn-danger");
