@@ -138,6 +138,9 @@ def get_item_for_list_in_html(context):
 	if (context.get("website_image") or "").startswith("files/"):
 		context["website_image"] = "/" + urllib.quote(context["website_image"])
 
+	context["show_availability_status"] = cint(frappe.db.get_single_value('Products Settings',
+		'show_availability_status'))
+
 	products_template = 'templates/includes/products_as_grid.html'
 	if cint(frappe.db.get_single_value('Products Settings', 'products_as_list')):
 		products_template = 'templates/includes/products_as_list.html'

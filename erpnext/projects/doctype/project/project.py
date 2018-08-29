@@ -69,6 +69,7 @@ class Project(Document):
 		self.tasks = []
 		self.load_tasks()
 		self.send_welcome_email()
+		self.update_percent_complete()
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -236,9 +237,13 @@ class Project(Document):
 		self.update_purchase_costing()
 		self.update_sales_amount()
 		self.update_billed_amount()
+		self.calculate_gross_margin()
 
-		self.gross_margin = flt(self.total_billed_amount) - (flt(self.total_costing_amount) + flt(self.total_expense_claim) + flt(self.total_purchase_cost))
+	def calculate_gross_margin(self):
+		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
+			+ flt(self.total_purchase_cost) + flt(self.get('total_consumed_material_cost', 0)))
 
+		self.gross_margin = flt(self.total_billed_amount) - expense_amount
 		if self.total_billed_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) *100
 
