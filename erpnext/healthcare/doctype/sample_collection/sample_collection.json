@@ -67,7 +67,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "SMPL-", 
+   "options": "HLC-SC-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -645,7 +645,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-12 19:19:00.573460", 
+ "modified": "2018-08-21 14:44:39.128989", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Sample Collection", 
@@ -682,5 +682,6 @@
  "sort_order": "DESC", 
  "title_field": "patient", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }
