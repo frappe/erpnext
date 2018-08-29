@@ -86,29 +86,20 @@ def publish_selected_items(items_to_publish):
 	items = map_fields(items_to_publish)
 
 	try:
-		item_sync_preprocess()
+		item_sync_preprocess(len(items))
 		load_base64_image_from_items(items)
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
 		connection.insert_many(items)
 
-		item_sync_postprocess({
-			'status': 'Success',
-			'stats': len(items)
-		})
+		item_sync_postprocess()
 	except Exception as e:
 		frappe.log_error(message=e, title='Hub Sync Error')
 
-def item_sync_preprocess():
-	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
-
-	response = call_hub_method('add_hub_seller_activity', {
-		'hub_seller': hub_seller,
-		'activity_details': json.dumps({
-			'subject': 'Publishing items',
-			'status': 'Success'
-		})
+def item_sync_preprocess(intended_item_publish_count):
+	response = call_hub_method('pre_items_publish', {
+		'intended_item_publish_count': intended_item_publish_count
 	})
 
 	if response:
@@ -117,17 +108,8 @@ def item_sync_preprocess():
 	else:
 		frappe.throw('Unable to update remote activity')
 
-def item_sync_postprocess(sync_details):
-	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
-
-	response = call_hub_method('add_hub_seller_activity', {
-		'hub_seller': hub_seller,
-		'activity_details': json.dumps({
-			'subject': 'Publishing items:' + sync_details['status'],
-			'content': str(sync_details['stats']) + ' items synced.'
-		})
-	})
-
+def item_sync_postprocess():
+	response = call_hub_method('post_items_publish', {})
 	if response:
 		frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
