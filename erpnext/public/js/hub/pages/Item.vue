@@ -28,7 +28,7 @@
 
 		</detail-view>
 
-		<!-- <review-area :hub_item_name="hub_item_name"></review-area> -->
+		<review-area :hub_item_name="hub_item_name"></review-area>
 	</div>
 </template>
 
