@@ -220,7 +220,7 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
-
+				
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -486,7 +486,6 @@ class PurchaseInvoice(BuyingController):
 
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
-				item.expense_account = item.expense_account
 
 				if (not item.expense_account or frappe.db.get_value('Account',
 					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):

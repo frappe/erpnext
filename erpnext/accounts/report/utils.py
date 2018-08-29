@@ -2,7 +2,7 @@ import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
-from frappe.utils import cint, get_datetime_str, formatdate
+from frappe.utils import cint, get_datetime_str, formatdate, flt
 
 __exchange_rates = {}
 P_OR_L_ACCOUNTS = list(
@@ -49,7 +49,7 @@ def convert(value, from_, to, date):
 	:return: Result of converting `value`
 	"""
 	rate = get_rate_as_at(date, from_, to)
-	converted_value = value / (rate or 1)
+	converted_value = flt(value) / (rate or 1)
 	return converted_value
 
 
@@ -97,17 +97,16 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 
 	for entry in gl_entries:
 		account = entry['account']
-		debit = cint(entry['debit'])
-		credit = cint(entry['credit'])
-		debit_in_account_currency = cint(entry['debit_in_account_currency'])
-		credit_in_account_currency = cint(entry['credit_in_account_currency'])
+		debit = flt(entry['debit'])
+		credit = flt(entry['credit'])
+		debit_in_account_currency = flt(entry['debit_in_account_currency'])
+		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
 
 		if account_currency != presentation_currency or (account_currency == presentation_currency and not is_p_or_l_account(account)):
 			value = debit or credit
 
 			date = currency_info['report_date'] if not is_p_or_l_account(account) else entry['posting_date']
-
 			converted_value = convert(value, presentation_currency, company_currency, date)
 
 			if entry.get('debit'):

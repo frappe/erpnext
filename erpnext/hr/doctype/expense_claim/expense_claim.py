@@ -26,7 +26,7 @@ class ExpenseClaim(AccountsController):
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
 		set_employee_name(self)
-		self.set_expense_account()
+		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
@@ -53,11 +53,11 @@ class ExpenseClaim(AccountsController):
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
-			self.payable_account = frappe.db.get_value("Company", self.company, "default_payable_account")
+			self.payable_account = frappe.get_cached_value('Company',  self.company,  "default_payable_account")
 
 	def set_cost_center(self):
 		if not self.cost_center:
-			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
+			self.cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
@@ -226,9 +226,9 @@ class ExpenseClaim(AccountsController):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
-	def set_expense_account(self):
+	def set_expense_account(self, validate=False):
 		for expense in self.expenses:
-			if not expense.default_account:
+			if not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
@@ -311,8 +311,8 @@ def get_advances(employee, advance_id=None):
 @frappe.whitelist()
 def get_expense_claim(
 	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount):
-	default_payable_account = frappe.db.get_value("Company", company, "default_payable_account")
-	default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
+	default_payable_account = frappe.get_cached_value('Company',  company,  "default_payable_account")
+	default_cost_center = frappe.get_cached_value('Company',  company,  'cost_center')
 
 	expense_claim = frappe.new_doc('Expense Claim')
 	expense_claim.company = company

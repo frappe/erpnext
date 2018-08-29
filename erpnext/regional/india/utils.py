@@ -111,8 +111,8 @@ def get_regional_address_details(out, doctype, company):
 	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
 def calculate_annual_eligible_hra_exemption(doc):
-	basic_component = frappe.db.get_value("Company", doc.company, "basic_component")
-	hra_component = frappe.db.get_value("Company", doc.company, "hra_component")
+	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
+	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
 	if hra_component and basic_component:
 		assignment = get_salary_assignment(doc.employee, getdate())

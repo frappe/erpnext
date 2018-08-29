@@ -102,7 +102,7 @@ class POSProfile(Document):
 
 def get_item_groups(pos_profile):
 	item_groups = []
-	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+	pos_profile = frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile

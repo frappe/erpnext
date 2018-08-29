@@ -40,9 +40,9 @@ def unauthorized_user(supplier):
 
 def update_supplier_details(context):
 	supplier_doc = frappe.get_doc("Supplier", context.doc.supplier)
-	context.doc.currency = supplier_doc.default_currency or frappe.db.get_value("Company", context.doc.company, "default_currency")
-	context.doc.currency_symbol = frappe.db.get_value("Currency", context.doc.currency, "symbol")
-	context.doc.number_format = frappe.db.get_value("Currency", context.doc.currency, "number_format")
+	context.doc.currency = supplier_doc.default_currency or frappe.get_cached_value('Company',  context.doc.company,  "default_currency")
+	context.doc.currency_symbol = frappe.db.get_value("Currency", context.doc.currency, "symbol", cache=True)
+	context.doc.number_format = frappe.db.get_value("Currency", context.doc.currency, "number_format", cache=True)
 	context.doc.buying_price_list = supplier_doc.default_price_list or ''
 
 def get_link_quotation(supplier, rfq):

@@ -623,14 +623,14 @@ class StockEntry(StockController):
 			["Cost Center", "cost_center", "cost_center"]]:
 				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
 				if not ret[d[1]] or (company and self.company != company):
-					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
+					ret[d[1]] = frappe.get_cached_value('Company',  self.company,  d[2]) if d[2] else None
 
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
 
 		if not ret["expense_account"]:
-			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+			ret["expense_account"] = frappe.get_cached_value('Company',  self.company,  "stock_adjustment_account")
 
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
@@ -666,8 +666,9 @@ class StockEntry(StockController):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
-				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
-					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
+				elif (self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
+					and not self.pro_doc.skip_transfer and frappe.db.get_single_value("Manufacturing Settings",
+					"backflush_raw_materials_based_on")== "Material Transferred for Manufacture"):
 					self.get_transfered_raw_materials()
 
 				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
@@ -689,8 +690,9 @@ class StockEntry(StockController):
 							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 							where po.name = poitemsup.parent
 								and po.name = %s""",self.purchase_order))
+
 					for item in itervalues(item_dict):
-						if self.pro_doc and not self.pro_doc.skip_transfer:
+						if self.pro_doc and (cint(self.pro_doc.from_wip_warehouse) or not self.pro_doc.skip_transfer):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
 						if self.purchase_order and self.purpose=="Subcontract":
@@ -1027,14 +1029,19 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 
 	def validate_batch(self):
-		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"]:
+		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract", "Material Issue"]:
 			for item in self.get("items"):
 				if item.batch_no:
-					expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
-					if expiry_date:
-						if getdate(self.posting_date) > getdate(expiry_date):
-							frappe.throw(_("Batch {0} of Item {1} has expired.")
-								.format(item.batch_no, item.item_code))
+					disabled = frappe.db.get_value("Batch", item.batch_no, "disabled")
+					if disabled == 0:
+						expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
+						if expiry_date:
+							if getdate(self.posting_date) > getdate(expiry_date):
+								frappe.throw(_("Batch {0} of Item {1} has expired.")
+									.format(item.batch_no, item.item_code))
+					else:
+						frappe.throw(_("Batch {0} of Item {1} is disabled.")
+							.format(item.batch_no, item.item_code))
 
 	def update_purchase_order_supplied_items(self):
 		#Get PO Supplied Items Details

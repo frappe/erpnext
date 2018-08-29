@@ -31,5 +31,5 @@ def execute():
 		if when_then:
 			frappe.db.sql('''
 				UPDATE
-					`tab%s` dt SET dt.total_qty = CASE %s END
+					`tab%s` dt SET dt.total_qty = CASE %s ELSE 0.0 END
 			''' % (doctype, " ".join(when_then)))

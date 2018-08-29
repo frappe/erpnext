@@ -132,7 +132,7 @@ class ReceivablePayableReport(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
+		company_currency = frappe.get_cached_value('Company',  self.filters.get("company"),  "default_currency")
 
 		return_entries = self.get_return_entries(args.get("party_type"))
 
@@ -170,11 +170,12 @@ class ReceivablePayableReport(object):
 
 					# ageing data
 					if self.filters.ageing_based_on == "Due Date":
-					    entry_date = due_date 
+						entry_date = due_date 
 					elif self.filters.ageing_based_on == "Supplier Invoice Date": 
-					    entry_date = bill_date    
+						entry_date = bill_date    
 					else:
-					    entry_date = gle.posting_date
+						entry_date = gle.posting_date
+
 					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
 
@@ -186,7 +187,8 @@ class ReceivablePayableReport(object):
 
 					if self.filters.ageing_based_on == "Supplier Invoice Date" \
 							and getdate(bill_date) > getdate(self.filters.report_date):
-						row[-1]=row[-2]=row[-3]=row[-4]=0	
+
+						row[-1]=row[-2]=row[-3]=row[-4]=0
 
 					if self.filters.get(scrub(args.get("party_type"))):
 						row.append(gle.account_currency)
@@ -378,6 +380,13 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select parent
 					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
 				values.append(self.filters.get("sales_person"))
+
+		if party_type_field=="supplier":
+			if self.filters.get("supplier_group"):
+				conditions.append("""party in (select name from tabSupplier
+					where supplier_group=%s)""")
+				values.append(self.filters.get("supplier_group"))
+								
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):

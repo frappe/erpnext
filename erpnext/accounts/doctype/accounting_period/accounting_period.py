@@ -14,7 +14,7 @@ class AccountingPeriod(Document):
 		self.bootstrap_doctypes_for_closing()
 
 	def autoname(self):
-		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
+		company_abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
 		self.name = " - ".join([self.period_name, company_abbr])
 	
 	def validate_overlap(self):

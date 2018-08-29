@@ -11,7 +11,7 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = frappe._dict()
-	filters.currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	filters.currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	gross_profit_data = GrossProfitGenerator(filters)
 

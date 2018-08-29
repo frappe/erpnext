@@ -178,7 +178,7 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		variants = json.loads(args)
 	total_variants = 1
 	for key in variants:
@@ -186,10 +186,15 @@ def enqueue_multiple_variant_creation(item, args):
 	if total_variants >= 600:
 		frappe.msgprint("Please do not create more than 500 items at a time", raise_exception=1)
 		return
-	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
-		item=item, args=args, now=frappe.flags.in_test);
+	if total_variants < 10:
+		return create_multiple_variants(item, args)
+	else:
+		frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
+			item=item, args=args, now=frappe.flags.in_test);
+		return 'queued'
 
 def create_multiple_variants(item, args):
+	count = 0
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -199,6 +204,9 @@ def create_multiple_variants(item, args):
 		if not get_variant(item, args=attribute_values):
 			variant = create_variant(item, attribute_values)
 			variant.save()
+			count +=1
+
+	return count
 
 def generate_keyed_value_combinations(args):
 	"""

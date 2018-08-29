@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, add_days
 from frappe.utils import get_datetime_str, nowdate
+from erpnext import get_default_company
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -155,3 +156,8 @@ def insert_record(records):
 				pass
 			else:
 				raise
+
+def welcome_email():
+	site_name = get_default_company()
+	title = _("Welcome to {0}".format(site_name))
+	return title

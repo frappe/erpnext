@@ -1324,14 +1324,14 @@ class TestSalesInvoice(unittest.TestCase):
 		return si
 
 	def test_company_monthly_sales(self):
-		existing_current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		existing_current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 
 		si = create_sales_invoice()
-		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
 
 		si.cancel()
-		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
 	def test_rounding_adjustment(self):

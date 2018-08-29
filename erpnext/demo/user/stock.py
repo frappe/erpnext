@@ -55,7 +55,7 @@ def make_delivery_note():
 			for d in dn.get("items"):
 				if not d.expense_account:
 					d.expense_account = ("Cost of Goods Sold - {0}".format(
-						frappe.db.get_value('Company', dn.company, 'abbr')))
+						frappe.get_cached_value('Company',  dn.company,  'abbr')))
 			dn.insert()
 			try:
 				dn.submit()

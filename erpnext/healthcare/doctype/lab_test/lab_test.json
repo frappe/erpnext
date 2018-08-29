@@ -54,6 +54,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -66,7 +67,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "LP-", 
+   "options": "HLC-LT-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -1516,7 +1517,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-17 12:47:01.425117", 
+ "modified": "2018-08-21 14:44:21.605374", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Lab Test", 
@@ -1591,5 +1592,6 @@
  "sort_order": "DESC", 
  "title_field": "patient", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }

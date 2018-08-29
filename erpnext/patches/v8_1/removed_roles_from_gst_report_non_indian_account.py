@@ -15,4 +15,4 @@ def execute():
 			where
 				parenttype = 'Report' and parent in('GST Sales Register',
 					'GST Purchase Register', 'GST Itemised Sales Register',
-					'GST Itemised Purchase Register')""")
+					'GST Itemised Purchase Register', 'Eway Bill')""")

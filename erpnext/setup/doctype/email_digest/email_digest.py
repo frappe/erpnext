@@ -22,7 +22,7 @@ class EmailDigest(Document):
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
+		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
 	def get_users(self):
 		"""get list of users"""
@@ -135,7 +135,7 @@ class EmailDigest(Document):
 		notifications = frappe.desk.notifications.get_notifications()
 
 		notifications = sorted(notifications.get("open_count_doctype", {}).items(),
-			lambda a, b: 1 if a[1] < b[1] else -1)
+			key=lambda a: a[1])
 
 		notifications = [{"key": n[0], "value": n[1],
 			"link": get_url_to_list(n[0])} for n in notifications if n[1]]

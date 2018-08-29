@@ -515,7 +515,7 @@ class PaymentEntry(AccountsController):
 	def calculate_deductions(self, tax_details):
 		return {
 			"account": tax_details['tax']['account_head'],
-			"cost_center": frappe.db.get_value("Company", self.company, "cost_center"),
+			"cost_center": frappe.get_cached_value('Company',  self.company,  "cost_center"),
 			"amount": self.total_allocated_amount * (tax_details['tax']['rate'] / 100)
 		}
 
@@ -535,7 +535,7 @@ def get_outstanding_reference_documents(args):
 					return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
-	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
+	company_currency = frappe.get_cached_value('Company',  args.get("company"),  "default_currency")
 
 	# Get negative outstanding sales /purchase invoices
 	negative_outstanding_invoices = []
@@ -686,7 +686,7 @@ def get_account_details(account, date):
 @frappe.whitelist()
 def get_company_defaults(company):
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
-	ret = frappe.db.get_value("Company", company, fields, as_dict=1)
+	ret = frappe.get_cached_value('Company',  company,  fields, as_dict=1)
 
 	for fieldname in fields:
 		if not ret[fieldname]:

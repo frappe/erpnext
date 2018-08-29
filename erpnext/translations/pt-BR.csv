@@ -1443,7 +1443,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Fee Schedule,Fee Structure,Estrutura da Taxa
 DocType: Timesheet Detail,Costing Amount,Valor de Custo
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +60,Submit Salary Slip,Enviar Folha de Pagamentos
-apps/erpnext/erpnext/controllers/selling_controller.py +138,Maxiumm discount for Item {0} is {1}%,Desconto máximo para o item {0} {1}%
+apps/erpnext/erpnext/controllers/selling_controller.py +138,Maximum discount for Item {0} is {1}%,Desconto máximo para o item {0} {1}%
 DocType: Sales Partner,Address & Contacts,Endereços e Contatos
 DocType: SMS Log,Sent To,Enviado para
 DocType: Payment Request,Make Sales Invoice,Fazer Fatura de Venda

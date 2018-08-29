@@ -84,6 +84,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -98,7 +99,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "QTN-", 
+   "options": "SAL-QTN-.YYYY.-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
@@ -3163,8 +3164,8 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2018-07-30 08:36:29.125285",
- "modified_by": "Administrator",
+ "modified": "2018-08-21 14:44:49.838149", 
+ "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
  "owner": "Administrator", 
@@ -3336,5 +3337,6 @@
  "timeline_field": "customer", 
  "title_field": "title", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

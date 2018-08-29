@@ -48,7 +48,7 @@ def get_receivable_account(company):
     receivable_account = get_account(None, "receivable_account", "Healthcare Settings", company)
     if receivable_account:
         return receivable_account
-    return frappe.db.get_value("Company", company, "default_receivable_account")
+    return frappe.get_cached_value('Company',  company,  "default_receivable_account")
 
 def get_income_account(practitioner, company):
     if(practitioner):
@@ -58,7 +58,7 @@ def get_income_account(practitioner, company):
     income_account = get_account(None, "income_account", "Healthcare Settings", company)
     if income_account:
         return income_account
-    return frappe.db.get_value("Company", company, "default_income_account")
+    return frappe.get_cached_value('Company',  company,  "default_income_account")
 
 def get_account(parent_type, parent_field, parent, company):
     if(parent_type):
