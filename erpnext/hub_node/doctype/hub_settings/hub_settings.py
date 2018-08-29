@@ -15,10 +15,7 @@ class HubSetupError(frappe.ValidationError): pass
 class HubSettings(Document):
 
 	def validate(self):
-		protocol = 'http://'
-		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
-		if self.publish_pricing and not self.selling_price_list:
-			frappe.throw(_("Please select a Price List to publish pricing"))
+		self.site_name = frappe.utils.get_url()
 
 	def get_hub_url(self):
 		if not frappe.conf.hub_url:
@@ -32,8 +29,7 @@ class HubSettings(Document):
 			frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
 
 		# TODO: site_name for cloud sites
-		protocol = 'http://'
-		self.site_name = protocol + frappe.local.site + ':' + str(frappe.conf.webserver_port)
+		self.site_name = frappe.utils.get_url()
 
 		data = {
 			'profile': self.as_json()
