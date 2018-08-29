@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
-import frappe, requests, json
-from frappe.utils import now
+import frappe, json
 from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
 from six import string_types
@@ -62,7 +61,7 @@ def get_valid_items(search_value=''):
 		item.attachments = get_attachments('Item', item.item_code)
 		return item
 
-	valid_items = map(lambda x: prepare_item(x), valid_items)
+	valid_items = map(prepare_item, valid_items)
 
 	return valid_items
 
@@ -99,7 +98,7 @@ def publish_selected_items(items_to_publish):
 			'stats': len(items)
 		})
 	except Exception as e:
-		frappe.log_error(title='Hub Sync Error')
+		frappe.log_error(message=e, title='Hub Sync Error')
 
 def item_sync_preprocess():
 	hub_seller = frappe.db.get_value("Hub Settings", "Hub Settings", "company_email")
