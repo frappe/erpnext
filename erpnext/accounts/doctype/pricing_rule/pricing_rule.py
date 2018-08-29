@@ -255,8 +255,10 @@ def get_pricing_rules(args):
 
 			if parent_groups:
 				if allow_blank: parent_groups.append('')
-				condition = " ifnull("+field+", '') in ('" + \
-					", ".join([frappe.db.escape(d) for d in parent_groups])+")"
+				condition = "ifnull({field}, '') in ({parent_groups})".format(
+					field=field,
+					parent_groups=", ".join([frappe.db.escape(d) for d in parent_groups])
+				)
 
 				frappe.flags.tree_conditions[key] = condition
 		return condition
@@ -306,7 +308,7 @@ def get_pricing_rules(args):
 			item_group_condition = item_group_condition,
 			item_variant_condition = item_variant_condition,
 			transaction_type = args.transaction_type,
-			conditions = conditions), values, as_dict=1)
+			conditions = conditions), values, as_dict=1, debug=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
