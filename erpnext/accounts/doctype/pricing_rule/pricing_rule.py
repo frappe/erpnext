@@ -308,7 +308,7 @@ def get_pricing_rules(args):
 			item_group_condition = item_group_condition,
 			item_variant_condition = item_variant_condition,
 			transaction_type = args.transaction_type,
-			conditions = conditions), values, as_dict=1, debug=1)
+			conditions = conditions), values, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
