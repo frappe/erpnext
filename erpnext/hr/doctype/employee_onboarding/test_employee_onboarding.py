@@ -9,7 +9,6 @@ from frappe.utils import nowdate
 from erpnext.hr.doctype.employee_onboarding.employee_onboarding import make_employee
 from erpnext.hr.doctype.employee_onboarding.employee_onboarding import IncompleteTaskError
 
-
 class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):
 		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Researcher'}):
