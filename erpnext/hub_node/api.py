@@ -50,6 +50,7 @@ def get_valid_items(search_value=''):
 		'Item',
 		fields=["*"],
 		filters={
+			'disabled': 0,
 			'item_name': ['like', '%' + search_value + '%'],
 			'publish_in_hub': 0
 		},
