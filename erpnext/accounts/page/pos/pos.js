@@ -123,6 +123,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.sync_sales_invoice()
 		});
 
+		this.page.add_menu_item(__("Cashier Closing"), function () {
+			frappe.set_route('List', 'Cashier Closing');
+		});		
+
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
