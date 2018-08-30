@@ -11,17 +11,13 @@ import erpnext.education
 def get_random_group():
 	doc = frappe.get_doc({
 		"doctype": "Student Group",
-		"student_group_name": "_Test Student Group R",
+		"student_group_name": "_Test Student Group-" + frappe.generate_hash(length=5),
 		"group_based_on": "Activity"
 		}).insert()
 
-	student_list = []
-	while len(student_list) < 3:
-		s = get_random("Student")
-		if s not in student_list:
-			student_list.append(s)
+	student_list = frappe.get_all('Student')
 
-	doc.extend("students", [{"student":d} for d in student_list])
+	doc.extend("students", [{"student":d.name} for d in student_list])
 	doc.save()
 
 	return doc
