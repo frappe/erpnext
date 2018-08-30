@@ -16,6 +16,15 @@
 					{{_("Supplier Part No") + ": "+ supplier_part_no}}
 				{% endif %}
 			</p>
+      {% set mpn = frappe.get_list('Item MPN', {'parent': d.item_code, 'approval_status': ('!=', 'Blocked')}, ['manufacturer', 'manufacturer_part_no']) %}
+			<p class="text-muted small supplier-part-no">
+				{% if mpn %}
+          {{_("MPN") + ": "}} <br>
+          {% for m in mpn %}
+            {{m.manufacturer + ": " + m.manufacturer_part_no}}
+          {% endfor %}
+				{% endif %}
+			</p>
         </div>
     </div>
 {% endmacro %}
