@@ -333,13 +333,13 @@ def get_default_cost_center(args, item, item_group):
 	cost_center = None
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
-	
+
 	if not cost_center:
 		if args.get('customer'):
 			cost_center = item.get('selling_cost_center') or item_group.get('selling_cost_center')
 		else:
 			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center')
-	
+
 	return cost_center or args.get("cost_center")
 
 def get_default_supplier(args, item, item_group):
@@ -401,7 +401,7 @@ def insert_item_price(args):
 				})
 				item_price.insert()
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
-					args.price_list))
+					args.price_list), alert=True)
 
 def get_item_price(args, item_code):
 	"""
@@ -658,7 +658,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	if stock_qty > 0:
+	if flt(stock_qty) > 0:
 		if has_batch_no:
 			args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "stock_qty":stock_qty})
 			serial_no = get_serial_no(args)
