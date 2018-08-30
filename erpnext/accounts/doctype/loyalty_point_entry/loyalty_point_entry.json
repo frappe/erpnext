@@ -344,12 +344,12 @@
  "hide_toolbar": 0, 
  "idx": 0, 
  "image_view": 0, 
- "in_create": 0, 
+ "in_create": 1, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-21 16:15:49.911384", 
+ "modified": "2018-08-29 16:05:22.810347", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Loyalty Point Entry", 
@@ -422,6 +422,5 @@
  "sort_order": "DESC", 
  "title_field": "customer", 
  "track_changes": 1, 
- "track_seen": 0, 
- "track_views": 0
+ "track_seen": 0
 }
