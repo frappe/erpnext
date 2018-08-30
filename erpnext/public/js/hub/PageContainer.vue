@@ -9,8 +9,8 @@
 import Home from './pages/Home.vue';
 import Search from './pages/Search.vue';
 import Category from './pages/Category.vue';
-import SavedProducts from './pages/SavedProducts.vue';
-import PublishedProducts from './pages/PublishedProducts.vue';
+import SavedItems from './pages/SavedItems.vue';
+import PublishedItems from './pages/PublishedItems.vue';
 import Item from './pages/Item.vue';
 import Seller from './pages/Seller.vue';
 import Publish from './pages/Publish.vue';
@@ -30,9 +30,9 @@ const route_map = {
 
 	// Registered seller routes
 	'marketplace/profile': Profile,
-	'marketplace/saved-products': SavedProducts,
+	'marketplace/saved-items': SavedItems,
 	'marketplace/publish': Publish,
-	'marketplace/my-products': PublishedProducts,
+	'marketplace/published-items': PublishedItems,
 	'marketplace/buying': Buying,
 	'marketplace/buying/:item': Messages,
 	'marketplace/selling': Selling,

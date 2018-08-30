@@ -34,7 +34,7 @@
 		>
 		</item-cards-container>
 
-		<p class="text-muted">{{ valid_products_instruction }}</p>
+		<p class="text-muted">{{ valid_items_instruction }}</p>
 
 		<search-input
 			:placeholder="search_placeholder"
@@ -73,16 +73,16 @@ export default {
 
 			// Constants
 			// TODO: multiline translations don't work
-			page_title: __('Publish Products'),
+			page_title: __('Publish Items'),
 			search_placeholder: __('Search Items ...'),
-			empty_state_message: __(`No Items selected yet. Browse and click on products below to publish.`),
-			valid_products_instruction: __(`Only products with an image and description can be published. Please update them if an item in your inventory does not appear.`),
+			empty_state_message: __(`No Items selected yet. Browse and click on items below to publish.`),
+			valid_items_instruction: __(`Only items with an image and description can be published. Please update them if an item in your inventory does not appear.`),
 			last_sync_message: (hub.settings.last_sync_datetime)
 				? __(`Last sync was
 				<a href="#marketplace/profile">
 					${comment_when(hub.settings.last_sync_datetime)}</a>.
-				<a href="#marketplace/my-products">
-					See your Published Products</a>.`)
+				<a href="#marketplace/published-items">
+					See your Published Items</a>.`)
 				: ''
 		};
 	},
@@ -93,14 +93,14 @@ export default {
 
 		publish_button_text() {
 			const number = this.selected_items.length;
-			let text = 'Publish';
+			let text = __('Publish');
 			if(number === 1) {
-				text = 'Publish 1 Product';
+				text = __('Publish 1 Item');
 			}
 			if(number > 1) {
-				text = `Publish ${number} Products`;
+				text = __('Publish {0} Items', [number]);
 			}
-			return __(text);
+			return text;
 		},
 
 		items_dict() {
@@ -150,8 +150,8 @@ export default {
 			this.last_sync_message = __(`Last sync was
 				<a href="#marketplace/profile">
 					${comment_when(hub.settings.last_sync_datetime)}</a>.
-				<a href="#marketplace/my-products">
-					See your Published Products</a>.`);
+				<a href="#marketplace/published-items">
+					See your Published Items</a>.`);
 		},
 
 		clear_last_sync_message() {

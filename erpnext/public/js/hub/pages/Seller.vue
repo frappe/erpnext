@@ -61,7 +61,7 @@ export default {
 	},
 	computed: {
 		item_container_heading() {
-			return __('Products by ' + this.seller_company);
+			return __('Items by ' + this.seller_company);
 		}
 	},
 	methods: {
