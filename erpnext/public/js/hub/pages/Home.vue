@@ -13,7 +13,7 @@
 
 			<section-header>
 				<h4>{{ section.title }}</h4>
-				<p :data-route="'marketplace/category/' + section.title">{{ 'See All' }}</p>
+				<p v-if="section.expandable" :data-route="'marketplace/category/' + section.title">{{ 'See All' }}</p>
 			</section-header>
 
 			<item-cards-container
@@ -71,6 +71,7 @@ export default {
 
 						this.sections.push({
 							title: __(category),
+							expandable: true,
 							items
 						});
 					});
