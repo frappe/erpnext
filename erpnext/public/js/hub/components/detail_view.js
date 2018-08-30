@@ -94,7 +94,7 @@ function get_detail_view_html(item, allow_edit) {
 			</div>
 			<div class="row hub-item-description">
 				<h6 class="col-md-12 margin-top">
-					<b class="text-muted">Product Description</b>
+					<b class="text-muted">Item Description</b>
 				</h6>
 				<p class="col-md-12">
 					${description ? description : __('No details')}

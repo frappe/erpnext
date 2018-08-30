@@ -25,7 +25,6 @@
 
 <script>
 export default {
-	name: 'saved-products-page',
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -42,7 +41,7 @@ export default {
 		page_title() {
 			return this.items.length
 				? __(`Results for "${this.search_value}"`)
-				: __(`No Products found.`);
+				: __('No Items found.');
 		}
 	},
 	created() {

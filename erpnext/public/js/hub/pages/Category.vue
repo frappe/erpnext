@@ -18,7 +18,6 @@
 
 <script>
 export default {
-	name: 'saved-products-page',
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -27,7 +26,7 @@ export default {
 			item_id_fieldname: 'name',
 
 			// Constants
-			empty_state_message: __(`No products in this category yet.`)
+			empty_state_message: __(`No items in this category yet.`)
 		};
 	},
 	computed: {

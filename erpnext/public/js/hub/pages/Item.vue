@@ -61,7 +61,7 @@ export default {
 					action: this.add_to_saved_items
 				},
 				{
-					label: __('Report this Product'),
+					label: __('Report this Item'),
 					condition: !this.is_own_item,
 					action: this.report_item
 				},
@@ -71,7 +71,7 @@ export default {
 					action: this.edit_details
 				},
 				{
-					label: __('Unpublish Product'),
+					label: __('Unpublish Item'),
 					condition: this.is_own_item,
 					action: this.unpublish_item
 				}
@@ -174,7 +174,7 @@ export default {
 
 			this.sections = [
 				{
-					title: __('Product Description'),
+					title: __('Item Description'),
 					content: this.item.description
 						? __(this.item.description)
 						: __('No description')
@@ -188,6 +188,7 @@ export default {
 
 		make_dialogs() {
 			this.make_contact_seller_dialog();
+			this.make_report_item_dialog();
 		},
 
 		add_to_saved_items() {
@@ -196,7 +197,7 @@ export default {
 				hub_seller: hub.settings.company_email
 			})
 			.then(() => {
-				const saved_items_link = `<b><a href="#marketplace/saved-products">${__('Saved')}</a></b>`
+				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`
 				frappe.show_alert(saved_items_link);
 				erpnext.hub.trigger('action:item_save');
 			})
@@ -239,8 +240,32 @@ export default {
 			});
 		},
 
+		make_report_item_dialog() {
+			this.report_item_dialog = new frappe.ui.Dialog({
+				title: __('Report Item'),
+				fields: [
+					{
+						label: __('Why do think this Item should be removed?'),
+						fieldtype: 'Text',
+						fieldname: 'message'
+					}
+				],
+				primary_action: ({ message }) => {
+					hub.call('add_reported_item', { hub_item_name: this.item.name, message })
+						.then(() => {
+							d.hide();
+							frappe.show_alert(__('Item Reported'));
+						});
+				}
+			});
+		},
+
 		contact_seller() {
 			this.contact_seller_dialog.show();
+		},
+
+		report_item() {
+			this.report_item_dialog.show();
 		},
 
 		edit_details() {

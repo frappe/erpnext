@@ -19,15 +19,15 @@
 export default {
 	data() {
 		return {
-			hub_registered: hub.settings.registered,
+			hub_registered: hub.settings.registered && frappe.session.user === hub.settings.company_email,
 			items: [
 				{
 					label: __('Browse'),
 					route: 'marketplace/home'
 				},
 				{
-					label: __('Saved Products'),
-					route: 'marketplace/saved-products',
+					label: __('Saved Items'),
+					route: 'marketplace/saved-items',
 					condition: () => this.hub_registered
 				},
 				{
@@ -36,12 +36,12 @@ export default {
 					condition: () => this.hub_registered
 				},
 				{
-					label: __('Your Products'),
-					route: 'marketplace/my-products',
+					label: __('Your Items'),
+					route: 'marketplace/published-items',
 					condition: () => this.hub_registered
 				},
 				{
-					label: __('Publish Products'),
+					label: __('Publish Items'),
 					route: 'marketplace/publish',
 					condition: () => this.hub_registered
 				},

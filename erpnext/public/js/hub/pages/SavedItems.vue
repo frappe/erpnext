@@ -20,7 +20,7 @@
 
 <script>
 export default {
-	name: 'saved-products-page',
+	name: 'saved-items-page',
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -28,8 +28,8 @@ export default {
 			item_id_fieldname: 'name',
 
 			// Constants
-			page_title: __('Saved Products'),
-			empty_state_message: __(`You haven't favourited any items yet.`)
+			page_title: __('Saved Items'),
+			empty_state_message: __(`You haven't saved any items yet.`)
 		};
 	},
 	created() {
@@ -76,12 +76,12 @@ export default {
 
 			setTimeout(() => {
 				if(!reverted) {
-					this.remove_item_from_saved_products(hub_item_name);
+					this.remove_item_from_saved_items(hub_item_name);
 				}
 			}, grace_period);
 		},
 
-		remove_item_from_saved_products(hub_item_name) {
+		remove_item_from_saved_items(hub_item_name) {
 			erpnext.hub.trigger('action:item_save');
 			hub.call('remove_item_from_seller_saved_items', {
 				hub_item_name,

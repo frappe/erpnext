@@ -9,8 +9,8 @@
 import Home from './pages/Home.vue';
 import Search from './pages/Search.vue';
 import Category from './pages/Category.vue';
-import SavedProducts from './pages/SavedProducts.vue';
-import PublishedProducts from './pages/PublishedProducts.vue';
+import SavedItems from './pages/SavedItems.vue';
+import PublishedItems from './pages/PublishedItems.vue';
 import Item from './pages/Item.vue';
 import Seller from './pages/Seller.vue';
 import Publish from './pages/Publish.vue';
@@ -30,9 +30,9 @@ const route_map = {
 
 	// Registered seller routes
 	'marketplace/profile': Profile,
-	'marketplace/saved-products': SavedProducts,
+	'marketplace/saved-items': SavedItems,
 	'marketplace/publish': Publish,
-	'marketplace/my-products': PublishedProducts,
+	'marketplace/published-items': PublishedItems,
 	'marketplace/buying': Buying,
 	'marketplace/buying/:item': Messages,
 	'marketplace/selling': Selling,
@@ -58,7 +58,6 @@ export default {
 		get_current_page() {
 			const curr_route = frappe.get_route_str();
 			let route = Object.keys(route_map).filter(route => route == curr_route)[0];
-
 			if (!route) {
 				// find route by matching it with dynamic part
 				const curr_route_parts = curr_route.split('/');
@@ -70,7 +69,7 @@ export default {
 						let weight = 0;
 						route_parts.forEach((part, i) => {
 							const curr_route_part = curr_route_parts[i];
-							if (part === curr_route_part || curr_route_part.includes(':')) {
+							if (part === curr_route_part || part.includes(':')) {
 								weight += 1;
 							}
 						});
@@ -80,12 +79,13 @@ export default {
 					}, {});
 
 				// get the route with the highest weight
-				let weight = 0
 				for (let key in weighted_routes) {
 					const route_weight = weighted_routes[key];
-					if (route_weight > weight) {
+					if (route_weight === curr_route_parts.length) {
 						route = key;
-						weight = route_weight;
+						break;
+					} else {
+						route = null;
 					}
 				}
 			}
