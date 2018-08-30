@@ -60,7 +60,7 @@ export default {
 					action: this.add_to_saved_items
 				},
 				{
-					label: __('Report this Product'),
+					label: __('Report this Item'),
 					condition: !this.is_own_item,
 					action: this.report_item
 				},
@@ -70,7 +70,7 @@ export default {
 					action: this.report_item
 				},
 				{
-					label: __('Unpublish Product'),
+					label: __('Unpublish Item'),
 					condition: this.is_own_item,
 					action: this.report_item
 				}
@@ -170,7 +170,7 @@ export default {
 
 			this.sections = [
 				{
-					title: __('Product Description'),
+					title: __('Item Description'),
 					content: this.item.description
 						? __(this.item.description)
 						: __('No description')
@@ -192,7 +192,7 @@ export default {
 				hub_seller: hub.settings.company_email
 			})
 			.then(() => {
-				const saved_items_link = `<b><a href="#marketplace/saved-products">${__('Saved')}</a></b>`
+				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`
 				frappe.show_alert(saved_items_link);
 				erpnext.hub.trigger('action:item_save');
 			})

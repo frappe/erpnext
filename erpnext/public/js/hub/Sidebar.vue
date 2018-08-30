@@ -26,8 +26,8 @@ export default {
 					route: 'marketplace/home'
 				},
 				{
-					label: __('Saved Products'),
-					route: 'marketplace/saved-products',
+					label: __('Saved Items'),
+					route: 'marketplace/saved-items',
 					condition: () => this.hub_registered
 				},
 				{
@@ -36,12 +36,12 @@ export default {
 					condition: () => this.hub_registered
 				},
 				{
-					label: __('Your Products'),
-					route: 'marketplace/my-products',
+					label: __('Your Items'),
+					route: 'marketplace/published-items',
 					condition: () => this.hub_registered
 				},
 				{
-					label: __('Publish Products'),
+					label: __('Publish Items'),
 					route: 'marketplace/publish',
 					condition: () => this.hub_registered
 				},
