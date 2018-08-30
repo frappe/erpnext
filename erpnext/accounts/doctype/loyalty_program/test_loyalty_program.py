@@ -188,6 +188,9 @@ def create_sales_invoice_record(qty=1):
 
 def create_records():
 	# create a new loyalty Account
+	if frappe.db.exists("Account", "Loyalty - _TC"):
+		return
+
 	frappe.get_doc({
 		"doctype": "Account",
 		"account_name": "Loyalty",

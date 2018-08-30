@@ -99,6 +99,7 @@ class StockEntry(StockController):
 
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.update_cost_in_project()
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -129,8 +130,8 @@ class StockEntry(StockController):
 					se.docstatus = 1 and se.project = %s and sed.parent = se.name
 					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
 
-			if amount:
-				frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount[0][0])
+			amount = amount[0][0] if amount else 0
+			frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount)
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
