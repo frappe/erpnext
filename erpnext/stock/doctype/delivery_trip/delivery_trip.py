@@ -11,7 +11,7 @@ import googlemaps
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, getdate
+from frappe.utils import cstr, get_datetime, getdate, get_link_to_form
 from frappe.utils.user import get_user_fullname
 
 
@@ -23,7 +23,7 @@ class DeliveryTrip(Document):
 		self.update_delivery_notes(delete=True)
 
 	def update_delivery_notes(self, delete=False):
-		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops]))
+		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
 
 		update_fields = {
 			"transporter": self.driver,
@@ -43,6 +43,10 @@ class DeliveryTrip(Document):
 				setattr(note_doc, field, value)
 
 			note_doc.save()
+
+		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
+		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
+
 
 def get_default_contact(out, name):
 	contact_persons = frappe.db.sql(
