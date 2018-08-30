@@ -68,12 +68,12 @@ export default {
 				{
 					label: __('Edit Details'),
 					condition: this.is_own_item,
-					action: this.report_item
+					action: this.edit_details
 				},
 				{
 					label: __('Unpublish Product'),
 					condition: this.is_own_item,
-					action: this.report_item
+					action: this.unpublish_item
 				}
 			]
 		};
@@ -161,6 +161,7 @@ export default {
 				this.item = item;
 
 				this.build_data();
+				this.make_dialogs();
 			});
 		},
 
@@ -185,8 +186,8 @@ export default {
 			];
 		},
 
-		report_item() {
-			//
+		make_dialogs() {
+			this.make_contact_seller_dialog();
 		},
 
 		add_to_saved_items() {
@@ -204,8 +205,8 @@ export default {
 			});
 		},
 
-		contact_seller() {
-			const d = new frappe.ui.Dialog({
+		make_contact_seller_dialog() {
+			this.contact_seller_dialog = new frappe.ui.Dialog({
 				title: __('Send a message'),
 				fields: [
 					{
@@ -236,8 +237,18 @@ export default {
 						});
 				}
 			});
+		},
 
-			d.show();
+		contact_seller() {
+			this.contact_seller_dialog.show();
+		},
+
+		edit_details() {
+			//
+		},
+
+		unpublish_item() {
+			//
 		}
 	}
 }
