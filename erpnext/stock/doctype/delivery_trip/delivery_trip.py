@@ -86,6 +86,9 @@ class DeliveryTrip(Document):
 
 			note_doc.flags.ignore_validate_update_after_submit = True
 			note_doc.save()
+			
+		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
+		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
