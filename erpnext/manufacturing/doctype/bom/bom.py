@@ -173,7 +173,7 @@ class BOM(WebsiteGenerator):
 
 				if not rate:
 					frappe.msgprint(_("{0} not found for Item {1}")
-						.format(self.rm_cost_as_per, arg["item_code"]))
+						.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
 		return flt(rate)
 
@@ -561,7 +561,6 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and is_stock_item = 1
 				{where_conditions}
 				group by item_code, stock_uom
 				order by idx"""
