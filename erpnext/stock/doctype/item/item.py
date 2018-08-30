@@ -76,8 +76,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		if self.is_sales_item and not self.get('is_item_from_hub'):
-			self.publish_in_hub = 1
+		# if self.is_sales_item and not self.get('is_item_from_hub'):
+		# 	self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
