@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 import frappe, json
+import io, base64, os, requests
 from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
+from frappe.utils.file_manager import get_file_path
 from six import string_types
 
 @frappe.whitelist()
@@ -119,9 +121,6 @@ def item_sync_postprocess():
 
 
 def load_base64_image_from_items(items):
-	import io, base64, urllib, os, requests, tempfile
-	from frappe.utils.file_manager import get_file_path
-
 	for item in items:
 		file_path = item['image']
 		file_name = os.path.basename(file_path)
