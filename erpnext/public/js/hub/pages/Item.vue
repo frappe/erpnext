@@ -183,7 +183,25 @@ export default {
 		},
 
 		report_item() {
-			//
+			const d = new frappe.ui.Dialog({
+				title: __('Report Item'),
+				fields: [
+					{
+						label: __('Why do think this Item should be removed?'),
+						fieldtype: 'Text',
+						fieldname: 'message'
+					}
+				],
+				primary_action: ({ message }) => {
+					hub.call('add_reported_item', { hub_item_name: this.item.name, message })
+						.then(() => {
+							d.hide();
+							frappe.show_alert(__('Item Reported'));
+						});
+				}
+			});
+
+			d.show();
 		},
 
 		add_to_saved_items() {
