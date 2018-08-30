@@ -28,7 +28,7 @@
 
 		</detail-view>
 
-		<review-area :hub_item_name="hub_item_name" :reviews="reviews"></review-area>
+		<review-area :hub_item_name="hub_item_name"></review-area>
 	</div>
 </template>
 
@@ -52,7 +52,6 @@ export default {
 			title: null,
 			image: null,
 			sections: [],
-			reviews: [],
 
 			menu_items: [
 				{
@@ -167,10 +166,7 @@ export default {
 
 		build_data() {
 			this.title = this.item.item_name || this.item.name;
-
 			this.image = this.item.image;
-
-			this.reviews = this.item.reviews || [];
 
 			this.sections = [
 				{
@@ -181,7 +177,9 @@ export default {
 				},
 				{
 					title: __('Seller Information'),
-					content: ''
+					content: this.item.seller_description
+						? __(this.item.seller_description)
+						: __('No description')
 				}
 			];
 		},
