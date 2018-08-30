@@ -2,6 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+<<<<<<< HEAD
+=======
+
+import json
+
+from six import string_types
+>>>>>>> Keep Delivery Trip stops unique based on their Delivery Notes
 
 import frappe
 import frappe.defaults
