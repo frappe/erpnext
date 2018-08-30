@@ -15,7 +15,7 @@ def get_random_group():
 		"group_based_on": "Activity"
 		}).insert()
 
-	student_list = frappe.get_all('Student')
+	student_list = frappe.get_all('Student', limit=5)
 
 	doc.extend("students", [{"student":d.name} for d in student_list])
 	doc.save()
@@ -25,7 +25,7 @@ def get_random_group():
 class TestStudentGroup(unittest.TestCase):
 	def test_student_roll_no(self):
 		doc = get_random_group()
-		self.assertEqual(max([d.group_roll_number for d in doc.students]), 3)
+		self.assertEqual(max([d.group_roll_number for d in doc.students]), len(doc.students))
 
 	def test_in_group(self):
 		doc = get_random_group()
