@@ -1,4 +1,4 @@
-const ProfileDialog = (title = __('Edit Profile'), action={}, initial_values={}) => {
+const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 	const fields = [
 		{
 			fieldtype: 'Link',
@@ -13,7 +13,6 @@ const ProfileDialog = (title = __('Edit Profile'), action={}, initial_values={})
 						.then(company => {
 							dialog.set_values({
 								country: company.country,
-								company_email: company.email,
 								currency: company.default_currency
 							});
 						});
@@ -23,7 +22,7 @@ const ProfileDialog = (title = __('Edit Profile'), action={}, initial_values={})
 		{
 			fieldname: 'company_email',
 			label: __('Email'),
-			fieldtype: 'Data'
+			fieldtype: 'Read Only'
 		},
 		{
 			fieldname: 'country',
@@ -63,11 +62,10 @@ const ProfileDialog = (title = __('Edit Profile'), action={}, initial_values={})
 		}
 	});
 
-	dialog.set_values(initial_values);
-
 	// Post create
 	const default_company = frappe.defaults.get_default('company');
 	dialog.set_value('company', default_company);
+	dialog.set_value('company_email', frappe.session.user);
 
 	return dialog;
 }
