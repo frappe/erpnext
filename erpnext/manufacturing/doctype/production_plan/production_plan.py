@@ -304,7 +304,7 @@ class ProductionPlan(Document):
 						bei.docstatus < 2
 						and bom.name=%s and item.is_stock_item in (1, {0})
 					group by bei.item_code, bei.stock_uom""".format(0 if self.include_non_stock_items else 1),
-					(self.company, data.bom_no), as_dict=1, debug=1):
+					(self.company, data.bom_no), as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				bom_wise_item_details = self.get_subitems(data, bom_wise_item_details, data.bom_no, 1)
@@ -336,7 +336,7 @@ class ProductionPlan(Document):
 				'bom': bom_no,
 				'parent_qty': parent_qty,
 				'company': self.company
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 		for d in items:
 			if not data.include_exploded_items or not d.default_bom:
