@@ -35,7 +35,6 @@
 
 <script>
 export default {
-	name: 'saved-products-page',
 	data() {
 		return {
 			page_name: frappe.get_route()[1],
@@ -54,7 +53,7 @@ export default {
 			publish_button_text: __('Publish More Items'),
 			published_items_message: __('You can publish upto 200 items.'),
 			// TODO: Add empty state action
-			empty_state_message: __(`You haven't published any products yet. Publish.`)
+			empty_state_message: __('You haven\'t published any items yet.')
 		};
 	},
 	created() {

@@ -23,13 +23,14 @@ erpnext.hub.Marketplace = class Marketplace {
 		frappe.db.get_doc('Hub Settings')
 		.then(doc => {
 				hub.settings = doc;
-				const is_registered = hub.settings.registered
+				const is_registered = hub.settings.registered;
+				const is_registered_seller = hub.settings.company_email === frappe.session.user;
 				this.setup_header();
 				this.make_sidebar();
 				this.make_body();
 				this.setup_events();
 				this.refresh();
-				if (!is_registered && frappe.user_roles.includes('System Manager')) {
+				if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
 					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
 				}
 			});

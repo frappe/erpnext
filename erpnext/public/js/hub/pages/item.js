@@ -48,7 +48,7 @@ erpnext.hub.Item = class Item extends SubPage {
 	edit_details() {
 		if (!this.edit_dialog) {
 			this.edit_dialog = new frappe.ui.Dialog({
-				title: "Edit Your Product",
+				title: "Edit Your Item",
 				fields: []
 			});
 		}
@@ -59,7 +59,7 @@ erpnext.hub.Item = class Item extends SubPage {
 	unpublish_item() {
 		if (!this.unpublish_dialog) {
 			this.unpublish_dialog = new frappe.ui.Dialog({
-				title: "Edit Your Product",
+				title: "Edit Your Item",
 				fields: []
 			});
 		}
