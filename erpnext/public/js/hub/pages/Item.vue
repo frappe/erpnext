@@ -28,7 +28,7 @@
 
 		</detail-view>
 
-		<review-area :hub_item_name="hub_item_name"></review-area>
+		<review-area :hub_item_name="hub_item_name" :reviews="reviews"></review-area>
 	</div>
 </template>
 
@@ -52,6 +52,7 @@ export default {
 			title: null,
 			image: null,
 			sections: [],
+			reviews: [],
 
 			menu_items: [
 				{
@@ -167,6 +168,8 @@ export default {
 			this.title = this.item.item_name || this.item.name;
 
 			this.image = this.item.image;
+
+			this.reviews = this.item.reviews || [];
 
 			this.sections = [
 				{

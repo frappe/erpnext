@@ -1,11 +1,12 @@
 <template>
 	<div>
 		<div ref="review-area" class="timeline-head"></div>
+		<div class="timeline-items"></div>
 	</div>
 </template>
 <script>
 export default {
-	props: ['hub_item_code'],
+	props: ['hub_item_name', 'reviews'],
 	mounted() {
 		this.make_input();
 	},
@@ -19,17 +20,19 @@ export default {
 		},
 
 		on_submit_review(values) {
-			values.user = frappe.session.user;
-			values.username = frappe.session.user_fullname;
+			values.user = hub.settings.company_email;
 
 			this.review_area.reset();
-			this.$emit('change', message);
 
 			hub.call('add_item_review', {
-				hub_item_code: this.hub_item_code,
+				hub_item_name: this.hub_item_name,
 				review: JSON.stringify(values)
 			})
-			// .then(this.push_review_in_review_area.bind(this));
+			.then(this.push_review.bind(this));
+		},
+
+		push_review(){
+			//
 		}
 	}
 }
