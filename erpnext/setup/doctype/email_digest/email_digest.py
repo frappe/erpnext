@@ -45,8 +45,8 @@ class EmailDigest(Document):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n"))
+		recipients = list(filter(lambda r: r in valid_users,
+			self.recipient_list.split("\n")))
 
 		original_user = frappe.session.user
 
