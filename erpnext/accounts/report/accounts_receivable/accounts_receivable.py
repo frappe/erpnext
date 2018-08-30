@@ -124,9 +124,6 @@ class ReceivablePayableReport(object):
 		currency_precision = get_currency_precision() or 2
 		dr_or_cr = "debit" if args.get("party_type") == "Customer" else "credit"
 
-		dn_details = get_dn_details(args.get("party_type"))
-		voucher_details = self.get_voucher_details(args.get("party_type"), dn_details)
-
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
 		if not self.filters.get("company"):
@@ -139,7 +136,14 @@ class ReceivablePayableReport(object):
 		data = []
 		pdc_details = get_pdc_details(args.get("party_type"), self.filters.report_date)
 
-		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
+		gl_entries_data = self.get_entries_till(self.filters.report_date, args.get("party_type"))
+
+		if gl_entries_data:
+			voucher_nos = [d.voucher_no for d in gl_entries_data] or []
+			dn_details = get_dn_details(args.get("party_type"), voucher_nos)
+			voucher_details = get_voucher_details(args.get("party_type"), voucher_nos, dn_details)
+
+		for gle in gl_entries_data:
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
 				outstanding_amount, credit_note_amount = self.get_outstanding_amount(gle,
 					self.filters.report_date, dr_or_cr, return_entries, currency_precision)
@@ -172,7 +176,7 @@ class ReceivablePayableReport(object):
 					if self.filters.ageing_based_on == "Due Date":
 						entry_date = due_date 
 					elif self.filters.ageing_based_on == "Supplier Invoice Date": 
-						entry_date = bill_date    
+						entry_date = bill_date
 					else:
 						entry_date = gle.posting_date
 
@@ -221,12 +225,11 @@ class ReceivablePayableReport(object):
 
 	def get_entries_after(self, report_date, party_type):
 		# returns a distinct list
-		return list(set([(e.voucher_type, e.voucher_no) for e in self.get_gl_entries(party_type)
-			if getdate(e.posting_date) > report_date]))
+		return list(set([(e.voucher_type, e.voucher_no) for e in self.get_gl_entries(party_type, report_date, for_future=True)]))
 
 	def get_entries_till(self, report_date, party_type):
 		# returns a generator
-		return (e for e in self.get_gl_entries(party_type) if getdate(e.posting_date) <= report_date)
+		return self.get_gl_entries(party_type, report_date)
 
 	def is_receivable_or_payable(self, gle, dr_or_cr, future_vouchers):
 		return (
@@ -289,42 +292,31 @@ class ReceivablePayableReport(object):
 
 		return self.party_map
 
-	def get_voucher_details(self, party_type, dn_details):
-		voucher_details = frappe._dict()
+	def get_gl_entries(self, party_type, date=None, for_future=False):
+		conditions, values = self.prepare_conditions(party_type)
 
-		if party_type == "Customer":
-			for si in frappe.db.sql("""select name, due_date, po_no
-				from `tabSales Invoice` where docstatus=1""", as_dict=1):
-					si['delivery_note'] = dn_details.get(si.name)
-					voucher_details.setdefault(si.name, si)
+		if self.filters.get(scrub(party_type)):
+			select_fields = "sum(debit_in_account_currency) as debit, sum(credit_in_account_currency) as credit"
+		else:
+			select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-		if party_type == "Supplier":
-			for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
-				from `tabPurchase Invoice` where docstatus = 1
-				union
-				select name, due_date, bill_no, bill_date from `tabJournal Entry`
-				where docstatus = 1 and bill_no is not NULL""", as_dict=1):
-					voucher_details.setdefault(pi.name, pi)
+		if date and not for_future:
+			conditions += " and posting_date <= '%s'" % date
 
-		return voucher_details
+		if date and for_future:
+			conditions += " and posting_date > '%s'" % date
 
-	def get_gl_entries(self, party_type):
-		if not hasattr(self, "gl_entries"):
-			conditions, values = self.prepare_conditions(party_type)
-
-			if self.filters.get(scrub(party_type)):
-				select_fields = "sum(debit_in_account_currency) as debit, sum(credit_in_account_currency) as credit"
-			else:
-				select_fields = "sum(debit) as debit, sum(credit) as credit"
-
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
-				voucher_type, voucher_no, against_voucher_type, against_voucher,
-				account_currency, remarks, {0}
-				from `tabGL Entry`
-				where docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
+		self.gl_entries = frappe.db.sql("""
+			select
+				name, posting_date, account, party_type, party, voucher_type, voucher_no,
+				against_voucher_type, against_voucher, account_currency, remarks, {0}
+			from
+				`tabGL Entry`
+			where
+				docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
 				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party
 				order by posting_date, party"""
-				.format(select_fields, conditions), values, as_dict=True)
+			.format(select_fields, conditions), values, as_dict=True)
 
 		return self.gl_entries
 
@@ -492,18 +484,57 @@ def get_pdc_details(party_type, report_date):
 
 	return pdc_details
 
-def get_dn_details(party_type):
+def get_dn_details(party_type, voucher_nos):
 	dn_details = frappe._dict()
 
 	if party_type == "Customer":
-		for si in frappe.db.sql("""select parent, GROUP_CONCAT(delivery_note SEPARATOR ', ') as dn
-			from `tabSales Invoice Item`
-			where docstatus=1 and delivery_note is not null and delivery_note != '' group by parent
-		Union
-			select against_sales_invoice as parent, GROUP_CONCAT(parent SEPARATOR ', ') as dn
-			from `tabDelivery Note Item`
-			where docstatus=1 and against_sales_invoice is not null
-			and against_sales_invoice != '' group by against_sales_invoice""", as_dict=1):
+		for si in frappe.db.sql("""
+			select
+				parent, GROUP_CONCAT(delivery_note SEPARATOR ', ') as dn
+			from
+				`tabSales Invoice Item`
+			where
+				docstatus=1 and delivery_note is not null and delivery_note != ''
+				and parent in (%s) group by parent
+			""" %(','.join(['%s'] * len(voucher_nos))), tuple(voucher_nos) , as_dict=1):
+			dn_details.setdefault(si.parent, si.dn)
+
+		for si in frappe.db.sql("""
+			select
+				against_sales_invoice as parent, GROUP_CONCAT(parent SEPARATOR ', ') as dn
+			from
+				`tabDelivery Note Item`
+			where
+				docstatus=1 and against_sales_invoice is not null and against_sales_invoice != ''
+				and against_sales_invoice in (%s)
+				group by against_sales_invoice
+			""" %(','.join(['%s'] * len(voucher_nos))), tuple(voucher_nos) , as_dict=1):
+			if si.parent in dn_details:
+				dn_details[si.parent] += ', %s' %(si.dn)
+			else:
 				dn_details.setdefault(si.parent, si.dn)
 
 	return dn_details
+
+def get_voucher_details(party_type, voucher_nos, dn_details):
+	voucher_details = frappe._dict()
+
+	if party_type == "Customer":
+		for si in frappe.db.sql("""select name, due_date, po_no
+			from `tabSales Invoice` where docstatus=1 and name in (%s)
+			""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
+				si['delivery_note'] = dn_details.get(si.name)
+				voucher_details.setdefault(si.name, si)
+
+	if party_type == "Supplier":
+		for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
+			from `tabPurchase Invoice` where docstatus = 1 and name in (%s)
+			""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
+			voucher_details.setdefault(pi.name, pi)
+
+	for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date from
+		`tabJournal Entry` where docstatus = 1 and bill_no is not NULL and name in (%s)
+		""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
+			voucher_details.setdefault(pi.name, pi)
+
+	return voucher_details

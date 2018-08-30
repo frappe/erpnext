@@ -18,7 +18,7 @@ def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=No
 		date = today()
 
 	return frappe.db.sql('''
-		select name, loyalty_points, expiry_date, loyalty_program_tier
+		select name, loyalty_points, expiry_date, loyalty_program_tier, sales_invoice
 		from `tabLoyalty Point Entry`
 		where customer=%s and loyalty_program=%s
 			and expiry_date>=%s and loyalty_points>0 and company=%s
