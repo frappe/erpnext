@@ -3,8 +3,9 @@
 		<empty-state
 			v-if="items.length === 0"
 			:message="empty_state_message"
+			:action="empty_state_action"
 			:bordered="true"
-			:height="80"
+			:height="empty_state_height"
 		/>
 		<item-card
 			v-for="item in items"
@@ -36,6 +37,7 @@ export default {
 		editable: Boolean,
 
 		empty_state_message: String,
+		empty_state_action: Object,
 		empty_state_height: Number,
 		empty_state_bordered: Boolean
 	},

@@ -72,13 +72,11 @@ export default {
 			item_id_fieldname: 'item_code',
 
 			// Constants
+			// TODO: multiline translations don't work
 			page_title: __('Publish Products'),
 			search_placeholder: __('Search Items ...'),
-			empty_state_message: __(`No Items selected yet.
-				Browse and click on products below to publish.`),
-			valid_products_instruction: __(`Only products with an image, description
-				and category can be published. Please update them if an item in your
-				inventory does not appear.`),
+			empty_state_message: __(`No Items selected yet. Browse and click on products below to publish.`),
+			valid_products_instruction: __(`Only products with an image and description can be published. Please update them if an item in your inventory does not appear.`),
 			last_sync_message: (hub.settings.last_sync_datetime)
 				? __(`Last sync was
 				<a href="#marketplace/profile">
