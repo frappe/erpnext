@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "EDU-RES-.YYYY.-.#####", 
  "beta": 0, 
@@ -704,7 +704,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-21 16:15:55.372499", 
+ "modified": "2018-08-21 17:15:55.372499", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Assessment Result", 

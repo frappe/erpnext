@@ -16,7 +16,7 @@ class EmployeeAttendanceTool(Document):
 def get_employees(date, department = None, branch = None, company = None):
 	attendance_not_marked = []
 	attendance_marked = []
-	filters = {"status": "Active"}
+	filters = {"status": "Active", "date_of_joining": ["<=", date]}
 	if department != "All":
 		filters["department"] = department
 	if branch != "All":
