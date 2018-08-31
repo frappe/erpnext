@@ -1,10 +1,62 @@
 from __future__ import unicode_literals
-import frappe, json
-import io, base64, os, requests
+
+import frappe
+import json
+import io
+import base64
+import os
+import requests
+
+from frappe import _
 from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
 from frappe.utils.file_manager import get_file_path
 from six import string_types
+
+@frappe.whitelist()
+def register_seller(**kwargs):
+	settings = frappe.get_single('Marketplace Settings')
+	settings.update(kwargs)
+	settings.users = []
+
+	validate_registerer()
+
+	message = settings.register()
+
+	if message.get('email'):
+		settings.registered = 1
+
+		user_emails = kwargs.get('users').strip()[:-1].split(', ')
+		settings.users = get_users_object_list(
+			user_emails,
+			kwargs.get('username'),
+			message.get('password')
+		)
+
+		settings.save()
+
+	return message
+
+def validate_registerer():
+	if frappe.session.user == 'Administrator':
+		frappe.throw(_('Please login as another user to register on Marketplace'))
+
+	if 'System Manager' not in frappe.get_roles():
+		frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
+
+def get_users_object_list(user_emails, session_user_username, session_user_password):
+	users = []
+
+	for user_email in user_emails:
+		users.append({ 'user': user_email })
+
+	users.insert(0, {
+		'user': frappe.session.user,
+		'username': session_user_username,
+		'password': session_user_password
+	})
+
+	return users
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
