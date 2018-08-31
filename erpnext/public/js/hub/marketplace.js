@@ -101,7 +101,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 	register_seller(form_values) {
 		frappe.call({
-		    method: 'erpnext.hub_node.doctype.hub_settings.hub_settings.register_seller',
+		    method: 'erpnext.hub_node.doctype.marketplace_settings.marketplace_settings.register_seller',
 		    args: form_values
 		}).then(() => {
 			this.register_dialog.hide();

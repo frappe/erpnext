@@ -19,8 +19,7 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 						.then(company => {
 							dialog.set_values({
 								country: company.country,
-								currency: company.default_currency,
-								company_email: company.email
+								currency: company.default_currency
 							});
 						});
 				}
@@ -28,8 +27,8 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 		},
 		{
 			fieldname: 'company_email',
-			label: __('Company Email'),
-			fieldtype: 'Data'
+			label: __('Email'),
+			fieldtype: 'Read Only'
 		},
 		{
 			fieldname: 'users',
@@ -80,8 +79,6 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 				.filter(user => !['Guest', 'Administrator', frappe.session.user].includes(user));
 			dialog.fields_dict.users.set_data(users);
 		});
-
-	dialog.set_values(initial_values);
 
 	// Post create
 	const default_company = frappe.defaults.get_default('company');
