@@ -999,7 +999,7 @@ class SalesInvoice(SellingController):
 	def verify_payment_amount_is_negative(self):
 		for entry in self.payments:
 			if entry.amount > 0:
-			frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))				
+				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))				
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
