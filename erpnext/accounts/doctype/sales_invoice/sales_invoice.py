@@ -1143,7 +1143,7 @@ class SalesInvoice(SellingController):
 				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
 				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
-					amount = 
+					amount = base_amount
 				else:
 					amount = flt(item.net_amount - gl_entries_details.total_debit_in_account_currency, item.precision("net_amount"))
 
