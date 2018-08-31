@@ -13,6 +13,8 @@ from frappe.desk.form.load import get_attachments
 from frappe.utils.file_manager import get_file_path
 from six import string_types
 
+current_user = frappe.session.user
+
 @frappe.whitelist()
 def register_seller(**kwargs):
 	settings = frappe.get_single('Marketplace Settings')
@@ -26,8 +28,8 @@ def register_seller(**kwargs):
 		settings.registered = 1
 
 		settings.append('users', {
-			'user': frappe.session.user,
-			'name': frappe.session.user,
+			'user': current_user,
+			'name': current_user,
 			'username': kwargs.get('username'),
 			'password': message.get('password')
 		})
@@ -41,7 +43,7 @@ def register_seller(**kwargs):
 	return message
 
 def validate_registerer():
-	if frappe.session.user == 'Administrator':
+	if current_user == 'Administrator':
 		frappe.throw(_('Please login as another user to register on Marketplace'))
 
 	if 'System Manager' not in frappe.get_roles():
@@ -188,24 +190,19 @@ def load_base64_image_from_items(items):
 
 
 def get_hub_connection():
-	read_only = True
+	settings = frappe.get_single('Marketplace Settings')
+	marketplace_url = settings.marketplace_url
+	current_user_records = filter(lambda x: x.user == current_user, settings.users)
 
-	if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
-		hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
-
-		# full rights to user who registered as hub_seller
-		if hub_connector.username == frappe.session.user:
-			read_only = False
-
-		if not read_only:
-			hub_connection = hub_connector.get_connection()
-			return hub_connection.connection
-
-	# read-only connection
-	if read_only:
-		marketplace_url = frappe.db.get_single_value('Marketplace Settings', 'marketplace_url')
-		hub_connection = FrappeClient(marketplace_url)
+	if current_user_records:
+		record = current_user_records[0]
+		password = frappe.get_doc('Hub User', current_user).get_password()
+		hub_connection = FrappeClient(marketplace_url, record.user, password)
 		return hub_connection
+	else:
+		read_only_hub_connection = FrappeClient(marketplace_url)
+		return read_only_hub_connection
+
 
 def get_field_mappings():
 	return []
