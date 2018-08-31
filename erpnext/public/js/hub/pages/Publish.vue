@@ -138,7 +138,7 @@ export default {
 			)
 			.then((r) => {
 				this.selected_items = [];
-				return frappe.db.get_doc('Hub Settings');
+				return frappe.db.get_doc('Marketplace Settings');
 			})
 			.then(doc => {
 				hub.settings = doc;

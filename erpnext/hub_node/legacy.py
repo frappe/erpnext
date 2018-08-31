@@ -101,7 +101,7 @@ def make_rfq(item, supplier, contact):
 		'doctype': 'Request for Quotation',
 		'transaction_date': nowdate(),
 		'status': 'Draft',
-		'company': frappe.db.get_single_value('Hub Settings', 'company'),
+		'company': frappe.db.get_single_value('Marketplace Settings', 'company'),
 		'message_for_supplier': 'Please supply the specified items at the best possible rates',
 		'suppliers': [
 			{ 'supplier': supplier.name, 'contact': contact.name }
@@ -126,8 +126,8 @@ def send_opportunity(contact):
 	# Make Hub Message on Hub with lead data
 	doc = {
 		'doctype': 'Lead',
-		'lead_name': frappe.db.get_single_value('Hub Settings', 'company'),
-		'email_id': frappe.db.get_single_value('Hub Settings', 'user')
+		'lead_name': frappe.db.get_single_value('Marketplace Settings', 'company'),
+		'email_id': frappe.db.get_single_value('Marketplace Settings', 'user')
 	}
 
 	args = frappe._dict(dict(
