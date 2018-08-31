@@ -20,20 +20,23 @@ def register_seller(**kwargs):
 	settings.users = []
 
 	validate_registerer()
-
 	message = settings.register()
 
 	if message.get('email'):
 		settings.registered = 1
 
-		user_emails = kwargs.get('users').strip()[:-1].split(', ')
-		settings.users = get_users_object_list(
-			user_emails,
-			kwargs.get('username'),
-			message.get('password')
-		)
+		settings.append('users', {
+			'user': frappe.session.user,
+			'name': frappe.session.user,
+			'username': kwargs.get('username'),
+			'password': message.get('password')
+		})
 
-		settings.save()
+		user_emails = kwargs.get('users').strip()[:-1].split(', ')
+		for email in user_emails:
+			settings.append('users', {'user': email, 'name': email})
+
+		settings.insert()
 
 	return message
 
@@ -43,20 +46,6 @@ def validate_registerer():
 
 	if 'System Manager' not in frappe.get_roles():
 		frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
-
-def get_users_object_list(user_emails, session_user_username, session_user_password):
-	users = []
-
-	for user_email in user_emails:
-		users.append({ 'user': user_email })
-
-	users.insert(0, {
-		'user': frappe.session.user,
-		'username': session_user_username,
-		'password': session_user_password
-	})
-
-	return users
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
