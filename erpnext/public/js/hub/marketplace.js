@@ -20,20 +20,19 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.$parent = $(parent);
 		this.page = parent.page;
 
-		frappe.db.get_doc('Hub Settings')
-		.then(doc => {
-				hub.settings = doc;
-				const is_registered = hub.settings.registered;
-				const is_registered_seller = hub.settings.company_email === frappe.session.user;
-				this.setup_header();
-				this.make_sidebar();
-				this.make_body();
-				this.setup_events();
-				this.refresh();
-				if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
-					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
-				}
-			});
+		frappe.model.with_doc('Marketplace Settings').then(doc => {
+			hub.settings = doc;
+			const is_registered = hub.settings.registered;
+			const is_registered_seller = hub.settings.company_email === frappe.session.user;
+			this.setup_header();
+			this.make_sidebar();
+			this.make_body();
+			this.setup_events();
+			this.refresh();
+			if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
+				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+			}
+		});
 	}
 
 	setup_header() {
@@ -78,7 +77,7 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		erpnext.hub.on('seller-registered', () => {
 			this.page.clear_primary_action()
-			frappe.db.get_doc('Hub Settings').then((doc)=> {
+			frappe.model.with_doc('Marketplace Settings').then((doc)=> {
 				hub.settings = doc;
 			});
 		});

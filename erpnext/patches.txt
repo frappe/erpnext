@@ -560,6 +560,6 @@ erpnext.patches.v10_0.update_address_template_for_india
 erpnext.patches.v11_0.add_expense_claim_default_account
 execute:frappe.delete_doc("Page", "hub")
 erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
-erpnext.patches.v11_0.update_hub_url
+erpnext.patches.v11_0.update_hub_url # 2018-08-31
 erpnext.patches.v10_0.set_discount_amount
 erpnext.patches.v10_0.recalculate_gross_margin_for_project
