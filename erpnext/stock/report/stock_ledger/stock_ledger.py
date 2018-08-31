@@ -37,10 +37,14 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [
-		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
-		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
-		_("Warehouse") + ":Link/Warehouse:100", _("Stock UOM") + ":Link/UOM:100",
+		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
@@ -49,13 +53,12 @@ def get_columns():
 			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
-		_("Voucher Type") + "::110",
-		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
-		_("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100",
-		_("Project") + ":Link/Project:100",
-		{"label": _("Company"), "fieldtype": "Link", "width": 110,
-			"options": "Company", "fieldname": "company"}
+		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
+		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
+		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
+		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
 
 	return columns
@@ -104,20 +107,19 @@ def get_item_details(items, sl_entries, include_uom):
 	if not items:
 		return item_details
 
-	for item in frappe.db.sql("""
-		select name, item_name, description, item_group, brand, stock_uom
-		from `tabItem`
-		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
-			item_details.setdefault(item.name, item)
-
+	cf_field = cf_join = ""
 	if include_uom:
-		for item in frappe.db.sql("""select item.name, ucd.conversion_factor from `tabItem` item
-				inner join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s
-				where item.name in ({0})
-				""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), include_uom,
-				as_dict=1):
-			item_details[item.name].conversion_factor = item.conversion_factor
+		cf_field = ", ucd.conversion_factor"
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+
+	for item in frappe.db.sql("""
+		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		from `tabItem` item
+		{cf_join}
+		where item.name in ({names})
+		""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
+		{"include_uom": include_uom}, as_dict=1):
+			item_details.setdefault(item.name, item)
 
 	return item_details
 

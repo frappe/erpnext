@@ -56,13 +56,13 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		_("Item Code") + ":Link/Item:140",
-		_("Item Name") + "::100",
-		_("Description") + "::200",
-		_("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100",
-		_("Warehouse") + ":Link/Warehouse:120",
-		_("UOM") + ":Link/UOM:100",
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 140},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
+		{"label": _("UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
 		{"label": _("Actual Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Planned Qty"), "fieldname": "planned_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
@@ -106,13 +106,22 @@ def get_item_map(item_code, include_uom):
 	if item_code:
 		condition = 'and item_code = "{0}"'.format(frappe.db.escape(item_code, percent=False))
 
-	items = frappe.db.sql("""select * from `tabItem` item
-		where is_stock_item = 1
-		and disabled=0
+	cf_field = cf_join = ""
+	if include_uom:
+		cf_field = ", ucd.conversion_factor"
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+
+	items = frappe.db.sql("""
+		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		from `tabItem` item
+		{cf_join}
+		where item.is_stock_item = 1
+		and item.disabled=0
 		{condition}
-		and (end_of_life > %(today)s or end_of_life is null or end_of_life='0000-00-00')
+		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
 		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
-		.format(condition=condition), {"today": today()}, as_dict=True)
+		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
+		{"today": today(), "include_uom": include_uom}, as_dict=True)
 
 	condition = ""
 	if item_code:
@@ -129,13 +138,5 @@ def get_item_map(item_code, include_uom):
 	for item in items:
 		item["reorder_levels"] = reorder_levels.get(item.name) or []
 		item_map[item.name] = item
-
-	if include_uom:
-		for item in frappe.db.sql("""select item.name, ucd.conversion_factor from `tabItem` item
-				inner join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s
-				where item.name in ({0})
-				""".format(', '.join(['"' + frappe.db.escape(i.name, percent=False) + '"' for i in items])),
-				include_uom, as_dict=1):
-			item_map[item.name].conversion_factor = item.conversion_factor
 
 	return item_map

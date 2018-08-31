@@ -254,29 +254,28 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		return
 
 	convertible_cols = {}
-	for iCol in reversed(range(0, len(columns))):
-		col = columns[iCol]
+	for col_idx in reversed(range(0, len(columns))):
+		col = columns[col_idx]
 		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
-			convertible_cols[iCol] = col['convertible']
-			del col['convertible']
-			columns.insert(iCol+1, col.copy())
-			columns[iCol+1]['fieldname'] += "_alt"
-			if convertible_cols[iCol] == 'rate':
-				columns[iCol+1]['label'] += " (per {})".format(include_uom)
+			convertible_cols[col_idx] = col['convertible']
+			columns.insert(col_idx+1, col.copy())
+			columns[col_idx+1]['fieldname'] += "_alt"
+			if convertible_cols[col_idx] == 'rate':
+				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
 			else:
-				columns[iCol+1]['label'] += " ({})".format(include_uom)
+				columns[col_idx+1]['label'] += " ({})".format(include_uom)
 
-	for iRow, row in enumerate(result):
+	for row_idx, row in enumerate(result):
 		new_row = []
-		for iCol, d in enumerate(row):
+		for col_idx, d in enumerate(row):
 			new_row.append(d)
-			if iCol in convertible_cols:
-				if conversion_factors[iRow]:
-					if convertible_cols[iCol] == 'rate':
-						new_row.append(flt(d) * conversion_factors[iRow])
+			if col_idx in convertible_cols:
+				if conversion_factors[row_idx]:
+					if convertible_cols[col_idx] == 'rate':
+						new_row.append(flt(d) * conversion_factors[row_idx])
 					else:
-						new_row.append(flt(d) / conversion_factors[iRow])
+						new_row.append(flt(d) / conversion_factors[row_idx])
 				else:
 					new_row.append(None)
 
-		result[iRow] = new_row
+		result[row_idx] = new_row
