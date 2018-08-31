@@ -274,13 +274,7 @@ def get_basic_details(args, item):
 	})
 
 	if item.enable_deferred_revenue:
-		service_end_date = add_months(args.transaction_date, item.no_of_months)
-		out.update({
-			"enable_deferred_revenue": item.enable_deferred_revenue,
-			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
-			"service_start_date": args.transaction_date,
-			"service_end_date": service_end_date
-		})
+		out.update(calculate_service_end_date(args, item))
 
 	# calculate conversion factor
 	if item.stock_uom == args.uom:
@@ -310,6 +304,22 @@ def get_basic_details(args, item):
 
 	return out
 
+@frappe.whitelist()
+def calculate_service_end_date(args, item=None):
+	args = process_args(args)
+	if not item:
+		item = frappe.get_cached_doc("Item", args.item_code)
+
+	service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
+	service_end_date = add_months(service_start_date, item.no_of_months)
+	deferred_detail = {
+		"enable_deferred_revenue": item.enable_deferred_revenue,
+		"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
+		"service_start_date": service_start_date,
+		"service_end_date": service_end_date
+	}
+
+	return deferred_detail
 
 def get_default_income_account(args, item, item_group):
 	return (item.get("income_account")
