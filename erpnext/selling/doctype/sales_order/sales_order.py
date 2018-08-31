@@ -730,7 +730,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):
+def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target_doc=None):
 	def set_missing_values(source, target):
 		target.supplier = supplier
 		target.apply_discount_on = ""
