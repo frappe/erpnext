@@ -82,6 +82,7 @@ frappe.ui.form.on('Leave Period', {
 					callback: function(r) {
 						if(!r.exc) {
 							d.hide();
+							frm.reload_doc();
 						}
 					}
 				});

@@ -31,17 +31,20 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.status = 'Pending'
 		onboarding.insert()
 		onboarding.submit()
-		self.assertEqual(onboarding.project, 'Employee Onboarding : Test Researcher - test@researcher.com')
-		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
-		return onboarding
 
-	def test_employee_onboarding_completed_task(self):
-		doc = self.test_employee_onboarding_incomplete_task()
-		project = frappe.get_doc('Project', doc.project)
+		self.assertEqual(onboarding.project, 'Employee Onboarding : Test Researcher - test@researcher.com')
+
+		# don't allow making employee if onboarding is not complete
+		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
+
+		# complete the task
+		project = frappe.get_doc('Project', onboarding.project)
 		project.tasks[0].status = 'Closed'
 		project.save()
-		doc.reload()
-		employee = make_employee(doc.name)
+
+		# make employee
+		onboarding.reload()
+		employee = make_employee(onboarding.name)
 		employee.first_name = employee.employee_name
 		employee.date_of_joining = nowdate()
 		employee.date_of_birth = '1990-05-08'
