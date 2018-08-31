@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -10,15 +10,13 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-class HubSetupError(frappe.ValidationError): pass
-
-class HubSettings(Document):
+class MarketplaceSettings(Document):
 
 	def validate(self):
 		self.site_name = frappe.utils.get_url()
 
-	def get_hub_url(self):
-		return self.hub_url
+	def get_marketplace_url(self):
+		return self.marketplace_url
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
@@ -34,7 +32,7 @@ class HubSettings(Document):
 		data = {
 			'profile': self.as_json()
 		}
-		post_url = self.get_hub_url() + '/api/method/hub.hub.api.register'
+		post_url = self.get_marketplace_url() + '/api/method/hub.hub.api.register'
 
 		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
 
@@ -68,7 +66,7 @@ class HubSettings(Document):
 	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 			hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
-			hub_connector.hostname = self.get_hub_url()
+			hub_connector.hostname = self.get_marketplace_url()
 			hub_connector.username = message['email']
 			hub_connector.password = message['password']
 			hub_connector.save()
@@ -78,19 +76,19 @@ class HubSettings(Document):
 			'doctype': 'Data Migration Connector',
 			'connector_type': 'Frappe',
 			'connector_name': 'Hub Connector',
-			'hostname': self.get_hub_url(),
+			'hostname': self.get_marketplace_url(),
 			'username': message['email'],
 			'password': message['password']
 		}).insert()
 
 def reset_hub_publishing_settings(last_sync_datetime = ""):
-	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	doc = frappe.get_doc("Marketplace Settings", "Marketplace Settings")
 	doc.reset_publishing_settings(last_sync_datetime)
 	doc.in_callback = 1
 	doc.save()
 
 def reset_hub_settings(last_sync_datetime = ""):
-	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	doc = frappe.get_doc("Marketplace Settings", "Marketplace Settings")
 	doc.reset_publishing_settings(last_sync_datetime)
 	doc.reset_enable()
 	doc.in_callback = 1
@@ -99,7 +97,7 @@ def reset_hub_settings(last_sync_datetime = ""):
 
 @frappe.whitelist()
 def register_seller(**kwargs):
-	settings = frappe.get_doc('Hub Settings')
+	settings = frappe.get_doc('Marketplace Settings')
 	settings.update(kwargs)
 	message = settings.register()
 
