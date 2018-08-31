@@ -203,8 +203,8 @@ def get_hub_connection():
 
 	# read-only connection
 	if read_only:
-		hub_url = frappe.db.get_single_value('Marketplace Settings', 'hub_url')
-		hub_connection = FrappeClient(hub_url)
+		marketplace_url = frappe.db.get_single_value('Marketplace Settings', 'marketplace_url')
+		hub_connection = FrappeClient(marketplace_url)
 		return hub_connection
 
 def get_field_mappings():
