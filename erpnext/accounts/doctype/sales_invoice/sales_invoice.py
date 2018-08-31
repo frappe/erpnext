@@ -1130,8 +1130,9 @@ class SalesInvoice(SellingController):
 
 			account_currency = get_account_currency(item.income_account)
 			if not last_gl_entry:
+				base_amount = flt(item.base_net_amount*total_booking_days/flt(total_days), item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
-					amount = flt(item.base_net_amount*total_booking_days/flt(total_days), item.precision("base_net_amount"))
+					amount = base_amount
 				else:
 					amount = flt(item.net_amount*total_booking_days/flt(total_days), item.precision("net_amount"))
 			else:
@@ -1140,9 +1141,9 @@ class SalesInvoice(SellingController):
 					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					group by voucher_detail_no
 				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
-
+				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
-					amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
+					amount = 
 				else:
 					amount = flt(item.net_amount - gl_entries_details.total_debit_in_account_currency, item.precision("net_amount"))
 
