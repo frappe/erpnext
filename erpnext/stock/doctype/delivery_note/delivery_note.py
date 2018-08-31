@@ -3,10 +3,6 @@
 
 from __future__ import unicode_literals
 
-import json
-
-from six import string_types
-
 import frappe
 import frappe.defaults
 from erpnext.controllers.selling_controller import SellingController
@@ -455,10 +451,10 @@ def make_delivery_trip(source_name, target_doc=None):
 		target_doc.contact = source_parent.contact_person
 		target_doc.customer_contact = source_parent.contact_display
 
-	if isinstance(target_doc, string_types):
-		delivery_stops = json.loads(target_doc).get("delivery_stops") or []
-	else:
-		delivery_stops = target_doc.delivery_stops or []
+		# Append unique Delivery Notes in Delivery Trip
+		delivery_notes.append(target_doc.delivery_note)
+
+	delivery_notes = []
 
 	doclist = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
@@ -472,8 +468,8 @@ def make_delivery_trip(source_name, target_doc=None):
 			"field_map": {
 				"parent": "delivery_note"
 			},
-			"postprocess": update_stop_details,
-			"condition": lambda item: item.parent not in [stop.delivery_note for stop in delivery_stops]
+			"condition": lambda item: item.parent not in delivery_notes,
+			"postprocess": update_stop_details
 		}
 	}, target_doc)
 
