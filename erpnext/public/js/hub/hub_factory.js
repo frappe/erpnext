@@ -32,7 +32,7 @@ frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.
 };
 
 function is_marketplace_disabled() {
-	return frappe.model.with_doc('Hub Settings')
+	return frappe.model.with_doc('Marketplace Settings')
 		.then(doc => doc.disable_marketplace);
 }
 

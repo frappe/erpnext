@@ -6,12 +6,12 @@ import frappe
 
 @frappe.whitelist()
 def enable_hub():
-	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings = frappe.get_doc('Marketplace Settings')
 	hub_settings.register()
 	frappe.db.commit()
 	return hub_settings
 
 @frappe.whitelist()
 def sync():
-	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings = frappe.get_doc('Marketplace Settings')
 	hub_settings.sync()

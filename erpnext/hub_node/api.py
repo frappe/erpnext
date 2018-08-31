@@ -24,7 +24,7 @@ def map_fields(items):
 	field_mappings = get_field_mappings()
 	table_fields = [d.fieldname for d in frappe.get_meta('Item').get_table_fields()]
 
-	hub_seller = frappe.db.get_value('Hub Settings' , 'Hub Settings', 'company_email')
+	hub_seller = frappe.db.get_value('Marketplace Settings' , 'Marketplace Settings', 'company_email')
 
 	for item in items:
 		for fieldname in table_fields:
@@ -105,7 +105,7 @@ def item_sync_preprocess(intended_item_publish_count):
 	})
 
 	if response:
-		frappe.db.set_value("Hub Settings", "Hub Settings", "sync_in_progress", 1)
+		frappe.db.set_value("Marketplace Settings", "Marketplace Settings", "sync_in_progress", 1)
 		return response
 	else:
 		frappe.throw('Unable to update remote activity')
@@ -113,11 +113,11 @@ def item_sync_preprocess(intended_item_publish_count):
 def item_sync_postprocess():
 	response = call_hub_method('post_items_publish', {})
 	if response:
-		frappe.db.set_value('Hub Settings', 'Hub Settings', 'last_sync_datetime', frappe.utils.now())
+		frappe.db.set_value('Marketplace Settings', 'Marketplace Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
 		frappe.throw('Unable to update remote activity')
 
-	frappe.db.set_value('Hub Settings', 'Hub Settings', 'sync_in_progress', 0)
+	frappe.db.set_value('Marketplace Settings', 'Marketplace Settings', 'sync_in_progress', 0)
 
 
 def load_base64_image_from_items(items):
@@ -161,7 +161,7 @@ def get_hub_connection():
 
 	# read-only connection
 	if read_only:
-		hub_url = frappe.db.get_single_value('Hub Settings', 'hub_url')
+		hub_url = frappe.db.get_single_value('Marketplace Settings', 'hub_url')
 		hub_connection = FrappeClient(hub_url)
 		return hub_connection
 
