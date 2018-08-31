@@ -149,6 +149,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
+		"conversion_factor": ref_item_row.get("conversion_factor", 1),
 		"batch_no": []
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
@@ -223,11 +224,16 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if doc.doctype == 'Sales Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
+					paid_amount = 0.00
+					base_paid_amount = 0.00
+					data.base_amount = flt(data.amount*source.conversion_rate, source.precision("base_paid_amount"))
+					paid_amount += data.amount
+					base_paid_amount += data.base_amount
 					doc.append('payments', {
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
-						'amount': -1 * data.amount,
-						'base_amount': -1 * data.base_amount
+						'amount': -1 * paid_amount,
+						'base_amount': -1 * base_paid_amount
 					})
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
