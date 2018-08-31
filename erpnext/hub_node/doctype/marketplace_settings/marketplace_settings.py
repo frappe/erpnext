@@ -44,7 +44,7 @@ class MarketplaceSettings(Document):
 			frappe.throw(json.loads(response.text))
 
 		if message.get('email'):
-			self.create_hub_connector(message)
+			self.update_session_user_password(message)
 			self.registered = 1
 			self.save()
 
@@ -62,6 +62,10 @@ class MarketplaceSettings(Document):
 	# 	if response_doc['enabled'] == 0:
 	# 		self.enabled = 0
 	# 		self.save()
+
+	def update_session_user_password(self, message):
+		# TODO: Update child table session user password
+		pass
 
 	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
@@ -98,7 +102,24 @@ def reset_hub_settings(last_sync_datetime = ""):
 @frappe.whitelist()
 def register_seller(**kwargs):
 	settings = frappe.get_doc('Marketplace Settings')
-	settings.update(kwargs)
-	message = settings.register()
+	user_emails = kwargs.get('users').strip()[:-1].split(', ')
 
+	users = []
+
+	for user_email in user_emails:
+		users.append({
+			"user": user_email
+		})
+
+	users.insert(0, {
+		"user": frappe.session.user,
+		"hub_username": kwargs.get('username')
+	})
+
+	kwargs['users'] = users
+	settings.update(kwargs)
+
+	settings.save()
+
+	message = settings.register()
 	return message.get('email')
