@@ -66,17 +66,27 @@ frappe.ui.form.on('Delivery Trip', {
 
 	calculate_arrival_time: function (frm) {
 		frappe.call({
-			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.calculate_time_matrix',
+			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
 			freeze: true,
 			freeze_message: __("Updating estimated arrival times."),
 			args: {
-				name: frm.doc.name
+				name: frm.doc.name,
 			},
 			callback: function (r) {
-				if (r.message.error) {
-					frappe.throw(__("Malformatted address for {0}, please fix to continue.",
-						[r.message.error.destination.address]));
-				}
+				frm.reload_doc();
+			}
+		});
+	},
+
+	optimize_route: function (frm) {
+		frappe.call({
+			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
+			freeze: true,
+			freeze_message: __("Optimizing routes."),
+			args: {
+				name: frm.doc.name,
+			},
+			callback: function (r) {
 				frm.reload_doc();
 			}
 		});

@@ -497,15 +497,15 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 }
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "income_account");
+	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "income_account");
 }
 
 cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "expense_account");
+	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
 }
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "cost_center");
+	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 }
 
 cur_frm.set_query("debit_to", function(doc) {
@@ -734,6 +734,39 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
 						calculate_total_billing_amount(frm)
 					}
+				}
+			})
+		}
+	}
+})
+
+frappe.ui.form.on('Sales Invoice Item', {
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	},
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
 				}
 			})
 		}

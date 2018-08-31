@@ -198,7 +198,7 @@ class Gstr1Report(object):
 
 	def get_gst_accounts(self):
 		self.gst_accounts = frappe._dict()
-		gst_settings_accounts = frappe.get_list("GST Account",
+		gst_settings_accounts = frappe.get_all("GST Account",
 			filters={"parent": "GST Settings", "company": self.filters.company},
 			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
