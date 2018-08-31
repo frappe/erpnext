@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.make_random import get_random
 import erpnext.education
 
 def get_random_group():
@@ -13,11 +12,11 @@ def get_random_group():
 		"doctype": "Student Group",
 		"student_group_name": "_Test Student Group-" + frappe.generate_hash(length=5),
 		"group_based_on": "Activity"
-		}).insert()
+	}).insert()
 
 	student_list = frappe.get_all('Student', limit=5)
 
-	doc.extend("students", [{"student":d.name} for d in student_list])
+	doc.extend("students", [{"student":d.name, "active": 1} for d in student_list])
 	doc.save()
 
 	return doc
