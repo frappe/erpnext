@@ -99,15 +99,20 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.register_dialog.show();
 	}
 
-	register_marketplace(form_values) {
+	register_marketplace({company, company_email, company_description}) {
 		frappe.call({
 		    method: 'erpnext.hub_node.api.register_marketplace',
-		    args: form_values
-		}).then(() => {
-			this.register_dialog.hide();
-			frappe.set_route('marketplace', 'publish');
-
-		    erpnext.hub.trigger('seller-registered');
+		    args: {
+				company,
+				company_email,
+				company_description
+			}
+		}).then((r) => {
+			if (r.message && r.message.ok) {
+				this.register_dialog.hide();
+				frappe.set_route('marketplace', 'publish');
+				erpnext.hub.trigger('seller-registered');
+			}
 		});
 	}
 

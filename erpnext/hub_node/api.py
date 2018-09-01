@@ -17,31 +17,27 @@ current_user = frappe.session.user
 
 
 @frappe.whitelist()
-def register_marketplace(**kwargs):
-	settings = frappe.get_single('Marketplace Settings')
-	settings.update(kwargs)
-	settings.users = []
-
+def register_marketplace(company, company_description):
 	validate_registerer()
+
+	settings = frappe.get_single('Marketplace Settings')
+	country, currency = frappe.db.get_value('Company', company, ['country', 'default_currency'])
+
+	settings.company = company
+	settings.country = country
+	settings.currency = currency
+	settings.company_description = company_description
+
 	message = settings.register()
 
-	if message.get('email'):
+	if message.get('hub_seller_name'):
 		settings.registered = 1
+		settings.hub_seller_name = message.get('hub_seller_name')
+		settings.save()
 
-		settings.append('users', {
-			'user': current_user,
-			'name': current_user,
-			'username': kwargs.get('username'),
-			'password': message.get('password')
-		})
+		settings.add_user(frappe.session.user)
 
-		user_emails = kwargs.get('users').strip()[:-1].split(', ')
-		for email in user_emails:
-			settings.append('users', {'user': email, 'name': email})
-
-		settings.insert()
-
-	return message
+	return { 'ok': 1 }
 
 
 @frappe.whitelist()
@@ -53,8 +49,11 @@ def validate_registerer():
 	if current_user == 'Administrator':
 		frappe.throw(_('Please login as another user to register on Marketplace'))
 
-	if 'System Manager' not in frappe.get_roles():
-		frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
+	valid_roles = ['System Manager', 'Item Manager']
+
+	if not frappe.utils.is_subset(valid_roles, frappe.get_roles()):
+		frappe.throw(_('Only users with {0} role can register on Marketplace').format(', '.join(valid_roles)),
+			frappe.PermissionError)
 
 
 @frappe.whitelist()
