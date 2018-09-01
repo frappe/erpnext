@@ -1,5 +1,7 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v11_0.refactor_naming_series
+erpnext.patches.v11_0.refactor_autoname_naming
 erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
@@ -71,7 +73,6 @@ erpnext.patches.v4_0.create_price_list_if_missing
 execute:frappe.db.sql("update `tabItem` set end_of_life=null where end_of_life='0000-00-00'") #2014-06-16
 erpnext.patches.v4_0.update_users_report_view_settings
 erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
-erpnext.patches.v4_0.set_naming_series_property_setter
 erpnext.patches.v4_1.set_outgoing_email_footer
 erpnext.patches.v4_1.fix_sales_order_delivered_status
 erpnext.patches.v4_1.fix_delivery_and_billing_status
@@ -520,6 +521,8 @@ erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
 erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
+erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
+erpnext.patches.v11_0.rename_supplier_type_to_supplier_group
 erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
 erpnext.patches.v11_0.update_brand_in_item_price
 erpnext.patches.v11_0.create_default_success_action
@@ -530,7 +533,6 @@ erpnext.patches.v11_0.rename_field_max_days_allowed
 erpnext.patches.v11_0.create_salary_structure_assignments
 erpnext.patches.v11_0.rename_health_insurance
 erpnext.patches.v11_0.rebuild_tree_for_company
-erpnext.patches.v11_0.rename_supplier_type_to_supplier_group
 erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
@@ -553,6 +555,11 @@ erpnext.patches.v11_0.hr_ux_cleanups
 erpnext.patches.v11_0.skip_user_permission_check_for_department
 erpnext.patches.v11_0.set_department_for_doctypes
 erpnext.patches.v11_0.update_allow_transfer_for_manufacture
-erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
 erpnext.patches.v11_0.add_item_group_defaults
 erpnext.patches.v10_0.update_address_template_for_india
+erpnext.patches.v11_0.add_expense_claim_default_account
+execute:frappe.delete_doc("Page", "hub")
+erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
+erpnext.patches.v11_0.update_hub_url # 2018-08-31
+erpnext.patches.v10_0.set_discount_amount
+erpnext.patches.v10_0.recalculate_gross_margin_for_project

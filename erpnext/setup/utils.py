@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, add_days
 from frappe.utils import get_datetime_str, nowdate
+from erpnext import get_default_company
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -51,24 +52,6 @@ def before_tests():
 
 	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
-
-	if not frappe.db.exists('Company', 'Woocommerce'):
-		company = frappe.new_doc("Company")
-		company.company_name = "Woocommerce"
-		company.abbr = "W"
-		company.default_currency = "INR"
-		company.save()
-
-	woo_settings = frappe.get_doc("Woocommerce Settings")
-	if not woo_settings.secret:
-		woo_settings.secret = "ec434676aa1de0e502389f515c38f89f653119ab35e9117c7a79e576"
-		woo_settings.woocommerce_server_url = "https://woocommerce.mntechnique.com/"
-		woo_settings.api_consumer_key = "ck_fd43ff5756a6abafd95fadb6677100ce95a758a1"
-		woo_settings.api_consumer_secret = "cs_94360a1ad7bef7fa420a40cf284f7b3e0788454e"
-		woo_settings.enable_sync = 1
-		woo_settings.tax_account = "Sales Expenses - W"
-		woo_settings.f_n_f_account = "Expenses - W"
-		woo_settings.save(ignore_permissions=True)
 
 	frappe.db.commit()
 
@@ -155,3 +138,8 @@ def insert_record(records):
 				pass
 			else:
 				raise
+
+def welcome_email():
+	site_name = get_default_company()
+	title = _("Welcome to {0}".format(site_name))
+	return title

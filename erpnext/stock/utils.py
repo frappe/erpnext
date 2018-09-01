@@ -11,8 +11,7 @@ from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
-def get_stock_value_from_bin (warehouse=None, item_code=None):
-
+def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
 	conditions = ""
 	if warehouse:
@@ -28,14 +27,13 @@ def get_stock_value_from_bin (warehouse=None, item_code=None):
 	if item_code:
 		conditions += " and item_code = %(item_code)s"
 
-
 		values['item_code'] = item_code
 
-	query = "select sum(stock_value) from `tabBin` where 1 = 1" + conditions
+	query = "select sum(stock_value) from `tabBin` where 1 = 1 %s" % conditions
 
 	stock_value = frappe.db.sql(query, values)
 
-	return stock_value;
+	return stock_value
 
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if not posting_date: posting_date = nowdate()

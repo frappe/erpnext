@@ -526,7 +526,7 @@ class SalarySlip(TransactionBase):
 				"reference_name": self.name
 				}
 			if not frappe.flags.in_test:
-				enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+				enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
 			else:
 				frappe.sendmail(**email_args)
 		else:
