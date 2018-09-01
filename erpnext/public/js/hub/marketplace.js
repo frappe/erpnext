@@ -92,16 +92,16 @@ erpnext.hub.Marketplace = class Marketplace {
 			__('Become a Seller'),
 			{
 				label: __('Register'),
-				on_submit: this.register_seller.bind(this)
+				on_submit: this.register_marketplace.bind(this)
 			}
 		);
 
 		this.register_dialog.show();
 	}
 
-	register_seller(form_values) {
+	register_marketplace(form_values) {
 		frappe.call({
-		    method: 'erpnext.hub_node.api.register_seller',
+		    method: 'erpnext.hub_node.api.register_marketplace',
 		    args: form_values
 		}).then(() => {
 			this.register_dialog.hide();
