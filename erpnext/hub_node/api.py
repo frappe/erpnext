@@ -17,25 +17,17 @@ current_user = frappe.session.user
 
 
 @frappe.whitelist()
-def register_marketplace(company, company_description):
+def register_marketplace(company):
 	validate_registerer()
-
 	settings = frappe.get_single('Marketplace Settings')
-	country, currency = frappe.db.get_value('Company', company, ['country', 'default_currency'])
-
-	settings.company = company
-	settings.country = country
-	settings.currency = currency
-	settings.company_description = company_description
-
-	message = settings.register()
+	message = settings.register_seller(company)
 
 	if message.get('hub_seller_name'):
 		settings.registered = 1
 		settings.hub_seller_name = message.get('hub_seller_name')
 		settings.save()
 
-		settings.add_user(frappe.session.user)
+		settings.add_hub_user(frappe.session.user)
 
 	return { 'ok': 1 }
 

@@ -4,30 +4,12 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 			fieldtype: 'Link',
 			fieldname: 'company',
 			label: __('Company'),
-			options: 'Company',
-			onchange: () => {
-				const value = dialog.get_value('company');
-
-				if (value) {
-					frappe.db.get_doc('Company', value)
-						.then(company => {
-							dialog.set_values({
-								country: company.country,
-								currency: company.default_currency
-							});
-						});
-				}
-			}
+			options: 'Company'
 		},
 		{
 			fieldname: 'company_email',
 			label: __('Email'),
 			fieldtype: 'Read Only'
-		},
-		{
-			fieldtype: 'Text',
-			label: __('About your Company'),
-			fieldname: 'company_description'
 		}
 	];
 
@@ -38,7 +20,11 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 		primary_action: () => {
 			const form_values = dialog.get_values();
 			let values_filled = true;
-			const mandatory_fields = ['company', 'company_email', 'company_description'];
+
+			// TODO: Say "we notice that the company description and logo isn't set. Please set them in master."
+			// Only then allow to register
+
+			const mandatory_fields = ['company'];
 			mandatory_fields.forEach(field => {
 				const value = form_values[field];
 				if (!value) {
@@ -51,6 +37,7 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 			action.on_submit(form_values);
 		}
 	});
+
 	// Post create
 	const default_company = frappe.defaults.get_default('company');
 	dialog.set_value('company', default_company);
