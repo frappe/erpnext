@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "autoname": "Offer-.#####", 
+ "autoname": "HR-OFF-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2015-03-04 14:20:17.662207", 
  "custom": 0, 
@@ -578,7 +578,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-20 14:40:26.748824", 
+ "modified": "2018-08-21 16:15:35.616910", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Offer", 
@@ -613,5 +613,6 @@
  "sort_order": "DESC", 
  "title_field": "applicant_name", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

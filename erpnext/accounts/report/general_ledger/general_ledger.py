@@ -58,6 +58,14 @@ def validate_filters(filters, account_details):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
+	if filters.get('project'):
+		projects = str(filters.get("project")).strip()
+		filters.project = [d.strip() for d in projects.split(',') if d]
+
+	if filters.get('cost_center'):
+		cost_centers = str(filters.get("cost_center")).strip()
+		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+
 
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
@@ -164,7 +172,10 @@ def get_conditions(filters):
 		conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
-		conditions.append("project=%(project)s")
+		conditions.append("project in %(project)s")
+
+	if filters.get("cost_center"):
+		conditions.append("cost_center in %(cost_center)s")
 
 	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):

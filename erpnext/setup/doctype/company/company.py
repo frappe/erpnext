@@ -95,6 +95,10 @@ class Company(NestedSet):
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
 
+		if not frappe.db.get_value("Department", {"company": self.name}):
+			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
+			install_post_company_fixtures(self.name)
+
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 
@@ -329,6 +333,8 @@ class Company(NestedSet):
 					% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
 
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
+		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
+		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
