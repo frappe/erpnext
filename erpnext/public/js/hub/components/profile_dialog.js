@@ -1,12 +1,6 @@
 const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 	const fields = [
 		{
-			// TODO: add hub check for taken
-			fieldname: 'username',
-			label: __('Username'),
-			fieldtype: 'Data'
-		},
-		{
 			fieldtype: 'Link',
 			fieldname: 'company',
 			label: __('Company'),
@@ -28,21 +22,6 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 		{
 			fieldname: 'company_email',
 			label: __('Email'),
-			fieldtype: 'Read Only'
-		},
-		{
-			fieldname: 'users',
-			label: __('Users'),
-			fieldtype: 'MultiSelect'
-		},
-		{
-			fieldname: 'country',
-			label: __('Country'),
-			fieldtype: 'Read Only'
-		},
-		{
-			fieldname: 'currency',
-			label: __('Currency'),
 			fieldtype: 'Read Only'
 		},
 		{
@@ -72,14 +51,6 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 			action.on_submit(form_values);
 		}
 	});
-
-	frappe.db.get_list('User')
-		.then(result => {
-			const users = result.map(result => result.name)
-				.filter(user => !['Guest', 'Administrator', frappe.session.user].includes(user));
-			dialog.fields_dict.users.set_data(users);
-		});
-
 	// Post create
 	const default_company = frappe.defaults.get_default('company');
 	dialog.set_value('company', default_company);
