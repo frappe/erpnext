@@ -15,8 +15,9 @@ from six import string_types
 
 current_user = frappe.session.user
 
+
 @frappe.whitelist()
-def register_seller(**kwargs):
+def register_marketplace(**kwargs):
 	settings = frappe.get_single('Marketplace Settings')
 	settings.update(kwargs)
 	settings.users = []
@@ -42,12 +43,19 @@ def register_seller(**kwargs):
 
 	return message
 
+
+@frappe.whitelist()
+def register_user(username, first_name, company):
+	pass
+
+
 def validate_registerer():
 	if current_user == 'Administrator':
 		frappe.throw(_('Please login as another user to register on Marketplace'))
 
 	if 'System Manager' not in frappe.get_roles():
 		frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
+
 
 @frappe.whitelist()
 def call_hub_method(method, params=None):
@@ -62,6 +70,7 @@ def call_hub_method(method, params=None):
 
 	response = connection.post_request(params)
 	return response
+
 
 def map_fields(items):
 	field_mappings = get_field_mappings()
@@ -87,6 +96,7 @@ def map_fields(items):
 
 	return items
 
+
 @frappe.whitelist()
 def get_valid_items(search_value=''):
 	items = frappe.get_list(
@@ -111,6 +121,7 @@ def get_valid_items(search_value=''):
 
 	return valid_items
 
+
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
@@ -128,7 +139,6 @@ def publish_selected_items(items_to_publish):
 			'image_list': item.get('image_list')
 		}).insert(ignore_if_duplicate=True)
 
-
 	items = map_fields(items_to_publish)
 
 	try:
@@ -143,6 +153,7 @@ def publish_selected_items(items_to_publish):
 	except Exception as e:
 		frappe.log_error(message=e, title='Hub Sync Error')
 
+
 def item_sync_preprocess(intended_item_publish_count):
 	response = call_hub_method('pre_items_publish', {
 		'intended_item_publish_count': intended_item_publish_count
@@ -153,6 +164,7 @@ def item_sync_preprocess(intended_item_publish_count):
 		return response
 	else:
 		frappe.throw('Unable to update remote activity')
+
 
 def item_sync_postprocess():
 	response = call_hub_method('post_items_publish', {})
@@ -192,7 +204,10 @@ def load_base64_image_from_items(items):
 def get_hub_connection():
 	settings = frappe.get_single('Marketplace Settings')
 	marketplace_url = settings.marketplace_url
-	current_user_records = filter(lambda x: x.user == current_user, settings.users)
+	current_user_records = filter(
+		lambda x: x.user == current_user and x.password,
+		settings.users
+	)
 
 	if current_user_records:
 		record = current_user_records[0]
