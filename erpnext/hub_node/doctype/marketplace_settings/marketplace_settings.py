@@ -13,23 +13,33 @@ from six import string_types
 
 class MarketplaceSettings(Document):
 
-	def validate(self):
-		self.site_name = frappe.utils.get_url()
+	def register_seller(self, company):
 
-	def register(self):
-		""" Create a User on hubmarket.org and return username/password """
-		self.site_name = frappe.utils.get_url()
+		country, currency, company_description = frappe.db.get_value('Company', company,
+			['country', 'default_currency', 'company_description'])
+
+		company_details = {
+			'company': company,
+			'country': country,
+			# 'city': '',
+			'currency': currency,
+			'company_description': company_description,
+			# 'company_logo': company_logo,
+
+			'site_name': frappe.utils.get_url(),
+		}
 
 		hub_connection = self.get_connection()
 
 		response = hub_connection.post_request({
-			'cmd': 'hub.hub.api.register',
-			'company_details': self.as_json()
+			'cmd': 'hub.hub.api.add_hub_seller',
+			'company_details': json.dumps(company_details)
 		})
 
 		return response
 
-	def add_user(self, user_email):
+
+	def add_hub_user(self, user_email):
 		if not self.registered:
 			return
 
@@ -53,10 +63,11 @@ class MarketplaceSettings(Document):
 
 		self.insert()
 
+
 	def get_connection(self):
 		return FrappeClient(self.marketplace_url)
 
 
 	def unregister(self):
-		""" Disable the User on hub.erpnext.org"""
+		"""Disable the User on hubmarket.org"""
 		pass
