@@ -61,7 +61,7 @@ def add_transaction():
         if not frappe.db.exists(
                 "Customer",
                 dict(
-                    customer_name=("like", "%@{0}".format(customer_id)
+                    customer_name=("like", "%@{0}".format(customer_id))
                 )
         ):
             to_customer = frappe.get_doc(
@@ -80,7 +80,7 @@ def add_transaction():
             to_customer = frappe.get_doc(
                 "Customer",
                 dict(
-                    customer_name=("like", "%@{0}".format(customer_id)
+                    customer_name=("like", "%@{0}".format(customer_id))
                 )
             )
 
