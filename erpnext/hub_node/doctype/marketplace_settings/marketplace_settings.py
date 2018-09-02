@@ -40,6 +40,10 @@ class MarketplaceSettings(Document):
 
 
 	def add_hub_user(self, user_email):
+		'''Create a Hub User and User record on hub server
+		and if successfull append it to Hub User table
+		'''
+
 		if not self.registered:
 			return
 
@@ -62,6 +66,17 @@ class MarketplaceSettings(Document):
 		})
 
 		self.insert()
+
+	def get_hub_user(self, user):
+		'''Return the Hub User doc from the `users` table if password is set'''
+
+		filtered_users = filter(
+			lambda x: x.user == user and x.password,
+			self.users
+		)
+
+		if filtered_users:
+			return filtered_users[0]
 
 
 	def get_connection(self):
