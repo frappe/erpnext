@@ -2,7 +2,7 @@ import unittest, frappe, requests, os, time, erpnext
 from erpnext.erpnext_integrations.connectors.woocommerce_connection import order
 
 class TestWoocommerce(unittest.TestCase):
-	def setup(self):
+	def setUp(self):
 		if not frappe.db.exists('Company', 'Woocommerce'):
 			company = frappe.new_doc("Company")
 			company.company_name = "Woocommerce"
