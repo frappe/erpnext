@@ -63,7 +63,7 @@ export default {
 		get_items() {
 			hub.call('get_items', {
 				filters: {
-					hub_seller: hub.settings.company_email
+					hub_seller: hub.settings.hub_seller_name
 				}
 			})
 			.then((items) => {
