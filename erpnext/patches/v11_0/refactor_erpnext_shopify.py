@@ -29,4 +29,5 @@ def setup_app_type():
 		shopify_settings.ignore_permissions = True
 		shopify_settings.save()
 	except Exception:
+		frappe.db.set_value("Shopify Shopify", None, "enable_shopify", 0)
 		frappe.log_error(frappe.get_traceback())
