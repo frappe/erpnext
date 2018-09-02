@@ -33,8 +33,15 @@ def register_marketplace(company):
 
 
 @frappe.whitelist()
-def register_user(username, first_name, company):
-	pass
+def register_users(user_list):
+	user_list = json.loads(user_list)
+
+	settings = frappe.get_single('Marketplace Settings')
+
+	for user in user_list:
+		settings.add_hub_user(user)
+
+	return user_list
 
 
 def validate_registerer():
@@ -195,15 +202,11 @@ def load_base64_image_from_items(items):
 def get_hub_connection():
 	settings = frappe.get_single('Marketplace Settings')
 	marketplace_url = settings.marketplace_url
-	current_user_records = filter(
-		lambda x: x.user == current_user and x.password,
-		settings.users
-	)
+	hub_user = settings.get_hub_user(frappe.session.user)
 
-	if current_user_records:
-		record = current_user_records[0]
-		password = frappe.get_doc('Hub User', current_user).get_password()
-		hub_connection = FrappeClient(marketplace_url, record.user, password)
+	if hub_user:
+		password = hub_user.get_password()
+		hub_connection = FrappeClient(marketplace_url, hub_user.user, password)
 		return hub_connection
 	else:
 		read_only_hub_connection = FrappeClient(marketplace_url)

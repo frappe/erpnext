@@ -31,6 +31,8 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.refresh();
 			if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
 				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+			} else {
+				this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
 			}
 		});
 	}
@@ -113,6 +115,48 @@ erpnext.hub.Marketplace = class Marketplace {
 				erpnext.hub.trigger('seller-registered');
 			}
 		});
+	}
+
+	show_add_user_dialog() {
+		const user_list = Object.keys(frappe.boot.user_info)
+			.filter(user => !['Administrator', 'Guest', frappe.session.user].includes(user));
+		const d = new frappe.ui.Dialog({
+			title: __('Add Users to Marketplace'),
+			fields: [
+				{
+					label: __('Users'),
+					fieldname: 'users',
+					fieldtype: 'MultiSelect',
+					reqd: 1,
+					get_data() {
+						return user_list;
+					}
+				}
+			],
+			primary_action({ users }) {
+				const selected_users = users.split(',').map(d => d.trim()).filter(Boolean);
+
+				if (!selected_users.every(user => user_list.includes(user))) {
+					d.set_df_property('users', 'description', __('Some emails are invalid'));
+					return;
+				} else {
+					d.set_df_property('users', 'description', '');
+				}
+
+				frappe.call('erpnext.hub_node.api.register_users', {
+					user_list: selected_users
+				})
+				.then(r => {
+					d.hide();
+
+					if (r.message && r.message.length) {
+						frappe.show_alert('Added {0} users', [r.message.length]);
+					}
+				});
+			}
+		});
+
+		d.show();
 	}
 
 }
