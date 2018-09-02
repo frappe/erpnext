@@ -190,9 +190,9 @@ export default {
 		},
 
 		add_to_saved_items() {
-			hub.call('add_item_to_seller_saved_items', {
+			hub.call('add_item_to_user_saved_items', {
 				hub_item_name: this.hub_item_name,
-				hub_seller: hub.settings.company_email
+				hub_user: frappe.session.user
 			})
 			.then(() => {
 				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`

@@ -38,7 +38,7 @@ export default {
 	methods: {
 		get_items() {
 			hub.call(
-				'get_saved_items_of_seller', {},
+				'get_saved_items_of_user', {},
 				'action:item_save'
 			)
 			.then((items) => {
@@ -83,9 +83,9 @@ export default {
 
 		remove_item_from_saved_items(hub_item_name) {
 			erpnext.hub.trigger('action:item_save');
-			hub.call('remove_item_from_seller_saved_items', {
+			hub.call('remove_item_from_user_saved_items', {
 				hub_item_name,
-				hub_seller: hub.settings.company_email
+				hub_user: frappe.session.user
 			})
 			.then(() => {
 				this.get_items();
