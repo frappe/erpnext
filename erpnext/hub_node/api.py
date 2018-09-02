@@ -74,7 +74,7 @@ def map_fields(items):
 	field_mappings = get_field_mappings()
 	table_fields = [d.fieldname for d in frappe.get_meta('Item').get_table_fields()]
 
-	hub_seller = frappe.db.get_value('Marketplace Settings' , 'Marketplace Settings', 'company_email')
+	hub_seller_name = frappe.db.get_value('Marketplace Settings' , 'Marketplace Settings', 'hub_seller_name')
 
 	for item in items:
 		for fieldname in table_fields:
@@ -89,7 +89,7 @@ def map_fields(items):
 			item[remote_fieldname] = value
 
 		item['doctype'] = 'Hub Item'
-		item['hub_seller'] = hub_seller
+		item['hub_seller'] = hub_seller_name
 		item.pop('attachments', None)
 
 	return items
