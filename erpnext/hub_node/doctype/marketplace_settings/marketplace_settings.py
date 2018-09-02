@@ -65,7 +65,7 @@ class MarketplaceSettings(Document):
 			'password': hub_user.get('password')
 		})
 
-		self.insert()
+		self.save()
 
 	def get_hub_user(self, user):
 		'''Return the Hub User doc from the `users` table if password is set'''
