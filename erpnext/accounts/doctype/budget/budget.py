@@ -33,7 +33,7 @@ class Budget(Document):
 			select
 				b.name, ba.account from `tabBudget` b, `tabBudget Account` ba
 			where
-				ba.parent = b.name and b.company = %s and %s=%s and
+				ba.parent = b.name and b.docstatus < 2 and b.company = %s and %s=%s and
 				b.fiscal_year=%s and b.name != %sand ba.account in (%s) """
 				% ('%s', budget_against_field, '%s', '%s', '%s', ','.join(['%s'] * len(accounts))),
 			(self.company, budget_against, self.fiscal_year, self.name) + tuple(accounts), as_dict=1)
