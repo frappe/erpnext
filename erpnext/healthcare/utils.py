@@ -95,9 +95,9 @@ def get_healthcare_services_to_invoice(patient):
 			if lab_rxs:
 				for lab_rx in lab_rxs:
 					rx_obj = frappe.get_doc("Lab Prescription", lab_rx[0])
-					if rx_obj.test_code and (frappe.db.get_value("Lab Test Template", rx_obj.test_code, "is_billable") == 1):
+					if rx_obj.lab_test_code and (frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "is_billable") == 1):
 						item_to_invoice.append({'reference_type': 'Lab Prescription', 'reference_name': rx_obj.name,
-						'service': frappe.db.get_value("Lab Test Template", rx_obj.test_code, "item")})
+						'service': frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item")})
 
 			procedures = frappe.get_list("Clinical Procedure", {'patient': patient.name, 'invoiced': False})
 			if procedures:

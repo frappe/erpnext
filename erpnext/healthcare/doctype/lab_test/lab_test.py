@@ -77,7 +77,7 @@ def create_lab_test_from_encounter(encounter_id):
 	lab_test_created = False
 	encounter = frappe.get_doc("Patient Encounter", encounter_id)
 
-	lab_test_ids = frappe.db.sql("""select lp.name, lp.test_code, lp.invoiced
+	lab_test_ids = frappe.db.sql("""select lp.name, lp.lab_test_code, lp.invoiced
 	from `tabPatient Encounter` et, `tabLab Prescription` lp
 	where et.patient=%s and lp.parent=%s and
 	lp.parent=et.name and lp.test_created=0 and et.docstatus=1""", (encounter.patient, encounter_id))
@@ -282,7 +282,9 @@ def get_employee_by_user_id(user_id):
 
 def insert_lab_test_to_medical_record(doc):
 	table_row = False
-	subject = cstr(doc.lab_test_name) +" "+ doc.practitioner
+	subject = cstr(doc.lab_test_name)
+	if doc.practitioner:
+		subject += " "+ doc.practitioner
 	if doc.normal_test_items:
 		item = doc.normal_test_items[0]
 		comment = ""
@@ -327,5 +329,5 @@ def delete_lab_test_from_medical_record(self):
 
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
-	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoiced, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
+	return frappe.db.sql("""select cp.name, cp.lab_test_code, cp.parent, cp.invoiced, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
 	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))

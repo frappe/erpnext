@@ -3,8 +3,8 @@
 
 frappe.ui.form.on("Lab Test Template",{
 	lab_test_name: function(frm) {
-		if(!frm.doc.test_code)
-			frm.set_value("test_code", frm.doc.lab_test_name);
+		if(!frm.doc.lab_test_code)
+			frm.set_value("lab_test_code", frm.doc.lab_test_name);
 		if(!frm.doc.test_description)
 			frm.set_value("test_description", frm.doc.lab_test_name);
 	},
@@ -21,7 +21,7 @@ frappe.ui.form.on("Lab Test Template",{
 });
 
 cur_frm.cscript.custom_refresh = function(doc) {
-	cur_frm.set_df_property("test_code", "read_only", doc.__islocal ? 0 : 1);
+	cur_frm.set_df_property("lab_test_code", "read_only", doc.__islocal ? 0 : 1);
 
 	if(!doc.__islocal) {
 		cur_frm.add_custom_button(__('Change Template Code'), function() {
@@ -88,13 +88,13 @@ var change_template_code = function(frm,doc){
 	});
 	d.show();
 	d.set_values({
-		'Test Code': doc.test_code
+		'Test Code': doc.lab_test_code
 	});
 
-	var change_test_code_from_template = function(test_code,doc){
+	var change_test_code_from_template = function(lab_test_code,doc){
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.lab_test_template.lab_test_template.change_test_code_from_template",
-			"args": {test_code: test_code, doc: doc},
+			"args": {lab_test_code: lab_test_code, doc: doc},
 			callback: function (data) {
 				frappe.set_route("Form", "Lab Test Template", data.message);
 			}

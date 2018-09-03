@@ -10,7 +10,7 @@ frappe.ui.form.on('Patient Encounter', {
 			{fieldname: 'period', columns: 2}
 		];
 		frm.get_field('test_prescription').grid.editable_fields = [
-			{fieldname: 'test_code', columns: 2},
+			{fieldname: 'lab_test_code', columns: 2},
 			{fieldname: 'lab_test_name', columns: 4},
 			{fieldname: 'test_comment', columns: 4}
 		];
@@ -72,7 +72,7 @@ frappe.ui.form.on('Patient Encounter', {
 				}
 			};
 		});
-		frm.set_query("test_code", "test_prescription", function() {
+		frm.set_query("lab_test_code", "test_prescription", function() {
 			return {
 				filters: {
 					is_billable:'1'

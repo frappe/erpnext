@@ -17,9 +17,9 @@ class LabTestTemplate(Document):
 				if(self.test_rate != 0.0):
 					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
 					if(self.test_rate):
-						make_item_price(self.test_code, price_list_name, self.test_rate)
+						make_item_price(self.lab_test_code, price_list_name, self.test_rate)
 					else:
-						make_item_price(self.test_code, price_list_name, 0.0)
+						make_item_price(self.lab_test_code, price_list_name, 0.0)
 			else:
 				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.test_rate)
 
@@ -44,7 +44,7 @@ class LabTestTemplate(Document):
 def item_price_exist(doc):
 	item_price = frappe.db.exists({
 	"doctype": "Item Price",
-	"item_code": doc.test_code})
+	"item_code": doc.lab_test_code})
 	if(item_price):
 		return item_price[0][0]
 	else:
@@ -63,7 +63,7 @@ def create_item_from_template(doc):
 	#insert item
 	item =  frappe.get_doc({
 	"doctype": "Item",
-	"item_code": doc.test_code,
+	"item_code": doc.lab_test_code,
 	"item_name":doc.lab_test_name,
 	"item_group": doc.test_group,
 	"description":doc.test_description,
@@ -102,20 +102,20 @@ def make_item_price(item, price_list_name, item_price):
 	}).insert(ignore_permissions=True)
 
 @frappe.whitelist()
-def change_test_code_from_template(test_code, doc):
+def change_test_code_from_template(lab_test_code, doc):
 	args = json.loads(doc)
 	doc = frappe._dict(args)
 
 	item_exist = frappe.db.exists({
 		"doctype": "Item",
-		"item_code": test_code})
+		"item_code": lab_test_code})
 	if(item_exist):
-		frappe.throw(_("Code {0} already exist").format(test_code))
+		frappe.throw(_("Code {0} already exist").format(lab_test_code))
 	else:
-		frappe.rename_doc("Item", doc.name, test_code, ignore_permissions = True)
-		frappe.db.set_value("Lab Test Template",doc.name,"test_code",test_code)
-		frappe.rename_doc("Lab Test Template", doc.name, test_code, ignore_permissions = True)
-	return test_code
+		frappe.rename_doc("Item", doc.name, lab_test_code, ignore_permissions = True)
+		frappe.db.set_value("Lab Test Template",doc.name,"lab_test_code",lab_test_code)
+		frappe.rename_doc("Lab Test Template", doc.name, lab_test_code, ignore_permissions = True)
+	return lab_test_code
 
 @frappe.whitelist()
 def disable_enable_test_template(status, name,  is_billable):
