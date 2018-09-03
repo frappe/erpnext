@@ -20,29 +20,15 @@ import Messages from './pages/Messages.vue';
 import Profile from './pages/Profile.vue';
 import NotFound from './pages/NotFound.vue';
 
-const route_map = {
-	'marketplace/home': Home,
-	'marketplace/search/:keyword': Search,
-	'marketplace/category/:category': Category,
-	'marketplace/item/:item': Item,
-	'marketplace/seller/:seller': Seller,
-	'marketplace/not-found': NotFound,
-
-	// Registered seller routes
-	'marketplace/profile': Profile,
-	'marketplace/saved-items': SavedItems,
-	'marketplace/publish': Publish,
-	'marketplace/published-items': PublishedItems,
-	'marketplace/buying': Buying,
-	'marketplace/buying/:item': Messages,
-	'marketplace/selling': Selling,
-	'marketplace/selling/:buyer/:item': Messages
-}
-
 export default {
 	data() {
 		return {
-			current_page: this.get_current_page()
+			route_map: this.get_route_map()
+		}
+	},
+	computed: {
+		current_page() {
+			return this.get_current_page()
 		}
 	},
 	mounted() {
@@ -57,11 +43,11 @@ export default {
 		},
 		get_current_page() {
 			const curr_route = frappe.get_route_str();
-			let route = Object.keys(route_map).filter(route => route == curr_route)[0];
+			let route = Object.keys(this.route_map).filter(route => route == curr_route)[0];
 			if (!route) {
 				// find route by matching it with dynamic part
 				const curr_route_parts = curr_route.split('/');
-				const weighted_routes = Object.keys(route_map)
+				const weighted_routes = Object.keys(this.route_map)
 					.map(route_str => route_str.split('/'))
 					.filter(route_parts => route_parts.length === curr_route_parts.length)
 					.reduce((obj, route_parts) => {
@@ -94,7 +80,35 @@ export default {
 				return NotFound;
 			}
 
-			return route_map[route];
+			return this.route_map[route];
+		},
+
+		get_route_map() {
+			const read_only_routes = {
+				'marketplace/home': Home,
+				'marketplace/search/:keyword': Search,
+				'marketplace/category/:category': Category,
+				'marketplace/item/:item': Item,
+				'marketplace/seller/:seller': Seller,
+				'marketplace/not-found': NotFound,
+			}
+
+			const registered_routes = {
+				'marketplace/profile': Profile,
+				'marketplace/saved-items': SavedItems,
+				'marketplace/publish': Publish,
+				'marketplace/published-items': PublishedItems,
+				'marketplace/buying': Buying,
+				'marketplace/buying/:item': Messages,
+				'marketplace/selling': Selling,
+				'marketplace/selling/:buyer/:item': Messages
+			}
+
+			const hub_registered = hub.settings.registered && frappe.session.user === hub.settings.company_email;
+
+			return hub_registered
+				? Object.assign({}, read_only_routes, registered_routes)
+				: read_only_routes;
 		}
 	}
 }
