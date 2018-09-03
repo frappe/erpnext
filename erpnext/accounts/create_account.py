@@ -27,9 +27,9 @@ def create_account():
         report_type = frappe.form_dict.get('report_type')
         parent_account = frappe.form_dict.get('parent_account')
         account_type = frappe.form_dict.get('account_type')
-        tax_rate = frappe.form_dict.get('tax_rate'])
+        tax_rate = frappe.form_dict.get('tax_rate')
         freeze_account = frappe.form_dict.get('freeze_account')
-        balance_must_be = frappe.form_dict.get('balance_must_be'])
+        balance_must_be = frappe.form_dict.get('balance_must_be')
         
         if not parent_account and not (
             root_type or report_type or account_type or tax_rate or freeze_account or balance_must_be):
