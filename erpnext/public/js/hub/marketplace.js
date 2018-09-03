@@ -29,13 +29,10 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.setup_events();
 			this.refresh();
 
-			if (is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
-				// show buttons only to System Manager
-				if (!hub.is_seller_registered()) {
-					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
-				} else {
-					this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
-				}
+			if (!hub.is_seller_registered()) {
+				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+			} else {
+				this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
 			}
 		});
 	}
@@ -98,6 +95,11 @@ erpnext.hub.Marketplace = class Marketplace {
 			return;
 		}
 
+		if (!is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
+			frappe.msgprint(__('You need to be a user with System Manager and Item Manager roles to register on Marketplace.'));
+			return;
+		}
+
 		this.register_dialog = ProfileDialog(
 			__('Become a Seller'),
 			{
@@ -126,6 +128,11 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	show_add_user_dialog() {
+		if (!is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
+			frappe.msgprint(__('You need to be a user with System Manager and Item Manager roles to add users to Marketplace.'));
+			return;
+		}
+
 		this.get_unregistered_users()
 			.then(r => {
 				const user_list = r.message;
