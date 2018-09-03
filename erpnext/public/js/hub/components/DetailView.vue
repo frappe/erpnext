@@ -38,7 +38,7 @@
 					</div>
 				</div>
 
-				<div v-if="menu_items" class="col-md-1">
+				<div v-if="menu_items && menu_items.length" class="col-md-1">
 					<div class="dropdown pull-right hub-item-dropdown">
 						<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
 							<span class="caret"></span>
