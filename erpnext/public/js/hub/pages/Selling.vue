@@ -17,15 +17,15 @@
 					</div>
 				</item-list-card>
 				<div class="hub-list-item" v-for="(message, index) in item.received_messages" :key="index"
-					v-route="'marketplace/selling/' + message.buyer_email + '/' + item.name"
+					v-route="'marketplace/selling/' + message.buyer + '/' + item.name"
 				>
 					<div class="hub-list-left">
 						<div class="hub-list-body">
 							<div class="hub-list-title">
-								{{ message.buyer }}
+								{{ message.buyer_name }}
 							</div>
 							<div class="hub-list-subtitle">
-								{{ message.sender }}: {{ message.content }}
+								{{ message.sender }}: {{ message.message | striphtml }}
 							</div>
 						</div>
 					</div>
