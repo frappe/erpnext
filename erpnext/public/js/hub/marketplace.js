@@ -20,8 +20,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.$parent = $(parent);
 		this.page = parent.page;
 
-		frappe.model.with_doc('Marketplace Settings').then(doc => {
-			hub.settings = doc;
+		this.update_hub_settings().then(() => {
 
 			this.setup_header();
 			this.make_sidebar();
@@ -78,10 +77,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		});
 
 		erpnext.hub.on('seller-registered', () => {
-			this.page.clear_primary_action()
-			frappe.model.with_doc('Marketplace Settings').then((doc)=> {
-				hub.settings = doc;
-			});
+			this.page.clear_primary_action();
 		});
 	}
 
@@ -121,8 +117,12 @@ erpnext.hub.Marketplace = class Marketplace {
 		}).then((r) => {
 			if (r.message && r.message.ok) {
 				this.register_dialog.hide();
-				frappe.set_route('marketplace', 'publish');
-				erpnext.hub.trigger('seller-registered');
+
+				this.update_hub_settings()
+					.then(() => {
+						frappe.set_route('marketplace', 'publish');
+						erpnext.hub.trigger('seller-registered');
+					});
 			}
 		});
 	}
@@ -181,6 +181,11 @@ erpnext.hub.Marketplace = class Marketplace {
 		return frappe.call('erpnext.hub_node.api.get_unregistered_users')
 	}
 
+	update_hub_settings() {
+		return frappe.db.get_doc('Marketplace Settings').then(doc => {
+			hub.settings = doc;
+		});
+	}
 }
 
 Object.assign(hub, {
