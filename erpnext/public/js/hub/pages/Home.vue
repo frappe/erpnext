@@ -9,7 +9,18 @@
 			v-model="search_value"
 		/>
 
-		<div v-for="section in sections" :key="section.title">
+		<div v-if="show_skeleton">
+			<section-header>
+				<h4 class="hub-skeleton">Explore Explore Explore</h4>
+			</section-header>
+			<div class="row">
+				<div class="col-md-3 col-sm-4 col-xs-6 hub-card-container" v-for="(f, $index) in [1, 2, 3, 4, 5, 6, 7]" :key="$index">
+					<div class="hub-skeleton" style="height: 262px; width: 100%; margin-bottom: 25px;"></div>
+				</div>
+			</div>
+		</div>
+
+		<div v-else v-for="section in sections" :key="section.title">
 
 			<section-header>
 				<h4>{{ section.title }}</h4>
@@ -36,6 +47,7 @@ export default {
 			search_value: '',
 
 			sections: [],
+			show_skeleton: true,
 
 			// Constants
 			search_placeholder: __('Search for anything ...'),
@@ -52,6 +64,8 @@ export default {
 				country: frappe.defaults.get_user_default('country')
 			})
 			.then((data) => {
+				this.show_skeleton = false;
+
 				this.sections.push({
 					title: __('Explore'),
 					items: data.random_items
