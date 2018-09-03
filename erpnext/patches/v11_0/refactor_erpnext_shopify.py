@@ -21,9 +21,13 @@ def execute():
 		setup_app_type()
 
 def setup_app_type():
-	shopify_settings = frappe.get_doc("Shopify Settings")
-	shopify_settings.app_type = 'Private'
-	shopify_settings.update_price_in_erpnext_price_list =  0 if getattr(shopify_settings, 'push_prices_to_shopify', None) else 1
-	shopify_settings.flags.ignore_mandatory = True
-	shopify_settings.ignore_permissions = True
-	shopify_settings.save()
+	try:
+		shopify_settings = frappe.get_doc("Shopify Settings")
+		shopify_settings.app_type = 'Private'
+		shopify_settings.update_price_in_erpnext_price_list =  0 if getattr(shopify_settings, 'push_prices_to_shopify', None) else 1
+		shopify_settings.flags.ignore_mandatory = True
+		shopify_settings.ignore_permissions = True
+		shopify_settings.save()
+	except Exception:
+		frappe.db.set_value("Shopify Shopify", None, "enable_shopify", 0)
+		frappe.log_error(frappe.get_traceback())
