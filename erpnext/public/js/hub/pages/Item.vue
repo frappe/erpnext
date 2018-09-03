@@ -19,7 +19,7 @@
 				:value="item_views_and_ratings"
 			></detail-header-item>
 
-			<button slot="detail-header-item"
+			<button v-if="primary_action" slot="detail-header-item"
 				class="btn btn-primary btn-sm margin-top"
 				@click="primary_action.action"
 			>
@@ -56,7 +56,7 @@ export default {
 			menu_items: [
 				{
 					label: __('Save Item'),
-					condition: !this.is_own_item,
+					condition: hub.is_user_registered() && !this.is_own_item,
 					action: this.add_to_saved_items
 				},
 				{
@@ -66,12 +66,12 @@ export default {
 				},
 				{
 					label: __('Edit Details'),
-					condition: this.is_own_item,
+					condition: hub.is_user_registered() && this.is_own_item,
 					action: this.edit_details
 				},
 				{
 					label: __('Unpublish Item'),
-					condition: this.is_own_item,
+					condition: hub.is_user_registered() && this.is_own_item,
 					action: this.unpublish_item
 				}
 			]
@@ -81,7 +81,7 @@ export default {
 		is_own_item() {
 			let is_own_item = false;
 			if(this.item) {
-				if(this.item.hub_seller === hub.setting.company_email) {
+				if(this.item.hub_seller === hub.settings.hub_seller_name) {
 					is_own_item = true;
 				}
 			}
@@ -125,9 +125,13 @@ export default {
 		},
 
 		primary_action() {
-			return {
-				label: __('Contact Seller'),
-				action: this.contact_seller.bind(this)
+			if (hub.is_user_registered()) {
+				return {
+					label: __('Contact Seller'),
+					action: this.contact_seller.bind(this)
+				}
+			} else {
+				return undefined;
 			}
 		}
 	},
@@ -190,9 +194,9 @@ export default {
 		},
 
 		add_to_saved_items() {
-			hub.call('add_item_to_seller_saved_items', {
+			hub.call('add_item_to_user_saved_items', {
 				hub_item_name: this.hub_item_name,
-				hub_seller: hub.settings.company_email
+				hub_user: frappe.session.user
 			})
 			.then(() => {
 				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`
@@ -224,13 +228,11 @@ export default {
 					if (!message) return;
 
 					hub.call('send_message', {
-						from_seller: hub.settings.company_email,
-						to_seller: this.item.hub_seller,
 						hub_item: this.item.name,
 						message
 					})
 						.then(() => {
-							d.hide();
+							this.contact_seller_dialog.hide();
 							frappe.set_route('marketplace', 'buying', this.item.name);
 							erpnext.hub.trigger('action:send_message')
 						});

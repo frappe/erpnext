@@ -7,98 +7,80 @@ import frappe, requests, json, time
 from frappe.model.document import Document
 from frappe.utils import add_years, now, get_datetime, get_datetime_str
 from frappe import _
+from frappe.frappeclient import FrappeClient
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
 class MarketplaceSettings(Document):
 
-	def validate(self):
-		self.site_name = frappe.utils.get_url()
+	def register_seller(self, company, company_description):
 
-	def get_marketplace_url(self):
-		return self.marketplace_url
+		country, currency, company_logo = frappe.db.get_value('Company', company,
+			['country', 'default_currency', 'company_logo'])
 
-	def register(self):
-		""" Create a User on hub.erpnext.org and return username/password """
-
-		if frappe.session.user == 'Administrator':
-			frappe.throw(_('Please login as another user to register on Marketplace'))
-
-		if 'System Manager' not in frappe.get_roles():
-			frappe.throw(_('Only users with System Manager role can register on Marketplace'), frappe.PermissionError)
-
-		self.site_name = frappe.utils.get_url()
-
-		data = {
-			'profile': self.as_json()
+		company_details = {
+			'company': company,
+			'country': country,
+			'currency': currency,
+			'company_description': company_description,
+			'company_logo': company_logo,
+			'site_name': frappe.utils.get_url()
 		}
-		post_url = self.get_marketplace_url() + '/api/method/hub.hub.api.register'
 
-		response = requests.post(post_url, data=data, headers = {'accept': 'application/json'})
+		hub_connection = self.get_connection()
 
-		response.raise_for_status()
+		response = hub_connection.post_request({
+			'cmd': 'hub.hub.api.add_hub_seller',
+			'company_details': json.dumps(company_details)
+		})
 
-		if response.ok:
-			message = response.json().get('message')
-		else:
-			frappe.throw(json.loads(response.text))
+		return response
 
-		if message.get('email'):
-			self.create_hub_connector(message)
-			self.registered = 1
-			self.save()
 
-		return message or None
+	def add_hub_user(self, user_email):
+		'''Create a Hub User and User record on hub server
+		and if successfull append it to Hub User table
+		'''
 
-	# def unregister(self):
-	# 	""" Disable the User on hub.erpnext.org"""
-
-	# 	hub_connector = frappe.get_doc(
-	# 		'Data Migration Connector', 'Hub Connector')
-
-	# 	connection = hub_connector.get_connection()
-	# 	response_doc = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
-
-	# 	if response_doc['enabled'] == 0:
-	# 		self.enabled = 0
-	# 		self.save()
-
-	def create_hub_connector(self, message):
-		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
-			hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
-			hub_connector.hostname = self.get_marketplace_url()
-			hub_connector.username = message['email']
-			hub_connector.password = message['password']
-			hub_connector.save()
+		if not self.registered:
 			return
 
-		frappe.get_doc({
-			'doctype': 'Data Migration Connector',
-			'connector_type': 'Frappe',
-			'connector_name': 'Hub Connector',
-			'hostname': self.get_marketplace_url(),
-			'username': message['email'],
-			'password': message['password']
-		}).insert()
+		hub_connection = self.get_connection()
 
-def reset_hub_publishing_settings(last_sync_datetime = ""):
-	doc = frappe.get_doc("Marketplace Settings", "Marketplace Settings")
-	doc.reset_publishing_settings(last_sync_datetime)
-	doc.in_callback = 1
-	doc.save()
+		first_name, last_name = frappe.db.get_value('User', user_email, ['first_name', 'last_name'])
 
-def reset_hub_settings(last_sync_datetime = ""):
-	doc = frappe.get_doc("Marketplace Settings", "Marketplace Settings")
-	doc.reset_publishing_settings(last_sync_datetime)
-	doc.reset_enable()
-	doc.in_callback = 1
-	doc.save()
-	frappe.msgprint(_("Successfully unregistered."))
+		hub_user = hub_connection.post_request({
+			'cmd': 'hub.hub.api.add_hub_user',
+			'user_email': user_email,
+			'first_name': first_name,
+			'last_name': last_name,
+			'hub_seller': self.hub_seller_name
+		})
 
-@frappe.whitelist()
-def register_seller(**kwargs):
-	settings = frappe.get_doc('Marketplace Settings')
-	settings.update(kwargs)
-	message = settings.register()
+		self.append('users', {
+			'user': hub_user.get('user_email'),
+			'hub_user_name': hub_user.get('hub_user_name'),
+			'password': hub_user.get('password')
+		})
 
-	return message.get('email')
+		self.save()
+
+	def get_hub_user(self, user):
+		'''Return the Hub User doc from the `users` table if password is set'''
+
+		filtered_users = filter(
+			lambda x: x.user == user and x.password,
+			self.users
+		)
+
+		if filtered_users:
+			return filtered_users[0]
+
+
+	def get_connection(self):
+		return FrappeClient(self.marketplace_url)
+
+
+	def unregister(self):
+		"""Disable the User on hubmarket.org"""
+		pass

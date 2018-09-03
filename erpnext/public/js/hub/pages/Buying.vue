@@ -13,8 +13,8 @@
 					v-route="'marketplace/buying/' + item.name"
 				>
 					<div slot="subtitle">
-						<span>{{item.recent_message.sender}}: </span>
-						<span>{{item.recent_message.content | striphtml}}</span>
+						<span>{{ get_sender(item.recent_message) }}: </span>
+						<span>{{ item.recent_message.message | striphtml }}</span>
 					</div>
 				</item-list-card>
 			</div>
@@ -47,6 +47,9 @@ export default {
 	methods: {
 		get_items_for_messages() {
 			return hub.call('get_buying_items_for_messages', {}, 'action:send_message');
+		},
+		get_sender(message) {
+			return message.sender === frappe.session.user ? __('You') : (message.sender_name || message.sender);
 		}
 	}
 }

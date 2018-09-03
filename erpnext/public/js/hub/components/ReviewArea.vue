@@ -56,8 +56,6 @@ export default {
 		},
 
 		on_submit_review(values) {
-			values.user = hub.settings.company_email;
-
 			this.review_area.reset();
 
 			hub.call('add_item_review', {

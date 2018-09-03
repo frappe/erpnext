@@ -20,17 +20,18 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.$parent = $(parent);
 		this.page = parent.page;
 
-		frappe.model.with_doc('Marketplace Settings').then(doc => {
-			hub.settings = doc;
-			const is_registered = hub.settings.registered;
-			const is_registered_seller = hub.settings.company_email === frappe.session.user;
+		this.update_hub_settings().then(() => {
+
 			this.setup_header();
 			this.make_sidebar();
 			this.make_body();
 			this.setup_events();
 			this.refresh();
-			if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
+
+			if (!hub.is_seller_registered()) {
 				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+			} else {
+				this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
 			}
 		});
 	}
@@ -76,10 +77,7 @@ erpnext.hub.Marketplace = class Marketplace {
 		});
 
 		erpnext.hub.on('seller-registered', () => {
-			this.page.clear_primary_action()
-			frappe.model.with_doc('Marketplace Settings').then((doc)=> {
-				hub.settings = doc;
-			});
+			this.page.clear_primary_action();
 		});
 	}
 
@@ -88,27 +86,125 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	show_register_dialog() {
+		if(frappe.session.user === 'Administrator') {
+			frappe.msgprint(__('You need to be a user other than Administrator with System Manager and Item Manager roles to register on Marketplace.'));
+			return;
+		}
+
+		if (!is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
+			frappe.msgprint(__('You need to be a user with System Manager and Item Manager roles to register on Marketplace.'));
+			return;
+		}
+
 		this.register_dialog = ProfileDialog(
 			__('Become a Seller'),
 			{
 				label: __('Register'),
-				on_submit: this.register_seller.bind(this)
+				on_submit: this.register_marketplace.bind(this)
 			}
 		);
 
 		this.register_dialog.show();
 	}
 
-	register_seller(form_values) {
+	register_marketplace({company, company_description}) {
 		frappe.call({
-		    method: 'erpnext.hub_node.doctype.marketplace_settings.marketplace_settings.register_seller',
-		    args: form_values
-		}).then(() => {
-			this.register_dialog.hide();
-			frappe.set_route('marketplace', 'publish');
+		    method: 'erpnext.hub_node.api.register_marketplace',
+		    args: {
+				company,
+				company_description
+			}
+		}).then((r) => {
+			if (r.message && r.message.ok) {
+				this.register_dialog.hide();
 
-		    erpnext.hub.trigger('seller-registered');
+				this.update_hub_settings()
+					.then(() => {
+						frappe.set_route('marketplace', 'publish');
+						erpnext.hub.trigger('seller-registered');
+					});
+			}
 		});
 	}
 
+	show_add_user_dialog() {
+		if (!is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
+			frappe.msgprint(__('You need to be a user with System Manager and Item Manager roles to add users to Marketplace.'));
+			return;
+		}
+
+		this.get_unregistered_users()
+			.then(r => {
+				const user_list = r.message;
+
+				const d = new frappe.ui.Dialog({
+					title: __('Add Users to Marketplace'),
+					fields: [
+						{
+							label: __('Users'),
+							fieldname: 'users',
+							fieldtype: 'MultiSelect',
+							reqd: 1,
+							get_data() {
+								return user_list;
+							}
+						}
+					],
+					primary_action({ users }) {
+						const selected_users = users.split(',').map(d => d.trim()).filter(Boolean);
+
+						if (!selected_users.every(user => user_list.includes(user))) {
+							d.set_df_property('users', 'description', __('Some emails are invalid'));
+							return;
+						} else {
+							d.set_df_property('users', 'description', '');
+						}
+
+						frappe.call('erpnext.hub_node.api.register_users', {
+							user_list: selected_users
+						})
+						.then(r => {
+							d.hide();
+
+							if (r.message && r.message.length) {
+								frappe.show_alert(__('Added {0} users', [r.message.length]));
+							}
+						});
+					}
+				});
+
+				d.show();
+			});
+	}
+
+	get_unregistered_users() {
+		return frappe.call('erpnext.hub_node.api.get_unregistered_users')
+	}
+
+	update_hub_settings() {
+		return frappe.db.get_doc('Marketplace Settings').then(doc => {
+			hub.settings = doc;
+		});
+	}
+}
+
+Object.assign(hub, {
+	is_seller_registered() {
+		return hub.settings.registered;
+	},
+
+	is_user_registered() {
+		return this.is_seller_registered() && hub.settings.users
+			.filter(hub_user => hub_user.user === frappe.session.user)
+			.length === 1;
+	},
+});
+
+/**
+ * Returns true if list_a is subset of list_b
+ * @param {Array} list_a
+ * @param {Array} list_b
+ */
+function is_subset(list_a, list_b) {
+	return list_a.every(item => list_b.includes(item));
 }
