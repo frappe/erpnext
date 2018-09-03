@@ -39,8 +39,8 @@ function get_route_map() {
 		'marketplace/selling': Selling,
 		'marketplace/selling/:buyer/:item': Messages
 	}
-	const hub_registered = hub.settings.registered;
-	return hub_registered
+
+	return hub.is_seller_registered()
 		? Object.assign({}, read_only_routes, registered_routes)
 		: read_only_routes;
 }
