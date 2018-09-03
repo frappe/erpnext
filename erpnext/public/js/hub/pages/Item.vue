@@ -19,7 +19,7 @@
 				:value="item_views_and_ratings"
 			></detail-header-item>
 
-			<button slot="detail-header-item"
+			<button v-if="primary_action" slot="detail-header-item"
 				class="btn btn-primary btn-sm margin-top"
 				@click="primary_action.action"
 			>
@@ -56,7 +56,7 @@ export default {
 			menu_items: [
 				{
 					label: __('Save Item'),
-					condition: !this.is_own_item,
+					condition: hub.is_user_registered() && !this.is_own_item,
 					action: this.add_to_saved_items
 				},
 				{
@@ -66,12 +66,12 @@ export default {
 				},
 				{
 					label: __('Edit Details'),
-					condition: this.is_own_item,
+					condition: hub.is_user_registered() && this.is_own_item,
 					action: this.edit_details
 				},
 				{
 					label: __('Unpublish Item'),
-					condition: this.is_own_item,
+					condition: hub.is_user_registered() && this.is_own_item,
 					action: this.unpublish_item
 				}
 			]
@@ -125,9 +125,13 @@ export default {
 		},
 
 		primary_action() {
-			return {
-				label: __('Contact Seller'),
-				action: this.contact_seller.bind(this)
+			if (hub.is_user_registered()) {
+				return {
+					label: __('Contact Seller'),
+					action: this.contact_seller.bind(this)
+				}
+			} else {
+				return undefined;
 			}
 		}
 	},
