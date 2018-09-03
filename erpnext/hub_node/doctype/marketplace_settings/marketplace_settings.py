@@ -15,18 +15,16 @@ class MarketplaceSettings(Document):
 
 	def register_seller(self, company, company_description):
 
-		country, currency, description = frappe.db.get_value('Company', company,
-			['country', 'default_currency', 'company_description'])
+		country, currency, company_logo = frappe.db.get_value('Company', company,
+			['country', 'default_currency', 'company_logo'])
 
 		company_details = {
 			'company': company,
 			'country': country,
-			# 'city': '',
 			'currency': currency,
 			'company_description': company_description,
-			# 'company_logo': company_logo,
-
-			'site_name': frappe.utils.get_url(),
+			'company_logo': company_logo,
+			'site_name': frappe.utils.get_url()
 		}
 
 		hub_connection = self.get_connection()

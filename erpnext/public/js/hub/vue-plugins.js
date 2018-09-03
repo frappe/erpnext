@@ -62,5 +62,5 @@ Vue.directive('img-src', {
 });
 
 Vue.filter('striphtml', function (text) {
-	return strip_html(text);
+	return strip_html(text || '');
 });

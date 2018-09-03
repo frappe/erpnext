@@ -24,16 +24,10 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 				}
 			}
 		},
-		// {
-		// 	fieldname: 'company_logo',
-		// 	label: __('Logo'),
-		// 	fieldtype: 'Attach Image',
-		// 	read_only: true
-		// },
 		{
+			label: __('About your company'),
 			fieldname: 'company_description',
-			label: __('About Your Company'),
-			fieldtype: 'Long Text'
+			fieldtype: 'Text'
 		}
 	];
 
@@ -48,7 +42,7 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 			// TODO: Say "we notice that the company description and logo isn't set. Please set them in master."
 			// Only then allow to register
 
-			const mandatory_fields = ['company'];
+			const mandatory_fields = ['company', 'company_description'];
 			mandatory_fields.forEach(field => {
 				const value = form_values[field];
 				if (!value) {
@@ -65,7 +59,7 @@ const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 	// Post create
 	const default_company = frappe.defaults.get_default('company');
 	dialog.set_value('company', default_company);
-	dialog.set_value('company_email', frappe.session.user);
+	dialog.set_value('email', frappe.session.user);
 
 	return dialog;
 }

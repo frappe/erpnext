@@ -22,17 +22,20 @@ erpnext.hub.Marketplace = class Marketplace {
 
 		frappe.model.with_doc('Marketplace Settings').then(doc => {
 			hub.settings = doc;
-			const is_registered = hub.settings.registered;
-			const is_registered_seller = hub.settings.company_email === frappe.session.user;
+
 			this.setup_header();
 			this.make_sidebar();
 			this.make_body();
 			this.setup_events();
 			this.refresh();
-			if (!is_registered && !is_registered_seller && frappe.user_roles.includes('System Manager')) {
-				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
-			} else {
-				this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
+
+			if (is_subset(['System Manager', 'Item Manager'], frappe.user_roles)) {
+				// show buttons only to System Manager
+				if (!hub.is_seller_registered()) {
+					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+				} else {
+					this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
+				}
 			}
 		});
 	}
@@ -118,45 +121,73 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	show_add_user_dialog() {
-		const user_list = Object.keys(frappe.boot.user_info)
-			.filter(user => !['Administrator', 'Guest', frappe.session.user].includes(user));
-		const d = new frappe.ui.Dialog({
-			title: __('Add Users to Marketplace'),
-			fields: [
-				{
-					label: __('Users'),
-					fieldname: 'users',
-					fieldtype: 'MultiSelect',
-					reqd: 1,
-					get_data() {
-						return user_list;
-					}
-				}
-			],
-			primary_action({ users }) {
-				const selected_users = users.split(',').map(d => d.trim()).filter(Boolean);
+		this.get_unregistered_users()
+			.then(r => {
+				const user_list = r.message;
 
-				if (!selected_users.every(user => user_list.includes(user))) {
-					d.set_df_property('users', 'description', __('Some emails are invalid'));
-					return;
-				} else {
-					d.set_df_property('users', 'description', '');
-				}
+				const d = new frappe.ui.Dialog({
+					title: __('Add Users to Marketplace'),
+					fields: [
+						{
+							label: __('Users'),
+							fieldname: 'users',
+							fieldtype: 'MultiSelect',
+							reqd: 1,
+							get_data() {
+								return user_list;
+							}
+						}
+					],
+					primary_action({ users }) {
+						const selected_users = users.split(',').map(d => d.trim()).filter(Boolean);
 
-				frappe.call('erpnext.hub_node.api.register_users', {
-					user_list: selected_users
-				})
-				.then(r => {
-					d.hide();
+						if (!selected_users.every(user => user_list.includes(user))) {
+							d.set_df_property('users', 'description', __('Some emails are invalid'));
+							return;
+						} else {
+							d.set_df_property('users', 'description', '');
+						}
 
-					if (r.message && r.message.length) {
-						frappe.show_alert('Added {0} users', [r.message.length]);
+						frappe.call('erpnext.hub_node.api.register_users', {
+							user_list: selected_users
+						})
+						.then(r => {
+							d.hide();
+
+							if (r.message && r.message.length) {
+								frappe.show_alert(__('Added {0} users', [r.message.length]));
+							}
+						});
 					}
 				});
-			}
-		});
 
-		d.show();
+				d.show();
+			});
 	}
 
+	get_unregistered_users() {
+		return frappe.call('erpnext.hub_node.api.get_unregistered_users')
+	}
+
+}
+
+Object.assign(hub, {
+	is_seller_registered() {
+		return hub.settings.registered;
+	},
+
+	is_user_registered() {
+		return this.is_seller_registered() && hub.settings.users
+			.filter(hub_user => hub_user.user === frappe.session.user)
+			.length === 1;
+	},
+});
+
+/**
+ * Returns true if list_a is subset of list_b
+ * @param {Array} list_a
+ * @param {Array} list_b
+ */
+function is_subset(list_a, list_b) {
+	return list_a.every(item => list_b.includes(item));
 }

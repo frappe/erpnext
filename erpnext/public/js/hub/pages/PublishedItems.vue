@@ -5,10 +5,10 @@
 	>
 		<section-header>
 			<div>
-				<h5>{{ page_title }}</h5>
+				<h5>{{ __('Published Items') }}</h5>
 				<p v-if="items.length"
 					class="text-muted margin-bottom">
-					{{ published_items_message }}
+					{{ __('You can publish upto 200 items.') }}
 				</p>
 			</div>
 
@@ -16,7 +16,7 @@
 				class="btn btn-default btn-xs publish-items"
 				v-route="'marketplace/publish'"
 			>
-				<span>{{ publish_button_text }}</span>
+				<span>{{ __('Publish More Items') }}</span>
 			</button>
 
 		</section-header>
@@ -26,7 +26,7 @@
 			:items="items"
 			:item_id_fieldname="item_id_fieldname"
 			:on_click="go_to_item_details_page"
-			:empty_state_message="empty_state_message"
+			:empty_state_message="__('You haven\'t published any items yet.')"
 			:empty_state_action="publish_page_action"
 		>
 		</item-cards-container>
@@ -44,16 +44,9 @@ export default {
 			publish_page_action: {
 				label: __('Publish Your First Items'),
 				on_click: () => {
-					frappe.set_route(`marketplace/home`);
+					frappe.set_route(`marketplace/publish`);
 				}
-			},
-
-			// Constants
-			page_title: __('Published Items'),
-			publish_button_text: __('Publish More Items'),
-			published_items_message: __('You can publish upto 200 items.'),
-			// TODO: Add empty state action
-			empty_state_message: __('You haven\'t published any items yet.')
+			}
 		};
 	},
 	created() {

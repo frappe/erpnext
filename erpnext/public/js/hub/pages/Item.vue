@@ -81,7 +81,7 @@ export default {
 		is_own_item() {
 			let is_own_item = false;
 			if(this.item) {
-				if(this.item.hub_seller === hub.setting.company_email) {
+				if(this.item.hub_seller === hub.settings.hub_seller_name) {
 					is_own_item = true;
 				}
 			}
@@ -224,13 +224,11 @@ export default {
 					if (!message) return;
 
 					hub.call('send_message', {
-						from_seller: hub.settings.company_email,
-						to_seller: this.item.hub_seller,
 						hub_item: this.item.name,
 						message
 					})
 						.then(() => {
-							d.hide();
+							this.contact_seller_dialog.hide();
 							frappe.set_route('marketplace', 'buying', this.item.name);
 							erpnext.hub.trigger('action:send_message')
 						});
