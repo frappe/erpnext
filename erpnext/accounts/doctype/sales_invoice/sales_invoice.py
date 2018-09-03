@@ -546,11 +546,12 @@ class SalesInvoice(SellingController):
 
 		for item in self.items:
 			if item.enable_deferred_revenue:
-				if date_diff(item.service_stop_date, item.service_start_date) < 0:
-					frappe.throw(_("Service Stop Date cannot be before Service Start Date"))
+				if item.service_stop_date:
+					if date_diff(item.service_stop_date, item.service_start_date) < 0:
+						frappe.throw(_("Service Stop Date cannot be before Service Start Date"))
 
-				if date_diff(item.service_stop_date, item.service_end_date) > 0:
-					frappe.throw(_("Service Stop Date cannot be after Service End Date"))
+					if date_diff(item.service_stop_date, item.service_end_date) > 0:
+						frappe.throw(_("Service Stop Date cannot be after Service End Date"))
 
 				if old_stop_dates and old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
 					frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
