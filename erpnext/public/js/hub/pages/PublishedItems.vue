@@ -22,7 +22,7 @@
 		</section-header>
 
 		<item-cards-container
-			:container_name="page_title"
+			:container_name="__('Published Items')"
 			:items="items"
 			:item_id_fieldname="item_id_fieldname"
 			:on_click="go_to_item_details_page"
