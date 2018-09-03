@@ -142,7 +142,7 @@ def publish_selected_items(items_to_publish):
 
 	try:
 		item_sync_preprocess(len(items))
-		load_base64_image_from_items(items)
+		convert_relative_image_urls_to_absolute(items)
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
@@ -183,29 +183,14 @@ def item_sync_postprocess():
 	frappe.db.set_value('Marketplace Settings', 'Marketplace Settings', 'sync_in_progress', 0)
 
 
-def load_base64_image_from_items(items):
+def convert_relative_image_urls_to_absolute(items):
+	from urlparse import urljoin
+
 	for item in items:
 		file_path = item['image']
-		file_name = os.path.basename(file_path)
-		base64content = None
 
-		if file_path.startswith('http'):
-			# fetch content and then base64 it
-			url = file_path
-			response = requests.get(url)
-			base64content = base64.b64encode(response.content)
-		else:
-			# read file then base64 it
-			file_path = os.path.abspath(get_file_path(file_path))
-			with io.open(file_path, 'rb') as f:
-				base64content = base64.b64encode(f.read())
-
-		image_data = json.dumps({
-			'file_name': file_name,
-			'base64': base64content
-		})
-
-		item['image'] = image_data
+		if file_path.startswith('/files/'):
+			item['image'] = urljoin(frappe.utils.get_url(), file_path)
 
 
 def get_hub_connection():
