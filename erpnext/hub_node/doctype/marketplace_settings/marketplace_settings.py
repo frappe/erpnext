@@ -13,9 +13,9 @@ from six import string_types
 
 class MarketplaceSettings(Document):
 
-	def register_seller(self, company):
+	def register_seller(self, company, company_description):
 
-		country, currency, company_description = frappe.db.get_value('Company', company,
+		country, currency, description = frappe.db.get_value('Company', company,
 			['country', 'default_currency', 'company_description'])
 
 		company_details = {
