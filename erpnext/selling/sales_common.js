@@ -145,15 +145,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.set_gross_profit(item);
 	},
 
-	discount_amount: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		if(!item.price_list_rate) {
-			item.discount_amount = 0.0;
-		} else {
-			this.price_list_rate(doc, cdt, cdn);
-		}
-	},
-
 	commission_rate: function() {
 		this.calculate_commission();
 		refresh_field("total_commission");
