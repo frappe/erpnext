@@ -113,7 +113,7 @@ DocType: Hotel Room Reservation,Guest Name,손님 이름
 DocType: Lab Prescription,Lab Prescription,실험실 처방전
 ,Delay Days,지연 일
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service Expense,서비스 비용
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +982,Serial Number: {0} is already referenced in Sales Invoice: {1},일련 번호 : {0}은 (는) 판매 송장에서 이미 참조되었습니다. {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +983,Serial Number: {0} is already referenced in Sales Invoice: {1},일련 번호 : {0}은 (는) 판매 송장에서 이미 참조되었습니다. {1}
 DocType: Bank Statement Transaction Invoice Item,Invoice,송장
 DocType: Purchase Invoice Item,Item Weight Details,품목 무게 세부 사항
 DocType: Asset Maintenance Log,Periodicity,주기성
@@ -466,6 +466,7 @@ DocType: Student Group Creation Tool Course,Student Group Creation Tool Course,�
 DocType: Lead,Do Not Contact,연락하지 말라
 apps/erpnext/erpnext/utilities/user_progress.py +210,People who teach at your organisation,조직에서 가르치는 사람들
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +123,Software Developer,소프트웨어 개발자
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,강사 네이밍 시스템&gt; 교육 환경 설정
 DocType: Item,Minimum Order Qty,최소 주문 수량
 DocType: Course Scheduling Tool,Course Start Date,코스 시작 날짜
 ,Student Batch-Wise Attendance,학생 배치 식 참석
@@ -613,6 +614,8 @@ DocType: Volunteer,Weekends,주말
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +131,Credit Note Amount,대변 메모 금액
 DocType: Setup Progress Action,Action Document,액션 문서
 DocType: Chapter Member,Website URL,웹 사이트 URL
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","이 문서를 취소하려면 사원 <a href=""#Form/Employee/{0}"">{0}</a> \을 (를) 삭제하십시오."
 ,Finished Goods,완성품
 DocType: Delivery Note,Instructions,지침
 DocType: Quality Inspection,Inspected By,검사
@@ -675,10 +678,11 @@ DocType: Journal Entry Account,Sales Order,판매 주문
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +67,Avg. Selling Rate,평균. 판매 비율
 DocType: Assessment Plan,Examiner Name,심사관 이름
 DocType: Lab Test Template,No Result,어떤 결과가 없습니다
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,설정&gt; 설정&gt; 이름 지정 시리즈를 통해 이름 지정 시리즈를 {0}으로 설정하십시오.
 DocType: Purchase Invoice Item,Quantity and Rate,수량 및 평가
 DocType: Delivery Note,% Installed,% 설치
 apps/erpnext/erpnext/utilities/user_progress.py +230,Classrooms/ Laboratories etc where lectures can be scheduled.,교실 / 강의는 예약 할 수 있습니다 연구소 등.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1339,Company currencies of both the companies should match for Inter Company Transactions.,두 회사의 회사 통화는 Inter Company Transactions와 일치해야합니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1340,Company currencies of both the companies should match for Inter Company Transactions.,두 회사의 회사 통화는 Inter Company Transactions와 일치해야합니다.
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +95,Please enter company name first,첫 번째 회사 이름을 입력하십시오
 DocType: Travel Itinerary,Non-Vegetarian,비 채식주의 자
 DocType: Purchase Invoice,Supplier Name,공급 업체 이름
@@ -956,7 +960,6 @@ apps/erpnext/erpnext/config/accounts.py +156,Update Bank Transaction Dates,업�
 apps/erpnext/erpnext/config/projects.py +41,Time Tracking,시간 추적
 DocType: Purchase Invoice,DUPLICATE FOR TRANSPORTER,전송자 용 복제
 apps/erpnext/erpnext/hr/doctype/employee_advance/employee_advance.py +57,Row {0}# Paid Amount cannot be greater than requested advance amount,행 {0} # 유료 금액은 요청 된 선금보다 클 수 없습니다.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,상품 코드&gt; 상품 그룹&gt; 브랜드
 DocType: Fiscal Year Company,Fiscal Year Company,회계 연도 회사
 DocType: Packing Slip Item,DN Detail,DN 세부 정보
 DocType: Training Event,Conference,회의
@@ -1006,7 +1009,7 @@ DocType: Student Batch Name,Batch Name,배치 이름
 DocType: Fee Validity,Max number of visit,최대 방문 횟수
 ,Hotel Room Occupancy,호텔 객실 점유
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +392,Timesheet created:,작업 표 작성 :
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1244,Please set default Cash or Bank account in Mode of Payment {0},지불 모드로 기본 현금 또는 은행 계정을 설정하십시오 {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1245,Please set default Cash or Bank account in Mode of Payment {0},지불 모드로 기본 현금 또는 은행 계정을 설정하십시오 {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,싸다
 DocType: GST Settings,GST Settings,GST 설정
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +81,Currency should be same as Price List Currency: {0},통화는 가격표 통화와 같아야합니다 통화 : {0}
@@ -1169,7 +1172,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +50,Reserved for 
 DocType: Soil Texture,Sand,모래
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +25,Energy,에너지
 DocType: Opportunity,Opportunity From,기회에서
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +970,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,행 {0} : {1} 품목 {2}에 필요한 일련 번호. 귀하는 {3}을 (를) 제공했습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +971,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,행 {0} : {1} 품목 {2}에 필요한 일련 번호. 귀하는 {3}을 (를) 제공했습니다.
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +79,Please select a table,표를 선택하십시오.
 DocType: BOM,Website Specifications,웹 사이트 사양
 DocType: Special Test Items,Particulars,상세
@@ -1188,7 +1191,6 @@ apps/erpnext/erpnext/projects/doctype/project/project.py +471,Please Update your
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py +26,Currency Exchange must be applicable for Buying or for Selling.,환전은 구매 또는 판매에 적용 할 수 있어야합니다.
 DocType: Item,Maximum sample quantity that can be retained,보존 할 수있는 최대 샘플 양
 DocType: Project Update,How is the Project Progressing Right Now?,프로젝트 진행 상황은 어떻게됩니까?
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,고객&gt; 고객 그룹&gt; 지역
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +482,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},행 {0} # 구매 주문 {3}에 대해 {1} 항목을 {2} 이상으로 이전 할 수 없습니다.
 apps/erpnext/erpnext/config/selling.py +158,Sales campaigns.,판매 캠페인.
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +117,Make Timesheet,표 만들기
@@ -1392,7 +1394,7 @@ DocType: Setup Progress Action,Action Field,액션 필드
 DocType: Healthcare Settings,Manage Customer,고객 관리
 DocType: Delivery Trip,Delivery Stops,배달 중지
 DocType: Salary Slip,Working Days,작업 일
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +556,Cannot change Service Stop Date for item in row {0},{0} 행의 항목에 대한 서비스 중지 날짜를 변경할 수 없습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +557,Cannot change Service Stop Date for item in row {0},{0} 행의 항목에 대한 서비스 중지 날짜를 변경할 수 없습니다.
 DocType: Serial No,Incoming Rate,수신 속도
 DocType: Packing Slip,Gross Weight,총중량
 DocType: Leave Type,Encashment Threshold Days,상한선 인계 일수
@@ -1419,7 +1421,7 @@ apps/erpnext/erpnext/stock/report/warehouse_wise_item_balance_age_and_value/ware
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +375,Unable to find Time Slot in the next {0} days for Operation {1},작업에 대한 다음 {0} 일 시간 슬롯을 찾을 수 없습니다 {1}
 DocType: Work Order,Plan material for sub-assemblies,서브 어셈블리 계획 물질
 apps/erpnext/erpnext/config/selling.py +97,Sales Partners and Territory,판매 파트너 및 지역
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +609,BOM {0} must be active,BOM {0}이 활성화되어 있어야합니다
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +612,BOM {0} must be active,BOM {0}이 활성화되어 있어야합니다
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +427,No Items available for transfer,전송 가능한 항목이 없습니다.
 DocType: Employee Boarding Activity,Activity Name,활동 이름
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +797,Change Release Date,출시일 변경
@@ -1971,7 +1973,7 @@ apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +173,From Party Name
 DocType: Student Group Student,Group Roll Number,그룹 롤 번호
 DocType: Student Group Student,Group Roll Number,그룹 롤 번호
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +177,"For {0}, only credit accounts can be linked against another debit entry",{0} 만 신용 계정은 자동 이체 항목에 링크 할 수 있습니다 들어
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +646,Delivery Note {0} is not submitted,배송 참고 {0} 제출되지
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +647,Delivery Note {0} is not submitted,배송 참고 {0} 제출되지
 apps/erpnext/erpnext/stock/get_item_details.py +167,Item {0} must be a Sub-contracted Item,{0} 항목 하위 계약 품목이어야합니다
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +44,Capital Equipments,자본 장비
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +33,"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","가격 규칙은 첫 번째 항목, 항목 그룹 또는 브랜드가 될 수있는 필드 '에 적용'에 따라 선택됩니다."
@@ -2014,7 +2016,7 @@ DocType: Grading Scale Interval,Grade Code,등급 코드
 DocType: POS Item Group,POS Item Group,POS 항목 그룹
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +17,Email Digest:,다이제스트 이메일 :
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +23,Alternative item must not be same as item code,대체 품목은 품목 코드와 같을 수 없습니다.
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +625,BOM {0} does not belong to Item {1},BOM {0} 아이템에 속하지 않는 {1}
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +628,BOM {0} does not belong to Item {1},BOM {0} 아이템에 속하지 않는 {1}
 DocType: Sales Partner,Target Distribution,대상 배포
 DocType: Purchase Invoice,06-Finalization of Provisional assessment,06 - 임시 평가 마무리
 DocType: Salary Slip,Bank Account No.,은행 계좌 번호
@@ -2491,7 +2493,6 @@ DocType: Lab Test,Technician Name,기술자 이름
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +411,"Cannot ensure delivery by Serial No as \
 					Item {0} is added with and without Ensure Delivery by \
 					Serial No.",\ Item {0}이 \ Serial No.로 배달 보장 여부와 함께 추가되므로 일련 번호로 배송 할 수 없습니다.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,공급 업체&gt; 공급 업체 유형
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,송장의 취소에 지불 연결 해제
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +16,Current Odometer reading entered should be greater than initial Vehicle Odometer {0},입력 현재 주행 독서는 초기 차량 주행보다 커야합니다 {0}
 DocType: Restaurant Reservation,No Show,더 쇼 없다
@@ -2591,7 +2592,6 @@ apps/erpnext/erpnext/utilities/user_progress.py +39,Opening Balances,기초 잔�
 DocType: Asset,Depreciation Method,감가 상각 방법
 DocType: Purchase Taxes and Charges,Is this Tax included in Basic Rate?,이 세금은 기본 요금에 포함되어 있습니까?
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +66,Total Target,총 대상
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,강사 네이밍 시스템&gt; 교육 환경 설정
 DocType: Soil Texture,Sand Composition (%),모래 조성 (%)
 DocType: Job Applicant,Applicant for a Job,작업에 대한 신청자
 DocType: Production Plan Material Request,Production Plan Material Request,생산 계획 자료 요청
@@ -2650,7 +2650,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +26,"Numbe
 DocType: Sales Order,To Deliver and Bill,제공 및 법안
 DocType: Student Group,Instructors,강사
 DocType: GL Entry,Credit Amount in Account Currency,계정 통화 신용의 양
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +612,BOM {0} must be submitted,BOM은 {0} 제출해야합니다
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +615,BOM {0} must be submitted,BOM은 {0} 제출해야합니다
 apps/erpnext/erpnext/config/accounts.py +489,Share Management,공유 관리
 DocType: Authorization Control,Authorization Control,권한 제어
 apps/erpnext/erpnext/controllers/buying_controller.py +403,Row #{0}: Rejected Warehouse is mandatory against rejected Item {1},행 번호 {0} : 창고 거부 거부 항목에 대해 필수입니다 {1}
@@ -3110,6 +3110,7 @@ DocType: Blanket Order Item,Ordered Quantity,주문 수량
 apps/erpnext/erpnext/public/js/setup_wizard.js +118,"e.g. ""Build tools for builders""","예) ""빌더를 위한  빌드 도구"""
 DocType: Grading Scale,Grading Scale Intervals,등급 스케일 간격
 DocType: Item Default,Purchase Defaults,구매 기본값
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,인력&gt; 인사말 설정에서 Employee Naming System을 설정하십시오.
 apps/erpnext/erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py +39,Profit for the year,1 년 이익
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +125,{0} {1}: Accounting Entry for {2} can only be made in currency: {3},{0} {1} {2}에 대한 회계 항목 만 통화 할 수있다 : {3}
 DocType: Fee Schedule,In Process,처리 중
@@ -3120,7 +3121,7 @@ DocType: Cash Flow Mapping,Cash Flow Mapping,현금 흐름 매핑
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +396,{0} against Sales Order {1},{0} 판매 주문에 대한 {1}
 DocType: Account,Fixed Asset,고정 자산
 apps/erpnext/erpnext/config/stock.py +327,Serialized Inventory,직렬화 된 재고
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1204,Invalid {0} for Inter Company Invoice.,회사 간 송장에 대해 {0}이 (가) 잘못되었습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1205,Invalid {0} for Inter Company Invoice.,회사 간 송장에 대해 {0}이 (가) 잘못되었습니다.
 ,Department Analytics,부서 분석
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74,Email not found in default contact,기본 연락처에 이메일이 없습니다.
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +23,Generate Secret,비밀 생성
@@ -3187,7 +3188,6 @@ apps/erpnext/erpnext/public/js/utils.js +109,Total Unpaid: {0},총 미지급 : {
 DocType: BOM Website Operation,BOM Website Operation,BOM 웹 사이트 운영
 DocType: Bank Statement Transaction Payment Item,outstanding_amount,outstanding_amount
 DocType: Supplier Scorecard,Supplier Score,공급자 점수
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,공급 업체&gt; 공급 업체 그룹
 apps/erpnext/erpnext/healthcare/doctype/patient_encounter/patient_encounter.js +37,Schedule Admission,일정표
 DocType: Tax Withholding Rate,Cumulative Transaction Threshold,누적 트랜잭션 임계 값
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,총 청구 AMT 사의
@@ -3324,7 +3324,7 @@ DocType: Travel Request,Any other details,기타 세부 정보
 DocType: Water Analysis,Origin,유래
 apps/erpnext/erpnext/controllers/status_updater.py +207,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,이 문서에 의해 제한을 초과 {0} {1} 항목 {4}. 당신은하고 있습니다 동일에 대한 또 다른 {3} {2}?
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1164,Please set recurring after saving,저장 한 후 반복 설정하십시오
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +852,Select change amount account,선택 변화량 계정
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +853,Select change amount account,선택 변화량 계정
 DocType: Purchase Invoice,Price List Currency,가격리스트 통화
 DocType: Naming Series,User must always select,사용자는 항상 선택해야합니다
 DocType: Stock Settings,Allow Negative Stock,음의 재고 허용
@@ -3398,6 +3398,7 @@ DocType: Buying Settings,Buying Settings,구매 설정
 DocType: Stock Entry Detail,BOM No. for a Finished Good Item,완제품 항목에 대한 BOM 번호
 DocType: Upload Attendance,Attendance To Date,날짜 출석
 DocType: Request for Quotation Supplier,No Quote,견적 없음
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,공급 업체&gt; 공급 업체 유형
 DocType: Support Search Source,Post Title Key,게시물 제목 키
 DocType: Warranty Claim,Raised By,에 의해 제기
 DocType: Payment Gateway Account,Payment Account,결제 계정
@@ -3423,7 +3424,7 @@ apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +76,View Fee
 apps/erpnext/erpnext/setup/doctype/company/company.js +55,Make Tax Template,세금 템플릿 만들기
 apps/erpnext/erpnext/public/js/conf.js +28,User Forum,사용자 포럼
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +321,Raw Materials cannot be blank.,원료는 비워 둘 수 없습니다.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1002,Row #{0} (Payment Table): Amount must be negative,행 # {0} (결제 표) : 금액은 음수 여야합니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1003,Row #{0} (Payment Table): Amount must be negative,행 # {0} (결제 표) : 금액은 음수 여야합니다.
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +539,"Could not update stock, invoice contains drop shipping item.","주식을 업데이트 할 수 없습니다, 송장은 하락 선박 항목이 포함되어 있습니다."
 DocType: Contract,Fulfilment Status,이행 상태
 DocType: Lab Test Sample,Lab Test Sample,실험실 테스트 샘플
@@ -3582,13 +3583,12 @@ DocType: Purchase Receipt Item,Recd Quantity,Recd 수량
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +167,Doc Date,문서 날짜
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +64,Fee Records Created - {0},요금 기록 작성 - {0}
 DocType: Asset Category Account,Asset Category Account,자산 분류 계정
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +997,Row #{0} (Payment Table): Amount must be positive,행 # {0} (지급 표) : 금액은 양수 여야합니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +998,Row #{0} (Payment Table): Amount must be positive,행 # {0} (지급 표) : 금액은 양수 여야합니다.
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +145,Cannot produce more Item {0} than Sales Order quantity {1},더 많은 항목을 생성 할 수 없습니다 {0}보다 판매 주문 수량 {1}
 apps/erpnext/erpnext/stock/doctype/item/item.js +422,Select Attribute Values,속성 값 선택
 DocType: Purchase Invoice,Reason For Issuing document,문서 발행 사유
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +578,Stock Entry {0} is not submitted,재고 입력 {0} 미작성
 DocType: Payment Reconciliation,Bank / Cash Account,은행 / 현금 계정
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,인력&gt; 인사말 설정에서 Employee Naming System을 설정하십시오.
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +47,Next Contact By cannot be same as the Lead Email Address,다음으로 연락으로는 리드 이메일 주소와 동일 할 수 없습니다
 DocType: Tax Rule,Billing City,결제시
 DocType: Asset,Manual,조작
@@ -3753,6 +3753,7 @@ DocType: Employee Education,Class / Percentage,클래스 / 비율
 DocType: Shopify Settings,Shopify Settings,쇼핑 설정
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +122,Head of Marketing and Sales,마케팅 및 영업 책임자
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +75,Income Tax,소득세
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,고객&gt; 고객 그룹&gt; 지역
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,트랙은 산업 유형에 의해 리드.
 apps/erpnext/erpnext/utilities/user_progress.py +101,Go to Letterheads,편지지로 이동
 DocType: Subscription,Cancel At End Of Period,기간 만료시 취소
@@ -3933,7 +3934,6 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +81,Select Seri
 DocType: BOM Item,Scrap %,스크랩 %
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +46,"Charges will be distributed proportionately based on item qty or amount, as per your selection","요금은 비례 적으로 사용자의 선택에 따라, 상품 수량 또는 금액에 따라 배포됩니다"
 DocType: Travel Request,Require Full Funding,완전한 자금 지원 필요
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,설치&gt; 번호 매기기 시리즈를 통해 출석을위한 번호 매기기 시리즈를 설정하십시오.
 DocType: Maintenance Visit,Purposes,목적
 DocType: Stock Entry,MAT-STE-.YYYY.-,매트 - 스티 - .YYYY.-
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +110,Atleast one item should be entered with negative quantity in return document,이어야 하나의 항목이 반환 문서에 부정적인 수량 입력해야합니다
@@ -4371,7 +4371,7 @@ DocType: Sales Invoice Item,Discount (%) on Price List Rate with Margin,증거�
 DocType: Sales Invoice Item,Discount (%) on Price List Rate with Margin,증거금율과 할인율 (%)
 DocType: Healthcare Service Unit Type,Rate / UOM,요율 / UOM
 apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py +59,All Warehouses,모든 창고
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1334,No {0} found for Inter Company Transactions.,회사 간 거래에 대해 {0}이 (가) 없습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1335,No {0} found for Inter Company Transactions.,회사 간 거래에 대해 {0}이 (가) 없습니다.
 DocType: Travel Itinerary,Rented Car,렌트카
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js +39,About your Company,회사 소개
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +139,Credit To account must be a Balance Sheet account,계정에 신용은 대차 대조표 계정이어야합니다
@@ -4845,8 +4845,6 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.ht
 apps/erpnext/erpnext/projects/doctype/task/task.py +54,Progress % for a task cannot be more than 100.,작업에 대한 진행 상황 % 이상 100 수 없습니다.
 DocType: Stock Reconciliation Item,Before reconciliation,계정조정전
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +12,To {0},에 {0}
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","이 문서를 취소하려면 사원 <a href=""#Form/Employee/{0}"">{0}</a> \을 (를) 삭제하십시오."
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),추가 세금 및 수수료 (회사 통화)
 apps/erpnext/erpnext/stock/doctype/item/item.py +493,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,상품 세금 행 {0} 유형의 세금 또는 수입 비용 또는 청구의 계정이 있어야합니다
 DocType: Sales Order,Partly Billed,일부 청구
@@ -4873,6 +4871,7 @@ DocType: Asset Category Account,Fixed Asset Account,고정 자산 계정
 DocType: Salary Structure Assignment,Variable,변하기 쉬운
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.js +47,From Delivery Note,배달 주에서
 DocType: Chapter,Members,회원
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,셋업&gt; 번호 매기기 시리즈를 통해 출석을위한 번호 매기기 시리즈를 설정하십시오.
 DocType: Student,Student Email Address,학생 이메일 주소
 DocType: Item,Hub Warehouse,허브 창고
 DocType: Assessment Plan,From Time,시간에서
@@ -5000,7 +4999,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,할인 금액 후 세액
 DocType: Patient,Inpatient Status,입원 환자 현황
 DocType: Daily Work Summary Settings,Daily Work Summary Settings,매일 작업 요약 설정
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1329,Selected Price List should have buying and selling fields checked.,선택된 가격 목록에는 매매 필드를 점검해야합니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1330,Selected Price List should have buying and selling fields checked.,선택된 가격 목록에는 매매 필드를 점검해야합니다.
 apps/erpnext/erpnext/controllers/buying_controller.py +680,Please enter Reqd by Date,Reqd by Date를 입력하십시오.
 DocType: Payment Entry,Internal Transfer,내부 전송
 DocType: Asset Maintenance,Maintenance Tasks,유지 관리 작업
@@ -5161,7 +5160,7 @@ DocType: Staffing Plan Detail,Vacancies,공석
 DocType: Hotel Room,Hotel Room,호텔 방
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +57,Account {0} does not belongs to company {1},계정 {0} 수행은 회사 소유하지 {1}
 DocType: Leave Type,Rounding,반올림
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +967,Serial Numbers in row {0} does not match with Delivery Note,행 {0}의 일련 번호가 배달 참고와 일치하지 않습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +968,Serial Numbers in row {0} does not match with Delivery Note,행 {0}의 일련 번호가 배달 참고와 일치하지 않습니다.
 DocType: Employee Benefit Application,Dispensed Amount (Pro-rated),분배 된 금액 (비례 계산 된 금액)
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +36,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Group, Campaign, Sales Partner etc.","그런 다음 고객, 고객 그룹, 지역, 공급 업체, 공급 업체 그룹, 캠페인, 영업 파트너 등을 기준으로 가격 규칙이 필터링됩니다."
 DocType: Student,Guardian Details,가디언의 자세한 사항
@@ -5170,7 +5169,7 @@ DocType: Agriculture Task,Start Day,시작일
 DocType: Vehicle,Chassis No,섀시 없음
 DocType: Payment Request,Initiated,개시
 DocType: Production Plan Item,Planned Start Date,계획 시작 날짜
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +630,Please select a BOM,BOM을 선택하십시오.
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +633,Please select a BOM,BOM을 선택하십시오.
 DocType: Purchase Invoice,Availed ITC Integrated Tax,ITC 통합 세금 사용 가능
 DocType: Purchase Order Item,Blanket Order Rate,담요 주문률
 apps/erpnext/erpnext/hooks.py +156,Certification,인증
@@ -5243,6 +5242,7 @@ DocType: Student Admission Program,Maximum Age,최대 연령
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +28,Please wait 3 days before resending the reminder.,알림을 다시 보내기 전에 3 일을 기다려주십시오.
 DocType: Landed Cost Voucher,Purchase Receipts,구매 영수증
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +29,How Pricing Rule is applied?,어떻게 가격의 규칙이 적용됩니다?
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,상품 코드&gt; 상품 그룹&gt; 브랜드
 DocType: Stock Entry,Delivery Note No,납품서 없음
 DocType: Cheque Print Template,Message to show,메시지 표시합니다
 apps/erpnext/erpnext/public/js/setup_wizard.js +28,Retail,소매의
@@ -5441,7 +5441,7 @@ DocType: Journal Entry,Cash Entry,현금 항목
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse_tree.js +17,Child nodes can be only created under 'Group' type nodes,자식 노드은 &#39;그룹&#39;유형 노드에서 생성 할 수 있습니다
 DocType: Attendance Request,Half Day Date,하프 데이 데이트
 DocType: Academic Year,Academic Year Name,학년 이름
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1213,{0} not allowed to transact with {1}. Please change the Company.,{0}은 (는) {1} (으)로 거래 할 수 없습니다. 회사를 변경하십시오.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1214,{0} not allowed to transact with {1}. Please change the Company.,{0}은 (는) {1} (으)로 거래 할 수 없습니다. 회사를 변경하십시오.
 DocType: Sales Partner,Contact Desc,연락처 제품 설명
 DocType: Email Digest,Send regular summary reports via Email.,이메일을 통해 정기적으로 요약 보고서를 보냅니다.
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +288,Please set default account in Expense Claim Type {0},경비 요청 유형에 기본 계정을 설정하십시오 {0}
@@ -5551,7 +5551,7 @@ Updated via 'Time Log'",'소요시간 로그' 분단위 업데이트
 DocType: Customer,From Lead,리드에서
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,생산 발표 순서.
 apps/erpnext/erpnext/public/js/account_tree_grid.js +65,Select Fiscal Year...,회계 연도 선택 ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +625,POS Profile required to make POS Entry,POS 프로필 POS 항목을 만드는 데 필요한
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +626,POS Profile required to make POS Entry,POS 프로필 POS 항목을 만드는 데 필요한
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +15,"Loyalty Points will be calculated from the spent done (via the Sales Invoice), based on collection factor mentioned.",로열티 포인트는 언급 된 징수 요인에 근거하여 완료된 지출액 (판매 송장을 통해)에서 계산됩니다.
 DocType: Program Enrollment Tool,Enroll Students,학생 등록
 DocType: Company,HRA Settings,HRA 설정
@@ -5700,7 +5700,6 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +197,Item {0} is not s
 DocType: Accounts Settings,Accounts Settings,계정 설정
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,승인
 DocType: Loyalty Program,Customer Territory,고객 지역
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,설정&gt; 설정&gt; 이름 지정 시리즈를 통해 이름 지정 시리즈를 {0}으로 설정하십시오.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Number of new Account, it will be included in the account name as a prefix",새 계정 번호입니다. 계정 이름에 접두어로 포함됩니다.
 DocType: Maintenance Team Member,Team Member,팀 구성원
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +151,No Result to submit,제출할 결과가 없습니다.
@@ -5744,7 +5743,7 @@ DocType: Asset Repair,Asset Repair,자산 복구
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +145,Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2},행 {0} 다음 BOM 번호의 통화 {1} 선택한 통화 같아야한다 {2}
 DocType: Journal Entry Account,Exchange Rate,환율
 DocType: Patient,Additional information regarding the patient,환자에 관한 추가 정보
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +643,Sales Order {0} is not submitted,판매 주문 {0} 제출되지 않았습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +644,Sales Order {0} is not submitted,판매 주문 {0} 제출되지 않았습니다.
 DocType: Homepage,Tag Line,태그 라인
 DocType: Fee Component,Fee Component,요금 구성 요소
 apps/erpnext/erpnext/config/hr.py +286,Fleet Management,함대 관리
@@ -6191,6 +6190,7 @@ apps/erpnext/erpnext/templates/includes/cart.js +150,Something went wrong!,문�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +174,Warning: Leave application contains following block dates,경고 : 응용 프로그램이 다음 블록 날짜를 포함 남겨
 DocType: Bank Statement Settings,Transaction Data Mapping,트랜잭션 데이터 매핑
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +277,Sales Invoice {0} has already been submitted,판매 송장 {0}이 (가) 이미 제출되었습니다
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,공급 업체&gt; 공급 업체 그룹
 DocType: Salary Component,Is Tax Applicable,세금 적용 가능
 DocType: Supplier Scorecard Scoring Criteria,Score,점수
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +25,Fiscal Year {0} does not exist,회계 연도 {0} 존재하지 않습니다
@@ -6735,7 +6735,7 @@ apps/erpnext/erpnext/hr/doctype/department_approver/department_approver.py +17,P
 apps/erpnext/erpnext/hr/doctype/attendance_request/attendance_request.py +52,Attendance not submitted for {0} as it is a Holiday.,휴일인데 {0}에 출석하지 않았습니다.
 DocType: POS Profile,Account for Change Amount,변경 금액에 대한 계정
 DocType: Exchange Rate Revaluation,Total Gain/Loss,총 손익
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1206,Invalid Company for Inter Company Invoice.,회사 간 인보이스에 대한 회사가 잘못되었습니다.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1207,Invalid Company for Inter Company Invoice.,회사 간 인보이스에 대한 회사가 잘못되었습니다.
 DocType: Purchase Invoice,input service,입력 서비스
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +249,Row {0}: Party / Account does not match with {1} / {2} in {3} {4},행 {0} : 파티 / 계정과 일치하지 않는 {1} / {2}에서 {3} {4}
 DocType: Employee Promotion,Employee Promotion,직원 홍보

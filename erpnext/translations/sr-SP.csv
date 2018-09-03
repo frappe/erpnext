@@ -517,7 +517,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +404,{0} ag
 apps/erpnext/erpnext/accounts/doctype/account/account.py +108,You are not authorized to set Frozen value,Немате дозволу да постављате замрзнуту вредност
 ,Requested Items To Be Ordered,Tražene stavke za isporuku
 DocType: Employee Attendance Tool,Unmarked Attendance,Neobilježeno prisustvo
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +643,Sales Order {0} is not submitted,Prodajni nalog {0} nije potvrđen
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +644,Sales Order {0} is not submitted,Prodajni nalog {0} nije potvrđen
 DocType: Item,Default Material Request Type,Podrazumijevani zahtjev za tip materijala
 apps/erpnext/erpnext/config/crm.py +6,Sales Pipeline,Prodajna linija
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +703,Already completed,Već završen
@@ -749,7 +749,7 @@ DocType: Healthcare Settings,Patient Name,Ime pacijenta
 apps/erpnext/erpnext/public/js/payment/pos_payment.html +17,Write Off,Otpisati
 DocType: Notification Control,Delivery Note Message,Poruka na otpremnici
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +162,"Cannot delete Serial No {0}, as it is used in stock transactions","Ne može se obrisati serijski broj {0}, dok god se nalazi u dijelu Promjene na zalihama"
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +646,Delivery Note {0} is not submitted,Otpremnica {0} nije potvrđena
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +647,Delivery Note {0} is not submitted,Otpremnica {0} nije potvrđena
 apps/erpnext/erpnext/hr/doctype/employee/employee_tree.js +29,New Employee,Novi Zaposleni
 apps/erpnext/erpnext/public/js/pos/pos.html +98,Customers in Queue,Kupci na čekanju
 DocType: Purchase Invoice,Price List Currency,Valuta Cjenovnika
@@ -863,7 +863,7 @@ DocType: Purchase Invoice,Apply Additional Discount On,Primijeni dodatni popust 
 apps/erpnext/erpnext/buying/doctype/supplier/supplier_dashboard.py +6,This is based on transactions against this Supplier. See timeline below for details,Ovo je zasnovano na transkcijama ovog dobavljača. Pogledajte vremensku liniju ispod za dodatne informacije
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,Iznad 90 dana
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py +49,You have already assessed for the assessment criteria {}.,Већ сте оценили за критеријум оцењивања {}.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +967,Serial Numbers in row {0} does not match with Delivery Note,Serijski broj na poziciji {0} se ne poklapa sa otpremnicom
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +968,Serial Numbers in row {0} does not match with Delivery Note,Serijski broj na poziciji {0} se ne poklapa sa otpremnicom
 apps/erpnext/erpnext/public/js/templates/contact_list.html +37,New Contact,Novi kontakt
 DocType: Purchase Invoice,Returns,Povraćaj
 DocType: Delivery Note,Delivery To,Isporuka za
