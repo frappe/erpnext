@@ -93,6 +93,11 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	show_register_dialog() {
+		if(frappe.session.user === 'Administrator') {
+			frappe.msgprint(__('You need to be a user other than Administrator with System Manager and Item Manager roles to register on Marketplace.'));
+			return;
+		}
+
 		this.register_dialog = ProfileDialog(
 			__('Become a Seller'),
 			{
