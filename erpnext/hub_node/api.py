@@ -19,6 +19,7 @@ current_user = frappe.session.user
 @frappe.whitelist()
 def register_marketplace(company, company_description):
 	validate_registerer()
+
 	settings = frappe.get_single('Marketplace Settings')
 	message = settings.register_seller(company, company_description)
 
@@ -150,6 +151,14 @@ def publish_selected_items(items_to_publish):
 		item_sync_postprocess()
 	except Exception as e:
 		frappe.log_error(message=e, title='Hub Sync Error')
+
+@frappe.whitelist()
+def get_unregistered_users():
+	settings = frappe.get_single('Marketplace Settings')
+	registered_users = [user.user for user in settings.users] + ['Administrator', 'Guest']
+	all_users = [user.name for user in frappe.db.get_all('User', filters={'enabled': 1})]
+	unregistered_users = [user for user in all_users if user not in registered_users]
+	return unregistered_users
 
 
 def item_sync_preprocess(intended_item_publish_count):

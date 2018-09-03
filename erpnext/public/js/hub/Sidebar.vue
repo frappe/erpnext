@@ -19,7 +19,7 @@
 export default {
 	data() {
 		return {
-			hub_registered: hub.settings.registered,
+			hub_registered: hub.is_user_registered(),
 			items: [
 				{
 					label: __('Browse'),
