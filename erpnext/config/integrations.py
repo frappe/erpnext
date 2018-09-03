@@ -30,7 +30,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Shopify Settings",
 					"description": _("Connect Shopify with ERPNext"),
+				},
+				{
+					"type": "doctype",
+					"name": "Quickbooks Settings",
+					"description": _("Connect Quickbooks with ERPNext"),
 				}
 			]
-		}
+		},
+
 	]
