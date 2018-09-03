@@ -11,7 +11,7 @@ frappe.ui.form.on('Patient Encounter', {
 		];
 		frm.get_field('test_prescription').grid.editable_fields = [
 			{fieldname: 'test_code', columns: 2},
-			{fieldname: 'test_name', columns: 4},
+			{fieldname: 'lab_test_name', columns: 4},
 			{fieldname: 'test_comment', columns: 4}
 		];
 	},

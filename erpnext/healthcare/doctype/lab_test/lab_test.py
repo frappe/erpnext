@@ -31,7 +31,7 @@ class LabTest(Document):
 			frappe.db.set_value("Lab Prescription", self.prescription, "test_created", 1)
 			if frappe.db.get_value("Lab Prescription", self.prescription, 'invoiced') == 1:
 				self.invoiced = True
-		if not self.test_name and self.template:
+		if not self.lab_test_name and self.template:
 			self.load_test_from_template()
 			self.reload()
 
@@ -44,7 +44,7 @@ def create_test_from_template(lab_test):
 	template = frappe.get_doc("Lab Test Template", lab_test.template)
 	patient = frappe.get_doc("Patient", lab_test.patient)
 
-	lab_test.test_name = template.test_name
+	lab_test.lab_test_name = template.lab_test_name
 	lab_test.result_date = getdate()
 	lab_test.department = template.department
 	lab_test.test_group = template.test_group
@@ -160,7 +160,7 @@ def create_lab_test_doc(invoiced, practitioner, patient, template):
 def create_normals(template, lab_test):
 	lab_test.normal_toggle = "1"
 	normal = lab_test.append("normal_test_items")
-	normal.test_name = template.test_name
+	normal.lab_test_name = template.lab_test_name
 	normal.test_uom = template.test_uom
 	normal.normal_range = template.test_normal_range
 	normal.require_result_value = 1
@@ -173,7 +173,7 @@ def create_compounds(template, lab_test, is_group):
 		if is_group:
 			normal.test_event = normal_test_template.test_event
 		else:
-			normal.test_name = normal_test_template.test_event
+			normal.lab_test_name = normal_test_template.test_event
 
 		normal.test_uom = normal_test_template.test_uom
 		normal.normal_range = normal_test_template.normal_range
@@ -202,7 +202,7 @@ def create_sample_doc(template, patient, invoice):
 			sample_collection = frappe.get_doc("Sample Collection",sample_exist[0][0])
 			quantity = int(sample_collection.sample_quantity)+int(template.sample_quantity)
 			if(template.sample_collection_details):
-				sample_collection_details = sample_collection.sample_collection_details+"\n==============\n"+"Test :"+template.test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
+				sample_collection_details = sample_collection.sample_collection_details+"\n==============\n"+"Test :"+template.lab_test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
 				frappe.db.set_value("Sample Collection", sample_collection.name, "sample_collection_details",sample_collection_details)
 			frappe.db.set_value("Sample Collection", sample_collection.name, "sample_quantity",quantity)
 
@@ -218,7 +218,7 @@ def create_sample_doc(template, patient, invoice):
 			sample_collection.sample_uom = template.sample_uom
 			sample_collection.sample_quantity = template.sample_quantity
 			if(template.sample_collection_details):
-				sample_collection.sample_collection_details = "Test :"+template.test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
+				sample_collection.sample_collection_details = "Test :"+template.lab_test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
@@ -249,19 +249,19 @@ def load_result_format(lab_test, template, prescription, invoice):
 						create_normals(template_in_group, lab_test)
 					elif(template_in_group.test_template_type == 'Compound'):
 						normal_heading = lab_test.append("normal_test_items")
-						normal_heading.test_name = template_in_group.test_name
+						normal_heading.lab_test_name = template_in_group.lab_test_name
 						normal_heading.require_result_value = 0
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
 					elif(template_in_group.test_template_type == 'Descriptive'):
 						special_heading = lab_test.append("special_test_items")
-						special_heading.test_name = template_in_group.test_name
+						special_heading.lab_test_name = template_in_group.lab_test_name
 						special_heading.require_result_value = 0
 						special_heading.template = template_in_group.name
 						create_specials(template_in_group, lab_test)
 			else:
 				normal = lab_test.append("normal_test_items")
-				normal.test_name = test_group.group_event
+				normal.lab_test_name = test_group.group_event
 				normal.test_uom = test_group.group_test_uom
 				normal.normal_range = test_group.group_test_normal_range
 				normal.require_result_value = 1
@@ -282,7 +282,7 @@ def get_employee_by_user_id(user_id):
 
 def insert_lab_test_to_medical_record(doc):
 	table_row = False
-	subject = cstr(doc.test_name) +" "+ doc.practitioner
+	subject = cstr(doc.lab_test_name) +" "+ doc.practitioner
 	if doc.normal_test_items:
 		item = doc.normal_test_items[0]
 		comment = ""
@@ -291,7 +291,7 @@ def insert_lab_test_to_medical_record(doc):
 		event = ""
 		if item.test_event:
 			event = test_event
-		table_row = item.test_name +" "+ event +" "+ item.result_value
+		table_row = item.lab_test_name +" "+ event +" "+ item.result_value
 		if item.normal_range:
 			table_row += " normal_range("+item.normal_range+")"
 		table_row += " "+comment

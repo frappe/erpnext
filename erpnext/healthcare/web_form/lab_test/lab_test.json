@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-07-17 13:10:47.940128", 
+ "modified": "2018-09-03 11:56:27.424619", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "lab-test", 
@@ -27,6 +27,7 @@
  "print_format": "Lab Test Print", 
  "published": 1, 
  "route": "lab-test", 
+ "show_in_grid": 0, 
  "show_sidebar": 1, 
  "sidebar_items": [], 
  "success_url": "/lab-test", 
@@ -143,7 +144,7 @@
    "reqd": 0
   }, 
   {
-   "fieldname": "test_name", 
+   "fieldname": "lab_test_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Test Name", 

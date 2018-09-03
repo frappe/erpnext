@@ -10,7 +10,7 @@ cur_frm.cscript.custom_refresh = function(doc) {
 frappe.ui.form.on('Lab Test', {
 	setup: function(frm) {
 		frm.get_field('normal_test_items').grid.editable_fields = [
-			{fieldname: 'test_name', columns: 3},
+			{fieldname: 'lab_test_name', columns: 3},
 			{fieldname: 'test_event', columns: 2},
 			{fieldname: 'result_value', columns: 2},
 			{fieldname: 'test_uom', columns: 1},

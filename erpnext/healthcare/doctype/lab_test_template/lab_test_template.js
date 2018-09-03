@@ -2,11 +2,11 @@
 // License: ESS license.txt
 
 frappe.ui.form.on("Lab Test Template",{
-	test_name: function(frm) {
+	lab_test_name: function(frm) {
 		if(!frm.doc.test_code)
-			frm.set_value("test_code", frm.doc.test_name);
+			frm.set_value("test_code", frm.doc.lab_test_name);
 		if(!frm.doc.test_description)
-			frm.set_value("test_description", frm.doc.test_name);
+			frm.set_value("test_description", frm.doc.lab_test_name);
 	},
 	refresh :  function(frm){
 		// Restrict Special, Grouped type templates in Child TestGroups
@@ -102,7 +102,7 @@ var change_template_code = function(frm,doc){
 	};
 };
 
-frappe.ui.form.on("Lab Test Template", "test_name", function(frm){
+frappe.ui.form.on("Lab Test Template", "lab_test_name", function(frm){
 
 	frm.doc.change_in_item = 1;
 
