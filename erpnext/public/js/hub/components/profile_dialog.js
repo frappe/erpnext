@@ -1,15 +1,39 @@
 const ProfileDialog = (title = __('Edit Profile'), action={}) => {
 	const fields = [
 		{
-			fieldtype: 'Link',
-			fieldname: 'company',
-			label: __('Company'),
-			options: 'Company'
-		},
-		{
 			fieldname: 'company_email',
 			label: __('Email'),
 			fieldtype: 'Read Only'
+		},
+		{
+			fieldtype: 'Link',
+			fieldname: 'company',
+			label: __('Company'),
+			options: 'Company',
+			onchange: () => {
+				const value = dialog.get_value('company');
+				if (value) {
+					frappe.db.get_doc('Company', value)
+						.then(company => {
+							console.log(company.company_logo);
+							dialog.set_values({
+								company_logo: company.company_logo,
+								company_description: company.company_description
+							});
+						});
+				}
+			}
+		},
+		// {
+		// 	fieldname: 'company_logo',
+		// 	label: __('Logo'),
+		// 	fieldtype: 'Attach Image',
+		// 	read_only: true
+		// },
+		{
+			fieldname: 'company_description',
+			label: __('About Your Company'),
+			fieldtype: 'Long Text'
 		}
 	];
 

@@ -101,12 +101,12 @@ erpnext.hub.Marketplace = class Marketplace {
 		this.register_dialog.show();
 	}
 
-	register_marketplace({company, company_email}) {
+	register_marketplace({company, company_description}) {
 		frappe.call({
 		    method: 'erpnext.hub_node.api.register_marketplace',
 		    args: {
 				company,
-				company_email,
+				company_description
 			}
 		}).then((r) => {
 			if (r.message && r.message.ok) {
