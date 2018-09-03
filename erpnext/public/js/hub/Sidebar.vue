@@ -9,7 +9,10 @@
 			<li class="hub-sidebar-item is-title bold text-muted">
 				{{ __('Categories') }}
 			</li>
-			<li class="hub-sidebar-item" v-for="category in categories" :key="category.label" v-route="category.route">
+			<li v-if="show_skeleton" class="hub-skeleton hub-sidebar-item" v-for="(c, $index) in [1, 2, 3, 4, 5, 6, 7]" :key="$index">
+				Category
+			</li>
+			<li class="hub-sidebar-item" v-else v-for="category in categories" :key="category.label" v-route="category.route">
 				{{ category.label }}
 			</li>
 		</ul>
@@ -57,11 +60,14 @@ export default {
 				},
 			],
 			categories: [],
+			show_skeleton: true
 		}
 	},
 	created() {
 		this.get_categories()
 			.then(categories => {
+				this.show_skeleton = false;
+
 				this.categories = categories.map(c => {
 					return {
 						label: __(c.name),
