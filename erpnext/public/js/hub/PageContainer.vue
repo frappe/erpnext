@@ -20,23 +20,29 @@ import Messages from './pages/Messages.vue';
 import Profile from './pages/Profile.vue';
 import NotFound from './pages/NotFound.vue';
 
-const route_map = {
-	'marketplace/home': Home,
-	'marketplace/search/:keyword': Search,
-	'marketplace/category/:category': Category,
-	'marketplace/item/:item': Item,
-	'marketplace/seller/:seller': Seller,
-	'marketplace/not-found': NotFound,
+function get_route_map() {
+	const read_only_routes = {
+		'marketplace/home': Home,
+		'marketplace/search/:keyword': Search,
+		'marketplace/category/:category': Category,
+		'marketplace/item/:item': Item,
+		'marketplace/seller/:seller': Seller,
+		'marketplace/not-found': NotFound,
+	}
+	const registered_routes = {
+		'marketplace/profile': Profile,
+		'marketplace/saved-items': SavedItems,
+		'marketplace/publish': Publish,
+		'marketplace/published-items': PublishedItems,
+		'marketplace/buying': Buying,
+		'marketplace/buying/:item': Messages,
+		'marketplace/selling': Selling,
+		'marketplace/selling/:buyer/:item': Messages
+	}
 
-	// Registered seller routes
-	'marketplace/profile': Profile,
-	'marketplace/saved-items': SavedItems,
-	'marketplace/publish': Publish,
-	'marketplace/published-items': PublishedItems,
-	'marketplace/buying': Buying,
-	'marketplace/buying/:item': Messages,
-	'marketplace/selling': Selling,
-	'marketplace/selling/:buyer/:item': Messages
+	return hub.is_seller_registered()
+		? Object.assign({}, read_only_routes, registered_routes)
+		: read_only_routes;
 }
 
 export default {
@@ -56,6 +62,7 @@ export default {
 			this.current_page = this.get_current_page();
 		},
 		get_current_page() {
+			const route_map = get_route_map();
 			const curr_route = frappe.get_route_str();
 			let route = Object.keys(route_map).filter(route => route == curr_route)[0];
 			if (!route) {

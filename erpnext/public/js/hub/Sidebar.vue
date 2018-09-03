@@ -19,7 +19,7 @@
 export default {
 	data() {
 		return {
-			hub_registered: hub.settings.registered && frappe.session.user === hub.settings.company_email,
+			hub_registered: hub.is_user_registered(),
 			items: [
 				{
 					label: __('Browse'),
