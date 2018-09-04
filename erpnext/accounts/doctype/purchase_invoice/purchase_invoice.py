@@ -74,6 +74,9 @@ class PurchaseInvoice(BuyingController):
 		if (self.is_paid == 1):
 			self.validate_cash()
 
+		# validate service stop date to lie in between start and end date
+		self.validate_service_stop_date()
+
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
 
@@ -787,6 +790,24 @@ class PurchaseInvoice(BuyingController):
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
+
+	def validate_service_stop_date(self):
+		old_doc = frappe.db.get_all("Purchase Invoice Item", {"parent": self.name}, ["name", "service_stop_date"])
+		old_stop_dates = {}
+		for d in old_doc:
+			old_stop_dates[d.name] = d.service_stop_date or ""
+
+		for item in self.items:
+			if item.enable_deferred_expense:
+				if item.service_stop_date:
+					if date_diff(item.service_stop_date, item.service_start_date) < 0:
+						frappe.throw(_("Service Stop Date cannot be before Service Start Date"))
+
+					if date_diff(item.service_stop_date, item.service_end_date) > 0:
+						frappe.throw(_("Service Stop Date cannot be after Service End Date"))
+
+				if old_stop_dates and old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
+					frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
