@@ -10,7 +10,7 @@ frappe.ui.form.on("Lab Test Template",{
 	},
 	refresh :  function(frm){
 		// Restrict Special, Grouped type templates in Child TestGroups
-		frm.set_query("lab_test_template", "test_groups", function() {
+		frm.set_query("lab_test_template", "lab_test_groups", function() {
 			return {
 				filters: {
 					test_template_type:['in',['Single','Compound']]

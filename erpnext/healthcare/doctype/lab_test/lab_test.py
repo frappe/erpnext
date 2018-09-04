@@ -239,7 +239,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 		create_specials(template, lab_test)
 	elif(template.test_template_type == 'Grouped'):
 		#iterate for each template in the group and create one result for all.
-		for test_group in template.test_groups:
+		for test_group in template.lab_test_groups:
 			#template_in_group = None
 			if(test_group.lab_test_template):
 				template_in_group = frappe.get_doc("Lab Test Template",
