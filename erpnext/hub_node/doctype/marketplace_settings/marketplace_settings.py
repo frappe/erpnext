@@ -68,10 +68,10 @@ class MarketplaceSettings(Document):
 	def get_hub_user(self, user):
 		'''Return the Hub User doc from the `users` table if password is set'''
 
-		filtered_users = filter(
+		filtered_users = list(filter(
 			lambda x: x.user == user and x.password,
 			self.users
-		)
+		))
 
 		if filtered_users:
 			return filtered_users[0]
