@@ -171,9 +171,9 @@ def create_compounds(template, lab_test, is_group):
 	for normal_test_template in template.normal_test_templates:
 		normal = lab_test.append("normal_test_items")
 		if is_group:
-			normal.test_event = normal_test_template.test_event
+			normal.lab_test_event = normal_test_template.lab_test_event
 		else:
-			normal.lab_test_name = normal_test_template.test_event
+			normal.lab_test_name = normal_test_template.lab_test_event
 
 		normal.lab_test_uom = normal_test_template.lab_test_uom
 		normal.normal_range = normal_test_template.normal_range
@@ -291,8 +291,8 @@ def insert_lab_test_to_medical_record(doc):
 		if item.lab_test_comment:
 			comment = str(item.lab_test_comment)
 		event = ""
-		if item.test_event:
-			event = test_event
+		if item.lab_test_event:
+			event = item.lab_test_event
 		table_row = item.lab_test_name +" "+ event +" "+ item.result_value
 		if item.normal_range:
 			table_row += " normal_range("+item.normal_range+")"
