@@ -162,7 +162,7 @@ def create_normals(template, lab_test):
 	normal = lab_test.append("normal_test_items")
 	normal.lab_test_name = template.lab_test_name
 	normal.lab_test_uom = template.lab_test_uom
-	normal.normal_range = template.test_normal_range
+	normal.normal_range = template.lab_test_normal_range
 	normal.require_result_value = 1
 	normal.template = template.name
 
