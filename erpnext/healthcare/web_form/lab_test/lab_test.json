@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-09-03 11:56:27.424619", 
+ "modified": "2018-09-04 08:50:41.314546", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "lab-test", 
@@ -42,7 +42,8 @@
    "max_value": 0, 
    "options": "LP-", 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "show_in_filter": 0
   }, 
   {
    "default": "0", 
@@ -54,7 +55,8 @@
    "max_value": 0, 
    "options": "", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "patient", 
@@ -65,7 +67,8 @@
    "max_value": 0, 
    "options": "Patient", 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "patient_name", 
@@ -76,7 +79,8 @@
    "max_value": 0, 
    "options": "patient.patient_name", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "practitioner", 
@@ -87,7 +91,8 @@
    "max_value": 0, 
    "options": "Healthcare Practitioner", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "status", 
@@ -98,7 +103,8 @@
    "max_value": 0, 
    "options": "Draft\nCompleted\nApproved\nRejected\nCancelled", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "department", 
@@ -109,7 +115,8 @@
    "max_value": 0, 
    "options": "Medical Department", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "sample", 
@@ -120,7 +127,8 @@
    "max_value": 0, 
    "options": "Sample Collection", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "default": "", 
@@ -131,7 +139,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "report_preference", 
@@ -141,7 +150,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "lab_test_name", 
@@ -151,7 +161,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "normal_test_items", 
@@ -161,7 +172,8 @@
    "max_value": 0, 
    "options": "Normal Test Items", 
    "read_only": 1, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "special_test_items", 
@@ -171,7 +183,8 @@
    "max_value": 0, 
    "options": "Special Test Items", 
    "read_only": 1, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "sensitivity_test_items", 
@@ -181,17 +194,19 @@
    "max_value": 0, 
    "options": "Sensitivity Test Items", 
    "read_only": 1, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
-   "fieldname": "test_comment", 
+   "fieldname": "lab_test_comment", 
    "fieldtype": "Text", 
    "hidden": 0, 
    "label": "Comments", 
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 1, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "custom_result", 
@@ -201,7 +216,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 1, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "default": "0", 
@@ -211,7 +227,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "default": "0", 
@@ -221,7 +238,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "default": "0", 
@@ -231,7 +249,8 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }
  ]
 }

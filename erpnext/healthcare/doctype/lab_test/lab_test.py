@@ -288,8 +288,8 @@ def insert_lab_test_to_medical_record(doc):
 	if doc.normal_test_items:
 		item = doc.normal_test_items[0]
 		comment = ""
-		if item.test_comment:
-			comment = str(item.test_comment)
+		if item.lab_test_comment:
+			comment = str(item.lab_test_comment)
 		event = ""
 		if item.test_event:
 			event = test_event
@@ -308,8 +308,8 @@ def insert_lab_test_to_medical_record(doc):
 
 	if table_row:
 		subject += "<br/>"+table_row
-	if doc.test_comment:
-		subject += "<br/>"+ cstr(doc.test_comment)
+	if doc.lab_test_comment:
+		subject += "<br/>"+ cstr(doc.lab_test_comment)
 
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
