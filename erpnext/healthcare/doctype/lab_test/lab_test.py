@@ -161,7 +161,7 @@ def create_normals(template, lab_test):
 	lab_test.normal_toggle = "1"
 	normal = lab_test.append("normal_test_items")
 	normal.lab_test_name = template.lab_test_name
-	normal.test_uom = template.test_uom
+	normal.lab_test_uom = template.lab_test_uom
 	normal.normal_range = template.test_normal_range
 	normal.require_result_value = 1
 	normal.template = template.name
@@ -175,7 +175,7 @@ def create_compounds(template, lab_test, is_group):
 		else:
 			normal.lab_test_name = normal_test_template.test_event
 
-		normal.test_uom = normal_test_template.test_uom
+		normal.lab_test_uom = normal_test_template.lab_test_uom
 		normal.normal_range = normal_test_template.normal_range
 		normal.require_result_value = 1
 		normal.template = template.name
@@ -262,7 +262,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 			else:
 				normal = lab_test.append("normal_test_items")
 				normal.lab_test_name = lab_test_group.group_event
-				normal.test_uom = lab_test_group.group_test_uom
+				normal.lab_test_uom = lab_test_group.group_test_uom
 				normal.normal_range = lab_test_group.group_test_normal_range
 				normal.require_result_value = 1
 				normal.template = template.name
