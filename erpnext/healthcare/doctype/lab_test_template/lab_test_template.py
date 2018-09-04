@@ -14,14 +14,14 @@ class LabTestTemplate(Document):
 			updating_item(self)
 			item_price = item_price_exist(self)
 			if not item_price:
-				if(self.test_rate != 0.0):
+				if(self.lab_test_rate != 0.0):
 					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
-					if(self.test_rate):
-						make_item_price(self.lab_test_code, price_list_name, self.test_rate)
+					if(self.lab_test_rate):
+						make_item_price(self.lab_test_code, price_list_name, self.lab_test_rate)
 					else:
 						make_item_price(self.lab_test_code, price_list_name, 0.0)
 			else:
-				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.test_rate)
+				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.lab_test_rate)
 
 			frappe.db.set_value(self.doctype,self.name,"change_in_item",0)
 		elif(self.is_billable == 0 and self.item):
@@ -53,7 +53,7 @@ def item_price_exist(doc):
 def updating_item(self):
 	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0, standard_rate=%s,
 		description=%s, modified=NOW() where item_code=%s""",
-		(self.lab_test_name, self.test_group , self.test_rate, self.test_description, self.item))
+		(self.lab_test_name, self.test_group , self.lab_test_rate, self.test_description, self.item))
 
 def create_item_from_template(doc):
 	if(doc.is_billable == 1):
@@ -79,11 +79,11 @@ def create_item_from_template(doc):
 
 	#insert item price
 	#get item price list to insert item price
-	if(doc.test_rate != 0.0):
+	if(doc.lab_test_rate != 0.0):
 		price_list_name = frappe.db.get_value("Price List", {"selling": 1})
-		if(doc.test_rate):
-			make_item_price(item.name, price_list_name, doc.test_rate)
-			item.standard_rate = doc.test_rate
+		if(doc.lab_test_rate):
+			make_item_price(item.name, price_list_name, doc.lab_test_rate)
+			item.standard_rate = doc.lab_test_rate
 		else:
 			make_item_price(item.name, price_list_name, 0.0)
 			item.standard_rate = 0.0
