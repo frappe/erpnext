@@ -241,9 +241,9 @@ def load_result_format(lab_test, template, prescription, invoice):
 		#iterate for each template in the group and create one result for all.
 		for test_group in template.test_groups:
 			#template_in_group = None
-			if(test_group.test_template):
+			if(test_group.lab_test_template):
 				template_in_group = frappe.get_doc("Lab Test Template",
-								test_group.test_template)
+								test_group.lab_test_template)
 				if(template_in_group):
 					if(template_in_group.test_template_type == 'Single'):
 						create_normals(template_in_group, lab_test)

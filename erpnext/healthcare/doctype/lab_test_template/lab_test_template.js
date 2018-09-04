@@ -10,7 +10,7 @@ frappe.ui.form.on("Lab Test Template",{
 	},
 	refresh :  function(frm){
 		// Restrict Special, Grouped type templates in Child TestGroups
-		frm.set_query("test_template", "test_groups", function() {
+		frm.set_query("lab_test_template", "test_groups", function() {
 			return {
 				filters: {
 					test_template_type:['in',['Single','Compound']]
@@ -126,7 +126,7 @@ frappe.ui.form.on("Lab Test Template", "test_description", function(frm){
 frappe.ui.form.on("Lab Test Groups", "template_or_new_line", function (frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 	if(child.template_or_new_line =="Add new line"){
-		frappe.model.set_value(cdt, cdn, 'test_template', "");
+		frappe.model.set_value(cdt, cdn, 'lab_test_template', "");
 		frappe.model.set_value(cdt, cdn, 'test_description', "");
 	}
 });
