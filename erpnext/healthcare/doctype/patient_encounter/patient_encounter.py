@@ -56,7 +56,7 @@ def set_subject_field(encounter):
 		subject += "No Diagnosis <br/>"
 	if(encounter.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
-	if(encounter.test_prescription):
+	if(encounter.lab_test_prescription):
 		subject += "\nTest(s) Prescribed."
 	if(encounter.procedure_prescription):
 		subject += "\nProcedure(s) Prescribed."
