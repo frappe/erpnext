@@ -53,7 +53,7 @@ def item_price_exist(doc):
 def updating_item(self):
 	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0, standard_rate=%s,
 		description=%s, modified=NOW() where item_code=%s""",
-		(self.lab_test_name, self.test_group , self.lab_test_rate, self.test_description, self.item))
+		(self.lab_test_name, self.test_group , self.lab_test_rate, self.lab_test_description, self.item))
 
 def create_item_from_template(doc):
 	if(doc.is_billable == 1):
@@ -66,7 +66,7 @@ def create_item_from_template(doc):
 	"item_code": doc.lab_test_code,
 	"item_name":doc.lab_test_name,
 	"item_group": doc.test_group,
-	"description":doc.test_description,
+	"description":doc.lab_test_description,
 	"is_sales_item": 1,
 	"is_service_item": 1,
 	"is_purchase_item": 0,
