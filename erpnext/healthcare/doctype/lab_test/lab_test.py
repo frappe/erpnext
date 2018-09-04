@@ -231,13 +231,13 @@ def create_sample_collection(lab_test, template, patient, invoice):
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice):
-	if(template.test_template_type == 'Single'):
+	if(template.lab_test_template_type == 'Single'):
 		create_normals(template, lab_test)
-	elif(template.test_template_type == 'Compound'):
+	elif(template.lab_test_template_type == 'Compound'):
 		create_compounds(template, lab_test, False)
-	elif(template.test_template_type == 'Descriptive'):
+	elif(template.lab_test_template_type == 'Descriptive'):
 		create_specials(template, lab_test)
-	elif(template.test_template_type == 'Grouped'):
+	elif(template.lab_test_template_type == 'Grouped'):
 		#iterate for each template in the group and create one result for all.
 		for lab_test_group in template.lab_test_groups:
 			#template_in_group = None
@@ -245,15 +245,15 @@ def load_result_format(lab_test, template, prescription, invoice):
 				template_in_group = frappe.get_doc("Lab Test Template",
 								lab_test_group.lab_test_template)
 				if(template_in_group):
-					if(template_in_group.test_template_type == 'Single'):
+					if(template_in_group.lab_test_template_type == 'Single'):
 						create_normals(template_in_group, lab_test)
-					elif(template_in_group.test_template_type == 'Compound'):
+					elif(template_in_group.lab_test_template_type == 'Compound'):
 						normal_heading = lab_test.append("normal_test_items")
 						normal_heading.lab_test_name = template_in_group.lab_test_name
 						normal_heading.require_result_value = 0
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
-					elif(template_in_group.test_template_type == 'Descriptive'):
+					elif(template_in_group.lab_test_template_type == 'Descriptive'):
 						special_heading = lab_test.append("special_test_items")
 						special_heading.lab_test_name = template_in_group.lab_test_name
 						special_heading.require_result_value = 0
@@ -266,7 +266,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 				normal.normal_range = lab_test_group.group_test_normal_range
 				normal.require_result_value = 1
 				normal.template = template.name
-	if(template.test_template_type != 'No Result'):
+	if(template.lab_test_template_type != 'No Result'):
 		if(prescription):
 			lab_test.prescription = prescription
 			if(invoice):
