@@ -15,10 +15,12 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -31,7 +33,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "MEM-", 
+   "options": "NPO-MEM-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -42,11 +44,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -73,11 +76,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -104,11 +108,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -134,11 +139,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -166,11 +172,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -198,11 +205,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -229,11 +237,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
@@ -260,11 +269,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -292,16 +302,17 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_from": "customer.customer_name",
+   "fetch_from": "customer.customer_name", 
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -325,11 +336,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
@@ -356,11 +368,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -388,11 +401,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -420,11 +434,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -451,11 +466,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -481,11 +497,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -512,7 +529,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -527,7 +544,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-16 22:42:55.734512",
+ "modified": "2018-08-21 14:44:23.218109", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Member", 
@@ -582,5 +599,6 @@
  "sort_order": "DESC", 
  "title_field": "member_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

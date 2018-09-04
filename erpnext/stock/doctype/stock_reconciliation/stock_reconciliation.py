@@ -61,7 +61,7 @@ class StockReconciliation(StockController):
 					- flt(qty, item.precision("qty")) * flt(rate, item.precision("valuation_rate")))
 				return True
 
-		items = filter(lambda d: _changed(d), self.items)
+		items = list(filter(lambda d: _changed(d), self.items))
 
 		if not items:
 			frappe.throw(_("None of the items have any change in quantity or value."),

@@ -3,16 +3,6 @@
 
 
 frappe.ui.form.on("Assessment Plan", {
-	setup: function(frm) {
-		frm.add_fetch("student_group", "course", "course");
-		frm.add_fetch("student_group", "program", "program");
-		frm.add_fetch("student_group", "academic_year", "academic_year");
-		frm.add_fetch("student_group", "academic_term", "academic_term");
-		frm.add_fetch("examiner", "instructor_name", "examiner_name");
-		frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
-		frm.add_fetch("course", "default_grading_scale", "grading_scale");
-	},
-
 	onload: function(frm) {
 		frm.set_query("assessment_group", function(doc, cdt, cdn) {
 			return{

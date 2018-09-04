@@ -82,7 +82,7 @@ frappe.ui.form.on("Sales Order Item", {
 	},
 	delivery_date: function(frm, cdt, cdn) {
 		if(!frm.doc.delivery_date) {
-			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
+			erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "delivery_date");
 		}
 	}
 });
@@ -416,19 +416,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			title: __("For Supplier"),
 			fields: [
 				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
+				 "description": __("Leave the field empty to make purchase orders for all suppliers"),
 					"get_query": function () {
 						return {
 							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
 							filters: {'parent': me.frm.doc.name}
 						}
-					}, "reqd": 1 },
+					}},
+				
 				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
 
 		dialog.fields_dict.make_purchase_order.$input.click(function() {
 			var args = dialog.get_values();
-			if(!args) return;
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
@@ -440,8 +441,17 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				freeze: true,
 				callback: function(r) {
 					if(!r.exc) {
-						var doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", r.message.doctype, r.message.name);
+						// var args = dialog.get_values();
+						if (args.supplier){
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+						else{
+							frappe.route_options = {
+								"sales_order": me.frm.doc.name
+							}
+							frappe.set_route("List", "Purchase Order");
+						}
 					}
 				}
 			})

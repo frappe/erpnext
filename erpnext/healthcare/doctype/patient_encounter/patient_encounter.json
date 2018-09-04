@@ -85,6 +85,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 1, 
@@ -97,7 +98,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "C-", 
+   "options": "HLC-ENC-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -1105,7 +1106,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-17 12:51:13.487000", 
+ "modified": "2018-08-21 14:44:40.378365", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Patient Encounter", 
@@ -1142,5 +1143,6 @@
  "sort_order": "DESC", 
  "title_field": "patient", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }
