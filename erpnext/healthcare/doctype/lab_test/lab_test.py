@@ -28,7 +28,7 @@ class LabTest(Document):
 
 	def after_insert(self):
 		if(self.prescription):
-			frappe.db.set_value("Lab Prescription", self.prescription, "test_created", 1)
+			frappe.db.set_value("Lab Prescription", self.prescription, "lab_test_created", 1)
 			if frappe.db.get_value("Lab Prescription", self.prescription, 'invoiced') == 1:
 				self.invoiced = True
 		if not self.lab_test_name and self.template:
@@ -80,7 +80,7 @@ def create_lab_test_from_encounter(encounter_id):
 	lab_test_ids = frappe.db.sql("""select lp.name, lp.lab_test_code, lp.invoiced
 	from `tabPatient Encounter` et, `tabLab Prescription` lp
 	where et.patient=%s and lp.parent=%s and
-	lp.parent=et.name and lp.test_created=0 and et.docstatus=1""", (encounter.patient, encounter_id))
+	lp.parent=et.name and lp.lab_test_created=0 and et.docstatus=1""", (encounter.patient, encounter_id))
 
 	if lab_test_ids:
 		patient = frappe.get_doc("Patient", encounter.patient)
@@ -89,7 +89,7 @@ def create_lab_test_from_encounter(encounter_id):
 			if template:
 				lab_test = create_lab_test_doc(lab_test_id[2], encounter.practitioner, patient, template)
 				lab_test.save(ignore_permissions = True)
-				frappe.db.set_value("Lab Prescription", lab_test_id[0], "test_created", 1)
+				frappe.db.set_value("Lab Prescription", lab_test_id[0], "lab_test_created", 1)
 				if not lab_test_created:
 					lab_test_created = lab_test.name
 				else:
@@ -98,17 +98,17 @@ def create_lab_test_from_encounter(encounter_id):
 
 
 def create_lab_test_from_invoice(invoice_name):
-	lab_test_created = False
+	lab_tests_created = False
 	invoice = frappe.get_doc("Sales Invoice", invoice_name)
 	if invoice.patient:
 		patient = frappe.get_doc("Patient", invoice.patient)
 		for item in invoice.items:
-			test_created = 0
+			lab_test_created = 0
 			if item.reference_dt == "Lab Prescription":
-				test_created = frappe.db.get_value("Lab Prescription", item.reference_dn, "test_created")
+				lab_test_created = frappe.db.get_value("Lab Prescription", item.reference_dn, "lab_test_created")
 			elif item.reference_dt == "Lab Test":
-				test_created = 1
-			if test_created != 1:
+				lab_test_created = 1
+			if lab_test_created != 1:
 				template = get_lab_test_template(item.item_code)
 				if template:
 					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template)
@@ -118,11 +118,11 @@ def create_lab_test_from_invoice(invoice_name):
 					if item.reference_dt != "Lab Prescription":
 						frappe.db.set_value("Sales Invoice Item", item.name, "reference_dt", "Lab Test")
 						frappe.db.set_value("Sales Invoice Item", item.name, "reference_dn", lab_test.name)
-					if not lab_test_created:
-						lab_test_created = lab_test.name
+					if not lab_tests_created:
+						lab_tests_created = lab_test.name
 					else:
-						lab_test_created += ", "+lab_test.name
-	return lab_test_created
+						lab_tests_created += ", "+lab_test.name
+	return lab_tests_created
 
 def get_lab_test_template(item):
 	template_id = check_template_exists(item)
@@ -330,4 +330,4 @@ def delete_lab_test_from_medical_record(self):
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
 	return frappe.db.sql("""select cp.name, cp.lab_test_code, cp.parent, cp.invoiced, ct.practitioner, ct.encounter_date from `tabPatient Encounter` ct,
-	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))
+	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.lab_test_created=0""", (patient))

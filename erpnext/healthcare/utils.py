@@ -91,7 +91,7 @@ def get_healthcare_services_to_invoice(patient):
 						'service': frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item")})
 
 			lab_rxs = frappe.db.sql("""select lp.name from `tabPatient Encounter` et, `tabLab Prescription` lp
-			where et.patient=%s and lp.parent=et.name and lp.test_created=0 and lp.invoiced=0""", (patient.name))
+			where et.patient=%s and lp.parent=et.name and lp.lab_test_created=0 and lp.invoiced=0""", (patient.name))
 			if lab_rxs:
 				for lab_rx in lab_rxs:
 					rx_obj = frappe.get_doc("Lab Prescription", lab_rx[0])
@@ -250,7 +250,7 @@ def set_invoiced(item, method, ref_invoice=None):
 		manage_doc_for_appoitnment(dt_from_appointment, item.reference_dn, invoiced)
 
 	elif item.reference_dt == 'Lab Prescription':
-		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Lab Test", "test_created")
+		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Lab Test", "lab_test_created")
 
 	elif item.reference_dt == 'Procedure Prescription':
 		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Clinical Procedure", "procedure_created")
