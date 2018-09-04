@@ -47,7 +47,7 @@ def create_test_from_template(lab_test):
 	lab_test.lab_test_name = template.lab_test_name
 	lab_test.result_date = getdate()
 	lab_test.department = template.department
-	lab_test.test_group = template.test_group
+	lab_test.lab_test_group = template.lab_test_group
 
 	lab_test = create_sample_collection(lab_test, template, patient, None)
 	lab_test = load_result_format(lab_test, template, None, None)
@@ -152,7 +152,7 @@ def create_lab_test_doc(invoiced, practitioner, patient, template):
 	lab_test.mobile = patient.mobile
 	lab_test.department = template.department
 	lab_test.template = template.name
-	lab_test.test_group = template.test_group
+	lab_test.lab_test_group = template.lab_test_group
 	lab_test.result_date = getdate()
 	lab_test.report_preference = patient.report_preference
 	return lab_test
@@ -239,11 +239,11 @@ def load_result_format(lab_test, template, prescription, invoice):
 		create_specials(template, lab_test)
 	elif(template.test_template_type == 'Grouped'):
 		#iterate for each template in the group and create one result for all.
-		for test_group in template.lab_test_groups:
+		for lab_test_group in template.lab_test_groups:
 			#template_in_group = None
-			if(test_group.lab_test_template):
+			if(lab_test_group.lab_test_template):
 				template_in_group = frappe.get_doc("Lab Test Template",
-								test_group.lab_test_template)
+								lab_test_group.lab_test_template)
 				if(template_in_group):
 					if(template_in_group.test_template_type == 'Single'):
 						create_normals(template_in_group, lab_test)
@@ -261,9 +261,9 @@ def load_result_format(lab_test, template, prescription, invoice):
 						create_specials(template_in_group, lab_test)
 			else:
 				normal = lab_test.append("normal_test_items")
-				normal.lab_test_name = test_group.group_event
-				normal.test_uom = test_group.group_test_uom
-				normal.normal_range = test_group.group_test_normal_range
+				normal.lab_test_name = lab_test_group.group_event
+				normal.test_uom = lab_test_group.group_test_uom
+				normal.normal_range = lab_test_group.group_test_normal_range
 				normal.require_result_value = 1
 				normal.template = template.name
 	if(template.test_template_type != 'No Result'):
