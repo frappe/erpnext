@@ -186,7 +186,7 @@ def create_specials(template, lab_test):
 		lab_test.sensitivity_toggle = "1"
 	for special_test_template in template.special_test_template:
 		special = lab_test.append("special_test_items")
-		special.test_particulars = special_test_template.particulars
+		special.lab_test_particulars = special_test_template.particulars
 		special.require_result_value = 1
 		special.template = template.name
 
@@ -300,7 +300,7 @@ def insert_lab_test_to_medical_record(doc):
 
 	elif doc.special_test_items:
 		item = doc.special_test_items[0]
-		table_row = item.test_particulars +" "+ item.result_value
+		table_row = item.lab_test_particulars +" "+ item.result_value
 
 	elif doc.sensitivity_test_items:
 		item = doc.sensitivity_test_items[0]

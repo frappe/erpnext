@@ -17,7 +17,7 @@ frappe.ui.form.on('Lab Test', {
 			{fieldname: 'normal_range', columns: 2}
 		];
 		frm.get_field('special_test_items').grid.editable_fields = [
-			{fieldname: 'test_particulars', columns: 3},
+			{fieldname: 'lab_test_particulars', columns: 3},
 			{fieldname: 'result_value', columns: 7}
 		];
 	},
