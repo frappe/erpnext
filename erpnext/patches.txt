@@ -563,3 +563,4 @@ erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
 erpnext.patches.v11_0.update_hub_url # 2018-08-31  # 2018-09-03
 erpnext.patches.v10_0.set_discount_amount
 erpnext.patches.v10_0.recalculate_gross_margin_for_project
+erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
