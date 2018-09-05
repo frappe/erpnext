@@ -250,6 +250,7 @@ scheduler_events = {
 	],
 	"monthly": [
 		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",
+		"erpnext.accounts.doctype.purchase_invoice.purchase_invoice.booked_deferred_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }

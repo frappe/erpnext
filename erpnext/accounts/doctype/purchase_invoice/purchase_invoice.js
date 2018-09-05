@@ -491,6 +491,16 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Purchase Invoice': 'Debit Note',
 			'Payment Entry': 'Payment'
 		}
+
+		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
+			return {
+				filters: {
+					'root_type': 'Liability',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
 	},
 
 	onload: function(frm) {
@@ -524,5 +534,38 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	}
+})
+
+frappe.ui.form.on('Purchase Invoice Item', {
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	},
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
+				}
+			})
+		}
 	}
 })
