@@ -243,14 +243,11 @@ class DeliveryTrip(Document):
 		return directions[0] if directions else False
 
 
-
 @frappe.whitelist()
 def get_contact_and_address(name):
 	out = frappe._dict()
-
 	get_default_contact(out, name)
 	get_default_address(out, name)
-
 	return out
 
 
