@@ -3,6 +3,8 @@ from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
 def execute():
+	frappe.local.lang = frappe.db.get_default("lang") or 'en'
+
 	for doctype in ['department', 'leave_period', 'staffing_plan', 'job_opening', 'payroll_entry']:
 		frappe.reload_doc("hr", "doctype", doctype)
 
@@ -36,6 +38,8 @@ def execute():
 		update_records(d, comp_dict)
 
 	update_instructors(comp_dict)
+
+	frappe.local.lang = 'en'
 
 def update_records(doctype, comp_dict):
 	when_then = []
