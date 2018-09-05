@@ -237,7 +237,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					"customer": this.frm.doc.customer
 				},
 				callback: function(r) {
-					if(r.message) {
+					if(r.message.length) {
 						select_loyalty_program(me.frm, r.message);
 					}
 				}
