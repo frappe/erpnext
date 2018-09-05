@@ -223,24 +223,21 @@ def send_birthday_reminders():
 	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
 		return
 
-	from frappe.utils.user import get_enabled_system_users
-	users = None
-
 	birthdays = get_employees_who_are_born_today()
 
 	if birthdays:
-		if not users:
-			users = [u.email_id or u.name for u in get_enabled_system_users()]
 
 		for e in birthdays:
-			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email, e.user_id), users),
+			employee_emails = frappe.db.get_all('Employee', filters={'company': e.company, 'status': 'Active'}, fields=['company_email'])
+			employee_emails = [email["company_email"] for email in employee_emails]
+			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email, e.user_id), employee_emails),
 				subject=_("Birthday Reminder for {0}").format(e.employee_name),
-				message=_("""Today is {0}'s birthday!""").format(e.employee_name),
+				message=_("""Today is {0}'s birthday! \U0001F601""").format(e.employee_name),
 				reply_to=e.company_email or e.personal_email or e.user_id)
 
 def get_employees_who_are_born_today():
 	"""Get Employee properties whose birthday is today."""
-	return frappe.db.sql("""select name, personal_email, company_email, user_id, employee_name
+	return frappe.db.sql("""select name,personal_email, company, company_email, user_id, employee_name
 		from tabEmployee where day(date_of_birth) = day(%(date)s)
 		and month(date_of_birth) = month(%(date)s)
 		and status = 'Active'""", {"date": today()}, as_dict=True)
