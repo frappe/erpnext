@@ -340,14 +340,11 @@ class EmailDigest(Document):
 		balance = past_balance = 0.0
 		count = 0
 		for account in accounts:
-			balance += (get_balance_on(account, date = self.future_to_date)
-				- get_balance_on(account, date = self.future_from_date - timedelta(days=1)))
+			balance += get_balance_on(account, date = self.future_to_date)
 
-			count += (get_count_on(account,fieldname, date = self.future_to_date )
-				- get_count_on(account,fieldname, date = self.future_from_date - timedelta(days=1)))
+			count += get_count_on(account,fieldname, date = self.future_to_date)
 
-			past_balance += (get_balance_on(account, date = self.past_to_date)
-				- get_balance_on(account, date = self.past_from_date - timedelta(days=1)))
+			past_balance += get_balance_on(account, date = self.past_to_date)
 
 		return balance, past_balance, count
 
