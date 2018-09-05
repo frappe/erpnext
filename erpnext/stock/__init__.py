@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 install_docs = [
 	{"doctype":"Role", "role_name":"Stock Manager", "name":"Stock Manager"},
@@ -32,7 +33,7 @@ def get_warehouse_account_map():
 def get_warehouse_account(warehouse, warehouse_account=None):
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
-		if warehouse_account:
+		if warehouse_account and warehouse_account.get(warehouse.parent_warehouse):
 			account = warehouse_account.get(warehouse.parent_warehouse).account
 		else:
 			account = frappe.db.sql("""
@@ -48,7 +49,10 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)
 
+	if not account:
+		frappe.throw(_("Set the warehouse account for the warehouse {0}").format(warehouse))
+
 	return account
-	
+
 def get_company_default_inventory_account(company):
 	return frappe.get_cached_value('Company',  company,  'default_inventory_account')
