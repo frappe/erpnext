@@ -10,13 +10,19 @@ from frappe.core.doctype.sms_settings.sms_settings import send_sms
 import json
 
 class HealthcareSettings(Document):
-    def validate(self):
-        for key in ["collect_registration_fee","manage_customer","patient_master_name",
-        "require_test_result_approval","require_sample_collection", "default_medical_code_standard"]:
-            frappe.db.set_default(key, self.get(key, ""))
-        if(self.collect_registration_fee):
-            if self.registration_fee <= 0 :
-                frappe.throw(_("Registration fee can not be Zero"))
+	def validate(self):
+		for key in ["collect_registration_fee","manage_customer","patient_master_name",
+		"require_test_result_approval","require_sample_collection", "default_medical_code_standard"]:
+			frappe.db.set_default(key, self.get(key, ""))
+		if(self.collect_registration_fee):
+			if self.registration_fee <= 0 :
+				frappe.throw(_("Registration fee can not be Zero"))
+		if self.inpatient_visit_charge_item:
+			validate_service_item(self.inpatient_visit_charge_item, "Configure a service Item for Inpatient Visit Charge Item")
+		if self.op_consulting_charge_item:
+			validate_service_item(self.op_consulting_charge_item, "Configure a service Item for Out Patient Consulting Charge Item")
+		if self.clinical_procedure_consumable_item:
+			validate_service_item(self.clinical_procedure_consumable_item, "Configure a service Item for Clinical Procedure Consumable Item")
 
 @frappe.whitelist()
 def get_sms_text(doc):
@@ -67,3 +73,7 @@ def get_account(parent_type, parent_field, parent, company):
     if(parent_field):
         return frappe.db.get_value("Party Account",
             {"parentfield": parent_field, "parent": parent, "company": company}, "account")
+
+def validate_service_item(item, msg):
+	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
+		frappe.throw(_(msg))
