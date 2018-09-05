@@ -3,7 +3,7 @@
 
 
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, date_diff
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, date_diff, add_months, today, add_days
 from frappe import _, throw
 import frappe.defaults
 
@@ -721,16 +721,16 @@ class PurchaseInvoice(BuyingController):
 					select name, posting_date from `tabGL Entry` where company=%s and account=%s and
 					voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					order by posting_date desc limit 1
-				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
+				''', (self.company, item.deferred_expense_account, "Purchase Invoice", self.name, item.name), as_dict=True)
 
 				if not prev_gl_entry:
 					booking_start_date = item.service_start_date
 				else:
-					booking_start_date = getdate(add_days(prev_gl_entry.posting_date, 1))
+					booking_start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
 
 			total_days = date_diff(item.service_end_date, item.service_start_date)
 			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
-			print(total_days, total_booking_days, "----------")
+
 			account_currency = get_account_currency(item.expense_account)
 			if not last_gl_entry:
 				base_amount = flt(item.base_net_amount*total_booking_days/flt(total_days), item.precision("base_net_amount"))
@@ -743,14 +743,16 @@ class PurchaseInvoice(BuyingController):
 					select sum(debit) as total_debit, sum(debit_in_account_currency) as total_debit_in_account_currency, voucher_detail_no
 					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					group by voucher_detail_no
-				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
+				''', (self.company, item.deferred_expense_account, "Purchase Invoice", self.name, item.name), as_dict=True)
+				already_booked_amount = gl_entries_details[0].total_debit if gl_entries_details else 0
 				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
 					amount = base_amount
 				else:
-					amount = flt(item.net_amount - gl_entries_details.total_debit_in_account_currency, item.precision("net_amount"))
+					already_booked_amount_in_account_currency = gl_entries_details[0].total_debit_in_account_currency if gl_entries_details else 0
+					amount = flt(item.net_amount - already_booked_amount_in_account_currency, item.precision("net_amount"))
 
-			# GL Entry for crediting the amount in the income
+			# GL Entry for crediting the amount in the expense
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": item.expense_account,
@@ -775,7 +777,6 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
 
 	def on_cancel(self):
