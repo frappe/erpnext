@@ -3,7 +3,7 @@
 
 
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, date_diff
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, date_diff, add_months, today, add_days
 from frappe import _, throw
 import frappe.defaults
 
@@ -768,7 +768,6 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
 
 	def on_cancel(self):
