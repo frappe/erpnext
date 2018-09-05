@@ -120,6 +120,7 @@ def create_address(driver):
 
 	return frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
 
+
 def create_driver():
 	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
 		driver = frappe.get_doc({
@@ -147,6 +148,7 @@ def create_delivery_notification():
 	delivery_settings = frappe.get_single("Delivery Settings")
 	delivery_settings.dispatch_template = 'Delivery Notification'
 	delivery_settings.save()
+
 
 
 def create_vehicle():
