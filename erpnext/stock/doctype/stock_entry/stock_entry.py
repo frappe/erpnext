@@ -58,6 +58,7 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
+		self.validate_fg_completed_qty()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -99,6 +100,7 @@ class StockEntry(StockController):
 
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.update_cost_in_project()
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -129,8 +131,8 @@ class StockEntry(StockController):
 					se.docstatus = 1 and se.project = %s and sed.parent = se.name
 					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
 
-			if amount:
-				frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount[0][0])
+			amount = amount[0][0] if amount else 0
+			frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount)
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
@@ -184,6 +186,13 @@ class StockEntry(StockController):
 						if req_items:
 							if stock_qty > trans_qty:
 								item_code.append(item.item_code)
+
+	def validate_fg_completed_qty(self):
+		if self.purpose == "Manufacture" and self.work_order:
+			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
+			for item in self.items:
+				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different").format(item.qty, self.fg_completed_qty))
 
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
@@ -666,8 +675,9 @@ class StockEntry(StockController):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
-				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
-					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
+				elif (self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
+					and not self.pro_doc.skip_transfer and frappe.db.get_single_value("Manufacturing Settings",
+					"backflush_raw_materials_based_on")== "Material Transferred for Manufacture"):
 					self.get_transfered_raw_materials()
 
 				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
@@ -689,8 +699,9 @@ class StockEntry(StockController):
 							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 							where po.name = poitemsup.parent
 								and po.name = %s""",self.purchase_order))
+
 					for item in itervalues(item_dict):
-						if self.pro_doc and not self.pro_doc.skip_transfer:
+						if self.pro_doc and (cint(self.pro_doc.from_wip_warehouse) or not self.pro_doc.skip_transfer):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
 						if self.purchase_order and self.purpose=="Subcontract":

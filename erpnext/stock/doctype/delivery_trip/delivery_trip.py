@@ -5,23 +5,22 @@
 from __future__ import unicode_literals
 import datetime
 import frappe
-import googlemaps
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.user import get_user_fullname
-from frappe.utils import getdate, cstr
-from frappe.integrations.doctype.google_maps.google_maps import round_timedelta
-from frappe.integrations.doctype.google_maps.google_maps import format_address
+from frappe.utils import getdate, cstr, get_datetime
+from frappe.contacts.doctype.address.address import get_address_display
 
 class DeliveryTrip(Document):
 	pass
+
 
 def get_default_contact(out, name):
 	contact_persons = frappe.db.sql(
 		"""
 			select parent,
 				(select is_primary_contact from tabContact c where c.name = dl.parent)
-			 	as is_primary_contact
+				as is_primary_contact
 			from
 				`tabDynamic Link` dl
 			where
@@ -82,61 +81,59 @@ def get_contact_display(contact):
 	}
 	return contact_info.html
 
-@frappe.whitelist()
-def calculate_time_matrix(name):
-	"""Calucation and round in closest 15 minutes, delivery stops"""
 
-	gmaps = frappe.db.get_value('Google Maps', None,
-		['client_key', 'enabled', 'home_address'], as_dict=1)
+def process_route(name, optimize):
+	doc = frappe.get_doc("Delivery Trip", name)
+	settings = frappe.get_single("Google Maps Settings")
+	gmaps_client = settings.get_client()
 
-	if not gmaps.enabled:
+	if not settings.enabled:
 		frappe.throw(_("Google Maps integration is not enabled"))
 
+	home_address = get_address_display(frappe.get_doc("Address", settings.home_address).as_dict())
+	address_list = []
+
+	for stop in doc.delivery_stops:
+		address_list.append(stop.customer_address)
+
+	# Cannot add datetime.date to datetime.timedelta
+	departure_datetime = get_datetime(doc.date) + doc.departure_time
+
 	try:
-		gmaps_client = googlemaps.Client(key=gmaps.client_key)
+		directions = gmaps_client.directions(origin=home_address,
+					destination=home_address, waypoints=address_list,
+					optimize_waypoints=optimize, departure_time=departure_datetime)
 	except Exception as e:
-		frappe.throw(e.message)
+		frappe.throw((e.message))
 
-	secs_15min = 900
-	doc = frappe.get_doc('Delivery Trip', name)
-	departure_time = doc.departure_time
-	matrix_duration = []
+	if not directions:
+		return
 
-	for i, stop in enumerate(doc.delivery_stops):
-		if i == 0:
-			# The first row is the starting pointing
-			origin = gmaps.home_address
-			destination = format_address(doc.delivery_stops[i].address)
-			distance_calc = gmaps_client.distance_matrix(origin, destination)
-			matrix_duration.append(distance_calc)
+	directions = directions[0]
+	duration = 0
 
-			try:
-				distance_secs = distance_calc['rows'][0]['elements'][0]['duration']['value']
-			except Exception as e:
-				frappe.throw(_("Error '{0}' occured. Arguments {1}.").format(e.message, e.args))
+	# Google Maps returns the optimized order of the waypoints that were sent
+	for idx, order in enumerate(directions.get("waypoint_order")):
+		# We accordingly rearrange the rows
+		doc.delivery_stops[order].idx = idx + 1
+		# Google Maps returns the "legs" in the optimized order, so we loop through it
+		duration += directions.get("legs")[idx].get("duration").get("value")
+		arrival_datetime = departure_datetime + datetime.timedelta(seconds=duration)
+		doc.delivery_stops[order].estimated_arrival = arrival_datetime
 
-			stop.estimated_arrival = round_timedelta(
-				departure_time + datetime.timedelta(0, distance_secs + secs_15min),
-				datetime.timedelta(minutes=15))
-		else:
-			# Calculation based on previous
-			origin = format_address(doc.delivery_stops[i - 1].address)
-			destination = format_address(doc.delivery_stops[i].address)
-			distance_calc = gmaps_client.distance_matrix(origin, destination)
-			matrix_duration.append(distance_calc)
+	doc.save()
+	frappe.db.commit()
 
-			try:
-				distance_secs = distance_calc['rows'][0]['elements'][0]['duration']['value']
-			except Exception as e:
-				frappe.throw(_("Error '{0}' occured. Arguments {1}.").format(e.message, e.args))
 
-			stop.estimated_arrival = round_timedelta(
-				doc.delivery_stops[i - 1].estimated_arrival +
-				datetime.timedelta(0, distance_secs + secs_15min), datetime.timedelta(minutes=15))
-		stop.save()
-		frappe.db.commit()
+@frappe.whitelist()
+def optimize_route(name):
+	process_route(name, optimize=True)
 
-	return matrix_duration
+
+@frappe.whitelist()
+def get_arrival_times(name):
+	process_route(name, optimize=False)
+
 
 @frappe.whitelist()
 def notify_customers(docname, date, driver, vehicle, sender_email, delivery_notification):
@@ -180,3 +177,18 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 			frappe.db.set_value("Delivery Stop", delivery_stop.name,
 				"email_sent_to", contact_info.email_id)
 			frappe.msgprint(_("Email sent to {0}").format(contact_info.email_id))
+
+def round_timedelta(td, period):
+	"""Round timedelta"""
+	period_seconds = period.total_seconds()
+	half_period_seconds = period_seconds / 2
+	remainder = td.total_seconds() % period_seconds
+	if remainder >= half_period_seconds:
+		return datetime.timedelta(seconds=td.total_seconds() + (period_seconds - remainder))
+	else:
+		return datetime.timedelta(seconds=td.total_seconds() - remainder)
+
+def format_address(address):
+	"""Customer Address format """
+	address = frappe.get_doc('Address', address)
+	return '{}, {}, {}, {}'.format(address.address_line1, address.city, address.pincode, address.country)

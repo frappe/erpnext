@@ -274,13 +274,7 @@ def get_basic_details(args, item):
 	})
 
 	if item.enable_deferred_revenue:
-		service_end_date = add_months(args.transaction_date, item.no_of_months)
-		out.update({
-			"enable_deferred_revenue": item.enable_deferred_revenue,
-			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
-			"service_start_date": args.transaction_date,
-			"service_end_date": service_end_date
-		})
+		out.update(calculate_service_end_date(args, item))
 
 	# calculate conversion factor
 	if item.stock_uom == args.uom:
@@ -310,6 +304,22 @@ def get_basic_details(args, item):
 
 	return out
 
+@frappe.whitelist()
+def calculate_service_end_date(args, item=None):
+	args = process_args(args)
+	if not item:
+		item = frappe.get_cached_doc("Item", args.item_code)
+
+	service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
+	service_end_date = add_months(service_start_date, item.no_of_months)
+	deferred_detail = {
+		"enable_deferred_revenue": item.enable_deferred_revenue,
+		"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
+		"service_start_date": service_start_date,
+		"service_end_date": service_end_date
+	}
+
+	return deferred_detail
 
 def get_default_income_account(args, item, item_group):
 	return (item.get("income_account")
@@ -333,13 +343,13 @@ def get_default_cost_center(args, item, item_group):
 	cost_center = None
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
-	
+
 	if not cost_center:
 		if args.get('customer'):
 			cost_center = item.get('selling_cost_center') or item_group.get('selling_cost_center')
 		else:
 			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center')
-	
+
 	return cost_center or args.get("cost_center")
 
 def get_default_supplier(args, item, item_group):
@@ -401,7 +411,7 @@ def insert_item_price(args):
 				})
 				item_price.insert()
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
-					args.price_list))
+					args.price_list), alert=True)
 
 def get_item_price(args, item_code):
 	"""
@@ -495,7 +505,7 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 	"""
 
 	item_price = frappe.get_doc("Item Price", price_list_rate_name)
-	if desired_qty:
+	if desired_qty and item_price.packing_unit:
 		packing_increment = desired_qty % item_price.packing_unit
 
 		if packing_increment == 0:
@@ -645,8 +655,8 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-			["projected_qty", "actual_qty"], as_dict=True, cache=True) \
-			or {"projected_qty": 0, "actual_qty": 0}
+		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
+			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
@@ -658,7 +668,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	if stock_qty > 0:
+	if flt(stock_qty) > 0:
 		if has_batch_no:
 			args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "stock_qty":stock_qty})
 			serial_no = get_serial_no(args)

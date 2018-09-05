@@ -381,6 +381,10 @@ class JournalEntry(AccountsController):
 
 	def create_remarks(self):
 		r = []
+
+		if self.user_remark:
+			r.append(_("Note: {0}").format(self.user_remark))
+
 		if self.cheque_no:
 			if self.cheque_date:
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
@@ -407,9 +411,6 @@ class JournalEntry(AccountsController):
 			if d.reference_type == "Purchase Order" and d.debit:
 				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
 					d.reference_name))
-
-		if self.user_remark:
-			r.append(_("Note: {0}").format(self.user_remark))
 
 		if r:
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
@@ -453,6 +454,10 @@ class JournalEntry(AccountsController):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
+				r = [d.user_remark, self.remark]
+				r = [x for x in r if x]
+				remarks = "\n".join(r)
+
 				gl_map.append(
 					self.get_gl_dict({
 						"account": d.account,
@@ -466,7 +471,7 @@ class JournalEntry(AccountsController):
 						"credit_in_account_currency": flt(d.credit_in_account_currency, d.precision("credit_in_account_currency")),
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
-						"remarks": self.remark,
+						"remarks": remarks,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book

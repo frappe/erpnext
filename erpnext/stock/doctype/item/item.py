@@ -76,8 +76,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		if self.is_sales_item and not self.get('is_item_from_hub'):
-			self.publish_in_hub = 1
+		# if self.is_sales_item and not self.get('is_item_from_hub'):
+		# 	self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -978,3 +978,11 @@ def get_uom_conv_factor(uom, stock_uom):
 				value = flt(uom_stock.value) * 1/flt(uom_row.value)
 
 	return value
+
+@frappe.whitelist()
+def get_item_attribute(parent, attribute_value=''):
+	if not frappe.has_permission("Item"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
+
+	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
+		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})

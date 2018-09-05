@@ -4,4 +4,3 @@ DocType: Purchase Invoice Item,Item,Producto
 DocType: Payment Entry,Deductions or Loss,Deducciones o Pérdidas
 DocType: Cheque Print Template,Cheque Size,Tamaño de Cheque
 apps/erpnext/erpnext/utilities/activation.py +128,Make Student Batch,Hacer lotes de Estudiante
-apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +35,Employee {0} on Leave on {1},"Empleado {0}, la jornada del día {1}"

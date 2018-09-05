@@ -45,8 +45,8 @@ class EmailDigest(Document):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n"))
+		recipients = list(filter(lambda r: r in valid_users,
+			self.recipient_list.split("\n")))
 
 		original_user = frappe.session.user
 
@@ -135,7 +135,7 @@ class EmailDigest(Document):
 		notifications = frappe.desk.notifications.get_notifications()
 
 		notifications = sorted(notifications.get("open_count_doctype", {}).items(),
-			lambda a, b: 1 if a[1] < b[1] else -1)
+			key=lambda a: a[1])
 
 		notifications = [{"key": n[0], "value": n[1],
 			"link": get_url_to_list(n[0])} for n in notifications if n[1]]

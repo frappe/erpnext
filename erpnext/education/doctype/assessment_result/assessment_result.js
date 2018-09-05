@@ -2,18 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Assessment Result", {
-	setup: function(frm) {
-		frm.add_fetch("student", "title", "student_name");
-		frm.add_fetch("assessment_plan", "course", "course");
-		frm.add_fetch("assessment_plan", "program", "program");
-		frm.add_fetch("assessment_plan", "academic_year", "academic_year");
-		frm.add_fetch("assessment_plan", "academic_term", "academic_term");
-		frm.add_fetch("assessment_plan", "grading_scale", "grading_scale");
-		frm.add_fetch("assessment_plan", "student_group", "student_group");
-		frm.add_fetch("assessment_plan", "assessment_group", "assessment_group");
-		frm.add_fetch("assessment_plan", "maximum_assessment_score", "maximum_score");
-	},
-
 	onload: function(frm) {
 		frm.set_query('assessment_plan', function(){
 			return {
