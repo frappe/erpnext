@@ -311,8 +311,7 @@ class DeliveryNote(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
-			if dn_doc.net_total > 0:
-				dn_doc.update_billing_percentage(update_modified=update_modified)
+			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
 
@@ -400,7 +399,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
