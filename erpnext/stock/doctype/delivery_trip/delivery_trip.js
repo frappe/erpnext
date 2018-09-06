@@ -65,31 +65,43 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
-		frappe.call({
-			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
-			freeze: true,
-			freeze_message: __("Updating estimated arrival times."),
-			args: {
-				name: frm.doc.name,
-			},
-			callback: function (r) {
-				frm.reload_doc();
+		frappe.db.get_value("Google Maps Settings", { name: "Google Maps Settings" }, "enabled", (r) => {
+			if (r.enabled == 0) {
+				frappe.throw(__("Please enable Google Maps Settings to estimate and optimize routes"));
+			} else {
+				frappe.call({
+					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
+					freeze: true,
+					freeze_message: __("Updating estimated arrival times."),
+					args: {
+						delivery_trip: frm.doc.name,
+					},
+					callback: function (r) {
+						frm.reload_doc();
+					}
+				});
 			}
-		});
+		})
 	},
 
 	optimize_route: function (frm) {
-		frappe.call({
-			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
-			freeze: true,
-			freeze_message: __("Optimizing routes."),
-			args: {
-				name: frm.doc.name,
-			},
-			callback: function (r) {
-				frm.reload_doc();
+		frappe.db.get_value("Google Maps Settings", {name: "Google Maps Settings"}, "enabled", (r) => {
+			if (r.enabled == 0) {
+				frappe.throw(__("Please enable Google Maps Settings to estimate and optimize routes"));
+			} else {
+				frappe.call({
+					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
+					freeze: true,
+					freeze_message: __("Optimizing routes."),
+					args: {
+						delivery_trip: frm.doc.name,
+					},
+					callback: function (r) {
+						frm.reload_doc();
+					}
+				});
 			}
-		});
+		})
 	},
 
 	notify_customers: function (frm) {
