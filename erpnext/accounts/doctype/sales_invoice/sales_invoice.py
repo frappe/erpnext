@@ -24,6 +24,8 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 
+from erpnext.healthcare.utils import manage_invoice_submit_cancel
+
 from six import iteritems
 
 form_grid_templates = {
@@ -179,6 +181,13 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 
+		# Healthcare Service Invoice.
+		domain_settings = frappe.get_doc('Domain Settings')
+		active_domains = [d.domain for d in domain_settings.active_domains]
+
+		if "Healthcare" in active_domains:
+			manage_invoice_submit_cancel(self, "on_submit")
+
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
@@ -226,6 +235,13 @@ class SalesInvoice(SellingController):
 			against_si_doc.make_loyalty_point_entry()
 
 		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+
+		# Healthcare Service Invoice.
+		domain_settings = frappe.get_doc('Domain Settings')
+		active_domains = [d.domain for d in domain_settings.active_domains]
+
+		if "Healthcare" in active_domains:
+			manage_invoice_submit_cancel(self, "on_cancel")
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -719,7 +735,8 @@ class SalesInvoice(SellingController):
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 
@@ -780,13 +797,14 @@ class SalesInvoice(SellingController):
 					"against": "Expense account - " + cstr(self.loyalty_redemption_account) + " for the Loyalty Program",
 					"credit": self.loyalty_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.loyalty_redemption_account,
-					"cost_center": self.loyalty_redemption_cost_center,
+					"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
@@ -810,6 +828,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
+							"cost_center": self.cost_center
 						}, self.party_account_currency)
 					)
 
@@ -821,7 +840,8 @@ class SalesInvoice(SellingController):
 							"debit": payment_mode.base_amount,
 							"debit_in_account_currency": payment_mode.base_amount \
 								if payment_mode_account_currency==self.company_currency \
-								else payment_mode.amount
+								else payment_mode.amount,
+							"cost_center": self.cost_center
 						}, payment_mode_account_currency)
 					)
 
@@ -838,7 +858,8 @@ class SalesInvoice(SellingController):
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-						"against_voucher_type": self.doctype
+						"against_voucher_type": self.doctype,
+						"cost_center": self.cost_center
 					}, self.party_account_currency)
 				)
 
@@ -846,7 +867,8 @@ class SalesInvoice(SellingController):
 					self.get_gl_dict({
 						"account": self.account_for_change_amount,
 						"against": self.customer,
-						"credit": self.base_change_amount
+						"credit": self.base_change_amount,
+						"cost_center": self.cost_center
 					})
 				)
 			else:
@@ -868,7 +890,8 @@ class SalesInvoice(SellingController):
 					"credit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 			gl_entries.append(
@@ -878,7 +901,7 @@ class SalesInvoice(SellingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
-					"cost_center": self.write_off_cost_center or default_cost_center
+					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 
@@ -893,7 +916,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"credit_in_account_currency": self.base_rounding_adjustment,
 					"credit": self.base_rounding_adjustment,
-					"cost_center": round_off_cost_center,
+					"cost_center": self.cost_center or round_off_cost_center,
 				}
 			))
 
@@ -1119,12 +1142,12 @@ class SalesInvoice(SellingController):
 					select name, posting_date from `tabGL Entry` where company=%s and account=%s and
 					voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					order by posting_date desc limit 1
-				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
+				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)
 
 				if not prev_gl_entry:
 					booking_start_date = item.service_start_date
 				else:
-					booking_start_date = getdate(add_days(prev_gl_entry.posting_date, 1))
+					booking_start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
 
 			total_days = date_diff(item.service_end_date, item.service_start_date)
 			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
@@ -1141,12 +1164,14 @@ class SalesInvoice(SellingController):
 					select sum(debit) as total_debit, sum(debit_in_account_currency) as total_debit_in_account_currency, voucher_detail_no
 					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					group by voucher_detail_no
-				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)[0]
-				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
+				''', (self.company, item.deferred_revenue_account, "Sales Invoice", self.name, item.name), as_dict=True)
+				already_booked_amount = gl_entries_details[0].total_debit if gl_entries_details else 0
+				base_amount = flt(item.base_net_amount - already_booked_amount, item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
 					amount = base_amount
 				else:
-					amount = flt(item.net_amount - gl_entries_details.total_debit_in_account_currency, item.precision("net_amount"))
+					already_booked_amount_in_account_currency = gl_entries_details[0].total_debit_in_account_currency if gl_entries_details else 0
+					amount = flt(item.net_amount - already_booked_amount_in_account_currency, item.precision("net_amount"))
 
 			# GL Entry for crediting the amount in the income
 			gl_entries.append(
@@ -1176,6 +1201,43 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
 
+	# Healthcare
+	def set_healthcare_services(self, checked_values):
+		self.set("items", [])
+		from erpnext.stock.get_item_details import get_item_details
+		for checked_item in checked_values:
+			item_line = self.append("items", {})
+			price_list, price_list_currency = frappe.db.get_values("Price List", {"selling": 1}, ['name', 'currency'])[0]
+			args = {
+				'doctype': "Sales Invoice",
+				'item_code': checked_item['item'],
+				'company': self.company,
+				'customer': frappe.db.get_value("Patient", self.patient, "customer"),
+				'selling_price_list': price_list,
+				'price_list_currency': price_list_currency,
+				'plc_conversion_rate': 1.0,
+				'conversion_rate': 1.0
+			}
+			item_details = get_item_details(args)
+			item_line.item_code = checked_item['item']
+			item_line.qty = 1
+			if checked_item['qty']:
+				item_line.qty = checked_item['qty']
+			if checked_item['rate']:
+				item_line.rate = checked_item['rate']
+			else:
+				item_line.rate = item_details.price_list_rate
+			item_line.amount = float(item_line.rate) * float(item_line.qty)
+			if checked_item['income_account']:
+				item_line.income_account = checked_item['income_account']
+			if checked_item['dt']:
+				item_line.reference_dt = checked_item['dt']
+			if checked_item['dn']:
+				item_line.reference_dn = checked_item['dn']
+			if checked_item['description']:
+				item_line.description = checked_item['description']
+
+		self.set_missing_values(for_validate = True)
 
 def booked_deferred_revenue(start_date=None, end_date=None):
 	# check for the sales invoice for which GL entries has to be done
