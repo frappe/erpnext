@@ -171,10 +171,10 @@ def get_arrival_times(name):
 def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 
-	args = delivery_trip.as_dict()
+	context = delivery_trip.as_dict()
 
 	if delivery_trip.driver:
-		args.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))
+		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))
 
 	email_recipients = []
 
@@ -182,28 +182,24 @@ def notify_customers(delivery_trip):
 		contact_info = frappe.db.get_value("Contact", stop.contact,
 											["first_name", "last_name", "email_id", "gender"], as_dict=1)
 
-		if contact_info.email_id:
-			args.update(stop.as_dict())
-			args.update(contact_info)
+		if contact_info and contact_info.email_id:
+			context.update(stop.as_dict())
+			context.update(contact_info)
 
 			dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
 			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
-			departure_date = getdate(delivery_trip.departure_time).strftime("%d.%m.%y")
-			estimated_arrival = cstr(stop.estimated_arrival)[:-3]  # Remove seconds from arrival time
-			subject = _(dispatch_template.subject).format(departure_date, estimated_arrival)
-
 			frappe.sendmail(recipients=contact_info.email_id,
-							subject=subject,
-							message=frappe.render_template(dispatch_template.response, args),
+							subject=dispatch_template.subject,
+							message=frappe.render_template(dispatch_template.response, context),
 							attachments=get_attachments(stop))
 
-			frappe.db.set_value("Delivery Stop", stop.name, "email_sent_to", contact_info.email_id)
+			stop.db_set("email_sent_to", contact_info.email_id)
 			email_recipients.append(contact_info.email_id)
 
 	if email_recipients:
 		frappe.msgprint(_("Email sent to {0}").format(", ".join(email_recipients)))
-		frappe.db.set_value("Delivery Trip", delivery_trip.name, "email_notification_sent", True)
+		delivery_trip.db_set("email_notification_sent", True)
 	else:
 		frappe.msgprint(_("No contacts with email IDs found."))
 
@@ -216,7 +212,7 @@ def get_attachments(delivery_stop):
 	attachments = frappe.attach_print("Delivery Note",
 										delivery_stop.delivery_note,
 										file_name="Delivery Note",
-										print_format=dispatch_attachment or "Standard")
+										print_format=dispatch_attachment)
 
 	return [attachments]
 
