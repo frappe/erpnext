@@ -246,15 +246,95 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.setup_item_selector();
 		}
 	},
-
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+		this.setup_barcode_scan();
+		this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');
 	},
-
+	setup_barcode_scan: function(){
+	      var field_items = this.frm.fields_dict["items"];
+	      console.log('called scan barcode');
+ 	      if  (field_items) {
+		    var grid = field_items.grid;
+		    var display_status = frappe.perm.get_field_display_status(grid.df, grid.frm.doc, grid.perm);
+		    if (frappe.meta.get_field(grid.doctype,'item_code') && frappe.meta.get_field(grid.doctype,'qty') &&
+			(this.frm.doc.__islocal || display_status == 'Write')){
+			if (!this.frm.$wrapper.find('.field_barcode')[0]){
+				 var field_barcode = frappe.ui.form.make_control({
+					df: {fieldtype:"Data", label:__("  Scan Barcode"), fieldname:"scan_barcode"},
+					parent: "<div></div>",
+					change: this.scan_barcode,
+					render_input:true
+				});			         
+				field_barcode.$wrapper.addClass('field_barcode col-sm-6');			  	
+			        this.frm.fields_dict["items"].$wrapper.parents('div.section-body').prepend(field_barcode.wrapper);
+			}
+			else{
+				this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');//after save and submit, remove the description
+			}
+		    }
+		    else{
+			this.frm.$wrapper.find('.field_barcode') && this.frm.$wrapper.find('.field_barcode').remove();
+		    }
+	      }
+	},
+	scan_barcode: function(e){
+	    var barcode = e.target.value;
+	    if (barcode){
+		frappe.db.get_value('Item', {barcode:barcode}, 'item_code', (r) => {
+			var scan_barcode_wrapper = $(e.target).parents("[data-fieldname='scan_barcode']")[0];
+                        var scan_barcode_field = scan_barcode_wrapper.fieldobj;
+			if(r){
+				var cur_grid= cur_frm.fields_dict["items"].grid;
+				var cur_doctype= cur_grid.doctype;
+				var cur_grid_rows = cur_grid.grid_rows;
+				var row_count=cur_grid_rows.length;
+				var find_exist_row = "no";
+				for (var i = 0; i < row_count; i++) {
+					if (cur_grid_rows[i].doc.item_code) {
+						if (cur_grid_rows[i].doc.item_code !==r.item_code) {
+							continue;
+						}
+						else{
+							find_exist_row = "yes";
+							break;
+						}
+					}
+					else {
+						find_exist_row = "empty";
+						break;
+					}
+				}
+				if (find_exist_row === "no"){
+					var new_row= cur_grid.add_new_row(-1)
+					if (new_row){
+						locals[cur_doctype][new_row.name]['qty'] = 1;					
+						frappe.model.set_value(cur_doctype, new_row.name, {"item_code":r.item_code});
+						scan_barcode_field.set_new_description('New row:' + cur_grid_rows[0].doc.idx + ' ' +cur_grid_rows[0].doc.item_code + '  Created')
+					};
+				}
+				else if (find_exist_row === "empty"){
+					locals[cur_doctype][cur_grid_rows[i].doc.name]['qty'] = 1;
+					frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "item_code", r.item_code);
+					scan_barcode_field.set_new_description('New row:' + cur_grid_rows[i].doc.idx + ' ' +cur_grid_rows[i].doc.item_code + '  Created')
+				}
+				else{
+					frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "qty", cur_grid_rows[i].doc.qty + 1);
+					scan_barcode_field.set_new_description('Row:' + cur_grid_rows[i].doc.idx + ' ' +cur_grid_rows[i].doc.item_code + ' Qty incresed by 1')
+				}
+			}
+			else{
+				scan_barcode_field.set_new_description(barcode +' does not exist!')
+			}
+		});
+		e.target.value="";
+	    }
+	return false;
+	},
 	apply_default_taxes: function() {
 		var me = this;
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
