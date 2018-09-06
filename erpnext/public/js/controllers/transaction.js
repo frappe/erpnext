@@ -343,7 +343,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
 							uom : item.uom,
-							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
+							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
+							cost_center: item.cost_center
 						}
 					},
 
