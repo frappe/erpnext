@@ -246,6 +246,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.setup_item_selector();
 		}
 	},
+	
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
@@ -255,9 +256,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.setup_barcode_scan();
 		this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');
 	},
+	
 	setup_barcode_scan: function(){
 	      var field_items = this.frm.fields_dict["items"];
-	      console.log('called scan barcode');
  	      if  (field_items) {
 		    var grid = field_items.grid;
 		    var display_status = frappe.perm.get_field_display_status(grid.df, grid.frm.doc, grid.perm);
@@ -265,7 +266,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			(this.frm.doc.__islocal || display_status == 'Write')){
 			if (!this.frm.$wrapper.find('.field_barcode')[0]){
 				 var field_barcode = frappe.ui.form.make_control({
-					df: {fieldtype:"Data", label:__("  Scan Barcode"), fieldname:"scan_barcode"},
+					df: {fieldtype:"Data", label:__("Scan Barcode"), fieldname:"scan_barcode"},
 					parent: "<div></div>",
 					change: this.scan_barcode,
 					render_input:true
@@ -274,7 +275,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			        this.frm.fields_dict["items"].$wrapper.parents('div.section-body').prepend(field_barcode.wrapper);
 			}
 			else{
-				this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');//after save and submit, remove the description
+				this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');//for save and submit
 			}
 		    }
 		    else{
@@ -282,6 +283,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		    }
 	      }
 	},
+	
 	scan_barcode: function(e){
 	    var barcode = e.target.value;
 	    if (barcode){
@@ -312,29 +314,33 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if (find_exist_row === "no"){
 					var new_row= cur_grid.add_new_row(-1)
 					if (new_row){
-						locals[cur_doctype][new_row.name]['qty'] = 1;					
+						locals[cur_doctype][new_row.name]['qty'] = 1;
 						frappe.model.set_value(cur_doctype, new_row.name, {"item_code":r.item_code});
-						scan_barcode_field.set_new_description('New row:' + cur_grid_rows[0].doc.idx + ' ' +cur_grid_rows[0].doc.item_code + '  Created')
+						scan_barcode_field.set_new_description(__('New row:') + cur_grid_rows[0].doc.idx + ' ' +
+										       cur_grid_rows[0].doc.item_code + __('  Created'));
 					};
 				}
 				else if (find_exist_row === "empty"){
 					locals[cur_doctype][cur_grid_rows[i].doc.name]['qty'] = 1;
 					frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "item_code", r.item_code);
-					scan_barcode_field.set_new_description('New row:' + cur_grid_rows[i].doc.idx + ' ' +cur_grid_rows[i].doc.item_code + '  Created')
+					scan_barcode_field.set_new_description(__('New row:') + cur_grid_rows[i].doc.idx + ' ' +
+									       cur_grid_rows[i].doc.item_code + __('  Created'));
 				}
 				else{
 					frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "qty", cur_grid_rows[i].doc.qty + 1);
-					scan_barcode_field.set_new_description('Row:' + cur_grid_rows[i].doc.idx + ' ' +cur_grid_rows[i].doc.item_code + ' Qty incresed by 1')
+					scan_barcode_field.set_new_description(__('Row:') + cur_grid_rows[i].doc.idx + ' ' +
+									       cur_grid_rows[i].doc.item_code + __(' Qty incresed by 1'));
 				}
 			}
 			else{
-				scan_barcode_field.set_new_description(barcode +' does not exist!')
+				scan_barcode_field.set_new_description(barcode +__(' does not exist!'));
 			}
 		});
 		e.target.value="";
 	    }
 	return false;
 	},
+
 	apply_default_taxes: function() {
 		var me = this;
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
