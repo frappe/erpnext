@@ -8,7 +8,7 @@ from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account, get_outstanding_on_journal_entry
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
@@ -144,8 +144,8 @@ class PaymentEntry(AccountsController):
 	def set_missing_ref_details(self, force=False):
 		for d in self.get("references"):
 			if d.allocated_amount:
-				ref_details = get_reference_details(d.reference_doctype,
-					d.reference_name, self.party_account_currency)
+				ref_details = get_reference_details(d.reference_doctype, d.reference_name, self.party_account_currency,
+					self.party_type, self.party, self.paid_from if self.payment_type == "Receive" else self.paid_to)
 
 				for field, value in iteritems(ref_details):
 					if not d.get(field) or force:
@@ -696,26 +696,8 @@ def get_company_defaults(company):
 	return ret
 
 
-def get_outstanding_on_journal_entry(name):
-	res = frappe.db.sql(
-			'SELECT '
-			'CASE WHEN party_type IN ("Customer", "Student") '
-			'THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) '
-			'ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) '
-			'END as outstanding_amount '
-			'FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) '
-			'AND party_type IS NOT NULL '
-			'AND party_type != ""',
-			(name, name), as_dict=1
-		)
-
-	outstanding_amount = res[0].get('outstanding_amount', 0) if res else 0
-
-	return outstanding_amount
-
-
 @frappe.whitelist()
-def get_reference_details(reference_doctype, reference_name, party_account_currency):
+def get_reference_details(reference_doctype, reference_name, party_account_currency, party_type, party, account):
 	total_amount = outstanding_amount = exchange_rate = None
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
@@ -730,7 +712,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+		outstanding_amount = get_outstanding_on_journal_entry(reference_name, party_type, party, account)
 	elif reference_doctype != "Journal Entry":
 		if party_account_currency == company_currency:
 			if ref_doc.doctype == "Expense Claim":

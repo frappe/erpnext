@@ -15,7 +15,9 @@ frappe.ui.form.on("Payment Reconciliation Payment", {
 				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
 			})[0].outstanding_amount;
 
-			frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
+			if(!flt(row.allocated_amount)) {
+				frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
+			}
 		}
 	}
 });

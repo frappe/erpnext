@@ -24,7 +24,7 @@ frappe.ui.form.on("Journal Entry", {
 			}, "fa fa-table");
 		}
 
-		if(frm.doc.docstatus==1 && frm.doc.naming_series=="JV-") {
+		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Reverse Journal Entry'), function() {
 				return erpnext.journal_entry.reverse_journal_entry(frm);
 			});
@@ -200,6 +200,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
 					filters: {
 						account: jvd.account,
+						party_type: jvd.party_type,
 						party: jvd.party
 					}
 				};
@@ -262,7 +263,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
 			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
 				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			} else if (d.reference_type==="Journal Entry" && !flt(d.debit) && !flt(d.credit) && d.party_type && d.party) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
 		}
@@ -274,6 +275,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			"doctype": doctype,
 			"docname": docname,
 			"party": child.party,
+			"party_type": child.party_type,
 			"account": child.account,
 			"account_currency": child.account_currency,
 			"company": company
