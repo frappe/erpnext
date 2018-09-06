@@ -2,19 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import flt, cint
-
-from frappe import msgprint, _
 import frappe.defaults
-from frappe.model.utils import get_fetch_values
-from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
-from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.stock.doctype.batch.batch import set_batch_nos
-from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from frappe import _
+from frappe.contacts.doctype.address.address import get_company_address
+from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.mapper import get_mapped_doc
+from frappe.model.utils import get_fetch_values
+from frappe.utils import cint, flt
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -170,12 +169,12 @@ class DeliveryNote(SellingController):
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
 				if e in check_list:
-					msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
@@ -312,8 +311,7 @@ class DeliveryNote(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_doc("Delivery Note", dn)
-			if dn_doc.net_total > 0:
-				dn_doc.update_billing_percentage(update_modified=update_modified)
+			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
 
@@ -411,7 +409,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
@@ -463,6 +461,11 @@ def make_delivery_trip(source_name, target_doc=None):
 		target_doc.contact = source_parent.contact_person
 		target_doc.customer_contact = source_parent.contact_display
 
+		# Append unique Delivery Notes in Delivery Trip
+		delivery_notes.append(target_doc.delivery_note)
+
+	delivery_notes = []
+
 	doclist = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
 			"doctype": "Delivery Trip",
@@ -475,7 +478,8 @@ def make_delivery_trip(source_name, target_doc=None):
 			"field_map": {
 				"parent": "delivery_note"
 			},
-			"postprocess": update_stop_details,
+			"condition": lambda item: item.parent not in delivery_notes,
+			"postprocess": update_stop_details
 		}
 	}, target_doc)
 
