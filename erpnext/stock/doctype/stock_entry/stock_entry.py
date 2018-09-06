@@ -17,6 +17,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 
 import json
+from erpnext.manufacturing.doctype.job_card.job_card import update_job_card_reference
 
 from six import string_types, itervalues, iteritems
 
@@ -59,6 +60,7 @@ class StockEntry(StockController):
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.set_job_card_data()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -88,6 +90,9 @@ class StockEntry(StockController):
 			self.update_so_in_serial_number()
 
 
+		if self.job_card:
+			update_job_card_reference(self.job_card, 'stock_entry', self.name)
+
 	def on_cancel(self):
 
 		if self.purchase_order and self.purpose == "Subcontract":
@@ -101,6 +106,18 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
+
+		if self.job_card:
+			update_job_card_reference(self.job_card, 'stock_entry', None)
+
+	def set_job_card_data(self):
+		if self.job_card and not self.work_order:
+			data = frappe.db.get_value('Job Card',
+				self.job_card, ['for_quantity', 'work_order', 'bom_no'], as_dict=1)
+			self.fg_completed_qty = data.for_quantity
+			self.work_order = data.work_order
+			self.from_bom = 1
+			self.bom_no = data.bom_no
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -583,6 +600,10 @@ class StockEntry(StockController):
 
 			if pro_doc.status == 'Stopped':
 				frappe.throw(_("Transaction not allowed against stopped Work Order {0}").format(self.work_order))
+
+		if self.job_card:
+			job_doc = frappe.get_doc('Job Card', self.job_card)
+			job_doc.set_transferred_qty()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
