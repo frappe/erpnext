@@ -24,6 +24,8 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 
+from erpnext.healthcare.utils import manage_invoice_submit_cancel
+
 from six import iteritems
 
 form_grid_templates = {
@@ -179,6 +181,13 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 
+		# Healthcare Service Invoice.
+		domain_settings = frappe.get_doc('Domain Settings')
+		active_domains = [d.domain for d in domain_settings.active_domains]
+
+		if "Healthcare" in active_domains:
+			manage_invoice_submit_cancel(self, "on_submit")
+
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
@@ -226,6 +235,13 @@ class SalesInvoice(SellingController):
 			against_si_doc.make_loyalty_point_entry()
 
 		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+
+		# Healthcare Service Invoice.
+		domain_settings = frappe.get_doc('Domain Settings')
+		active_domains = [d.domain for d in domain_settings.active_domains]
+
+		if "Healthcare" in active_domains:
+			manage_invoice_submit_cancel(self, "on_cancel")
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -1178,6 +1194,43 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
 
+	# Healthcare
+	def set_healthcare_services(self, checked_values):
+		self.set("items", [])
+		from erpnext.stock.get_item_details import get_item_details
+		for checked_item in checked_values:
+			item_line = self.append("items", {})
+			price_list, price_list_currency = frappe.db.get_values("Price List", {"selling": 1}, ['name', 'currency'])[0]
+			args = {
+				'doctype': "Sales Invoice",
+				'item_code': checked_item['item'],
+				'company': self.company,
+				'customer': frappe.db.get_value("Patient", self.patient, "customer"),
+				'selling_price_list': price_list,
+				'price_list_currency': price_list_currency,
+				'plc_conversion_rate': 1.0,
+				'conversion_rate': 1.0
+			}
+			item_details = get_item_details(args)
+			item_line.item_code = checked_item['item']
+			item_line.qty = 1
+			if checked_item['qty']:
+				item_line.qty = checked_item['qty']
+			if checked_item['rate']:
+				item_line.rate = checked_item['rate']
+			else:
+				item_line.rate = item_details.price_list_rate
+			item_line.amount = float(item_line.rate) * float(item_line.qty)
+			if checked_item['income_account']:
+				item_line.income_account = checked_item['income_account']
+			if checked_item['dt']:
+				item_line.reference_dt = checked_item['dt']
+			if checked_item['dn']:
+				item_line.reference_dn = checked_item['dn']
+			if checked_item['description']:
+				item_line.description = checked_item['description']
+
+		self.set_missing_values(for_validate = True)
 
 def booked_deferred_revenue(start_date=None, end_date=None):
 	# check for the sales invoice for which GL entries has to be done

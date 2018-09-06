@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-07-16 13:10:47.940128", 
+ "modified": "2018-07-17 13:10:47.940128", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "lab-test", 
@@ -44,13 +44,14 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "invoice", 
-   "fieldtype": "Link", 
+   "default": "0", 
+   "fieldname": "invoiced", 
+   "fieldtype": "Check", 
    "hidden": 0, 
-   "label": "Invoice", 
+   "label": "Invoiced", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Sales Invoice", 
+   "options": "", 
    "read_only": 0, 
    "reqd": 0
   }, 
