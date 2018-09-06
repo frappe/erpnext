@@ -212,7 +212,8 @@ class DeliveryNote(SellingController):
 
 		if not self.is_return:
 			self.check_credit_limit()
-
+		elif self.issue_credit_note:
+			self.make_return_invoice()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -313,6 +314,16 @@ class DeliveryNote(SellingController):
 			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
+
+	def make_return_invoice(self):
+		try:
+			return_invoice = make_sales_invoice(self.name)
+			return_invoice.is_return = True
+			return_invoice.save()
+			return_invoice.submit()
+			frappe.msgprint(_("Credit Note {0} has been created automatically").format(return_invoice.name))
+		except:
+			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
