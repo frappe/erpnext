@@ -716,7 +716,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 
 
 def get_payment_entry(ref_doc, args):
-	cost_center = frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
+	cost_center = ref_doc.get("cost_center") or frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
 		# Modified to include the posting date for which the exchange rate is required.
@@ -849,14 +849,14 @@ def get_outstanding(args):
 		}
 
 @frappe.whitelist()
-def get_party_account_and_balance(company, party_type, party):
+def get_party_account_and_balance(company, party_type, party, cost_center=None):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	account = get_party_account(party_type, party, company)
 
-	account_balance = get_balance_on(account=account)
-	party_balance = get_balance_on(party_type=party_type, party=party, company=company)
+	account_balance = get_balance_on(account=account, cost_center=cost_center)
+	party_balance = get_balance_on(party_type=party_type, party=party, company=company, cost_center=cost_center)
 
 	return {
 		"account": account,
@@ -867,7 +867,7 @@ def get_party_account_and_balance(company, party_type, party):
 
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None):
+def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None, cost_center=None):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
@@ -886,7 +886,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		party_type = ""
 
 	grid_values = {
-		"balance": get_balance_on(account, date),
+		"balance": get_balance_on(account, date, cost_center=cost_center),
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,

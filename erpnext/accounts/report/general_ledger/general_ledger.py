@@ -154,6 +154,11 @@ def get_conditions(filters):
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
+	if filters.get("cost_center"):
+		lft, rgt = frappe.db.get_value("Cost Center", filters["cost_center"], ["lft", "rgt"])
+		conditions.append("""cost_center in (select name from `tabCost Center`
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 

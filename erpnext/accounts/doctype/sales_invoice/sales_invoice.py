@@ -735,7 +735,8 @@ class SalesInvoice(SellingController):
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 
@@ -796,13 +797,14 @@ class SalesInvoice(SellingController):
 					"against": "Expense account - " + cstr(self.loyalty_redemption_account) + " for the Loyalty Program",
 					"credit": self.loyalty_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.loyalty_redemption_account,
-					"cost_center": self.loyalty_redemption_cost_center,
+					"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
@@ -826,6 +828,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
+							"cost_center": self.cost_center
 						}, self.party_account_currency)
 					)
 
@@ -837,7 +840,8 @@ class SalesInvoice(SellingController):
 							"debit": payment_mode.base_amount,
 							"debit_in_account_currency": payment_mode.base_amount \
 								if payment_mode_account_currency==self.company_currency \
-								else payment_mode.amount
+								else payment_mode.amount,
+							"cost_center": self.cost_center
 						}, payment_mode_account_currency)
 					)
 
@@ -854,7 +858,8 @@ class SalesInvoice(SellingController):
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-						"against_voucher_type": self.doctype
+						"against_voucher_type": self.doctype,
+						"cost_center": self.cost_center
 					}, self.party_account_currency)
 				)
 
@@ -862,7 +867,8 @@ class SalesInvoice(SellingController):
 					self.get_gl_dict({
 						"account": self.account_for_change_amount,
 						"against": self.customer,
-						"credit": self.base_change_amount
+						"credit": self.base_change_amount,
+						"cost_center": self.cost_center
 					})
 				)
 			else:
@@ -884,7 +890,8 @@ class SalesInvoice(SellingController):
 					"credit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 			gl_entries.append(
@@ -894,7 +901,7 @@ class SalesInvoice(SellingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
-					"cost_center": self.write_off_cost_center or default_cost_center
+					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 
@@ -909,7 +916,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"credit_in_account_currency": self.base_rounding_adjustment,
 					"credit": self.base_rounding_adjustment,
-					"cost_center": round_off_cost_center,
+					"cost_center": self.cost_center or round_off_cost_center,
 				}
 			))
 

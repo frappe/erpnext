@@ -569,6 +569,74 @@ class TestDeliveryNote(unittest.TestCase):
 		dt = make_delivery_trip(dn.name)
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
 
+	def test_delivery_note_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
+		set_valuation_method("_Test Item", "FIFO")
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		stock_in_hand_account = get_inventory_account('_Test Company')
+		dn = create_delivery_note(cost_center=cost_center)
+
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"Cost of Goods Sold - _TC": {
+				"cost_center": cost_center
+			},
+			stock_in_hand_account: {
+				"cost_center": cost_center
+			}
+		}
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		set_perpetual_inventory(0, company)
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_delivery_note_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+		cost_center = "_Test Cost Center - _TC"
+
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
+		set_valuation_method("_Test Item", "FIFO")
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		stock_in_hand_account = get_inventory_account('_Test Company')
+		dn = create_delivery_note()
+
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+
+		self.assertTrue(gl_entries)
+		expected_values = {
+			"Cost of Goods Sold - _TC": {
+				"cost_center": cost_center
+			},
+			stock_in_hand_account: {
+				"cost_center": None
+			}
+		}
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		set_perpetual_inventory(0, company)
+
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
@@ -589,7 +657,7 @@ def create_delivery_note(**args):
 		"rate": args.rate or 100,
 		"conversion_factor": 1.0,
 		"expense_account": "Cost of Goods Sold - _TC",
-		"cost_center": "_Test Cost Center - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"target_warehouse": args.target_warehouse
 	})
