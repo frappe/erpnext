@@ -6,7 +6,6 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'erpnext/selling/sales_common.js' %};
 
-cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -544,6 +543,9 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 
 frappe.ui.form.on('Sales Invoice', {
 	setup: function(frm){
+		frm.add_fetch('customer', 'tax_id', 'tax_id');
+		frm.add_fetch('payment_term', 'invoice_portion', 'invoice_portion');
+		frm.add_fetch('payment_term', 'description', 'description');
 
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
