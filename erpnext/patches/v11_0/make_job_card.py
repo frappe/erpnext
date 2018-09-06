@@ -14,5 +14,5 @@ def execute():
 		where (work_order is not null and work_order != '') and docstatus = 0""", as_dict=1):
 		if d.work_order:
 			doc = frappe.get_doc('Work Order', d.work_order)
-			doc.make_job_card()
+			doc.create_job_card()
 			frappe.delete_doc('Timesheet', d.name)
