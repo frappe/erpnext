@@ -592,6 +592,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
+		var  transaction_controller= new erpnext.TransactionController({frm:this.frm});
+		transaction_controller.setup_barcode_scan();
 	},
 
 	on_submit: function() {
