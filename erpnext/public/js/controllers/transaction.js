@@ -256,10 +256,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.setup_barcode_scan();
 		this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');
 	},
-	
+
 	setup_barcode_scan: function(){
 		var field_items = this.frm.fields_dict["items"];
- 		if  (field_items) {
+		if  (field_items) {
 			var grid = field_items.grid;
 			var display_status = frappe.perm.get_field_display_status(grid.df, grid.frm.doc, grid.perm);
 			if (frappe.meta.get_field(grid.doctype,'item_code') && frappe.meta.get_field(grid.doctype,'qty') &&
@@ -272,12 +272,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						render_input:true
 					});
 					field_barcode.$wrapper.addClass('field_barcode col-sm-6');
-			        	this.frm.fields_dict["items"].$wrapper.parents('div.section-body').prepend(field_barcode.wrapper);
+					this.frm.fields_dict["items"].$wrapper.parents('div.section-body').prepend(field_barcode.wrapper);
 				}
 				else{
 					this.frm.$wrapper.find('div.frappe-control.field_barcode p.help-box').text('');//	for save and submit
 				}
-		    }
+			}
 			else{
 				this.frm.$wrapper.find('.field_barcode') && this.frm.$wrapper.find('.field_barcode').remove();
 		    }
@@ -317,28 +317,28 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							locals[cur_doctype][new_row.name]['qty'] = 1;
 							frappe.model.set_value(cur_doctype, new_row.name, {"item_code":r.item_code});
 							scan_barcode_field.set_new_description(__('New row:') + cur_grid_rows[0].doc.idx + ' ' +
-										       cur_grid_rows[0].doc.item_code + __('  Created'));
+									cur_grid_rows[0].doc.item_code + __('  Created'));
 						}
 					}
 					else if (find_exist_row === "empty"){
 						locals[cur_doctype][cur_grid_rows[i].doc.name]['qty'] = 1;
 						frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "item_code", r.item_code);
 						scan_barcode_field.set_new_description(__('New row:') + cur_grid_rows[i].doc.idx + ' ' +
-									       cur_grid_rows[i].doc.item_code + __('  Created'));
+								cur_grid_rows[i].doc.item_code + __('  Created'));
 					}
 					else{
 						frappe.model.set_value(cur_doctype, cur_grid_rows[i].doc.name, "qty", cur_grid_rows[i].doc.qty + 1);
 						scan_barcode_field.set_new_description(__('Row:') + cur_grid_rows[i].doc.idx + ' ' +
-									       cur_grid_rows[i].doc.item_code + __(' Qty incresed by 1'));
+								cur_grid_rows[i].doc.item_code + __(' Qty incresed by 1'));
 					}
 				}
 				else{
 					scan_barcode_field.set_new_description(barcode +__(' does not exist!'));
 				}
 			});
-		e.target.value="";
+			e.target.value="";
 	    }
-	return false;
+		return false;
 	},
 
 	apply_default_taxes: function() {
