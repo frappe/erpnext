@@ -55,6 +55,10 @@ def set_default_settings(args):
 	buying_settings.allow_multiple_items = 1
 	buying_settings.save()
 
+	delivery_settings = frappe.get_doc("Delivery Settings")
+	delivery_settings.dispatch_template = _("Dispatch Notification")
+	delivery_settings.save()
+
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
