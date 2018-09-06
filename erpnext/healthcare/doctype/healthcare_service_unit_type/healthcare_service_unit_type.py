@@ -8,6 +8,11 @@ from frappe import _
 from frappe.model.document import Document
 
 class HealthcareServiceUnitType(Document):
+	def validate(self):
+		if self.is_billable == 1:
+			if not self.uom or not self.item_group or not self.description or not self.no_of_hours > 0:
+				frappe.throw(_("Configure Item Fields like UOM, Item Group, Description and No of Hours."))
+
 	def after_insert(self):
 		if self.inpatient_occupancy and self.is_billable:
 			create_item(self)
@@ -22,13 +27,16 @@ class HealthcareServiceUnitType(Document):
 	def on_update(self):
 		if(self.change_in_item and self.is_billable == 1 and self.item):
 			updating_item(self)
-			if not item_price_exist(self):
-				if(self.test_rate != 0.0):
+			item_price = item_price_exist(self)
+			if not item_price:
+				if(self.rate != 0.0):
 					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
-					if(self.test_rate):
-						make_item_price(self.test_code, price_list_name, self.test_rate)
+					if(self.rate):
+						make_item_price(self.item_code, price_list_name, self.rate)
 					else:
-						make_item_price(self.test_code, price_list_name, 0.0)
+						make_item_price(self.item_code, price_list_name, 0.0)
+			else:
+				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.rate)
 
 			frappe.db.set_value(self.doctype,self.name,"change_in_item",0)
 		elif(self.is_billable == 0 and self.item):
@@ -40,7 +48,7 @@ def item_price_exist(doc):
 	"doctype": "Item Price",
 	"item_code": doc.item_code})
 	if(item_price):
-		return True
+		return item_price[0][0]
 	else:
 		return False
 
