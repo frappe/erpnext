@@ -215,19 +215,3 @@ def get_attachments(delivery_stop):
 										print_format=dispatch_attachment)
 
 	return [attachments]
-
-
-def round_timedelta(td, period):
-	"""Round timedelta"""
-	period_seconds = period.total_seconds()
-	half_period_seconds = period_seconds / 2
-	remainder = td.total_seconds() % period_seconds
-	if remainder >= half_period_seconds:
-		return datetime.timedelta(seconds=td.total_seconds() + (period_seconds - remainder))
-	else:
-		return datetime.timedelta(seconds=td.total_seconds() - remainder)
-
-def format_address(address):
-	"""Customer Address format """
-	address = frappe.get_doc('Address', address)
-	return '{}, {}, {}, {}'.format(address.address_line1, address.city, address.pincode, address.country)
