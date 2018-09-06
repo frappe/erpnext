@@ -318,10 +318,14 @@ class DeliveryNote(SellingController):
 		self.load_from_db()
 
 	def make_return_invoice(self):
-		return_invoice = make_sales_invoice(self.name)
-		return_invoice.is_return = True
-		return_invoice.save()
-		return_invoice.submit()
+		try:
+			return_invoice = make_sales_invoice(self.name)
+			return_invoice.is_return = True
+			return_invoice.save()
+			return_invoice.submit()
+			frappe.msgprint(_("Credit Note {0} has been created automatically").format(return_invoice.name))
+		except:
+			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
