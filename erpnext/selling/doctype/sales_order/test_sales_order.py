@@ -692,7 +692,7 @@ class TestSalesOrder(unittest.TestCase):
 			"standard_rate": 2.00,
 			"stock_uom": "Nos",
 			"weight_per_unit": 1,
-			"weight_uom": "lb",
+			"weight_uom": "Kg",
 			"item_defaults": [{
 				"default_warehouse": "_Test Warehouse - _TC",
 				"company": "_Test Company"
