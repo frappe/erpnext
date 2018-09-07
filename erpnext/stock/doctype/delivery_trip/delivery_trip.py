@@ -86,9 +86,6 @@ class DeliveryTrip(Document):
 
 			note_doc.flags.ignore_validate_update_after_submit = True
 			note_doc.save()
-			
-		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
@@ -183,6 +180,22 @@ class DeliveryTrip(Document):
 
 		return route_list
 
+	def sanitize_address(self, address):
+		"""
+		Remove HTML breaks in a given address
+
+		Args:
+			address (str): Address to be sanitized
+
+		Returns:
+			(str): Sanitized address
+		"""
+
+		address = address.split('<br>')
+
+		# Only get the first 4 blocks of the address
+		return ', '.join(address[:3])
+
 	def rearrange_stops(self, optimized_order, start):
 		"""
 		Re-arrange delivery stops based on order optimized
@@ -249,8 +262,10 @@ class DeliveryTrip(Document):
 @frappe.whitelist()
 def get_contact_and_address(name):
 	out = frappe._dict()
+
 	get_default_contact(out, name)
 	get_default_address(out, name)
+
 	return out
 
 
