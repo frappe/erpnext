@@ -45,7 +45,7 @@ def punch_in(rfid_tag):
 						"in_time":check_in.in_time,
 						}]
 	else:
-		return [{"status":"error", "error_message":"RFID tag unknown."
+		return [{"status":"error", "error_message":"RFID Tag unknown."
 				}]
 
 @frappe.whitelist()
