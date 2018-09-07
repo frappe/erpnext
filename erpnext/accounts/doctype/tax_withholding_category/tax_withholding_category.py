@@ -102,17 +102,25 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 
 	return tds_amount
 
-def get_advance_vouchers(supplier, fiscal_year):
+def get_advance_vouchers(supplier, fiscal_year=None, company=None, from_date=None, to_date=None):
+	condition = "fiscal_year=%s" % fiscal_year
+	if from_date and to_date:
+		condition = "company=%s and posting_date between %s and %s" % (company, from_date, to_date)
+
 	return frappe.db.sql_list("""
 		select distinct voucher_no
 		from `tabGL Entry`
-		where party=%s and fiscal_year=%s and debit > 0
-	""", (supplier, fiscal_year))
+		where party=%s and %s and debit > 0
+	""", (supplier, condition))
 
-def get_debit_note_amount(supplier, year_start_date, year_end_date):
+def get_debit_note_amount(supplier, year_start_date, year_end_date, company=None):
+	condition = ""
+	if company:
+		condition = " and company=%s " % company
+
 	return flt(frappe.db.sql("""
 		select abs(sum(net_total))
 		from `tabPurchase Invoice`
-		where supplier=%s and is_return=1 and docstatus=1
+		where supplier=%s %s and is_return=1 and docstatus=1
 			and posting_date between %s and %s
-	""", (supplier, year_start_date, year_end_date)))
+	""", (supplier, condition, year_start_date, year_end_date)))
