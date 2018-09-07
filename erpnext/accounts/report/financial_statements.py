@@ -351,7 +351,8 @@ def set_gl_entries_by_account(
 			"from_date": from_date,
 			"to_date": to_date,
 			"lft": root_lft,
-			"rgt": root_rgt
+			"rgt": root_rgt,
+			"cost_center": filters.cost_center
 		},
 		as_dict=True)
 
@@ -381,10 +382,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("project = '%s'" % (frappe.db.escape(filters.get("project"))))
 
 		if filters.get("cost_center"):
-			if not isinstance(filters.get("cost_center"), list):
-				cost_centers = str(filters.get("cost_center")).strip()
-				filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
-			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
+			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
+			additional_conditions.append("cost_center in %(cost_center)s")
 
 		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 
@@ -397,14 +396,17 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
+def get_cost_centers_with_children(cost_centers):
+	if not isinstance(cost_centers, list):
+		cost_centers = [d.strip() for d in str(cost_centers).strip().split(',') if d]
 
-def get_cost_center_cond(cost_center):
-	cost_centers = frappe.db.get_all("Cost Center", {"name": ["in", cost_center]},
-		["name", "lft", "rgt"])
+	all_cost_centers = []
+	for d in cost_centers:
+		lft, rgt = frappe.db.get_value("Cost Center", d, ["lft", "rgt"])
+		children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+		all_cost_centers += [c.name for c in children]
 
-	lft_rgt = " or ".join(["(lft >=%s and rgt <=%s)" % (d.lft, d.rgt) for d in cost_centers])
-
-	return """ cost_center in (select name from `tabCost Center` where %s)""" % (lft_rgt)
+	return list(set(all_cost_centers))
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{
