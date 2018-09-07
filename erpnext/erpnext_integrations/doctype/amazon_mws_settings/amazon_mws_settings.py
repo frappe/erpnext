@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 import dateutil
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from amazon_methods import get_products_details, get_orders
+from erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods import get_products_details, get_orders
 
 class AmazonMWSSettings(Document):
 	def validate(self):
