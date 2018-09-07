@@ -319,11 +319,17 @@ class DeliveryNote(SellingController):
 		self.load_from_db()
 
 	def make_return_invoice(self):
+		if frappe.db.get_value('Delivery Note', self.return_against, 'per_billed') != 100:
+			frappe.throw(_("Cannot Issue Credit Note if Delvery Note {0} is not billed.").format(self.return_against))
+		 
 		return_invoices = defaultdict(list)
-
 		for item in self.items:
 			if item.against_sales_invoice:
 				return_invoices[item.against_sales_invoice].append(item.item_code)
+		
+		if not return_invoices:
+			for sales_invoice in frappe.db.sql("select parent from `tabSales Invoice Item` where delivery_note = %s", self.return_against, as_dict=1):
+				return_invoices[sales_invoice.parent].append(item.item_code)
 
 		for invoice, items in return_invoices.items():
 			return_invoice = make_sales_invoice(self.name)
