@@ -289,7 +289,7 @@ class SalesInvoice(SellingController):
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
-		print_format = pos.get("print_format_for_online")
+		print_format = pos.get("print_format_for_online") if pos else None
 		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
 			print_format = 'POS Invoice'
 
