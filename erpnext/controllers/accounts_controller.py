@@ -951,8 +951,9 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 
 	# Unallocated payment JVs
 	if include_unallocated:
-		against_account_condition = "and GROUP_CONCAT(gle_je.against) like '%%{0}%%'" \
-			.format(frappe.db.escape(against_account)) if against_account else ""
+		against_account_condition = ""
+		if against_account:
+			against_account_condition = "and GROUP_CONCAT(gle_je.against) like '%%{0}%%'".format(frappe.db.escape(against_account))
 
 		journal_entries += frappe.db.sql("""
 		select
@@ -966,14 +967,15 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 					and gle_payment.party_type = gle_je.party_type
 					and gle_payment.party = gle_je.party
 					and gle_payment.account = gle_je.account
-					and {payment_dr_or_cr} > 0
+					and gle_payment.name != gle_je.name
+					and abs({payment_dr_or_cr}) > 0
 			) as amount
 		from `tabGL Entry` gle_je
 		inner join `tabJournal Entry` je on je.name = gle_je.voucher_no
 		where
 			gle_je.party_type = %(party_type)s and gle_je.party = %(party)s and gle_je.account = %(account)s
 			and gle_je.voucher_type = 'Journal Entry' and (gle_je.against_voucher = '' or gle_je.against_voucher is null)
-			and {bal_dr_or_cr} > 0
+			and abs({bal_dr_or_cr}) > 0
 		group by gle_je.voucher_no
 		having amount > 0.005 {against_account_condition}
 		order by gle_je.posting_date""".format(

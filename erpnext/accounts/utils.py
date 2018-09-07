@@ -630,7 +630,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None):
+def get_outstanding_invoices(party_type, party, account, condition=None, include_negative_invoices=False):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
@@ -657,24 +657,26 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
-					and {payment_dr_or_cr} > 0
+					and payment_gl_entry.name != invoice_gl_entry.name
+					and abs({payment_dr_or_cr}) > 0
 			) as payment_amount
 		from
 			`tabGL Entry` invoice_gl_entry
 		where
 			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
+			and account = %(account)s and abs({dr_or_cr}) > 0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
-		having (invoice_amount - payment_amount) > 0.005
+		having {abs}(invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
 			payment_dr_or_cr=payment_dr_or_cr,
-			condition=condition or ""
+			condition=condition or "",
+			abs="abs" if include_negative_invoices else ""
 		), {
 			"party_type": party_type,
 			"party": party,

@@ -83,6 +83,18 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
+
+			if(child.reference_doctype == "Journal Entry") {
+				return {
+					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
+					filters: {
+						account: doc.payment_type=="Receive" ? doc.paid_from : doc.paid_to,
+						party_type: doc.party_type,
+						party: doc.party
+					}
+				};
+			}
+
 			const filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
 				'Purchase Order', 'Expense Claim', 'Fees'];

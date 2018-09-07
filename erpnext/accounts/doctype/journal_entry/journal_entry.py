@@ -175,8 +175,8 @@ class JournalEntry(AccountsController):
 			""", (d.account, d.reference_name), as_dict=True)
 
 		if not against_entries:
-			frappe.throw(_("Journal Entry {0} does not have account {1} or already matched against other voucher")
-				.format(d.reference_name, d.account))
+			frappe.throw(_("Row {0}: Journal Entry {1} does not have account {2} or is already matched against a voucher")
+				.format(d.idx, d.reference_name, d.account))
 		else:
 			dr_or_cr = "debit" if d.credit > 0 else "credit"
 			valid = False
@@ -184,8 +184,8 @@ class JournalEntry(AccountsController):
 				if flt(jvd[dr_or_cr]) > 0:
 					valid = True
 			if not valid:
-				frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
-					.format(d.reference_name, dr_or_cr))
+				frappe.throw(_("Row {0}: Against Journal Entry {1} does not have any unmatched {2} entry")
+					.format(d.idx, d.reference_name, dr_or_cr))
 
 		if d.party and d.party_type:
 			acc_tuple = (d.account, d.party_type, d.party)
@@ -310,15 +310,15 @@ class JournalEntry(AccountsController):
 						.format(reference_type, reference_name, invoice.outstanding_amount))
 
 	def validate_jv_party_references(self):
-		for reference_name, acc_balances in iteritems(self.jv_party_references):
-			for (account, party_type, party), balance in iteritems(acc_balances):
-				dr_or_cr = "credit_in_account_currency - debit_in_account_currency" if balance > 0 \
+		for reference_name, acc_amounts in iteritems(self.jv_party_references):
+			for (account, party_type, party), amount in iteritems(acc_amounts):
+				dr_or_cr = "credit_in_account_currency - debit_in_account_currency" if amount > 0 \
 					else "debit_in_account_currency - credit_in_account_currency"
-				amount = abs(balance)
-				balance = get_outstanding_on_journal_entry(reference_name, party_type, party, account, dr_or_cr)
-				if balance < amount:
+				amount = abs(amount)
+				jv_balance = get_outstanding_on_journal_entry(reference_name, party_type, party, account, dr_or_cr)
+				if jv_balance < amount:
 					frappe.throw(_("Journal Entry {0} has a balance of {1} for party {2} which is less than the referenced amount {3}")
-						.format(reference_name, balance, party, amount))
+						.format(reference_name, jv_balance, party, amount))
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
@@ -380,13 +380,14 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
-			elif not d.exchange_rate or d.exchange_rate == 1 or \
-				(d.reference_type in ("Sales Invoice", "Purchase Invoice")
-				and d.reference_name and self.posting_date):
+			elif not d.exchange_rate or d.exchange_rate == 1 \
+				or (d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name and self.posting_date) \
+				or (d.reference_type == "Journal Entry" and d.reference_name and d.party_type and d.party and d.account):
 
 					# Modified to include the posting date for which to retreive the exchange rate
 					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency,
-						self.company, d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
+						self.company, d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate,
+						d.party_type, d.party)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
@@ -607,7 +608,7 @@ class JournalEntry(AccountsController):
 					party=d.party, date=self.posting_date, company=self.company)
 
 			d.account_balance = account_balance[d.account]
-			d.party_balance = party_balance[(d.party_type, d.party)]
+			d.party_balance = flt(party_balance[(d.party_type, d.party)])
 
 
 @frappe.whitelist()
@@ -801,19 +802,6 @@ def get_opening_accounts(company):
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
-
-def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	if filters.get("account") and filters.get("party_type") and filters.get("party"):
-		res = get_outstanding_journal_entries(filters.get("account"), filters.get("party_type"), filters.get("party"))
-		return [[jv.name, jv.posting_date, jv.user_remark, _("Balance: {0}").format(jv.balance)] for jv in res]
-	else:
-		return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
-			from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-			where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
-			and (jv_detail.reference_type is null or jv_detail.reference_type = '')
-			and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
-			(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
-
 def get_outstanding_on_journal_entry(jv_name, party_type, party, account, dr_or_cr=None):
 	if not dr_or_cr:
 		if erpnext.get_party_account_type(party_type) == 'Receivable':
@@ -852,6 +840,7 @@ def get_outstanding_journal_entries(party_account, party_type, party):
 					and gle_payment.party_type = gle_je.party_type
 					and gle_payment.party = gle_je.party
 					and gle_payment.account = gle_je.account
+					and gle_payment.name != gle_je.name
 					and abs({payment_dr_or_cr}) > 0
 			) as balance
 		from `tabGL Entry` gle_je
@@ -870,6 +859,18 @@ def get_outstanding_journal_entries(party_account, party_type, party):
 		"party": party,
 		"account": party_account
 	}, as_dict=1)
+
+def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
+	if filters.get("account") and filters.get("party_type") and filters.get("party"):
+		res = get_outstanding_journal_entries(filters.get("account"), filters.get("party_type"), filters.get("party"))
+		return [[jv.name, jv.posting_date, _("Balance: {0}").format(jv.balance), jv.user_remark] for jv in res]
+	else:
+		return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
+			from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
+			where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
+			and (jv_detail.reference_type is null or jv_detail.reference_type = '')
+			and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
+			(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
 
 @frappe.whitelist()
 def get_outstanding(args):
@@ -968,7 +969,8 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 
 @frappe.whitelist()
 def get_exchange_rate(posting_date, account=None, account_currency=None, company=None,
-		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
+		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None,
+		party_type=None, party=None):
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
 		["account_type", "root_type", "account_currency", "company"], as_dict=1)
@@ -987,6 +989,8 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 	if account_currency != company_currency:
 		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
+		elif reference_type == "Journal Entry" and reference_name and party_type and party:
+			exchange_rate = get_average_party_exchange_rate_on_journal_entry(reference_name, party_type, party, account)
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
@@ -998,6 +1002,14 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 	# don't return None or 0 as it is multipled with a value and that value could be lost
 	return exchange_rate or 1
 
+def get_average_party_exchange_rate_on_journal_entry(jv_name, party_type, party, account):
+	res = frappe.db.sql("""select avg(jv_detail.exchange_rate)
+		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
+		where jv.name = %s and jv_detail.parent = jv.name
+		and jv_detail.account = %s and jv_detail.party_type = %s and jv_detail.party = %s
+		and (jv_detail.reference_type is null or jv_detail.reference_type = '')
+		""", [jv_name, account, party_type, party])
+	return res[0][0] if res else 1.0
 
 @frappe.whitelist()
 def get_average_exchange_rate(account):
