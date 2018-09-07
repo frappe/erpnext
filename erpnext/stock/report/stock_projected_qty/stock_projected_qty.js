@@ -21,7 +21,7 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldtype": "Link",
 			"options": "Item"
 		},
-			{
+		{
 			"fieldname":"item_group",
 			"label": __("Item Group"),
 			"fieldtype": "Link",
