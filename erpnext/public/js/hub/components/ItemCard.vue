@@ -15,7 +15,7 @@
 				</i>
 			</div>
 			<div class="hub-card-body">
-				<img class="hub-card-image" v-img-src="item.image"/>
+				<base-image class="hub-card-image" :src="item.image" :alt="title" />
 				<div class="hub-card-overlay">
 					<div v-if="is_local" class="hub-card-overlay-body">
 						<div class="hub-card-overlay-button">
