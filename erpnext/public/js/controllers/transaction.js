@@ -281,7 +281,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			else{
 				this.frm.$wrapper.find('.field_barcode') && this.frm.$wrapper.find('.field_barcode').remove();
 			}
-	      }
+		}
 	},
 
 	scan_barcode: function(e){
