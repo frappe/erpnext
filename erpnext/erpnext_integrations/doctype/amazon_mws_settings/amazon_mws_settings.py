@@ -12,7 +12,10 @@ from amazon_methods import get_products_details, get_orders
 class AmazonMWSSettings(Document):
 	def validate(self):
 		if self.enable_amazon == 1:
+			self.enable_synch = 1
 			setup_custom_fields()
+		else:
+			self.enable_synch = 0
 
 	def get_products_details(self):
 		if self.enable_amazon == 1:
@@ -25,7 +28,7 @@ class AmazonMWSSettings(Document):
 
 def schedule_get_order_details():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
-	if mws_settings.enable_synch:
+	if mws_settings.enable_synch and mws_settings.enable_amazon:
 		after_date = dateutil.parser.parse(mws_settings.after_date).strftime("%Y-%m-%d")
 		get_orders(after_date = after_date)
 
