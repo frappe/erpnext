@@ -11,10 +11,16 @@ def execute():
 	frappe.reload_doc('manufacturing', 'doctype', 'job_card')
 	frappe.reload_doc('manufacturing', 'doctype', 'job_card_item')
 
-	for d in frappe.db.sql("""select work_order, name from tabTimesheet
-		where (work_order is not null and work_order != '') and docstatus = 0""", as_dict=1):
-		if d.work_order:
-			doc = frappe.get_doc('Work Order', d.work_order)
+	fieldname = frappe.db.get_value('DocField', {'fieldname': 'work_order', 'parent': 'Timesheet'}, 'fieldname')
+	if not fieldname:
+		fieldname = frappe.db.get_value('DocField', {'fieldname': 'production_order', 'parent': 'Timesheet'}, 'fieldname')
+		if not fieldname: return
+
+	for d in frappe.db.sql("""select %(fieldname)s, name from tabTimesheet
+		where (%(fieldname)s is not null and %(fieldname)s != '') and docstatus = 0""",
+		{'fieldname': fieldname}, as_dict=1):
+		if d[fieldname]:
+			doc = frappe.get_doc('Work Order', d[fieldname])
 			for row in doc.operations:
 				create_job_card(doc, row, auto_create=True)
 			frappe.delete_doc('Timesheet', d.name)
