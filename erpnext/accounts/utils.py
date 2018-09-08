@@ -158,6 +158,24 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# if bal is None, return 0
 		return flt(bal)
 
+def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None):
+	if not dr_or_cr:
+		if erpnext.get_party_account_type(party_type) == 'Receivable':
+			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		else:
+			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+
+	res = frappe.db.sql("""
+		select ifnull(sum({dr_or_cr}), 0)
+		from `tabGL Entry`
+		where
+		((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
+			or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
+		and party_type=%(party_type)s and party=%(party)s and account=%(account)s""".format(dr_or_cr=dr_or_cr),
+	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party, "account": account})
+
+	return flt(res[0][0]) if res else 0.0
+
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
@@ -651,9 +669,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
 				where payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
-					and if(invoice_gl_entry.voucher_type='Journal Entry',
-						payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no,
-						payment_gl_entry.against_voucher = invoice_gl_entry.against_voucher)
+					and payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
@@ -666,9 +682,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 			party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s and abs({dr_or_cr}) > 0
 			{condition}
-			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
+			and voucher_type != 'Payment Entry' and (against_voucher = '' or against_voucher is null)
 		group by voucher_type, voucher_no
 		having {abs}(invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
@@ -703,7 +717,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 
 	return outstanding_invoices
-
 
 def get_account_name(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
 	"""return account based on matching conditions"""

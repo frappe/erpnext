@@ -6,7 +6,7 @@ import frappe, erpnext, json
 from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on, get_account_currency
+from erpnext.accounts.utils import get_balance_on, get_balance_on_voucher, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
@@ -315,7 +315,7 @@ class JournalEntry(AccountsController):
 				dr_or_cr = "credit_in_account_currency - debit_in_account_currency" if amount > 0 \
 					else "debit_in_account_currency - credit_in_account_currency"
 				amount = abs(amount)
-				jv_balance = get_outstanding_on_journal_entry(reference_name, party_type, party, account, dr_or_cr)
+				jv_balance = get_balance_on_voucher("Journal Entry", reference_name, party_type, party, account, dr_or_cr)
 				if jv_balance < amount:
 					frappe.throw(_("Journal Entry {0} has a balance of {1} for party {2} which is less than the referenced amount {3}")
 						.format(reference_name, jv_balance, party, amount))
@@ -802,25 +802,6 @@ def get_opening_accounts(company):
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
-def get_outstanding_on_journal_entry(jv_name, party_type, party, account, dr_or_cr=None):
-	if not dr_or_cr:
-		if erpnext.get_party_account_type(party_type) == 'Receivable':
-			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-		else:
-			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-
-	res = frappe.db.sql("""
-		select ifnull(sum({dr_or_cr}), 0) as outstanding_amount
-		from `tabGL Entry`
-		where
-		((voucher_type='Journal Entry' and voucher_no=%(jv_name)s and (against_voucher is null or against_voucher=''))
-			or (against_voucher_type='Journal Entry' and against_voucher=%(jv_name)s))
-		and party_type=%(party_type)s and party=%(party)s and account=%(account)s""".format(dr_or_cr=dr_or_cr),
-	{"jv_name": jv_name, "party_type": party_type, "party": party, "account": account})
-
-	outstanding_amount = res[0][0] if res else 0.0
-	return outstanding_amount
-
 def get_outstanding_journal_entries(party_account, party_type, party):
 	if erpnext.get_party_account_type(party_type) == "Receivable":
 		bal_dr_or_cr = "gle_je.credit_in_account_currency - gle_je.debit_in_account_currency"
@@ -883,7 +864,7 @@ def get_outstanding(args):
 	company_currency = erpnext.get_company_currency(args.get("company"))
 
 	if args.get("doctype") == "Journal Entry":
-		against_jv_amount = get_outstanding_on_journal_entry(args.get("docname"), args.get("party_type"),
+		against_jv_amount = get_balance_on_voucher("Journal Entry", args.get("docname"), args.get("party_type"),
 			args.get("party"), args.get("account"), dr_or_cr="debit_in_account_currency - credit_in_account_currency")
 
 		amount_field = "credit_in_account_currency" if against_jv_amount >= 0 else "debit_in_account_currency"

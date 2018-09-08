@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_balance_on_voucher
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account, \
-	get_outstanding_on_journal_entry, get_average_party_exchange_rate_on_journal_entry
+	get_average_party_exchange_rate_on_journal_entry
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
@@ -44,7 +44,7 @@ class PaymentEntry(AccountsController):
 
 	def validate(self):
 		self.setup_party_account_field()
-		self.set_missing_values()
+		self.set_missing_values(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.validate_bank_accounts()
@@ -58,7 +58,6 @@ class PaymentEntry(AccountsController):
 		self.set_title()
 		self.set_remarks()
 		self.validate_duplicate_entry()
-		self.update_outstanding_amounts()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 
@@ -102,7 +101,7 @@ class PaymentEntry(AccountsController):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
-	def set_missing_values(self):
+	def set_missing_values(self, force=False):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount",
 				"base_total_allocated_amount", "unallocated_amount"):
@@ -141,7 +140,7 @@ class PaymentEntry(AccountsController):
 		self.party_account_currency = self.paid_from_account_currency \
 			if self.payment_type=="Receive" else self.paid_to_account_currency
 
-		self.set_missing_ref_details()
+		self.set_missing_ref_details(force=force)
 
 	def set_missing_ref_details(self, force=False):
 		for d in self.get("references"):
@@ -707,7 +706,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = get_average_party_exchange_rate_on_journal_entry(reference_name, party_type, party, account)
 		else:
 			exchange_rate = 1
-		outstanding_amount = get_outstanding_on_journal_entry(reference_name, party_type, party, account)
+		outstanding_amount = get_balance_on_voucher("Journal Entry", reference_name, party_type, party, account)
 	elif reference_doctype != "Journal Entry":
 		if party_account_currency == company_currency:
 			if ref_doc.doctype == "Expense Claim":
