@@ -3,8 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, time, dateutil, math, csv, StringIO
-import amazon_mws_api as mws
+import frappe, time, dateutil, math, csv
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
 from frappe import _
 
 #Get and Create Products
@@ -22,7 +26,7 @@ def get_products_details():
 			listings_response = reports.get_report(report_id=report_id)
 
 			#Get ASIN Codes
-			string_io = StringIO.StringIO(listings_response.original)
+			string_io = StringIO(listings_response.original)
 			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 			#break into chunks of 10
