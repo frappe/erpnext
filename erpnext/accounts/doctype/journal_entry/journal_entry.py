@@ -312,13 +312,26 @@ class JournalEntry(AccountsController):
 	def validate_jv_party_references(self):
 		for reference_name, acc_amounts in iteritems(self.jv_party_references):
 			for (account, party_type, party), amount in iteritems(acc_amounts):
-				dr_or_cr = "credit_in_account_currency - debit_in_account_currency" if amount > 0 \
-					else "debit_in_account_currency - credit_in_account_currency"
-				amount = abs(amount)
-				jv_balance = get_balance_on_voucher("Journal Entry", reference_name, party_type, party, account, dr_or_cr)
-				if jv_balance < amount:
-					frappe.throw(_("Journal Entry {0} has a balance of {1} for party {2} which is less than the referenced amount {3}")
-						.format(reference_name, jv_balance, party, amount))
+				if amount == 0:
+					continue
+
+				if amount > 0:
+					bal_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+					dr_or_cr = "credit"
+				else:
+					bal_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+					dr_or_cr = "debit"
+
+				jv_balance = get_balance_on_voucher("Journal Entry", reference_name, party_type, party, account, bal_dr_or_cr)
+				if jv_balance <= 0:
+					frappe.throw(_("Journal Entry {0} does not have any {1} outstanding balance for party {2}")
+						.format(reference_name, dr_or_cr, party))
+				else:
+					amount = abs(amount)
+					if amount > jv_balance:
+						frappe.throw(_("Referenced amount {0} to Journal Entry {1} for party {2} is greater than the outstanding balance {3}")
+							.format(amount, reference_name, party, jv_balance))
+
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
