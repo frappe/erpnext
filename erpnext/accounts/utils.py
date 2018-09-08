@@ -648,7 +648,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, include_negative_invoices=False):
+def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
@@ -684,13 +684,13 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 			{condition}
 			and voucher_type != 'Payment Entry' and (against_voucher = '' or against_voucher is null)
 		group by voucher_type, voucher_no
-		having {abs}(invoice_amount - payment_amount) > 0.005
+		having {negative_invoices}(invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
 			payment_dr_or_cr=payment_dr_or_cr,
 			condition=condition or "",
-			abs="abs" if include_negative_invoices else ""
+			negative_invoices="-" if negative_invoices else ""
 		), {
 			"party_type": party_type,
 			"party": party,
@@ -714,7 +714,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 				})
 			)
 
-	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
+	outstanding_invoices = sorted(outstanding_invoices,
+		key=lambda k: (k['due_date'] or getdate(nowdate()), k['posting_date']))
 
 	return outstanding_invoices
 

@@ -542,8 +542,14 @@ def get_outstanding_reference_documents(args):
 		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
+	negative_invoices = False
+	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
+	if (args.get("payment_type") == "Receive" and party_account_type == "Payable") \
+			or (args.get("payment_type") == "Payable" and party_account_type == "Receivable"):
+		negative_invoices = True
+
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), condition=condition, include_negative_invoices=True)
+		args.get("party_account"), condition=condition, negative_invoices=negative_invoices)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -558,8 +564,8 @@ def get_outstanding_reference_documents(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
-	if (args.get("party_type") != "Student"):
-		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
+	if not negative_invoices:
+		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency)
 
 	return outstanding_invoices + orders_to_be_billed
@@ -570,7 +576,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		voucher_type = 'Sales Order'
 	elif party_type == "Supplier":
 		voucher_type = 'Purchase Order'
-	elif party_type == "Employee":
+	else:
 		voucher_type = None
 
 	orders = []
