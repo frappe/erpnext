@@ -3,16 +3,49 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import datetime
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils.user import get_user_fullname
-from frappe.utils import getdate, cstr, get_datetime
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.document import Document
+from frappe.utils import cstr, get_datetime, getdate, get_link_to_form
+from frappe.utils.user import get_user_fullname
+
 
 class DeliveryTrip(Document):
-	pass
+	def on_submit(self):
+		self.update_delivery_notes()
+
+	def on_cancel(self):
+		self.update_delivery_notes(delete=True)
+
+	def update_delivery_notes(self, delete=False):
+		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
+
+		update_fields = {
+			"transporter": self.driver,
+			"transporter_name": self.driver_name,
+			"transport_mode": "Road",
+			"vehicle_no": self.vehicle,
+			"vehicle_type": "Regular",
+			"lr_no": self.name,
+			"lr_date": self.date
+		}
+
+		for delivery_note in delivery_notes:
+			note_doc = frappe.get_doc("Delivery Note", delivery_note)
+
+			for field, value in update_fields.items():
+				value = None if delete else value
+				setattr(note_doc, field, value)
+
+			note_doc.save()
+
+		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
+		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
+
 
 
 def get_default_contact(out, name):

@@ -15,7 +15,7 @@ import json
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
-		pass
+		frappe.set_user("Administrator")
 
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)

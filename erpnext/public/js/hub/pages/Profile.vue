@@ -52,7 +52,7 @@ export default {
 		get_profile() {
 			hub.call(
 				'get_hub_seller_profile',
-				{ hub_seller: hub.settings.company_email }
+				{ hub_seller: hub.settings.hub_seller_name }
 			).then(profile => {
 				this.init = false;
 

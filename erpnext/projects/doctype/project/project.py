@@ -86,7 +86,7 @@ class Project(Document):
 	def validate_weights(self):
 		for task in self.tasks:
 			if task.task_weight is not None:
-				if task.task_weight > 0:
+				if task.task_weight < 0:
 					frappe.throw(_("Task weight cannot be negative"))
 
 	def sync_tasks(self):
@@ -208,7 +208,7 @@ class Project(Document):
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
-				pct_complete += row["progress"] * row["task_weight"] / weight_sum
+				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"

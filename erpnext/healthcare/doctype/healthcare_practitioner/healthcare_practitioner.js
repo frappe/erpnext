@@ -27,8 +27,21 @@ frappe.ui.form.on('Healthcare Practitioner', {
 				}
 			};
 		});
+		set_query_service_item(frm, 'inpatient_visit_charge_item');
+		set_query_service_item(frm, 'op_consulting_charge_item');
 	}
 });
+
+var set_query_service_item = function(frm, service_item_field) {
+	frm.set_query(service_item_field, function() {
+		return {
+			filters: {
+				'is_sales_item': 1,
+				'is_stock_item': 0
+			}
+		};
+	});
+};
 
 frappe.ui.form.on("Healthcare Practitioner", "user_id",function(frm) {
 	if(frm.doc.user_id){
