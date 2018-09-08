@@ -26,7 +26,7 @@ class JournalEntry(AccountsController):
 		self.clearance_date = None
 
 		self.validate_party()
-		self.validate_entries_for_advance()
+		self.validate_order_entries()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_total_debit_and_credit()
@@ -57,9 +57,8 @@ class JournalEntry(AccountsController):
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
-			if d.is_advance:
-				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
-					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
+			if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+				advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in iteritems(advance_paid):
 			for voucher_no in list(set(order_list)):
@@ -149,29 +148,19 @@ class JournalEntry(AccountsController):
 		if self.cheque_date and not self.cheque_no:
 			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
 
-	def validate_entries_for_advance(self):
+	def validate_order_entries(self):
 		for d in self.get('accounts'):
-			if d.reference_type not in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
-				if (d.party_type == 'Customer' and flt(d.credit) > 0) or \
-						(d.party_type == 'Supplier' and flt(d.debit) > 0):
-					if d.reference_type in ("Sales Order", "Purchase Order") and d.is_advance != "Yes":
-						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
-					elif d.is_advance == "No":
-						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account), alert=True)
-
-				if d.is_advance == "Yes":
-					if d.party_type == 'Customer' and flt(d.debit) > 0:
-						frappe.throw(_("Row {0}: Advance against Customer must be credit").format(d.idx))
-					elif d.party_type == 'Supplier' and flt(d.credit) > 0:
-						frappe.throw(_("Row {0}: Advance against Supplier must be debit").format(d.idx))
+			if d.reference_type == "Sales Order" and flt(d.debit) > 0:
+				frappe.throw(_("Row {0}: Advance against Sales Order must be credit").format(d.idx))
+			if d.reference_type == "Purchase Order" and flt(d.credit) > 0:
+				frappe.throw(_("Row {0}: Advance against Purchase Order must be debit").format(d.idx))
 
 	def validate_against_jv(self, d):
 		if d.reference_name == self.name:
 			frappe.throw(_("You can not enter current voucher in 'Against Journal Entry' column"))
 
 		against_entries = frappe.db.sql("""select debit, credit from `tabJournal Entry Account`
-			where account = %s and docstatus = 1 and parent = %s
-			and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+			where account = %s and docstatus = 1 and parent = %s and (reference_type is null or reference_type = '')
 			""", (d.account, d.reference_name), as_dict=True)
 
 		if not against_entries:
@@ -698,7 +687,6 @@ def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_curren
 		"amount": amount,
 		"debit_in_account_currency": debit_in_account_currency,
 		"remarks": 'Advance Payment received against {0} {1}'.format(dt, dn),
-		"is_advance": "Yes",
 		"bank_account": bank_account,
 		"journal_entry": journal_entry
 	})
@@ -730,7 +718,6 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"amount": amount if amount else abs(ref_doc.outstanding_amount),
 		"debit_in_account_currency": debit_in_account_currency,
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
-		"is_advance": "No",
 		"bank_account": bank_account,
 		"journal_entry": journal_entry
 	})
@@ -765,7 +752,6 @@ def get_payment_entry(ref_doc, args):
 		"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
 		"exchange_rate": exchange_rate,
 		args.get("amount_field_party"): args.get("amount"),
-		"is_advance": args.get("is_advance"),
 		"reference_type": ref_doc.doctype,
 		"reference_name": ref_doc.name
 	})

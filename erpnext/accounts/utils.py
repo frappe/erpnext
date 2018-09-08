@@ -423,8 +423,7 @@ def update_reference_in_journal_entry(d, jv_doc):
 
 		if amt_allocatable < original_dr_or_cr:
 			jvd = frappe.db.sql("""
-				select cost_center, balance, against_account, is_advance,
-					account_type, exchange_rate, account_currency
+				select cost_center, balance, against_account, account_type, exchange_rate, account_currency
 				from `tabJournal Entry Account` where name = %s
 			""", jv_detail.name, as_dict=True)
 
@@ -452,7 +451,6 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.against_account = cstr(jvd[0]["against_account"])
 			ch.reference_type = original_reference_type
 			ch.reference_name = original_reference_name
-			ch.is_advance = cstr(jvd[0]["is_advance"])
 			ch.docstatus = 1
 
 		amt_allocated += amt_allocatable

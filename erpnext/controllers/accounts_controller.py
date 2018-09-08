@@ -497,7 +497,6 @@ class AccountsController(TransactionBase):
 					'account': party_account,
 					'party_type': party_type,
 					'party': party,
-					'is_advance': 'Yes',
 					'dr_or_cr': dr_or_cr,
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
@@ -933,11 +932,8 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 			where
 				je.name = jea.parent and jea.account = %(account)s
 				and jea.party_type = %(party_type)s and jea.party = %(party)s
-				and jea.is_advance = 'Yes' and je.docstatus = 1
-				and {dr_or_cr} > 0
-				and jea.reference_type = '{order_doctype}'
-				{order_condition}
-				{against_account_condition}
+				and {dr_or_cr} > 0 and jea.reference_type = '{order_doctype}' and je.docstatus = 1
+				{order_condition} {against_account_condition}
 			order by je.posting_date""".format(
 				dr_or_cr=dr_or_cr,
 				order_doctype=order_doctype,

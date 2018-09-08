@@ -41,7 +41,6 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type = %s and reference_name = %s""", (test_voucher.doctype, test_voucher.name)))
 
-		base_jv.get("accounts")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
 		base_jv.get("accounts")[0].set("reference_type", test_voucher.doctype)
 		base_jv.get("accounts")[0].set("reference_name", test_voucher.name)
 		base_jv.insert()
@@ -53,7 +52,7 @@ class TestJournalEntry(unittest.TestCase):
 			where reference_type = %s and reference_name = %s and {0}=400""".format(dr_or_cr),
 				(submitted_voucher.doctype, submitted_voucher.name)))
 
-		if base_jv.get("accounts")[0].is_advance == "Yes":
+		if base_jv.get("accounts")[0].reference_type in ["Sales Order", "Purchase Order"]:
 			self.advance_paid_testcase(base_jv, submitted_voucher, dr_or_cr)
 		self.cancel_against_voucher_testcase(submitted_voucher)
 

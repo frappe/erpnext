@@ -77,7 +77,6 @@ class PaymentReconciliation(Document):
 					'account' : self.receivable_payable_account,
 					'party_type': self.party_type,
 					'party': self.party,
-					'is_advance' : e.is_advance,
 					'dr_or_cr' : dr_or_cr,
 					'unadjusted_amount' : flt(e.amount),
 					'allocated_amount' : flt(e.allocated_amount)
