@@ -99,7 +99,7 @@ class PaymentEntry(AccountsController):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
-	def set_missing_values(self, for_validation=False):
+	def set_missing_values(self, for_validate=False):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount",
 				"base_total_allocated_amount", "unallocated_amount"):
