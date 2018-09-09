@@ -12,8 +12,10 @@ import EventEmitter from './event_emitter';
 
 frappe.provide('hub');
 frappe.provide('erpnext.hub');
+frappe.provide('frappe.route');
 
 $.extend(erpnext.hub, EventEmitter.prototype);
+$.extend(frappe.route, EventEmitter.prototype);
 
 erpnext.hub.Marketplace = class Marketplace {
 	constructor({ parent }) {
@@ -37,7 +39,7 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	setup_header() {
-		this.page.set_title(__('Marketplace'));
+		this.page && this.page.set_title(__('Marketplace'));
 	}
 
 	setup_events() {
@@ -182,7 +184,7 @@ erpnext.hub.Marketplace = class Marketplace {
 	}
 
 	update_hub_settings() {
-		return frappe.db.get_doc('Marketplace Settings').then(doc => {
+		return hub.get_settings().then(doc => {
 			hub.settings = doc;
 		});
 	}
@@ -198,6 +200,15 @@ Object.assign(hub, {
 			.filter(hub_user => hub_user.user === frappe.session.user)
 			.length === 1;
 	},
+
+	get_settings() {
+		if (frappe.session.user === 'Guest') {
+			return Promise.resolve({
+				registered: 0
+			});
+		}
+		return frappe.db.get_doc('Marketplace Settings');
+	}
 });
 
 /**
