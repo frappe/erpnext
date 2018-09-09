@@ -476,7 +476,7 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.docstatus = 1
 
 		amt_allocated += amt_allocatable
-		if abs(amt_allocated - d["allocated_amount"]) < (1.0 / (10**(jv_detail.precision(d['dr_or_cr'])+1))):
+		if abs(amt_allocated - d["allocated_amount"]) < (1.0 / (10**(jv_detail.precision(d['dr_or_cr'])))):
 			break
 
 	# will work as update after submit
