@@ -253,9 +253,7 @@ class LandedCostVoucher(AccountsController):
 					"credit_in_account_currency": payable_amount,
 					"against": ",".join([d.account_head for d in self.taxes]),
 					"party_type": "Supplier",
-					"party": self.supplier,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"party": self.supplier
 				})
 			)
 
