@@ -589,7 +589,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.references.length == 0){
 			frm.events.get_outstanding_documents(frm);
 		}
-		if(frm.doc.payment_type == 'Receive') {
+		else if(frm.doc.payment_type == 'Receive') {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
 		} else {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
