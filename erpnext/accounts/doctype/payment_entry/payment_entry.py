@@ -44,7 +44,7 @@ class PaymentEntry(AccountsController):
 
 	def validate(self):
 		self.setup_party_account_field()
-		self.set_missing_values(force=True)
+		self.set_missing_values()
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.validate_bank_accounts()
@@ -66,20 +66,17 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.update_outstanding_amounts()
+		self.update_reference_details()
 		self.update_advance_paid()
 		self.update_expense_claim()
 
 	def on_cancel(self):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
-		self.update_outstanding_amounts()
+		self.update_reference_details()
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
-
-	def update_outstanding_amounts(self):
-		self.set_missing_ref_details(force=True)
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -91,9 +88,10 @@ class PaymentEntry(AccountsController):
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
-			if (flt(d.allocated_amount))> 0:
-				if flt(d.allocated_amount) > flt(d.outstanding_amount):
-					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
+			if flt(d.allocated_amount) > flt(d.outstanding_amount) \
+					or (flt(d.outstanding_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount)):
+				frappe.throw(_("Row #{0}: Allocated Amount of {1} against {2} is greater than its Outstanding Amount {3}.")
+					.format(d.idx, flt(d.allocated_amount), d.reference_name, flt(d.outstanding_amount)))
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -101,7 +99,7 @@ class PaymentEntry(AccountsController):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
-	def set_missing_values(self, force=False):
+	def set_missing_values(self, for_validation=False):
 		if self.payment_type == "Internal Transfer":
 			for field in ("party", "party_balance", "total_allocated_amount",
 				"base_total_allocated_amount", "unallocated_amount"):
@@ -140,17 +138,16 @@ class PaymentEntry(AccountsController):
 		self.party_account_currency = self.paid_from_account_currency \
 			if self.payment_type=="Receive" else self.paid_to_account_currency
 
-		self.set_missing_ref_details(force=force)
+		self.update_reference_details()
 
-	def set_missing_ref_details(self, force=False):
+	def update_reference_details(self):
 		for d in self.get("references"):
 			if d.allocated_amount:
 				ref_details = get_reference_details(d.reference_doctype, d.reference_name, self.party_account_currency,
 					self.party_type, self.party, self.paid_from if self.payment_type == "Receive" else self.paid_to)
 
 				for field, value in iteritems(ref_details):
-					if not d.get(field) or force:
-						d.set(field, value)
+					d.set(field, value)
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
@@ -714,7 +711,9 @@ def get_company_defaults(company):
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency, party_type, party, account):
-	total_amount = outstanding_amount = exchange_rate = None
+	total_amount = outstanding_amount = None
+	exchange_rate = 1
+
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 

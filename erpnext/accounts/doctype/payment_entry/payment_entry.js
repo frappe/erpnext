@@ -564,8 +564,8 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student") 
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency
-								? "paid_amount" : "received_amount", total_positive_outstanding - total_negative_outstanding);
+							frm.set_value(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency ?
+								"paid_amount" : "received_amount", total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding

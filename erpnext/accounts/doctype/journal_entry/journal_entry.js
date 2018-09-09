@@ -266,7 +266,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			} else if (d.reference_type==="Journal Entry" && !flt(d.debit) && !flt(d.credit) && d.party_type && d.party) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
-			erpnext.journal_entry.set_exchange_rate(this.frm, cdt, cdn)
+			erpnext.journal_entry.set_exchange_rate(this.frm, cdt, cdn);
 		}
 	},
 
