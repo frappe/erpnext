@@ -341,8 +341,8 @@ class PurchaseInvoice(BuyingController):
 				update_outstanding=update_outstanding, merge_entries=False)
 
 			if update_outstanding == "No":
-				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
-					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
+				update_outstanding_amt(self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name,
+					self.credit_to, "Supplier", self.supplier)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -387,8 +387,8 @@ class PurchaseInvoice(BuyingController):
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else None,
+					"against_voucher_type": self.doctype if cint(self.is_return) and self.return_against else None,
 					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)

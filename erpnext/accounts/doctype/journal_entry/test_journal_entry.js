@@ -13,7 +13,6 @@ QUnit.test("test journal entry", function(assert) {
 						{'party_type':'Customer'},
 						{'party':'Test Customer 1'},
 						{'credit_in_account_currency':1000},
-						{'is_advance':'Yes'},
 					],
 					[
 						{'account':'HDFC - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},

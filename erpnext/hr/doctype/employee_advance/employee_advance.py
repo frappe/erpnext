@@ -98,8 +98,7 @@ def make_bank_entry(dt, dn):
 		"reference_type": "Employee Advance",
 		"reference_name": doc.name,
 		"party_type": "Employee",
-		"party": doc.employee,
-		"is_advance": "Yes"
+		"party": doc.employee
 	})
 
 	je.append("accounts", {

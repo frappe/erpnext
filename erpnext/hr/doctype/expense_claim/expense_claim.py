@@ -113,9 +113,7 @@ class ExpenseClaim(AccountsController):
 					"credit_in_account_currency": payable_amount,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
-					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"party": self.employee
 				})
 			)
 

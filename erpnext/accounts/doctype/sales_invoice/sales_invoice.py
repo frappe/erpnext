@@ -683,8 +683,8 @@ class SalesInvoice(SellingController):
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, "Customer", self.customer,
-					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
+				update_outstanding_amt(self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name,
+					self.debit_to, "Customer", self.customer)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
@@ -734,8 +734,8 @@ class SalesInvoice(SellingController):
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else None,
+					"against_voucher_type": self.doctype if cint(self.is_return) and self.return_against else None,
 					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)

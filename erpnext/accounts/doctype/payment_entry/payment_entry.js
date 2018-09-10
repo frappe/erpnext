@@ -83,6 +83,18 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
+
+			if(child.reference_doctype == "Journal Entry") {
+				return {
+					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
+					filters: {
+						account: doc.payment_type=="Receive" ? doc.paid_from : doc.paid_to,
+						party_type: doc.party_type,
+						party: doc.party
+					}
+				};
+			}
+
 			const filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
 				'Purchase Order', 'Expense Claim', 'Fees'];
@@ -552,14 +564,14 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student") 
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value("paid_amount",
-								total_positive_outstanding - total_negative_outstanding);
+							frm.set_value(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency ?
+								"paid_amount" : "received_amount", total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
 					) {
-						frm.set_value("received_amount",
-							total_negative_outstanding - total_positive_outstanding);
+						frm.set_value(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency ?
+							"received_amount" : "paid_amount", total_negative_outstanding - total_positive_outstanding);
 					}
 				}
 
@@ -577,7 +589,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.references.length == 0){
 			frm.events.get_outstanding_documents(frm);
 		}
-		if(frm.doc.payment_type == 'Internal Transfer') {
+		else if(frm.doc.payment_type == 'Receive') {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
 		} else {
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
@@ -825,7 +837,10 @@ frappe.ui.form.on('Payment Entry Reference', {
 					reference_doctype: row.reference_doctype,
 					reference_name: row.reference_name,
 					party_account_currency: frm.doc.payment_type=="Receive" ?
-						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency
+						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party,
+					account: frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to
 				},
 				callback: function(r, rt) {
 					if(r.message) {
