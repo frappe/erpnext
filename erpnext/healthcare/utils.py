@@ -220,7 +220,7 @@ def get_practitioner_charge(practitioner, is_ip):
 def manage_invoice_submit_cancel(doc, method):
 	if doc.items:
 		for item in doc.items:
-			if item.reference_dt and item.reference_dn:
+			if item.get("reference_dt") and item.get("reference_dn"):
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
 
