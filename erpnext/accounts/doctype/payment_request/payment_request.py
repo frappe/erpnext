@@ -186,7 +186,7 @@ class PaymentRequest(Document):
 			"now": True,
 			"attachments": [frappe.attach_print(self.reference_doctype, self.reference_name,
 				file_name=self.reference_name, print_format=self.print_format)]}
-		enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+		enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
 
 	def get_message(self):
 		"""return message with payment gateway link"""

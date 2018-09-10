@@ -79,6 +79,37 @@ function get_filters(){
 			"options": "Finance Book"
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "MultiSelect",
+			get_data: function() {
+				var cost_centers = frappe.query_report.get_filter_value("cost_center") || "";
+
+				const values = cost_centers.split(/\s*,\s*/).filter(d => d);
+				const txt = cost_centers.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: "Cost Center",
+						txt: txt,
+						filters: {
+							"company": frappe.query_report.get_filter_value("company"),
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
+			}
+		},
+		{
 			"fieldname":"from_fiscal_year",
 			"label": __("Start Year"),
 			"fieldtype": "Link",
@@ -104,7 +135,7 @@ function get_filters(){
 				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
-			"default": "Monthly",
+			"default": "Yearly",
 			"reqd": 1
 		},
 		// Note:

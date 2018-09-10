@@ -119,7 +119,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
 			item_rate = item.blanket_order_rate;
 		}
-		item.rate = flt(item_rate * (1 - item.discount_percentage / 100.0), precision("rate", item));
+		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;		
+		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
 
 		this.calculate_taxes_and_totals();
 	},

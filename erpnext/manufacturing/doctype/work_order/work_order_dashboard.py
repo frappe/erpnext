@@ -5,7 +5,7 @@ def get_data():
 		'fieldname': 'work_order',
 		'transactions': [
 			{
-				'items': ['Stock Entry', 'Timesheet']
+				'items': ['Stock Entry', 'Job Card']
 			}
 		]
 	}

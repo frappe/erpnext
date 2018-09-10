@@ -45,7 +45,7 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 
 			account = account[0][0] if account else None
 
-	if not account:
+	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)
 
 	return account

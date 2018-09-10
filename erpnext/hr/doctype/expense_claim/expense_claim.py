@@ -53,11 +53,11 @@ class ExpenseClaim(AccountsController):
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
-			self.payable_account = frappe.get_cached_value('Company',  self.company,  "default_payable_account")
+			self.payable_account = frappe.get_cached_value('Company', self.company, 'default_expense_claim_payable_account')
 
 	def set_cost_center(self):
 		if not self.cost_center:
-			self.cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+			self.cost_center = frappe.get_cached_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
@@ -113,9 +113,7 @@ class ExpenseClaim(AccountsController):
 					"credit_in_account_currency": payable_amount,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
-					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"party": self.employee
 				})
 			)
 

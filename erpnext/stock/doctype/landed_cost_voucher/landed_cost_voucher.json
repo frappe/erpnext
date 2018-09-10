@@ -53,6 +53,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -65,7 +66,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "LCV-", 
+   "options": "MAT-LCV-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -993,7 +994,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-18 23:54:33.286173", 
+ "modified": "2018-08-21 14:44:30.850738",
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Voucher", 
@@ -1030,6 +1031,6 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 0, 
- "track_seen": 1, 
+ "track_seen": 0, 
  "track_views": 0
 }

@@ -121,6 +121,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -133,7 +134,7 @@
    "label": "Patient ID", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "PID-", 
+   "options": "HLC-PAT-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -1389,7 +1390,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 50, 
- "modified": "2018-07-18 13:36:05.308926", 
+ "modified": "2018-08-21 14:44:29.199666", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Patient", 
@@ -1464,5 +1465,6 @@
  "sort_order": "ASC", 
  "title_field": "patient_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

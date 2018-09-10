@@ -93,9 +93,7 @@ class Fees(AccountsController):
 			"party": self.student,
 			"against": self.income_account,
 			"debit": self.grand_total,
-			"debit_in_account_currency": self.grand_total,
-			"against_voucher": self.name,
-			"against_voucher_type": self.doctype
+			"debit_in_account_currency": self.grand_total
 		})
 		fee_gl_entry = self.get_gl_dict({
 			"account": self.income_account,

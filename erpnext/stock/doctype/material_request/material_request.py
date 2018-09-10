@@ -14,6 +14,8 @@ from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.manufacturing.doctype.job_card.job_card import update_job_card_reference
 
 from six import string_types
 
@@ -73,21 +75,16 @@ class MaterialRequest(BuyingController):
 
 		validate_for_items(self)
 
-		# self.set_title()
+		self.set_title()
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
-		items = []
-		for d in self.items:
-			if d.item_code not in items:
-				items.append(d.item_code)
-			if(len(items)==4):
-				break
+		items = ', '.join([d.item_name for d in self.items][:4])
 
-		self.title = ', '.join(items)
+		self.title = _('{0} for {1}'.format(self.material_request_type, items))[:100]
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
@@ -95,6 +92,9 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		if self.material_request_type == 'Purchase':
 			self.validate_budget()
+
+		if self.job_card:
+			update_job_card_reference(self.job_card, 'material_request', self.name)
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -148,6 +148,8 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		if self.job_card:
+			update_job_card_reference(self.job_card, 'material_request', None)
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -244,9 +246,28 @@ def update_item(obj, target, source_parent):
 	target.stock_qty = (target.qty * target.conversion_factor)
 
 @frappe.whitelist()
+def update_status(name, status):
+	material_request = frappe.get_doc('Material Request', name)
+	material_request.check_permission('write')
+	material_request.update_status(status)
+
+@frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
+
 	def postprocess(source, target_doc):
+		if frappe.flags.args and frappe.flags.args.default_supplier:
+			# items only for given default supplier
+			supplier_items = []
+			for d in target_doc.items:
+				default_supplier = get_item_defaults(d.item_code, target_doc.company).get('default_supplier')
+				if frappe.flags.args.default_supplier == default_supplier:
+					supplier_items.append(d)
+			target_doc.items = supplier_items
+
 		set_missing_values(source, target_doc)
+
+	def select_item(d):
+		return d.ordered_qty < d.stock_qty
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
@@ -267,7 +288,7 @@ def make_purchase_order(source_name, target_doc=None):
 				["sales_order_item", "sales_order_item"]
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+			"condition": select_item
 		}
 	}, target_doc, postprocess)
 
@@ -334,8 +355,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 	return target_doc
 
 def get_material_requests_based_on_supplier(supplier):
-	supplier_items = [d[0] for d in frappe.db.get_values("Item",
-		{"default_supplier": supplier})]
+	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
+		{"default_supplier": supplier}, 'parent')]
 	if supplier_items:
 		material_requests = frappe.db.sql_list("""select distinct mr.name
 			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
@@ -392,7 +413,11 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
+		if source.job_card:
+			target.purpose = 'Material Transfer for Manufacture'
+
 		target.run_method("calculate_rate_and_amount")
+		target.set_job_card_data()
 
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {

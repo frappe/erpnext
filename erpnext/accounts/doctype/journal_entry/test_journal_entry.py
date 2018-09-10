@@ -41,7 +41,6 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type = %s and reference_name = %s""", (test_voucher.doctype, test_voucher.name)))
 
-		base_jv.get("accounts")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
 		base_jv.get("accounts")[0].set("reference_type", test_voucher.doctype)
 		base_jv.get("accounts")[0].set("reference_name", test_voucher.name)
 		base_jv.insert()
@@ -53,7 +52,7 @@ class TestJournalEntry(unittest.TestCase):
 			where reference_type = %s and reference_name = %s and {0}=400""".format(dr_or_cr),
 				(submitted_voucher.doctype, submitted_voucher.name)))
 
-		if base_jv.get("accounts")[0].is_advance == "Yes":
+		if base_jv.get("accounts")[0].reference_type in ["Sales Order", "Purchase Order"]:
 			self.advance_paid_testcase(base_jv, submitted_voucher, dr_or_cr)
 		self.cancel_against_voucher_testcase(submitted_voucher)
 
@@ -204,12 +203,72 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertEqual(jv.inter_company_journal_entry_reference, "")
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
 
+	def test_jv_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
+		jv.voucher_type = "Bank Entry"
+		jv.multi_currency = 0
+		jv.cheque_no = "112233"
+		jv.cheque_date = nowdate()
+		jv.insert()
+		jv.submit()
+
+		expected_values = {
+			"_Test Cash - _TC": {
+				"cost_center": cost_center
+			},
+			"_Test Bank - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, debit, credit
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", jv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_jv_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.utils import get_balance_on
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
+		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
+		jv.voucher_type = "Bank Entry"
+		jv.multi_currency = 0
+		jv.cheque_no = "112233"
+		jv.cheque_date = nowdate()
+		jv.insert()
+		jv.submit()
+
+		expected_account_balance = account_balance - 100
+		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
+		self.assertEqual(expected_account_balance, account_balance)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
 
 	jv = frappe.new_doc("Journal Entry")
-	jv.posting_date = posting_date or "2013-02-14"
+	jv.posting_date = posting_date or nowdate()
 	jv.company = "_Test Company"
 	jv.user_remark = "test"
 	jv.multi_currency = 1

@@ -72,6 +72,7 @@ class Project(Document):
 		self.tasks = []
 		self.load_tasks()
 		self.send_welcome_email()
+		self.update_percent_complete()
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -83,13 +84,10 @@ class Project(Document):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
 
 	def validate_weights(self):
-		sum = 0
 		for task in self.tasks:
-			if task.task_weight > 0:
-				sum = flt(sum + task.task_weight, task.precision('task_weight'))
-		if sum > 0 and sum != 1:
-			frappe.throw(
-				_("Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly"))
+			if task.task_weight is not None:
+				if task.task_weight < 0:
+					frappe.throw(_("Task weight cannot be negative"))
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
@@ -206,13 +204,12 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			if weight_sum == 1:
-				weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
-					project=%s""", self.name, as_dict=1)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * row["task_weight"]
-				self.percent_complete = flt(flt(pct_complete), 2)
+			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+				project=%s""", self.name, as_dict=1)
+			pct_complete = 0
+			for row in weighted_progress:
+				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
+			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"
 		elif not self.status == "Cancelled":
@@ -243,10 +240,13 @@ class Project(Document):
 		self.update_purchase_costing()
 		self.update_sales_amount()
 		self.update_billed_amount()
+		self.calculate_gross_margin()
 
-		self.gross_margin = flt(self.total_billed_amount) - (
-		flt(self.total_costing_amount) + flt(self.total_expense_claim) + flt(self.total_purchase_cost))
+	def calculate_gross_margin(self):
+		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
+			+ flt(self.total_purchase_cost) + flt(self.get('total_consumed_material_cost', 0)))
 
+		self.gross_margin = flt(self.total_billed_amount) - expense_amount
 		if self.total_billed_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) * 100
 

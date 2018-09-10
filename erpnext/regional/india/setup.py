@@ -60,7 +60,7 @@ def create_hsn_codes(data, code_field):
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
-		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):
+		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill'):
 
 		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 			frappe.get_doc(dict(
@@ -171,7 +171,7 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
 				options='\n'.join(states), insert_after='gstin'),
 			dict(fieldname='gst_state_number', label='GST State Number',
-				fieldtype='Int', insert_after='gst_state', read_only=1),
+				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
 		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
