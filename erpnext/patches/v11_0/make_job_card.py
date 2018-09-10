@@ -16,9 +16,9 @@ def execute():
 		fieldname = frappe.db.get_value('DocField', {'fieldname': 'production_order', 'parent': 'Timesheet'}, 'fieldname')
 		if not fieldname: return
 
-	for d in frappe.db.sql("""select %(fieldname)s, name from tabTimesheet
-		where (%(fieldname)s is not null and %(fieldname)s != '') and docstatus = 0""",
-		{'fieldname': fieldname}, as_dict=1):
+	for d in frappe.get_all('Timesheet',
+		filters={fieldname: ['!=', ""], 'docstatus': 0},
+		fields=[fieldname, 'name']):
 		if d[fieldname]:
 			doc = frappe.get_doc('Work Order', d[fieldname])
 			for row in doc.operations:
