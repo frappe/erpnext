@@ -30,16 +30,19 @@ erpnext.hub.Marketplace = class Marketplace {
 			this.setup_events();
 			this.refresh();
 
-			if (!hub.is_seller_registered()) {
-				this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
-			} else {
-				this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
+			if (!hub.is_server) {
+				if (!hub.is_seller_registered()) {
+					this.page.set_primary_action('Become a Seller', this.show_register_dialog.bind(this))
+				} else {
+					this.page.set_secondary_action('Add Users', this.show_add_user_dialog.bind(this));
+				}
 			}
 		});
 	}
 
 	setup_header() {
-		this.page && this.page.set_title(__('Marketplace'));
+		if (hub.is_server) return;
+		this.page.set_title(__('Marketplace'));
 	}
 
 	setup_events() {
@@ -78,9 +81,11 @@ erpnext.hub.Marketplace = class Marketplace {
 			render: h => h(PageContainer)
 		});
 
-		erpnext.hub.on('seller-registered', () => {
-			this.page.clear_primary_action();
-		});
+		if (!hub.is_server) {
+			erpnext.hub.on('seller-registered', () => {
+				this.page.clear_primary_action();
+			});
+		}
 	}
 
 	refresh() {
