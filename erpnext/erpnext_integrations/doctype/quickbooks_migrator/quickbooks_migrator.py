@@ -353,6 +353,31 @@ def save_invoice_as_journal_entry(invoice):
 			"accounts": accounts,
 		}).insert().submit()
 
+def save_payment_as_journal_entry(payment):
+	if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Payment - {}".format(payment["Id"]), "company": company}):
+		accounts = []
+		for line in get_general_ledger()["Payment"][payment["Id"]]["lines"]:
+			account_line = {"account": line["account"]}
+			if line["debit"]:
+				account_line["debit_in_account_currency"] = line["debit"]
+			elif line["credit"]:
+				account_line["credit_in_account_currency"] = line["credit"]
+				account_line["party_type"] = "Customer"
+				account_line["party"] = frappe.get_all("Customer",
+					filters={"quickbooks_id": payment["CustomerRef"]["value"], "company": company}
+				)[0]["name"]
+
+			accounts.append(account_line)
+
+		frappe.get_doc({
+			"doctype": "Journal Entry",
+			"quickbooks_id": "Payment - {}".format(payment["Id"]),
+			"naming_series": "JV-",
+			"company": company,
+			"posting_date": payment["TxnDate"],
+			"accounts": accounts,
+		}).insert().submit()
+
 def save_credit_memo(credit_memo):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": "Credit Memo - {}".format(credit_memo["Id"]), "company": company}):
@@ -454,21 +479,44 @@ def save_vendor_credit(vendor_credit):
 
 def save_payment(payment):
 	try:
-		if not frappe.db.exists({"doctype": "Payment Entry", "quickbooks_id": "Payment - {}".format(payment["Id"]), "company": company}):
-			# Check if Payment is Linked to an Invoice
+		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Payment - {}".format(payment["Id"]), "company": company}):
+			if "DepositToAccountRef" not in payment:
+				return
 			if payment["Line"][0]["LinkedTxn"][0]["TxnType"] == "Invoice":
-				sales_invoice = frappe.get_all("Sales Invoice",
-					filters={
-						"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"],
+				if frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"], "company": company}):
+					sales_invoice = frappe.get_all("Sales Invoice",
+						filters={
+							"quickbooks_id": payment["Line"][0]["LinkedTxn"][0]["TxnId"],
+							"company": company,
+						},
+						fields=["name", "customer", "debit_to"],
+					)[0]
+					deposit_account = get_account_name_by_id(payment["DepositToAccountRef"]["value"])
+					accounts = [
+						{
+							"account": deposit_account,
+							"debit_in_account_currency": payment["TotalAmt"]
+						},
+						{
+							"party_type": "Customer",
+							"party": sales_invoice["customer"],
+							"reference_type": "Sales Invoice",
+							"reference_name": sales_invoice["name"],
+							"account": sales_invoice["debit_to"],
+							"credit_in_account_currency": payment["TotalAmt"]
+						}
+					]
+					frappe.get_doc({
+						"doctype": "Journal Entry",
+						"quickbooks_id": "Payment - {}".format(payment["Id"]),
+						"naming_series": "JV-",
 						"company": company,
-					})[0]["name"]
-				deposit_account = get_account_name_by_id(payment["DepositToAccountRef"]["value"])
-				erp_pe = get_payment_entry("Sales Invoice", sales_invoice, bank_account=deposit_account)
-				erp_pe.quickbooks_id = "Payment - {}".format(payment["Id"])
-				erp_pe.reference_no = "Reference No"
-				erp_pe.posting_date = payment["TxnDate"]
-				erp_pe.reference_date = payment["TxnDate"]
-				erp_pe.insert().submit()
+						"posting_date": payment["TxnDate"],
+						"accounts": accounts,
+					}).insert().submit()
+
+				elif frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Invoice - {}".format(payment["Line"][0]["LinkedTxn"][0]["TxnId"]), "company": company}):
+					save_payment_as_journal_entry(payment)
 	except:
 		import traceback
 		traceback.print_exc()
