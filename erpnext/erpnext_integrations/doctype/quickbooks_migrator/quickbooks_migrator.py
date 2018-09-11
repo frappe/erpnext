@@ -1069,21 +1069,19 @@ def is_group_account(account_id):
 	accounts = json.loads(frappe.cache().get("quickbooks-cached-Account").decode())
 	return any(account["SubAccount"] and account["ParentRef"]["value"] == account_id for account in accounts)
 
-def get_unique_account_name(quickbooks_name):
-	quickbooks_account_name = "{} - QB".format(quickbooks_name)
-	company_encoded_account_name = encode_company_abbr(quickbooks_account_name, company)
-	appended_account_name = append_number_if_name_exists("Account",
-		company_encoded_account_name,
-		filters={"company": company},
-	)
-	# Check for name collision
-	if appended_account_name == company_encoded_account_name:
-		unique_account_name = quickbooks_account_name
+def get_unique_account_name(quickbooks_name, number=0):
+	if number:
+		quickbooks_account_name = "{} - {} - QB".format(quickbooks_name, number)
 	else:
-		# Remove appended Number and append it to quickbooks_account_name
-		appended_number = frappe.utils.cint(appended_account_name.split("-")[-1])
-		unique_account_name = "{} - {}".format(quickbooks_account_name, appended_number)
+		quickbooks_account_name = "{} - QB".format(quickbooks_name)
+	company_encoded_account_name = encode_company_abbr(quickbooks_account_name, company)
+	if frappe.db.exists({"doctype": "Account", "name": company_encoded_account_name, "company": company}):
+		unique_account_name = get_unique_account_name(quickbooks_name, number + 1)
+	else:
+		unique_account_name = quickbooks_account_name
 	return unique_account_name
+
+
 gl_entries = {}
 def get_gl_entries_from_section(section, account=None):
 	if "Header" in section and "id" in section["Header"]["ColData"][0]:
