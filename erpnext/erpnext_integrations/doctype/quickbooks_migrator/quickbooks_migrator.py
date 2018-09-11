@@ -276,44 +276,47 @@ def save_preference(preference):
 def save_invoice(invoice):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"], "company": company}):
-			invoice_dict = {
-				"doctype": "Sales Invoice",
-				"quickbooks_id": invoice["Id"],
-				"naming_series": "SINV-",
+			if any(linked["TxnType"] in ("StatementCharge", "ReimburseCharge") for linked in invoice["LinkedTxn"]):
+				save_invoice_as_journal_entry(invoice)
+			else:
+				invoice_dict = {
+					"doctype": "Sales Invoice",
+					"quickbooks_id": invoice["Id"],
+					"naming_series": "SINV-",
 
-				# Quickbooks uses ISO 4217 Code
-				# of course this gonna come back to bite me
-				"currency": invoice["CurrencyRef"]["value"],
-				"conversion_rate": invoice.get("ExchangeRate", 1),
+					# Quickbooks uses ISO 4217 Code
+					# of course this gonna come back to bite me
+					"currency": invoice["CurrencyRef"]["value"],
+					"conversion_rate": invoice.get("ExchangeRate", 1),
 
-				# Need to check with someone as to what exactly this field represents
-				# And whether it is equivalent to posting_date
-				"posting_date": invoice["TxnDate"],
+					# Need to check with someone as to what exactly this field represents
+					# And whether it is equivalent to posting_date
+					"posting_date": invoice["TxnDate"],
 
-				# Due Date should be calculated from SalesTerm if not provided.
-				# For Now Just setting a default to suppress mandatory errors.
-				"due_date": invoice.get("DueDate", "2020-01-01"),
-				"customer": frappe.get_all("Customer",
-					filters={
-						"quickbooks_id": invoice["CustomerRef"]["value"],
-						"company": company,
-					})[0]["name"],
-				"items": get_items(invoice),
-				"taxes": get_taxes(invoice),
+					# Due Date should be calculated from SalesTerm if not provided.
+					# For Now Just setting a default to suppress mandatory errors.
+					"due_date": invoice.get("DueDate", "2020-01-01"),
+					"customer": frappe.get_all("Customer",
+						filters={
+							"quickbooks_id": invoice["CustomerRef"]["value"],
+							"company": company,
+						})[0]["name"],
+					"items": get_items(invoice),
+					"taxes": get_taxes(invoice),
 
-				# Do not change posting_date upon submission
-				"set_posting_time": 1,
-				"disable_rounded_total": 1,
-				"company": company,
-			}
-			discount = get_discount(invoice["Line"])
-			if discount:
-				if invoice["ApplyTaxAfterDiscount"]:
-					invoice_dict["apply_discount_on"] = "Net Total"
-				else:
-					invoice_dict["apply_discount_on"] = "Grand Total"
-				invoice_dict["discount_amount"] = discount["Amount"]
-			frappe.get_doc(invoice_dict).insert().submit()
+					# Do not change posting_date upon submission
+					"set_posting_time": 1,
+					"disable_rounded_total": 1,
+					"company": company,
+				}
+				discount = get_discount(invoice["Line"])
+				if discount:
+					if invoice["ApplyTaxAfterDiscount"]:
+						invoice_dict["apply_discount_on"] = "Net Total"
+					else:
+						invoice_dict["apply_discount_on"] = "Grand Total"
+					invoice_dict["discount_amount"] = discount["Amount"]
+				frappe.get_doc(invoice_dict).insert().submit()
 	except:
 		import traceback
 		traceback.print_exc()
@@ -323,6 +326,30 @@ def get_discount(lines):
 		if line["DetailType"] == "DiscountLineDetail":
 			return line
 
+
+def save_invoice_as_journal_entry(invoice):
+	if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Invoice - {}".format(invoice["Id"]), "company": company}):
+		accounts = []
+		for line in get_general_ledger()["Invoice"][invoice["Id"]]["lines"]:
+			print(line)
+			account_line = {"account": line["account"]}
+			if line["debit"]:
+				account_line["debit_in_account_currency"] = line["debit"]
+				account_line["party_type"] = "Customer"
+				account_line["party"] = frappe.get_all("Customer",
+					filters={"quickbooks_id": invoice["CustomerRef"]["value"], "company": company}
+				)[0]["name"]
+			elif line["credit"]:
+				account_line["credit_in_account_currency"] = line["credit"]
+			accounts.append(account_line)
+		frappe.get_doc({
+			"doctype": "Journal Entry",
+			"quickbooks_id": "Invoice - {}".format(invoice["Id"]),
+			"naming_series": "JV-",
+			"company": company,
+			"posting_date": invoice["TxnDate"],
+			"accounts": accounts,
+		}).insert().submit()
 
 def save_credit_memo(credit_memo):
 	try:
