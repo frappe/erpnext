@@ -615,7 +615,7 @@ def save_sales_receipt(sales_receipt):
 				"is_pos": 1,
 				"company": company,
 				"payments": [{
-					"mode_of_payment": sales_receipt["PaymentMethodRef"]["name"],
+					"mode_of_payment": "Cash",
 					"account": get_account_name_by_id(sales_receipt["DepositToAccountRef"]["value"]),
 					"amount": 0
 				}]
