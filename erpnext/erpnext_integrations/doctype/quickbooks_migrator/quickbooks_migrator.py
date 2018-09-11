@@ -67,7 +67,7 @@ def fetch_data():
 	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
 	for entity in relevant_entities:
 		fetch_all_entries(entity=entity, company_id=company_id)
-	relevant_entities = ["Advance Payment", "Tax Payment"]
+	relevant_entities = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment"]
 	for entity in relevant_entities:
 		fetch_all_entries_from_gl(entity=entity, company_id=company_id)
 	frappe.clear_messages()
@@ -951,6 +951,8 @@ save_methods = {
 	"Advance Payment": save_advance_payment,
 	"Preferences": save_preference,
 	"Tax Payment": save_tax_payment,
+	"Sales Tax Payment": save_tax_payment,
+	"Purchase Tax Payment": save_tax_payment,
 }
 
 def save_entries(doctype, entries):
