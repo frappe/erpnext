@@ -11,7 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext import get_company_currency
-from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 from six import string_types, iteritems
@@ -643,8 +643,12 @@ def get_conversion_factor(item_code, uom):
 	filters = {"parent": item_code, "uom": uom}
 	if variant_of:
 		filters["parent"] = ("in", (item_code, variant_of))
-	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
-		filters, "conversion_factor")}
+	conversion_factor = frappe.db.get_value("UOM Conversion Detail",
+		filters, "conversion_factor")
+	if not conversion_factor:
+		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
+		conversion_factor = get_uom_conv_factor(uom, stock_uom)
+	return {"conversion_factor": conversion_factor}
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
