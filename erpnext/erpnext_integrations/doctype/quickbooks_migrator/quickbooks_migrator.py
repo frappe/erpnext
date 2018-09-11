@@ -276,7 +276,7 @@ def save_preference(preference):
 def save_invoice(invoice):
 	try:
 		if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": invoice["Id"], "company": company}):
-			frappe.get_doc({
+			invoice_dict = {
 				"doctype": "Sales Invoice",
 				"quickbooks_id": invoice["Id"],
 				"naming_series": "SINV-",
@@ -305,10 +305,24 @@ def save_invoice(invoice):
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"company": company,
-			}).insert().submit()
+			}
+			discount = get_discount(invoice["Line"])
+			if discount:
+				if invoice["ApplyTaxAfterDiscount"]:
+					invoice_dict["apply_discount_on"] = "Net Total"
+				else:
+					invoice_dict["apply_discount_on"] = "Grand Total"
+				invoice_dict["discount_amount"] = discount["Amount"]
+			frappe.get_doc(invoice_dict).insert().submit()
 	except:
 		import traceback
 		traceback.print_exc()
+
+def get_discount(lines):
+	for line in lines:
+		if line["DetailType"] == "DiscountLineDetail":
+			return line
+
 
 def save_credit_memo(credit_memo):
 	try:
