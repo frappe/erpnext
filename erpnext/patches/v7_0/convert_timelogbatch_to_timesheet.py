@@ -6,7 +6,6 @@ def execute():
 		return
 
 	from erpnext.manufacturing.doctype.work_order.work_order import add_timesheet_detail
-	from erpnext.patches.v7_0.convert_timelog_to_timesheet import get_timelog_data
 
 	for tlb in frappe.get_all('Time Log Batch', fields=["*"], 
 		filters = [["docstatus", "<", "2"]]):
@@ -25,6 +24,8 @@ def execute():
 		time_sheet.save(ignore_permissions=True)
 
 def get_timesheet_data(data):
+	from erpnext.patches.v7_0.convert_timelog_to_timesheet import get_timelog_data
+
 	time_log = frappe.get_all('Time Log', fields=["*"], filters = {'name': data.time_log})
 	if time_log:
 		return get_timelog_data(time_log[0])

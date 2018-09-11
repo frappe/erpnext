@@ -383,7 +383,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'location_name': 'Test Location'
 			}).insert()
 
-		set_perpetual_inventory(1, pr.company)
+		set_perpetual_inventory(1, "_Test Company")
 		pr = make_purchase_receipt()
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
