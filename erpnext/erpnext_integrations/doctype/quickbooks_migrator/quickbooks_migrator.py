@@ -737,7 +737,7 @@ def get_items(invoice, is_return=False):
 					"qty": line["SalesItemLineDetail"]["Qty"],
 					"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
 					"cost_center": default_cost_center,
-					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
+					"item_tax_rate": json.dumps(get_item_taxes(tax_code))
 				})
 			else:
 				items.append({
@@ -750,7 +750,7 @@ def get_items(invoice, is_return=False):
 					"qty": 1,
 					"price_list_rate": line["Amount"],
 					"cost_center": default_cost_center,
-					"item_tax_rate": json.dumps(get_item_taxes(line["SalesItemLineDetail"]["TaxCodeRef"]["value"]))
+					"item_tax_rate": json.dumps(get_item_taxes(tax_code))
 				})
 			if is_return:
 				items[-1]["qty"] *= -1
@@ -806,7 +806,7 @@ def get_pi_items(purchase_invoice, is_return=False):
 				"qty": 1,
 				"price_list_rate": line["Amount"],
 				"cost_center": default_cost_center,
-				"item_tax_rate": json.dumps(get_item_taxes(line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
+				"item_tax_rate": json.dumps(get_item_taxes(tax_code)),
 			})
 		if is_return:
 			items[-1]["qty"] *= -1
