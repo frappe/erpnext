@@ -124,23 +124,43 @@ def save_account(account):
 	try:
 		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"], "company": company}):
 			is_child = account["SubAccount"]
+			is_group = is_group_account(account["Id"])
+			# Create Two Accounts for every Group Account
+			if is_group:
+				account_id = "Group - {}".format(account["Id"])
+			else:
+				account_id = account["Id"]
+
 			if is_child:
-				parent_account = get_account_name_by_id(account["ParentRef"]["value"])
+				parent_account = get_account_name_by_id("Group - {}".format(account["ParentRef"]["value"]))
 			else:
 				parent_account = encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), company)
 
 			frappe.get_doc({
 				"doctype": "Account",
-				"quickbooks_id": account["Id"],
+				"quickbooks_id": account_id,
 				"account_name": get_unique_account_name(account["Name"]),
 				"root_type": mapping[account["AccountType"]],
 				"account_type": get_account_type(account),
 				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": parent_account,
-				"is_group": is_group_account(account["Id"]),
+				"is_group": is_group,
 				"company": company,
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
 
+			if is_group:
+				# Create a Leaf account corresponding to the group account
+				frappe.get_doc({
+					"doctype": "Account",
+					"quickbooks_id": account["Id"],
+					"account_name": get_unique_account_name(account["Name"]),
+					"root_type": mapping[account["AccountType"]],
+					"account_type": get_account_type(account),
+					"account_currency": account["CurrencyRef"]["value"],
+					"parent_account": get_account_name_by_id(account_id),
+					"is_group": 0,
+					"company": company,
+				}).insert(ignore_permissions=True, ignore_mandatory=True)
 			if account["AccountSubType"] == "UndepositedFunds":
 				frappe.cache().set("quickbooks-cached-undeposited-funds-account-id", account["Id"])
 	except:
