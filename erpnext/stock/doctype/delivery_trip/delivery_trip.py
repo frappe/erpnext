@@ -359,7 +359,7 @@ def notify_customers(delivery_trip):
 	context = delivery_trip.as_dict()
 
 	if delivery_trip.driver:
-		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))
+		context.update({"cell_number": frappe.db.get_value("Driver", delivery_trip.driver, "cell_number")})
 
 	email_recipients = []
 
