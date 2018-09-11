@@ -6,11 +6,14 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration')
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission')
+
 	for doctype in ["Sales Invoice", "Delivery Note", "Purchase Invoice"]:
 		frappe.db.sql("""delete from `tabCustom Field` where dt = %s
 			and fieldname in ('port_code', 'shipping_bill_number', 'shipping_bill_date')""", doctype)
 
-	make_custom_fields(update=False)
+	make_custom_fields()
 
 	frappe.db.sql("""
 		update `tabCustom Field`
@@ -18,4 +21,8 @@ def execute():
 		where fieldname = 'reason_for_issuing_document'
 	""")
 
-
+	frappe.db.sql("""
+		update tabAddress
+		set gst_state_number=concat("0", gst_state_number)
+		where ifnull(gst_state_number, '') != '' and gst_state_number<10
+	""")

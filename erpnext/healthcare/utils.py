@@ -220,7 +220,7 @@ def get_practitioner_charge(practitioner, is_ip):
 def manage_invoice_submit_cancel(doc, method):
 	if doc.items:
 		for item in doc.items:
-			if item.reference_dt and item.reference_dn:
+			if item.get("reference_dt") and item.get("reference_dn"):
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
 
@@ -306,9 +306,6 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	else:
 		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date, ref_invoice)
 		visited = fee_validity.visited
-
-	print "do_not_update: ", do_not_update
-	print "visited: ", visited
 
 	# Mark All Patient Appointment invoiced = True in the validity range do not cross the max visit
 	if (method == "on_cancel"):
@@ -410,7 +407,6 @@ def get_children(doctype, parent, company, is_root=False):
 					lft > %s and rgt < %s""",
 					(each['lft'], each['rgt']))
 				for child in child_list:
-					print child[0], child[1]
 					if not occupied:
 						occupied = 0
 					if child[1] == "Occupied":
