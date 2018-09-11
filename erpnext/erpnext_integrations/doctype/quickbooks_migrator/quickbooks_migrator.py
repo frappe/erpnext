@@ -482,17 +482,19 @@ def save_bill_payment(bill_payment):
 					filters={
 						"quickbooks_id": bill_payment["Line"][0]["LinkedTxn"][0]["TxnId"],
 						"company": company,
-					},
-					fields=["name", "base_grand_total"])[0]
+					})[0]["name"]
 				if bill_payment["PayType"] == "Check":
 					bank_account = get_account_name_by_id(bill_payment["CheckPayment"]["BankAccountRef"]["value"])
+				elif bill_payment["PayType"] == "CreditCard":
+					bank_account = get_account_name_by_id(bill_payment["CreditCardPayment"]["CCAccountRef"]["value"])
 				else:
 					bank_account = None
-				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice["name"],
+				erp_pe = get_payment_entry("Purchase Invoice", purchase_invoice,
 					bank_account=bank_account,
-					bank_amount=purchase_invoice["base_grand_total"])
+				)
 				erp_pe.quickbooks_id = "BillPayment - {}".format(bill_payment["Id"])
 				erp_pe.reference_no = "Reference No"
+				erp_pe.paid_mount = bill_payment["TotalAmt"]
 				erp_pe.posting_date = bill_payment["TxnDate"]
 				erp_pe.reference_date = bill_payment["TxnDate"]
 				erp_pe.insert().submit()
