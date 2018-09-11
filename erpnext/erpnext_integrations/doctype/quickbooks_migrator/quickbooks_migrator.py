@@ -123,7 +123,6 @@ def save_account(account):
 	# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
 	try:
 		if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"], "company": company}):
-			account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank"}
 			is_child = account["SubAccount"]
 			if is_child:
 				parent_account = get_account_name_by_id(account["ParentRef"]["value"])
@@ -135,7 +134,7 @@ def save_account(account):
 				"quickbooks_id": account["Id"],
 				"account_name": get_unique_account_name(account["Name"]),
 				"root_type": mapping[account["AccountType"]],
-				"account_type": account_type_mapping.get(account["AccountType"]),
+				"account_type": get_account_type(account),
 				"account_currency": account["CurrencyRef"]["value"],
 				"parent_account": parent_account,
 				"is_group": is_group_account(account["Id"]),
@@ -147,6 +146,14 @@ def save_account(account):
 	except:
 		import traceback
 		traceback.print_exc()
+
+def get_account_type(account):
+	account_subtype_mapping = {"UndepositedFunds": "Cash"}
+	account_type = account_subtype_mapping.get(account["AccountSubType"])
+	if account_type is None:
+		account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank", "Credit Card": "Bank"}
+		account_type = account_type_mapping.get(account["AccountType"])
+	return account_type
 
 def save_tax_rate(tax_rate):
 	try:
