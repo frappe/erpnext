@@ -1127,3 +1127,49 @@ def get_unique_account_name(quickbooks_name):
 		appended_number = frappe.utils.cint(appended_account_name.split("-")[-1])
 		unique_account_name = "{} - {}".format(quickbooks_account_name, appended_number)
 	return unique_account_name
+gl_entries = {}
+def get_gl_entries_from_section(section, account=None):
+	if "Header" in section and "id" in section["Header"]["ColData"][0]:
+		account = get_account_name_by_id(section["Header"]["ColData"][0].get("id", 38))
+	entries = []
+	for row in section["Rows"]["Row"]:
+		if row["type"] == "Data":
+			data = row["ColData"]
+			entries.append({
+				"account": account,
+				"date": data[0]["value"],
+				"type": data[1]["value"],
+				"id": data[1]["id"],
+				"credit": frappe.utils.flt(data[2]["value"]),
+				"debit": frappe.utils.flt(data[3]["value"]),
+				"amount": frappe.utils.flt(data[4]["value"]),
+			})
+		if row["type"] == "Section":
+			get_gl_entries_from_section(row, account)
+	gl_entries.setdefault(account, []).extend(entries)
+
+def fetch_general_ledger(company_id):
+	if not frappe.cache().exists("quickbooks-cached-General-Ledger"):
+		general_ledger = get((BASE_QUERY_URL + "/{}").format(company_id, "reports", "GeneralLedger"), params={
+			"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt" , "subt_nat_amount"]),
+			"date_macro": "All",
+			"minorversion": 3,
+		}).json()
+		for section in general_ledger["Rows"]["Row"]:
+			if section["type"] == "Section":
+				get_gl_entries_from_section(section)
+		general_ledger = {}
+		for account in gl_entries.values():
+			for line in account:
+				type_dict = general_ledger.setdefault(line["type"], {})
+				if line["id"] not in type_dict:
+					type_dict[line["id"]] = {
+						"id": line["id"],
+						"date": line["date"],
+						"lines": [],
+					}
+				type_dict[line["id"]]["lines"].append(line)
+		frappe.cache().set("quickbooks-cached-General-Ledger", json.dumps(general_ledger))
+
+def get_general_ledger():
+	return json.loads(frappe.cache().get("quickbooks-cached-General-Ledger").decode())
