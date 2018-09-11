@@ -633,22 +633,12 @@ def save_advance_payment(advance_payment):
 		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Advance Payment - {}".format(advance_payment["id"]), "company": company}):
 			accounts = []
 			for line in advance_payment["lines"]:
-				root_type = frappe.get_doc("Account", line["account"]).root_type
-				if root_type in ("Asset", "Income"):
-					if line["amount"] > 0:
-						posting_type = "debit_in_account_currency"
-					else:
-						posting_type = "credit_in_account_currency"
+				account_line = {"account": line["account"]}
+				if line["credit"]:
+					account_line["credit_in_account_currency"] = line["credit"]
 				else:
-					if line["amount"] > 0:
-						posting_type = "credit_in_account_currency"
-					else:
-						posting_type = "debit_in_account_currency"
-
-				accounts.append({
-					"account": line["account"],
-					posting_type: abs(line["amount"]),
-				})
+					account_line["debit_in_account_currency"] = line["debit"]
+				accounts.append(account_line)
 
 			frappe.get_doc({
 				"doctype": "Journal Entry",
@@ -667,22 +657,12 @@ def save_tax_payment(tax_payment):
 		if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Tax Payment - {}".format(tax_payment["id"]), "company": company}):
 			accounts = []
 			for line in tax_payment["lines"]:
-				root_type = frappe.get_doc("Account", line["account"]).root_type
-				if root_type in ("Asset", "Income"):
-					if line["amount"] > 0:
-						posting_type = "debit_in_account_currency"
-					else:
-						posting_type = "credit_in_account_currency"
+				account_line = {"account": line["account"]}
+				if line["credit"]:
+					account_line["credit_in_account_currency"] = line["credit"]
 				else:
-					if line["amount"] > 0:
-						posting_type = "credit_in_account_currency"
-					else:
-						posting_type = "debit_in_account_currency"
-
-				accounts.append({
-					"account": line["account"],
-					posting_type: abs(line["amount"]),
-				})
+					account_line["debit_in_account_currency"] = line["debit"]
+				accounts.append(account_line)
 
 			frappe.get_doc({
 				"doctype": "Journal Entry",
