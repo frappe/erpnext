@@ -48,7 +48,6 @@ def callback(*args, **kwargs):
 	get_access_token()
 	frappe.publish_realtime("quickbooks_authenticated")
 
-@frappe.whitelist()
 def fetch_accounts():
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
@@ -61,6 +60,7 @@ def fetch_accounts():
 
 @frappe.whitelist()
 def fetch_data():
+	fetch_accounts()
 	company_id = frappe.cache().get("quickbooks_company_id").decode()
 	make_custom_fields()
 	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]

@@ -10,16 +10,6 @@ frappe.ui.form.on('QuickBooks Migrator', {
 			}
 		});
 	},
-	fetch_accounts: function(frm) {
-		frappe.call({
-			method: `${frm.python_path}.fetch_accounts`
-		});
-	},
-	delete_default_accounts: function(frm) {
-		frappe.call({
-			method: `${frm.python_path}.delete_default_accounts`
-		});
-	},
 	fetch_data: function(frm) {
 		frappe.call({
 			method: `${frm.python_path}.fetch_data`
@@ -34,39 +24,24 @@ frappe.ui.form.on('QuickBooks Migrator', {
 			callback: function(authentication_result) {
 				if (authentication_result.message) {
 					frm.is_authenticated = true;
-					frappe.call({
-						method: `${frm.python_path}.are_accounts_synced`,
-						callback: function(account_sync_result) {
-							frm.are_accounts_synced = account_sync_result.message;
-							frm.trigger("refresh");	
-						}
-					});
+					frm.trigger("refresh");
 				}
 			}
 		});
 		frappe.realtime.on("quickbooks_progress_update", function (data) {
 			switch (data.event) {
-			   case "fetch":
-				   frappe.show_progress("Fetching " + data.doctype + "s", data.count, data.total);
-				   break;
-			   case "save":
-				   frappe.show_progress("Saving " + data.doctype + "s", data.count, data.total);
-				   break;
-			   case "finish":
-				   frappe.hide_progress();
-				   break;
-			   case "message":
-				   frappe.hide_msgprint();
-				   frappe.show_alert(data.message);
-				   break;
-		   }
-	    });
+				case "fetch":
+					frm.dashboard.show_progress("Sync", (data.count / data.total) * 100,
+					`Fetching ${data.doctype}s (${data.count} / ${data.total})`);
+					break;
+				case "save":
+					frm.dashboard.show_progress("Sync", (data.count / data.total) * 100,
+					`Saving ${data.doctype}s (${data.count} / ${data.total})`);
+					break;
+			}
+		});
 		frappe.realtime.on("quickbooks_authenticated", function (data) {
 			frm.is_authenticated = true;
-			frm.trigger("refresh");
-		});
-		frappe.realtime.on("quickbooks_accounts_synced", function (data) {
-			frm.are_accounts_synced = true;
 			frm.trigger("refresh");
 		});
 	},
@@ -83,25 +58,13 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		if (frm.is_authenticated) {
 			frm.remove_custom_button("Connect to Quickbooks");
 
-			// Show company settings	
+			// Show company settings
 			frm.toggle_display("company_settings", 1);
 			frm.set_df_property("company", "reqd", 1);
+			frm.add_custom_button("Fetch Data", function () {
+				frm.trigger("fetch_data");
+			});
 
-			// No further actions until company is set
-			if (frm.fields_dict["company"].value) {
-				frm.add_custom_button("Fetch Accounts", function () {
-					frm.trigger("fetch_accounts");
-				});
-				if (frm.are_accounts_synced){
-					frm.add_custom_button("Delete Default Accounts", function () {
-						frm.trigger("delete_default_accounts");
-					});
-
-					frm.add_custom_button("Fetch Data", function () {
-						frm.trigger("fetch_data");
-					});
-				}
-			}
 		}
 	}
 });
