@@ -298,8 +298,8 @@ def save_invoice(invoice):
 						"quickbooks_id": invoice["CustomerRef"]["value"],
 						"company": company,
 					})[0]["name"],
-				"items": get_items(invoice["Line"]),
-				"taxes": get_taxes(invoice["TxnTaxDetail"].get("TaxLine", []), invoice["Line"]),
+				"items": get_items(invoice),
+				"taxes": get_taxes(invoice),
 
 				# Do not change posting_date upon submission
 				"set_posting_time": 1,
@@ -326,8 +326,8 @@ def save_credit_memo(credit_memo):
 						"quickbooks_id": credit_memo["CustomerRef"]["value"],
 						"company": company,
 					})[0]["name"],
-				"items": get_items(credit_memo["Line"], is_return=True),
-				"taxes": get_taxes(credit_memo["TxnTaxDetail"]["TaxLine"], credit_memo["Line"]),
+				"items": get_items(credit_memo, is_return=True),
+				"taxes": get_taxes(credit_memo),
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"is_return": 1,
@@ -370,8 +370,8 @@ def save_bill(bill):
 						"quickbooks_id": bill["VendorRef"]["value"],
 						"company": company,
 					})[0]["name"],
-				"items": get_pi_items(bill["Line"]),
-				"taxes": get_taxes(bill["TxnTaxDetail"]["TaxLine"]),
+				"items": get_pi_items(bill),
+				"taxes": get_taxes(bill),
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 			}).insert().submit()
@@ -397,8 +397,8 @@ def save_vendor_credit(vendor_credit):
 						"quickbooks_id": vendor_credit["VendorRef"]["value"],
 						"company": company,
 					})[0]["name"],
-				"items": get_pi_items(vendor_credit["Line"], is_return=True),
-				"taxes": get_taxes(vendor_credit["TxnTaxDetail"]["TaxLine"]),
+				"items": get_pi_items(vendor_credit, is_return=True),
+				"taxes": get_taxes(vendor_credit),
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"company": company,
@@ -558,8 +558,8 @@ def save_sales_receipt(sales_receipt):
 						"quickbooks_id": sales_receipt["CustomerRef"]["value"],
 						"company": company,
 					})[0]["name"],
-				"items": get_items(sales_receipt["Line"]),
-				"taxes": get_taxes(sales_receipt["TxnTaxDetail"]["TaxLine"], sales_receipt["Line"]),
+				"items": get_items(sales_receipt),
+				"taxes": get_taxes(sales_receipt),
 				"set_posting_time": 1,
 				"disable_rounded_total": 1,
 				"is_pos": 1,
@@ -660,10 +660,17 @@ def get_accounts(lines):
 			})
 	return accounts
 
-def get_items(lines, is_return=False):
+def get_items(invoice, is_return=False):
 	items = []
-	for line in lines:
+	for line in invoice["Line"]:
 		if line["DetailType"] == "SalesItemLineDetail":
+			if line["SalesItemLineDetail"]["TaxCodeRef"]["value"] != "TAX":
+				tax_code = line["SalesItemLineDetail"]["TaxCodeRef"]["value"]
+			else:
+				if "TxnTaxCodeRef" in invoice["TxnTaxDetail"]:
+					tax_code = invoice["TxnTaxDetail"]["TxnTaxCodeRef"]["value"]
+				else:
+					tax_code = "NON"
 			if line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
 				item = frappe.db.get_all("Item",
 					filters={
@@ -704,10 +711,17 @@ def get_items(lines, is_return=False):
 			})
 	return items
 
-def get_pi_items(lines, is_return=False):
+def get_pi_items(purchase_invoice, is_return=False):
 	items = []
-	for line in lines:
+	for line in purchase_invoice["Line"]:
 		if line["DetailType"] == "ItemBasedExpenseLineDetail":
+			if line["ItemBasedExpenseLineDetail"]["TaxCodeRef"]["value"] != "TAX":
+				tax_code = line["ItemBasedExpenseLineDetail"]["TaxCodeRef"]["value"]
+			else:
+				if "TxnTaxCodeRef" in purchase_invoice["TxnTaxDetail"]:
+					tax_code = purchase_invoice["TxnTaxDetail"]["TxnTaxCodeRef"]["value"]
+				else:
+					tax_code = "NON"
 			item = frappe.db.get_all("Item",
 				filters={
 					"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"],
@@ -723,9 +737,16 @@ def get_pi_items(lines, is_return=False):
 				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
 				"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
 				"cost_center": default_cost_center,
-				"item_tax_rate": json.dumps(get_item_taxes(line["ItemBasedExpenseLineDetail"]["TaxCodeRef"]["value"])),
+				"item_tax_rate": json.dumps(get_item_taxes(tax_code)),
 			})
 		elif line["DetailType"] == "AccountBasedExpenseLineDetail":
+			if line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"] != "TAX":
+				tax_code = line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"]
+			else:
+				if "TxnTaxCodeRef" in purchase_invoice["TxnTaxDetail"]:
+					tax_code = purchase_invoice["TxnTaxDetail"]["TxnTaxCodeRef"]["value"]
+				else:
+					tax_code = "NON"
 			items.append({
 				"item_name": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"conversion_factor": 1,
@@ -755,9 +776,11 @@ def get_item_taxes(tax_code):
 						item_taxes[tax_head] = tax_rate["RateValue"]
 	return item_taxes
 
-def get_taxes(lines, items=None):
+def get_taxes(entry):
 	taxes = []
-	for line in lines:
+	if "TxnTaxDetail" not in entry or "TaxLine" not in entry["TxnTaxDetail"]:
+		return taxes
+	for line in entry["TxnTaxDetail"]["TaxLine"]:
 		tax_rate = line["TaxLineDetail"]["TaxRateRef"]["value"]
 		account_head = get_account_name_by_id("TaxRate - {}".format(tax_rate))
 		tax_type_applicable = get_tax_type(tax_rate)
@@ -768,7 +791,7 @@ def get_taxes(lines, items=None):
 				"description": account_head,
 				"cost_center": default_cost_center,
 				"rate": 0,
-			})
+ 			})
 		else:
 			parent_tax_rate = get_parent_tax_rate(tax_rate)
 			parent_row_id = get_parent_row_id(parent_tax_rate, taxes)
