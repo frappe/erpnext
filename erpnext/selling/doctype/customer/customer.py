@@ -29,10 +29,17 @@ class Customer(TransactionBase):
 			info["loyalty_point"] = loyalty_point_details.loyalty_points
 		self.set_onload('dashboard_info', info)
 
+	# def autoname(self):
+	# 	cust_master_name = frappe.defaults.get_global_default('cust_master_name')
+	# 	if cust_master_name == 'Customer Name':
+	# 		self.name = self.get_customer_name()
+	# 	else:
+	# 		set_name_by_naming_series(self)
+
 	def autoname(self):
-		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
-		if cust_master_name == 'Customer Name':
-			self.name = self.get_customer_name()
+		if frappe.db.get_value("Customer", self.naming_series):
+			from frappe.model.naming import make_autoname
+			self.name = make_autoname(self.naming_series)
 		else:
 			set_name_by_naming_series(self)
 
