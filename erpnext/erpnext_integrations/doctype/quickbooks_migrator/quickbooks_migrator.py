@@ -178,7 +178,7 @@ def save_customer(customer):
 			erpcustomer = frappe.get_doc({
 				"doctype": "Customer",
 				"quickbooks_id": customer["Id"],
-				"customer_name" : customer["DisplayName"],
+				"customer_name" : encode_company_abbr(customer["DisplayName"], company),
 				"customer_type" : _("Individual"),
 				"customer_group" : _("Commercial"),
 				"default_currency": customer["CurrencyRef"]["value"],
@@ -201,7 +201,7 @@ def save_item(item):
 				item_dict = {
 					"doctype": "Item",
 					"quickbooks_id": item["Id"],
-					"item_code" : item["Name"],
+					"item_code" : encode_company_abbr(item["Name"], company),
 					"stock_uom": "Unit",
 					"is_stock_item": 0,
 					"item_group": "All Item Groups",
@@ -225,7 +225,7 @@ def save_vendor(vendor):
 			erpsupplier = frappe.get_doc({
 				"doctype": "Supplier",
 				"quickbooks_id": vendor["Id"],
-				"supplier_name" : vendor["DisplayName"],
+				"supplier_name" : encode_company_abbr(vendor["DisplayName"], company),
 				"supplier_group" : _("All Supplier Groups"),
 				"company": company,
 			}).insert(ignore_permissions=True)
