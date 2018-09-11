@@ -528,6 +528,15 @@ def save_purchase(purchase):
 						"debit_in_account_currency": line["Amount"],
 					})
 
+			if purchase.get("Credit"):
+				for account in accounts:
+					if "debit_in_account_currency" in account:
+						account["credit_in_account_currency"] = account["debit_in_account_currency"]
+						del account["debit_in_account_currency"]
+					else:
+						account["debit_in_account_currency"] = account["credit_in_account_currency"]
+						del account["credit_in_account_currency"]
+
 			# Create and Submit Journal Entry
 			frappe.get_doc({
 				"doctype": "Journal Entry",
