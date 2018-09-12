@@ -67,7 +67,7 @@ class Company(NestedSet):
 			"default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account",
 			"stock_received_but_not_billed", "stock_adjustment_account",
-			"expenses_included_in_valuation", "default_payroll_payable_account"]:
+			"expenses_included_in_valuation", "default_payroll_payable_account", "default_lc_payable_account"]:
 				if self.get(field):
 					for_company = frappe.db.get_value("Account", self.get(field), "company")
 					if for_company != self.name:
@@ -205,6 +205,12 @@ class Company(NestedSet):
 				{"account_name": _("Payroll Payable"), "company": self.name, "is_group": 0})
 
 			self.db_set("default_payroll_payable_account", payroll_payable_account)
+
+		if not self.default_lc_payable_account:
+			lc_payable_account = frappe.db.get_value("Account",
+				{"account_name": _("Letter of Credit Payable"), "company": self.name, "is_group": 0})
+
+			self.db_set("default_lc_payable_account", lc_payable_account)
 
 		if not self.default_employee_advance_account:
 			employe_advance_account = frappe.db.get_value("Account",

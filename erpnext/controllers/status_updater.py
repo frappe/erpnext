@@ -102,7 +102,6 @@ status_map = {
 		["Paid", "eval:self.outstanding_amount <= 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
-		["Billed", "eval:self.is_import_bill==1 and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
 	]
 }

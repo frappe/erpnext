@@ -175,9 +175,7 @@ class PurchaseReceipt(BuyingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
-		stock_rbnb = self.get("lc_account")
-		if not stock_rbnb:
-			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
@@ -370,8 +368,8 @@ class PurchaseReceipt(BuyingController):
 		self.load_from_db()
 
 	def set_title(self):
-		if self.lc_account and self.lc_account != self.get_company_default("stock_received_but_not_billed"):
-			self.title = self.lc_account
+		if self.letter_of_credit:
+			self.title = self.letter_of_credit
 		else:
 			self.title = self.supplier_name
 
@@ -395,13 +393,6 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 			where pr_detail=%s and docstatus=1""", pr_item.name)
 		billed_amt_agianst_pr = billed_amt_agianst_pr and billed_amt_agianst_pr[0][0] or 0
 
-		# Get billed amount from import bill LCVs
-		billed_amt_against_lcv = frappe.db.sql("""select sum(lcv_item.billable_amt)
-			from `tabLanded Cost Item` as lcv_item, `tabLanded Cost Voucher` as lcv
-			where lcv.name=lcv_item.parent and lcv.is_import_bill=1 and lcv_item.purchase_receipt_item=%s and lcv_item.docstatus=1""", pr_item.name)
-		billed_amt_against_lcv = billed_amt_against_lcv and billed_amt_against_lcv[0][0] or 0
-		billed_amt_agianst_pr += billed_amt_against_lcv
-
 		# Distribute billed amount directly against PO between PRs based on FIFO
 		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
 			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
@@ -418,25 +409,18 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 
 	return updated_pr
 
-def update_billed_amount_based_on_pr(doc, pr_detail_field, po_detail_field, update_modified=True):
+def update_billed_amount_based_on_pr(bill_doc, update_modified=True):
 	updated_pr = []
-	for d in doc.get("items"):
-		if d.get(pr_detail_field):
+	for d in bill_doc.get("items"):
+		if d.get("pr_detail"):
 			billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
-				where pr_detail=%s and docstatus=1""", d.get(pr_detail_field))
+				where pr_detail=%s and docstatus=1""", d.get("pr_detail"))
 			billed_amt = billed_amt and billed_amt[0][0] or 0
 
-			billed_amt_against_lcv = frappe.db.sql("""select sum(lcv_item.billable_amt)
-				from `tabLanded Cost Item` as lcv_item, `tabLanded Cost Voucher` as lcv
-				where lcv.name=lcv_item.parent and lcv.is_import_bill=1 and lcv_item.purchase_receipt_item=%s and lcv_item.docstatus=1""",
-				d.get(pr_detail_field))
-			billed_amt_against_lcv = billed_amt_against_lcv and billed_amt_against_lcv[0][0] or 0
-			billed_amt += billed_amt_against_lcv
-
-			frappe.db.set_value("Purchase Receipt Item", d.get(pr_detail_field), "billed_amt", billed_amt, update_modified=update_modified)
+			frappe.db.set_value("Purchase Receipt Item", d.get("pr_detail"), "billed_amt", billed_amt, update_modified=update_modified)
 			updated_pr.append(d.purchase_receipt)
-		elif po_detail_field and d.get(po_detail_field):
-			updated_pr += update_billed_amount_based_on_po(d.get(po_detail_field), update_modified)
+		elif d.get("po_detail"):
+			updated_pr += update_billed_amount_based_on_po(d.get("po_detail"), update_modified)
 
 	for pr in set(updated_pr):
 		frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)

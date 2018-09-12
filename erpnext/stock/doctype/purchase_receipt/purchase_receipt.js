@@ -20,17 +20,6 @@ frappe.ui.form.on("Purchase Receipt", {
 				}
 			}
 		})
-
-		frm.set_query("lc_account", function() {
-			return {
-				filters: {
-					'account_type': 'Letter of Credit',
-					'is_group': 0,
-					'company': frm.doc.company,
-					'account_currency': erpnext.get_currency(frm.doc.company)
-				}
-			};
-		});
 	},
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {

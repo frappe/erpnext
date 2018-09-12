@@ -231,6 +231,10 @@ def get():
                     _("Payroll Payable"): {
                         "account_number": "2120"
                     },
+                    _("Letter of Credit Payable"): {
+                        "account_type": "Payable",
+                        "account_number": "2130"
+                    },
                     "account_number": "2100"
                 },
                 _("Stock Liabilities"): {

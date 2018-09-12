@@ -208,7 +208,7 @@ class PurchaseInvoice(BuyingController):
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
-			# expense account is "Stock Received But Not Billed" or the Purchase Receipt's lc account for a stock item
+			# expense account is always "Stock Received But Not Billed" for a stock item
 			# except epening entry, drop-ship entry and fixed asset items
 
 			if auto_accounting_for_stock and item.item_code in stock_items \
@@ -219,8 +219,7 @@ class PurchaseInvoice(BuyingController):
 				if self.update_stock:
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
-					pr_lc_account = frappe.db.get_value("Purchase Receipt", item.purchase_receipt, "lc_account")
-					item.expense_account = pr_lc_account if pr_lc_account else stock_not_billed_account
+					item.expense_account = stock_not_billed_account
 
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
@@ -757,7 +756,7 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}".format(pi)))
 
 	def update_billing_status_in_pr(self, update_modified=True):
-		update_billed_amount_based_on_pr(self, "pr_detail", "po_detail", update_modified)
+		update_billed_amount_based_on_pr(self, update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None

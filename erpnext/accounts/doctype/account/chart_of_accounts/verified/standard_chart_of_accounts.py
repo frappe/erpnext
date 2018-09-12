@@ -148,6 +148,9 @@ def get():
 			            "account_type": "Payable"
 			        },
 			        _("Payroll Payable"): {},
+			        _("Letter of Credit Payable"): {
+			            "account_type": "Payable"
+			        }
 			    },
 			    _("Stock Liabilities"): {
 				    _("Stock Received But Not Billed"): {
