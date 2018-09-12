@@ -109,6 +109,16 @@ class StockEntry(StockController):
 					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
 
 			amount = amount[0][0] if amount else 0
+			additional_costs = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
+				from
+					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
+				where
+					se.docstatus = 1 and se.project = %s and sed.parent = se.name
+					and se.purpose = 'Manufacture'""", self.project, as_list=1)
+
+			additional_cost_amt = additional_costs[0][0] if additional_costs else 0
+
+			amount += additional_cost_amt
 			frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount)
 
 	def validate_item(self):
