@@ -126,25 +126,9 @@ class DeliveryTrip(Document):
 			leg.append(home_address)
 			route_list.append(leg)
 
-		route_list = [[self.sanitize_address(address) for address in route] for route in route_list]
+		route_list = [[sanitize_address(address) for address in route] for route in route_list]
 
 		return route_list
-
-	def sanitize_address(self, address):
-		"""
-		Remove HTML breaks in a given address
-
-		Args:
-			address (str): Address to be sanitized
-
-		Returns:
-			(str): Sanitized address
-		"""
-
-		address = address.split('<br>')
-
-		# Only get the first 4 blocks of the address
-		return ', '.join(address[:3])
 
 	def rearrange_stops(self, optimized_order, start):
 		"""
@@ -252,6 +236,23 @@ def optimize_route(delivery_trip):
 def get_arrival_times(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 	delivery_trip.process_route(optimize=False)
+
+
+def sanitize_address(address):
+	"""
+	Remove HTML breaks in a given address
+
+	Args:
+		address (str): Address to be sanitized
+
+	Returns:
+		(str): Sanitized address
+	"""
+
+	address = address.split('<br>')
+
+	# Only get the first 3 blocks of the address
+	return ', '.join(address[:3])
 
 
 def get_directions(route, optimize):
