@@ -16,6 +16,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import update_rate_in_serial_no
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
@@ -322,11 +323,45 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 			update_serial_nos_after_submit(self, "items")
 
+		self.update_receipts_valuation()
+
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
 
 		self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+
+	def update_receipts_valuation(self):
+		purchase_receipts = set()
+		for item in self.get("items"):
+			if item.purchase_receipt:
+				purchase_receipts.add(item.purchase_receipt)
+
+		for pr_name in purchase_receipts:
+			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
+
+			# set invoiced item tax amount in pr item
+			pr_doc.set_invoiced_item_tax_amount()
+
+			# set valuation amount in pr item
+			pr_doc.update_valuation_rate("items")
+
+			# db_update will update and save invoiced item tax amount in PR
+			for item in pr_doc.get("items"):
+				item.db_update()
+
+			# update latest valuation rate in serial no
+			update_rate_in_serial_no(pr_doc)
+
+			# update stock & gl entries for cancelled state of PR
+			pr_doc.docstatus = 2
+			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
+
+			# update stock & gl entries for submit state of PR
+			pr_doc.docstatus = 1
+			pr_doc.update_stock_ledger(via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -711,6 +746,8 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+
+		self.update_receipts_valuation()
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
