@@ -126,7 +126,6 @@ var get_emp_and_leave_details = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.employee = function(doc,dt,dn){
-	doc.salary_structure = ''
 	get_emp_and_leave_details(doc, dt, dn);
 }
 
