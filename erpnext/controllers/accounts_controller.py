@@ -963,7 +963,6 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 					and gle_payment.party_type = gle_je.party_type
 					and gle_payment.party = gle_je.party
 					and gle_payment.account = gle_je.account
-					and gle_payment.name != gle_je.name
 					and abs({payment_dr_or_cr}) > 0
 			) as amount
 		from `tabGL Entry` gle_je
