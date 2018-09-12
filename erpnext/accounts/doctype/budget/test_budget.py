@@ -231,7 +231,7 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, cost_center)
+			"_Test Bank - _TC", 40000, cost_center, posting_date="2013-02-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 
