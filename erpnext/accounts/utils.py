@@ -693,7 +693,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
-					and payment_gl_entry.name != invoice_gl_entry.name
 					and abs({payment_dr_or_cr}) > 0
 			) as payment_amount
 		from
@@ -702,7 +701,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 			party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s and abs({dr_or_cr}) > 0
 			{condition}
-			and voucher_type != 'Payment Entry' and (against_voucher = '' or against_voucher is null)
+			and (against_voucher = '' or against_voucher is null)
 		group by voucher_type, voucher_no
 		having {negative_invoices}(invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(

@@ -826,7 +826,6 @@ def get_outstanding_journal_entries(party_account, party_type, party):
 					and gle_payment.party_type = gle_je.party_type
 					and gle_payment.party = gle_je.party
 					and gle_payment.account = gle_je.account
-					and gle_payment.name != gle_je.name
 					and abs({payment_dr_or_cr}) > 0
 			) as balance
 		from `tabGL Entry` gle_je
