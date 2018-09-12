@@ -62,7 +62,7 @@ def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
-	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args)
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
 	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 @frappe.whitelist()
