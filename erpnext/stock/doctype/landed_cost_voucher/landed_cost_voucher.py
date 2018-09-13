@@ -170,7 +170,7 @@ class LandedCostVoucher(AccountsController):
 				item.db_update()
 
 			# update latest valuation rate in serial no
-			self.update_rate_in_serial_no(doc)
+			update_rate_in_serial_no(doc)
 
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
@@ -181,14 +181,6 @@ class LandedCostVoucher(AccountsController):
 			doc.docstatus = 1
 			doc.update_stock_ledger(via_landed_cost_voucher=True)
 			doc.make_gl_entries()
-
-	def update_rate_in_serial_no(self, receipt_document):
-		for item in receipt_document.get("items"):
-			if item.serial_no:
-				serial_nos = get_serial_nos(item.serial_no)
-				if serial_nos:
-					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
-						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_taxes_and_charges) > 0:
@@ -227,6 +219,14 @@ class LandedCostVoucher(AccountsController):
 			)
 
 		return gl_entry
+
+def update_rate_in_serial_no(receipt_document):
+	for item in receipt_document.get("items"):
+		if item.serial_no:
+			serial_nos = get_serial_nos(item.serial_no)
+			if serial_nos:
+				frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
+					.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
 
 @frappe.whitelist()
 def get_landed_cost_voucher(dt, dn):

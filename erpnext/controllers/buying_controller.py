@@ -180,10 +180,22 @@ class BuyingController(StockController):
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
 
-				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
+				valuation_item_tax_amount = self.get_valuation_item_tax_amount(item)
+				item.valuation_rate = ((item.base_net_amount + valuation_item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
+
+	def get_valuation_item_tax_amount(self, item):
+		valuation_item_tax_amount = item.item_tax_amount
+		# If item has been invoiced, use the tax amount from invoices
+		# If the invoice is incomplete, then use both invoiced_item_tax_amount and item_tax_amount
+		# proportional to the qty invoiced vs qty not yet invoiced
+		if self.doctype == "Purchase Receipt":
+			if item.invoiced_item_tax_portion:
+				valuation_item_tax_amount = item.invoiced_item_tax_amount
+				valuation_item_tax_amount += (1 - item.invoiced_item_tax_portion) * item.item_tax_amount
+		return valuation_item_tax_amount
 
 	def validate_for_subcontracting(self):
 		if not self.is_subcontracted and self.sub_contracted_items:
