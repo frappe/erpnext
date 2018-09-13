@@ -369,8 +369,15 @@ def get_drugs_to_invoice(encounter):
 						qty = 1
 						if frappe.db.get_value("Item", drug_line.drug_code, "stock_uom") == "Nos":
 							qty = drug_line.get_quantity()
+						description = False
+						if drug_line.dosage:
+							description = drug_line.dosage
+						if description and drug_line.period:
+							description += " for "+drug_line.period
+						if not description:
+							description = ""
 						item_to_invoice.append({'drug_code': drug_line.drug_code, 'quantity': qty,
-						'description': drug_line.dosage+" for "+drug_line.period})
+						'description': description})
 				return item_to_invoice
 
 @frappe.whitelist()
