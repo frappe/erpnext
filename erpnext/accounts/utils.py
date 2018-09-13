@@ -656,7 +656,7 @@ def get_held_invoices(party_type, party):
 	"""
 	Returns a list of names Purchase Invoices for the given party that are on hold
 	"""
-	held_invoices = None
+	held_invoices = []
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
@@ -701,7 +701,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 			party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s and abs({dr_or_cr}) > 0
 			{condition}
-			and (against_voucher = '' or against_voucher is null)
+			and voucher_type != 'Payment Entry' and (against_voucher = '' or against_voucher is null)
 		group by voucher_type, voucher_no
 		having {negative_invoices}(invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
