@@ -49,7 +49,7 @@ class BankStatementTransactionEntry(Document):
 		if not self.bank_settings:
 			frappe.throw("Bank Data mapper doesn't exist")
 		mapper_doc = frappe.get_doc("Bank Statement Settings", self.bank_settings)
-		headers = [entry.stmt_header for entry in mapper_doc.header_items]
+		headers = {entry.mapped_header:entry.stmt_header for entry in mapper_doc.header_items}
 		return headers
 
 	def populate_payment_entries(self):
@@ -63,9 +63,10 @@ class BankStatementTransactionEntry(Document):
 			date_format = '%Y-%m-%d'
 		if self.bank_settings:
 			mapped_items = frappe.get_doc("Bank Statement Settings", self.bank_settings).mapped_items
-		transactions = get_transaction_entries(filename, self.get_statement_headers())
+		statement_headers = self.get_statement_headers()
+		transactions = get_transaction_entries(filename, statement_headers)
 		for entry in transactions:
-			date = entry["Date"].strip()
+			date = entry[statement_headers["Date"]].strip()
 			#print("Processing entry DESC:{0}-W:{1}-D:{2}-DT:{3}".format(entry["Particulars"], entry["Withdrawals"], entry["Deposits"], entry["Date"]))
 			if (not date): continue
 			transaction_date = datetime.strptime(date, date_format).date()
@@ -73,19 +74,19 @@ class BankStatementTransactionEntry(Document):
 			if (self.to_date and transaction_date > datetime.strptime(self.to_date, '%Y-%m-%d').date()): continue
 			bank_entry = self.append('new_transaction_items', {})
 			bank_entry.transaction_date = transaction_date
-			bank_entry.description = entry["Particulars"]
+			bank_entry.description = entry[statement_headers["Particulars"]]
 
 			mapped_item = next((entry for entry in mapped_items if entry.mapping_type == "Transaction" and entry.bank_data.lower() in bank_entry.description.lower()), None)
 			if (mapped_item is not None):
 				bank_entry.party_type = mapped_item.mapped_data_type
 				bank_entry.party = mapped_item.mapped_data
 			else:
-				bank_entry.party_type = "Supplier" if not entry["Deposits"].strip() else "Customer"
+				bank_entry.party_type = "Supplier" if not entry[statement_headers["Deposits"]].strip() else "Customer"
 				party_list = frappe.get_all(bank_entry.party_type, fields=["name"])
 				parties = [party.name for party in party_list]
 				matches = difflib.get_close_matches(bank_entry.description.lower(), parties, 1, 0.4)
 				if len(matches) > 0: bank_entry.party = matches[0]
-			bank_entry.amount = -float(entry["Withdrawals"]) if not entry["Deposits"].strip() else float(entry["Deposits"])
+			bank_entry.amount = -float(entry[statement_headers["Withdrawals"]]) if not entry[statement_headers["Deposits"]].strip() else float(entry[statement_headers["Deposits"]])
 		self.map_unknown_transactions()
 		self.map_transactions_on_journal_entry()
 
@@ -93,7 +94,7 @@ class BankStatementTransactionEntry(Document):
 		for entry in self.new_transaction_items:
 			vouchers = frappe.db.sql("""select name, posting_date from `tabJournal Entry`
 										where posting_date='{0}' and total_credit={1} and cheque_no='{2}' and docstatus != 2
-									""".format(entry.transaction_date, abs(entry.amount), entry.description), as_dict=True)
+									""".format(entry.transaction_date, abs(entry.amount), frappe.safe_decode(entry.description)), as_dict=True)
 			if (len(vouchers) == 1):
 				entry.reference_name = vouchers[0].name
 
@@ -411,14 +412,15 @@ def get_transaction_entries(filename, headers):
 	else:
 		frappe.throw("Only .csv and .xlsx files are supported currently")
 
+	stmt_headers = headers.values()
 	for row in rows:
 		if len(row) == 0 or row[0] == None or not row[0]: continue
 		#print("Processing row {0}".format(row))
 		if header_index:
-			transaction = get_transaction_info(headers, header_index, row)
+			transaction = get_transaction_info(stmt_headers, header_index, row)
 			transactions.append(transaction)
-		elif is_headers_present(headers, row):
-			header_index =  get_header_index(headers, row)
+		elif is_headers_present(stmt_headers, row):
+			header_index = get_header_index(stmt_headers, row)
 	return transactions
 
 def get_rows_from_xls_file(filename):
