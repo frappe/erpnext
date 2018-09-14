@@ -184,7 +184,7 @@ def item_sync_postprocess():
 
 
 def convert_relative_image_urls_to_absolute(items):
-	from urlparse import urljoin
+	from six.moves.urllib.parse import urljoin
 
 	for item in items:
 		file_path = item['image']
