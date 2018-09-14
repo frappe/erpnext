@@ -12,6 +12,9 @@ def execute(filters=None):
 	set_filters(filters)
 
 	columns = get_columns()
+	if not filters["invoices"]:
+		return columns, []
+
 	res = get_result(filters)
 
 	return columns, res
@@ -185,6 +188,7 @@ def get_tds_invoices():
 	invoices = frappe.db.get_list("Purchase Invoice",
 		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
+	invoices = [d for d in invoices if d.supplier]
 	frappe.cache().hset("invoices", frappe.session.user, invoices)
 
 	return invoices
