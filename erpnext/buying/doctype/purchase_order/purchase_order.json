@@ -3829,5 +3829,6 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
