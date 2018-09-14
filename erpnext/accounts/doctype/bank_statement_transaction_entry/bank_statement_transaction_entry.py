@@ -76,7 +76,7 @@ class BankStatementTransactionEntry(Document):
 			bank_entry.transaction_date = transaction_date
 			bank_entry.description = entry[statement_headers["Particulars"]]
 
-			mapped_item = next((entry for entry in mapped_items if entry.mapping_type == "Transaction" and entry.bank_data.lower() in bank_entry.description.lower()), None)
+			mapped_item = next((entry for entry in mapped_items if entry.mapping_type == "Transaction" and frappe.safe_decode(entry.bank_data.lower()) in frappe.safe_decode(bank_entry.description.lower())), None)
 			if (mapped_item is not None):
 				bank_entry.party_type = mapped_item.mapped_data_type
 				bank_entry.party = mapped_item.mapped_data
@@ -84,7 +84,7 @@ class BankStatementTransactionEntry(Document):
 				bank_entry.party_type = "Supplier" if not entry[statement_headers["Deposits"]].strip() else "Customer"
 				party_list = frappe.get_all(bank_entry.party_type, fields=["name"])
 				parties = [party.name for party in party_list]
-				matches = difflib.get_close_matches(bank_entry.description.lower(), parties, 1, 0.4)
+				matches = difflib.get_close_matches(frappe.safe_decode(bank_entry.description.lower()), parties, 1, 0.4)
 				if len(matches) > 0: bank_entry.party = matches[0]
 			bank_entry.amount = -float(entry[statement_headers["Withdrawals"]]) if not entry[statement_headers["Deposits"]].strip() else float(entry[statement_headers["Deposits"]])
 		self.map_unknown_transactions()
@@ -116,7 +116,7 @@ class BankStatementTransactionEntry(Document):
 				if (added is not None): continue
 				ent = self.append('payment_invoice_items', {})
 				ent.transaction_date = entry.transaction_date
-				ent.payment_description = entry.description
+				ent.payment_description = frappe.safe_decode(entry.description)
 				ent.party_type = entry.party_type
 				ent.party = entry.party
 				ent.invoice = e.get('voucher_no')
@@ -139,7 +139,7 @@ class BankStatementTransactionEntry(Document):
 			amount = abs(entry.amount)
 			payment, matching_invoices = None, []
 			for inv_entry in self.payment_invoice_items:
-				if (inv_entry.payment_description != entry.description or inv_entry.transaction_date != entry.transaction_date): continue
+				if (inv_entry.payment_description != frappe.safe_decode(entry.description) or inv_entry.transaction_date != entry.transaction_date): continue
 				if (inv_entry.party != entry.party): continue
 				matching_invoices += [inv_entry.invoice_type + "|" + inv_entry.invoice]
 				payment = get_payments_matching_invoice(inv_entry.invoice, entry.amount, entry.transaction_date)
@@ -166,7 +166,7 @@ class BankStatementTransactionEntry(Document):
 			entry.mode_of_payment = "Wire Transfer"
 			entry.outstanding_amount = min(amount, 0)
 			if (entry.payment_reference is None):
-				entry.payment_reference = entry.description
+				entry.payment_reference = frappe.safe_decode(entry.description)
 			entry.invoices = ",".join(matching_invoices)
 			#print("Matching payment is {0}:{1}".format(entry.reference_type, entry.reference_name))
 
@@ -193,7 +193,7 @@ class BankStatementTransactionEntry(Document):
 	def populate_matching_vouchers(self):
 		for entry in self.new_transaction_items:
 			if (not entry.party or entry.reference_name): continue
-			print("Finding matching voucher for {0}".format(entry.description))
+			print("Finding matching voucher for {0}".format(frappe.safe_decode(entry.description)))
 			amount = abs(entry.amount)
 			invoices = []
 			vouchers = get_matching_journal_entries(self.from_date, self.to_date, entry.party, self.bank_account, amount)
@@ -208,7 +208,7 @@ class BankStatementTransactionEntry(Document):
 				ent.invoice_date = voucher.posting_date
 				ent.invoice_type = "Journal Entry"
 				ent.invoice = voucher.voucher_no
-				ent.payment_description = entry.description
+				ent.payment_description = frappe.safe_decode(entry.description)
 				ent.allocated_amount = max(voucher.debit, voucher.credit)
 
 				invoices += [ent.invoice_type + "|" + ent.invoice]
@@ -224,7 +224,7 @@ class BankStatementTransactionEntry(Document):
 		for payment_entry in self.new_transaction_items:
 			if (not payment_entry.party): continue
 			if (payment_entry.reference_name): continue
-			print("Creating payment entry for {0}".format(payment_entry.description))
+			print("Creating payment entry for {0}".format(frappe.safe_decode(payment_entry.description)))
 			if (payment_entry.party_type == "Account"):
 				payment = self.create_journal_entry(payment_entry)
 				invoices = [payment.doctype + "|" + payment.name]
@@ -339,7 +339,10 @@ class BankStatementTransactionEntry(Document):
 		idx = 0
 		while idx < len(self.new_transaction_items):
 			entry = self.new_transaction_items[idx]
-			print("Checking transaction {0}: {2} in {1} entries".format(idx, len(self.new_transaction_items), entry.description))
+			try:
+				print("Checking transaction {0}: {2} in {1} entries".format(idx, len(self.new_transaction_items), frappe.safe_decode(entry.description)))
+			except UnicodeEncodeError:
+				pass
 			idx += 1
 			if entry.reference_name is None: continue
 			doc = frappe.get_doc(entry.reference_type, entry.reference_name)
