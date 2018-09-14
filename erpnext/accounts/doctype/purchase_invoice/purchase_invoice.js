@@ -227,15 +227,25 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	supplier: function() {
-		var me = this;
+		this.set_party_details()
+	},
+
+	letter_of_credit: function() {
+		this.set_party_details()
+	},
+
+	set_party_details: function() {
 		if(this.frm.updating_party_details)
 			return;
+
+		var me = this;
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
 				bill_date: this.frm.doc.bill_date,
-				party: this.frm.doc.supplier,
 				party_type: "Supplier",
+				party: this.frm.doc.supplier,
+				letter_of_credit: this.frm.doc.letter_of_credit,
 				account: this.frm.doc.credit_to,
 				price_list: this.frm.doc.buying_price_list
 			}, function() {

@@ -56,12 +56,12 @@ class PaymentEntry(AccountsController):
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
-		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 
 	def on_submit(self):
+		self.set_remarks()
 		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
@@ -112,7 +112,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = "title" if self.party_type == "Student" else self.party_type.lower() + "_name"
+			_party_name = "title" if self.party_type in ["Letter of Credit", "Student"] else scrub(self.party_type) + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
@@ -200,6 +200,8 @@ class PaymentEntry(AccountsController):
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
+		elif self.party_type == "Letter of Credit":
+			valid_reference_doctypes = ("Purchase Invoice", "Landed Cost Voucher", "Journal Entry")
 
 		for d in self.get("references"):
 			if not d.allocated_amount:
@@ -221,12 +223,12 @@ class PaymentEntry(AccountsController):
 					else:
 						self.validate_journal_entry(d)
 
-					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Fees"):
+					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim", "Fees"):
 						if self.party_type == "Customer":
 							ref_party_account = ref_doc.debit_to
 						elif self.party_type == "Student":
 							ref_party_account = ref_doc.receivable_account
-						elif self.party_type=="Supplier":
+						elif self.party_type in ["Supplier", "Letter of Credit"]:
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type=="Employee":
 							ref_party_account = ref_doc.payable_account
@@ -330,7 +332,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_payment_against_negative_invoice(self):
 		if ((self.payment_type=="Pay" and self.party_type=="Customer")
-				or (self.payment_type=="Receive" and self.party_type=="Supplier")):
+				or (self.payment_type=="Receive" and self.party_type in ["Supplier", "Letter of Credit"])):
 
 			total_negative_outstanding = sum([abs(flt(d.outstanding_amount))
 				for d in self.get("references") if flt(d.outstanding_amount) < 0])
@@ -671,7 +673,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
-	_party_name = "title" if party_type == "Student" else party_type.lower() + "_name"
+	_party_name = "title" if party_type in ["Student", "Letter of Credit"] else scrub(party_type) + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 
@@ -778,8 +780,12 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	if dt in ("Sales Invoice", "Sales Order"):
 		party_type = "Customer"
-	elif dt in ("Purchase Invoice", "Purchase Order", "Landed Cost Voucher"):
+	elif dt == "Purchase Order":
 		party_type = "Supplier"
+	elif dt == "Purchase Invoice":
+		party_type = "Letter of Credit" if doc.letter_of_credit else "Supplier"
+	elif dt == "Landed Cost Voucher":
+		party_type = doc.party_type
 	elif dt in ("Expense Claim", "Employee Advance"):
 		party_type = "Employee"
 	elif dt in ("Fees"):
@@ -788,7 +794,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	# party account
 	if dt == "Sales Invoice":
 		party_account = doc.debit_to
-	elif dt == "Purchase Invoice":
+	elif dt in ["Purchase Invoice", "Landed Cost Voucher"]:
 		party_account = doc.credit_to
 	elif dt == "Fees":
 		party_account = doc.receivable_account
@@ -797,7 +803,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	elif dt == "Expense Claim":
 		party_account = doc.payable_account
 	else:
-		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
+		party_account = get_party_account(party_type, doc.get(scrub(party_type)), doc.company)
 
 	party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
 
@@ -861,7 +867,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.posting_date = nowdate()
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
-	pe.party = doc.get(scrub(party_type))
+	pe.party = doc.get(scrub(party_type)) or doc.get("party")
 
 	pe.ensure_supplier_is_not_blocked()
 

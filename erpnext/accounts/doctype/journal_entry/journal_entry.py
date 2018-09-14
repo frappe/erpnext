@@ -189,7 +189,7 @@ class JournalEntry(AccountsController):
 		"""Validates reference document"""
 		field_dict = {
 			'Sales Invoice': ["Customer", "Debit To"],
-			'Purchase Invoice': ["Supplier", "Credit To"],
+			'Purchase Invoice': ["Supplier", "Credit To", "Letter of Credit"],
 			'Sales Order': ["Customer"],
 			'Purchase Order': ["Supplier"]
 		}
@@ -231,13 +231,21 @@ class JournalEntry(AccountsController):
 
 					# check if party and account match
 					if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
-						if (against_voucher[0] != d.party or against_voucher[1] != d.account):
+						if d.reference_type == "Sales Invoice":
+							billing_party, account = against_voucher
+							billing_party_type, account_field = field_dict.get(d.reference_type)
+						else:
+							billing_party = against_voucher[2] if against_voucher[2] else against_voucher[0]
+							account = against_voucher[1]
+							billing_party_type = field_dict.get(d.reference_type)[2] if against_voucher[2] else field_dict.get(d.reference_type)[0]
+							account_field = field_dict.get(d.reference_type)[1]
+
+						if billing_party != d.party or billing_party_type != d.party_type or account != d.account:
 							frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
-								.format(d.idx, field_dict.get(d.reference_type)[0], field_dict.get(d.reference_type)[1],
-									d.reference_type, d.reference_name))
+								.format(d.idx, billing_party_type, account_field, d.reference_type, d.reference_name))
 
 					# check if party matches for Sales / Purchase Order
-					if d.reference_type in ("Sales Order", "Purchase Order"):
+					elif d.reference_type in ("Sales Order", "Purchase Order"):
 						# set totals
 						if against_voucher != d.party:
 							frappe.throw(_("Row {0}: {1} {2} does not match with {3}") \
@@ -400,14 +408,14 @@ class JournalEntry(AccountsController):
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
 
+		if self.reference_account:
+			r.append(_('Reference Account: {0}').format(self.reference_account))
+
 		if self.cheque_no:
 			if self.cheque_date:
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
-
-		if self.reference_account:
-			r.append(_('Reference Account: {0}').format(self.reference_account))
 
 		for d in self.get('accounts'):
 			if d.reference_type=="Sales Invoice" and d.credit:
@@ -430,17 +438,19 @@ class JournalEntry(AccountsController):
 				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
 					d.reference_name))
 
-		if r:
-			self.remark = "\n".join(r) if r else "" #User Remarks is not mandatory
+		self.remark = "\n".join(r) if r else "" #User Remarks is not mandatory
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
-			if d.party_type in ['Customer', 'Supplier'] and d.party:
+			if d.party_type in ['Customer', 'Supplier', 'Letter of Credit'] and d.party:
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					if d.party_type == "Letter of Credit":
+						name_field = "name"
+					else:
+						name_field = "customer_name" if d.party_type=="Customer" else "supplier_name"
+					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party, name_field)
 
 				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				party_account_currency = d.account_currency
@@ -678,7 +688,7 @@ def get_payment_entry_against_order(dt, dn, amount=None, debit_in_account_curren
 		amount_field_party = "debit_in_account_currency"
 		amount_field_bank = "credit_in_account_currency"
 
-	party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
+	party_account = get_party_account(party_type, ref_doc.get(scrub(party_type)), ref_doc.company)
 	party_account_currency = get_account_currency(party_account)
 
 	if not amount:
@@ -707,7 +717,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		party_type = "Customer"
 		party_account = ref_doc.debit_to
 	else:
-		party_type = "Supplier"
+		party_type = "Supplier" if not ref_doc.get("letter_of_credit") else "Letter of Credit"
 		party_account = ref_doc.credit_to
 
 	if (dt == "Sales Invoice" and ref_doc.outstanding_amount > 0) \
@@ -752,7 +762,7 @@ def get_payment_entry(ref_doc, args):
 	party_row = je.append("accounts", {
 		"account": args.get("party_account"),
 		"party_type": args.get("party_type"),
-		"party": ref_doc.get(args.get("party_type").lower()),
+		"party": ref_doc.get(scrub(args.get("party_type"))),
 		"cost_center": cost_center,
 		"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
 		"account_currency": args.get("party_account_currency") or \
@@ -881,7 +891,11 @@ def get_outstanding(args):
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
 		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
 		invoice = frappe.db.get_value(args["doctype"], args["docname"],
-			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
+			["outstanding_amount", "conversion_rate", scrub(party_type)]
+				+ ["letter_of_credit"] if args.get("doctype") == "Purchase Invoice" else [], as_dict=1)
+
+		if invoice.get("letter_of_credit"):
+			party_type = "Letter of Credit"
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -932,7 +946,11 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	if account_details.account_type == "Receivable":
 		party_type = "Customer"
 	elif account_details.account_type == "Payable":
-		party_type = "Supplier"
+		lc_payable_account = frappe.get_cached_value('Company', {"company_name": company}, "default_lc_payable_account")
+		if account == lc_payable_account:
+			party_type = "Letter of Credit"
+		else:
+			party_type = "Supplier"
 	else:
 		party_type = ""
 

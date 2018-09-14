@@ -93,6 +93,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset()
 		self.create_remarks()
 		self.set_status()
+		self.set_title()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_release_date(self):
@@ -117,9 +118,16 @@ class PurchaseInvoice(BuyingController):
 			else:
 				self.remarks = _("No Remarks")
 
+	def set_title(self):
+		if self.letter_of_credit:
+			self.title = "{0}/{1}".format(self.letter_of_credit, self.supplier_name)
+		else:
+			self.title = self.supplier_name
+
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
-			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			billing_party_type, billing_party = self.get_billing_party()
+			self.credit_to = get_party_account(billing_party_type, billing_party, self.company)
 		if not self.due_date:
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company,  self.bill_date)
 
@@ -139,7 +147,7 @@ class PurchaseInvoice(BuyingController):
 		if account.report_type != "Balance Sheet":
 			frappe.throw(_("Credit To account must be a Balance Sheet account"))
 
-		if self.supplier and account.account_type != "Payable":
+		if (self.supplier or self.letter_of_credit) and account.account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
 
 		self.party_account_currency = account.account_currency
@@ -370,14 +378,7 @@ class PurchaseInvoice(BuyingController):
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
-
-			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
-
-			if update_outstanding == "No":
-				update_outstanding_amt(self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name,
-					self.credit_to, "Supplier", self.supplier)
+			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2), merge_entries=False)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -410,14 +411,16 @@ class PurchaseInvoice(BuyingController):
 	def make_supplier_gl_entry(self, gl_entries):
 		grand_total = self.rounded_total or self.grand_total
 		if grand_total:
+			billing_party_type, billing_party = self.get_billing_party()
+
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
-					"party_type": "Supplier",
-					"party": self.supplier,
+					"party_type": billing_party_type,
+					"party": billing_party,
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
@@ -433,6 +436,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		warehouse_account = get_warehouse_account_map()
+		billing_party_type, billing_party = self.get_billing_party()
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -448,7 +452,7 @@ class PurchaseInvoice(BuyingController):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account,
-							"against": self.supplier,
+							"against": billing_party,
 							"debit": warehouse_debit_amount,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"cost_center": item.cost_center,
@@ -484,7 +488,7 @@ class PurchaseInvoice(BuyingController):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account,
-							"against": self.supplier,
+							"against": billing_party,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,
 								item.precision("base_net_amount")) if account_currency==self.company_currency
@@ -506,7 +510,7 @@ class PurchaseInvoice(BuyingController):
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": self.stock_received_but_not_billed,
-									"against": self.supplier,
+									"against": billing_party,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or "Accounting Entry for Stock",
 									"cost_center": self.cost_center
@@ -517,6 +521,7 @@ class PurchaseInvoice(BuyingController):
 								item.precision("item_tax_amount"))
 
 	def get_asset_gl_entry(self, gl_entries):
+		billing_party_type, billing_party = self.get_billing_party()
 		for item in self.get("items"):
 			if item.is_fixed_asset:
 				eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
@@ -533,7 +538,7 @@ class PurchaseInvoice(BuyingController):
 					asset_rbnb_currency = get_account_currency(item.expense_account)
 					gl_entries.append(self.get_gl_dict({
 						"account": item.expense_account,
-						"against": self.supplier,
+						"against": billing_party,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": base_asset_amount,
 						"debit_in_account_currency": (base_asset_amount
@@ -545,7 +550,7 @@ class PurchaseInvoice(BuyingController):
 						asset_eiiav_currency = get_account_currency(eiiav_account)
 						gl_entries.append(self.get_gl_dict({
 							"account": eiiav_account,
-							"against": self.supplier,
+							"against": billing_party,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 							"cost_center": item.cost_center,
 							"credit": item.item_tax_amount,
@@ -560,7 +565,7 @@ class PurchaseInvoice(BuyingController):
 					cwip_account_currency = get_account_currency(cwip_account)
 					gl_entries.append(self.get_gl_dict({
 						"account": cwip_account,
-						"against": self.supplier,
+						"against": billing_party,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": base_asset_amount,
 						"debit_in_account_currency": (base_asset_amount
@@ -572,7 +577,7 @@ class PurchaseInvoice(BuyingController):
 						asset_eiiav_currency = get_account_currency(eiiav_account)
 						gl_entries.append(self.get_gl_dict({
 							"account": eiiav_account,
-							"against": self.supplier,
+							"against": billing_party,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 							"cost_center": item.cost_center,
 							"credit": item.item_tax_amount,
@@ -585,6 +590,7 @@ class PurchaseInvoice(BuyingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
+		billing_party_type, billing_party = self.get_billing_party()
 		valuation_tax = {}
 		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
@@ -595,7 +601,7 @@ class PurchaseInvoice(BuyingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.supplier,
+						"against": billing_party,
 						dr_or_cr: tax.base_tax_amount_after_discount_amount,
 						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
 							if account_currency==self.company_currency \
@@ -629,7 +635,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": self.expenses_included_in_valuation,
 						"cost_center": cost_center,
-						"against": self.supplier,
+						"against": billing_party,
 						"credit": applicable_amount,
 						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
@@ -643,7 +649,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": self.expenses_included_in_valuation,
 						"cost_center": cost_center,
-						"against": self.supplier,
+						"against": billing_party,
 						"credit": amount,
 						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
@@ -652,13 +658,14 @@ class PurchaseInvoice(BuyingController):
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries
 		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
+			billing_party_type, billing_party = self.get_billing_party()
 			bank_account_currency = get_account_currency(self.cash_bank_account)
 			# CASH, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
-					"party_type": "Supplier",
-					"party": self.supplier,
+					"party_type": billing_party_type,
+					"party": billing_party,
 					"against": self.cash_bank_account,
 					"debit": self.base_paid_amount,
 					"debit_in_account_currency": self.base_paid_amount \
@@ -672,7 +679,7 @@ class PurchaseInvoice(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.cash_bank_account,
-					"against": self.supplier,
+					"against": billing_party,
 					"credit": self.base_paid_amount,
 					"credit_in_account_currency": self.base_paid_amount \
 						if bank_account_currency==self.company_currency else self.paid_amount,
@@ -685,12 +692,13 @@ class PurchaseInvoice(BuyingController):
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
 			write_off_account_currency = get_account_currency(self.write_off_account)
+			billing_party_type, billing_party = self.get_billing_party()
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
-					"party_type": "Supplier",
-					"party": self.supplier,
+					"party_type": billing_party_type,
+					"party": billing_party,
 					"against": self.write_off_account,
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
@@ -703,7 +711,7 @@ class PurchaseInvoice(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
-					"against": self.supplier,
+					"against": billing_party,
 					"credit": flt(self.base_write_off_amount),
 					"credit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
@@ -713,13 +721,14 @@ class PurchaseInvoice(BuyingController):
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
 		if self.rounding_adjustment:
+			billing_party_type, billing_party = self.get_billing_party()
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": round_off_account,
-					"against": self.supplier,
+					"against": billing_party,
 					"debit_in_account_currency": self.rounding_adjustment,
 					"debit": self.base_rounding_adjustment,
 					"cost_center": self.cost_center or round_off_cost_center,

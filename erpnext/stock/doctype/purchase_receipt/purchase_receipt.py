@@ -369,7 +369,7 @@ class PurchaseReceipt(BuyingController):
 
 	def set_title(self):
 		if self.letter_of_credit:
-			self.title = self.letter_of_credit
+			self.title = "{0}/{1}".format(self.letter_of_credit, self.supplier_name)
 		else:
 			self.title = self.supplier_name
 

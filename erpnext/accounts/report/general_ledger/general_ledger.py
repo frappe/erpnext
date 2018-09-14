@@ -401,6 +401,8 @@ def get_columns(filters):
 		{
 			"label": _("Party"),
 			"fieldname": "party",
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 			"width": 100
 		},
 		{

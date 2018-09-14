@@ -454,7 +454,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					var party_type = "Customer";
 					var party_account_field = 'debit_to';
 				} else {
-					var party_type = "Supplier";
+					var party_type = me.frm.doc.letter_of_credit ? "Letter of Credit" : "Supplier";
 					var party_account_field = 'credit_to';
 				}
 

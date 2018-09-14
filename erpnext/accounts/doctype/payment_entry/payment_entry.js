@@ -68,6 +68,8 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type=="Supplier") {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
+			} else if (frm.doc.party_type=="Letter of Credit") {
+				var doctypes = ["Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
 			} else if (frm.doc.party_type=="Student") {
@@ -100,7 +102,7 @@ frappe.ui.form.on('Payment Entry', {
 				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
-				filters[doc.party_type.toLowerCase()] = doc.party;
+				filters[frappe.model.scrub(doc.party_type)] = doc.party;
 			}
 
 			if(child.reference_doctype == "Expense Claim") {
@@ -613,10 +615,8 @@ frappe.ui.form.on('Payment Entry', {
 
 		var allocated_negative_outstanding = 0;
 		if (
-				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+				(frm.doc.payment_type=="Receive" && in_list(["Customer", "Student"], frm.doc.party_type)) ||
+				(frm.doc.payment_type=="Pay" && in_list(["Supplier", "Letter of Credit", "Employee"], frm.doc.party_type))
 			) {
 				if(total_positive_outstanding_including_order > paid_amount) {
 					var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;
@@ -625,7 +625,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
-		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
+		} else if (in_list(["Customer", "Supplier", "Letter of Credit"], frm.doc.party_type)) {
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
 					frappe.msgprint(__("Cannot {0} {1} {2} without any negative outstanding invoice",

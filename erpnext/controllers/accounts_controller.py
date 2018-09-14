@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import json
-from frappe import _, throw
+from frappe import _, throw, scrub
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -40,16 +40,24 @@ class AccountsController(TransactionBase):
 				self.set_payment_schedule()
 
 	def ensure_supplier_is_not_blocked(self):
-		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
-		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
-		supplier = None
-		supplier_name = None
+		supplier, supplier_name = None, None
+		is_buying_invoice, is_supplier_payment = False, False
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
+		if self.doctype == 'Payment Entry' and self.party_type == 'Supplier':
+			supplier_name = self.party
+			is_supplier_payment = True
+			supplier = frappe.get_doc('Supplier', supplier_name)
+		elif self.doctype in ['Purchase Invoice', 'Purchase Order']:
+			supplier_name = self.supplier
+			is_buying_invoice = True
+		elif self.doctype == 'Landed Cost Voucher' and self.party_type == 'Supplier':
+			supplier_name = self.party
+			is_buying_invoice = True
+
+		if supplier_name:
 			supplier = frappe.get_doc('Supplier', supplier_name)
 
-		if supplier and supplier_name and supplier.on_hold:
+		if supplier and supplier.on_hold:
 			if (is_buying_invoice and supplier.hold_type in ['All', 'Invoices']) or \
 					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
 				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
@@ -420,8 +428,8 @@ class AccountsController(TransactionBase):
 			order_doctype = "Sales Order"
 		else:
 			party_account = self.credit_to
-			party_type = "Supplier"
-			party = self.supplier
+			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
+			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 
@@ -480,8 +488,8 @@ class AccountsController(TransactionBase):
 			party_account = self.debit_to
 			dr_or_cr = "credit_in_account_currency"
 		else:
-			party_type = "Supplier"
-			party = self.supplier
+			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
+			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
 
@@ -611,7 +619,14 @@ class AccountsController(TransactionBase):
 		party_type, party = self.get_party()
 		validate_party_frozen_disabled(party_type, party)
 
+		billing_party_type, billing_party = self.get_billing_party()
+		if (billing_party_type, billing_party) != (party_type, party):
+			validate_party_frozen_disabled(billing_party_type, billing_party)
+
 	def get_party(self):
+		if self.doctype == "Landed Cost Voucher":
+			return self.get("party_type"), self.get("party")
+
 		party_type = None
 		if self.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 			party_type = 'Customer'
@@ -625,13 +640,19 @@ class AccountsController(TransactionBase):
 		elif self.meta.get_field("supplier"):
 			party_type = "Supplier"
 
-		party = self.get(party_type.lower()) if party_type else None
+		party = self.get(scrub(party_type)) if party_type else None
 
 		return party_type, party
 
+	def get_billing_party(self):
+		if self.get("letter_of_credit"):
+			return "Letter of Credit", self.get("letter_of_credit")
+		else:
+			return self.get_party()
+
 	def validate_currency(self):
 		if self.get("currency"):
-			party_type, party = self.get_party()
+			party_type, party = self.get_billing_party()
 			if party_type and party:
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
