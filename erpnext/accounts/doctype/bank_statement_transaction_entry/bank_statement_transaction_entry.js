@@ -85,7 +85,7 @@ frappe.ui.form.on('Bank Statement Transaction Invoice Item', {
 		} else if (row.party_type == "Account") {
 			row.invoice_type = "Journal Entry";
 		}
-		refresh_field("invoice_type", row.name, "payment_invoice_items")
+		refresh_field("invoice_type", row.name, "payment_invoice_items");
 
 	},
 	invoice_type: function(frm, cdt, cdn) {
@@ -95,6 +95,6 @@ frappe.ui.form.on('Bank Statement Transaction Invoice Item', {
 		} else if (row.invoice_type == "Sales Invoice") {
 			row.party_type = "Customer";
 		}
-		refresh_field("party_type", row.name, "payment_invoice_items")
+		refresh_field("party_type", row.name, "payment_invoice_items");
 	}
-})
+});
