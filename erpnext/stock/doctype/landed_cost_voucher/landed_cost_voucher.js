@@ -149,8 +149,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		return frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
-				"dt": this.frm.doc.doctype,
-				"dn": this.frm.doc.name
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
@@ -327,7 +327,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	load_manual_distribution_data: function() {
-		$.each(me.frm.doc.items || [], function(i, item) {
+		$.each(this.frm.doc.items || [], function(i, item) {
 			item.manual_distribution_data = JSON.parse(item.manual_distribution || "{}");
 		});
 	},
@@ -457,15 +457,15 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 	},
 
-	supplier: function() {
+	party: function() {
 		var me = this;
-		if(me.frm.doc.supplier && me.frm.doc.company) {
+		if(me.frm.doc.party && me.frm.doc.company) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
 					company: me.frm.doc.company,
-					party_type: "Supplier",
-					party: me.frm.doc.supplier
+					party_type: me.frm.doc.party_type,
+					party: me.frm.doc.party
 				},
 				callback: function(r) {
 					if(!r.exc && r.message) {
