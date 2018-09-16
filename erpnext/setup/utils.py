@@ -91,7 +91,8 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if entries:
 		return flt(entries[0].exchange_rate)
 
-	try:
+	return 0.0
+	'''try:
 		cache = frappe.cache()
 		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 		value = cache.get(key)
@@ -110,7 +111,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		return flt(value)
 	except:
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
-		return 0.0
+		return 0.0'''
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
