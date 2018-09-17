@@ -701,7 +701,7 @@ def add_additional_cost(stock_entry, work_order):
 		items.setdefault(d.item_code, d.rate)
 
 	non_stock_items = frappe.get_all('Item',
-		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
 
 	for name in non_stock_items:
 		stock_entry.append('additional_costs', {
