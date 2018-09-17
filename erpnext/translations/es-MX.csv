@@ -3,9 +3,9 @@ DocType: Leave Policy,Leave Policy Details,Detalles de Política de Licencia
 apps/erpnext/erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html +35,Mode of Payments,Forma de pago
 DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudiantes
 DocType: Delivery Note,% Installed,% Instalado
-apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +52,The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.,La cantidad de {0} establecida en esta solicitud de pago es diferente de la cantidad calculada para todos los planes de pago: {1}. Verifique que esto sea correcto antes de enviar el documento.
+apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +55,The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.,La cantidad de {0} establecida en esta solicitud de pago es diferente de la cantidad calculada para todos los planes de pago: {1}. Verifique que esto sea correcto antes de enviar el documento.
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +535,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +539,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Loyalty Point Entry,Loyalty Point Entry,Entrada de Punto de Lealtad
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +372,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +76,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
@@ -13,7 +13,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +76,Show unc
 apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batch_wise_attendance.py +42,Student Group Strength,Fortaleza de Grupo Estudiante
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +196,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +58,Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga
-apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +45,The payment gateway account in plan {0} is different from the payment gateway account in this payment request,La cuenta para pasarela de pago en el plan {0} es diferente de la cuenta de pasarela de pago en en esta petición de pago
+apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +48,The payment gateway account in plan {0} is different from the payment gateway account in this payment request,La cuenta para pasarela de pago en el plan {0} es diferente de la cuenta de pasarela de pago en en esta petición de pago
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +448,Show Salary Slip,Mostrar Recibo de Nómina
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +326,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
@@ -79,5 +79,5 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +711,Cannot change Variant prope
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js +91,Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,La cantidad de existencias para comenzar el procedimiento no está disponible en el almacén. ¿Desea registrar una transferencia de inventario?
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Payment Account, From Date and To Date is mandatory","Empresa, cuenta de pago, fecha de inicio y fecha final son obligatorios"
 DocType: Leave Encashment,Leave Encashment,Cobro de Permiso
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1127,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1110,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
 DocType: Salary Structure,Leave Encashment Amount Per Day,Cantidad por día para pago por Ausencia
