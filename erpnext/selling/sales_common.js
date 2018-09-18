@@ -12,6 +12,8 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
+		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
+		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
 	},
 
 	onload: function() {
@@ -28,8 +30,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	setup_queries: function() {
 		var me = this;
-
-		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 
 		$.each([["customer", "customer"],
 			["lead", "lead"]],
@@ -171,52 +171,26 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	allocated_percentage: function(doc, cdt, cdn) {
 		var sales_person = frappe.get_doc(cdt, cdn);
-
 		if(sales_person.allocated_percentage) {
+
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
 				precision("allocated_percentage", sales_person));
+
 			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
 				sales_person.allocated_percentage / 100.0,
 				precision("allocated_amount", sales_person));
+				refresh_field(["allocated_amount"], sales_person);
 
-				frappe.db.get_value("Sales Person",sales_person.sales_person, "commission_rate")
-				.then(function(response){
-					var commission_rate = response.message.commission_rate;
-					if(commission_rate){
-						sales_person.incentives = flt(
-							sales_person.allocated_amount * commission_rate  / 100.0,
-							precision("incentives", sales_person));	
-
-						sales_person.commission_rate = flt(commission_rate,precision("commission_rate",sales_person));
-					}
-					refresh_field(["allocated_percentage", "allocated_amount","commission_rate", "incentives"], sales_person.name,
-					sales_person.parentfield);	
- 			})
-
-				refresh_field(["allocated_percentage", "allocated_amount", "commission_rate", "incentives"], sales_person.name,
-					sales_person.parentfield);
+			this.calculate_incentive(sales_person);
+			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
+				sales_person.parentfield);
 		}	
 	},
 
 	sales_person: function(doc, cdt, cdn) {
-		var sales_person = frappe.get_doc(cdt, cdn);
-
-		if(sales_person.allocated_percentage) {
-
-			frappe.db.get_value("Sales Person",sales_person.sales_person, "commission_rate")
-				.then(function(response){
-					var commission_rate = response.message.commission_rate;
-					if(commission_rate){
-						sales_person.incentives = flt(
-							sales_person.allocated_amount * commission_rate  / 100.0,
-							precision("incentives", sales_person));	
-
-						sales_person.commission_rate = flt(commission_rate,precision("commission_rate",sales_person));
-					}
-					refresh_field(["allocated_percentage", "allocated_amount", "commission_rate", "incentives"], sales_person.name,
-					sales_person.parentfield);	
- 			})
-		}
+		var row = frappe.get_doc(cdt, cdn);
+		this.calculate_incentive(row);
+		refresh_field("incentives",row.name,row.parentfield);
 	},
 
 	warehouse: function(doc, cdt, cdn) {
@@ -283,6 +257,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					precision("allocated_amount", sales_person));
 			}
 		});
+	},
+
+	calculate_incentive: function(row) {
+		if(row.allocated_amount)
+		{
+			row.incentives = flt(
+					row.allocated_amount * row.commission_rate / 100.0,
+					precision("incentives", sales_person));
+		}
 	},
 
 	batch_no: function(doc, cdt, cdn) {

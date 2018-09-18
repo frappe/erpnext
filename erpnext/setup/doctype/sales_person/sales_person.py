@@ -25,8 +25,8 @@ class SalesPerson(NestedSet):
 
 		allocated_amount = frappe.db.sql("""
 			select sum(allocated_amount)
-			from `tabSales Team`
-			where sales_person = %s and docstatus=1 
+			from `tabSales Team` 
+			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
 		""",(self.sales_person_name))
 
 		info = {}
@@ -68,21 +68,33 @@ def get_timeline_data(doctype, name):
 			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year) 
 			group by dt.transaction_date ''', name)))
 
-	out.update(dict(frappe.db.sql('''select
+	sales_invoice = dict(frappe.db.sql('''select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabSales Invoice` dt, `tabSales Team` st
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name)))
+			group by dt.posting_date ''', name))
+	
+	for key in sales_invoice:
+		if out.get(key):
+			out[key] += sales_invoice[key]
+		else:
+			out[key] = sales_invoice[key]
 
-	out.update(dict(frappe.db.sql('''select
+	delivery_note = dict(frappe.db.sql('''select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabDelivery Note` dt, `tabSales Team` st
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name)))
+			group by dt.posting_date ''', name))
+
+	for key in delivery_note:
+		if out.get(key):
+			out[key] += delivery_note[key]
+		else:
+			out[key] = delivery_note[key]
 
 	return out
 
