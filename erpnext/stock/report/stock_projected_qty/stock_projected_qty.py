@@ -39,6 +39,9 @@ def get_data(filters):
 
 		if filters.brand and filters.brand != item.brand:
 			continue
+			
+		elif filters.item_group and filters.item_group != item.item_group:
+			continue
 
 		elif filters.company and filters.company != company:
 			continue

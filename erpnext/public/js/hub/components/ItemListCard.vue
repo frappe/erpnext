@@ -1,7 +1,7 @@
 <template>
 	<div class="hub-list-item" :data-route="item.route">
 		<div class="hub-list-left">
-			<img class="hub-list-image" v-img-src="item.image">
+			<base-image class="hub-list-image" :src="item.image" />
 			<div class="hub-list-body ellipsis">
 				<div class="hub-list-title">{{item.item_name}}</div>
 				<div class="hub-list-subtitle ellipsis">

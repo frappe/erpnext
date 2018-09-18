@@ -210,6 +210,30 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
+	make_payment_request: function() {
+		const me = this;
+		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], me.frm.doc.doctype))
+			? "Inward" : "Outward";
+
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				dt: me.frm.doc.doctype,
+				dn: me.frm.doc.name,
+				recipient_id: me.frm.doc.contact_email,
+				payment_request_type: payment_request_type,
+				party_type: payment_request_type == 'Outward' ? "Supplier" : "Customer",
+				party: payment_request_type == 'Outward' ? me.frm.doc.supplier : me.frm.doc.customer
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
+	},
+
 	onload_post_render: function() {
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
@@ -343,7 +367,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
 							uom : item.uom,
-							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
+							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
+							cost_center: item.cost_center
 						}
 					},
 

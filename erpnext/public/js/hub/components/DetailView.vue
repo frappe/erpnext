@@ -28,7 +28,7 @@
 			<div class="row margin-bottom">
 				<div class="col-md-3">
 					<div class="hub-item-image">
-						<img v-img-src="image">
+						<base-image :src="image" :alt="title" />
 					</div>
 				</div>
 				<div class="col-md-8">
@@ -38,7 +38,7 @@
 					</div>
 				</div>
 
-				<div v-if="menu_items" class="col-md-1">
+				<div v-if="menu_items && menu_items.length" class="col-md-1">
 					<div class="dropdown pull-right hub-item-dropdown">
 						<a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">
 							<span class="caret"></span>

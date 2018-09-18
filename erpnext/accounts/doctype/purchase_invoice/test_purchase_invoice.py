@@ -790,6 +790,66 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi.name)
 		self.assertEqual(pi_doc.outstanding_amount, 0)
 
+	def test_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		pi =  make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
+		self.assertEqual(pi.cost_center, cost_center)
+
+		expected_values = {
+			"Creditors - _TC": {
+				"cost_center": cost_center
+			},
+			"_Test Account Cost for Goods Sold - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_purchase_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+		cost_center = "_Test Cost Center - _TC"
+		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
+
+		expected_values = {
+			"Creditors - _TC": {
+				"cost_center": None
+			},
+			"_Test Account Cost for Goods Sold - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
@@ -829,6 +889,52 @@ def make_purchase_invoice(**args):
 		"serial_no": args.serial_no,
 		"stock_uom": "_Test UOM",
 		"cost_center": "_Test Cost Center - _TC",
+		"project": args.project,
+		"rejected_warehouse": args.rejected_warehouse or "",
+		"rejected_serial_no": args.rejected_serial_no or ""
+	})
+	if not args.do_not_save:
+		pi.insert()
+		if not args.do_not_submit:
+			pi.submit()
+	return pi
+
+def make_purchase_invoice_against_cost_center(**args):
+	pi = frappe.new_doc("Purchase Invoice")
+	args = frappe._dict(args)
+	pi.posting_date = args.posting_date or today()
+	if args.posting_time:
+		pi.posting_time = args.posting_time
+	if args.update_stock:
+		pi.update_stock = 1
+	if args.is_paid:
+		pi.is_paid = 1
+
+	if args.cash_bank_account:
+		pi.cash_bank_account=args.cash_bank_account
+
+	pi.company = args.company or "_Test Company"
+	pi.cost_center = args.cost_center or "_Test Cost Center - _TC"
+	pi.supplier = args.supplier or "_Test Supplier"
+	pi.currency = args.currency or "INR"
+	pi.conversion_rate = args.conversion_rate or 1
+	pi.is_return = args.is_return
+	pi.is_return = args.is_return
+	pi.credit_to = args.return_against or "Creditors - _TC"
+	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
+
+	pi.append("items", {
+		"item_code": args.item or args.item_code or "_Test Item",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 5,
+		"received_qty": args.received_qty or 0,
+		"rejected_qty": args.rejected_qty or 0,
+		"rate": args.rate or 50,
+		"conversion_factor": 1.0,
+		"serial_no": args.serial_no,
+		"stock_uom": "_Test UOM",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",
 		"rejected_serial_no": args.rejected_serial_no or ""

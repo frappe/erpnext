@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import fmt_money, formatdate, format_time, now_datetime, \
-	get_url_to_form, get_url_to_list, flt
+	get_url_to_form, get_url_to_list, flt, getdate
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
 import frappe.desk.notifications
-from erpnext.accounts.utils import get_balance_on, get_count_on
+from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -279,7 +279,7 @@ class EmailDigest(Document):
 
 	def get_income(self):
 		"""Get income for given period"""
-		income, past_income, count = self.get_period_amounts(self.get_root_type_accounts("income"),'income')
+		income, past_income, count = self.get_period_amounts(self.get_roots("income"),'income')
 
 		return {
 			"label": self.meta.get_label("income"),
@@ -326,12 +326,12 @@ class EmailDigest(Document):
 		return self.get_type_balance('invoiced_amount', 'Receivable')
 
 	def get_expenses_booked(self):
-		expense, past_expense, count = self.get_period_amounts(self.get_root_type_accounts("expense"), 'expenses_booked')
+		expenses, past_expenses, count = self.get_period_amounts(self.get_roots("expense"), 'expenses_booked')
 
 		return {
 			"label": self.meta.get_label("expenses_booked"),
-			"value": expense,
-			"last_value": past_expense,
+			"value": expenses,
+			"last_value": past_expenses,
 			"count": count
 		}
 
@@ -340,14 +340,9 @@ class EmailDigest(Document):
 		balance = past_balance = 0.0
 		count = 0
 		for account in accounts:
-			balance += (get_balance_on(account, date = self.future_to_date)
-				- get_balance_on(account, date = self.future_from_date - timedelta(days=1)))
-
-			count += (get_count_on(account,fieldname, date = self.future_to_date )
-				- get_count_on(account,fieldname, date = self.future_from_date - timedelta(days=1)))
-
-			past_balance += (get_balance_on(account, date = self.past_to_date)
-				- get_balance_on(account, date = self.past_from_date - timedelta(days=1)))
+			balance += get_incomes_expenses_for_period(account, self.future_from_date, self.future_to_date)
+			past_balance += get_incomes_expenses_for_period(account, self.past_from_date, self.past_to_date)
+			count += get_count_for_period(account, fieldname, self.future_from_date, self.future_to_date)
 
 		return balance, past_balance, count
 
@@ -382,6 +377,10 @@ class EmailDigest(Document):
 				'count': count
 			}
 
+	def get_roots(self, root_type):
+		return [d.name for d in frappe.db.get_all("Account",
+			filters={"root_type": root_type.title(), "company": self.company,
+				"is_group": 1, "parent_account": ["in", ("", None)]})]
 
 	def get_root_type_accounts(self, root_type):
 		if not root_type in self._accounts:
@@ -445,9 +444,9 @@ class EmailDigest(Document):
 
 		return {
 			"label": self.meta.get_label(fieldname),
-            		"value": value,
+            "value": value,
 			"last_value": last_value,
-            		"count": count
+            "count": count
 		}
 
 	def get_summary_of_doc(self, doc_type, fieldname):
@@ -459,8 +458,8 @@ class EmailDigest(Document):
 
 		return {
 			"label": self.meta.get_label(fieldname),
-            		"value": value,
-            		"last_value": last_value,
+            "value": value,
+            "last_value": last_value,
 			"count": count
 		}
 
@@ -542,3 +541,39 @@ def send():
 @frappe.whitelist()
 def get_digest_msg(name):
 	return frappe.get_doc("Email Digest", name).get_msg_html()
+
+def get_incomes_expenses_for_period(account, from_date, to_date):
+		"""Get amounts for current and past periods"""
+		
+		val = 0.0
+		balance_on_to_date = get_balance_on(account, date = to_date)
+		balance_before_from_date = get_balance_on(account, date = from_date - timedelta(days=1))
+	
+		fy_start_date = get_fiscal_year(to_date)[1]
+
+		if from_date == fy_start_date:
+			val = balance_on_to_date
+		elif from_date > fy_start_date:
+			val = balance_on_to_date - balance_before_from_date
+		else:
+			last_year_closing_balance = get_balance_on(account, date=fy_start_date - timedelta(days=1))
+			print(fy_start_date - timedelta(days=1), last_year_closing_balance)
+			val = balance_on_to_date + (last_year_closing_balance - balance_before_from_date)
+
+		return val
+
+def get_count_for_period(account, fieldname, from_date, to_date):
+	count = 0.0
+	count_on_to_date = get_count_on(account, fieldname, to_date)
+	count_before_from_date = get_count_on(account, fieldname, from_date - timedelta(days=1))
+
+	fy_start_date = get_fiscal_year(to_date)[1]
+	if from_date == fy_start_date:
+		count = count_on_to_date
+	elif from_date > fy_start_date:
+		count = count_on_to_date - count_before_from_date
+	else:
+		last_year_closing_count = get_count_on(account, fieldname, fy_start_date - timedelta(days=1))
+		count = count_on_to_date + (last_year_closing_count - count_before_from_date)
+
+	return count

@@ -34,6 +34,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Cashier Closing",
+					"description": _("Cashier Closing")
+				},
+				{
+					"type": "doctype",
 					"name": "Auto Repeat",
 					"label": _("Auto Repeat"),
 					"description": _("To make recurring documents")

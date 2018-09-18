@@ -48,6 +48,13 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			};
 		});
+		frm.set_query("practitioner", function() {
+			return {
+				filters: {
+					'department': frm.doc.medical_department
+				}
+			};
+		});
 		if(frm.doc.consume_stock){
 			frm.set_indicator_formatter('item_code',
 				function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" ; });
@@ -217,6 +224,20 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			});
 		}
+	},
+	practitioner: function(frm) {
+		if(frm.doc.practitioner){
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Healthcare Practitioner",
+					name: frm.doc.practitioner
+				},
+				callback: function (data) {
+					frappe.model.set_value(frm.doctype,frm.docname, "medical_department",data.message.department);
+				}
+			});
+		}
 	}
 });
 
@@ -264,21 +285,20 @@ frappe.ui.form.on('Clinical Procedure Item', {
 		let args = null;
 		if(d.item_code) {
 			args = {
-				'item_code'			: d.item_code,
-				'transfer_qty'		: d.transfer_qty,
-				'company'			: frm.doc.company,
-				'quantity'				: d.qty
+				'doctype' : "Clinical Procedure",
+				'item_code' : d.item_code,
+				'company' : frm.doc.company,
+				'warehouse': frm.doc.warehouse
 			};
 			return frappe.call({
-				doc: frm.doc,
-				method: "get_item_details",
-				args: args,
+				method: "erpnext.stock.get_item_details.get_item_details",
+				args: {args: args},
 				callback: function(r) {
 					if(r.message) {
-						var d = locals[cdt][cdn];
-						$.each(r.message, function(k, v){
-							d[k] = v;
-						});
+						frappe.model.set_value(cdt, cdn, "item_name", r.message.item_name);
+						frappe.model.set_value(cdt, cdn, "stock_uom", r.message.stock_uom);
+						frappe.model.set_value(cdt, cdn, "conversion_factor", r.message.conversion_factor);
+						frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
 						refresh_field("items");
 					}
 				}

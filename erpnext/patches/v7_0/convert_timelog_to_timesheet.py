@@ -1,12 +1,13 @@
 import frappe
-from erpnext.manufacturing.doctype.work_order.work_order \
-	import make_timesheet, add_timesheet_detail
 
 def execute():
 	frappe.reload_doc('projects', 'doctype', 'task')
 	frappe.reload_doc('projects', 'doctype', 'timesheet')
 	if not frappe.db.table_exists("Time Log"):
 		return
+
+	from erpnext.manufacturing.doctype.work_order.work_order \
+		import make_timesheet, add_timesheet_detail
 
 	for data in frappe.db.sql("select * from `tabTime Log`", as_dict=1):
 		if data.task:

@@ -631,15 +631,10 @@ $.extend(erpnext.item, {
 				.on('input', function(e) {
 					var term = e.target.value;
 					frappe.call({
-						method:"frappe.client.get_list",
+						method:"erpnext.stock.doctype.item.item.get_item_attribute",
 						args:{
-							doctype:"Item Attribute Value",
-							filters: [
-								["parent","=", i],
-								["attribute_value", "like", term + "%"]
-							],
-							fields: ["attribute_value"],
-							parent: "Item"
+							parent: i,
+							attribute_value: term
 						},
 						callback: function(r) {
 							if (r.message) {
