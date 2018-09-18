@@ -28,7 +28,10 @@ class ShoppingCartSettings(Document):
 				raise_exception=ShoppingCartSetupError)
 
 		price_list_currency_map = frappe.db.get_values("Price List",
-			[self.price_list], "currency", as_dict=1)
+			[self.price_list], "currency")
+
+		price_list_currency_map = dict(price_list_currency_map)
+		
 		# check if all price lists have a currency
 		for price_list, currency in price_list_currency_map.items():
 			if not currency:
