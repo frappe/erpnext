@@ -9,16 +9,16 @@ frappe.ui.form.on('Patient Encounter', {
 			{fieldname: 'dosage', columns: 2},
 			{fieldname: 'period', columns: 2}
 		];
-		frm.get_field('test_prescription').grid.editable_fields = [
-			{fieldname: 'test_code', columns: 2},
-			{fieldname: 'test_name', columns: 4},
-			{fieldname: 'test_comment', columns: 4}
+		frm.get_field('lab_test_prescription').grid.editable_fields = [
+			{fieldname: 'lab_test_code', columns: 2},
+			{fieldname: 'lab_test_name', columns: 4},
+			{fieldname: 'lab_test_comment', columns: 4}
 		];
 	},
 
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
-		refresh_field('test_prescription');
+		refresh_field('lab_test_prescription');
 		if (!frm.doc.__islocal){
 			frappe.call({
 				method: 'frappe.client.get_value',
@@ -72,7 +72,7 @@ frappe.ui.form.on('Patient Encounter', {
 				}
 			};
 		});
-		frm.set_query("test_code", "test_prescription", function() {
+		frm.set_query("lab_test_code", "lab_test_prescription", function() {
 			return {
 				filters: {
 					is_billable:'1'
