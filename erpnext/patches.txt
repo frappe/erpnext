@@ -564,3 +564,4 @@ erpnext.patches.v10_0.recalculate_gross_margin_for_project
 erpnext.patches.v11_0.make_job_card
 erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
 erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
+erpnext.patches.v11_0.rename_healthcare_fields
