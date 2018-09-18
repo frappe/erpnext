@@ -520,6 +520,9 @@ def make_sales_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
+	def update_total(source, target):
+		target.package_total = sum([stop.grand_total for stop in target.delivery_stops])
+
 	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
@@ -548,7 +551,7 @@ def make_delivery_trip(source_name, target_doc=None):
 			"condition": lambda item: item.parent not in delivery_notes,
 			"postprocess": update_stop_details
 		}
-	}, target_doc)
+	}, target_doc, update_total)
 
 	return doclist
 
