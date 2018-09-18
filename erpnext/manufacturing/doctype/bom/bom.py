@@ -661,8 +661,8 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 			# extend bom_item dict with respective item dict
 			bom_item.update(
 				# returns an item dict from items list which matches with item_code
-				(item for item in items if item.get('name')
-					== bom_item.get('item_code')).next()
+				next(item for item in items if item.get('name')
+					== bom_item.get('item_code'))
 			)
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
 
