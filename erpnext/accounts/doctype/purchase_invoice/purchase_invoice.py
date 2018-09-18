@@ -740,39 +740,41 @@ class PurchaseInvoice(BuyingController):
 					amount = flt(item.net_amount*total_booking_days/flt(total_days), item.precision("net_amount"))
 			else:
 				gl_entries_details = frappe.db.sql('''
-					select sum(debit) as total_debit, sum(debit_in_account_currency) as total_debit_in_account_currency, voucher_detail_no
+					select sum(credit) as total_credit, sum(credit_in_account_currency) as total_credit_in_account_currency, voucher_detail_no
 					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
 					group by voucher_detail_no
 				''', (self.company, item.deferred_expense_account, "Purchase Invoice", self.name, item.name), as_dict=True)
-				already_booked_amount = gl_entries_details[0].total_debit if gl_entries_details else 0
-				base_amount = flt(item.base_net_amount - gl_entries_details.total_debit, item.precision("base_net_amount"))
+				already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
+				base_amount = flt(item.base_net_amount - gl_entries_details.total_credit, item.precision("base_net_amount"))
 				if account_currency==self.company_currency:
 					amount = base_amount
 				else:
-					already_booked_amount_in_account_currency = gl_entries_details[0].total_debit_in_account_currency if gl_entries_details else 0
+					already_booked_amount_in_account_currency = gl_entries_details[0].total_credit_in_account_currency if gl_entries_details else 0
 					amount = flt(item.net_amount - already_booked_amount_in_account_currency, item.precision("net_amount"))
 
-			# GL Entry for crediting the amount in the expense
+			# GL Entry for crediting the amount in the deferred expense
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": item.expense_account,
+					"account": item.deferred_expense_account,
 					"against": self.supplier,
 					"credit": base_amount,
 					"credit_in_account_currency": amount,
 					"cost_center": item.cost_center,
-					'posting_date': booking_end_date
+					'posting_date': booking_end_date,
+					'project': item.project
 				}, account_currency)
 			)
-			# GL Entry to debit the amount from the deferred account
+			# GL Entry to debit the amount from the expense
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": item.deferred_expense_account,
+					"account": item.expense_account,
 					"against": self.supplier,
 					"debit": base_amount,
 					"debit_in_account_currency": amount,
 					"cost_center": item.cost_center,
 					"voucher_detail_no": item.name,
-					'posting_date': booking_end_date
+					'posting_date': booking_end_date,
+					'project': item.project
 				}, account_currency)
 			)
 
