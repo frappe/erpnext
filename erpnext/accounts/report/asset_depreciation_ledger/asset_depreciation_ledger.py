@@ -18,6 +18,7 @@ def get_data(filters):
 	filters_data = [["company", "=", filters.get('company')],
 		["posting_date", ">=", filters.get('from_date')],
 		["posting_date", "<=", filters.get('to_date')],
+		["against_voucher_type", "=", "Asset"],
 		["account", "in", depreciation_accounts]]
 
 	if filters.get("asset"):
