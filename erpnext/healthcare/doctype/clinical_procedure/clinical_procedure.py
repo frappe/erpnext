@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, nowdate, nowtime
+from frappe.utils import cint, flt, nowdate, nowtime, cstr
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
@@ -81,9 +81,9 @@ class ClinicalProcedure(Document):
 		allow_start = self.set_actual_qty()
 		if allow_start:
 			self.status = 'In Progress'
+			insert_clinical_procedure_to_medical_record(self)
 		else:
 			self.status = 'Draft'
-
 		self.save()
 
 	def set_actual_qty(self):
@@ -201,3 +201,18 @@ def create_procedure(appointment):
 		if warehouse:
 			procedure.warehouse = warehouse
 	return procedure.as_dict()
+
+def insert_clinical_procedure_to_medical_record(doc):
+	subject = cstr(doc.procedure_template) +" "+ doc.practitioner
+	if subject and doc.notes:
+		subject += "<br/>"+doc.notes
+
+	medical_record = frappe.new_doc("Patient Medical Record")
+	medical_record.patient = doc.patient
+	medical_record.subject = subject
+	medical_record.status = "Open"
+	medical_record.communication_date = doc.start_date
+	medical_record.reference_doctype = "Clinical Procedure"
+	medical_record.reference_name = doc.name
+	medical_record.reference_owner = doc.owner
+	medical_record.save(ignore_permissions=True)
