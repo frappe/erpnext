@@ -8,7 +8,7 @@ import frappe
 
 from frappe.website.website_generator import WebsiteGenerator
 from frappe import _
-from erpnext.hr.doctype.staffing_plan.staffing_plan import get_active_staffing_plan_details
+from erpnext.hr.doctype.staffing_plan.staffing_plan import get_designation_counts, get_active_staffing_plan_details
 
 class JobOpening(WebsiteGenerator):
 	website = frappe._dict(
