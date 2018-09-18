@@ -796,6 +796,38 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	},
+
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
+				}
+			})
+		}
+	},
+
 	calculate_net_weight: function(){
 		/* Calculate Total Net Weight then further applied shipping rule to calculate shipping charges.*/
 		var me = this;
