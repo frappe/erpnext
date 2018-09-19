@@ -150,7 +150,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					&& flt(doc.per_delivered, 6) < 100) {
 					this.frm.add_custom_button(__('Material Request'),
 						function() { me.make_material_request() }, __("Make"));
-					this.frm.add_custom_button(__('Request for Raw Materials Against Production Order'),
+					this.frm.add_custom_button(__('Request for Raw Materials'),
 						function() { me.make_raw_material_request() }, __("Make"));
 				}
 
@@ -359,8 +359,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								args: {
 									items: data,
 									company: me.frm.doc.company,
-									project: me.frm.doc.project
-									sales_order: me.frm.docname
+									sales_order: me.frm.docname,
+									project: me.frm.project
 								},
 								freeze: true,
 								callback: function(r) {
