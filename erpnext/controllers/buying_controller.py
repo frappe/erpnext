@@ -756,8 +756,8 @@ def validate_item_type(doc, fieldname, message):
 		items = ", ".join([d for d in invalid_items])
 
 		if len(invalid_items) > 1:
-			error_message = _("Following items {0} are not marked as {2} item. You can enable them as {2} item from its Item master".format(items, message))
+			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
 		else:
-			error_message = _("Following item {0} is not marked as {2} item. You can enable them as {2} item from its Item master".format(items, message))
+			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
 
 		frappe.throw(error_message)
