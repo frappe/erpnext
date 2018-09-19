@@ -22,6 +22,7 @@ from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -75,7 +76,7 @@ class PurchaseInvoice(BuyingController):
 			self.validate_cash()
 
 		# validate service stop date to lie in between start and end date
-		self.validate_service_stop_date()
+		validate_service_stop_date(self)
 
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
@@ -694,93 +695,6 @@ class PurchaseInvoice(BuyingController):
 				}
 			))
 
-	def book_expense_for_deferred_expense(self, start_date=None, end_date=None):
-		# book the expense on the last day, but it will be trigger on the 1st of month at 12:00 AM
-		# start_date: 1st of the last month or the start date
-		# end_date: end_date or today-1
-
-		gl_entries = []
-		for item in self.get('items'):
-			last_gl_entry = False
-
-			booking_end_date = getdate(add_days(today(), -1)) if not end_date else end_date
-			if booking_end_date < item.service_start_date or (item.service_stop_date and booking_end_date.month > item.service_stop_date.month):
-				continue
-			elif booking_end_date>=item.service_end_date:
-				last_gl_entry = True
-				booking_end_date = item.service_end_date
-			elif item.service_stop_date and item.service_stop_date<=booking_end_date:
-				last_gl_entry = True
-				booking_end_date = item.service_stop_date
-
-			booking_start_date = getdate(add_months(today(), -1)) if not start_date else start_date
-			booking_start_date = booking_start_date if booking_start_date>item.service_start_date else item.service_start_date
-
-			if item.service_start_date < booking_start_date:
-				prev_gl_entry = frappe.db.sql('''
-					select name, posting_date from `tabGL Entry` where company=%s and account=%s and
-					voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-					order by posting_date desc limit 1
-				''', (self.company, item.deferred_expense_account, "Purchase Invoice", self.name, item.name), as_dict=True)
-
-				if not prev_gl_entry:
-					booking_start_date = item.service_start_date
-				else:
-					booking_start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
-
-			total_days = date_diff(item.service_end_date, item.service_start_date)
-			total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
-
-			account_currency = get_account_currency(item.expense_account)
-			if not last_gl_entry:
-				base_amount = flt(item.base_net_amount*total_booking_days/flt(total_days), item.precision("base_net_amount"))
-				if account_currency==self.company_currency:
-					amount = base_amount
-				else:
-					amount = flt(item.net_amount*total_booking_days/flt(total_days), item.precision("net_amount"))
-			else:
-				gl_entries_details = frappe.db.sql('''
-					select sum(credit) as total_credit, sum(credit_in_account_currency) as total_credit_in_account_currency, voucher_detail_no
-					from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-					group by voucher_detail_no
-				''', (self.company, item.deferred_expense_account, "Purchase Invoice", self.name, item.name), as_dict=True)
-				already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
-				base_amount = flt(item.base_net_amount - gl_entries_details.total_credit, item.precision("base_net_amount"))
-				if account_currency==self.company_currency:
-					amount = base_amount
-				else:
-					already_booked_amount_in_account_currency = gl_entries_details[0].total_credit_in_account_currency if gl_entries_details else 0
-					amount = flt(item.net_amount - already_booked_amount_in_account_currency, item.precision("net_amount"))
-
-			# GL Entry for crediting the amount in the deferred expense
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": item.deferred_expense_account,
-					"against": self.supplier,
-					"credit": base_amount,
-					"credit_in_account_currency": amount,
-					"cost_center": item.cost_center,
-					'posting_date': booking_end_date,
-					'project': item.project
-				}, account_currency)
-			)
-			# GL Entry to debit the amount from the expense
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": item.expense_account,
-					"against": self.supplier,
-					"debit": base_amount,
-					"debit_in_account_currency": amount,
-					"cost_center": item.cost_center,
-					"voucher_detail_no": item.name,
-					'posting_date': booking_end_date,
-					'project': item.project
-				}, account_currency)
-			)
-
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=True)
-
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
 
@@ -885,24 +799,6 @@ class PurchaseInvoice(BuyingController):
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
 
-	def validate_service_stop_date(self):
-		old_doc = frappe.db.get_all("Purchase Invoice Item", {"parent": self.name}, ["name", "service_stop_date"])
-		old_stop_dates = {}
-		for d in old_doc:
-			old_stop_dates[d.name] = d.service_stop_date or ""
-
-		for item in self.items:
-			if item.enable_deferred_expense:
-				if item.service_stop_date:
-					if date_diff(item.service_stop_date, item.service_start_date) < 0:
-						frappe.throw(_("Service Stop Date cannot be before Service Start Date"))
-
-					if date_diff(item.service_stop_date, item.service_end_date) > 0:
-						frappe.throw(_("Service Stop Date cannot be after Service End Date"))
-
-				if old_stop_dates and old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
-					frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
-
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -951,15 +847,3 @@ def block_invoice(name, hold_comment):
 def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
 	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
-
-def booked_deferred_expense(start_date=None, end_date=None):
-	# check for the purchase invoice for which GL entries has to be done
-	invoices = frappe.db.sql_list('''
-		select parent from `tabPurchase Invoice Item` where service_start_date<=%s and service_end_date>=%s
-		and enable_deferred_expense = 1 and docstatus = 1
-	''', (end_date or today(), start_date or add_months(today(), -1)))
-
-	# ToDo also find the list on the basic of the GL entry, and make another list
-	for invoice in invoices:
-		doc = frappe.get_doc("Purchase Invoice", invoice)
-		doc.book_expense_for_deferred_expense(start_date, end_date)
