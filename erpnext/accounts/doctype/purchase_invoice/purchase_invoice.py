@@ -3,7 +3,7 @@
 
 
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, date_diff, add_months, today, add_days
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 

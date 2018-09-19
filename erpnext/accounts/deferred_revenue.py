@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
 from frappe import _
-from frappe.utils import date_diff, add_months, today, getdate, add_days, add_months, flt
+from frappe.utils import date_diff, add_months, today, getdate, add_days, flt
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.general_ledger import make_gl_entries
 
