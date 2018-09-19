@@ -12,6 +12,6 @@ def execute():
 	try:
 		doc = frappe.get_doc('Desktop Icon', {'standard': 1, 'module_name': 'Land Unit'})
 		frappe.delete_doc('Desktop Icon', doc.name)
-	except ValidationError:
+	except frappe.ValidationError:
 		# The 'Land Unit' doc doesn't exist, nothing to do
 		pass
