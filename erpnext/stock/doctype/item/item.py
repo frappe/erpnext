@@ -101,6 +101,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_uom()
 		self.validate_description()
+		self.set_absolute_uom_conversion_factors()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -417,11 +418,18 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
+	def set_absolute_uom_conversion_factors(self):
+		for d in self.get("uoms"):
+			d.conversion_factor = flt(d.factor) if d.multiply_or_divide == '/' else 1/flt(d.factor)
+			d.conversion_factor = flt(d.conversion_factor, d.precision("conversion_factor"))
+
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
 			ch = self.append('uoms', {})
 			ch.uom = self.stock_uom
+			ch.factor = 1
+			ch.multiply_or_divide = '*'
 			ch.conversion_factor = 1
 
 		to_remove = []
