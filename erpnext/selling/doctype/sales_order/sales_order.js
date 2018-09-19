@@ -338,7 +338,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									label: __('BOM'), in_list_view:1, get_query: function(doc) {
 										return {filters: {item: doc.item_code}};
 									}},
-								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
+								{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
 									label: __('Qty'), in_list_view:1},
 								{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
 									label: __('For Warehouse')}

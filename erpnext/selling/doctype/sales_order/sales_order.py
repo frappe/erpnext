@@ -381,6 +381,7 @@ class SalesOrder(SellingController):
 								where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
 					else:
 						pending_qty = stock_qty
+
 					if pending_qty:
 						items.append(dict(
 							name= i.name,
@@ -388,6 +389,7 @@ class SalesOrder(SellingController):
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
+							required_qty = pending_qty if for_raw_material_request else 0,
 							sales_order_item = i.name
 						))
 		return items

@@ -407,8 +407,7 @@ def get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_
 			if ((d.default_material_request_type in ["Manufacture", "Purchase"] and
 				not d.is_sub_contracted) or (d.is_sub_contracted and include_subcontracted_items)):
 				if d.qty > 0:
-					doc.get_subitems(data, bom_wise_item_details, d.default_bom, d.qty)
-
+					get_subitems(doc, data, bom_wise_item_details, d.default_bom, company, include_non_stock_items, include_subcontracted_items, d.qty)
 	return bom_wise_item_details
 
 def add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, row, data, warehouse, company):
@@ -503,8 +502,9 @@ def get_items_for_material_requests(doc, company=None):
 	for data in po_items:
 		warehouse = None
 		bom_wise_item_details = {}
-		if data.get('pending_qty'):
-			planned_qty = data.get('pending_qty')
+
+		if data.get('required_qty'):
+			planned_qty = data.get('required_qty')
 			bom_no = data.get('bom')
 			ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty')
 			include_non_stock_items = 1
@@ -520,7 +520,6 @@ def get_items_for_material_requests(doc, company=None):
 			company = doc['company']
 			include_non_stock_items = doc['include_non_stock_items']
 			ignore_existing_ordered_qty = doc['ignore_existing_ordered_qty']
-
 		if not planned_qty:
 			frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get('idx')))
 
@@ -539,11 +538,10 @@ def get_items_for_material_requests(doc, company=None):
 					bei.docstatus < 2
 					and bom.name=%s and item.is_stock_item in (1, {0})
 				group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
-				(company, company, bom_no), as_dict=1):
+				(company, bom_no), as_dict=1):
 					bom_wise_item_details.setdefault(d.get('item_code'), d)
 		else:
 			bom_wise_item_details = get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, 1)
-
 		for item, item_details in bom_wise_item_details.items():
 			if item_details.qty > 0:
 				add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, item_details, data, warehouse, company)
