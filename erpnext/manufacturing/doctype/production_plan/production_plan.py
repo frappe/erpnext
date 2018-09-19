@@ -10,6 +10,7 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from six import string_types
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -281,102 +282,6 @@ class ProductionPlan(Document):
 
 		return item_dict
 
-	def get_items_for_material_requests(self):
-		self.mr_items = []
-
-		for data in self.po_items:
-			bom_wise_item_details = {}
-			if not data.planned_qty:
-				frappe.throw(_("For row {0}: Enter planned qty").format(data.idx))
-
-			if data.include_exploded_items and data.bom_no and self.include_subcontracted_items:
-				for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
-						ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
-						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
-						item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
-					from
-						`tabBOM Explosion Item` bei
-						JOIN `tabBOM` bom ON bom.name = bei.parent
-						JOIN `tabItem` item ON item.name = bei.item_code
-						LEFT JOIN `tabItem Default` item_default
-							ON item_default.parent = item.name and item_default.company=%s
-					where
-						bei.docstatus < 2
-						and bom.name=%s and item.is_stock_item in (1, {0})
-					group by bei.item_code, bei.stock_uom""".format(0 if self.include_non_stock_items else 1),
-					(self.company, data.bom_no), as_dict=1):
-						bom_wise_item_details.setdefault(d.item_code, d)
-			else:
-				bom_wise_item_details = self.get_subitems(data, bom_wise_item_details, data.bom_no, 1)
-
-			for item, item_details in bom_wise_item_details.items():
-				if item_details.qty > 0:
-					self.add_item_in_material_request_items(item, item_details, data)
-
-	def get_subitems(self, data, bom_wise_item_details, bom_no, parent_qty):
-		items = frappe.db.sql("""
-			SELECT
-				bom_item.item_code, default_material_request_type, item.item_name,
-				ifnull(%(parent_qty)s * sum(bom_item.stock_qty/ifnull(bom.quantity, 1)), 0) as qty,
-				item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
-				item.default_bom as default_bom, bom_item.description as description,
-				bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty,
-				item_default.default_warehouse
-			FROM
-				`tabBOM Item` bom_item
-				JOIN `tabBOM` bom ON bom.name = bom_item.parent
-				JOIN tabItem item ON bom_item.item_code = item.name
-				LEFT JOIN `tabItem Default` item_default
-					ON item.name = item_default.parent and item_default.company = %(company)s
-			where
-				bom.name = %(bom)s
-				and bom_item.docstatus < 2
-				and item.is_stock_item in (1, {0})
-			group by bom_item.item_code""".format(0 if self.include_non_stock_items else 1),{
-				'bom': bom_no,
-				'parent_qty': parent_qty,
-				'company': self.company
-			}, as_dict=1)
-
-		for d in items:
-			if not data.include_exploded_items or not d.default_bom:
-				if d.item_code in bom_wise_item_details:
-					bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty + d.qty
-				else:
-					bom_wise_item_details[d.item_code] = d
-
-			if data.include_exploded_items and d.default_bom:
-				if ((d.default_material_request_type in ["Manufacture", "Purchase"] and
-					not d.is_sub_contracted) or (d.is_sub_contracted and self.include_subcontracted_items)):
-					if d.qty > 0:
-						self.get_subitems(data, bom_wise_item_details, d.default_bom, d.qty)
-
-		return bom_wise_item_details
-
-	def add_item_in_material_request_items(self, item, row, data):
-		total_qty = row.qty * data.planned_qty
-		projected_qty, actual_qty = get_bin_details(row)
-
-		requested_qty = 0
-		if self.ignore_existing_ordered_qty:
-			requested_qty = total_qty
-		else:
-			requested_qty = total_qty - projected_qty
-
-		if requested_qty > 0 and requested_qty < row.min_order_qty:
-			requested_qty = row.min_order_qty
-
-		if requested_qty > 0:
-			self.append('mr_items', {
-				'item_code': item,
-				'item_name': row.item_name,
-				'quantity': requested_qty,
-				'warehouse': row.source_warehouse or row.default_warehouse,
-				'actual_qty': actual_qty,
-				'min_order_qty': row.min_order_qty,
-				'sales_order': data.sales_order
-			})
-
 	def make_work_order(self):
 		wo_list = []
 		self.validate_data()
@@ -466,6 +371,69 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No material request created"))
 
+def get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, parent_qty):
+	items = frappe.db.sql("""
+		SELECT
+			bom_item.item_code, default_material_request_type, item.item_name,
+			ifnull(%(parent_qty)s * sum(bom_item.stock_qty/ifnull(bom.quantity, 1)), 0) as qty,
+			item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
+			item.default_bom as default_bom, bom_item.description as description,
+			bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty,
+			item_default.default_warehouse
+		FROM
+			`tabBOM Item` bom_item
+			JOIN `tabBOM` bom ON bom.name = bom_item.parent
+			JOIN tabItem item ON bom_item.item_code = item.name
+			LEFT JOIN `tabItem Default` item_default
+				ON item.name = item_default.parent and item_default.company = %(company)s
+		where
+			bom.name = %(bom)s
+			and bom_item.docstatus < 2
+			and item.is_stock_item in (1, {0})
+		group by bom_item.item_code""".format(0 if include_non_stock_items else 1),{
+			'bom': bom_no,
+			'parent_qty': parent_qty,
+			'company': company
+		}, as_dict=1)
+
+	for d in items:
+		if not data.get('include_exploded_items') or not d.default_bom:
+			if d.item_code in bom_wise_item_details:
+				bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty + d.qty
+			else:
+				bom_wise_item_details[d.item_code] = d
+
+		if data.get('include_exploded_items') and d.default_bom:
+			if ((d.default_material_request_type in ["Manufacture", "Purchase"] and
+				not d.is_sub_contracted) or (d.is_sub_contracted and include_subcontracted_items)):
+				if d.qty > 0:
+					doc.get_subitems(data, bom_wise_item_details, d.default_bom, d.qty)
+
+	return bom_wise_item_details
+
+def add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, row, data, warehouse, company):
+	total_qty = row.qty * planned_qty
+	projected_qty, actual_qty = get_bin_details(row)
+
+	requested_qty = 0
+	if ignore_existing_ordered_qty:
+		requested_qty = total_qty
+	else:
+		requested_qty = total_qty - projected_qty
+	if requested_qty > 0 and requested_qty < row.min_order_qty:
+		requested_qty = row.min_order_qty
+	item_group_defaults = get_item_group_defaults(item, company)
+	if requested_qty > 0:
+		doc.setdefault('mr_items', []).append({
+			'item_code': item,
+			'item_name': row.item_name,
+			'quantity': requested_qty,
+			'warehouse': warehouse or row.source_warehouse or row.default_warehouse or item_group_defaults.get("default_warehouse"),
+			'actual_qty': actual_qty,
+			'min_order_qty': row.min_order_qty,
+			'sales_order': data.get('sales_order')
+		})
+
 def get_sales_orders(self):
 	so_filter = item_filter = ""
 	if self.from_date:
@@ -520,3 +488,64 @@ def get_bin_details(row):
 	""".format(conditions=conditions), { "item_code": row.item_code }, as_list=1)
 
 	return item_projected_qty and item_projected_qty[0] or (0,0)
+
+@frappe.whitelist()
+def get_items_for_material_requests(doc, company=None):
+	if isinstance(doc, string_types):
+		doc = frappe._dict(json.loads(doc))
+
+	doc['mr_items'] = []
+	if doc.get('po_items'):
+		po_items = doc['po_items']
+	else:
+		po_items = doc['items']
+
+	for data in po_items:
+		warehouse = None
+		bom_wise_item_details = {}
+		if data.get('pending_qty'):
+			planned_qty = data.get('pending_qty')
+			bom_no = data.get('bom')
+			ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty')
+			include_non_stock_items = 1
+			warehouse = data.get('for_warehouse')
+			if data.get('include_exploded_items'):
+				include_subcontracted_items = 1
+			else:
+				include_subcontracted_items = 0
+		else:
+			planned_qty = data.get('planned_qty')
+			bom_no = data.get('bom_no')
+			include_subcontracted_items = doc['include_subcontracted_items']
+			company = doc['company']
+			include_non_stock_items = doc['include_non_stock_items']
+			ignore_existing_ordered_qty = doc['ignore_existing_ordered_qty']
+
+		if not planned_qty:
+			frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get('idx')))
+
+		if data.get('include_exploded_items') and bom_no and include_subcontracted_items:
+			for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
+					ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
+					bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
+					item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
+				from
+					`tabBOM Explosion Item` bei
+					JOIN `tabBOM` bom ON bom.name = bei.parent
+					JOIN `tabItem` item ON item.name = bei.item_code
+					LEFT JOIN `tabItem Default` item_default
+						ON item_default.parent = item.name and item_default.company=%s
+				where
+					bei.docstatus < 2
+					and bom.name=%s and item.is_stock_item in (1, {0})
+				group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
+				(company, company, bom_no), as_dict=1):
+					bom_wise_item_details.setdefault(d.get('item_code'), d)
+		else:
+			bom_wise_item_details = get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, 1)
+
+		for item, item_details in bom_wise_item_details.items():
+			if item_details.qty > 0:
+				add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, item_details, data, warehouse, company)
+
+	return doc['mr_items']
