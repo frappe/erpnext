@@ -350,7 +350,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}
 					]
 					var d = new frappe.ui.Dialog({
-						title: __("Select Items"),
+						title: __("Select from Items having BOM"),
 						fields: fields,
 						primary_action: function() {
 							var data = d.get_values();
@@ -369,6 +369,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 										['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
 									}
 									d.hide();
+									me.frm.reload_doc();
 								}
 							});
 						},
