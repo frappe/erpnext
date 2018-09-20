@@ -116,13 +116,13 @@ frappe.ui.form.on('Production Plan', {
 					$.each(r.message, function(i, d) {
 						var item = frm.add_child('mr_items');
 						item.actual_qty = d.actual_qty;
-						item.item_code = d.item_code
-						item.item_name = d.item_name
-						item.min_order_qty = d.min_order_qty
-						item.quantity = d.quantity
-						item.sales_order = d.sales_order
-						item.warehouse = d.warehouse
-					})
+						item.item_code = d.item_code;
+						item.item_name = d.item_name;
+						item.min_order_qty = d.min_order_qty;
+						item.quantity = d.quantity;
+						item.sales_order = d.sales_order;
+						item.warehouse = d.warehouse;
+					});
 				}
 				refresh_field('mr_items');
 			}
