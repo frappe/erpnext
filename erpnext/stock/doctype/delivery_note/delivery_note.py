@@ -321,12 +321,12 @@ class DeliveryNote(SellingController):
 	def make_return_invoice(self):
 		if frappe.db.get_value('Delivery Note', self.return_against, 'per_billed') != 100:
 			frappe.throw(_("Cannot Issue Credit Note if Delvery Note {0} is not billed.").format(self.return_against))
-		 
+
 		return_invoices = defaultdict(list)
 		for item in self.items:
 			if item.against_sales_invoice:
 				return_invoices[item.against_sales_invoice].append(item.item_code)
-		
+
 		if not return_invoices:
 			for sales_invoice in frappe.db.sql("select parent from `tabSales Invoice Item` where delivery_note = %s", self.return_against, as_dict=1):
 				return_invoices[sales_invoice.parent].append(item.item_code)
@@ -521,7 +521,7 @@ def make_sales_invoice(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
 	def update_total(source, target):
-		target.package_total = sum([stop.grand_total for stop in target.delivery_stops])
+		target.package_total = sum([stop.grand_total for stop in target.delivery_stops if stop.grand_total])
 
 	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
