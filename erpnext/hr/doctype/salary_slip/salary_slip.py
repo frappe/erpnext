@@ -258,7 +258,9 @@ class SalarySlip(TransactionBase):
 			'end_date': self.end_date, 'joining_date': joining_date})
 
 		if st_name:
-			return st_name and st_name[0][0] or ''
+			self.salary_structure = st_name[0][0]
+			return self.salary_structure
+
 		else:
 			self.salary_structure = None
 			frappe.msgprint(_("No active or default Salary Structure found for employee {0} for the given dates")
