@@ -253,14 +253,16 @@ class ReceivablePayableReport(object):
 
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
-				amount = flt(e.get(reverse_dr_or_cr)) - flt(e.get(dr_or_cr))
+				amount = flt(e.get(reverse_dr_or_cr), currency_precision) - flt(e.get(dr_or_cr), currency_precision)
 				if e.voucher_no not in return_entries:
 					payment_amount += amount
 				else:
 					credit_note_amount += amount
 
-		outstanding_amount = flt((flt(gle.get(dr_or_cr)) - flt(gle.get(reverse_dr_or_cr)) \
-			- payment_amount - credit_note_amount), currency_precision)
+		outstanding_amount = (flt((flt(gle.get(dr_or_cr), currency_precision)
+			- flt(gle.get(reverse_dr_or_cr), currency_precision)
+			- payment_amount - credit_note_amount), currency_precision))
+
 		credit_note_amount = flt(credit_note_amount, currency_precision)
 
 		return outstanding_amount, credit_note_amount
