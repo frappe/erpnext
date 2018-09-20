@@ -98,6 +98,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			frm.cscript.calculate_taxes_and_totals();
 		});
 
+		frappe.ui.form.on(this.frm.doctype + " Item", {
+			items_add: function(frm, cdt, cdn) {
+				var item = frappe.get_doc(cdt, cdn);
+				if(!item.warehouse && frm.doc.def_warehouse) {
+					item.warehouse = frm.doc.def_warehouse;
+				}
+			}
+		});
+
 		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
@@ -1406,6 +1415,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			})
+		}
+	},
+
+	def_warehouse: function() {
+		var me = this;
+		if(this.frm.doc.def_warehouse) {
+			$.each(this.frm.doc.items || [], function(i, item) {
+				frappe.model.set_value(me.frm.doctype + " Item", item.name, "warehouse", me.frm.doc.def_warehouse);
+			});
 		}
 	}
 });
