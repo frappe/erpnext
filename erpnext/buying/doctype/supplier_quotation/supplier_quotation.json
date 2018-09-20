@@ -543,6 +543,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
+   "collapsible_depends_on": "eval:doc.currency!=erpnext.get_currency(doc.company)", 
    "columns": 0, 
    "fieldname": "currency_and_price_list", 
    "fieldtype": "Section Break", 
@@ -2844,8 +2845,8 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-08-29 12:14:31.329035", 
- "modified_by": "nabinhait@gmail.com", 
+ "modified": "2018-09-20 13:01:42.244554", 
+ "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
  "owner": "Administrator", 
@@ -2956,5 +2957,6 @@
  "timeline_field": "supplier", 
  "title_field": "title", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
