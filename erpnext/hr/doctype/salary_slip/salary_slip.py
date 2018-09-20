@@ -181,7 +181,8 @@ class SalarySlip(TransactionBase):
 			if len(st_name) > 1:
 				frappe.msgprint(_("Multiple active Salary Structures found for employee {0} for the given dates")
 					.format(self.employee), title=_('Warning'))
-			return st_name and st_name[0][0] or ''
+			self.salary_structure = st_name and st_name[0][0] or ''
+			return self.salary_structure
 		else:
 			self.salary_structure = None
 			frappe.msgprint(_("No active or default Salary Structure found for employee {0} for the given dates")
