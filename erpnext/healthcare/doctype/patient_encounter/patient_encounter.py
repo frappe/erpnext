@@ -45,12 +45,18 @@ def delete_medical_record(encounter):
 	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (encounter.name))
 
 def set_subject_field(encounter):
-	subject = "No Diagnosis "
+	subject = encounter.practitioner+"<br/>"
+	if(encounter.symptoms):
+		subject += "Symptoms: "+ cstr(encounter.symptoms)+".<br/>"
+	else:
+		subject += "No Symptoms <br/>"
 	if(encounter.diagnosis):
-		subject = "Diagnosis: \n"+ cstr(encounter.diagnosis)+". "
+		subject += "Diagnosis: "+ cstr(encounter.diagnosis)+".<br/>"
+	else:
+		subject += "No Diagnosis <br/>"
 	if(encounter.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
-	if(encounter.test_prescription):
+	if(encounter.lab_test_prescription):
 		subject += "\nTest(s) Prescribed."
 	if(encounter.procedure_prescription):
 		subject += "\nProcedure(s) Prescribed."

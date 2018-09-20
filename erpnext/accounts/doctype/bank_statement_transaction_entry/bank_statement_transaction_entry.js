@@ -44,21 +44,21 @@ frappe.ui.form.on('Bank Statement Transaction Entry', {
 
 	invoice_filter: function(frm) {
 		frm.set_query("invoice", "payment_invoice_items", function(doc, cdt, cdn) {
-			row = locals[cdt][cdn]
+			let row = locals[cdt][cdn]
 			if (row.party_type == "Customer") {
 				return {
-								filters:[[row.invoice_type, "customer", "in", [row.party]],
-												[row.invoice_type, "status", "!=", "Cancelled" ],
-											  [row.invoice_type, "posting_date", "<", row.transaction_date ],
-											  [row.invoice_type, "outstanding_amount", ">", 0 ]]
-							}
+					filters:[[row.invoice_type, "customer", "in", [row.party]],
+									[row.invoice_type, "status", "!=", "Cancelled" ],
+									[row.invoice_type, "posting_date", "<", row.transaction_date ],
+									[row.invoice_type, "outstanding_amount", ">", 0 ]]
+				}
 			} else if (row.party_type == "Supplier") {
 				return {
-								filters:[[row.invoice_type, "supplier", "in", [row.party]],
-												[row.invoice_type, "status", "!=", "Cancelled" ],
-												[row.invoice_type, "posting_date", "<", row.transaction_date ],
-												[row.invoice_type, "outstanding_amount", ">", 0 ]]
-							}
+					filters:[[row.invoice_type, "supplier", "in", [row.party]],
+									[row.invoice_type, "status", "!=", "Cancelled" ],
+									[row.invoice_type, "posting_date", "<", row.transaction_date ],
+									[row.invoice_type, "outstanding_amount", ">", 0 ]]
+				}
 			}
 		});
 	},
@@ -72,4 +72,29 @@ frappe.ui.form.on('Bank Statement Transaction Entry', {
 	submit_payments: function(frm) {
 		frm.events.invoke_doc_function(frm, "submit_payment_entries");
 	},
+});
+
+
+frappe.ui.form.on('Bank Statement Transaction Invoice Item', {
+	party_type: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.party_type == "Customer") {
+			row.invoice_type = "Sales Invoice";
+		} else if (row.party_type == "Supplier") {
+			row.invoice_type = "Purchase Invoice";
+		} else if (row.party_type == "Account") {
+			row.invoice_type = "Journal Entry";
+		}
+		refresh_field("invoice_type", row.name, "payment_invoice_items");
+
+	},
+	invoice_type: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.invoice_type == "Purchase Invoice") {
+			row.party_type = "Supplier";
+		} else if (row.invoice_type == "Sales Invoice") {
+			row.party_type = "Customer";
+		}
+		refresh_field("party_type", row.name, "payment_invoice_items");
+	}
 });
