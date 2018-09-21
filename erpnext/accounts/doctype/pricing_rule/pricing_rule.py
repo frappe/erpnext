@@ -255,10 +255,12 @@ def get_pricing_rules(args):
 
 			if parent_groups:
 				if allow_blank: parent_groups.append('')
-				condition = " ifnull("+field+", '') in ('" + \
-					"', '".join([frappe.db.escape(d) for d in parent_groups])+"')"
-			frappe.flags.tree_conditions[key] = condition
+				condition = "ifnull({field}, '') in ({parent_groups})".format(
+					field=field,
+					parent_groups=", ".join([frappe.db.escape(d) for d in parent_groups])
+				)
 
+				frappe.flags.tree_conditions[key] = condition
 		return condition
 
 

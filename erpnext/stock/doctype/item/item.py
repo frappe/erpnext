@@ -961,7 +961,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	value = ""
 	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
 		where to_uom in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in uoms])), as_dict=True)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
 
 	for d in uom_details:
 		if d.from_uom == stock_uom and d.to_uom == uom:

@@ -167,7 +167,8 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 				%(mcond)s
 			order by name
 			limit %(start)s, %(page_len)s """ % {'key': searchfield,
-			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
+			'txt': frappe.db.escape('%' + txt + '%'),
+			'mcond':get_match_cond(doctype),
 			'start': start, 'page_len': page_len})
 
 
