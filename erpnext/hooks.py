@@ -250,7 +250,8 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
 	"monthly": [
-		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",
+		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
+		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }
