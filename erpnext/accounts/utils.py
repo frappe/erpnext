@@ -127,7 +127,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			)""" % (cc.lft, cc.rgt))
 
 		else:
-			cond.append("""gle.cost_center = "%s" """ % (frappe.db.escape(cost_center, percent=False), ))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
 
 
 	if account:
@@ -175,7 +175,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		bal = frappe.db.sql("""
 			SELECT {0}
 			FROM `tabGL Entry` gle
-			WHERE {1}""".format(select_field, " and ".join(cond)))[0][0]
+			WHERE {1}""".format(select_field, " and ".join(cond)), debug=1)[0][0]
 
 		# if bal is None, return 0
 		return flt(bal)
