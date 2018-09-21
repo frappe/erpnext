@@ -310,14 +310,18 @@ def calculate_service_end_date(args, item=None):
 	if not item:
 		item = frappe.get_cached_doc("Item", args.item_code)
 
+	enable_deferred = "enable_deferred_revenue" if args.doctype=="Sales Invoice" else "enable_deferred_expense"
+	no_of_months = "no_of_months" if args.doctype=="Sales Invoice" else "no_of_months_exp"
+	account = "deferred_revenue_account" if args.doctype=="Sales Invoice" else "deferred_expense_account"
+
 	service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
-	service_end_date = add_months(service_start_date, item.no_of_months)
+	service_end_date = add_months(service_start_date, item.get(no_of_months))
 	deferred_detail = {
-		"enable_deferred_revenue": item.enable_deferred_revenue,
-		"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
 		"service_start_date": service_start_date,
 		"service_end_date": service_end_date
 	}
+	deferred_detail[enable_deferred] = item.get(enable_deferred)
+	deferred_detail[account] = get_default_deferred_account(args, item, fieldname=account)
 
 	return deferred_detail
 
@@ -331,11 +335,11 @@ def get_default_expense_account(args, item, item_group):
 		or item_group.get("expense_account")
 		or args.expense_account)
 
-def get_default_deferred_revenue_account(args, item):
+def get_default_deferred_account(args, item, fieldname=None):
 	if item.enable_deferred_revenue:
-		return (item.deferred_revenue_account
-			or args.deferred_revenue_account
-			or frappe.get_cached_value('Company',  args.company,  "default_deferred_revenue_account"))
+		return (item.get(fieldname)
+			or args.get(fieldname)
+			or frappe.get_cached_value('Company',  args.company,  "default_"+fieldname))
 	else:
 		return None
 
