@@ -127,7 +127,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			)""" % (cc.lft, cc.rgt))
 
 		else:
-			cond.append("""gle.cost_center = "%s" """ % (frappe.db.escape(cost_center, percent=False), ))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
 
 
 	if account:
