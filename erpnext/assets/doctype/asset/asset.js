@@ -275,8 +275,52 @@ frappe.ui.form.on('Asset', {
 		})
 
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+	},
+
+	set_depreciation_rate: function(frm, row) {
+		if (row.total_number_of_depreciations && row.frequency_of_depreciation) {
+			frappe.call({
+				method: "erpnext.assets.doctype.asset.asset.get_depreciation_rate",
+				args: {
+					asset_cost: frm.doc.gross_purchase_amount,
+					salvage_value: row.expected_value_after_useful_life,
+					no_of_depreciations: row.total_number_of_depreciations,
+					frequency_of_depreciation: row.frequency_of_depreciation,
+					depreciation_method: row.depreciation_method,
+					number_of_depreciations_booked: frm.doc.is_existing_asset ?
+						frm.doc.number_of_depreciations_booked : 0
+				},
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(row.doctype, row.name, "rate_of_depreciation", r.message);
+					}
+				}
+			});
+		}
 	}
 });
+
+frappe.ui.form.on('Asset Finance Book', {
+	depreciation_method: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	expected_value_after_useful_life: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	frequency_of_depreciation: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	total_number_of_depreciations: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	}
+})
 
 frappe.ui.form.on('Depreciation Schedule', {
 	make_depreciation_entry: function(frm, cdt, cdn) {

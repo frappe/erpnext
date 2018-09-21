@@ -47,14 +47,16 @@ class AssetValueAdjustment(Document):
 		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
 
 		je.append("accounts", {
-			"account": accumulated_depreciation_account,
-			"credit_in_account_currency": self.difference_amount,
+			"account": fixed_asset_account,
+			"credit_in_account_currency": self.difference_amount if self.difference_amount > 0 else 0,
+			"debit_in_account_currency": abs(self.difference_amount) if self.difference_amount < 0 else 0,
 			"cost_center": depreciation_cost_center or self.cost_center
 		})
 
 		je.append("accounts", {
-			"account": depreciation_expense_account,
-			"debit_in_account_currency": self.difference_amount,
+			"account": self.difference_account,
+			"debit_in_account_currency": self.difference_amount if self.difference_amount > 0 else 0,
+			"credit_in_account_currency": abs(self.difference_amount) if self.difference_amount < 0 else 0,
 			"cost_center": depreciation_cost_center or self.cost_center
 		})
 

@@ -12,6 +12,16 @@ frappe.ui.form.on('Asset Value Adjustment', {
 				}
 			}
 		});
+
+		frm.set_query('difference_account', function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					root_type: ['in', 'Expense,Liability'],
+					is_group: 0
+				}
+			}
+		});
 	},
 
 	asset: function(frm) {
