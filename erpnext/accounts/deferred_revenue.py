@@ -32,7 +32,7 @@ def validate_service_stop_date(doc):
 		if old_stop_dates and old_stop_dates[item.name] and item.service_stop_date!=old_stop_dates[item.name]:
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
-def booked_deferred_expense(start_date=None, end_date=None):
+def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 	# check for the purchase invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
 		select parent from `tabPurchase Invoice Item` where service_start_date<=%s and service_end_date>=%s
@@ -42,9 +42,9 @@ def booked_deferred_expense(start_date=None, end_date=None):
 	# For each invoice, book deferred expense
 	for invoice in invoices:
 		doc = frappe.get_doc("Purchase Invoice", invoice)
-		book_income_or_expense_for_deferred_transactions(doc, start_date, end_date)
+		book_deferred_income_or_expense(doc, start_date, end_date)
 
-def booked_deferred_revenue(start_date=None, end_date=None):
+def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 	# check for the sales invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
 		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
@@ -54,7 +54,7 @@ def booked_deferred_revenue(start_date=None, end_date=None):
 	# For each invoice, book deferred revenue
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
-		book_income_or_expense_for_deferred_transactions(doc, start_date, end_date)
+		book_deferred_income_or_expense(doc, start_date, end_date)
 
 def get_booking_dates(doc, item, start_date=None, end_date=None):
 	deferred_account = "deferred_revenue_account" if doc.doctype=="Sales Invoice" else "deferred_expense_account"
@@ -124,7 +124,7 @@ def calculate_amount_and_base_amount(doc, item, last_gl_entry, total_days, total
 
 	return amount, base_amount
 
-def book_income_or_expense_for_deferred_transactions(doc, start_date=None, end_date=None):
+def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	# start_date: 1st of the last month or the start date
 	# end_date: end_date or today-1

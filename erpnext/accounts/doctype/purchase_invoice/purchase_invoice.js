@@ -500,7 +500,7 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
 			return {
 				filters: {
-					'root_type': 'Liability',
+					'root_type': 'Asset',
 					'company': doc.company,
 					"is_group": 0
 				}
