@@ -59,15 +59,15 @@ class HotelRoomReservation(Document):
 				if not d.item:
 					continue
 				day_rate = frappe.db.sql("""
-					select 
-						item.rate 
-					from 
+					select
+						item.rate
+					from
 						`tabHotel Room Pricing Item` item,
 						`tabHotel Room Pricing` pricing
 					where
 						item.parent = pricing.name
 						and item.item = %s
-						and %s between pricing.from_date 
+						and %s between pricing.from_date
 							and pricing.to_date""", (d.item, day))
 
 				if day_rate:
@@ -90,7 +90,7 @@ def get_room_rate(hotel_room_reservation):
 def get_rooms_booked(room_type, day, exclude_reservation=None):
 	exclude_condition = ''
 	if exclude_reservation:
-		exclude_condition = 'and reservation.name != "{0}"'.format(frappe.db.escape(exclude_reservation))
+		exclude_condition = 'and reservation.name != {0}'.format(frappe.db.escape(exclude_reservation))
 
 	return frappe.db.sql("""
 		select sum(item.qty)
@@ -105,5 +105,5 @@ def get_rooms_booked(room_type, day, exclude_reservation=None):
 			and reservation.docstatus = 1
 			{exclude_condition}
 			and %s between reservation.from_date
-				and reservation.to_date""".format(exclude_condition=exclude_condition), 
+				and reservation.to_date""".format(exclude_condition=exclude_condition),
 				(room_type, day))[0][0] or 0

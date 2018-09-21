@@ -126,7 +126,7 @@ def get_conditions(item_code, serial_no, batch_no, barcode):
 	condition = """(i.name like %(item_code)s
 			or i.item_name like %(item_code)s)"""
 
-	return '%%%s%%'%(frappe.db.escape(item_code)), condition
+	return frappe.db.escape('%' + item_code + '%'), condition
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
