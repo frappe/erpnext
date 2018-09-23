@@ -13,7 +13,6 @@ from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
-from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.assets.doctype.asset.asset import get_asset_account
@@ -87,6 +86,7 @@ class PurchaseInvoice(BuyingController):
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
 		self.check_for_closed_status()
 		self.validate_with_previous_doc()
+		self.validate_return_against()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.set_expense_account(for_validate=True)
@@ -183,6 +183,18 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Order", "purchase_order", "po_detail"],
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
+
+	def validate_return_against(self):
+		if cint(self.is_return) and self.return_against:
+			against_doc = frappe.get_doc("Purchase Invoice", self.return_against)
+			if not against_doc:
+				frappe.throw(_("Return Against Purchase Invoice {0} does not exist").format(self.return_against))
+			if against_doc.company != self.company:
+				frappe.throw(_("Return Against Purchase Invoice {0} must be against the same Company").format(self.return_against))
+			if against_doc.supplier != self.supplier:
+				frappe.throw(_("Return Against Purchase Invoice {0} must be against the same Supplier").format(self.return_against))
+			if against_doc.credit_to != self.credit_to:
+				frappe.throw(_("Return Against Purchase Invoice {0} must have the same Credit To account").format(self.return_against))
 
 	def validate_warehouse(self):
 		if self.update_stock:
@@ -339,14 +351,7 @@ class PurchaseInvoice(BuyingController):
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
-
-			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
-
-			if update_outstanding == "No":
-				update_outstanding_amt(self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name,
-					self.credit_to, "Supplier", self.supplier)
+			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2), merge_entries=False)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after

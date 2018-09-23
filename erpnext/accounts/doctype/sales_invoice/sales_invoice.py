@@ -74,6 +74,7 @@ class SalesInvoice(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
+		self.validate_return_against()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
@@ -467,6 +468,18 @@ class SalesInvoice(SellingController):
 				["Delivery Note", "delivery_note", "dn_detail"]
 			])
 
+	def validate_return_against(self):
+		if cint(self.is_return) and self.return_against:
+			against_doc = frappe.get_doc("Sales Invoice", self.return_against)
+			if not against_doc:
+				frappe.throw(_("Return Against Sales Invoice {0} does not exist").format(self.return_against))
+			if against_doc.company != self.company:
+				frappe.throw(_("Return Against Sales Invoice {0} must be against the same Company").format(self.return_against))
+			if against_doc.customer != self.customer:
+				frappe.throw(_("Return Against Sales Invoice {0} must be against the same Customer").format(self.return_against))
+			if against_doc.debit_to != self.debit_to:
+				frappe.throw(_("Return Against Sales Invoice {0} must have the same Debit To account").format(self.return_against))
+
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
@@ -661,17 +674,7 @@ class SalesInvoice(SellingController):
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
-			# if POS and amount is written off, updating outstanding amt after posting all gl entries
-			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
-				cint(self.redeem_loyalty_points)) else "Yes"
-
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
-
-			if update_outstanding == "No":
-				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name,
-					self.debit_to, "Customer", self.customer)
+			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=False)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
