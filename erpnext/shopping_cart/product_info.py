@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe.utils import cint
 from erpnext.shopping_cart.cart import _get_cart_quotation
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings \
 	import is_cart_enabled, get_shopping_cart_settings, show_quantity_in_website
@@ -32,7 +33,8 @@ def get_product_info_for_website(item_code):
 		"qty": 0,
 		"uom": frappe.db.get_value("Item", item_code, "stock_uom"),
 		"show_stock_qty": show_quantity_in_website(),
-		"sales_uom": frappe.db.get_value("Item", item_code, "sales_uom")
+		"sales_uom": frappe.db.get_value("Item", item_code, "sales_uom"),
+		"show_availability_status": cint(frappe.db.get_single_value('Products Settings', 'show_availability_status'))
 	}
 
 	if product_info["price"]:
