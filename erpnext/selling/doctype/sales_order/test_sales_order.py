@@ -8,7 +8,7 @@ import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
+from erpnext.selling.doctype.sales_order.sales_order import make_work_orders, add_pricing_rule
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 
@@ -684,6 +684,33 @@ class TestSalesOrder(unittest.TestCase):
 		se.load_from_db()
 		se.cancel()
 		self.assertFalse(frappe.db.exists("Serial No", {"sales_order": so.name}))
+
+	def test_add_pricing_rule(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		item = make_item("_Test Item A", {"maintain_stock": 1,
+			"valuation_rate": 1,
+			"standard_rate": 2.00,
+			"stock_uom": "Nos",
+			"weight_per_unit": 1,
+			"weight_uom": "Kg",
+			"item_defaults": [{
+				"default_warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company"
+			}]
+		})
+
+		pricing_rule = add_pricing_rule("_Test Item A", "_Test Customer", 1.00, 0.2)
+		self.assertEqual(pricing_rule.rate, 5.0)
+		self.assertFalse(pricing_rule.rate == item.standard_rate)
+		pricing_rule = None
+
+		pricing_rule = add_pricing_rule("_Test Item A", "_Test Customer", 7.00, 1.0)
+		self.assertEqual(pricing_rule.rate, 7.0)
+		self.assertFalse(pricing_rule.rate == item.standard_rate)
+
+		self.assertRaises(frappe.ValidationError, add_pricing_rule, "Bad Item", "_Test Customer", 1.00, 0.2)
+		self.assertRaises(frappe.ValidationError, add_pricing_rule, "_Test Item A", "Bad Customer", 1.00, 0.2)
+
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
