@@ -138,11 +138,29 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 							tax.amount = d.amount;
 						});
 						me.frm.refresh_field("taxes");
-						me.set_total_taxes_and_charges();
+						me.calculate_taxes_and_totals();
 					}
 				}
 			});
 		}
+	},
+
+	allocate_advances_automatically: function() {
+		if(this.frm.doc.allocate_advances_automatically) {
+			this.get_advances();
+		}
+	},
+
+	get_advances: function() {
+		var me = this;
+		return this.frm.call({
+			method: "set_advances",
+			doc: this.frm.doc,
+			callback: function(r, rt) {
+				refresh_field("advances");
+				me.calculate_taxes_and_totals();
+			}
+		})
 	},
 
 	make_payment_entry: function() {
@@ -176,20 +194,34 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	distribute_applicable_charges: function(frm) {
-		this.set_total_taxes_and_charges();
+		this.calculate_taxes_and_totals();
 		this.set_applicable_charges_for_item();
 	},
 
 	amount: function(frm) {
-		this.set_total_taxes_and_charges();
+		this.calculate_taxes_and_totals();
 	},
 
-	set_total_taxes_and_charges: function() {
-		var total_taxes_and_charges = 0.0;
+	allocated_amount: function(frm) {
+		this.calculate_taxes_and_totals();
+	},
+
+	calculate_taxes_and_totals: function() {
+		var total = 0.0;
+
+		frappe.model.round_floats_in(this.frm.doc.taxes);
 		$.each(this.frm.doc.taxes || [], function(i, d) {
-			total_taxes_and_charges += flt(d.amount)
+			total += flt(d.amount)
 		});
-		this.frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
+
+		var total_allocated_amount = frappe.utils.sum($.map(this.frm.doc["advances"] || [], function(adv) {
+			return flt(adv.allocated_amount, precision("allocated_amount", adv));
+		}));
+
+		this.frm.set_value("grand_total", total);
+		this.frm.set_value("total_advance", total_allocated_amount);
+		this.frm.set_value("outstanding_amount", total - total_allocated_amount);
+		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "outstanding_amount"]);
 	},
 
 	set_applicable_charges_for_item: function() {
@@ -249,8 +281,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				accumulated_taxes += item.applicable_charges;
 			});
 
-			/*if (accumulated_taxes != me.frm.doc.total_taxes_and_charges) {
-				var diff = me.frm.doc.total_taxes_and_charges - flt(accumulated_taxes);
+			/*if (accumulated_taxes != me.frm.doc.grand_total) {
+				var diff = me.frm.doc.grand_total - flt(accumulated_taxes);
 				me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 			}*/
 
@@ -284,7 +316,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 		Object.keys(tax_account_totals).forEach(function(account_head) {
 			var currency = erpnext.get_currency(me.frm.doc.company);
-			var digits = precision("total_taxes_and_charges");
+			var digits = precision("grand_total");
 			var diff = flt(tax_account_totals[account_head]) - flt(item_totals[account_head]);
 			diff = flt(diff, digits);
 

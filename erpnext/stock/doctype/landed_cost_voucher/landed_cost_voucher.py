@@ -17,18 +17,24 @@ class LandedCostVoucher(AccountsController):
 	def validate(self):
 		super(LandedCostVoucher, self).validate()
 		self.check_mandatory()
+		self.validate_credit_to_account()
 		self.validate_purchase_receipts()
-		self.set_total_taxes_and_charges()
+		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
+		self.calculates_taxes_and_totals()
 		self.set_status()
 
 	def before_submit(self):
 		self.validate_applicable_charges_for_item()
 
 	def on_submit(self):
+		self.update_against_document_in_jv()
 		self.update_landed_cost()
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+			unlink_ref_doc_from_payment_entries(self)
 		self.update_landed_cost()
 		self.make_gl_entries(cancel=True)
 
@@ -133,7 +139,7 @@ class LandedCostVoucher(AccountsController):
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = self.precision("applicable_charges", "items")
-		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
+		diff = flt(self.grand_total) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
 
 		if abs(diff) < (2.0 / (10**precision)):
@@ -151,9 +157,17 @@ class LandedCostVoucher(AccountsController):
 		if account.account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
 
-	def set_total_taxes_and_charges(self):
-		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
-		self.outstanding_amount = self.total_taxes_and_charges #TODO advance payments
+	def calculates_taxes_and_totals(self):
+		total_taxes = sum([flt(d.amount, d.precision("amount")) for d in self.get("taxes")])
+		self.grand_total = flt(total_taxes, self.precision("grand_total"))
+
+		total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
+		self.total_advance = flt(total_allocated, self.precision("total_advance"))
+
+		if self.grand_total > 0 and self.total_advance > self.grand_total:
+			frappe.throw(_("Advance amount cannot be greater than {0}").format(self.grand_total))
+
+		self.outstanding_amount = self.grand_total - self.total_advance
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -183,15 +197,14 @@ class LandedCostVoucher(AccountsController):
 			doc.make_gl_entries()
 
 	def make_gl_entries(self, cancel=False):
-		if flt(self.total_taxes_and_charges) > 0:
+		if flt(self.grand_total) > 0:
 			gl_entries = self.get_gl_entries()
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
 		gl_entry = []
-		self.validate_credit_to_account()
 
-		payable_amount = flt(self.total_taxes_and_charges)
+		payable_amount = flt(self.grand_total)
 
 		# payable entry
 		if payable_amount:

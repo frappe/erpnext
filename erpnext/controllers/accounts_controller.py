@@ -93,11 +93,10 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
-		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			if cint(self.allocate_advances_automatically):
-				self.set_advances()
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice', 'Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
+			self.set_advances()
 
-			if self.is_return:
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice'] and self.is_return:
 				self.validate_qty()
 
 	def validate_invoice_documents_schedule(self):
@@ -426,15 +425,23 @@ class AccountsController(TransactionBase):
 			party = self.customer
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
-		else:
+		elif self.doctype == "Purchase Invoice":
 			party_account = self.credit_to
 			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
 			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
+		else:
+			party_account = self.credit_to
+			party_type = self.party_type
+			party = self.party
+			order_field = None
+			order_doctype = None
 
-		order_list = list(set([d.get(order_field)
-							   for d in self.get("items") if d.get(order_field)]))
+		if order_field:
+			order_list = list(set([d.get(order_field) for d in self.get("items") if d.get(order_field)]))
+		else:
+			order_list = []
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
 													  order_doctype, order_list, include_unallocated)
@@ -487,11 +494,29 @@ class AccountsController(TransactionBase):
 			party = self.customer
 			party_account = self.debit_to
 			dr_or_cr = "credit_in_account_currency"
-		else:
+		elif self.doctype == "Purchase Invoice":
 			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
 			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
+		else:
+			party_type = self.party_type
+			party = self.party
+			party_account = self.credit_to
+			dr_or_cr = "debit_in_account_currency"
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			invoice_amounts = {
+				'exchange_rate': (self.conversion_rate
+								  if self.party_account_currency != self.company_currency else 1),
+				'grand_total': (self.base_grand_total
+								if self.party_account_currency == self.company_currency else self.grand_total)
+			}
+		else:
+			invoice_amounts = {
+				'exchange_rate': 1,
+				'grand_total': self.grand_total
+			}
 
 		lst = []
 		for d in self.get('advances'):
@@ -508,12 +533,9 @@ class AccountsController(TransactionBase):
 					'dr_or_cr': dr_or_cr,
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
-					'exchange_rate': (self.conversion_rate
-									  if self.party_account_currency != self.company_currency else 1),
-					'grand_total': (self.base_grand_total
-									if self.party_account_currency == self.company_currency else self.grand_total),
 					'outstanding_amount': self.outstanding_amount
 				})
+				args.update(invoice_amounts)
 				lst.append(args)
 
 		if lst:

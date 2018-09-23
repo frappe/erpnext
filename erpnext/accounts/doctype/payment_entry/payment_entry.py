@@ -95,7 +95,7 @@ class PaymentEntry(AccountsController):
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
-			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
