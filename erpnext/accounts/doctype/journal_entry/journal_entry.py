@@ -94,7 +94,7 @@ class JournalEntry(AccountsController):
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
-			if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if d.reference_type in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
 				doc = frappe.get_doc(d.reference_type, d.reference_name)
 				doc.delink_advance_entries(self.name)
 

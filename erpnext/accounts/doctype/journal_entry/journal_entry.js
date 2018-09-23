@@ -212,7 +212,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				]
 			};
 
-			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
+			if(in_list(["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
 
 				// account filter
@@ -230,7 +230,12 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			}
 
 			if(jvd.party_type && jvd.party) {
-				out.filters.push([jvd.reference_type, frappe.model.scrub(jvd.party_type), "=", jvd.party]);
+				if(jvd.reference_type == "Landed Cost Voucher") {
+					out.filters.push([jvd.reference_type, "party", "=", jvd.party]);
+					out.filters.push([jvd.reference_type, "party_type", "=", jvd.party_type]);
+				} else {
+					out.filters.push([jvd.reference_type, frappe.model.scrub(jvd.party_type), "=", jvd.party]);
+				}
 			}
 
 			return out;
