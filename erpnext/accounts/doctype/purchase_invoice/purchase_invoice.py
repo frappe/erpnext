@@ -200,8 +200,8 @@ class PurchaseInvoice(BuyingController):
 				frappe.throw(_("Return Against Purchase Invoice {0} does not exist").format(self.return_against))
 			if against_doc.company != self.company:
 				frappe.throw(_("Return Against Purchase Invoice {0} must be against the same Company").format(self.return_against))
-			if against_doc.supplier != self.supplier:
-				frappe.throw(_("Return Against Purchase Invoice {0} must be against the same Supplier").format(self.return_against))
+			if against_doc.supplier != self.supplier or against_doc.letter_of_credit != self.letter_of_credit:
+				frappe.throw(_("Return Against Purchase Invoice {0} must be against the same Supplier and Letter of Credit").format(self.return_against))
 			if against_doc.credit_to != self.credit_to:
 				frappe.throw(_("Return Against Purchase Invoice {0} must have the same Credit To account").format(self.return_against))
 
