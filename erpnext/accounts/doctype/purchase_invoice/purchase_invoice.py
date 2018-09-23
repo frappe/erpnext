@@ -22,6 +22,7 @@ from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -73,6 +74,9 @@ class PurchaseInvoice(BuyingController):
 		# validate cash purchase
 		if (self.is_paid == 1):
 			self.validate_cash()
+
+		# validate service stop date to lie in between start and end date
+		validate_service_stop_date(self)
 
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
@@ -448,7 +452,7 @@ class PurchaseInvoice(BuyingController):
 				elif not item.is_fixed_asset:
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_account,
+							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
 							"against": self.supplier,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,

@@ -51,8 +51,7 @@
 	"globals": {
 		"frappe": true,
 		"erpnext": true,
-		"schools": true,
-		"education": true,
+		"hub": true,
 
 		"$": true,
 		"jQuery": true,

@@ -76,6 +76,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}
 		}
 
+		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
+			cur_frm.add_custom_button(__('Payment Request'),
+				this.make_payment_request, __("Make"));
+		}
+
 		if(doc.docstatus===0) {
 			this.frm.add_custom_button(__('Purchase Order'), function() {
 				erpnext.utils.map_current_doc({
@@ -490,6 +495,16 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.custom_make_buttons = {
 			'Purchase Invoice': 'Debit Note',
 			'Payment Entry': 'Payment'
+		}
+
+		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
 		}
 	},
 

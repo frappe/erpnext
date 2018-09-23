@@ -661,8 +661,8 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 			# extend bom_item dict with respective item dict
 			bom_item.update(
 				# returns an item dict from items list which matches with item_code
-				(item for item in items if item.get('name')
-					== bom_item.get('item_code')).next()
+				next(item for item in items if item.get('name')
+					== bom_item.get('item_code'))
 			)
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
 
@@ -701,7 +701,7 @@ def add_additional_cost(stock_entry, work_order):
 		items.setdefault(d.item_code, d.rate)
 
 	non_stock_items = frappe.get_all('Item',
-		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
 
 	for name in non_stock_items:
 		stock_entry.append('additional_costs', {

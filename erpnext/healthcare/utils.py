@@ -91,13 +91,13 @@ def get_healthcare_services_to_invoice(patient):
 						'service': frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item")})
 
 			lab_rxs = frappe.db.sql("""select lp.name from `tabPatient Encounter` et, `tabLab Prescription` lp
-			where et.patient=%s and lp.parent=et.name and lp.test_created=0 and lp.invoiced=0""", (patient.name))
+			where et.patient=%s and lp.parent=et.name and lp.lab_test_created=0 and lp.invoiced=0""", (patient.name))
 			if lab_rxs:
 				for lab_rx in lab_rxs:
 					rx_obj = frappe.get_doc("Lab Prescription", lab_rx[0])
-					if rx_obj.test_code and (frappe.db.get_value("Lab Test Template", rx_obj.test_code, "is_billable") == 1):
+					if rx_obj.lab_test_code and (frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "is_billable") == 1):
 						item_to_invoice.append({'reference_type': 'Lab Prescription', 'reference_name': rx_obj.name,
-						'service': frappe.db.get_value("Lab Test Template", rx_obj.test_code, "item")})
+						'service': frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item")})
 
 			procedures = frappe.get_list("Clinical Procedure", {'patient': patient.name, 'invoiced': False})
 			if procedures:
@@ -220,7 +220,7 @@ def get_practitioner_charge(practitioner, is_ip):
 def manage_invoice_submit_cancel(doc, method):
 	if doc.items:
 		for item in doc.items:
-			if item.reference_dt and item.reference_dn:
+			if item.get("reference_dt") and item.get("reference_dn"):
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
 
@@ -250,7 +250,7 @@ def set_invoiced(item, method, ref_invoice=None):
 		manage_doc_for_appoitnment(dt_from_appointment, item.reference_dn, invoiced)
 
 	elif item.reference_dt == 'Lab Prescription':
-		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Lab Test", "test_created")
+		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Lab Test", "lab_test_created")
 
 	elif item.reference_dt == 'Procedure Prescription':
 		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, "Clinical Procedure", "procedure_created")
@@ -306,9 +306,6 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	else:
 		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date, ref_invoice)
 		visited = fee_validity.visited
-
-	print("do_not_update: ", do_not_update)
-	print("visited: ", visited)
 
 	# Mark All Patient Appointment invoiced = True in the validity range do not cross the max visit
 	if (method == "on_cancel"):
@@ -372,8 +369,15 @@ def get_drugs_to_invoice(encounter):
 						qty = 1
 						if frappe.db.get_value("Item", drug_line.drug_code, "stock_uom") == "Nos":
 							qty = drug_line.get_quantity()
+						description = False
+						if drug_line.dosage:
+							description = drug_line.dosage
+						if description and drug_line.period:
+							description += " for "+drug_line.period
+						if not description:
+							description = ""
 						item_to_invoice.append({'drug_code': drug_line.drug_code, 'quantity': qty,
-						'description': drug_line.dosage+" for "+drug_line.period})
+						'description': description})
 				return item_to_invoice
 
 @frappe.whitelist()
@@ -410,7 +414,6 @@ def get_children(doctype, parent, company, is_root=False):
 					lft > %s and rgt < %s""",
 					(each['lft'], each['rgt']))
 				for child in child_list:
-					print(child[0], child[1])
 					if not occupied:
 						occupied = 0
 					if child[1] == "Occupied":

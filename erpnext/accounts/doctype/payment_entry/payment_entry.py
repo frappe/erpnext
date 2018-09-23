@@ -584,10 +584,11 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		return []
 
 	# Add cost center condition
-	doc = frappe.get_doc({"doctype": voucher_type})
-	condition = ""
-	if doc and hasattr(doc, 'cost_center'):
-		condition = " and cost_center='%s'" % cost_center
+	if voucher_type:
+		doc = frappe.get_doc({"doctype": voucher_type})
+		condition = ""
+		if doc and hasattr(doc, 'cost_center'):
+			condition = " and cost_center='%s'" % cost_center
 
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 

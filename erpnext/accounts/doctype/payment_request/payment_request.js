@@ -16,7 +16,8 @@ frappe.ui.form.on("Payment Request", "onload", function(frm, dt, dn){
 })
 
 frappe.ui.form.on("Payment Request", "refresh", function(frm) {
-	if(!in_list(["Initiated", "Paid"], frm.doc.status) && !frm.doc.__islocal && frm.doc.docstatus==1){
+	if(frm.doc.payment_request_type == 'Inward' &&
+		!in_list(["Initiated", "Paid"], frm.doc.status) && !frm.doc.__islocal && frm.doc.docstatus==1){
 		frm.add_custom_button(__('Resend Payment Email'), function(){
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email",

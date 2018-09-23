@@ -7,6 +7,7 @@ import SearchInput from './components/SearchInput.vue';
 import DetailView from './components/DetailView.vue';
 import DetailHeaderItem from './components/DetailHeaderItem.vue';
 import EmptyState from './components/EmptyState.vue';
+import Image from './components/Image.vue';
 
 Vue.prototype.__ = window.__;
 Vue.prototype.frappe = window.frappe;
@@ -17,6 +18,7 @@ Vue.component('search-input', SearchInput);
 Vue.component('detail-view', DetailView);
 Vue.component('detail-header-item', DetailHeaderItem);
 Vue.component('empty-state', EmptyState);
+Vue.component('base-image', Image);
 
 Vue.directive('route', {
 	bind(el, binding) {
@@ -50,16 +52,6 @@ const handleImage = (el, src) => {
 	}
 	img.src = src;
 }
-
-Vue.directive('img-src', {
-	bind(el, binding) {
-		handleImage(el, binding.value);
-	},
-	update(el, binding) {
-		if (binding.value === binding.oldValue) return;
-		handleImage(el, binding.value);
-	}
-});
 
 Vue.filter('striphtml', function (text) {
 	return strip_html(text || '');

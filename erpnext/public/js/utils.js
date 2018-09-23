@@ -144,6 +144,21 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	make_bank_account: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",

@@ -60,8 +60,8 @@ class LandedCostVoucher(Document):
 			if not item.receipt_document:
 				frappe.throw(_("Item must be added using 'Get Items from Purchase Receipts' button"))
 			elif item.receipt_document not in receipt_documents:
-				frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
-					.format(idx=item.idx, doctype=item.receipt_document_type, docname=item.receipt_document))
+				frappe.throw(_("Item Row {0}: {1} {2} does not exist in above '{1}' table")
+					.format(item.idx, item.receipt_document_type, item.receipt_document))
 
 			if not item.cost_center:
 				frappe.throw(_("Row {0}: Cost center is required for an item {1}")
