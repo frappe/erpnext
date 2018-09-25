@@ -123,7 +123,10 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 	},
 
-	contact_person: erpnext.utils.get_contact_details,
+	contact_person: function(frm) {
+		frm.set_value("contact_email", "");
+		erpnext.utils.get_contact_details(frm);
+	},
 
 	hide_unhide_fields: function(frm) {
 		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
@@ -241,6 +244,10 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	party: function(frm) {
+		if (frm.doc.contact_email || frm.doc.contact_person) {
+			frm.set_value("contact_email", "");
+			frm.set_value("contact_person", "");
+		}
 		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party) {
 			if(!frm.doc.posting_date) {
 				frappe.msgprint(__("Please select Posting Date before selecting Party"))
