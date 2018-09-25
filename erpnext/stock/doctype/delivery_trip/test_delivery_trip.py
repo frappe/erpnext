@@ -38,6 +38,7 @@ class TestDeliveryTrip(unittest.TestCase):
 			delivery_trip.insert()
 
 			notify_customers(delivery_trip=delivery_trip.name)
+			delivery_trip.load_from_db()
 			self.assertEqual(delivery_trip.email_notification_sent, 1)
 
 

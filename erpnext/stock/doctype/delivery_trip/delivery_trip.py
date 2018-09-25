@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, get_link_to_form
+from frappe.utils import get_datetime, get_link_to_form
 
 
 class DeliveryTrip(Document):
