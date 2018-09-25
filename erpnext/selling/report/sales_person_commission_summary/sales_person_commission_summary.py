@@ -32,7 +32,7 @@ def get_columns(filters):
 
 	columns =[
 		{
-			"label": filters["doc_type"],
+			"label": _(filters["doc_type"]),
 			"options": filters["doc_type"],
 			"fieldname": filters['doc_type'],
 			"fieldtype": "Link",
