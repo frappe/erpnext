@@ -37,7 +37,10 @@ def get_product_list(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (cint(start), cint(limit))
+	if cint(frappe.db.get_single_value('Products Settings', 'show_availability_status')):
+		query += """ order by I.weightage desc, in_stock desc, I.item_name limit %s, %s""" % (cint(start), cint(limit))
+	else:
+		query += """ order by I.weightage desc, I.item_name limit %s, %s""" % (cint(start), cint(limit))
 
 	data = frappe.db.sql(query, {
 		"search": search,
