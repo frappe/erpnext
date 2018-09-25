@@ -59,6 +59,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 		frappe.local.flags.ignore_on_update = True
 		_import_accounts(chart, None, None, root_account=True)
 		rebuild_tree("Account", "parent_account")
+		frappe.local.flags.ignore_on_update = False
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):
 	if account_number:
