@@ -187,6 +187,8 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
 		user.add_roles('HR User', 'HR Manager', 'Accounts User')
 		frappe.db.set_global('demo_hr_user', user.name)
+		for d in frappe.get_all('User Permission', filters={"user": "CaitlinSnow@example.com"}):
+			frappe.delete_doc('User Permission', d.name)
 
 	if not frappe.db.get_global('demo_sales_user_1'):
 		user = frappe.get_doc('User', 'VandalSavage@example.com')
