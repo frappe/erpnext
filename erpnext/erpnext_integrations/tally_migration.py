@@ -126,6 +126,7 @@ def _create_vouchers(company, vouchers):
 		try:
 			voucher_type_mapping = {
 				"Journal": create_journal_voucher,
+				"Sales": create_sales_voucher,
 			}
 			function = voucher_type_mapping[voucher["voucher_type"]]
 			function(company, voucher)
@@ -147,6 +148,30 @@ def create_journal_voucher(company, voucher):
 						account["party_type"] = "Supplier"
 						account["party"] = account["account"]
 						account["account"] = "Sundry Creditors"
+				account["account"] = encode_company_abbr(account["account"], company)
+
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"naming_series": "JV-",
+				"tally_id": voucher["guid"],
+				"posting_date": voucher["posting_date"],
+				"company": company,
+				"accounts": voucher["accounts"],
+			}).insert().submit()
+	except:
+		traceback.print_exc()
+		print(voucher)
+
+
+def create_sales_voucher(company, voucher):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "tally_id": voucher["guid"], "company": company}):
+			for account in voucher["accounts"]:
+				if account["is_party"]:
+					if frappe.db.exists({"doctype": "Customer", "customer_name": account["account"], "company": company}):
+						account["party_type"] = "Customer"
+						account["party"] = account["account"]
+						account["account"] = "Sundry Debtors"
 				account["account"] = encode_company_abbr(account["account"], company)
 
 			frappe.get_doc({
