@@ -14,7 +14,7 @@ def setup(domain):
 	setup_fiscal_year()
 	setup_holiday_list()
 	setup_user()
-	#setup_employee()
+	setup_employee()
 	setup_user_roles()
 	setup_role_permissions()
 
@@ -184,52 +184,52 @@ def setup_user_roles():
 		'Nursing User', 'Patient')
 
 	if not frappe.db.get_global('demo_hr_user'):
-		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')
+		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
 		user.add_roles('HR User', 'HR Manager', 'Accounts User')
 		frappe.db.set_global('demo_hr_user', user.name)
 
 	if not frappe.db.get_global('demo_sales_user_1'):
-		user = frappe.get_doc('User', 'VakhitaRyzaev@example.com')
+		user = frappe.get_doc('User', 'VandalSavage@example.com')
 		user.add_roles('Sales User')
 		frappe.db.set_global('demo_sales_user_1', user.name)
 
 	if not frappe.db.get_global('demo_sales_user_2'):
-		user = frappe.get_doc('User', 'GabrielleLoftus@example.com')
+		user = frappe.get_doc('User', 'GraceChoi@example.com')
 		user.add_roles('Sales User', 'Sales Manager', 'Accounts User')
 		frappe.db.set_global('demo_sales_user_2', user.name)
 
 	if not frappe.db.get_global('demo_purchase_user'):
-		user = frappe.get_doc('User', 'MichalSobczak@example.com')
+		user = frappe.get_doc('User', 'MaxwellLord@example.com')
 		user.add_roles('Purchase User', 'Purchase Manager', 'Accounts User', 'Stock User')
 		frappe.db.set_global('demo_purchase_user', user.name)
 
 	if not frappe.db.get_global('demo_manufacturing_user'):
-		user = frappe.get_doc('User', 'NuranVerkleij@example.com')
+		user = frappe.get_doc('User', 'NeptuniaAquaria@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
 		frappe.db.set_global('demo_manufacturing_user', user.name)
 
 	if not frappe.db.get_global('demo_stock_user'):
-		user = frappe.get_doc('User', 'HatsueKashiwagi@example.com')
+		user = frappe.get_doc('User', 'HollyGranger@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
 		frappe.db.set_global('demo_stock_user', user.name)
 
 	if not frappe.db.get_global('demo_accounts_user'):
-		user = frappe.get_doc('User', 'LeonAbdulov@example.com')
+		user = frappe.get_doc('User', 'BarryAllen@example.com')
 		user.add_roles('Accounts User', 'Accounts Manager', 'Sales User', 'Purchase User')
 		frappe.db.set_global('demo_accounts_user', user.name)
 
 	if not frappe.db.get_global('demo_projects_user'):
-		user = frappe.get_doc('User', 'panca@example.com')
+		user = frappe.get_doc('User', 'PeterParker@example.com')
 		user.add_roles('HR User', 'Projects User')
 		frappe.db.set_global('demo_projects_user', user.name)
 
 	if not frappe.db.get_global('demo_education_user'):
-		user = frappe.get_doc('User', 'aromn@example.com')
+		user = frappe.get_doc('User', 'ArthurCurry@example.com')
 		user.add_roles('Academics User')
 		frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
-	user = frappe.get_doc('User', 'WanMai@example.com')
+	user = frappe.get_doc('User', 'ClarkKent@example.com')
 	user.add_roles('Expense Approver')
 
 def setup_leave_allocation():
