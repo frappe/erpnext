@@ -1,6 +1,6 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
-frappe.provide("desk");
+frappe.provide("frappe.desk");
 
 frappe.ui.form.on("Event", {
 	refresh: function(frm) {
@@ -13,19 +13,19 @@ frappe.ui.form.on("Event", {
 		})
 
 		frm.add_custom_button(__('Add Leads'), function() {
-			new desk.eventParticipants(frm, "Lead");
+			new frappe.desk.eventParticipants(frm, "Lead");
 		}, __("Add Participants"));
 	
 		frm.add_custom_button(__('Add Customers'), function() {
-			new desk.eventParticipants(frm, "Customer");
+			new frappe.desk.eventParticipants(frm, "Customer");
 		}, __("Add Participants"));
 	
 		frm.add_custom_button(__('Add Suppliers'), function() {
-			new desk.eventParticipants(frm, "Supplier");
+			new frappe.desk.eventParticipants(frm, "Supplier");
 		}, __("Add Participants"));
 	
 		frm.add_custom_button(__('Add Employees'), function() {
-			new desk.eventParticipants(frm, "Employee");
+			new frappe.desk.eventParticipants(frm, "Employee");
 		}, __("Add Participants"));
 	}
 });
