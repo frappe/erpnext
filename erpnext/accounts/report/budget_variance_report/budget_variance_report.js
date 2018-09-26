@@ -56,7 +56,7 @@ frappe.query_reports["Budget Variance Report"] = {
 		},
 		{
 			fieldname:"show_cumulative",
-			label: __("Show Cumulative Entries"),
+			label: __("Show Cumulative Amount"),
 			fieldtype: "Check",
 			default: 0,
 		},
