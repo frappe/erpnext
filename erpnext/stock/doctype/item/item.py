@@ -432,13 +432,6 @@ class Item(WebsiteGenerator):
 			ch.multiply_or_divide = '*'
 			ch.conversion_factor = 1
 
-		to_remove = []
-		for d in self.get("uoms"):
-			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				to_remove.append(d)
-
-		[self.remove(d) for d in to_remove]
-
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
 
