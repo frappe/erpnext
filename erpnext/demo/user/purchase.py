@@ -122,7 +122,7 @@ def add_suppliers(rfq):
 			rfq.append("suppliers", { "supplier": supplier })
 
 def make_subcontract():
-	from erpnext.buying.doctype.purchase_order.purchase_order import make_stock_entry
+	from erpnext.buying.doctype.purchase_order.purchase_order import make_rm_stock_entry
 	item_code = get_random("Item", {"is_sub_contracted_item": 1})
 	if item_code:
 		# make sub-contract PO
@@ -150,7 +150,7 @@ def make_subcontract():
 		make_material_request(po.items[0].item_code, po.items[0].qty)
 
 		# transfer material for sub-contract
-		stock_entry = frappe.get_doc(make_stock_entry(po.name, po.items[0].item_code))
+		stock_entry = frappe.get_doc(make_rm_stock_entry(po.name, po.items[0].item_code))
 		stock_entry.from_warehouse = "Stores - WPL"
 		stock_entry.to_warehouse = "Supplier - WPL"
 		stock_entry.insert()
