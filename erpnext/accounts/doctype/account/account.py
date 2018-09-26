@@ -16,7 +16,7 @@ class Account(NestedSet):
 		if frappe.local.flags.ignore_on_update:
 			return
 		else:
-			super().on_update()
+			super(Account, self).on_update()
 
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
