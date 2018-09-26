@@ -219,7 +219,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters.get('customer'):
-		cond = """(`tabProject`.customer = '%s' or
+		cond = """(`tabProject`.customer = %s or
 			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
@@ -398,7 +398,7 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty
 		from `tabWarehouse`
 		where
-		   `tabWarehouse`.`{key}` like '{txt}'
+		   `tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
 		order by
 			`tabWarehouse`.name desc
