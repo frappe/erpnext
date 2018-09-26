@@ -123,12 +123,17 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.update_defaults_add_company()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
 					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+
+	def update_defaults_add_company(self):
+		if not self.item_defaults:
+				self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
