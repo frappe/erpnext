@@ -876,8 +876,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
-	pe.contact_person = doc.contact_person if dt in ("Sales Invoice", "Purchase Invoice") else None
-	pe.contact_email = doc.contact_email if dt in ("Sales Invoice", "Purchase Invoice") else None
+	pe.contact_person = doc.get("contact_person")
+	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account
