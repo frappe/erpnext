@@ -10,7 +10,8 @@ def execute(filters=None):
 	if not filters: filters = {}
 
 	columns = get_columns(filters)
-	item_map = get_item_details()
+	conditions = get_condition(filters)
+	item_map = get_item_details(conditions)
 	pl = get_price_list()
 	last_purchase_rate = get_last_purchase_rate()
 	bom_rate = get_item_bom_rate()
@@ -41,14 +42,14 @@ def get_columns(filters):
 
 	return columns
 
-def get_item_details():
+def get_item_details(conditions):
 	"""returns all items details"""
 
 	item_map = {}
 
 	for i in frappe.db.sql("""select name, item_group, item_name, description,
-		brand, stock_uom from tabItem
-		order by item_code, item_group""", as_dict=1):
+		brand, stock_uom from tabItem %s
+		order by item_code, item_group""" % (conditions), as_dict=1):
 			item_map.setdefault(i.name, i)
 
 	return item_map
@@ -133,3 +134,15 @@ def get_valuation_rate():
 			item_val_rate_map.setdefault(d.item_code, d.val_rate)
 
 	return item_val_rate_map
+
+def get_condition(filters):
+	"""Get Filter Items"""
+
+	if filters.get("items") == "Enabled Items only":
+		conditions = " where disabled=0 "
+	elif filters.get("items") == "Disabled Items only":
+		conditions = " where disabled=1 "
+	else:
+		conditions = ""
+
+	return conditions
