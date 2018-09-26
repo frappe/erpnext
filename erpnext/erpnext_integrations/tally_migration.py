@@ -130,6 +130,7 @@ def _create_vouchers(company, vouchers):
 				"Purchase": create_purchase_voucher,
 				"Payment": create_payment_voucher,
 				"Credit Note": create_credit_note_voucher,
+				"Receipt": create_receipt_voucher,
 			}
 			function = voucher_type_mapping[voucher["voucher_type"]]
 			function(company, voucher)
@@ -266,6 +267,34 @@ def create_credit_note_voucher(company, voucher):
 		print(voucher)
 
 
+def create_receipt_voucher(company, voucher):
+	try:
+		if not frappe.db.exists({"doctype": "Journal Entry", "tally_id": voucher["guid"], "company": company}):
+			for account in voucher["accounts"]:
+				if account["is_party"]:
+					if frappe.db.exists({"doctype": "Customer", "customer_name": account["account"], "company": company}):
+						account["party_type"] = "Customer"
+						account["party"] = account["account"]
+						account["account"] = "Sundry Debtors"
+					elif frappe.db.exists({"doctype": "Supplier", "supplier_name": account["account"], "company": company}):
+						account["party_type"] = "Supplier"
+						account["party"] = account["account"]
+						account["account"] = "Sundry Creditors"
+				account["account"] = encode_company_abbr(account["account"], company)
+
+			frappe.get_doc({
+				"doctype": "Journal Entry",
+				"naming_series": "JV-",
+				"tally_id": voucher["guid"],
+				"posting_date": voucher["posting_date"],
+				"company": company,
+				"accounts": voucher["accounts"],
+			}).insert().submit()
+	except:
+		traceback.print_exc()
+		print(voucher)
+
+
 def resolve_name_conflicts(accounts):
 	group_accounts = [a["account_name"] for a in accounts if a["is_group"]]
 	non_group_accounts = [a["account_name"] for a in accounts if not a["is_group"]]
@@ -277,6 +306,11 @@ def resolve_name_conflicts(accounts):
 			else:
 				account["parent_account"] = "{} - Group".format(account["parent_account"])
 	return accounts
+
+
+@frappe.whitelist()
+def null():
+	pass
 
 
 @frappe.whitelist()
