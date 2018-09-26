@@ -256,8 +256,8 @@ def send_birthday_reminders():
 
 def get_birthday_reminder_message(employee, employee_names):
 	"""Get employee birthday reminder message"""
-	message = "<br> *".join(filter(lambda u: u not in (employee['employee_name']), employee_names))
-	message = "Hi!!!<br>Today your colleagues are celebrating their birthday<br> *" + message
+	message = "</li><br><li> ".join(filter(lambda u: u not in (employee['employee_name']), employee_names))
+	message = "Today your colleagues are celebrating their birthday \U0001F382<br><ul><strong><li> " + message +"</li></strong></ul>"
 	return message
 
 
