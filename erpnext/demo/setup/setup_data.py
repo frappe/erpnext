@@ -166,12 +166,16 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		"idx": 1
 	})
 	ss.insert()
+	ss.submit()
 
 	for e in employees:
 		sa  = frappe.new_doc("Salary Structure Assignment")
 		sa.employee = e.name
+		sa.salary_structure = ss.name
 		sa.from_date = "2015-01-01"
 		sa.base = random.random() * 10000
+		sa.insert()
+		sa.submit()
 
 	return ss
 
