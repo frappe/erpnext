@@ -7,7 +7,7 @@ frappe.ui.form.on("Event", {
 		frm.set_query('reference_doctype', "event_participants", function() {
 			return {
 				"filters": {
-					"name": ["in", ["Contact", "Lead", "Customer", "Supplier", "Employee"]]
+					"name": ["in", ["Contact", "Lead", "Customer", "Supplier", "Employee", "Sales Partner"]]
 				}
 			};
 		});
@@ -26,6 +26,10 @@ frappe.ui.form.on("Event", {
 
 		frm.add_custom_button(__('Add Employees'), function() {
 			new frappe.desk.eventParticipants(frm, "Employee");
+		}, __("Add Participants"));
+
+		frm.add_custom_button(__('Add Sales Partners'), function() {
+			new frappe.desk.eventParticipants(frm, "Sales Partners");
 		}, __("Add Participants"));
 	}
 });
