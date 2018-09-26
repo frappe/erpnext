@@ -191,14 +191,14 @@ def process_serial_no(sle):
 	update_serial_nos(sle, item_det)
 
 def validate_serial_no(sle, item_det):
+	serial_nos = get_serial_nos(sle.serial_no) if sle.serial_no else []
 
 	if item_det.has_serial_no==0:
-		if sle.serial_no:
+		if serial_nos:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
 	elif sle.is_cancelled == "No":
-		if sle.serial_no:
-			serial_nos = get_serial_nos(sle.serial_no)
+		if serial_nos:
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
 
@@ -285,6 +285,12 @@ def validate_serial_no(sle, item_det):
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
+	elif serial_nos:
+		for serial_no in serial_nos:
+			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
+			if sr and sle.actual_qty < 0 and sr.warehouse != sle.warehouse:
+				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
+					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
 
 def validate_so_serial_no(sr, sales_order,):
 	if not sr.sales_order or sr.sales_order!= sales_order:
