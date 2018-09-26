@@ -86,7 +86,7 @@ class Item(WebsiteGenerator):
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
-			for default in self.item_defaults:
+			for default in self.item_defaults or [frappe._dict()]:
 				self.add_price(default.default_price_list)
 
 		if self.opening_stock:
@@ -126,19 +126,12 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
-		self.validate_item_defaults()
-		self.update_defaults_from_item_group()
-		self.update_defaults_add_company()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
 					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
-
-	def update_defaults_add_company(self):
-		if not self.item_defaults:
-				self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
@@ -181,7 +174,7 @@ class Item(WebsiteGenerator):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
-		for default in self.item_defaults:
+		for default in self.item_defaults or [frappe._dict({'company': frappe.defaults.get_defaults().company})]:
 			default_warehouse = (default.default_warehouse
 					or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
 					or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
