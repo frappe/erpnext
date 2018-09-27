@@ -254,7 +254,7 @@ class StockReconciliation(StockController):
 
 	def get_items_for(self, warehouse):
 		self.items = []
-		for item in get_items(warehouse, self.posting_date, self.posting_time):
+		for item in get_items(warehouse, self.posting_date, self.posting_time, self.company):
 			self.append("items", item)
 
 	def submit(self):
