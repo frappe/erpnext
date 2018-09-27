@@ -10,7 +10,8 @@ frappe.ui.form.on("Sales Order", {
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
-			'Project': 'Project'
+			'Project': 'Project',
+			'Purchase Receipt': 'Purchase Receipt'
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -179,6 +180,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 						this.frm.add_custom_button(__('Project'),
 							function() { me.make_project() }, __("Make"));
+				}
+
+				// purchase receipt
+				if(flt(doc.per_delivered, 2) < 100) {
+					this.frm.add_custom_button(__('Purchase Receipt'), function() { me.make_purchase_receipt() }, __("Make"));
 				}
 
 				if(!doc.auto_repeat) {
@@ -408,6 +414,38 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 			frm: this.frm
 		})
+	},
+
+	make_purchase_receipt: function(){
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Supplier"),
+			fields: [
+				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier", "mandatory":true},
+				{"fieldtype": "Button", "label": __("Make Purchase Receipt"), "fieldname": "make_purchase_receipt", "cssClass": "btn-primary"},
+			]
+		});
+
+		dialog.fields_dict.make_purchase_receipt.$input.click(function() {
+			var args = dialog.get_values();
+			dialog.hide();
+			return frappe.call({
+				type: "GET",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_receipt",
+				args: {
+					"supplier": args.supplier,
+					"source_name": me.frm.doc.name
+				},
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", r.message.doctype, r.message.name);
+					}
+				}
+			})
+		});
+		dialog.show();
 	},
 
 	make_purchase_order: function(){
