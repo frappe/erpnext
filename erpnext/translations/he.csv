@@ -6,7 +6,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +19,Consumer Produ
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js +52,Please select Party Type first,אנא בחר מפלגה סוג ראשון
 DocType: Item,Customer Items,פריטים לקוח
 DocType: Project,Costing and Billing,תמחיר וחיובים
-apps/erpnext/erpnext/accounts/doctype/account/account.py +50,Account {0}: Parent account {1} can not be a ledger,חשבון {0}: הורה חשבון {1} לא יכול להיות פנקס
+apps/erpnext/erpnext/accounts/doctype/account/account.py +55,Account {0}: Parent account {1} can not be a ledger,חשבון {0}: הורה חשבון {1} לא יכול להיות פנקס
 DocType: Item,Publish Item to hub.erpnext.com,פרסם פריט לhub.erpnext.com
 apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py +22,Evaluation,הַעֲרָכָה
 DocType: Item,Default Unit of Measure,ברירת מחדל של יחידת מדידה
@@ -15,7 +15,7 @@ DocType: Department,Leave Approvers,השאר מאשרים
 DocType: Employee,Rented,הושכר
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +216,"Stopped Production Order cannot be cancelled, Unstop it first to cancel","הזמנת ייצור הפסיק אינה ניתנת לביטול, מגופתו הראשונה לביטול"
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +317,Do you really want to scrap this asset?,האם אתה באמת רוצה לבטל הנכס הזה?
-apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +37,Currency is required for Price List {0},מטבע נדרש למחיר המחירון {0}
+apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +38,Currency is required for Price List {0},מטבע נדרש למחיר המחירון {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* יחושב בעסקה.
 DocType: Purchase Order,Customer Contact,צור קשר עם לקוחות
 DocType: Employee,Job Applicant,עבודת מבקש
@@ -90,7 +90,7 @@ apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +22,Sam
 DocType: Patient,Married,נשוי
 apps/erpnext/erpnext/accounts/party.py +41,Not permitted for {0},חל איסור על {0}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +617,Get items from,קבל פריטים מ
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +528,Stock cannot be updated against Delivery Note {0},המניה לא ניתן לעדכן נגד תעודת משלוח {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +529,Stock cannot be updated against Delivery Note {0},המניה לא ניתן לעדכן נגד תעודת משלוח {0}
 apps/erpnext/erpnext/templates/pages/home.py +25,Product {0},מוצרים {0}
 DocType: Payment Reconciliation,Reconcile,ליישב
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +30,Grocery,מכולת
@@ -98,7 +98,7 @@ DocType: Quality Inspection Reading,Reading 1,קריאת 1
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +40,Pension Funds,קרנות פנסיה
 DocType: SMS Center,All Sales Person,כל איש המכירות
 DocType: Monthly Distribution,**Monthly Distribution** helps you distribute the Budget/Target across months if you have seasonality in your business.,** בחתך חודשי ** עוזר לך להפיץ את התקציב / היעד ברחבי חודשים אם יש לך עונתיות בעסק שלך.
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +265,Salary Structure Missing,חסר מבנה השכר
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +267,Salary Structure Missing,חסר מבנה השכר
 DocType: Lead,Person Name,שם אדם
 DocType: Sales Invoice Item,Sales Invoice Item,פריט חשבונית מכירות
 DocType: Account,Credit,אשראי
@@ -121,7 +121,7 @@ DocType: Item,Copy From Item Group,העתק מ קבוצת פריט
 DocType: Journal Entry,Opening Entry,כניסת פתיחה
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +25,Account Pay Only,חשבון משלם רק
 DocType: Stock Entry,Additional Costs,עלויות נוספות
-apps/erpnext/erpnext/accounts/doctype/account/account.py +140,Account with existing transaction can not be converted to group.,חשבון עם עסקה הקיימת לא ניתן להמיר לקבוצה.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +145,Account with existing transaction can not be converted to group.,חשבון עם עסקה הקיימת לא ניתן להמיר לקבוצה.
 DocType: Lead,Product Enquiry,חקירה מוצר
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +23,Please enter company first,אנא ראשון להיכנס החברה
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +626,Please select Company first,אנא בחר החברה ראשונה
@@ -152,7 +152,7 @@ DocType: Item,Supply Raw Materials for Purchase,חומרי גלם לאספקת �
 DocType: Products Settings,Show Products as a List,הצג מוצרים כרשימה
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure_template/clinical_procedure_template.py +43,Item {0} is not active or end of life has been reached,פריט {0} אינו פעיל או שהגיע הסוף של חיים
 apps/erpnext/erpnext/utilities/user_progress.py +190,Example: Basic Mathematics,דוגמה: מתמטיקה בסיסית
-apps/erpnext/erpnext/controllers/accounts_controller.py +869,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","כדי לכלול מס בשורת {0} בשיעור פריט, מסים בשורות {1} חייבים להיות כלולים גם"
+apps/erpnext/erpnext/controllers/accounts_controller.py +868,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","כדי לכלול מס בשורת {0} בשיעור פריט, מסים בשורות {1} חייבים להיות כלולים גם"
 DocType: SMS Center,SMS Center,SMS מרכז
 DocType: Sales Invoice,Change Amount,שנת הסכום
 DocType: BOM Update Tool,New BOM,BOM החדש
@@ -258,7 +258,7 @@ apps/erpnext/erpnext/config/desktop.py +159,Learn,לִלמוֹד
 DocType: Asset,Next Depreciation Date,תאריך הפחת הבא
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js +3,Activity Cost per Employee,עלות פעילות לעובדים
 DocType: Accounts Settings,Settings for Accounts,הגדרות עבור חשבונות
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +756,Supplier Invoice No exists in Purchase Invoice {0},ספק חשבונית לא קיים חשבונית רכישת {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +760,Supplier Invoice No exists in Purchase Invoice {0},ספק חשבונית לא קיים חשבונית רכישת {0}
 apps/erpnext/erpnext/config/selling.py +118,Manage Sales Person Tree.,ניהול מכירות אדם עץ.
 DocType: Job Applicant,Cover Letter,מכתב כיסוי
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +37,Outstanding Cheques and Deposits to clear,המחאות ופיקדונות כדי לנקות מצטיינים
@@ -276,7 +276,7 @@ DocType: Lead,Industry,תעשייה
 DocType: Stock Settings,Notify by Email on creation of automatic Material Request,להודיע באמצעות דואר אלקטרוני על יצירת בקשת חומר אוטומטית
 DocType: Journal Entry,Multi Currency,מטבע רב
 DocType: Bank Statement Transaction Invoice Item,Invoice Type,סוג חשבונית
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +971,Delivery Note,תעודת משלוח
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +989,Delivery Note,תעודת משלוח
 apps/erpnext/erpnext/config/learn.py +82,Setting up Taxes,הגדרת מסים
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +149,Cost of Sold Asset,עלות נמכר נכס
 apps/erpnext/erpnext/accounts/utils.py +374,Payment Entry has been modified after you pulled it. Please pull it again.,כניסת תשלום השתנתה לאחר שמשכת אותו. אנא למשוך אותו שוב.
@@ -303,7 +303,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +101,Convert to
 DocType: Bank Statement Transaction Invoice Item,Invoice Date,תאריך חשבונית
 DocType: GL Entry,Debit Amount,סכום חיוב
 apps/erpnext/erpnext/accounts/party.py +277,There can only be 1 Account per Company in {0} {1},לא יכול להיות רק 1 חשבון לכל חברת {0} {1}
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +522,Please see attachment,אנא ראה קובץ מצורף
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +524,Please see attachment,אנא ראה קובץ מצורף
 DocType: Purchase Order,% Received,% התקבל
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +3,Create Student Groups,יצירת קבוצות סטודנטים
 DocType: Chapter Member,Website URL,כתובת אתר אינטרנט
@@ -386,7 +386,7 @@ DocType: Sales Order Item,Used for Production Plan,המשמש לתכנית יי�
 DocType: Manufacturing Settings,Time Between Operations (in mins),זמן בין פעולות (בדקות)
 DocType: Customer,Buyer of Goods and Services.,קונה של מוצרים ושירותים.
 DocType: Journal Entry,Accounts Payable,חשבונות לתשלום
-apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +36,The selected BOMs are not for the same item,בומס שנבחר אינו תמורת אותו הפריט
+apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +43,The selected BOMs are not for the same item,בומס שנבחר אינו תמורת אותו הפריט
 DocType: Item Price,Valid Upto,Upto חוקי
 apps/erpnext/erpnext/utilities/user_progress.py +67,List a few of your customers. They could be organizations or individuals.,רשימה כמה מהלקוחות שלך. הם יכולים להיות ארגונים או יחידים.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +135,Direct Income,הכנסה ישירה
@@ -460,7 +460,7 @@ DocType: Sales Order,Billing and Delivery Status,סטטוס חיוב ומשלו�
 DocType: Job Applicant,Resume Attachment,מצורף קורות חיים
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +58,Repeat Customers,חזרו על לקוחות
 DocType: Leave Control Panel,Allocate,להקצות
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +878,Sales Return,חזור מכירות
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +896,Sales Return,חזור מכירות
 DocType: Announcement,Posted By,פורסם על ידי
 DocType: Item,Delivered by Supplier (Drop Ship),נמסר על ידי ספק (זרוק משלוח)
 apps/erpnext/erpnext/config/crm.py +12,Database of potential customers.,מסד הנתונים של לקוחות פוטנציאליים.
@@ -477,7 +477,7 @@ DocType: Sales Invoice Timesheet,Sales Invoice Timesheet,גליון חשבוני
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +150,Reference No & Reference Date is required for {0},התייחסות לא & תאריך הפניה נדרש עבור {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +166,Proposal Writing,כתיבת הצעה
 DocType: Payment Entry Deduction,Payment Entry Deduction,ניכוי קליט הוצאות
-apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +35,Another Sales Person {0} exists with the same Employee id,אדם אחר מכירות {0} קיים עם אותו זיהוי העובד
+apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +54,Another Sales Person {0} exists with the same Employee id,אדם אחר מכירות {0} קיים עם אותו זיהוי העובד
 apps/erpnext/erpnext/config/education.py +180,Masters,תואר שני
 apps/erpnext/erpnext/config/accounts.py +161,Update Bank Transaction Dates,תאריכי עסקת בנק Update
 apps/erpnext/erpnext/config/projects.py +41,Time Tracking,מעקב זמן
@@ -504,7 +504,7 @@ DocType: Sales Person,Sales Person Targets,מטרות איש מכירות
 DocType: Work Order Operation,In minutes,בדקות
 DocType: Issue,Resolution Date,תאריך החלטה
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,גיליון נוצר:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1311,Please set default Cash or Bank account in Mode of Payment {0},אנא הגדר מזומנים ברירת מחדל או חשבון בנק במצב של תשלום {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1197,Please set default Cash or Bank account in Mode of Payment {0},אנא הגדר מזומנים ברירת מחדל או חשבון בנק במצב של תשלום {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,לְהִרָשֵׁם
 DocType: Selling Settings,Customer Naming By,Naming הלקוח על ידי
 DocType: Depreciation Schedule,Depreciation Amount,סכום הפחת
@@ -550,7 +550,7 @@ DocType: Email Digest,Next email will be sent on:,"הדוא""ל הבא יישל�
 apps/erpnext/erpnext/stock/doctype/item/item.py +705,Item has variants.,יש פריט גרסאות.
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +65,Item {0} not found,פריט {0} לא נמצא
 DocType: Bin,Stock Value,מניית ערך
-apps/erpnext/erpnext/accounts/doctype/account/account.py +197,Company {0} does not exist,החברה {0} לא קיים
+apps/erpnext/erpnext/accounts/doctype/account/account.py +202,Company {0} does not exist,החברה {0} לא קיים
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +54,Tree Type,סוג העץ
 DocType: BOM Explosion Item,Qty Consumed Per Unit,כמות נצרכת ליחידה
 DocType: Serial No,Warranty Expiry Date,תאריך תפוגה אחריות
@@ -572,7 +572,7 @@ apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be se
 apps/erpnext/erpnext/hr/doctype/holiday_list/holiday_list.py +30,Please select weekly off day,אנא בחר יום מנוחה שבועי
 DocType: Work Order Operation,Planned End Time,שעת סיום מתוכננת
 ,Sales Person Target Variance Item Group-Wise,פריט יעד שונות איש מכירות קבוצה-Wise
-apps/erpnext/erpnext/accounts/doctype/account/account.py +95,Account with existing transaction cannot be converted to ledger,חשבון עם עסקה הקיימת לא ניתן להמיר לדג'ר
+apps/erpnext/erpnext/accounts/doctype/account/account.py +100,Account with existing transaction cannot be converted to ledger,חשבון עם עסקה הקיימת לא ניתן להמיר לדג'ר
 DocType: Delivery Note,Customer's Purchase Order No,להזמין ללא הרכישה של הלקוח
 apps/erpnext/erpnext/stock/reorder_item.py +194,Auto Material Requests Generated,בקשות אוטומטיות חומר שנוצרו
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +7,Lost,איבדתי
@@ -584,7 +584,7 @@ DocType: BOM,Website Specifications,מפרט אתר
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +23,{0}: From {0} of type {1},{0}: החל מ- {0} מסוג {1}
 apps/erpnext/erpnext/controllers/buying_controller.py +386,Row {0}: Conversion Factor is mandatory,שורת {0}: המרת פקטור הוא חובה
 DocType: Student,A+,A +
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +351,"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}","חוקי מחיר מרובים קיימים עם אותם הקריטריונים, בבקשה לפתור את סכסוך על ידי הקצאת עדיפות. חוקי מחיר: {0}"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +353,"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}","חוקי מחיר מרובים קיימים עם אותם הקריטריונים, בבקשה לפתור את סכסוך על ידי הקצאת עדיפות. חוקי מחיר: {0}"
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +532,Cannot deactivate or cancel BOM as it is linked with other BOMs,לא יכול לבטל או לבטל BOM כפי שהוא מקושר עם עצי מוצר אחרים
 DocType: Asset,Maintenance,תחזוקה
 DocType: Item Attribute Value,Item Attribute Value,פריט תכונה ערך
@@ -622,7 +622,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js +2
 DocType: Account,Liability,אחריות
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +227,Sanctioned Amount cannot be greater than Claim Amount in Row {0}.,סכום גושפנקא לא יכול להיות גדול מסכום תביעה בשורה {0}.
 DocType: Company,Default Cost of Goods Sold Account,עלות ברירת מחדל של חשבון מכר
-apps/erpnext/erpnext/stock/get_item_details.py +519,Price List not selected,מחיר המחירון לא נבחר
+apps/erpnext/erpnext/stock/get_item_details.py +523,Price List not selected,מחיר המחירון לא נבחר
 DocType: Employee,Family Background,רקע משפחתי
 DocType: Request for Quotation Supplier,Send Email,שלח אי-מייל
 apps/erpnext/erpnext/stock/doctype/item/item.py +243,Warning: Invalid Attachment {0},אזהרה: קובץ מצורף לא חוקי {0}
@@ -641,8 +641,7 @@ DocType: Location,Tree Details,עץ פרטים
 ,Support Analytics,Analytics תמיכה
 DocType: Item,Website Warehouse,מחסן אתר
 DocType: Payment Reconciliation,Minimum Invoice Amount,סכום חשבונית מינימום
-apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +63,Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table,פריט שורה {idx}: {DOCTYPE} {DOCNAME} אינה קיימת מעל &#39;{DOCTYPE} שולחן
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +356,Timesheet {0} is already completed or cancelled,גיליון {0} כבר הושלם או בוטל
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +357,Timesheet {0} is already completed or cancelled,גיליון {0} כבר הושלם או בוטל
 DocType: Asset,Opening Accumulated Depreciation,פתיחת פחת שנצבר
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.js +50,Score must be less than or equal to 5,ציון חייב להיות קטן או שווה ל 5
 DocType: Program Enrollment Tool,Program Enrollment Tool,כלי הרשמה לתכנית
@@ -685,7 +684,7 @@ apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +106,"Enabling 'Use f
 DocType: Sales Invoice Item,Stock Details,פרטי מלאי
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +29,Project Value,פרויקט ערך
 apps/erpnext/erpnext/config/selling.py +332,Point-of-Sale,נקודת מכירה
-apps/erpnext/erpnext/accounts/doctype/account/account.py +118,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","יתרת חשבון כבר בקרדיט, שאינך מורשה להגדרה 'יתרה חייבים להיות' כמו 'חיוב'"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +123,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","יתרת חשבון כבר בקרדיט, שאינך מורשה להגדרה 'יתרה חייבים להיות' כמו 'חיוב'"
 DocType: Account,Balance must be,איזון חייב להיות
 DocType: Notification Control,Expense Claim Rejected Message,הודעת תביעת הוצאות שנדחו
 ,Available Qty,כמות זמינה
@@ -711,7 +710,7 @@ DocType: Work Order,Plan material for sub-assemblies,חומר תכנית לתת 
 apps/erpnext/erpnext/config/selling.py +97,Sales Partners and Territory,שותפי מכירות טריטוריה
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +621,BOM {0} must be active,BOM {0} חייב להיות פעיל
 DocType: Journal Entry,Depreciation Entry,כניסת פחת
-apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +33,Please select the document type first,אנא בחר את סוג המסמך ראשון
+apps/erpnext/erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py +31,Please select the document type first,אנא בחר את סוג המסמך ראשון
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,ביקורי חומר לבטל {0} לפני ביטול תחזוקת הביקור הזה
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +218,Serial No {0} does not belong to Item {1},מספר סידורי {0} אינו שייך לפריט {1}
 DocType: Purchase Receipt Item Supplied,Required Qty,חובה כמות
@@ -719,7 +718,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +126,Warehouses with e
 DocType: Bank Reconciliation,Total Amount,"סה""כ לתשלום"
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +32,Internet Publishing,הוצאה לאור באינטרנט
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +82,Balance Value,ערך איזון
-apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,Sales Price List,מחיר מחירון מכירות
+apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +40,Sales Price List,מחיר מחירון מכירות
 DocType: Bank Reconciliation,Account Currency,מטבע חשבון
 apps/erpnext/erpnext/accounts/general_ledger.py +178,Please mention Round Off Account in Company,נא לציין לעגל חשבון בחברה
 DocType: Purchase Receipt,Range,טווח
@@ -750,9 +749,9 @@ DocType: Material Request Item,Lead Time Date,תאריך ליד זמן
 DocType: Cheque Print Template,Has Print Format,יש פורמט להדפסה
 apps/erpnext/erpnext/accounts/page/pos/pos.js +78, is mandatory. Maybe Currency Exchange record is not created for ,הוא חובה. אולי שיא המרה לא נוצר ל
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +187,Row #{0}: Please specify Serial No for Item {1},# שורה {0}: נא לציין את מספר סידורי לפריט {1}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +660,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","לפריטים &#39;מוצרי Bundle&#39;, מחסן, מספר סידורי ויצוו לא ייחשב מהשולחן &quot;רשימת האריזה&quot;. אם מחסן ויצוו אין הם זהים עבור כל פריטי האריזה עבור כל הפריט &quot;מוצרים Bundle &#39;, ניתן להזין ערכים אלה בטבלת הפריט העיקרית, ערכים יועתקו ל&#39;אריזת רשימה&#39; שולחן."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +678,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","לפריטים &#39;מוצרי Bundle&#39;, מחסן, מספר סידורי ויצוו לא ייחשב מהשולחן &quot;רשימת האריזה&quot;. אם מחסן ויצוו אין הם זהים עבור כל פריטי האריזה עבור כל הפריט &quot;מוצרים Bundle &#39;, ניתן להזין ערכים אלה בטבלת הפריט העיקרית, ערכים יועתקו ל&#39;אריזת רשימה&#39; שולחן."
 DocType: Student Admission,Publish on website,פרסם באתר
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +734,Supplier Invoice Date cannot be greater than Posting Date,תאריך חשבונית ספק לא יכול להיות גדול מ תאריך פרסום
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +738,Supplier Invoice Date cannot be greater than Posting Date,תאריך חשבונית ספק לא יכול להיות גדול מ תאריך פרסום
 DocType: Purchase Invoice Item,Purchase Order Item,לרכוש פריט להזמין
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +139,Indirect Income,הכנסות עקיפות
 DocType: Cheque Print Template,Date Settings,הגדרות תאריך
@@ -779,7 +778,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +183,Whit
 DocType: SMS Center,All Lead (Open),כל הלידים (פתוח)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +356,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),שורה {0}: כמות אינה זמינה עבור {4} במחסן {1} בכל שעת הפרסום של כניסה ({2} {3})
 DocType: Purchase Invoice,Get Advances Paid,קבלו תשלום מקדמות
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +71,Make ,הפוך
 DocType: Journal Entry,Total Amount in Words,סכתי-הכל סכום מילים
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,הייתה שגיאה. סיבה סבירה אחת יכולה להיות שלא שמרת את הטופס. אנא צור קשר עם support@erpnext.com אם הבעיה נמשכת.
 apps/erpnext/erpnext/templates/pages/cart.html +5,My Cart,סל הקניות שלי
@@ -858,7 +856,7 @@ DocType: SMS Center,Total Characters,"סה""כ תווים"
 apps/erpnext/erpnext/controllers/buying_controller.py +191,Please select BOM in BOM field for Item {0},אנא בחר BOM בתחום BOM לפריט {0}
 DocType: C-Form Invoice Detail,C-Form Invoice Detail,פרט C-טופס חשבונית
 DocType: Payment Reconciliation Invoice,Payment Reconciliation Invoice,תשלום פיוס חשבונית
-apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +39,Contribution %,% תרומה
+apps/erpnext/erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py +75,Contribution %,% תרומה
 DocType: Company,Company registration numbers for your reference. Tax numbers etc.,מספרי רישום חברה לעיונך. מספרי מס וכו '
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +145,Distributor,מפיץ
 DocType: Shopping Cart Shipping Rule,Shopping Cart Shipping Rule,כלל משלוח סל קניות
@@ -894,7 +892,7 @@ DocType: Purchase Invoice Item,UOM Conversion Factor,אוני 'מישגן המר
 DocType: Stock Settings,Default Item Group,קבוצת ברירת מחדל של הפריט
 apps/erpnext/erpnext/config/buying.py +38,Supplier database.,מסד נתוני ספק.
 DocType: Account,Balance Sheet,מאזן
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +779,Cost Center For Item with Item Code ',עלות מרכז לפריט עם קוד פריט '
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +797,Cost Center For Item with Item Code ',עלות מרכז לפריט עם קוד פריט '
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2529,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.","מצב תשלום אינו מוגדר. אנא קרא, אם חשבון הוגדר על מצב תשלומים או על פרופיל קופה."
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +30,"Further accounts can be made under Groups, but entries can be made against non-Groups","חשבונות נוספים יכולים להתבצע תחת קבוצות, אבל ערכים יכולים להתבצע נגד לא-קבוצות"
 DocType: Lead,Lead,לידים
@@ -985,12 +983,12 @@ apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +71,This is a root i
 DocType: Journal Entry Account,Purchase Order,הזמנת רכש
 DocType: Warehouse,Warehouse Contact Info,מחסן פרטים ליצירת קשר
 DocType: Payment Entry,Write Off Difference Amount,מחיקת חוב סכום הפרש
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +533,"{0}: Employee email not found, hence email not sent","{0}: דוא&quot;ל שכיר לא נמצא, ומכאן דוא&quot;ל לא נשלח"
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +535,"{0}: Employee email not found, hence email not sent","{0}: דוא&quot;ל שכיר לא נמצא, ומכאן דוא&quot;ל לא נשלח"
 DocType: Email Digest,Annual Income,הכנסה שנתית
 DocType: Serial No,Serial No Details,Serial No פרטים
 DocType: Purchase Invoice Item,Item Tax Rate,שיעור מס פריט
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +177,"For {0}, only credit accounts can be linked against another debit entry","עבור {0}, רק חשבונות האשראי יכולים להיות מקושרים נגד כניסת חיוב נוספת"
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +667,Delivery Note {0} is not submitted,משלוח הערה {0} לא תוגש
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +650,Delivery Note {0} is not submitted,משלוח הערה {0} לא תוגש
 apps/erpnext/erpnext/stock/get_item_details.py +167,Item {0} must be a Sub-contracted Item,פריט {0} חייב להיות פריט-נדבק Sub
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +44,Capital Equipments,ציוד הון
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +33,"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","כלל תמחור נבחר ראשון המבוססת על 'החל ב'שדה, אשר יכול להיות פריט, קבוצת פריט או מותג."
@@ -1027,7 +1025,7 @@ DocType: Contract,HR Manager,מנהל משאבי אנוש
 apps/erpnext/erpnext/accounts/party.py +196,Please select a Company,אנא בחר חברה
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +95,Privilege Leave,זכות Leave
 DocType: Purchase Invoice,Supplier Invoice Date,תאריך חשבונית ספק
-apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +90,You need to enable Shopping Cart,אתה צריך לאפשר סל קניות
+apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +91,You need to enable Shopping Cart,אתה צריך לאפשר סל קניות
 DocType: Payment Entry,Writeoff,מחיקת חוב
 DocType: Appraisal Template Goal,Appraisal Template Goal,מטרת הערכת תבנית
 DocType: Salary Component,Earning,להרוויח
@@ -1070,7 +1068,7 @@ DocType: Purchase Invoice Item,Item Tax Amount,סכום מס פריט
 DocType: Item,Maintain Stock,לשמור על המלאי
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +92,Net Change in Fixed Asset,שינוי נטו בנכסים קבועים
 DocType: Leave Control Panel,Leave blank if considered for all designations,שאר ריק אם תיחשב לכל הכינויים
-apps/erpnext/erpnext/controllers/accounts_controller.py +875,Charge of type 'Actual' in row {0} cannot be included in Item Rate,תשלום מסוג 'בפועל' בשורת {0} אינו יכול להיות כלולים במחיר הפריט
+apps/erpnext/erpnext/controllers/accounts_controller.py +874,Charge of type 'Actual' in row {0} cannot be included in Item Rate,תשלום מסוג 'בפועל' בשורת {0} אינו יכול להיות כלולים במחיר הפריט
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +531,Max: {0},מקס: {0}
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,From Datetime,מDatetime
 DocType: Shopify Settings,For Company,לחברה
@@ -1079,7 +1077,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Buying Amount,סכום קנייה
 DocType: Sales Invoice,Shipping Address Name,שם כתובת למשלוח
 DocType: Material Request,Terms and Conditions Content,תוכן תנאים והגבלות
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +602,cannot be greater than 100,לא יכול להיות גדול מ 100
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +611,cannot be greater than 100,לא יכול להיות גדול מ 100
 apps/erpnext/erpnext/stock/doctype/item/item.py +810,Item {0} is not a stock Item,פריט {0} הוא לא פריט מניות
 DocType: Maintenance Visit,Unscheduled,לא מתוכנן
 DocType: Employee,Owned,בבעלות
@@ -1116,7 +1114,7 @@ DocType: Asset,Asset Name,שם נכס
 DocType: Shipping Rule Condition,To Value,לערך
 DocType: Asset Movement,Stock Manager,ניהול מלאי
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +254,Source warehouse is mandatory for row {0},מחסן המקור הוא חובה עבור שורת {0}
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +888,Packing Slip,Slip אריזה
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +906,Packing Slip,Slip אריזה
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +117,Office Rent,השכרת משרד
 apps/erpnext/erpnext/config/setup.py +105,Setup SMS gateway settings,הגדרות שער SMS ההתקנה
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +61,Import Failed!,יבוא נכשל!
@@ -1166,7 +1164,7 @@ DocType: Leave Block List,Block Holidays on important days.,חגים בלוק ב
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +119,Accounts Receivable Summary,חשבונות חייבים סיכום
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +211,Please set User ID field in an Employee record to set Employee Role,אנא הגדר שדה זיהוי משתמש בשיא לעובדים להגדיר תפקיד העובד
 DocType: UOM,UOM Name,שם של אוני 'מישגן
-apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +40,Contribution Amount,סכום תרומה
+apps/erpnext/erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py +87,Contribution Amount,סכום תרומה
 DocType: Purchase Invoice,Shipping Address,כתובת למשלוח
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,כלי זה עוזר לך לעדכן או לתקן את הכמות והערכת שווי של המניה במערכת. הוא משמש בדרך כלל כדי לסנכרן את ערכי המערכת ומה בעצם קיים במחסנים שלך.
 DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,במילים יהיו גלוי לאחר שתשמרו את תעודת המשלוח.
@@ -1228,10 +1226,10 @@ DocType: Account,Account Name,שם חשבון
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +496,From Date cannot be greater than To Date,מתאריך לא יכול להיות גדול יותר מאשר תאריך
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +203,Serial No {0} quantity {1} cannot be a fraction,לא {0} כמות סידורי {1} לא יכולה להיות חלק
 DocType: Purchase Order Item,Supplier Part Number,"ספק מק""ט"
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +132,Conversion rate cannot be 0 or 1,שער המרה לא יכול להיות 0 או 1
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +136,Conversion rate cannot be 0 or 1,שער המרה לא יכול להיות 0 או 1
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +233,{0} {1} is cancelled or stopped,{0} {1} יבוטל או הפסיק
 DocType: Accounts Settings,Credit Controller,בקר אשראי
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +261,Purchase Receipt {0} is not submitted,קבלת רכישת {0} לא תוגש
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +265,Purchase Receipt {0} is not submitted,קבלת רכישת {0} לא תוגש
 DocType: Company,Default Payable Account,חשבון זכאים ברירת מחדל
 apps/erpnext/erpnext/config/website.py +17,"Settings for online shopping cart such as shipping rules, price list etc.","הגדרות לעגלת קניות מקוונות כגון כללי משלוח, מחירון וכו '"
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +113,{0}% Billed,{0}% שחויבו
@@ -1247,7 +1245,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +170,Row {0
 DocType: Company,Default Values,ערכי ברירת מחדל
 DocType: Expense Claim,Total Amount Reimbursed,הסכום כולל החזר
 apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.py +87,{0} {1} created,{0} {1} נוצר
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +114,Against Supplier Invoice {0} dated {1},נגד ספק חשבונית {0} יום {1}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +118,Against Supplier Invoice {0} dated {1},נגד ספק חשבונית {0} יום {1}
 DocType: Customer,Default Price List,מחיר מחירון ברירת מחדל
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +483,Asset Movement record {0} created,שיא תנועת נכסים {0} נוצרו
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +51,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,אתה לא יכול למחוק את שנת הכספים {0}. שנת הכספים {0} מוגדרת כברירת מחדל ב הגדרות גלובליות
@@ -1294,7 +1292,7 @@ DocType: Fee Category,Fee Category,קטגורית דמים
 ,Student Fee Collection,אוסף דמי סטודנטים
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,הפוך חשבונאות כניסה לכל מנית תנועה
 DocType: Leave Allocation,Total Leaves Allocated,"סה""כ עלים מוקצבות"
-apps/erpnext/erpnext/public/js/setup_wizard.js +146,Please enter valid Financial Year Start and End Dates,נא להזין פיננסית בתוקף השנה תאריכי ההתחלה וסיום
+apps/erpnext/erpnext/public/js/setup_wizard.js +178,Please enter valid Financial Year Start and End Dates,נא להזין פיננסית בתוקף השנה תאריכי ההתחלה וסיום
 DocType: Employee,Date Of Retirement,מועד הפרישה
 DocType: Upload Attendance,Get Template,קבל תבנית
 apps/erpnext/erpnext/setup/setup_wizard/operations/defaults_setup.py +114,ERPNext Setup Complete!,ERPNext ההתקנה הושלמה!
@@ -1331,7 +1329,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +475,Default BOM ({0}) must be a
 DocType: Employee,Leave Encashed?,השאר Encashed?
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,הזדמנות מ השדה היא חובה
 DocType: Item,Variants,גרסאות
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1208,Make Purchase Order,הפוך הזמנת רכש
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1226,Make Purchase Order,הפוך הזמנת רכש
 DocType: SMS Center,Send To,שלח אל
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +202,There is not enough leave balance for Leave Type {0},אין איזון חופשה מספיק לחופשת סוג {0}
 DocType: Payment Reconciliation Payment,Allocated amount,סכום שהוקצה
@@ -1484,7 +1482,7 @@ DocType: Task,Actual End Date (via Time Sheet),תאריך סיום בפועל (�
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +389,Amount {0} {1} against {2} {3},סכום {0} {1} נגד {2} {3}
 ,Quotation Trends,מגמות ציטוט
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +166,Item Group not mentioned in item master for item {0},קבוצת פריט שלא צוינה באב פריט לפריט {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +429,Debit To account must be a Receivable account,חיוב החשבון חייב להיות חשבון חייבים
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +430,Debit To account must be a Receivable account,חיוב החשבון חייב להיות חשבון חייבים
 DocType: Shipping Rule,Shipping Amount,סכום משלוח
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py +20,Pending Amount,סכום תלוי ועומד
 DocType: Loyalty Program,Conversion Factor,המרת פקטור
@@ -1525,7 +1523,7 @@ DocType: Production Plan Item,material_request_item,material_request_item
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1103,"Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice or Journal Entry","# השורה {0}: Reference סוג המסמך חייב להיות אחד להזמין מכירות, חשבוניות מכירות או תנועת יומן"
 DocType: Salary Component,Deduction,ניכוי
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +109,Row {0}: From Time and To Time is mandatory.,שורת {0}: מעת לעת ו היא חובה.
-apps/erpnext/erpnext/stock/get_item_details.py +412,Item Price added for {0} in Price List {1},מחיר הפריט נוסף עבור {0} ב מחירון {1}
+apps/erpnext/erpnext/stock/get_item_details.py +416,Item Price added for {0} in Price List {1},מחיר הפריט נוסף עבור {0} ב מחירון {1}
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person_tree.js +8,Please enter Employee Id of this sales person,נא להזין את עובדי זיהוי של איש מכירות זה
 DocType: Territory,Classification of Customers by region,סיווג של לקוחות מאזור לאזור
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +66,Difference Amount must be zero,סכום ההבדל חייב להיות אפס
@@ -1533,7 +1531,7 @@ DocType: Project,Gross Margin,שיעור רווח גולמי
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +60,Please enter Production Item first,אנא ראשון להיכנס פריט הפקה
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +45,Calculated Bank Statement balance,מאזן חשבון בנק מחושב
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +64,disabled user,משתמשים נכים
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +951,Quotation,הצעת מחיר
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +969,Quotation,הצעת מחיר
 DocType: Salary Slip,Total Deduction,סך ניכוי
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +213,Cost Updated,עלות עדכון
 DocType: Inpatient Record,Date of Birth,תאריך לידה
@@ -1572,7 +1570,7 @@ DocType: Leave Application,Total Leave Days,"ימי חופשה סה""כ"
 DocType: Email Digest,Note: Email will not be sent to disabled users,הערה: דואר אלקטרוני לא יישלח למשתמשים בעלי מוגבלויות
 apps/erpnext/erpnext/manufacturing/page/production_analytics/production_analytics.js +37,Select Company...,בחר חברה ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,שאר ריק אם תיחשב לכל המחלקות
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +495,{0} is mandatory for Item {1},{0} הוא חובה עבור פריט {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +496,{0} is mandatory for Item {1},{0} הוא חובה עבור פריט {1}
 DocType: Currency Exchange,From Currency,ממטבע
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +171,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row","אנא בחר סכום שהוקצה, סוג החשבונית וחשבונית מספר בatleast שורה אחת"
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +143,Cost of New Purchase,עלות רכישה חדשה
@@ -1619,8 +1617,8 @@ DocType: Employee,Contact Details,פרטי
 DocType: C-Form,Received Date,תאריך קבלה
 DocType: Delivery Note,"If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.","אם יצרת תבנית סטנדרטית בתבנית מסים מכירות וחיובים, בחר אחד ולחץ על הכפתור למטה."
 DocType: Stock Entry,Total Incoming Value,"ערך הנכנס סה""כ"
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +423,Debit To is required,חיוב נדרש
-apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +40,Purchase Price List,מחיר מחירון רכישה
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +424,Debit To is required,חיוב נדרש
+apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +41,Purchase Price List,מחיר מחירון רכישה
 DocType: Job Offer Term,Offer Term,טווח הצעה
 DocType: Asset,Quality Manager,מנהל איכות
 DocType: Job Applicant,Job Opening,פתיחת עבודה
@@ -1630,7 +1628,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +51,Technology,ט�
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,"סה""כ חשבונית Amt"
 DocType: Cashier Closing,To Time,לעת
 DocType: Authorization Rule,Approving Role (above authorized value),אישור תפקיד (מעל הערך מורשה)
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +142,Credit To account must be a Payable account,אשראי לחשבון חייב להיות חשבון לתשלום
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +146,Credit To account must be a Payable account,אשראי לחשבון חייב להיות חשבון לתשלום
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +364,BOM recursion: {0} cannot be parent or child of {2},רקורסיה BOM: {0} אינה יכולה להיות הורה או ילד של {2}
 DocType: Work Order Operation,Completed Qty,כמות שהושלמה
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +180,"For {0}, only debit accounts can be linked against another credit entry","עבור {0}, רק חשבונות החיוב יכולים להיות מקושרים נגד כניסת אשראי אחרת"
@@ -1686,7 +1684,7 @@ DocType: Serial No,Delivery Time,זמן אספקה
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +45,Ageing Based On,הזדקנות המבוסס על
 DocType: Item,End of Life,סוף החיים
 apps/erpnext/erpnext/demo/setup/setup_data.py +325,Travel,נסיעות
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +264,No active or default Salary Structure found for employee {0} for the given dates,אין מבנה פעיל או שכר מחדל נמצא עבור עובד {0} לתאריכים הנתונים
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +266,No active or default Salary Structure found for employee {0} for the given dates,אין מבנה פעיל או שכר מחדל נמצא עבור עובד {0} לתאריכים הנתונים
 DocType: Leave Block List,Allow Users,אפשר למשתמשים
 DocType: Purchase Order,Customer Mobile No,לקוחות ניידים לא
 DocType: Cost Center,Track separate Income and Expense for product verticals or divisions.,עקוב אחר הכנסות והוצאות נפרדות לאנכי מוצר או חטיבות.
@@ -1696,7 +1694,7 @@ DocType: Item Reorder,Item Reorder,פריט סידור מחדש
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +810,Transfer Material,העברת חומר
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.","ציין את הפעולות, עלויות הפעלה ולתת מבצע ייחודי לא לפעולות שלך."
 apps/erpnext/erpnext/controllers/status_updater.py +207,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,מסמך זה חורג מהמגבלה על ידי {0} {1} עבור פריט {4}. האם אתה גורם אחר {3} נגד אותו {2}?
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1189,Please set recurring after saving,אנא קבע חוזר לאחר השמירה
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1221,Please set recurring after saving,אנא קבע חוזר לאחר השמירה
 DocType: Purchase Invoice,Price List Currency,מטבע מחירון
 DocType: Naming Series,User must always select,משתמש חייב תמיד לבחור
 DocType: Stock Settings,Allow Negative Stock,אפשר מלאי שלילי
@@ -1722,7 +1720,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 apps/erpnext/erpnext/controllers/buying_controller.py +706,Specified BOM {0} does not exist for Item {1},BOM צוין {0} אינו קיימת עבור פריט {1}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +242,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,לוח זמנים תחזוקת {0} יש לבטל לפני ביטול הזמנת מכירות זה
 DocType: Notification Control,Expense Claim Approved,תביעת הוצאות שאושרה
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +401,Salary Slip of employee {0} already created for this period,תלוש משכורת של עובד {0} נוצר כבר בתקופה זו
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +403,Salary Slip of employee {0} already created for this period,תלוש משכורת של עובד {0} נוצר כבר בתקופה זו
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +144,Pharmaceutical,תרופות
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Cost of Purchased Items,עלות של פריטים שנרכשו
 DocType: Selling Settings,Sales Order Required,סדר הנדרש מכירות
@@ -1750,7 +1748,7 @@ apps/erpnext/erpnext/utilities/transaction_base.py +101,Invalid reference {0} {1
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +187,{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3},{0} ({1}) לא יכול להיות גדול יותר מquanitity המתוכנן ({2}) בהפקה להזמין {3}
 DocType: Shipping Rule,Shipping Rule Label,תווית כלל משלוח
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +328,Raw Materials cannot be blank.,חומרי גלם לא יכולים להיות ריקים.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +559,"Could not update stock, invoice contains drop shipping item.","לא ניתן לעדכן מניות, חשבונית מכילה פריט ירידת משלוח."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +560,"Could not update stock, invoice contains drop shipping item.","לא ניתן לעדכן מניות, חשבונית מכילה פריט ירידת משלוח."
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +533,Quick Journal Entry,מהיר יומן
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +244,You can not change rate if BOM mentioned agianst any item,אתה לא יכול לשנות את השיעור אם BOM ציינו agianst כל פריט
 DocType: Employee,Previous Work Experience,ניסיון בעבודה קודם
@@ -1896,7 +1894,7 @@ apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depr
 apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py +43,Disabled template must not be default template,תבנית לנכים אסור להיות תבנית ברירת המחדל
 DocType: Account,Income Account,חשבון הכנסות
 DocType: Payment Request,Amount in customer's currency,הסכום במטבע של הלקוח
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +861,Delivery,משלוח
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +879,Delivery,משלוח
 DocType: Stock Reconciliation Item,Current Qty,כמות נוכחית
 DocType: Appraisal Goal,Key Responsibility Area,פינת אחריות מפתח
 DocType: Payment Entry,Total Allocated Amount,סכום כולל שהוקצה
@@ -1916,11 +1914,11 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +122,Head
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +75,Income Tax,מס הכנסה
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,צפייה בלידים לפי סוג התעשייה.
 DocType: Item Supplier,Item Supplier,ספק פריט
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1290,Please enter Item Code to get batch no,נא להזין את קוד פריט כדי לקבל אצווה לא
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +910,Please select a value for {0} quotation_to {1},אנא בחר ערך עבור {0} quotation_to {1}
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1322,Please enter Item Code to get batch no,נא להזין את קוד פריט כדי לקבל אצווה לא
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +928,Please select a value for {0} quotation_to {1},אנא בחר ערך עבור {0} quotation_to {1}
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,כל הכתובות.
 DocType: Company,Stock Settings,הגדרות מניות
-apps/erpnext/erpnext/accounts/doctype/account/account.py +239,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","המיזוג אפשרי רק אם המאפיינים הבאים הם זהים בשני רשומות. האם קבוצה, סוג רוט, חברה"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +244,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","המיזוג אפשרי רק אם המאפיינים הבאים הם זהים בשני רשומות. האם קבוצה, סוג רוט, חברה"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +130,Gain/Loss on Asset Disposal,רווח / הפסד בעת מימוש נכסים
 apps/erpnext/erpnext/config/selling.py +36,Manage Customer Group Tree.,ניהול קבוצת לקוחות עץ.
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js +22,New Cost Center Name,שם מרכז העלות חדש
@@ -2011,10 +2009,10 @@ DocType: Maintenance Visit,Purposes,מטרות
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +110,Atleast one item should be entered with negative quantity in return document,פריט אחד atleast יש להזין עם כמות שלילית במסמך התמורה
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +71,"Operation {0} longer than any available working hours in workstation {1}, break down the operation into multiple operations","מבצע {0} יותר מכל שעות עבודה זמינות בתחנת העבודה {1}, לשבור את הפעולה לפעולות מרובות"
 ,Requested,ביקשתי
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +117,No Remarks,אין הערות
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +121,No Remarks,אין הערות
 DocType: Purchase Invoice,Overdue,איחור
 DocType: Account,Stock Received But Not Billed,המניה התקבלה אבל לא חויבה
-apps/erpnext/erpnext/accounts/doctype/account/account.py +86,Root Account must be a group,חשבון שורש חייב להיות קבוצה
+apps/erpnext/erpnext/accounts/doctype/account/account.py +91,Root Account must be a group,חשבון שורש חייב להיות קבוצה
 DocType: Item,Total Projected Qty,כללית המתוכננת כמות
 DocType: Monthly Distribution,Distribution Name,שם הפצה
 DocType: Course,Course Code,קוד קורס
@@ -2028,7 +2026,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +502,Please select Apply Discount 
 DocType: Company,Default Receivable Account,חשבון חייבים ברירת מחדל
 DocType: Stock Entry,Material Transfer for Manufacture,העברת חומר לייצור
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +20,Discount Percentage can be applied either against a Price List or for all Price List.,אחוז הנחה יכול להיות מיושם גם נגד מחיר מחירון או לכל רשימת המחיר.
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +418,Accounting Entry for Stock,כניסה לחשבונאות במלאי
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +422,Accounting Entry for Stock,כניסה לחשבונאות במלאי
 DocType: Sales Invoice,Sales Team1,Team1 מכירות
 apps/erpnext/erpnext/stock/doctype/item/item.py +564,Item {0} does not exist,פריט {0} אינו קיים
 DocType: Sales Invoice,Customer Address,כתובת הלקוח
@@ -2067,7 +2065,7 @@ apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.js +13,"Pleas
 apps/erpnext/erpnext/controllers/accounts_controller.py +601,Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2}),מראש סה&quot;כ ({0}) נגד להזמין {1} לא יכול להיות גדול יותר מהסך כולל ({2})
 DocType: Sales Partner,Select Monthly Distribution to unevenly distribute targets across months.,בחר בחתך חודשי להפיץ בצורה לא אחידה על פני מטרות חודשים.
 DocType: Purchase Invoice Item,Valuation Rate,שערי הערכת שווי
-apps/erpnext/erpnext/stock/get_item_details.py +542,Price List Currency not selected,מטבע מחירון לא נבחר
+apps/erpnext/erpnext/stock/get_item_details.py +546,Price List Currency not selected,מטבע מחירון לא נבחר
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,תאריך התחלת פרויקט
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +36,Until,עד
 DocType: Rename Tool,Rename Log,שינוי שם התחבר
@@ -2084,8 +2082,8 @@ DocType: Program Enrollment Tool Student,Program Enrollment Tool Student,סטו�
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +25,Name or Email is mandatory,שם או דוא&quot;ל הוא חובה
 DocType: Purchase Order Item,Returned Qty,כמות חזר
 DocType: Student,Exit,יציאה
-apps/erpnext/erpnext/accounts/doctype/account/account.py +158,Root Type is mandatory,סוג השורש הוא חובה
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +392,Serial No {0} created,מספר סידורי {0} נוצר
+apps/erpnext/erpnext/accounts/doctype/account/account.py +163,Root Type is mandatory,סוג השורש הוא חובה
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +398,Serial No {0} created,מספר סידורי {0} נוצר
 DocType: Homepage,Company Description for website homepage,תיאור החברה עבור הבית של האתר
 DocType: Item Customer Detail,"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","לנוחות לקוחות, ניתן להשתמש בקודים אלה בפורמטי הדפסה כמו הערות חשבוניות ומשלוח"
 DocType: Sales Invoice,Time Sheet List,רשימת גיליון זמן
@@ -2108,9 +2106,9 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +38,Newspaper Publ
 apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js +30,Select Fiscal Year,בחר שנת כספים
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +43,Reorder Level,הזמנה חוזרת רמה
 DocType: Attendance,Attendance Date,תאריך נוכחות
-apps/erpnext/erpnext/stock/get_item_details.py +401,Item Price updated for {0} in Price List {1},מחיר הפריט עודכן עבור {0} ב מחירון {1}
+apps/erpnext/erpnext/stock/get_item_details.py +405,Item Price updated for {0} in Price List {1},מחיר הפריט עודכן עבור {0} ב מחירון {1}
 DocType: Salary Structure,Salary breakup based on Earning and Deduction.,פרידה שכר על בסיס צבירה וניכוי.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +130,Account with child nodes cannot be converted to ledger,חשבון עם בלוטות ילד לא יכול להיות מומר לדג'ר
+apps/erpnext/erpnext/accounts/doctype/account/account.py +135,Account with child nodes cannot be converted to ledger,חשבון עם בלוטות ילד לא יכול להיות מומר לדג'ר
 DocType: Purchase Invoice Item,Accepted Warehouse,מחסן מקובל
 DocType: Bank Reconciliation Detail,Posting Date,תאריך פרסום
 DocType: Item,Valuation Method,שיטת הערכת שווי
@@ -2153,7 +2151,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 apps/erpnext/erpnext/config/selling.py +164,Template of terms or contract.,תבנית של מונחים או חוזה.
 DocType: Bank Account,Address and Contact,כתובת ולתקשר
 DocType: Cheque Print Template,Is Account Payable,האם חשבון זכאי
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +300,Stock cannot be updated against Purchase Receipt {0},מניות יכולות להיות לא מעודכנות נגד קבלת רכישת {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +304,Stock cannot be updated against Purchase Receipt {0},מניות יכולות להיות לא מעודכנות נגד קבלת רכישת {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +85,"Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","לעזוב לא יכול להיות מוקצה לפני {0}, כאיזון חופשה כבר היה בשיא הקצאת חופשת העתיד יועבר לשאת {1}"
 apps/erpnext/erpnext/accounts/party.py +350,Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s),הערה: תאריך יעד / הפניה עולה ימי אשראי ללקוחות מותר על ידי {0} יום (ים)
 apps/erpnext/erpnext/education/doctype/program/program.js +8,Student Applicant,סטודנט המבקש
@@ -2211,7 +2209,7 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +39,Cannot change status as student {0} is linked with student application {1},לא ניתן לשנות את מצב כמו סטודנט {0} הוא מקושר עם יישום סטודנט {1}
 DocType: Asset,Fully Depreciated,לגמרי מופחת
 ,Stock Projected Qty,המניה צפויה כמות
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +505,Customer {0} does not belong to project {1},לקוח {0} אינו שייכים לפרויקט {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +506,Customer {0} does not belong to project {1},לקוח {0} אינו שייכים לפרויקט {1}
 DocType: Employee Attendance Tool,Marked Attendance HTML,HTML נוכחות ניכרת
 DocType: Sales Invoice,Customer's Purchase Order,הלקוח הזמנת הרכש
 apps/erpnext/erpnext/config/stock.py +112,Serial No and Batch,אין ו אצווה סידורי
@@ -2224,7 +2222,7 @@ DocType: Purchase Invoice,Purchase Taxes and Charges,לרכוש מסים והי�
 ,Qty to Receive,כמות לקבלת
 DocType: Leave Block List,Leave Block List Allowed,השאר בלוק רשימת מחמד
 apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py +59,All Warehouses,מחסן כל
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +139,Credit To account must be a Balance Sheet account,אשראי לחשבון חייב להיות חשבון מאזן
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +143,Credit To account must be a Balance Sheet account,אשראי לחשבון חייב להיות חשבון מאזן
 DocType: Global Defaults,Disable In Words,שבת במילות
 apps/erpnext/erpnext/stock/doctype/item/item.py +70,Item Code is mandatory because Item is not automatically numbered,"קוד פריט חובה, כי הפריט לא ממוספר באופן אוטומטי"
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +101,Quotation {0} not of type {1},ציטוט {0} לא מסוג {1}
@@ -2248,7 +2246,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +549,Select 
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +34,Approving Role cannot be same as role the rule is Applicable To,אישור התפקיד לא יכול להיות זהה לתפקיד השלטון הוא ישים
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +65,Unsubscribe from this Email Digest,לבטל את המנוי לדוא&quot;ל זה תקציר
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +29,Message Sent,הודעה נשלחה
-apps/erpnext/erpnext/accounts/doctype/account/account.py +100,Account with child nodes cannot be set as ledger,חשבון עם בלוטות ילד לא ניתן להגדיר כחשבונות
+apps/erpnext/erpnext/accounts/doctype/account/account.py +105,Account with child nodes cannot be set as ledger,חשבון עם בלוטות ילד לא ניתן להגדיר כחשבונות
 DocType: C-Form,II,שני
 DocType: Sales Invoice,Rate at which Price list currency is converted to customer's base currency,קצב שבו רשימת מחיר המטבע מומר למטבע הבסיס של הלקוח
 DocType: Purchase Invoice Item,Net Amount (Company Currency),סכום נטו (חברת מטבע)
@@ -2258,7 +2256,7 @@ apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_vouc
 DocType: Work Order,Material Transferred for Manufacturing,חומר הועבר לייצור
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +49,Account {0} does not exists,חשבון {0} אינו קיים
 DocType: Project,Project Type,סוג פרויקט
-apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +16,Either target qty or target amount is mandatory.,כך או סכום כמות היעד או המטרה הוא חובה.
+apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +17,Either target qty or target amount is mandatory.,כך או סכום כמות היעד או המטרה הוא חובה.
 apps/erpnext/erpnext/config/projects.py +56,Cost of various activities,עלות של פעילויות שונות
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +60,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","הגדרת אירועים ל {0}, מאז עובד מצורף להלן אנשים מכירים אין זיהוי משתמש {1}"
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +163,Source and target warehouse must be different,המקור ומחסן היעד חייב להיות שונים
@@ -2292,7 +2290,7 @@ apps/erpnext/erpnext/templates/includes/product_list.js +45,Nothing more to show
 DocType: Lead,From Customer,מלקוחות
 apps/erpnext/erpnext/demo/setup/setup_data.py +321,Calls,שיחות
 DocType: Purchase Order Item Supplied,Stock UOM,המניה של אוני 'מישגן
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +257,Purchase Order {0} is not submitted,הזמנת רכש {0} לא תוגש
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +261,Purchase Order {0} is not submitted,הזמנת רכש {0} לא תוגש
 apps/erpnext/erpnext/stock/doctype/item/item.js +41,Projected,צפוי
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +233,Serial No {0} does not belong to Warehouse {1},מספר סידורי {0} אינו שייך למחסן {1}
 apps/erpnext/erpnext/controllers/status_updater.py +180,Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,הערה: מערכת לא תבדוק על-אספקה ועל-הזמנה לפריט {0} ככמות או כמות היא 0
@@ -2325,7 +2323,7 @@ DocType: Company,Asset Depreciation Cost Center,מרכז עלות פחת נכס�
 DocType: Production Plan Sales Order,Sales Order Date,תאריך הזמנת מכירות
 DocType: Sales Invoice Item,Delivered Qty,כמות נמסרה
 ,Payment Period Based On Invoice Date,תקופת תשלום מבוסס בתאריך החשבונית
-apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +58,Missing Currency Exchange Rates for {0},שערי חליפין מטבע חסר עבור {0}
+apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +59,Missing Currency Exchange Rates for {0},שערי חליפין מטבע חסר עבור {0}
 DocType: Assessment Plan,Examiner,בּוֹחֵן
 DocType: Journal Entry,Stock Entry,פריט מלאי
 DocType: Payment Entry,Payment References,הפניות תשלום
@@ -2356,7 +2354,7 @@ DocType: Bin,Requested Quantity,כמות מבוקשת
 DocType: Patient,Marital Status,מצב משפחתי
 DocType: Stock Settings,Auto Material Request,בקשת Auto חומר
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,כמות אצווה זמינה ממחסן
-apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +32,Current BOM and New BOM can not be same,BOM הנוכחי והחדש BOM אינו יכולים להיות זהים
+apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +39,Current BOM and New BOM can not be same,BOM הנוכחי והחדש BOM אינו יכולים להיות זהים
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +128,Date Of Retirement must be greater than Date of Joining,מועד הפרישה חייב להיות גדול מ תאריך ההצטרפות
 DocType: Sales Invoice,Against Income Account,נגד חשבון הכנסות
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +117,{0}% Delivered,{0}% נמסר
@@ -2375,7 +2373,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +231,Valuat
 DocType: POS Profile,Update Stock,בורסת עדכון
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +100,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,"אוני 'מישגן שונה עבור פריטים יובילו לערך השגוי (סה""כ) נקי במשקל. ודא שמשקל נטו של כל פריט הוא באותו אוני 'מישגן."
 DocType: Certification Application,Payment Details,פרטי תשלום
-apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +40,BOM Rate,BOM שערי
+apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +41,BOM Rate,BOM שערי
 DocType: Asset,Journal Entry for Scrap,תנועת יומן עבור גרוטאות
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +83,Please pull items from Delivery Note,אנא למשוך פריטים מתעודת המשלוח
 apps/erpnext/erpnext/accounts/utils.py +496,Journal Entries {0} are un-linked,"תנועות היומן {0} הם לא צמוד,"
@@ -2392,7 +2390,7 @@ DocType: Sales Invoice Item,Delivery Note Item,פריט תעודת משלוח
 DocType: Asset Maintenance Log,Task,משימה
 DocType: Purchase Taxes and Charges,Reference Row #,# ההתייחסות Row
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +76,Batch number is mandatory for Item {0},מספר אצווה הוא חובה עבור פריט {0}
-apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js +13,This is a root sales person and cannot be edited.,זה איש מכירות שורש ולא ניתן לערוך.
+apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js +22,This is a root sales person and cannot be edited.,זה איש מכירות שורש ולא ניתן לערוך.
 ,Stock Ledger,יומן מלאי
 apps/erpnext/erpnext/templates/includes/cart/cart_items.html +29,Rate: {0},שיעור: {0}
 DocType: Company,Exchange Gain / Loss Account,Exchange רווח / והפסד
@@ -2432,13 +2430,13 @@ apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.
 DocType: Serial No,Out of AMC,מתוך AMC
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +203,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,מספר הפחת הוזמן לא יכול להיות גדול ממספרם הכולל של פחת
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,הפוך תחזוקה בקר
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +262,Please contact to the user who have Sales Master Manager {0} role,אנא צור קשר עם למשתמש שיש לי מכירות Master מנהל {0} תפקיד
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +263,Please contact to the user who have Sales Master Manager {0} role,אנא צור קשר עם למשתמש שיש לי מכירות Master מנהל {0} תפקיד
 DocType: Company,Default Cash Account,חשבון מזומנים ברירת מחדל
 apps/erpnext/erpnext/config/accounts.py +79,Company (not Customer or Supplier) master.,אדון חברה (לא לקוח או ספק).
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +6,This is based on the attendance of this Student,זה מבוסס על הנוכחות של תלמיד זה
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +180,Add more items or open full form,תוכלו להוסיף עוד פריטים או מלא טופס פתוח
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +222,Delivery Notes {0} must be cancelled before cancelling this Sales Order,תעודות משלוח {0} יש לבטל לפני ביטול הזמנת מכירות זה
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +109,Paid amount + Write Off Amount can not be greater than Grand Total,הסכום ששולם + לכתוב את הסכום לא יכול להיות גדול יותר מסך כולל
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +113,Paid amount + Write Off Amount can not be greater than Grand Total,הסכום ששולם + לכתוב את הסכום לא יכול להיות גדול יותר מסך כולל
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},{0} הוא לא מספר אצווה תקף לפריט {1}
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +199,Note: There is not enough leave balance for Leave Type {0},הערה: אין איזון חופשה מספיק לחופשת סוג {0}
 DocType: Program Enrollment Fee,Program Enrollment Fee,הרשמה לתכנית דמים
@@ -2485,7 +2483,7 @@ apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.js +47,
 DocType: Cashier Closing,From Time,מזמן
 DocType: Notification Control,Custom Message,הודעה מותאמת אישית
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +33,Investment Banking,בנקאות השקעות
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +103,Cash or Bank Account is mandatory for making payment entry,חשבון מזומן או בנק הוא חובה להכנת כניסת תשלום
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +107,Cash or Bank Account is mandatory for making payment entry,חשבון מזומן או בנק הוא חובה להכנת כניסת תשלום
 DocType: Purchase Invoice,Price List Exchange Rate,מחיר מחירון שער חליפין
 DocType: Purchase Invoice Item,Rate,שיעור
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +107,Intern,Intern
@@ -2515,7 +2513,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py +448,All Territories,
 DocType: Purchase Invoice,Items,פריטים
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +33,Student is already enrolled.,סטודנטים כבר נרשמו.
 DocType: Fiscal Year,Year Name,שם שנה
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +321,There are more holidays than working days this month.,ישנם יותר מ חגי ימי עבודה בחודש זה.
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,ישנם יותר מ חגי ימי עבודה בחודש זה.
 DocType: Production Plan Item,Product Bundle Item,פריט Bundle מוצר
 DocType: Sales Partner,Sales Partner Name,שם שותף מכירות
 apps/erpnext/erpnext/hooks.py +140,Request for Quotations,בקשת ציטטות
@@ -2591,7 +2589,7 @@ apps/erpnext/erpnext/config/maintenance.py +17,Visit report for maintenance call
 DocType: Stock Entry,Update Rate and Availability,עדכון תעריף וזמינות
 DocType: Stock Settings,Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,אחוז מותר לך לקבל או למסור יותר נגד כל הכמות המוזמנת. לדוגמא: אם יש לך הורה 100 יחידות. והפרשה שלך הוא 10% אז אתה רשאי לקבל 110 יחידות.
 DocType: Loyalty Program,Customer Group,קבוצת לקוחות
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +225,Expense account is mandatory for item {0},חשבון הוצאות הוא חובה עבור פריט {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +229,Expense account is mandatory for item {0},חשבון הוצאות הוא חובה עבור פריט {0}
 DocType: BOM,Website Description,תיאור אתר
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +101,Net Change in Equity,שינוי נטו בהון עצמי
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +291,Please cancel Purchase Invoice {0} first,אנא בטל חשבונית רכישת {0} ראשון
@@ -2603,11 +2601,11 @@ apps/erpnext/erpnext/setup/doctype/supplier_group/supplier_group.js +5,There is 
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Summary for this month and pending activities,סיכום לחודש זה ופעילויות תלויות ועומדות
 DocType: Customer Group,Customer Group Name,שם קבוצת הלקוחות
 apps/erpnext/erpnext/public/js/financial_statements.js +58,Cash Flow Statement,דוח על תזרימי המזומנים
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +552,Please remove this Invoice {0} from C-Form {1},אנא הסר חשבונית זו {0} מC-טופס {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +553,Please remove this Invoice {0} from C-Form {1},אנא הסר חשבונית זו {0} מC-טופס {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,אנא בחר לשאת קדימה אם אתה גם רוצה לכלול האיזון של שנת כספים הקודמת משאיר לשנה הפיסקלית
 DocType: GL Entry,Against Voucher Type,נגד סוג השובר
 DocType: Item,Attributes,תכונות
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +250,Please enter Write Off Account,נא להזין לכתוב את החשבון
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +254,Please enter Write Off Account,נא להזין לכתוב את החשבון
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +71,Last Order Date,התאריך אחרון סדר
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +57,Account {0} does not belongs to company {1},חשבון {0} אינו שייך לחברת {1}
 DocType: C-Form,C-Form,C-טופס
@@ -2632,7 +2630,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +28,Financial Serv
 apps/erpnext/erpnext/config/projects.py +51,Types of activities for Time Logs,סוגי פעילויות יומני זמן
 DocType: Opening Invoice Creation Tool,Sales,מכירות
 DocType: Stock Entry Detail,Basic Amount,סכום בסיסי
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +523,Warehouse required for stock Item {0},מחסן נדרש לפריט המניה {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +524,Warehouse required for stock Item {0},מחסן נדרש לפריט המניה {0}
 DocType: Leave Allocation,Unused leaves,עלים שאינם בשימוש
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +248,Cr,Cr
 DocType: Tax Rule,Billing State,מדינת חיוב
@@ -2716,7 +2714,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +232,Sales Invoi
 DocType: Clinical Procedure,Age,גיל
 DocType: Sales Invoice Timesheet,Billing Amount,סכום חיוב
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +84,Invalid quantity specified for item {0}. Quantity should be greater than 0.,כמות לא חוקית שצוינה עבור פריט {0}. כמות צריכה להיות גדולה מ -0.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +166,Account with existing transaction can not be deleted,חשבון עם עסקה הקיימת לא ניתן למחוק
+apps/erpnext/erpnext/accounts/doctype/account/account.py +171,Account with existing transaction can not be deleted,חשבון עם עסקה הקיימת לא ניתן למחוק
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +109,Legal Expenses,הוצאות משפטיות
 DocType: Purchase Invoice,Posting Time,זמן פרסום
 DocType: Timesheet,% Amount Billed,% סכום החיוב
@@ -2730,9 +2728,9 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,הכנסות מלקוחות חדשות
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Travel Expenses,הוצאות נסיעה
 DocType: Maintenance Visit,Breakdown,התפלגות
-apps/erpnext/erpnext/controllers/accounts_controller.py +890,Account: {0} with currency: {1} can not be selected,חשבון: {0} עם מטבע: {1} לא ניתן לבחור
+apps/erpnext/erpnext/controllers/accounts_controller.py +889,Account: {0} with currency: {1} can not be selected,חשבון: {0} עם מטבע: {1} לא ניתן לבחור
 DocType: Bank Reconciliation Detail,Cheque Date,תאריך המחאה
-apps/erpnext/erpnext/accounts/doctype/account/account.py +52,Account {0}: Parent account {1} does not belong to company: {2},חשבון {0}: הורה חשבון {1} אינו שייך לחברה: {2}
+apps/erpnext/erpnext/accounts/doctype/account/account.py +57,Account {0}: Parent account {1} does not belong to company: {2},חשבון {0}: הורה חשבון {1} אינו שייך לחברה: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js +126,Successfully deleted all transactions related to this company!,בהצלחה נמחק כל העסקות הקשורות לחברה זו!
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +39,As on Date,כבתאריך
 DocType: Additional Salary,HR,HR
@@ -2764,7 +2762,7 @@ apps/erpnext/erpnext/healthcare/doctype/healthcare_practitioner/healthcare_pract
 DocType: Bank Account,Party Type,סוג המפלגה
 DocType: Item Attribute Value,Abbreviation,קיצור
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py +36,Not authroized since {0} exceeds limits,לא authroized מאז {0} עולה על גבולות
-apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +63,Set Tax Rule for shopping cart,כלל מס שנקבע לעגלת קניות
+apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +64,Set Tax Rule for shopping cart,כלל מס שנקבע לעגלת קניות
 DocType: Purchase Invoice,Taxes and Charges Added,מסים והיטלים נוסף
 ,Sales Funnel,משפך מכירות
 apps/erpnext/erpnext/setup/doctype/company/company.py +53,Abbreviation is mandatory,הקיצור הוא חובה
@@ -2775,9 +2773,9 @@ DocType: Stock Settings,Role Allowed to edit frozen stock,תפקיד מחמד ל
 ,Territory Target Variance Item Group-Wise,פריט יעד שונות טריטורית קבוצה-Wise
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +131,All Customer Groups,בכל קבוצות הלקוחות
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +155,Accumulated Monthly,מצטבר חודשי
-apps/erpnext/erpnext/controllers/accounts_controller.py +847,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} הוא חובה. אולי שיא המרה לא נוצר עבור {1} ל {2}.
+apps/erpnext/erpnext/controllers/accounts_controller.py +846,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} הוא חובה. אולי שיא המרה לא נוצר עבור {1} ל {2}.
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +46,Tax Template is mandatory.,תבנית מס היא חובה.
-apps/erpnext/erpnext/accounts/doctype/account/account.py +46,Account {0}: Parent account {1} does not exist,חשבון {0}: הורה חשבון {1} לא קיימת
+apps/erpnext/erpnext/accounts/doctype/account/account.py +51,Account {0}: Parent account {1} does not exist,חשבון {0}: הורה חשבון {1} לא קיימת
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),מחיר מחירון שיעור (חברת מטבע)
 DocType: Products Settings,Products Settings,הגדרות מוצרים
 DocType: Account,Temporary,זמני
@@ -2812,7 +2810,7 @@ Updated via 'Time Log'","בדקות עדכון באמצעות 'יומן זמן "
 DocType: Customer,From Lead,מליד
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,הזמנות שוחררו לייצור.
 apps/erpnext/erpnext/public/js/account_tree_grid.js +65,Select Fiscal Year...,בחר שנת כספים ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +646,POS Profile required to make POS Entry,פרופיל קופה הנדרש כדי להפוך את קופה הכניסה
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +629,POS Profile required to make POS Entry,פרופיל קופה הנדרש כדי להפוך את קופה הכניסה
 DocType: Program Enrollment Tool,Enroll Students,רשם תלמידים
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,מכירה סטנדרטית
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +248,Atleast one warehouse is mandatory,Atleast מחסן אחד הוא חובה
@@ -2888,7 +2886,7 @@ apps/erpnext/erpnext/config/learn.py +107,Newsletters,ידיעונים
 DocType: Stock Ledger Entry,Stock Ledger Entry,מניית דג'ר כניסה
 DocType: Department,Leave Block List,השאר בלוק רשימה
 DocType: Purchase Invoice,Tax ID,זיהוי מס
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +197,Item {0} is not setup for Serial Nos. Column must be blank,פריט {0} הוא לא התקנה למס סידורי. טור חייב להיות ריק
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Item {0} is not setup for Serial Nos. Column must be blank,פריט {0} הוא לא התקנה למס סידורי. טור חייב להיות ריק
 DocType: Accounts Settings,Accounts Settings,חשבונות הגדרות
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,לְאַשֵׁר
 DocType: Customer,Sales Partner and Commission,פרטנר מכירות והוועדה
@@ -2907,7 +2905,7 @@ apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +117,"Asset {0} cannot
 DocType: Task,Total Expense Claim (via Expense Claim),תביעה סה&quot;כ הוצאות (באמצעות תביעת הוצאות)
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177,Mark Absent,מארק בהעדר
 DocType: Journal Entry Account,Exchange Rate,שער חליפין
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +664,Sales Order {0} is not submitted,להזמין מכירות {0} לא יוגש
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +647,Sales Order {0} is not submitted,להזמין מכירות {0} לא יוגש
 DocType: Homepage,Tag Line,קו תג
 DocType: Cheque Print Template,Regular,רגיל
 DocType: Purchase Order Item,Last Purchase Rate,שער רכישה אחרונה
@@ -2925,7 +2923,7 @@ DocType: Payment Entry,Paid Amount,סכום ששולם
 DocType: Assessment Plan,Supervisor,מְפַקֵחַ
 ,Available Stock for Packing Items,מלאי זמין לפריטי אריזה
 DocType: Item Variant,Item Variant,פריט Variant
-apps/erpnext/erpnext/accounts/doctype/account/account.py +116,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","יתרת חשבון כבר בחיוב, שאינך מורשים להגדרה 'יתרה חייבים להיות' כמו 'אשראי'"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +121,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","יתרת חשבון כבר בחיוב, שאינך מורשים להגדרה 'יתרה חייבים להיות' כמו 'אשראי'"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +330,Quality Management,ניהול איכות
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +52,Item {0} has been disabled,פריט {0} הושבה
 apps/erpnext/erpnext/buying/utils.py +47,Please enter quantity for Item {0},נא להזין את הכמות לפריט {0}
@@ -3031,7 +3029,7 @@ DocType: BOM,Manage cost of operations,ניהול עלות של פעולות
 DocType: Notification Control,"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","כאשר כל אחת מהעסקאות בדקו ""הוגש"", מוקפץ הדוא""ל נפתח באופן אוטומטי לשלוח דואר אלקטרוני לקשורים ""צור קשר"" בעסקה ש, עם העסקה כקובץ מצורף. המשתמשים יכולים או לא יכולים לשלוח הדואר האלקטרוני."
 apps/erpnext/erpnext/config/setup.py +14,Global Settings,הגדרות גלובליות
 DocType: Employee Education,Employee Education,חינוך לעובדים
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1148,It is needed to fetch Item Details.,הוא צריך את זה כדי להביא פרטי פריט.
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1180,It is needed to fetch Item Details.,הוא צריך את זה כדי להביא פרטי פריט.
 DocType: Salary Slip,Net Pay,חבילת נקי
 DocType: Cash Flow Mapping Accounts,Account,חשבון
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +222,Serial No {0} has already been received,מספר סידורי {0} כבר קיבל
@@ -3099,7 +3097,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +52,Charges are updated in Purchase Receipt against each item,חיובים מתעדכנות בקבלת רכישה כנגד כל פריט
 DocType: Warranty Claim,Resolved By,נפתר על ידי
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,המחאות ופיקדונות פינו באופן שגוי
-apps/erpnext/erpnext/accounts/doctype/account/account.py +48,Account {0}: You can not assign itself as parent account,חשבון {0}: לא ניתן להקצות את עצמו כחשבון אב
+apps/erpnext/erpnext/accounts/doctype/account/account.py +53,Account {0}: You can not assign itself as parent account,חשבון {0}: לא ניתן להקצות את עצמו כחשבון אב
 DocType: Purchase Invoice Item,Price List Rate,מחיר מחירון שערי
 DocType: Item,"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.","הצג ""במלאי"" או ""לא במלאי"", המבוסס על המלאי זמין במחסן זה."
 apps/erpnext/erpnext/config/manufacturing.py +38,Bill of Materials (BOM),הצעת החוק של חומרים (BOM)
@@ -3171,7 +3169,7 @@ DocType: Item,List this Item in multiple groups on the website.,רשימת פר�
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +215,{0} {1} does not exist,{0} {1} לא קיים
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +355,Please check Multi Currency option to allow accounts with other currency,אנא בדוק את אפשרות מטבע רב כדי לאפשר חשבונות עם מטבע אחר
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +88,Item: {0} does not exist in the system,פריט: {0} אינו קיים במערכת
-apps/erpnext/erpnext/accounts/doctype/account/account.py +108,You are not authorized to set Frozen value,אתה לא רשאי לקבוע ערך קפוא
+apps/erpnext/erpnext/accounts/doctype/account/account.py +113,You are not authorized to set Frozen value,אתה לא רשאי לקבוע ערך קפוא
 DocType: Payment Reconciliation,Get Unreconciled Entries,קבל ערכים לא מותאמים
 DocType: Payment Reconciliation,From Invoice Date,מתאריך החשבונית
 apps/erpnext/erpnext/public/js/setup_wizard.js +114,What does it do?,מה זה עושה?
@@ -3184,12 +3182,12 @@ DocType: Purchase Taxes and Charges,Account Head,חשבון ראש
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +142,Electrical,חשמל
 DocType: Stock Entry,Total Value Difference (Out - In),הבדל ערך כולל (Out - ב)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +380,Row {0}: Exchange Rate is mandatory,שורת {0}: שער החליפין הוא חובה
-apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +27,User ID not set for Employee {0},זיהוי משתמש לא נקבע לעובדים {0}
+apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +46,User ID not set for Employee {0},זיהוי משתמש לא נקבע לעובדים {0}
 DocType: Stock Entry,Default Source Warehouse,מחסן מקור ברירת מחדל
 DocType: Item,Customer Code,קוד לקוח
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +237,Birthday Reminder for {0},תזכורת יום הולדת עבור {0}
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72,Days Since Last Order,ימים מאז הזמנה אחרונה
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +426,Debit To account must be a Balance Sheet account,חיוב החשבון חייב להיות חשבון מאזן
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +427,Debit To account must be a Balance Sheet account,חיוב החשבון חייב להיות חשבון מאזן
 DocType: Asset,Naming Series,סדרת שמות
 DocType: Leave Block List,Leave Block List Name,השאר שם בלוק רשימה
 DocType: Shopping Cart Settings,Display Settings,הגדרות תצוגה
@@ -3200,7 +3198,7 @@ DocType: Student Attendance,Present,הווה
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +37,Delivery Note {0} must not be submitted,תעודת משלוח {0} אסור תוגש
 DocType: Notification Control,Sales Invoice Message,מסר חשבונית מכירות
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +27,Closing Account {0} must be of type Liability / Equity,סגירת חשבון {0} חייבת להיות אחריות / הון עצמי סוג
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +405,Salary Slip of employee {0} already created for time sheet {1},תלוש משכורת של עובד {0} כבר נוצר עבור גיליון זמן {1}
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +407,Salary Slip of employee {0} already created for time sheet {1},תלוש משכורת של עובד {0} כבר נוצר עבור גיליון זמן {1}
 DocType: Production Plan Item,Ordered Qty,כמות הורה
 apps/erpnext/erpnext/stock/doctype/item/item.py +802,Item {0} is disabled,פריט {0} הוא נכים
 DocType: Stock Settings,Stock Frozen Upto,המניה קפואה Upto
@@ -3235,7 +3233,7 @@ DocType: SG Creation Tool Course,Max Strength,מקס חוזק
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +127,Available {0},זמין {0}
 DocType: Manufacturing Settings,Manufacturing Settings,הגדרות ייצור
 apps/erpnext/erpnext/config/setup.py +56,Setting up Email,הגדרת דוא&quot;ל
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +130,Please enter default currency in Company Master,נא להזין את ברירת מחדל של המטבע בחברה Master
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +134,Please enter default currency in Company Master,נא להזין את ברירת מחדל של המטבע בחברה Master
 DocType: Stock Entry Detail,Stock Entry Detail,פרט מניית הכניסה
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +111,Daily Reminders,תזכורות יומיות
 DocType: Products Settings,Home Page is Products,דף הבית הוא מוצרים
@@ -3261,7 +3259,7 @@ DocType: Task,Closing Date,תאריך סגירה
 DocType: Sales Order Item,Produced Quantity,כמות מיוצרת
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +114,Engineer,מהנדס
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +38,Search Sub Assemblies,הרכבות תת חיפוש
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +195,Item Code required at Row No {0},קוד פריט נדרש בשורה לא {0}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +199,Item Code required at Row No {0},קוד פריט נדרש בשורה לא {0}
 DocType: Sales Partner,Partner Type,שם שותף
 DocType: Purchase Taxes and Charges,Actual,בפועל
 DocType: Authorization Rule,Customerwise Discount,Customerwise דיסקונט
@@ -3279,7 +3277,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +102,Part
 DocType: Employee,Applicable Holiday List,רשימת Holiday ישימה
 DocType: Employee,Cheque,המחאה
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +67,Series Updated,סדרת עדכון
-apps/erpnext/erpnext/accounts/doctype/account/account.py +161,Report Type is mandatory,סוג הדוח הוא חובה
+apps/erpnext/erpnext/accounts/doctype/account/account.py +166,Report Type is mandatory,סוג הדוח הוא חובה
 DocType: Item,Serial Number Series,סדרת מספר סידורי
 apps/erpnext/erpnext/buying/utils.py +68,Warehouse is mandatory for stock Item {0} in row {1},המחסן הוא חובה עבור פריט המניה {0} בשורת {1}
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +45,Retail & Wholesale,קמעונאות וסיטונאות
@@ -3305,7 +3303,7 @@ DocType: Task,Review Date,תאריך סקירה
 DocType: Purchase Invoice,Advance Payments,תשלומים מראש
 DocType: Purchase Taxes and Charges,On Net Total,בסך הכל נטו
 apps/erpnext/erpnext/controllers/item_variant.py +92,Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4},ערך תמורת תכונה {0} חייב להיות בטווח של {1} {2} וזאת במדרגות של {3} עבור פריט {4}
-apps/erpnext/erpnext/accounts/doctype/account/account.py +126,Currency can not be changed after making entries using some other currency,מטבע לא ניתן לשנות לאחר ביצוע ערכים באמצעות כמה מטבע אחר
+apps/erpnext/erpnext/accounts/doctype/account/account.py +131,Currency can not be changed after making entries using some other currency,מטבע לא ניתן לשנות לאחר ביצוע ערכים באמצעות כמה מטבע אחר
 DocType: Company,Round Off Account,לעגל את החשבון
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +100,Administrative Expenses,הוצאות הנהלה
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +18,Consulting,ייעוץ
@@ -3372,7 +3370,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +536,Debit 
 DocType: Fiscal Year,Year Start Date,תאריך התחלת שנה
 DocType: Additional Salary,Employee Name,שם עובד
 DocType: Purchase Invoice,Rounded Total (Company Currency),"סה""כ מעוגל (חברת מטבע)"
-apps/erpnext/erpnext/accounts/doctype/account/account.py +98,Cannot covert to Group because Account Type is selected.,לא יכול סמוי לקבוצה בגלל סוג חשבון הנבחר.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +103,Cannot covert to Group because Account Type is selected.,לא יכול סמוי לקבוצה בגלל סוג חשבון הנבחר.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +270,{0} {1} has been modified. Please refresh.,{0} {1} כבר שונה. אנא רענן.
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,להפסיק ממשתמשים לבצע יישומי חופשה בימים שלאחר מכן.
 DocType: Loyalty Point Entry,Purchase Amount,סכום הרכישה
@@ -3394,7 +3392,7 @@ DocType: GL Entry,Voucher Type,סוג שובר
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1733,Price List not found or disabled,מחיר המחירון לא נמצא או נכים
 DocType: Student Applicant,Approved,אושר
 apps/erpnext/erpnext/public/js/pos/pos_selected_item.html +15,Price,מחיר
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +347,Employee relieved on {0} must be set as 'Left',עובד הקלה על {0} חייב להיות מוגדרים כ'שמאל '
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +349,Employee relieved on {0} must be set as 'Left',עובד הקלה על {0} חייב להיות מוגדרים כ'שמאל '
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,הערכת {0} נוצרה עבור עובדי {1} בטווח התאריכים נתון
 DocType: Academic Term,Education,חינוך
 DocType: Selling Settings,Campaign Naming By,Naming קמפיין ב
@@ -3470,7 +3468,7 @@ apps/erpnext/erpnext/config/selling.py +184,Analytics,Analytics
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +25,Cart is Empty,עגלה ריקה
 DocType: Work Order,Actual Operating Cost,עלות הפעלה בפועל
 DocType: Payment Entry,Cheque/Reference No,המחאה / אסמכתא
-apps/erpnext/erpnext/accounts/doctype/account/account.py +83,Root cannot be edited.,לא ניתן לערוך את השורש.
+apps/erpnext/erpnext/accounts/doctype/account/account.py +88,Root cannot be edited.,לא ניתן לערוך את השורש.
 DocType: Manufacturing Settings,Allow Production on Holidays,לאפשר ייצור בחגים
 DocType: Sales Invoice,Customer's Purchase Order Date,תאריך הזמנת הרכש של הלקוח
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +173,Capital Stock,מלאי הון
@@ -3483,7 +3481,7 @@ apps/erpnext/erpnext/templates/pages/home.html +14,Featured Products,מוצרי�
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +124,Designer,מעצב
 apps/erpnext/erpnext/config/selling.py +163,Terms and Conditions Template,תבנית תנאים והגבלות
 DocType: Serial No,Delivery Details,פרטי משלוח
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +574,Cost Center is required in row {0} in Taxes table for type {1},מרכז העלות נדרש בשורת {0} במסי שולחן לסוג {1}
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +578,Cost Center is required in row {0} in Taxes table for type {1},מרכז העלות נדרש בשורת {0} במסי שולחן לסוג {1}
 DocType: Program,Program Code,קוד התוכנית
 ,Item-wise Purchase Register,הרשם רכישת פריט-חכם
 DocType: Loyalty Point Entry,Expiry Date,תַאֲרִיך תְפוּגָה
@@ -3508,6 +3506,6 @@ DocType: Employee,Reason for Leaving,סיבה להשארה
 DocType: Expense Claim Detail,Sanctioned Amount,סכום גושפנקא
 DocType: GL Entry,Is Opening,האם פתיחה
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +228,Row {0}: Debit entry can not be linked with a {1},שורת {0}: כניסת חיוב לא יכולה להיות מקושרת עם {1}
-apps/erpnext/erpnext/accounts/doctype/account/account.py +233,Account {0} does not exist,חשבון {0} אינו קיים
+apps/erpnext/erpnext/accounts/doctype/account/account.py +238,Account {0} does not exist,חשבון {0} אינו קיים
 DocType: Account,Cash,מזומנים
 DocType: Employee,Short biography for website and other publications.,ביוגרפיה קצרות באתר האינטרנט של ופרסומים אחרים.
