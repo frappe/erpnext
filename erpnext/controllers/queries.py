@@ -208,9 +208,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(start)s, %(page_len)s """.format(
 			fcond=get_filters_cond(doctype, filters, conditions),
 			mcond=get_match_cond(doctype),
-			key=searchfield),
-		{
-			'txt': frappe.db.escape('%' + txt + '%'),
+			key=searchfield), {
+			'txt': '%' + txt + '%',
 			'_txt': txt.replace("%", ""),
 			'start': start or 0,
 			'page_len': page_len or 20
@@ -353,7 +352,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				{condition} {match_condition}
 			order by idx desc, name"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
-				'txt': frappe.db.escape('%' + txt + '%'),
+				'txt': '%' + txt + '%',
 				'company': filters.get("company", "")
 			})
 
@@ -378,7 +377,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 		.format(condition=condition, key=searchfield,
 			match_condition=get_match_cond(doctype)), {
 			'company': filters.get("company", ""),
-			'txt': frappe.db.escape('%' + txt + '%')
+			'txt': '%' + txt + '%'
 		})
 
 
