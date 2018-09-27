@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe, random
+import frappe, random, json
 from frappe.utils.make_random import how_many, get_random
 from frappe.desk import query_report
 from erpnext.setup.utils import get_exchange_rate
@@ -16,14 +16,14 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
 
-	if random.random() < 0.3:
+	if random.random() < 0.6:
 		report = "Items To Be Requested"
 		for row in query_report.run(report)["result"][:random.randint(1, 5)]:
 			item_code, qty = row[0], abs(row[-1])
 
 			mr = make_material_request(item_code, qty)
 
-	if random.random() < 0.3:
+	if random.random() < 0.6:
 		for mr in frappe.get_all('Material Request',
 			filters={'material_request_type': 'Purchase', 'status': 'Open'},
 			limit=random.randint(1,6)):
@@ -36,7 +36,7 @@ def work():
 				rfq.submit()
 
 	# Make suppier quotation from RFQ against each supplier.
-	if random.random() < 0.3:
+	if random.random() < 0.6:
 		for rfq in frappe.get_all('Request for Quotation',
 			filters={'status': 'Open'}, limit=random.randint(1, 6)):
 			if not frappe.get_all('Supplier Quotation',
@@ -59,7 +59,7 @@ def work():
 		exchange_rate = get_exchange_rate(party_account_currency, company_currency, args="for_buying")
 
 	# make supplier quotations
-	if random.random() < 0.2:
+	if random.random() < 0.5:
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
 		report = "Material Requests for which Supplier Quotations are not created"
@@ -89,7 +89,7 @@ def work():
 				po.submit()
 				frappe.db.commit()
 
-	if random.random() < 0.2:
+	if random.random() < 0.5:
 		make_subcontract()
 
 def make_material_request(item_code, qty):
@@ -129,6 +129,7 @@ def make_subcontract():
 		po = frappe.new_doc("Purchase Order")
 		po.is_subcontracted = "Yes"
 		po.supplier = get_random("Supplier")
+		po.transaction_date = frappe.flags.current_date # added
 		po.schedule_date = frappe.utils.add_days(frappe.flags.current_date, 7)
 
 		item_code = get_random("Item", {"is_sub_contracted_item": 1})
@@ -150,7 +151,7 @@ def make_subcontract():
 		make_material_request(po.items[0].item_code, po.items[0].qty)
 
 		# transfer material for sub-contract
-		stock_entry = frappe.get_doc(make_rm_stock_entry(po.name, po.items[0].item_code))
+		stock_entry = frappe.get_doc(make_rm_stock_entry(po.name, frappe.as_json(po.items)))
 		stock_entry.from_warehouse = "Stores - WPL"
 		stock_entry.to_warehouse = "Supplier - WPL"
 		stock_entry.insert()

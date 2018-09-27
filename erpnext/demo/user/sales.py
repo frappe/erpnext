@@ -12,12 +12,13 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
-	if random.random() < 0.5:
-		for i in range(random.randint(1,7)):
+
+	for i in range(random.randint(1,7)):
+		if random.random() < 0.5:
 			make_opportunity()
 
-	if random.random() < 0.5:
-		for i in range(random.randint(1,3)):
+	for i in range(random.randint(1,3)):
+		if random.random() < 0.5:
 			make_quotation()
 
 	# lost quotations / inquiries
@@ -32,11 +33,11 @@ def work():
 			if opportunity and opportunity.status in ('Open', 'Replied'):
 				opportunity.declare_enquiry_lost('Did not ask')
 
-	if random.random() < 0.3:
-		for i in range(random.randint(1,3)):
+	for i in range(random.randint(1,3)):
+		if random.random() < 0.3:
 			make_sales_order()
 
-	if random.random() < 0.1:
+	if random.random() < 0.5:
 		#make payment request against Sales Order
 		sales_order_name = get_random("Sales Order", filters={"docstatus": 1})
 		if sales_order_name:
@@ -115,8 +116,8 @@ def make_quotation():
 def make_sales_order():
 	q = get_random("Quotation", {"status": "Submitted"})
 	if q:
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-		so = frappe.get_doc(make_sales_order(q))
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order as mso
+		so = frappe.get_doc(mso(q))
 		so.transaction_date = frappe.flags.current_date
 		so.delivery_date = frappe.utils.add_days(frappe.flags.current_date, 10)
 		so.insert()
