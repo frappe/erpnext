@@ -153,7 +153,8 @@ class Item(WebsiteGenerator):
 				"price_list": price_list,
 				"item_code": self.name,
 				"currency": erpnext.get_default_currency(),
-				"price_list_rate": self.standard_rate
+				"price_list_rate": self.standard_rate,
+				"valid_from": None
 			})
 			item_price.insert()
 
