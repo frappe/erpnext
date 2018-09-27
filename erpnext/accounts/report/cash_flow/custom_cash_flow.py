@@ -10,7 +10,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 
 
 def get_mapper_for(mappers, position):
-	mapper_list = filter(lambda x: x['position'] == position, mappers)
+	mapper_list = list(filter(lambda x: x['position'] == position, mappers))
 	return mapper_list[0] if mapper_list else []
 
 
