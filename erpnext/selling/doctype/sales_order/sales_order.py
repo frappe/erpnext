@@ -498,6 +498,41 @@ def make_material_request(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
+def make_purchase_receipt(supplier, source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.supplier = supplier
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
+
+		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
+		if default_price_list:
+			target.buying_price_list = default_price_list
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
+		target.project = source_parent.project
+
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Receipt",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Receipt Item",
+			"postprocess": update_item
+		}
+	}, target_doc, set_missing_values)
+
+	return doc
+
+@frappe.whitelist()
 def make_project(source_name, target_doc=None):
 	def postprocess(source, doc):
 		doc.project_type = "External"
