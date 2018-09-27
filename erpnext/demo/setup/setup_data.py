@@ -191,47 +191,56 @@ def setup_user_roles():
 		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
 		user.add_roles('HR User', 'HR Manager', 'Accounts User')
 		frappe.db.set_global('demo_hr_user', user.name)
+		update_employee_department(user.name, 'Human Resources')
 		for d in frappe.get_all('User Permission', filters={"user": "CaitlinSnow@example.com"}):
 			frappe.delete_doc('User Permission', d.name)
 
 	if not frappe.db.get_global('demo_sales_user_1'):
 		user = frappe.get_doc('User', 'VandalSavage@example.com')
 		user.add_roles('Sales User')
+		update_employee_department(user.name, 'Sales')
 		frappe.db.set_global('demo_sales_user_1', user.name)
 
 	if not frappe.db.get_global('demo_sales_user_2'):
 		user = frappe.get_doc('User', 'GraceChoi@example.com')
 		user.add_roles('Sales User', 'Sales Manager', 'Accounts User')
+		update_employee_department(user.name, 'Sales')
 		frappe.db.set_global('demo_sales_user_2', user.name)
 
 	if not frappe.db.get_global('demo_purchase_user'):
 		user = frappe.get_doc('User', 'MaxwellLord@example.com')
 		user.add_roles('Purchase User', 'Purchase Manager', 'Accounts User', 'Stock User')
+		update_employee_department(user.name, 'Purchase')
 		frappe.db.set_global('demo_purchase_user', user.name)
 
 	if not frappe.db.get_global('demo_manufacturing_user'):
 		user = frappe.get_doc('User', 'NeptuniaAquaria@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
+		update_employee_department(user.name, 'Production')
 		frappe.db.set_global('demo_manufacturing_user', user.name)
 
 	if not frappe.db.get_global('demo_stock_user'):
 		user = frappe.get_doc('User', 'HollyGranger@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
+		update_employee_department(user.name, 'Production')
 		frappe.db.set_global('demo_stock_user', user.name)
 
 	if not frappe.db.get_global('demo_accounts_user'):
 		user = frappe.get_doc('User', 'BarryAllen@example.com')
 		user.add_roles('Accounts User', 'Accounts Manager', 'Sales User', 'Purchase User')
+		update_employee_department(user.name, 'Accounts')
 		frappe.db.set_global('demo_accounts_user', user.name)
 
 	if not frappe.db.get_global('demo_projects_user'):
 		user = frappe.get_doc('User', 'PeterParker@example.com')
 		user.add_roles('HR User', 'Projects User')
+		update_employee_department(user.name, 'Management')
 		frappe.db.set_global('demo_projects_user', user.name)
 
 	if not frappe.db.get_global('demo_education_user'):
 		user = frappe.get_doc('User', 'ArthurCurry@example.com')
 		user.add_roles('Academics User')
+		update_employee_department(user.name, 'Management')
 		frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
@@ -409,3 +418,8 @@ def import_json(doctype, submit=False, values=None):
 	frappe.db.commit()
 
 	frappe.flags.in_import = False
+
+def update_employee_department(user_id, department):
+	employee = frappe.db.get_value('Employee', {"user_id": user_id}, 'name')
+	department = frappe.db.get_value('Department', {'department_name': department}, 'name')
+	frappe.db.set_value('Employee', employee, 'department', department)
