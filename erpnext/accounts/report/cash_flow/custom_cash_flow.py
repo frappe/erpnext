@@ -345,13 +345,13 @@ def execute(filters=None):
 
 	# compute net profit / loss
 	income = get_data(
-		filters.company, "Income", "Credit", period_list,
+		filters.company, "Income", "Credit", period_list, filters=filters,
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
 		ignore_accumulated_values_for_fy=True
 	)
 
 	expense = get_data(
-		filters.company, "Expense", "Debit", period_list,
+		filters.company, "Expense", "Debit", period_list, filters=filters,
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
 		ignore_accumulated_values_for_fy=True
 	)
