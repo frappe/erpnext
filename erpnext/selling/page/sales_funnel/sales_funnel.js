@@ -26,8 +26,8 @@ erpnext.SalesFunnel = class SalesFunnel {
 	setup(wrapper) {
 		var me = this;
 
-		this.company_field = wrapper.page.add_field({"fieldtype": "Link", "fieldname": "company", "options": "Company", 
-			"label": __("Company"), "reqd": 1, "default": frappe.defaults.get_user_default('company'), 
+		this.company_field = wrapper.page.add_field({"fieldtype": "Link", "fieldname": "company", "options": "Company",
+			"label": __("Company"), "reqd": 1, "default": frappe.defaults.get_user_default('company'),
 			change: function() {
 				me.company = this.value || frappe.defaults.get_user_default('company');
 				me.get_data();
@@ -38,9 +38,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 			layout: $(wrapper).find(".layout-main"),
 			from_date: wrapper.page.add_date(__("From Date")),
 			to_date: wrapper.page.add_date(__("To Date")),
-			chart: wrapper.page.add_select(__("Chart"), [{value: 'sales_funnel', label:__("Sales Funnel")}, 
-			{value: 'sales_pipeline', label:__("Sales Pipeline")},
-			{value: 'opp_by_lead_source', label:__("Opportunities by lead source")}]),
+			chart: wrapper.page.add_select(__("Chart"), [{value: 'sales_funnel', label:__("Sales Funnel")},
+				{value: 'sales_pipeline', label:__("Sales Pipeline")},
+				{value: 'opp_by_lead_source', label:__("Opportunities by lead source")}]),
 			refresh_btn: wrapper.page.set_primary_action(__("Refresh"),
 				function() { me.get_data(); }, "fa fa-refresh"),
 		};
@@ -66,7 +66,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 			} else {
 				me.elements[k].val(v);
 			}
-			
+
 			me.elements[k].on("change", function() {
 				if (k in ['from_change', 'to_change']) {
 					me.options[k] = frappe.datetime.user_to_str($(this).val());
@@ -144,6 +144,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 	}
 
 	render() {
+		let me = this;
 		if (me.options.chart == 'sales_funnel'){
 			me.render_funnel();
 		} else if (me.options.chart == 'opp_by_lead_source'){
@@ -262,7 +263,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		let chart_data = me.options.data ? me.options.data : null;
 
-		const parent = me.elements.funnel_wrapper[0]
+		const parent = me.elements.funnel_wrapper[0];
 		this.chart = new Chart(parent, {
 			title: __("Sales Opportunities by Source"),
 			height: 400,

@@ -41,7 +41,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 	opportunities = frappe.get_all("Opportunity", filters=[['status', 'in', ['Open', 'Quotation', 'Replied']], ['company', '=', company]], fields=['currency', 'sales_stage', 'opportunity_amount', 'probability', 'source'])
 
 	default_currency = frappe.get_cached_value('Global Defaults', 'None',  'default_currency')
-	
+
 	cp_opportunities = [dict(x, **{'compound_amount': (convert(x['opportunity_amount'], x['currency'], default_currency, to_date) * x['probability']/100)}) for x in opportunities]
 
 	df = pd.DataFrame(cp_opportunities).groupby(['source', 'sales_stage'], as_index=False).agg({'compound_amount': 'sum'})
@@ -53,7 +53,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 	for s in set(df.sales_stage.values):
 		result['datasets'].append({'name': s, 'values': [0]*len(result['labels']), 'chartType': 'bar'})
 
-	for index, row in df.iterrows():
+	for i, row in df.iterrows():
 		source_index = result['labels'].index(row['source'])
 
 		for dataset in result['datasets']:
