@@ -14,15 +14,17 @@ def work():
 
 	from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 
-	ppt = frappe.get_doc("Production Planning Tool", "Production Planning Tool")
+	ppt = frappe.new_doc("Production Plan")
 	ppt.company = erpnext.get_default_company()
-	ppt.use_multi_level_bom = 1
+	# ppt.use_multi_level_bom = 1 #refactored
 	ppt.get_items_from = "Sales Order"
-	ppt.purchase_request_for_warehouse = "Stores - WPL"
+	# ppt.purchase_request_for_warehouse = "Stores - WPL" # refactored
 	ppt.run_method("get_open_sales_orders")
 	ppt.run_method("get_items")
-	ppt.run_method("raise_work_orders")
 	ppt.run_method("raise_material_requests")
+	ppt.save()
+	ppt.submit()
+	ppt.run_method("raise_work_orders")
 	frappe.db.commit()
 
 	# submit work orders
