@@ -424,7 +424,9 @@ class Item(WebsiteGenerator):
 			d.conversion_factor = flt(d.conversion_factor, d.precision("conversion_factor"))
 
 	def add_default_uom_in_conversion_factor_table(self):
-		if self.alt_uom and self.alt_uom != self.stock_uom:
+		uom_conv_list = [d.uom for d in self.get("uoms")]
+
+		if self.alt_uom and self.alt_uom != self.stock_uom and self.alt_uom not in uom_conv_list:
 			if not flt(self.alt_uom_conversion_factor):
 				frappe.throw(_("Alternate UOM Conversion Factor is invalid"))
 			ch = self.append('uoms', {})
@@ -432,8 +434,6 @@ class Item(WebsiteGenerator):
 			ch.factor = flt(self.alt_uom_conversion_factor)
 			ch.multiply_or_divide = '*'
 			ch.conversion_factor = 1/flt(self.alt_uom_conversion_factor)
-
-		uom_conv_list = [d.uom for d in self.get("uoms")]
 
 		if self.stock_uom not in uom_conv_list:
 			ch = self.append('uoms', {})
