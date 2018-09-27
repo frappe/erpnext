@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import random
 import datetime
+from frappe import _
 from frappe.utils import random_string, add_days, get_last_day, getdate
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
@@ -14,6 +15,7 @@ from erpnext.hr.doctype.leave_application.leave_application import (get_leave_ba
 def work():
 	frappe.set_user(frappe.db.get_global('demo_hr_user'))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
+	setup_department_approvers()
 	mark_attendance()
 	make_leave_application()
 
@@ -51,12 +53,14 @@ def work():
 		expense_claim.company = frappe.flags.company
 		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
-		expense_claim.insert()
+		expense_claim.expense_approver = frappe.db.get_global('demo_hr_user')
+		expense_claim.save()
 
 		rand = random.random()
 
 		if rand < 0.4:
 			update_sanctioned_amount(expense_claim)
+			expense_claim.approval_status = 'Approved'
 			expense_claim.submit()
 
 			if random.randint(0, 1):
@@ -204,3 +208,11 @@ def mark_attendance():
 			attendance.save()
 			attendance.submit()
 			frappe.db.commit()
+
+def setup_department_approvers():
+	for d in frappe.get_all('Department', filters={'department_name': ['!=', 'All Departments']}):
+		doc = frappe.get_doc('Department', d.name)
+		doc.append("leave_approvers", {'approver': frappe.session.user})
+		doc.append("expense_approvers", {'approver': frappe.session.user})
+		doc.flags.ignore_mandatory = True
+		doc.save()
