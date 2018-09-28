@@ -11,7 +11,7 @@ frappe.ui.form.on("Sales Order", {
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
-			'Purchase Receipt': 'Purchase Receipt'
+			'Purchase Invoice': 'Purchase Invoice'
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -182,9 +182,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_project() }, __("Make"));
 				}
 
-				// purchase receipt
+				// purchase invoice
 				if(flt(doc.per_delivered, 2) < 100) {
-					this.frm.add_custom_button(__('Purchase Receipt'), function() { me.make_purchase_receipt() }, __("Make"));
+					this.frm.add_custom_button(__('Purchase Invoice'), function() { me.make_purchase_invoice() }, __("Make"));
 				}
 
 				if(!doc.auto_repeat) {
@@ -416,22 +416,22 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	make_purchase_receipt: function(){
+	make_purchase_invoice: function(){
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Supplier"),
 			fields: [
 				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier", "mandatory":true},
-				{"fieldtype": "Button", "label": __("Make Purchase Receipt"), "fieldname": "make_purchase_receipt", "cssClass": "btn-primary"},
+				{"fieldtype": "Button", "label": __("Make Purchase Invoice"), "fieldname": "make_purchase_invoice", "cssClass": "btn-primary"},
 			]
 		});
 
-		dialog.fields_dict.make_purchase_receipt.$input.click(function() {
+		dialog.fields_dict.make_purchase_invoice.$input.click(function() {
 			var args = dialog.get_values();
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_receipt",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_invoice",
 				args: {
 					"supplier": args.supplier,
 					"source_name": me.frm.doc.name
