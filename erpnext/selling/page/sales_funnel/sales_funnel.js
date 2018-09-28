@@ -284,7 +284,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		let chart_data = me.options.data ? me.options.data : null;
 
-		const parent = me.elements.funnel_wrapper[0]
+		const parent = me.elements.funnel_wrapper[0];
 		this.chart = new Chart(parent, {
 			title: __("Sales Pipeline by Stage"),
 			height: 400,

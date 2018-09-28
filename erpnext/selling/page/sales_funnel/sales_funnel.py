@@ -53,7 +53,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 	for s in set(df.sales_stage.values):
 		result['datasets'].append({'name': s, 'values': [0]*len(result['labels']), 'chartType': 'bar'})
 
-	for i, row in df.iterrows():
+	for _, row in df.iterrows():
 		source_index = result['labels'].index(row['source'])
 
 		for dataset in result['datasets']:
