@@ -13,6 +13,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -498,12 +499,16 @@ def make_material_request(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_purchase_receipt(supplier, source_name, target_doc=None):
+def make_purchase_invoice(supplier, source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.supplier = supplier
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
+		target.update_stock = 1
+
+		default_tax = get_default_taxes_and_charges("Purchase Taxes and Charges Template", company=target.company)
+		target.update(default_tax)
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -519,13 +524,13 @@ def make_purchase_receipt(supplier, source_name, target_doc=None):
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
-			"doctype": "Purchase Receipt",
+			"doctype": "Purchase Invoice",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
 		},
 		"Sales Order Item": {
-			"doctype": "Purchase Receipt Item",
+			"doctype": "Purchase Invoice Item",
 			"postprocess": update_item
 		}
 	}, target_doc, set_missing_values)
