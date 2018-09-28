@@ -494,10 +494,7 @@ def get_items_for_material_requests(doc, company=None):
 		doc = frappe._dict(json.loads(doc))
 
 	doc['mr_items'] = []
-	if doc.get('po_items'):
-		po_items = doc['po_items']
-	else:
-		po_items = doc['items']
+	po_items = doc['po_items'] if doc.get('po_items') else doc['items']
 
 	for data in po_items:
 		warehouse = None
