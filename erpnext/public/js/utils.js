@@ -173,6 +173,20 @@ $.extend(erpnext.utils, {
 		})
 	},
 
+	make_pricing_rule: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
 	/**
 	* Checks if the first row of a given child table is empty
 	* @param child_table - Child table Doctype
