@@ -151,7 +151,20 @@ def make_subcontract():
 		make_material_request(po.items[0].item_code, po.items[0].qty)
 
 		# transfer material for sub-contract
-		stock_entry = frappe.get_doc(make_rm_stock_entry(po.name, frappe.as_json(po.items)))
+		rm_items = get_rm_item(po.items[0], po.supplied_items[0])
+		stock_entry = frappe.get_doc(make_rm_stock_entry(po.name, json.dumps([rm_items])))
 		stock_entry.from_warehouse = "Stores - WPL"
 		stock_entry.to_warehouse = "Supplier - WPL"
 		stock_entry.insert()
+
+def get_rm_item(items, supplied_items):
+	return {
+		"item_code": items.get("item_code"),
+		"rm_item_code": supplied_items.get("rm_item_code"),
+		"item_name": supplied_items.get("rm_item_code"),
+		"qty": supplied_items.get("required_qty"),
+		"amount": supplied_items.get("amount"),
+		"warehouse": supplied_items.get("reserve_warehouse"),
+		"rate": supplied_items.get("rate"),
+		"stock_uom": supplied_items.get("stock_uom")
+	}
