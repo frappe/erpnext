@@ -62,7 +62,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 					dataset['values'][source_index] = row.compound_amount
 
 		return result
-	
+
 	else:
 		return 'empty'
 
@@ -83,6 +83,6 @@ def get_pipeline_data(from_date, to_date, company):
 		result['datasets'].append({'name': _("Total Amount"), 'values': df['compound_amount'].values(), 'chartType': 'bar'})
 
 		return result
-	
+
 	else:
 		return 'empty'
