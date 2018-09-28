@@ -55,11 +55,11 @@ def get_opp_by_lead_source(from_date, to_date, company):
 			result['datasets'].append({'name': s, 'values': [0]*len(result['labels']), 'chartType': 'bar'})
 
 		for row in df.itertuples():
-			source_index = result['labels'].index(row[1])
+			source_index = result['labels'].index(row.source)
 
 			for dataset in result['datasets']:
-				if dataset['name'] == row[2]:
-					dataset['values'][source_index] = row[3]
+				if dataset['name'] == row.sales_stage:
+					dataset['values'][source_index] = row.compound_amount
 
 		return result
 	
