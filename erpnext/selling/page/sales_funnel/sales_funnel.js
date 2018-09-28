@@ -61,15 +61,15 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		// set defaults and bind on change
 		$.each(this.options, function(k, v) {
-			if (k in ['from_change', 'to_change']) {
+			if (['from_date', 'to_date'].includes(k)) {
 				me.elements[k].val(frappe.datetime.str_to_user(v));
 			} else {
 				me.elements[k].val(v);
 			}
 
 			me.elements[k].on("change", function() {
-				if (k in ['from_change', 'to_change']) {
-					me.options[k] = frappe.datetime.user_to_str($(this).val());
+				if (['from_date', 'to_date'].includes(k)) {
+					me.options[k] = frappe.datetime.user_to_str($(this).val()) != 'Invalid date' ? frappe.datetime.user_to_str($(this).val()) : frappe.datetime.get_today();
 				} else {
 					me.options.chart = $(this).val();
 				}
@@ -102,7 +102,12 @@ erpnext.SalesFunnel = class SalesFunnel {
 				callback: function(r) {
 					if(!r.exc) {
 						me.options.data = r.message;
-						me.render_funnel();
+						if (me.options.data=='empty') {
+							const $parent = me.elements.funnel_wrapper;
+							$parent.html(__('No data for this period'));
+						} else {
+							me.render_funnel();
+						}
 					}
 				}
 			});
@@ -118,7 +123,12 @@ erpnext.SalesFunnel = class SalesFunnel {
 				callback: function(r) {
 					if(!r.exc) {
 						me.options.data = r.message;
-						me.render_opp_by_lead_source();
+						if (me.options.data=='empty') {
+							const $parent = me.elements.funnel_wrapper;
+							$parent.html(__('No data for this period'));
+						} else {
+							me.render_opp_by_lead_source();
+						}
 					}
 				}
 			});
@@ -134,7 +144,12 @@ erpnext.SalesFunnel = class SalesFunnel {
 				callback: function(r) {
 					if(!r.exc) {
 						me.options.data = r.message;
-						me.render_pipeline();
+						if (me.options.data=='empty') {
+							const $parent = me.elements.funnel_wrapper;
+							$parent.html(__('No data for this period'));
+						} else {
+							me.render_pipeline();
+						}
 					}
 				}
 			});
