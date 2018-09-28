@@ -139,8 +139,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 				}
 			});
 		}
-		
-		
 	}
 
 	render() {
