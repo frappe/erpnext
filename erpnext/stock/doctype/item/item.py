@@ -429,7 +429,7 @@ class Item(WebsiteGenerator):
 			ch = self.append('uoms', {})
 			ch.uom = self.stock_uom
 			ch.factor = 1
-			ch.multiply_or_divide = '*'
+			ch.multiply_or_divide = '/'
 			ch.conversion_factor = 1
 
 		to_remove = []
