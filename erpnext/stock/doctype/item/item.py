@@ -427,13 +427,15 @@ class Item(WebsiteGenerator):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
 
 		if self.alt_uom and self.alt_uom != self.stock_uom and self.alt_uom not in uom_conv_list:
-			if not flt(self.alt_uom_conversion_factor):
-				frappe.throw(_("Alternate UOM Conversion Factor is invalid"))
+			if not flt(self.alt_uom_size):
+				frappe.throw(_("Container Size is invalid"))
+			self.purchase_uom = self.alt_uom
+			self.sales_uom = self.alt_uom
 			ch = self.append('uoms', {})
 			ch.uom = self.alt_uom
-			ch.factor = flt(self.alt_uom_conversion_factor)
-			ch.multiply_or_divide = '*'
-			ch.conversion_factor = 1/flt(self.alt_uom_conversion_factor)
+			ch.factor = flt(self.alt_uom_size)
+			ch.multiply_or_divide = '/'
+			ch.conversion_factor = flt(self.alt_uom_size)
 
 		if self.stock_uom not in uom_conv_list:
 			ch = self.append('uoms', {})
@@ -477,6 +479,9 @@ class Item(WebsiteGenerator):
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 				frappe.throw(
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
+
+			if self.alt_uom and d.uom == self.alt_uom:
+				self.alt_uom_size = flt(d.conversion_factor)
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
