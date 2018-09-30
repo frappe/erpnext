@@ -384,3 +384,13 @@ def set_transaction_type(args):
 		args.transaction_type = "selling"
 	else:
 		args.transaction_type = "buying"
+
+@frappe.whitelist()
+def make_pricing_rule(doctype, docname):
+	doc = frappe.new_doc("Pricing Rule")
+	doc.applicable_for = doctype
+	doc.set(frappe.scrub(doctype), docname)
+	doc.selling = 1 if doctype == "Customer" else 0
+	doc.buying = 1 if doctype == "Supplier" else 0
+
+	return doc
