@@ -13,8 +13,9 @@ source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '11.x.x-develop'
 staging_version = '11.0.3-beta.2'
+saif_version = staging_version
 
-error_report_email = "support@erpnext.com"
+error_report_email = "saifi0102@gmail.com"
 
 docs_app = "foundation"
 
