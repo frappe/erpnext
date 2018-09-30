@@ -566,3 +566,4 @@ erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
 erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
 erpnext.patches.v11_0.rename_healthcare_fields
 erpnext.patches.v11_0.remove_land_unit_icon
+erpnext.patches.v11_0.add_default_dispatch_notification_template
