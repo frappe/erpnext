@@ -23,6 +23,7 @@ from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
 	unlink_inter_company_invoice
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -74,6 +75,9 @@ class PurchaseInvoice(BuyingController):
 		# validate cash purchase
 		if (self.is_paid == 1):
 			self.validate_cash()
+
+		# validate service stop date to lie in between start and end date
+		validate_service_stop_date(self)
 
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
@@ -424,6 +428,7 @@ class PurchaseInvoice(BuyingController):
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 
@@ -482,7 +487,7 @@ class PurchaseInvoice(BuyingController):
 				elif not item.is_fixed_asset:
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_account,
+							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
 							"against": self.supplier,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,
@@ -507,7 +512,8 @@ class PurchaseInvoice(BuyingController):
 									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks or "Accounting Entry for Stock"
+									"remarks": self.remarks or "Accounting Entry for Stock",
+									"cost_center": self.cost_center
 								})
 							)
 
@@ -535,7 +541,8 @@ class PurchaseInvoice(BuyingController):
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": base_asset_amount,
 						"debit_in_account_currency": (base_asset_amount
-							if asset_rbnb_currency == self.company_currency else asset_amount)
+							if asset_rbnb_currency == self.company_currency else asset_amount),
+						"cost_center": item.cost_center
 					}))
 
 					if item.item_tax_amount:
@@ -561,7 +568,8 @@ class PurchaseInvoice(BuyingController):
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": base_asset_amount,
 						"debit_in_account_currency": (base_asset_amount
-							if cwip_account_currency == self.company_currency else asset_amount)
+							if cwip_account_currency == self.company_currency else asset_amount),
+						"cost_center": self.cost_center
 					}))
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -661,6 +669,7 @@ class PurchaseInvoice(BuyingController):
 						if self.party_account_currency==self.company_currency else self.paid_amount,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 
@@ -670,7 +679,8 @@ class PurchaseInvoice(BuyingController):
 					"against": self.supplier,
 					"credit": self.base_paid_amount,
 					"credit_in_account_currency": self.base_paid_amount \
-						if bank_account_currency==self.company_currency else self.paid_amount
+						if bank_account_currency==self.company_currency else self.paid_amount,
+					"cost_center": self.cost_center
 				}, bank_account_currency)
 			)
 
@@ -691,6 +701,7 @@ class PurchaseInvoice(BuyingController):
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
 			gl_entries.append(
@@ -700,7 +711,7 @@ class PurchaseInvoice(BuyingController):
 					"credit": flt(self.base_write_off_amount),
 					"credit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
-					"cost_center": self.write_off_cost_center
+					"cost_center": self.cost_center or self.write_off_cost_center
 				})
 			)
 
@@ -715,7 +726,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.supplier,
 					"debit_in_account_currency": self.rounding_adjustment,
 					"debit": self.base_rounding_adjustment,
-					"cost_center": round_off_cost_center,
+					"cost_center": self.cost_center or round_off_cost_center,
 				}
 			))
 

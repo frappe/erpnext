@@ -16,16 +16,23 @@ class BOMUpdateTool(Document):
 		self.update_new_bom()
 		bom_list = self.get_parent_boms(self.new_bom)
 		updated_bom = []
+
 		for bom in bom_list:
-			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.get_doc_before_save()
-			updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
-			bom_obj.calculate_cost()
-			bom_obj.update_parent_cost()
-			bom_obj.db_update()
-			if (getattr(bom_obj.meta, 'track_changes', False)
-				and bom_obj._doc_before_save and not bom_obj.flags.ignore_version):
-				bom_obj.save_version()
+			try:
+				bom_obj = frappe.get_doc("BOM", bom)
+				bom_obj.get_doc_before_save()
+				updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
+				bom_obj.calculate_cost()
+				bom_obj.update_parent_cost()
+				bom_obj.db_update()
+				if (getattr(bom_obj.meta, 'track_changes', False)
+					and bom_obj._doc_before_save and not bom_obj.flags.ignore_version):
+					bom_obj.save_version()
+
+				frappe.db.commit()
+			except Exception:
+				frappe.db.rollback()
+				frappe.log_error(frappe.get_traceback())
 
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
@@ -62,7 +69,7 @@ def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
-	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args)
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
 	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 @frappe.whitelist()

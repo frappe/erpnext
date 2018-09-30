@@ -1,14 +1,14 @@
 DocType: Production Plan Item,Ordered Qty,Quantité commandée
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Center {2} does not belong to Company {3},{0} {1}: Le Centre de Coûts {2} ne fait pas partie de la Société {3}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +112,{0} {1}: Cost Center {2} does not belong to Company {3},{0} {1}: Le Centre de Coûts {2} ne fait pas partie de la Société {3}
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Soit un montant au débit ou crédit est nécessaire pour {2}
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Taux de la Liste de Prix (Devise de la Compagnie)
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +53,{0} {1}: Customer is required against Receivable account {2},{0} {1}: Client est requis envers un compte à recevoir {2}
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +125,{0} {1}: Accounting Entry for {2} can only be made in currency: {3},{0} {1}: L'entrée comptable pour {2} ne peut être faite qu'en devise: {3}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +126,{0} {1}: Accounting Entry for {2} can only be made in currency: {3},{0} {1}: L'entrée comptable pour {2} ne peut être faite qu'en devise: {3}
 DocType: Purchase Invoice Item,Price List Rate,Taux de la Liste de Prix
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +56,{0} {1}: Supplier is required against Payable account {2},{0} {1}: Fournisseur est requis envers un compte à payer {2}
 DocType: Stock Settings,Auto insert Price List rate if missing,Insertion automatique du taux à la Liste de Prix si manquant
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,{0} {1}: Account {2} does not belong to Company {3},{0} {1}: Le compte {2} ne fait pas partie de la Société {3}
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +78,{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry,{0} {1}: Le compte {2} de type 'Profit et Perte' n'est pas admis dans une Entrée d'Ouverture
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +92,{0} {1}: Account {2} is inactive,{0} {1}: Le compte {2} est inactif
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +97,{0} {1}: Account {2} does not belong to Company {3},{0} {1}: Le compte {2} ne fait pas partie de la Société {3}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +79,{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry,{0} {1}: Le compte {2} de type 'Profit et Perte' n'est pas admis dans une Entrée d'Ouverture
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +93,{0} {1}: Account {2} is inactive,{0} {1}: Le compte {2} est inactif
 DocType: Journal Entry,Difference (Dr - Cr),Différence (Dt - Ct )
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +88,{0} {1}: Account {2} cannot be a Group,{0} {1}: Le compte {2} ne peut pas être un Groupe
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +89,{0} {1}: Account {2} cannot be a Group,{0} {1}: Le compte {2} ne peut pas être un Groupe

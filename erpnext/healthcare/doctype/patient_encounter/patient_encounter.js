@@ -9,16 +9,16 @@ frappe.ui.form.on('Patient Encounter', {
 			{fieldname: 'dosage', columns: 2},
 			{fieldname: 'period', columns: 2}
 		];
-		frm.get_field('test_prescription').grid.editable_fields = [
-			{fieldname: 'test_code', columns: 2},
-			{fieldname: 'test_name', columns: 4},
-			{fieldname: 'test_comment', columns: 4}
+		frm.get_field('lab_test_prescription').grid.editable_fields = [
+			{fieldname: 'lab_test_code', columns: 2},
+			{fieldname: 'lab_test_name', columns: 4},
+			{fieldname: 'lab_test_comment', columns: 4}
 		];
 	},
 
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
-		refresh_field('test_prescription');
+		refresh_field('lab_test_prescription');
 		if (!frm.doc.__islocal){
 			frappe.call({
 				method: 'frappe.client.get_value',
@@ -72,7 +72,7 @@ frappe.ui.form.on('Patient Encounter', {
 				}
 			};
 		});
-		frm.set_query("test_code", "test_prescription", function() {
+		frm.set_query("lab_test_code", "lab_test_prescription", function() {
 			return {
 				filters: {
 					is_billable:'1'
@@ -94,11 +94,6 @@ frappe.ui.form.on('Patient Encounter', {
 				}
 			};
 		});
-		if(!frm.doc.__islocal && !frm.doc.invoice && (frappe.user.has_role("Accounts User"))){
-			frm.add_custom_button(__('Invoice'), function() {
-				btn_invoice_encounter(frm);
-			},__("Create"));
-		}
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient_age", "read_only", frm.doc.__islocal ? 0:1);
@@ -136,23 +131,6 @@ var schedule_discharge = function(frm) {
 		},
 		freeze: true,
 		freeze_message: "Process Discharge"
-	});
-};
-
-var btn_invoice_encounter = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method:
-		"erpnext.healthcare.doctype.encounter.encounter.create_invoice",
-		args: {company: doc.company, patient: doc.patient, practitioner: doc.practitioner, encounter_id: doc.name },
-		callback: function(data){
-			if(!data.exc){
-				if(data.message){
-					frappe.set_route("Form", "Sales Invoice", data.message);
-				}
-				cur_frm.reload_doc();
-			}
-		}
 	});
 };
 
@@ -203,9 +181,15 @@ frappe.ui.form.on("Patient Encounter", "appointment", function(frm){
 				frappe.model.set_value(frm.doctype,frm.docname, "patient", data.message.patient);
 				frappe.model.set_value(frm.doctype,frm.docname, "type", data.message.appointment_type);
 				frappe.model.set_value(frm.doctype,frm.docname, "practitioner", data.message.practitioner);
-				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice);
+				frappe.model.set_value(frm.doctype,frm.docname, "invoiced", data.message.invoiced);
 			}
 		});
+	}
+	else{
+		frappe.model.set_value(frm.doctype,frm.docname, "patient", "");
+		frappe.model.set_value(frm.doctype,frm.docname, "type", "");
+		frappe.model.set_value(frm.doctype,frm.docname, "practitioner", "");
+		frappe.model.set_value(frm.doctype,frm.docname, "invoiced", 0);
 	}
 });
 

@@ -434,7 +434,7 @@ erpnext.patches.v8_5.update_customer_group_in_POS_profile
 erpnext.patches.v8_6.update_timesheet_company_from_PO
 erpnext.patches.v8_6.set_write_permission_for_quotation_for_sales_manager
 erpnext.patches.v8_5.remove_project_type_property_setter
-erpnext.patches.v8_7.add_more_gst_fields #21-09-2017
+erpnext.patches.v8_7.sync_india_custom_fields
 erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
@@ -486,10 +486,8 @@ erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
 erpnext.patches.v10_0.fichier_des_ecritures_comptables_for_france
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
-erpnext.patches.v10_0.added_extra_gst_custom_field
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
 erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
-erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2 #2018-02-13
 erpnext.patches.v10_0.item_barcode_childtable_migrate
 erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
@@ -538,7 +536,7 @@ erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
 erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018
-erpnext.patches.v11_0.refactor_erpnext_shopify
+erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
 erpnext.patches.v10_0.update_status_in_purchase_receipt
@@ -560,6 +558,12 @@ erpnext.patches.v10_0.update_address_template_for_india
 erpnext.patches.v11_0.add_expense_claim_default_account
 execute:frappe.delete_doc("Page", "hub")
 erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
-erpnext.patches.v11_0.update_hub_url
+erpnext.patches.v11_0.update_hub_url # 2018-08-31  # 2018-09-03
 erpnext.patches.v10_0.set_discount_amount
 erpnext.patches.v10_0.recalculate_gross_margin_for_project
+erpnext.patches.v11_0.make_job_card
+erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
+erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
+erpnext.patches.v11_0.rename_healthcare_fields
+erpnext.patches.v11_0.remove_land_unit_icon
+erpnext.patches.v11_0.add_default_dispatch_notification_template

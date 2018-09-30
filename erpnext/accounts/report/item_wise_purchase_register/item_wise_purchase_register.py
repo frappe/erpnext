@@ -12,6 +12,7 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
+	filters.update({"from_date": filters.get("date_range")[0], "to_date": filters.get("date_range")[1]})
 	columns = get_columns(additional_table_columns)
 
 	company_currency = erpnext.get_company_currency(filters.company)
@@ -40,7 +41,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
-		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
+		row = [d.item_code, d.item_name, d.item_group, d.description, d.parent, d.posting_date, d.supplier,
 			d.supplier_name]
 
 		if additional_query_columns:
@@ -68,7 +69,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 def get_columns(additional_table_columns):
 	columns = [
 		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
-		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
+		_("Item Group") + ":Link/Item Group:100", "Description::150", _("Invoice") + ":Link/Purchase Invoice:120",
 		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
 		"Supplier Name::120"
 	]
@@ -116,7 +117,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
 			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total, `tabPurchase Invoice Item`.`item_code`,
-			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
+			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`, `tabPurchase Invoice Item`.description,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,

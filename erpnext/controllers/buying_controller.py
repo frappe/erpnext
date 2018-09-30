@@ -673,7 +673,7 @@ class BuyingController(StockController):
 		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
 			return
 
-		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
+		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
@@ -765,8 +765,11 @@ def validate_item_type(doc, fieldname, message):
 		""".format(item_list, fieldname), as_list=True)]
 
 	if invalid_items:
-		frappe.throw(_("Following item {items} {verb} marked as {message} item.\
-			You can enable them as {message} item from its Item master".format(
-				items = ", ".join([d for d in invalid_items]),
-				verb = _("are not") if len(invalid_items) > 1 else _("is not"),
-				message = message)))
+		items = ", ".join([d for d in invalid_items])
+
+		if len(invalid_items) > 1:
+			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+		else:
+			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+
+		frappe.throw(error_message)

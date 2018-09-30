@@ -34,6 +34,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Cashier Closing",
+					"description": _("Cashier Closing")
+				},
+				{
+					"type": "doctype",
 					"name": "Auto Repeat",
 					"label": _("Auto Repeat"),
 					"description": _("To make recurring documents")
@@ -229,6 +234,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "GST HSN Code",
+				},
+				{
+					"type": "report",
+					"name": "GSTR-1",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "GSTR-2",
+					"is_query_report": True
 				},
 				{
 					"type": "report",

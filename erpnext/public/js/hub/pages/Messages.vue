@@ -16,7 +16,7 @@
 						<div class="level margin-bottom" v-for="message in messages" :key="message.name">
 							<div class="level-left ellipsis" style="width: 80%;">
 								<div v-html="frappe.avatar(message.sender)" />
-								<div style="white-space: normal;" v-html="message.content" />
+								<div style="white-space: normal;" v-html="message.message" />
 							</div>
 							<div class="level-right text-muted" v-html="frappe.datetime.comment_when(message.creation, true)" />
 						</div>
@@ -64,13 +64,12 @@ export default {
 	methods: {
 		send_message(message) {
 			this.messages.push({
-				sender: hub.settings.company_email,
-				content: message,
+				sender: frappe.session.user,
+				message: message,
 				creation: Date.now(),
 				name: frappe.utils.get_random(6)
 			});
 			hub.call('send_message', {
-				from_seller: hub.settings.company_email,
 				to_seller: this.get_against_seller(),
 				hub_item: this.item_details.name,
 				message

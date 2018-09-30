@@ -61,7 +61,7 @@ class OpeningInvoiceCreationTool(Document):
 
 	def make_invoices(self):
 		names = []
-		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
+		mandatory_error_msg = _("Row {0}: {1} is required to create the Opening {2} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
@@ -73,7 +73,7 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.temporary_opening_account:
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
-			
+
 			# Allow to create invoice even if no party present in customer or supplier.
 			if not frappe.db.exists(row.party_type, row.party):
 				if self.create_missing_party:
@@ -90,11 +90,7 @@ class OpeningInvoiceCreationTool(Document):
 
 			for d in ("Party", "Outstanding Amount", "Temporary Opening Account"):
 				if not row.get(scrub(d)):
-					frappe.throw(mandatory_error_msg.format(
-						idx=row.idx,
-						field=_(d),
-						invoice_type=self.invoice_type
-					))
+					frappe.throw(mandatory_error_msg.format(row.idx, _(d), self.invoice_type))
 
 			args = self.get_invoice_dict(row=row)
 			if not args:
@@ -128,7 +124,7 @@ class OpeningInvoiceCreationTool(Document):
 			party_doc.supplier_group = supplier_group
 
 		party_doc.flags.ignore_mandatory = True
-		party_doc.save(ignore_permissions=True)		
+		party_doc.save(ignore_permissions=True)
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():

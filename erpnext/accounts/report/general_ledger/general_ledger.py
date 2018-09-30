@@ -8,7 +8,7 @@ from erpnext.accounts.report.utils import get_currency, convert_to_presentation_
 from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
-
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from six import iteritems
 
 def execute(filters=None):
@@ -154,6 +154,10 @@ def get_conditions(filters):
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
+	if filters.get("cost_center"):
+		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
+		conditions.append("cost_center in %(cost_center)s")
+
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
@@ -173,9 +177,6 @@ def get_conditions(filters):
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
-
-	if filters.get("cost_center"):
-		conditions.append("cost_center in %(cost_center)s")
 
 	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
