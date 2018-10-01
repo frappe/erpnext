@@ -51,7 +51,7 @@ def work():
 	# get supplier details
 	supplier = get_random("Supplier")
 
-	company_currency = frappe.get_cached_value('Company',  "Wind Power LLC",  "default_currency")
+	company_currency = frappe.get_cached_value('Company', "Wind Power LLC", "default_currency")
 	party_account_currency = get_party_account_currency("Supplier", supplier, "Wind Power LLC")
 	if company_currency == party_account_currency:
 		exchange_rate = 1
@@ -80,14 +80,18 @@ def work():
 		report = "Requested Items To Be Ordered"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
 			if row[0] != "'Total'":
-				po = frappe.get_doc(make_purchase_order(row[0]))
-				po.supplier = supplier
-				po.currency = party_account_currency or company_currency
-				po.conversion_rate = exchange_rate
-				po.transaction_date = frappe.flags.current_date
-				po.insert()
-				po.submit()
-				frappe.db.commit()
+				try:
+					po = frappe.get_doc(make_purchase_order(row[0]))
+					po.supplier = supplier
+					po.currency = party_account_currency or company_currency
+					po.conversion_rate = exchange_rate
+					po.transaction_date = frappe.flags.current_date
+					po.insert()
+					po.submit()
+				except Exception:
+					pass
+				else:
+					frappe.db.commit()
 
 	if random.random() < 0.5:
 		make_subcontract()
