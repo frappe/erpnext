@@ -34,21 +34,24 @@ def work():
 				opportunity.declare_enquiry_lost('Did not ask')
 
 	for i in range(random.randint(1,3)):
-		if random.random() < 0.3:
+		if random.random() < 0.6:
 			make_sales_order()
 
 	if random.random() < 0.5:
 		#make payment request against Sales Order
 		sales_order_name = get_random("Sales Order", filters={"docstatus": 1})
-		if sales_order_name:
-			so = frappe.get_doc("Sales Order", sales_order_name)
-			if flt(so.per_billed) != 100:
-				payment_request = make_payment_request(dt="Sales Order", dn=so.name, recipient_id=so.contact_email,
-					submit_doc=True, mute_email=True, use_dummy_message=True)
+		try:
+			if sales_order_name:
+				so = frappe.get_doc("Sales Order", sales_order_name)
+				if flt(so.per_billed) != 100:
+					payment_request = make_payment_request(dt="Sales Order", dn=so.name, recipient_id=so.contact_email,
+						submit_doc=True, mute_email=True, use_dummy_message=True)
 
-				payment_entry = frappe.get_doc(make_payment_entry(payment_request.name))
-				payment_entry.posting_date = frappe.flags.current_date
-				payment_entry.submit()
+					payment_entry = frappe.get_doc(make_payment_entry(payment_request.name))
+					payment_entry.posting_date = frappe.flags.current_date
+					payment_entry.submit()
+		except Exception:
+			pass
 
 def make_opportunity():
 	b = frappe.get_doc({
