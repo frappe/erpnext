@@ -56,8 +56,9 @@ def make_delivery_note():
 				if not d.expense_account:
 					d.expense_account = ("Cost of Goods Sold - {0}".format(
 						frappe.get_cached_value('Company',  dn.company,  'abbr')))
-			dn.insert()
+
 			try:
+				dn.insert()
 				dn.submit()
 				frappe.db.commit()
 			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):

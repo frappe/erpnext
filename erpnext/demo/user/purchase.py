@@ -162,7 +162,7 @@ def get_rm_item(items, supplied_items):
 		"item_code": items.get("item_code"),
 		"rm_item_code": supplied_items.get("rm_item_code"),
 		"item_name": supplied_items.get("rm_item_code"),
-		"qty": supplied_items.get("required_qty"),
+		"qty": supplied_items.get("required_qty") + random.randint(3,10),
 		"amount": supplied_items.get("amount"),
 		"warehouse": supplied_items.get("reserve_warehouse"),
 		"rate": supplied_items.get("rate"),
