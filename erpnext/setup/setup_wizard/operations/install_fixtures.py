@@ -232,6 +232,11 @@ def install(country=None):
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
 		{"doctype": "Share Type", "title": _("Preference")},
+
+		# Market Segments
+		{"doctype": "Market Segment", "market_segment": _("Lower Income")},
+		{"doctype": "Market Segment", "market_segment": _("Middle Income")},
+		{"doctype": "Market Segment", "market_segment": _("Upper Income")}
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
