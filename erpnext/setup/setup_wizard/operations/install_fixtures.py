@@ -231,17 +231,7 @@ def install(country=None):
 
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
-		{"doctype": "Share Type", "title": _("Preference")},
-
-		# Sales Stages
-		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
-		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
-		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
-		{"doctype": "Sales Stage", "stage_name": _("Value Proposition")},
-		{"doctype": "Sales Stage", "stage_name": _("Identifying Decision Makers")},
-		{"doctype": "Sales Stage", "stage_name": _("Perception Analysis")},
-		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
-		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")},
+		{"doctype": "Share Type", "title": _("Preference")}
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
@@ -318,6 +308,7 @@ def add_market_segments():
 
 	make_fixture_records(records)
 def add_sale_stages():
+	# Sale Stages
 	records = [
 		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
 		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
