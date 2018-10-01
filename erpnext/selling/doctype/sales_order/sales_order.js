@@ -331,6 +331,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_raw_material_request_dialog: function(r) {
 		var fields = [
+			{fieldtype:'Check', fieldname:'include_exploded_items',
+				label: __('Include Exploded Items')},
+			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
+				label: __('Ignore Existing Ordered Qty')},
 			{
 				fieldtype:'Table', fieldname: 'items',
 				description: __('Select BOM, Qty and For Warehouse'),
@@ -383,6 +387,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			},
 			primary_action_label: __('Make')
 		});
+		d.fields_dict["include_exploded_items"].df.onchange = () => {
+			console.log(d)
+		}
 		d.show();
 	},
 
