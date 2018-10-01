@@ -5,7 +5,7 @@
 cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'erpnext/selling/sales_common.js' %};
-
+var bars = [];
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -116,6 +116,34 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			});
 		}
 	},
+	scan: function(doc) {
+		var me = this;
+		var changed = false;
+		bar = String(doc.scan);
+
+    	for (var i=0, l=(this.frm.doc.items || []).length; i<l; i++){
+    		var row = this.frm.doc.items[i];
+    		if (row.barcode == null) {
+				frappe.model.set_value(row.doctype, row.name, "barcode", bar, "Link");
+    			changed = true;
+				bars.push(row.barcode);
+    		}else if (row.barcode == bar){
+    			quant = row.qty+1;
+    			frappe.model.set_value(row.doctype, row.name, "qty", quant, "data");
+				changed = true;
+    		}else if (!(bars.includes(bar))){
+    			cur_frm.add_child("items");
+    			var row = this.frm.doc.items[l];
+				frappe.model.set_value(row.doctype, row.name, "barcode", bar, "Link");
+    			changed = true;
+				bars.push(row.barcode);
+    		}
+    	}
+
+
+		doc.scan = "";
+		refresh_field("scan");
+	},	
 
 	on_submit: function(doc, dt, dn) {
 		var me = this;
