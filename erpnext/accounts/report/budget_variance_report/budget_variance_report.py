@@ -77,8 +77,8 @@ def get_columns(filters):
 				columns.append(label+":Float:120")
 
 	if filters["period"] != "Yearly" :
-		return columns + [_("Total Budget") + ":Float:120", _("Total Actual") + ":Float:120",
-			_("Total Variance") + ":Float:120"]
+		return columns + [_("Total Budget") + ":Float:80", _("Total Actual") + ":Float:80",
+			_("Total Variance") + ":Float:80"]
 	else:
 		return columns
 		
@@ -99,10 +99,10 @@ def get_cost_center_target_details(filters):
 	return frappe.db.sql("""
 			select b.{budget_against} as budget_against, b.monthly_distribution, ba.account, ba.budget_amount,b.fiscal_year
 			from `tabBudget` b, `tabBudget Account` ba
-			where b.name=ba.parent and b.docstatus = 1 and b.fiscal_year between '{from_year}' and '{to_year}'
+			where b.name=ba.parent and b.docstatus = 1 and b.fiscal_year between %s and %s
 			and b.budget_against = %s and b.company=%s {cond} order by b.fiscal_year
-		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower(), cond=cond, from_year=filters["from_fiscal_year"], to_year=filters["to_fiscal_year"]),
-		(filters.budget_against, filters.company), as_dict=True)
+		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower(), cond=cond),
+		(filters.from_fiscal_year,filters.to_fiscal_year,filters.budget_against, filters.company), as_dict=True)
 
 	
 
@@ -111,7 +111,7 @@ def get_target_distribution_details(filters):
 	target_details = {}
 	for d in frappe.db.sql("""select md.name, mdp.month, mdp.percentage_allocation
 		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
-		where mdp.parent=md.name and md.fiscal_year between '{from_year}' and '{to_year}' order by md.fiscal_year""".format(from_year=filters["from_fiscal_year"],to_year=filters["to_fiscal_year"]), as_dict=1):
+		where mdp.parent=md.name and md.fiscal_year between %s and %s order by md.fiscal_year""",(filters.from_fiscal_year, filters.to_fiscal_year), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 	
 	return target_details
@@ -133,11 +133,11 @@ def get_actual_details(name, filters):
 			and b.docstatus = 1
 			and ba.account=gl.account
 			and b.{budget_against} = gl.{budget_against}
-			and gl.fiscal_year between '{from_year}' and '{to_year}'
+			and gl.fiscal_year between %s and %s
 			and b.{budget_against}=%s
 			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond}) group by gl.name order by gl.fiscal_year
 	""".format(tab = filters.budget_against, budget_against = budget_against, cond = cond,from_year=filters.from_fiscal_year,to_year=filters.to_fiscal_year),
-	(name), as_dict=1)
+	(filters.from_fiscal_year, filters.to_fiscal_year, name), as_dict=1)
 
 	cc_actual_details = {}
 	for d in ac_details:
