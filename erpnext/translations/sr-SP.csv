@@ -188,7 +188,6 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +817,
 DocType: C-Form Invoice Detail,Territory,Teritorija
 DocType: Notification Control,Sales Order Message,Poruka prodajnog naloga
 DocType: Employee Attendance Tool,Employees HTML,HTML Zaposlenih
-DocType: Email Digest,Pending Sales Orders,Prodajni nalozi na čekanju
 ,Employee Leave Balance,Pregled odsustva Zaposlenih
 apps/erpnext/erpnext/utilities/user_progress.py +147,Minute,Minut
 DocType: HR Settings,Emails salary slip to employee based on preferred email selected in Employee,Pošalji platnu listu Zaposlenom na željenu adresu označenu u tab-u ZAPOSLENI
@@ -984,7 +983,6 @@ DocType: Journal Entry Account,Sales Order,Prodajni nalog
 DocType: Stock Entry,Customer or Supplier Details,Detalji kupca ili dobavljača
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +25,Sell,Prodaja
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +407,Salary Slip of employee {0} already created for time sheet {1},Isplatna lista Zaposlenog {0} kreirana je već za raspored {1}
-DocType: Email Digest,Pending Quotations,Predračuni na čekanju
 DocType: Purchase Invoice,Additional Discount Percentage,Dodatni procenat popusta
 DocType: Additional Salary,HR User,Korisnik za ljudske resure
 apps/erpnext/erpnext/config/stock.py +28,Stock Reports,Izvještaji zaliha robe

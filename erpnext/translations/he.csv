@@ -281,7 +281,7 @@ apps/erpnext/erpnext/config/learn.py +82,Setting up Taxes,הגדרת מסים
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py +149,Cost of Sold Asset,עלות נמכר נכס
 apps/erpnext/erpnext/accounts/utils.py +374,Payment Entry has been modified after you pulled it. Please pull it again.,כניסת תשלום השתנתה לאחר שמשכת אותו. אנא למשוך אותו שוב.
 apps/erpnext/erpnext/stock/doctype/item/item.py +496,{0} entered twice in Item Tax,{0} נכנס פעמיים במס פריט
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +115,Summary for this week and pending activities,סיכום השבוע הזה ופעילויות תלויות ועומדות
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +121,Summary for this week and pending activities,סיכום השבוע הזה ופעילויות תלויות ועומדות
 DocType: Student Applicant,Admitted,רישיון
 DocType: Workstation,Rent Cost,עלות השכרה
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +89,Amount After Depreciation,הסכום לאחר פחת
@@ -380,7 +380,7 @@ DocType: Packing Slip,From Package No.,ממס החבילה
 DocType: Item Attribute,To Range,לטווח
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +30,Securities and Deposits,ניירות ערך ופיקדונות
 DocType: Job Opening,Description of a Job Opening,תיאור של פתיחת איוב
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +112,Pending activities for today,פעילויות ממתינים להיום
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Pending activities for today,פעילויות ממתינים להיום
 DocType: Salary Structure,Salary Component for timesheet based payroll.,רכיב שכר שכר מבוסס גיליון.
 DocType: Sales Order Item,Used for Production Plan,המשמש לתכנית ייצור
 DocType: Manufacturing Settings,Time Between Operations (in mins),זמן בין פעולות (בדקות)
@@ -2598,7 +2598,7 @@ DocType: Serial No,AMC Expiry Date,תאריך תפוגה AMC
 DocType: Quotation,Quotation Lost Reason,סיבה אבודה ציטוט
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +383,Transaction reference no {0} dated {1},התייחסות עסקה לא {0} מתאריך {1}
 apps/erpnext/erpnext/setup/doctype/supplier_group/supplier_group.js +5,There is nothing to edit.,אין שום דבר כדי לערוך.
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Summary for this month and pending activities,סיכום לחודש זה ופעילויות תלויות ועומדות
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +124,Summary for this month and pending activities,סיכום לחודש זה ופעילויות תלויות ועומדות
 DocType: Customer Group,Customer Group Name,שם קבוצת הלקוחות
 apps/erpnext/erpnext/public/js/financial_statements.js +58,Cash Flow Statement,דוח על תזרימי המזומנים
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +553,Please remove this Invoice {0} from C-Form {1},אנא הסר חשבונית זו {0} מC-טופס {1}
@@ -2868,7 +2868,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +89,Casua
 DocType: Batch,Batch ID,זיהוי אצווה
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +386,Note: {0},הערה: {0}
 ,Delivery Note Trends,מגמות תעודת משלוח
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +114,This Week's Summary,סיכום זה של השבוע
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +120,This Week's Summary,סיכום זה של השבוע
 apps/erpnext/erpnext/accounts/general_ledger.py +113,Account: {0} can only be updated via Stock Transactions,חשבון: {0} ניתן לעדכן רק דרך עסקות במלאי
 DocType: Student Group Creation Tool,Get Courses,קבל קורסים
 DocType: Bank Account,Party,מפלגה
@@ -3074,7 +3074,7 @@ apps/erpnext/erpnext/config/manufacturing.py +27,Time Sheet for manufacturing.,�
 apps/erpnext/erpnext/templates/pages/cart.html +37,Subtotal,סיכום ביניים
 DocType: Salary Detail,Default Amount,סכום ברירת מחדל
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,מחסן לא נמצא במערכת
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,This Month's Summary,סיכום של החודש
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +123,This Month's Summary,סיכום של החודש
 DocType: Quality Inspection Reading,Quality Inspection Reading,איכות פיקוח קריאה
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`מניות הקפאה ישן יותר Than` צריך להיות קטן יותר מאשר% d ימים.
 DocType: Tax Rule,Purchase Tax Template,מס רכישת תבנית
@@ -3235,7 +3235,7 @@ DocType: Manufacturing Settings,Manufacturing Settings,הגדרות ייצור
 apps/erpnext/erpnext/config/setup.py +56,Setting up Email,הגדרת דוא&quot;ל
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +134,Please enter default currency in Company Master,נא להזין את ברירת מחדל של המטבע בחברה Master
 DocType: Stock Entry Detail,Stock Entry Detail,פרט מניית הכניסה
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +111,Daily Reminders,תזכורות יומיות
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,Daily Reminders,תזכורות יומיות
 DocType: Products Settings,Home Page is Products,דף הבית הוא מוצרים
 ,Asset Depreciation Ledger,לדג&#39;ר פחת נכסים
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +97,Tax Rule Conflicts with {0},ניגודים כלל מס עם {0}
