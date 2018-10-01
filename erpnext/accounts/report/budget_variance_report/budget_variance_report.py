@@ -60,7 +60,7 @@ def validate_filters(filters):
 		frappe.throw(_("Filter based on Cost Center is only applicable if Budget Against is selected as Cost Center"))
 
 def get_columns(filters):
-	columns = [_(filters.get("budget_against")) + ":Link/%s:120"%(filters.get("budget_against")), _("Account") + ":Link/Account:120"]
+	columns = [_(filters.get("budget_against")) + ":Link/%s:80"%(filters.get("budget_against")), _("Account") + ":Link/Account:80"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
@@ -68,13 +68,18 @@ def get_columns(filters):
 
 	for year in fiscal_year:
 		for from_date, to_date in get_period_date_ranges(filters["period"], year[0]):
-			for label in [_("Budget") + " (%s)" + str( year[0]), _("Actual") + " (%s)" + str( year[0]), _("Variance") + " (%s)" + str( year[0])]:
-				if group_months:
-					label = label % (formatdate(from_date, format_string="MMM") + " - " + formatdate(to_date, format_string="MMM"))
-				else:
-					label = label % formatdate(from_date, format_string="MMM")
+			if filters["period"] == "Yearly":
+				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Varaiance ") + " " + str(year[0])]
+				for label in labels:
+					columns.append(label+":Float:80")
+			else:
+				for label in [_("Budget") + " (%s)" + " " + str(year[0]), _("Actual") + " (%s)" + " " + str(year[0]), _("Variance") + " (%s)" + " " + str(year[0])]:
+					if group_months:
+						label = label % (formatdate(from_date, format_string="MMM") + "-" + formatdate(to_date, format_string="MMM"))
+					else:
+						label = label % formatdate(from_date, format_string="MMM")
 
-				columns.append(label+":Float:120")
+					columns.append(label+":Float:80")
 
 	if filters["period"] != "Yearly" :
 		return columns + [_("Total Budget") + ":Float:80", _("Total Actual") + ":Float:80",
