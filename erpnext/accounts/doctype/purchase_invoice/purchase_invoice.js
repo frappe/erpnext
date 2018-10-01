@@ -496,6 +496,16 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Purchase Invoice': 'Debit Note',
 			'Payment Entry': 'Payment'
 		}
+
+		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
 	},
 
 	onload: function(frm) {

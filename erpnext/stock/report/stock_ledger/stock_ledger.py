@@ -56,7 +56,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = 'and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i) for i in items]))
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
@@ -100,7 +100,7 @@ def get_item_details(items, sl_entries):
 		select name, item_name, description, item_group, brand, stock_uom
 		from `tabItem`
 		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
+		""".format(', '.join([frappe.db.escape(i,percent=False) for i in items])), as_dict=1):
 			item_details.setdefault(item.name, item)
 
 	return item_details
