@@ -284,7 +284,6 @@ apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +67,Avg. Selli
 DocType: Delivery Note,% Installed,Instalado %
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +25,Read the ERPNext Manual,Leia o manual de ERPNext
 DocType: Purchase Invoice,01-Sales Return,01-Devolução de vendas
-DocType: Email Digest,Pending Purchase Orders,Pedidos de Compra Pendentes
 DocType: Stock Settings,Automatically Set Serial Nos based on FIFO,Número de Série automaticamente definido com base na FIFO
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,Verificar unicidade de número de nota fiscal do fornecedor
 DocType: Vehicle Service,Oil Change,Troca de Óleo
@@ -1302,7 +1301,6 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Workstation,Wages per hour,Salário por hora
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Da balança em Batch {0} se tornará negativo {1} para item {2} no Armazém {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,As seguintes Requisições de Material foram criadas automaticamente com base no nível de reposição do item
-DocType: Email Digest,Pending Sales Orders,Pedidos de Venda Pendentes
 apps/erpnext/erpnext/controllers/accounts_controller.py +361,Account {0} is invalid. Account Currency must be {1},Conta {0} é inválido. Conta de moeda deve ser {1}
 apps/erpnext/erpnext/buying/utils.py +34,UOM Conversion factor is required in row {0},Fator de Conversão da Unidade de Medida é necessário na linha {0}
 DocType: Production Plan Item,material_request_item,material_request_item
@@ -2688,7 +2686,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1080,Batch {0} of
 apps/erpnext/erpnext/config/manufacturing.py +27,Time Sheet for manufacturing.,Registro de Tempo para fabricação
 DocType: Salary Detail,Default Amount,Quantidade Padrão
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,Armazén não foi encontrado no sistema
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,This Month's Summary,Resumo deste mês
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +123,This Month's Summary,Resumo deste mês
 DocType: Quality Inspection Reading,Quality Inspection Reading,Leitura da Inspeção de Qualidade
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Congelar Estoque anterior a' deve ser menor que %d dias.
 DocType: Tax Rule,Purchase Tax Template,Modelo de Impostos sobre a compra
@@ -2742,7 +2740,6 @@ DocType: Fee Schedule,Student Category,Categoria do Aluno
 DocType: Announcement,Student,Aluno
 DocType: Company,Budget Detail,Detalhe do Orçamento
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Por favor introduza a mensagem antes de enviá-
-DocType: Email Digest,Pending Quotations,Orçamentos Pendentes
 apps/erpnext/erpnext/config/accounts.py +346,Point-of-Sale Profile,Perfil do Ponto de Vendas
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +166,Unsecured Loans,Empréstimos não Garantidos
 DocType: Maintenance Schedule Detail,Scheduled Date,Data Agendada

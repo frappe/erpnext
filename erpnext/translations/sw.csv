@@ -373,7 +373,6 @@ DocType: Shift Assignment,Shift Request,Ombi la Shift
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +79,Installation date cannot be before delivery date for Item {0},Tarehe ya usanii haiwezi kuwa kabla ya tarehe ya utoaji wa Bidhaa {0}
 DocType: Pricing Rule,Discount on Price List Rate (%),Punguzo kwa Orodha ya Bei Kiwango (%)
 apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +112,Item Template,Kigezo cha Kigezo
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Tafadhali weka Mfululizo wa Naming kwa {0} kupitia Setup&gt; Mipangilio&gt; Mfululizo wa Naming
 DocType: Job Offer,Select Terms and Conditions,Chagua Masharti na Masharti
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +80,Out Value,Thamani ya nje
 DocType: Bank Statement Settings Item,Bank Statement Settings Item,Mipangilio ya Taarifa ya Benki
@@ -575,7 +574,7 @@ DocType: Volunteer,Morning,Asubuhi
 apps/erpnext/erpnext/accounts/utils.py +374,Payment Entry has been modified after you pulled it. Please pull it again.,Ulipaji wa Malipo umebadilishwa baada ya kuvuta. Tafadhali futa tena.
 DocType: Program Enrollment Tool,New Student Batch,Kikundi kipya cha Wanafunzi
 apps/erpnext/erpnext/stock/doctype/item/item.py +496,{0} entered twice in Item Tax,{0} imeingia mara mbili katika Kodi ya Item
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +115,Summary for this week and pending activities,Muhtasari wa wiki hii na shughuli zinazosubiri
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +121,Summary for this week and pending activities,Muhtasari wa wiki hii na shughuli zinazosubiri
 DocType: Student Applicant,Admitted,Imekubaliwa
 DocType: Workstation,Rent Cost,Gharama ya Kodi
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +89,Amount After Depreciation,Kiasi Baada ya kushuka kwa thamani
@@ -698,7 +697,6 @@ DocType: Purchase Invoice,01-Sales Return,Kurudi kwa Mauzo ya 01
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +15,Temporarily on Hold,Kwa muda Ukizingatia
 DocType: Account,Is Group,Ni Kikundi
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +324,Credit Note {0} has been created automatically,Maelezo ya Mikopo {0} yameundwa moja kwa moja
-DocType: Email Digest,Pending Purchase Orders,Maagizo ya Ununuzi yaliyotarajiwa
 DocType: Stock Settings,Automatically Set Serial Nos based on FIFO,Weka kwa moja kwa moja Serial Nos kulingana na FIFO
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,Angalia Nambari ya Nambari ya Invoice ya Wauzaji
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +34,Primary Address Details,Maelezo ya Anwani ya Msingi
@@ -748,7 +746,7 @@ DocType: Student Report Generation Tool,Attended by Parents,Kuhudhuria na Wazazi
 apps/erpnext/erpnext/hr/doctype/shift_assignment/shift_assignment.py +39,Employee {0} has already applied for {1} on {2} : ,Mfanyakazi {0} tayari ameomba kwa {1} juu ya {2}:
 DocType: Inpatient Record,AB Positive,AB Chanya
 DocType: Job Opening,Description of a Job Opening,Maelezo ya Kufungua kazi
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +112,Pending activities for today,Shughuli zinasubiri leo
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Pending activities for today,Shughuli zinasubiri leo
 DocType: Salary Structure,Salary Component for timesheet based payroll.,Kipengele cha Mshahara kwa malipo ya nyakati ya maraheet.
 DocType: Sales Order Item,Used for Production Plan,Kutumika kwa Mpango wa Uzalishaji
 DocType: Loan,Total Payment,Malipo ya Jumla
@@ -936,6 +934,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +243,Opening
 apps/erpnext/erpnext/stock/doctype/item/item.py +930,Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,Kipengee cha Kupima kwa Kipengee cha Bidhaa {0} hawezi kubadilishwa moja kwa moja kwa sababu tayari umefanya shughuli au UOM mwingine. Utahitaji kujenga kipengee kipya cha kutumia UOM tofauti ya UOM.
 apps/erpnext/erpnext/accounts/utils.py +378,Allocated amount can not be negative,Kiwango kilichowekwa hawezi kuwa hasi
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +11,Please set the Company,Tafadhali weka Kampuni
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Wateja&gt; Kikundi cha Wateja&gt; Eneo
 DocType: Share Balance,Share Balance,Shiriki Mizani
 DocType: Amazon MWS Settings,AWS Access Key ID,Kitambulisho cha Ufikiaji wa AWS
 DocType: Employee Tax Exemption Declaration,Monthly House Rent,Kodi ya Nyumba ya Kila mwezi
@@ -1236,7 +1235,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +13,Biotechnology,
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1125,"Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
 						 to fullfill Sales Order {2}.",Kipengee {0} (Serial No: {1}) haiwezi kutumiwa kama vile reserverd \ to Order Sales kamilifu {2}.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +116,Office Maintenance Expenses,Malipo ya Matengenezo ya Ofisi
-apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","Tarehe ya mwanzo na tarehe ya kumalizika inaingiliana na kadi ya kazi <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/utilities/user_progress.py +54,Go to ,Enda kwa
 DocType: Shopify Settings,Update Price from Shopify To ERPNext Price List,Punguza bei kutoka kwa Shopify hadi ERPNext Orodha ya Bei
 apps/erpnext/erpnext/config/learn.py +47,Setting up Email Account,Kuweka Akaunti ya Barua pepe
@@ -1324,6 +1322,7 @@ DocType: Item,Allow over delivery or receipt upto this percent,Ruhusu utoaji au 
 DocType: Upload Attendance,Import Attendance,Weka Mahudhurio
 apps/erpnext/erpnext/public/js/pos/pos.html +124,All Item Groups,Vikundi vyote vya Item
 DocType: Work Order,Item To Manufacture,Mchapishaji wa Utengenezaji
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Tafadhali weka Mfululizo wa Naming kwa {0} kupitia Setup&gt; Mipangilio&gt; Mfululizo wa Naming
 apps/erpnext/erpnext/buying/utils.py +80,{0} {1} status is {2},{0} {1} hali ni {2}
 DocType: Water Analysis,Collection Temperature ,Ukusanyaji Joto
 DocType: Employee,Provide Email Address registered in company,Kutoa anwani ya barua pepe iliyosajiliwa katika kampuni
@@ -1503,6 +1502,7 @@ DocType: Amazon MWS Settings,BR,BR
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +198,From Place,Kutoka mahali
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +460,Net Pay cannnot be negative,Net Pay haiwezi kuwa mbaya
 DocType: Student Admission,Publish on website,Chapisha kwenye tovuti
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,Wasambazaji&gt; Aina ya Wasambazaji
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +738,Supplier Invoice Date cannot be greater than Posting Date,Tarehe ya Invozi ya Wasambazaji haiwezi kuwa kubwa kuliko Tarehe ya Kuweka
 DocType: Installation Note,MAT-INS-.YYYY.-,MAT-INS -YYYY.-
 DocType: Subscription,Cancelation Date,Tarehe ya kufuta
@@ -1667,6 +1667,7 @@ DocType: Sales Order Item,Work Order Qty,Kazi ya Utoaji Kazi
 DocType: Item Default,Default Selling Cost Center,Kituo cha Gharama ya Kuuza Ghali
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +594,Disc,Duru
 DocType: Buying Settings,Material Transferred for Subcontract,Nyenzo zimehamishwa kwa Mkataba wa Chini
+DocType: Email Digest,Purchase Orders Items Overdue,Malipo ya Amri ya Ununuzi
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1640,ZIP Code,Namba ya Posta
 apps/erpnext/erpnext/controllers/selling_controller.py +261,Sales Order {0} is {1},Amri ya Mauzo {0} ni {1}
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +256,Select interest income account in loan {0},Chagua akaunti ya mapato ya riba kwa mkopo {0}
@@ -1753,6 +1754,7 @@ apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Kufungua Miz
 ,GST Sales Register,Jumuiya ya Daftari ya Mauzo
 DocType: Sales Invoice Advance,Sales Invoice Advance,Advance ya Mauzo ya Mauzo
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +552,Nothing to request,Hakuna chochote cha kuomba
+DocType: Stock Settings,Default Return Warehouse,Default Kurudi Ghala
 apps/erpnext/erpnext/public/js/setup_wizard.js +18,Select your Domains,Chagua Domains yako
 apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/sync_product.py +228,Shopify Supplier,Mtoa Wasambazaji
 DocType: Bank Statement Transaction Entry,Payment Invoice Items,Vitu vya ankara za malipo
@@ -2145,6 +2147,7 @@ DocType: Support Search Source,Response Options,Chaguo la majibu
 DocType: HR Settings,Employee Settings,Mipangilio ya Waajiriwa
 apps/erpnext/erpnext/templates/pages/integrations/gocardless_checkout.html +13,Loading Payment System,Inapakia Mfumo wa Malipo
 ,Batch-Wise Balance History,Historia ya Mizani-Hekima
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Wasambazaji&gt; Kikundi cha Wasambazaji
 apps/erpnext/erpnext/controllers/accounts_controller.py +1062,Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.,Row # {0}: Haiwezi kuweka Kiwango kama kiasi ni kikubwa kuliko kiasi cha malipo kwa Item {1}.
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +73,Print settings updated in respective print format,Mipangilio ya magazeti imewekwa katika fomu ya kuchapisha husika
 DocType: Package Code,Package Code,Kanuni ya pakiti
@@ -2617,6 +2620,7 @@ DocType: Sales Team,Contribution to Net Total,Mchango kwa Jumla ya Net
 DocType: Sales Invoice Item,Customer's Item Code,Msimbo wa Bidhaa ya Wateja
 DocType: Stock Reconciliation,Stock Reconciliation,Upatanisho wa hisa
 DocType: Territory,Territory Name,Jina la Wilaya
+DocType: Email Digest,Purchase Orders to Receive,Amri ya Ununuzi Ili Kupokea
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +197,Work-in-Progress Warehouse is required before Submit,Ghala ya Maendeleo ya Kazi inahitajika kabla ya Wasilisha
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +71,You can only have Plans with the same billing cycle in a Subscription,Unaweza tu kuwa na Mipango yenye mzunguko wa bili sawa katika Usajili
 DocType: Bank Statement Transaction Settings Item,Mapped Data,Takwimu zilizopangwa
@@ -2634,7 +2638,6 @@ apps/erpnext/erpnext/config/selling.py +179,Track Leads by Lead Source.,Orodha i
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Hali ya Utawala wa Usafirishaji
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +175,Please enter ,Tafadhali ingiza
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +64,Maintenance Log,Ingia ya Matengenezo
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Wasambazaji&gt; Kikundi cha Wasambazaji
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +242,Please set filter based on Item or Warehouse,Tafadhali weka kichujio kulingana na Bidhaa au Ghala
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),Uzito wavu wa mfuko huu. (mahesabu ya moja kwa moja kama jumla ya uzito wa vitu)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +43,Make Inter Company Journal Entry,Fanya Ingia ya Kuingia kwa Kampuni ya Inter
@@ -2723,6 +2726,9 @@ apps/erpnext/erpnext/public/js/utils.js +498,You have already selected items fro
 DocType: Monthly Distribution,Name of the Monthly Distribution,Jina la Usambazaji wa Kila mwezi
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +100,Batch ID is mandatory,Kitambulisho cha Batch ni lazima
 DocType: Sales Person,Parent Sales Person,Mtu wa Mauzo ya Mzazi
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Tafadhali futa Waajiri <a href=""#Form/Employee/{0}"">{0}</a> \ ili kufuta hati hii"
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +102,No items to be received are overdue,Hakuna vitu vilivyopokelewa vimepungua
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +101,The seller and the buyer cannot be the same,Muuzaji na mnunuzi hawezi kuwa sawa
 DocType: Project,Collect Progress,Kusanya Maendeleo
 DocType: Delivery Note,MAT-DN-.YYYY.-,MAT-DN -YYYY.-
@@ -2970,7 +2976,6 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Workstation,Wages per hour,Mshahara kwa saa
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Usawa wa hisa katika Batch {0} utakuwa hasi {1} kwa Bidhaa {2} kwenye Ghala {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,Ufuatiliaji wa Nyenzo zifuatayo umefufuliwa kwa moja kwa moja kulingana na ngazi ya re-order ya Item
-DocType: Email Digest,Pending Sales Orders,Amri ya Mauzo inasubiri
 apps/erpnext/erpnext/controllers/accounts_controller.py +361,Account {0} is invalid. Account Currency must be {1},Akaunti {0} ni batili. Fedha ya Akaunti lazima iwe {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py +31,From Date {0} cannot be after employee's relieving Date {1},Kutoka tarehe {0} haiwezi kuwa baada ya Tarehe ya kuondokana na mfanyakazi {1}
 DocType: Supplier,Is Internal Supplier,Ni wauzaji wa ndani
@@ -3236,6 +3241,7 @@ DocType: Supplier Scorecard Scoring Standing,Min Grade,Daraja la Kidogo
 DocType: Healthcare Service Unit Type,Healthcare Service Unit Type,Aina ya Huduma ya Huduma ya Afya
 apps/erpnext/erpnext/projects/doctype/project/project.py +278,You have been invited to collaborate on the project: {0},Umealikwa kushirikiana kwenye mradi: {0}
 DocType: Supplier Group,Parent Supplier Group,Kundi la Wauzaji wa Mzazi
+DocType: Email Digest,Purchase Orders to Bill,Amri ya Ununuzi kwa Bill
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js +47,Accumulated Values in Group Company,Maadili yaliyokusanywa katika Kundi la Kampuni
 DocType: Leave Block List Date,Block Date,Weka Tarehe
 DocType: Crop,Crop,Mazao
@@ -3369,7 +3375,6 @@ apps/erpnext/erpnext/controllers/buying_controller.py +706,Specified BOM {0} doe
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +301,Course: ,Kozi:
 DocType: Soil Texture,Sandy Loam,Sandy Loam
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +242,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Ratiba ya Matengenezo {0} lazima iondoliwe kabla ya kufuta Sheria hii ya Mauzo
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,Tafadhali kuanzisha Mfumo wa Jina la Waajiriwa katika Rasilimali za Binadamu&gt; Mipangilio ya HR
 DocType: POS Profile,Applicable for Users,Inatumika kwa Watumiaji
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,PUR-SQTN -YYYY.-
 DocType: Notification Control,Expense Claim Approved,Madai ya Madai yaliidhinishwa
@@ -3383,7 +3388,6 @@ DocType: Employee Separation,Employee Separation Template,Kigezo cha Utunzaji wa
 DocType: Selling Settings,Sales Order Required,Amri ya Mauzo Inahitajika
 apps/erpnext/erpnext/public/js/hub/marketplace.js +107,Become a Seller,Kuwa Muzaji
 DocType: Purchase Invoice,Credit To,Mikopo Kwa
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Msimbo wa Item&gt; Kikundi cha Bidhaa&gt; Brand
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +31,Active Leads / Customers,Msaidizi wa Active / Wateja
 DocType: Employee Education,Post Graduate,Chapisha Chuo
 DocType: Maintenance Schedule Detail,Maintenance Schedule Detail,Ratiba ya Matengenezo ya Daraja
@@ -3400,7 +3404,6 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +232,For Job
 DocType: Warranty Claim,Raised By,Iliyotolewa na
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +1551,Prescriptions,Maagizo
 DocType: Payment Gateway Account,Payment Account,Akaunti ya Malipo
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,Wasambazaji&gt; Aina ya Wasambazaji
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +1041,Please specify Company to proceed,Tafadhali taja Kampuni ili kuendelea
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +81,Net Change in Accounts Receivable,Mabadiliko ya Nambari katika Akaunti ya Kukubalika
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +91,Compensatory Off,Off Compensation
@@ -3825,6 +3828,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Quotation {
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +132,Total Outstanding Amount,Jumla ya Kiasi Kikubwa
 DocType: Sales Partner,Targets,Malengo
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +40,Please register the SIREN number in the company information file,Tafadhali kujiandikisha namba ya SIREN katika faili ya habari ya kampuni
+DocType: Email Digest,Sales Orders to Bill,Maagizo ya Mauzo kwa Bill
 DocType: Price List,Price List Master,Orodha ya Bei Mwalimu
 DocType: GST Account,CESS Account,Akaunti ya CESS
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Shughuli zote za Mauzo zinaweza kutambulishwa dhidi ya watu wengi wa Mauzo ** ili uweze kuweka na kufuatilia malengo.
@@ -3985,6 +3989,7 @@ DocType: Payment Request,Mute Email,Tuma barua pepe
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +29,"Food, Beverage & Tobacco","Chakula, Beverage &amp; Tobacco"
 DocType: Account,Account Number,Idadi ya Akaunti
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +795,Can only make payment against unbilled {0},Inaweza tu kulipa malipo dhidi ya unbilled {0}
+apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","Tarehe ya mwanzo na tarehe ya kumalizika inaingiliana na kadi ya kazi <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/controllers/selling_controller.py +110,Commission rate cannot be greater than 100,Kiwango cha Tume haiwezi kuwa zaidi ya 100
 DocType: Sales Invoice,Allocate Advances Automatically (FIFO),Shirikisha Maendeleo kwa moja kwa moja (FIFO)
 DocType: Volunteer,Volunteer,Kujitolea
@@ -4036,8 +4041,6 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Rename Tool,Rename Log,Rejesha Ingia
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Kundi la Wanafunzi au Ratiba ya Kozi ni lazima
 DocType: HR Settings,Maintain Billing Hours and Working Hours Same on Timesheet,Hifadhi Masaa ya Ulipaji na Masaa ya Kazi sawa na Timesheet
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Tafadhali futa Waajiri <a href=""#Form/Employee/{0}"">{0}</a> \ ili kufuta hati hii"
 DocType: Maintenance Visit Purpose,Against Document No,Dhidi ya Nambari ya Hati
 DocType: BOM,Scrap,Vipande
 apps/erpnext/erpnext/utilities/user_progress.py +217,Go to Instructors,Nenda kwa Walimu
@@ -4568,6 +4571,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Gross Purchase Amount is 
 apps/erpnext/erpnext/setup/doctype/company/company.js +115,Company name not same,Jina la kampuni si sawa
 DocType: Lead,Address Desc,Anwani Desc
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +114,Party is mandatory,Chama ni lazima
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Tafadhali kuanzisha mfululizo wa kuhesabu kwa Mahudhurio kupitia Upangilio&gt; Orodha ya Kuhesabu
 DocType: Topic,Topic Name,Jina la Mada
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +312,Please set default template for Leave Approval Notification in HR Settings.,Tafadhali weka template default kwa Acha Acha idhini katika Mipangilio ya HR.
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +38,Atleast one of the Selling or Buying must be selected,Atleast moja ya Mauzo au Ununuzi lazima ichaguliwe
@@ -4848,6 +4852,7 @@ DocType: Chapter,Members,Wanachama
 DocType: Student,Student Email Address,Anwani ya barua pepe ya wanafunzi
 DocType: Item,Hub Warehouse,Warehouse Hub
 DocType: Cashier Closing,From Time,Kutoka wakati
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Tafadhali kuanzisha Msaidizi wa Kuita Mfumo katika Elimu&gt; Mipangilio ya Elimu
 DocType: Hotel Settings,Hotel Settings,Mipangilio ya Hoteli
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock: ,Katika Stock:
 DocType: Notification Control,Custom Message,Ujumbe maalum
@@ -4910,7 +4915,6 @@ apps/erpnext/erpnext/crm/doctype/contract/contract.py +38,End Date cannot be bef
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +33,Student is already enrolled.,Mwanafunzi tayari amejiandikisha.
 DocType: Fiscal Year,Year Name,Jina la Mwaka
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,Kuna sikukuu zaidi kuliko siku za kazi mwezi huu.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Tafadhali kuanzisha mfululizo wa kuhesabu kwa Mahudhurio kupitia Upangilio&gt; Orodha ya Kuhesabu
 apps/erpnext/erpnext/controllers/buying_controller.py +759,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,Vipengele vifuatavyo {0} hazijainishwa kama kipengee {1}. Unaweza kuwawezesha kama kipengee {1} kutoka kwa kichwa chake cha Bidhaa
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,Bidhaa ya Bundle Item
@@ -5080,6 +5084,7 @@ DocType: Healthcare Settings,Clinical Procedure Consumable Item,Utaratibu wa Kli
 apps/erpnext/erpnext/utilities/activation.py +99,Create Users,Unda Watumiaji
 apps/erpnext/erpnext/utilities/user_progress.py +147,Gram,Gramu
 apps/erpnext/erpnext/accounts/doctype/subscriber/subscriber_dashboard.py +10,Subscriptions,Usajili
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,Tafadhali kuanzisha Mfumo wa Jina la Waajiriwa katika Rasilimali za Binadamu&gt; Mipangilio ya HR
 DocType: Supplier Scorecard,Per Month,Kwa mwezi
 DocType: Education Settings,Make Academic Term Mandatory,Fanya muda wa kitaaluma wa lazima
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +414,Quantity to Manufacture must be greater than 0.,Wingi wa Utengenezaji lazima uwe mkubwa kuliko 0.
@@ -5105,7 +5110,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +383,Transa
 apps/erpnext/erpnext/setup/doctype/supplier_group/supplier_group.js +5,There is nothing to edit.,Hakuna kitu cha kuhariri.
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +542,Form View,Tazama Fomu
 DocType: HR Settings,Expense Approver Mandatory In Expense Claim,Mpangilio wa gharama unaohitajika katika dai ya gharama
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Summary for this month and pending activities,Muhtasari wa mwezi huu na shughuli zinazosubiri
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +124,Summary for this month and pending activities,Muhtasari wa mwezi huu na shughuli zinazosubiri
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py +91,Please set Unrealized Exchange Gain/Loss Account in Company {0},Tafadhali weka Akaunti ya Kushindwa Kuchangia / Kupoteza kwa Kampuni {0}
 apps/erpnext/erpnext/utilities/user_progress.py +248,"Add users to your organization, other than yourself.","Ongeza watumiaji kwenye shirika lako, isipokuwa wewe mwenyewe."
 DocType: Customer Group,Customer Group Name,Jina la Kundi la Wateja
@@ -5170,6 +5175,7 @@ DocType: Item Alternative,Alternative Item Name,Jina la Mchapishaji
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +24,Parent Item {0} must not be a Stock Item,Item ya Mzazi {0} haipaswi kuwa Item ya Hifadhi
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +187,Website Listing,Orodha ya tovuti
 apps/erpnext/erpnext/config/selling.py +57,All Products or Services.,Bidhaa zote au Huduma.
+DocType: Email Digest,Open Quotations,Fungua Nukuu
 DocType: Expense Claim,More Details,Maelezo zaidi
 DocType: Supplier Quotation,Supplier Address,Anwani ya Wasambazaji
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +168,{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5},{0} Bajeti ya Akaunti {1} dhidi ya {2} {3} ni {4}. Itazidisha {5}
@@ -5204,7 +5210,6 @@ DocType: Employee Benefit Claim,Benefit Type and Amount,Aina ya Faida na Kiasi
 apps/erpnext/erpnext/hotels/report/hotel_room_occupancy/hotel_room_occupancy.py +19,Rooms Booked,Vyumba vimeandikwa
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +57,Ends On date cannot be before Next Contact Date.,Mwisho wa tarehe haiwezi kuwa kabla ya Tarehe ya Mawasiliano ya Ijayo.
 DocType: Journal Entry,Pay To / Recd From,Kulipa / Recd Kutoka
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Wateja&gt; Kikundi cha Wateja&gt; Eneo
 DocType: Naming Series,Setup Series,Mipangilio ya kuanzisha
 DocType: Payment Reconciliation,To Invoice Date,Kwa tarehe ya ankara
 DocType: Bank Account,Contact HTML,Wasiliana HTML
@@ -5327,6 +5332,7 @@ DocType: Repayment Schedule,Payment Date,Tarehe ya Malipo
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +122,New Batch Qty,Uchina Mpya
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +10,Apparel & Accessories,Nguo &amp; Accessories
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.py +91,Could not solve weighted score function. Make sure the formula is valid.,Haikuweza kutatua kazi ya alama ya uzito. Hakikisha fomu hiyo halali.
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +186,Purchase Order Items not received on time,Vipengee Vipengee vya Ununuzi havikupokea kwa wakati
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +67,Number of Order,Idadi ya Utaratibu
 DocType: Item Group,HTML / Banner that will show on the top of product list.,HTML / Banner ambayo itaonyesha juu ya orodha ya bidhaa.
 DocType: Shipping Rule,Specify conditions to calculate shipping amount,Eleza hali ya kuhesabu kiasi cha meli
@@ -5640,7 +5646,7 @@ DocType: Agriculture Task,End Day,Siku ya Mwisho
 DocType: Batch,Batch ID,Kitambulisho cha Bundi
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +386,Note: {0},Kumbuka: {0}
 ,Delivery Note Trends,Mwelekeo wa Kumbuka Utoaji
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +114,This Week's Summary,Muhtasari wa wiki hii
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +120,This Week's Summary,Muhtasari wa wiki hii
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +22,In Stock Qty,Katika Stock
 ,Daily Work Summary Replies,Muhtasari wa Kazi ya Kila siku
 DocType: Delivery Trip,Calculate Estimated Arrival Times,Tumia Hesabu ya Kufika Iliyohesabiwa
@@ -5684,6 +5690,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Item {0} is not s
 DocType: Accounts Settings,Accounts Settings,Mipangilio ya Akaunti
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,Thibitisha
 DocType: Loyalty Program,Customer Territory,Eneo la Wateja
+DocType: Email Digest,Sales Orders to Deliver,Maagizo ya Mauzo ya Kutoa
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Number of new Account, it will be included in the account name as a prefix","Idadi ya Akaunti mpya, itaingizwa katika jina la akaunti kama kiambishi"
 DocType: Maintenance Team Member,Team Member,Mwanachama wa Timu
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +151,No Result to submit,Hakuna matokeo ya kuwasilisha
@@ -6062,7 +6069,6 @@ apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +21,"In
 DocType: Appointment Type,Physician,Daktari
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1080,Batch {0} of Item {1} has expired.,Kipengee {0} cha Bidhaa {1} kimekamilika.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11,Consultations,Majadiliano
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Tafadhali kuanzisha Msaidizi wa Kuita Mfumo katika Elimu&gt; Mipangilio ya Elimu
 apps/erpnext/erpnext/manufacturing/report/bom_variance_report/bom_variance_report.py +36,Finished Good,Imekamilishwa vizuri
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +56,"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","Item Bei inaonekana mara nyingi kulingana na Orodha ya Bei, Wafanyabiashara / Wateja, Fedha, Bidhaa, UOM, Uchina na Tarehe."
 DocType: Sales Invoice,Commission,Tume
@@ -6077,7 +6083,7 @@ DocType: Production Plan,Get Items For Work Order,Pata Vipengee Kwa Kazi ya Kazi
 DocType: Salary Detail,Default Amount,Kiasi cha malipo
 DocType: Lab Test Template,Descriptive,Maelezo
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,Ghala haipatikani kwenye mfumo
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,This Month's Summary,Muhtasari wa Mwezi huu
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +123,This Month's Summary,Muhtasari wa Mwezi huu
 DocType: Quality Inspection Reading,Quality Inspection Reading,Uhakiki wa Uhakiki wa Ubora
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Zuia Hifadhi za Bidha za Kale Kuliko` lazima iwe ndogo kuliko siku% d.
 DocType: Tax Rule,Purchase Tax Template,Kigezo cha Kodi ya Ununuzi
@@ -6191,6 +6197,7 @@ DocType: Agriculture Analysis Criteria,Agriculture User,Mtumiaji wa Kilimo
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +38,Valid till date cannot be before transaction date,Halali hadi tarehe haiwezi kuwa kabla ya tarehe ya shughuli
 DocType: Fee Schedule,Student Category,Jamii ya Wanafunzi
 DocType: Announcement,Student,Mwanafunzi
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Msimbo wa Item&gt; Kikundi cha Bidhaa&gt; Brand
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js +98,Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,Stock kiasi cha kuanza utaratibu haipatikani katika ghala. Unataka kurekodi Uhamisho wa Hifadhi
 DocType: Shipping Rule,Shipping Rule Type,Aina ya Rule ya Utoaji
 apps/erpnext/erpnext/utilities/user_progress.py +239,Go to Rooms,Nenda kwenye Vyumba
@@ -6198,7 +6205,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Pa
 DocType: Company,Budget Detail,Maelezo ya Bajeti
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Tafadhali ingiza ujumbe kabla ya kutuma
 DocType: Purchase Invoice,DUPLICATE FOR SUPPLIER,DUPLICATE KWA MFASHAJI
-DocType: Email Digest,Pending Quotations,Nukuu zinazopendu
 DocType: Delivery Note,Distance (KM),Umbali (KM)
 DocType: Asset,Custodian,Mtunzaji
 apps/erpnext/erpnext/config/accounts.py +346,Point-of-Sale Profile,Ushauri wa Maandishi ya Uhakika
@@ -6383,7 +6389,7 @@ apps/erpnext/erpnext/config/setup.py +56,Setting up Email,Kuweka Barua pepe
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +57,Guardian1 Mobile No,Guardian1 Simu ya Mkono Hakuna
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +134,Please enter default currency in Company Master,Tafadhali ingiza fedha za msingi kwa Kampuni ya Kampuni
 DocType: Stock Entry Detail,Stock Entry Detail,Maelezo ya Entry Entry
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +111,Daily Reminders,Kumbukumbu za kila siku
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,Daily Reminders,Kumbukumbu za kila siku
 apps/erpnext/erpnext/templates/pages/help.html +56,See all open tickets,Angalia tiketi zote za wazi
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_service_unit.js +21,Healthcare Service Unit Tree,Kitengo cha Utunzaji wa Huduma ya Afya
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +270,Product,Bidhaa
