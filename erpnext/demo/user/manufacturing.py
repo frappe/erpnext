@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe, random, erpnext
-from datetime import datetime, timedelta
+from datetime import timedelta
 from frappe.utils.make_random import how_many
 from frappe.desk import query_report
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
