@@ -108,6 +108,23 @@ def get_conditions(filters):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
 			where parent=`tabSales Invoice`.name
 				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+	
+	if filters.get("warehouse"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
+
+	
+	if filters.get("brand"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
 
 	return conditions
 
