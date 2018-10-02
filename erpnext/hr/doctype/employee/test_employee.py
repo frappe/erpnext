@@ -30,8 +30,7 @@ class TestEmployee(unittest.TestCase):
 		send_birthday_reminders()
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
-		self.assertTrue("Subject: Birthday Reminder for {0}".format(employee.employee_name) \
-			in email_queue[0].message)
+		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
 
 def make_employee(user):
 	if not frappe.db.get_value("User", user):
