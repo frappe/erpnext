@@ -307,6 +307,7 @@ def add_market_segments():
 	]
 
 	make_fixture_records(records)
+
 def add_sale_stages():
 	# Sale Stages
 	records = [
