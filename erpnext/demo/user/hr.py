@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import random
 import datetime
-from frappe import _
 from frappe.utils import random_string, add_days, get_last_day, getdate
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
