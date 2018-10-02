@@ -373,7 +373,6 @@ DocType: Shift Assignment,Shift Request,શીફ્ટ વિનંતી
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +79,Installation date cannot be before delivery date for Item {0},સ્થાપન તારીખ વસ્તુ માટે બોલ તારીખ પહેલાં ન હોઈ શકે {0}
 DocType: Pricing Rule,Discount on Price List Rate (%),ભાવ યાદી દર પર ડિસ્કાઉન્ટ (%)
 apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +112,Item Template,વસ્તુ નમૂનો
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,કૃપા કરીને {0} સેટઅપ&gt; સેટિંગ્સ&gt; નામકરણ શ્રેણી દ્વારા નામકરણ સીરીઝ સેટ કરો
 DocType: Job Offer,Select Terms and Conditions,પસંદ કરો નિયમો અને શરતો
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +80,Out Value,મૂલ્ય
 DocType: Bank Statement Settings Item,Bank Statement Settings Item,બેંક સ્ટેટમેન્ટ સેટિંગ્સ આઇટમ
@@ -575,7 +574,7 @@ DocType: Volunteer,Morning,મોર્નિંગ
 apps/erpnext/erpnext/accounts/utils.py +374,Payment Entry has been modified after you pulled it. Please pull it again.,તમે તેને ખેંચી ચુકવણી પછી એન્ટ્રી સુધારાઈ ગયેલ છે. તેને ફરીથી ખેંચી કરો.
 DocType: Program Enrollment Tool,New Student Batch,નવા વિદ્યાર્થી બેચ
 apps/erpnext/erpnext/stock/doctype/item/item.py +496,{0} entered twice in Item Tax,{0} વસ્તુ ટેક્સ બે વખત દાખલ
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +115,Summary for this week and pending activities,આ અઠવાડિયે અને બાકી પ્રવૃત્તિઓ માટે સારાંશ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +121,Summary for this week and pending activities,આ અઠવાડિયે અને બાકી પ્રવૃત્તિઓ માટે સારાંશ
 DocType: Student Applicant,Admitted,પ્રવેશ
 DocType: Workstation,Rent Cost,ભાડું ખર્ચ
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +89,Amount After Depreciation,રકમ અવમૂલ્યન પછી
@@ -698,7 +697,6 @@ DocType: Purchase Invoice,01-Sales Return,01- સેલ્સ રિટર્ન
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +15,Temporarily on Hold,કામચલાઉ હોલ્ડ પર
 DocType: Account,Is Group,Is ગ્રુપ
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +324,Credit Note {0} has been created automatically,ક્રેડિટ નોંધ {0} આપમેળે બનાવવામાં આવી છે
-DocType: Email Digest,Pending Purchase Orders,ખરીદી ઓર્ડર બાકી
 DocType: Stock Settings,Automatically Set Serial Nos based on FIFO,આપમેળે FIFO પર આધારિત અમે સીરીયલ સેટ
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,ચેક પુરવઠોકર્તા ભરતિયું નંબર વિશિષ્ટતા
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +34,Primary Address Details,પ્રાથમિક સરનામું વિગતો
@@ -748,7 +746,7 @@ DocType: Student Report Generation Tool,Attended by Parents,માતાપિ�
 apps/erpnext/erpnext/hr/doctype/shift_assignment/shift_assignment.py +39,Employee {0} has already applied for {1} on {2} : ,કર્મચારી {0} એ {2} પર {1} માટે પહેલાથી જ અરજી કરી છે:
 DocType: Inpatient Record,AB Positive,એબી હકારાત્મક
 DocType: Job Opening,Description of a Job Opening,એક જોબ ખુલી વર્ણન
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +112,Pending activities for today,આજે બાકી પ્રવૃત્તિઓ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Pending activities for today,આજે બાકી પ્રવૃત્તિઓ
 DocType: Salary Structure,Salary Component for timesheet based payroll.,Timesheet આધારિત પેરોલ માટે પગાર પુન.
 DocType: Sales Order Item,Used for Production Plan,ઉત્પાદન યોજના માટે વપરાય છે
 DocType: Loan,Total Payment,કુલ ચુકવણી
@@ -936,6 +934,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +243,Opening
 apps/erpnext/erpnext/stock/doctype/item/item.py +930,Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,જો તમે પહેલાથી જ અન્ય UOM સાથે કેટલાક વ્યવહાર (ઓ) કર્યા છે કારણ કે વસ્તુ માટે માપવા એકમ મૂળભૂત {0} સીધા બદલી શકાતું નથી. તમે વિવિધ મૂળભૂત UOM વાપરવા માટે એક નવી આઇટમ બનાવવા માટે જરૂર પડશે.
 apps/erpnext/erpnext/accounts/utils.py +378,Allocated amount can not be negative,ફાળવેલ રકમ નકારાત્મક ન હોઈ શકે
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +11,Please set the Company,કંપની સેટ કરો
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ગ્રાહક&gt; ગ્રાહક જૂથ&gt; પ્રદેશ
 DocType: Share Balance,Share Balance,શેર બેલેન્સ
 DocType: Amazon MWS Settings,AWS Access Key ID,AWS ઍક્સેસ કી ID
 DocType: Employee Tax Exemption Declaration,Monthly House Rent,માસિક હાઉસ ભાડું
@@ -1236,7 +1235,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +13,Biotechnology,
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1125,"Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
 						 to fullfill Sales Order {2}.",આઇટમ {0} (સીરીયલ નંબર: {1}) રિચાર્જ તરીકે સેલ્સ ઓર્ડર {2} માટે પૂર્ણફ્લાય થઈ શકે નહીં.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +116,Office Maintenance Expenses,ઓફિસ જાળવણી ખર્ચ
-apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","પ્રારંભ તારીખ અને સમાપ્તિ તારીખ જોબ કાર્ડ સાથે ઓવરલેપ થઈ રહી છે <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/utilities/user_progress.py +54,Go to ,પર જાઓ
 DocType: Shopify Settings,Update Price from Shopify To ERPNext Price List,Shopify થી ERPNext ભાવ સૂચિ માટે અપડેટ ભાવ
 apps/erpnext/erpnext/config/learn.py +47,Setting up Email Account,ઇમેઇલ એકાઉન્ટ સુયોજિત કરી રહ્યા છે
@@ -1324,6 +1322,7 @@ DocType: Item,Allow over delivery or receipt upto this percent,આ ટકા સ
 DocType: Upload Attendance,Import Attendance,આયાત એટેન્ડન્સ
 apps/erpnext/erpnext/public/js/pos/pos.html +124,All Item Groups,બધા આઇટમ જૂથો
 DocType: Work Order,Item To Manufacture,વસ્તુ ઉત્પાદન
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,કૃપા કરીને {0} સેટઅપ&gt; સેટિંગ્સ&gt; નામકરણ શ્રેણી દ્વારા નામકરણ સીરીઝ સેટ કરો
 apps/erpnext/erpnext/buying/utils.py +80,{0} {1} status is {2},{0} {1} સ્થિતિ {2} છે
 DocType: Water Analysis,Collection Temperature ,સંગ્રહ તાપમાન
 DocType: Employee,Provide Email Address registered in company,ઇમેઇલ કંપની રજીસ્ટર સરનામું પૂરું પાડો
@@ -1503,6 +1502,7 @@ DocType: Amazon MWS Settings,BR,બીઆર
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +198,From Place,પ્લેસ પ્રતિ
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +460,Net Pay cannnot be negative,નેટ પે નકારાત્મક હોઈ શકે નહીં
 DocType: Student Admission,Publish on website,વેબસાઇટ પર પ્રકાશિત
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,સપ્લાયર&gt; સપ્લાયર પ્રકાર
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +738,Supplier Invoice Date cannot be greater than Posting Date,પુરવઠોકર્તા ભરતિયું તારીખ પોસ્ટ તારીખ કરતાં વધારે ન હોઈ શકે
 DocType: Installation Note,MAT-INS-.YYYY.-,મેટ-આઈએનએસ - .YYY.-
 DocType: Subscription,Cancelation Date,રદ કરવાની તારીખ
@@ -1667,6 +1667,7 @@ DocType: Sales Order Item,Work Order Qty,વર્ક ઓર્ડર Qty
 DocType: Item Default,Default Selling Cost Center,મૂળભૂત વેચાણ ખર્ચ કેન્દ્ર
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +594,Disc,ડિસ્ક
 DocType: Buying Settings,Material Transferred for Subcontract,ઉપકોન્ટ્રેક્ટ માટે વપરાયેલી સામગ્રી
+DocType: Email Digest,Purchase Orders Items Overdue,ખરીદી ઓર્ડર આઈટમ્સ ઓવરડ્યુ
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1640,ZIP Code,પિન કોડ
 apps/erpnext/erpnext/controllers/selling_controller.py +261,Sales Order {0} is {1},વેચાણ ઓર્ડર {0} છે {1}
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +256,Select interest income account in loan {0},લોનમાં વ્યાજની આવકનું એકાઉન્ટ પસંદ કરો {0}
@@ -1753,6 +1754,7 @@ apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,ખુલવ
 ,GST Sales Register,જીએસટી સેલ્સ રજિસ્ટર
 DocType: Sales Invoice Advance,Sales Invoice Advance,સેલ્સ ભરતિયું એડવાન્સ
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +552,Nothing to request,કંઈ વિનંતી કરવા
+DocType: Stock Settings,Default Return Warehouse,ડિફૉલ્ટ રીટર્ન વેરહાઉસ
 apps/erpnext/erpnext/public/js/setup_wizard.js +18,Select your Domains,તમારા ડોમેન્સ પસંદ કરો
 apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/sync_product.py +228,Shopify Supplier,Shopify પુરવઠોકર્તા
 DocType: Bank Statement Transaction Entry,Payment Invoice Items,ચુકવણી ભરતિયું આઈટમ્સ
@@ -2145,6 +2147,7 @@ DocType: Support Search Source,Response Options,પ્રતિભાવ વિ�
 DocType: HR Settings,Employee Settings,કર્મચારીનું સેટિંગ્સ
 apps/erpnext/erpnext/templates/pages/integrations/gocardless_checkout.html +13,Loading Payment System,ચુકવણી સિસ્ટમ લોડ કરી રહ્યું છે
 ,Batch-Wise Balance History,બેચ વાઈસ બેલેન્સ ઇતિહાસ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,સપ્લાયર&gt; સપ્લાયર જૂથ
 apps/erpnext/erpnext/controllers/accounts_controller.py +1062,Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.,પંક્તિ # {0}: આઇટમ {1} માટે રકમની બિલ કરતાં વધુ રકમ હોય તો દર સેટ કરી શકાતી નથી.
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +73,Print settings updated in respective print format,પ્રિંટ સેટિંગ્સને સંબંધિત પ્રિન્ટ બંધારણમાં સુધારાશે
 DocType: Package Code,Package Code,પેકેજ કોડ
@@ -2617,6 +2620,7 @@ DocType: Sales Team,Contribution to Net Total,નેટ કુલ ફાળો
 DocType: Sales Invoice Item,Customer's Item Code,ગ્રાહક વસ્તુ કોડ
 DocType: Stock Reconciliation,Stock Reconciliation,સ્ટોક રિકંસીલેશન
 DocType: Territory,Territory Name,પ્રદેશ નામ
+DocType: Email Digest,Purchase Orders to Receive,ખરીદી ઓર્ડર પ્રાપ્ત કરવા માટે
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +197,Work-in-Progress Warehouse is required before Submit,વર્ક ઈન પ્રોગ્રેસ વેરહાઉસ સબમિટ પહેલાં જરૂરી છે
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +71,You can only have Plans with the same billing cycle in a Subscription,તમે સબ્સ્ક્રિપ્શનમાં જ બિલિંગ ચક્ર સાથે માત્ર યોજનાઓ ધરાવી શકો છો
 DocType: Bank Statement Transaction Settings Item,Mapped Data,મેપ થયેલ ડેટા
@@ -2633,7 +2637,6 @@ apps/erpnext/erpnext/config/selling.py +179,Track Leads by Lead Source.,લી�
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,એક શિપિંગ નિયમ માટે એક શરત
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +175,Please enter ,દાખલ કરો
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +64,Maintenance Log,જાળવણી લૉગ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,સપ્લાયર&gt; સપ્લાયર જૂથ
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +242,Please set filter based on Item or Warehouse,આઇટમ અથવા વેરહાઉસ પર આધારિત ફિલ્ટર સેટ
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),આ પેકેજની નેટ વજન. (વસ્તુઓ નેટ વજન રકમ તરીકે આપોઆપ ગણતરી)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +43,Make Inter Company Journal Entry,ઇન્ટર કંપની જર્નલ એન્ટ્રી બનાવો
@@ -2723,6 +2726,9 @@ apps/erpnext/erpnext/public/js/utils.js +498,You have already selected items fro
 DocType: Monthly Distribution,Name of the Monthly Distribution,માસિક વિતરણ નામ
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +100,Batch ID is mandatory,બૅચ ID ફરજિયાત છે
 DocType: Sales Person,Parent Sales Person,પિતૃ વેચાણ વ્યક્તિ
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","કૃપા કરીને આ દસ્તાવેજને રદ કરવા માટે કર્મચારી <a href=""#Form/Employee/{0}"">{0}</a> \ કાઢી નાખો"
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +102,No items to be received are overdue,પ્રાપ્ત થવાની કોઈ વસ્તુ બાકી નથી
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +101,The seller and the buyer cannot be the same,વેચનાર અને ખરીદનાર તે જ ન હોઈ શકે
 DocType: Project,Collect Progress,પ્રગતિ એકત્રિત કરો
 DocType: Delivery Note,MAT-DN-.YYYY.-,એમએટી-ડી.એન.-વાય.વાય.વાય.-
@@ -2970,7 +2976,6 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Workstation,Wages per hour,કલાક દીઠ વેતન
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},બેચ સ્ટોક બેલેન્સ {0} બનશે નકારાત્મક {1} વેરહાઉસ ખાતે વસ્તુ {2} માટે {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,સામગ્રી અરજીઓ નીચેની આઇટમ ફરીથી ક્રમમાં સ્તર પર આધારિત આપોઆપ ઊભા કરવામાં આવ્યા છે
-DocType: Email Digest,Pending Sales Orders,વેચાણ ઓર્ડર બાકી
 apps/erpnext/erpnext/controllers/accounts_controller.py +361,Account {0} is invalid. Account Currency must be {1},એકાઉન્ટ {0} અમાન્ય છે. એકાઉન્ટ કરન્સી હોવા જ જોઈએ {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py +31,From Date {0} cannot be after employee's relieving Date {1},{0} તારીખથી કર્મચારીની રાહતની તારીખ {1} પછી ન હોઈ શકે
 DocType: Supplier,Is Internal Supplier,આંતરિક પુરવઠોકર્તા છે
@@ -3236,6 +3241,7 @@ DocType: Supplier Scorecard Scoring Standing,Min Grade,મીન ગ્રેડ
 DocType: Healthcare Service Unit Type,Healthcare Service Unit Type,હેલ્થકેર સેવા એકમ પ્રકાર
 apps/erpnext/erpnext/projects/doctype/project/project.py +278,You have been invited to collaborate on the project: {0},તમે આ પ્રોજેક્ટ પર સહયોગ કરવા માટે આમંત્રિત કરવામાં આવ્યા છે: {0}
 DocType: Supplier Group,Parent Supplier Group,પિતૃ પુરવઠોકર્તા ગ્રુપ
+DocType: Email Digest,Purchase Orders to Bill,બિલ માટે ખરીદી ઓર્ડર
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js +47,Accumulated Values in Group Company,ગ્રૂપ કંપનીમાં સંચિત મૂલ્યો
 DocType: Leave Block List Date,Block Date,બ્લોક તારીખ
 DocType: Crop,Crop,પાક
@@ -3369,7 +3375,6 @@ apps/erpnext/erpnext/controllers/buying_controller.py +706,Specified BOM {0} doe
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +301,Course: ,અભ્યાસક્રમ:
 DocType: Soil Texture,Sandy Loam,સેન્ડી લોમ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +242,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,જાળવણી સુનિશ્ચિત {0} આ વેચાણ ઓર્ડર રદ પહેલાં રદ થયેલ હોવું જ જોઈએ
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,કૃપા કરીને માનવ સંસાધન&gt; એચઆર સેટિંગ્સમાં કર્મચારી નામકરણ સિસ્ટમ સેટ કરો
 DocType: POS Profile,Applicable for Users,વપરાશકર્તાઓ માટે લાગુ
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,પુ-એસક્યુટીએન-. વાયવાયવાય.-
 DocType: Notification Control,Expense Claim Approved,ખર્ચ દાવો મંજૂર
@@ -3383,7 +3388,6 @@ DocType: Employee Separation,Employee Separation Template,કર્મચાર�
 DocType: Selling Settings,Sales Order Required,વેચાણ ઓર્ડર જરૂરી
 apps/erpnext/erpnext/public/js/hub/marketplace.js +107,Become a Seller,એક વિક્રેતા બનો
 DocType: Purchase Invoice,Credit To,માટે ક્રેડિટ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,આઇટમ કોડ&gt; આઇટમ જૂથ&gt; બ્રાન્ડ
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +31,Active Leads / Customers,સક્રિય તરફ દોરી જાય છે / ગ્રાહકો
 DocType: Employee Education,Post Graduate,પોસ્ટ ગ્રેજ્યુએટ
 DocType: Maintenance Schedule Detail,Maintenance Schedule Detail,જાળવણી સુનિશ્ચિત વિગતવાર
@@ -3400,7 +3404,6 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +232,For Job
 DocType: Warranty Claim,Raised By,દ્વારા ઊભા
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +1551,Prescriptions,પ્રિસ્ક્રિપ્શનો
 DocType: Payment Gateway Account,Payment Account,ચુકવણી એકાઉન્ટ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,સપ્લાયર&gt; સપ્લાયર પ્રકાર
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +1041,Please specify Company to proceed,આગળ વધવા માટે કંપની સ્પષ્ટ કરો
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +81,Net Change in Accounts Receivable,એકાઉન્ટ્સ પ્રાપ્ત નેટ બદલો
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +91,Compensatory Off,વળતર બંધ
@@ -3825,6 +3828,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Quotation {
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +132,Total Outstanding Amount,કુલ બાકી રકમ
 DocType: Sales Partner,Targets,લક્ષ્યાંક
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +40,Please register the SIREN number in the company information file,કૃપા કરીને કંપનીની માહિતી ફાઇલમાં SIREN નંબર રજીસ્ટર કરો
+DocType: Email Digest,Sales Orders to Bill,વેચાણ ઓર્ડર બિલ
 DocType: Price List,Price List Master,ભાવ યાદી માસ્ટર
 DocType: GST Account,CESS Account,CESS એકાઉન્ટ
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,તમે સુયોજિત અને લક્ષ્યો મોનીટર કરી શકે છે કે જેથી બધા સેલ્સ વ્યવહારો બહુવિધ ** વેચાણ વ્યક્તિઓ ** સામે ટૅગ કરી શકો છો.
@@ -3985,6 +3989,7 @@ DocType: Payment Request,Mute Email,મ્યૂટ કરો ઇમેઇલ
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +29,"Food, Beverage & Tobacco","ફૂડ, પીણું અને તમાકુ"
 DocType: Account,Account Number,ખાતા નંબર
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +795,Can only make payment against unbilled {0},માત્ર સામે ચુકવણી કરી શકો છો unbilled {0}
+apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","પ્રારંભ તારીખ અને સમાપ્તિ તારીખ જોબ કાર્ડ સાથે ઓવરલેપ થઈ રહી છે <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/controllers/selling_controller.py +110,Commission rate cannot be greater than 100,કમિશન દર કરતા વધારે 100 ન હોઈ શકે
 DocType: Sales Invoice,Allocate Advances Automatically (FIFO),આપમેળે એડવાન્સિસ ફાળવો (ફિફા)
 DocType: Volunteer,Volunteer,સ્વયંસેવક
@@ -4036,8 +4041,6 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Rename Tool,Rename Log,લોગ
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,વિદ્યાર્થી ગ્રૂપ અથવા કોર્સ સૂચિ ફરજિયાત છે
 DocType: HR Settings,Maintain Billing Hours and Working Hours Same on Timesheet,બિલિંગ કલાક અને કામના કલાકો Timesheet પર જ જાળવી
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","કૃપા કરીને આ દસ્તાવેજને રદ કરવા માટે કર્મચારી <a href=""#Form/Employee/{0}"">{0}</a> \ કાઢી નાખો"
 DocType: Maintenance Visit Purpose,Against Document No,દસ્તાવેજ વિરુદ્ધમાં કોઇ
 DocType: BOM,Scrap,સ્ક્રેપ
 apps/erpnext/erpnext/utilities/user_progress.py +217,Go to Instructors,પ્રશિક્ષકો પર જાઓ
@@ -4571,6 +4574,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Gross Purchase Amount is 
 apps/erpnext/erpnext/setup/doctype/company/company.js +115,Company name not same,કંપની નામ જ નથી
 DocType: Lead,Address Desc,DESC સરનામું
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +114,Party is mandatory,પાર્ટી ફરજિયાત છે
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,કૃપા કરીને સેટઅપ&gt; નંબરિંગ સીરીઝ દ્વારા હાજરી માટે નંબરિંગ શ્રેણી સેટ કરો
 DocType: Topic,Topic Name,વિષય નામ
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +312,Please set default template for Leave Approval Notification in HR Settings.,એચઆર સેટિંગ્સમાં મંજૂરી મંજૂરીને છોડો માટે ડિફૉલ્ટ નમૂનો સેટ કરો.
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +38,Atleast one of the Selling or Buying must be selected,વેચાણ અથવા ખરીદી ઓછામાં ઓછા એક પસંદ કરેલ હોવું જ જોઈએ
@@ -4852,6 +4856,7 @@ DocType: Chapter,Members,સભ્યો
 DocType: Student,Student Email Address,વિદ્યાર્થી ઇમેઇલ સરનામું
 DocType: Item,Hub Warehouse,હબ વેરહાઉસ
 DocType: Cashier Closing,From Time,સમય
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,કૃપા કરીને શિક્ષણ&gt; શિક્ષણ સેટિંગ્સમાં પ્રશિક્ષક નામકરણ સિસ્ટમ સેટ કરો
 DocType: Hotel Settings,Hotel Settings,હોટેલ સેટિંગ્સ
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock: ,ઉપલબ્ધ છે:
 DocType: Notification Control,Custom Message,કસ્ટમ સંદેશ
@@ -4914,7 +4919,6 @@ apps/erpnext/erpnext/crm/doctype/contract/contract.py +38,End Date cannot be bef
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +33,Student is already enrolled.,વિદ્યાર્થી પહેલેથી પ્રવેશ છે.
 DocType: Fiscal Year,Year Name,વર્ષ નામ
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,કામ દિવસો કરતાં વધુ રજાઓ આ મહિને છે.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,કૃપા કરીને સેટઅપ&gt; નંબરિંગ સીરીઝ દ્વારા હાજરી માટે નંબરિંગ શ્રેણી સેટ કરો
 apps/erpnext/erpnext/controllers/buying_controller.py +759,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,નીચેની આઇટમ્સ {0} {1} આઇટમ તરીકે ચિહ્નિત નથી. તમે તેને {1} આઇટમના માસ્ટરમાંથી વસ્તુ તરીકે સક્ષમ કરી શકો છો
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Ref,પી.ડી.સી. / એલસી રિફ
 DocType: Production Plan Item,Product Bundle Item,ઉત્પાદન બંડલ વસ્તુ
@@ -5084,6 +5088,7 @@ DocType: Healthcare Settings,Clinical Procedure Consumable Item,ક્લિન�
 apps/erpnext/erpnext/utilities/activation.py +99,Create Users,બનાવવા વપરાશકર્તાઓ
 apps/erpnext/erpnext/utilities/user_progress.py +147,Gram,ગ્રામ
 apps/erpnext/erpnext/accounts/doctype/subscriber/subscriber_dashboard.py +10,Subscriptions,સબ્સ્ક્રિપ્શન્સ
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,કૃપા કરીને માનવ સંસાધન&gt; એચઆર સેટિંગ્સમાં કર્મચારી નામકરણ સિસ્ટમ સેટ કરો
 DocType: Supplier Scorecard,Per Month,દર મહિને
 DocType: Education Settings,Make Academic Term Mandatory,શૈક્ષણિક સમયની ફરજિયાત બનાવો
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +414,Quantity to Manufacture must be greater than 0.,ઉત્પાદન જથ્થો 0 કરતાં મોટી હોવી જ જોઈએ.
@@ -5109,7 +5114,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +383,Transa
 apps/erpnext/erpnext/setup/doctype/supplier_group/supplier_group.js +5,There is nothing to edit.,ફેરફાર કરવા માટે કંઈ નથી.
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +542,Form View,ફોર્મ જુઓ
 DocType: HR Settings,Expense Approver Mandatory In Expense Claim,ખર્ચ દાવા માં ખર્ચાળ ફરજિયાત ખર્ચ
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Summary for this month and pending activities,આ મહિને અને બાકી પ્રવૃત્તિઓ માટે સારાંશ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +124,Summary for this month and pending activities,આ મહિને અને બાકી પ્રવૃત્તિઓ માટે સારાંશ
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py +91,Please set Unrealized Exchange Gain/Loss Account in Company {0},કંપનીમાં અવાસ્તવિક એક્સચેન્જ ગેઇન / લોસ એકાઉન્ટ સેટ કરો {0}
 apps/erpnext/erpnext/utilities/user_progress.py +248,"Add users to your organization, other than yourself.","તમારા સંગઠન માટે, તમારી જાતે કરતાં અન્ય વપરાશકર્તાઓને ઉમેરો"
 DocType: Customer Group,Customer Group Name,ગ્રાહક જૂથ નામ
@@ -5174,6 +5179,7 @@ DocType: Item Alternative,Alternative Item Name,વૈકલ્પિક વસ�
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +24,Parent Item {0} must not be a Stock Item,પિતૃ વસ્તુ {0} સ્ટોક વસ્તુ ન હોવું જોઈએ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +187,Website Listing,વેબસાઇટ લિસ્ટિંગ
 apps/erpnext/erpnext/config/selling.py +57,All Products or Services.,બધા ઉત્પાદનો અથવા સેવાઓ.
+DocType: Email Digest,Open Quotations,ઓપન ક્વોટેશન્સ
 DocType: Expense Claim,More Details,વધુ વિગતો
 DocType: Supplier Quotation,Supplier Address,પુરવઠોકર્તા સરનામું
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +168,{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5},{0} એકાઉન્ટ માટે બજેટ {1} સામે {2} {3} છે {4}. તે દ્વારા કરતાં વધી જશે {5}
@@ -5208,7 +5214,6 @@ DocType: Employee Benefit Claim,Benefit Type and Amount,લાભ પ્રક�
 apps/erpnext/erpnext/hotels/report/hotel_room_occupancy/hotel_room_occupancy.py +19,Rooms Booked,બૂક કરેલ રૂમ
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +57,Ends On date cannot be before Next Contact Date.,સમાપ્તિ તારીખ પર સંપર્કની તારીખ પહેલાં ન હોઈ શકે
 DocType: Journal Entry,Pay To / Recd From,ના / Recd પગાર
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ગ્રાહક&gt; ગ્રાહક જૂથ&gt; પ્રદેશ
 DocType: Naming Series,Setup Series,સેટઅપ સિરીઝ
 DocType: Payment Reconciliation,To Invoice Date,તારીખ ભરતિયું
 DocType: Bank Account,Contact HTML,સંપર્ક HTML
@@ -5331,6 +5336,7 @@ DocType: Repayment Schedule,Payment Date,ચુકવણીની તારી�
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +122,New Batch Qty,ન્યૂ બેચ Qty
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +10,Apparel & Accessories,એપેરલ અને એસેસરીઝ
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.py +91,Could not solve weighted score function. Make sure the formula is valid.,ભારિત સ્કોર વિધેયને હલ કરી શક્યા નથી. ખાતરી કરો કે સૂત્ર માન્ય છે.
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +186,Purchase Order Items not received on time,ખરીદી ઓર્ડર આઇટમ્સ સમય પર પ્રાપ્ત નથી
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +67,Number of Order,ઓર્ડર સંખ્યા
 DocType: Item Group,HTML / Banner that will show on the top of product list.,ઉત્પાદન યાદી ટોચ પર બતાવશે કે html / બેનર.
 DocType: Shipping Rule,Specify conditions to calculate shipping amount,શીપીંગ જથ્થો ગણતરી કરવા માટે શરતો સ્પષ્ટ
@@ -5645,7 +5651,7 @@ DocType: Agriculture Task,End Day,સમાપ્તિ દિવસ
 DocType: Batch,Batch ID,બેચ ID ને
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +386,Note: {0},નોંધ: {0}
 ,Delivery Note Trends,ડ લવર નોંધ પ્રવાહો
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +114,This Week's Summary,આ અઠવાડિયાના સારાંશ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +120,This Week's Summary,આ અઠવાડિયાના સારાંશ
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +22,In Stock Qty,સ્ટોક Qty માં
 ,Daily Work Summary Replies,દૈનિક કાર્ય સારાંશ જવાબો
 DocType: Delivery Trip,Calculate Estimated Arrival Times,અંદાજિત આગમન ટાઇમ્સની ગણતરી કરો
@@ -5689,6 +5695,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Item {0} is not s
 DocType: Accounts Settings,Accounts Settings,સેટિંગ્સ એકાઉન્ટ્સ
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,મંજૂર
 DocType: Loyalty Program,Customer Territory,ગ્રાહક ક્ષેત્ર
+DocType: Email Digest,Sales Orders to Deliver,સેલ્સ ઓર્ડર્સ વિતરિત કરવા
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Number of new Account, it will be included in the account name as a prefix","નવા એકાઉન્ટની સંખ્યા, તેને ઉપસર્ગ તરીકે એકાઉન્ટ નામમાં શામેલ કરવામાં આવશે"
 DocType: Maintenance Team Member,Team Member,ટુકડી નો સભ્ય
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +151,No Result to submit,સબમિટ કરવાના કોઈ પરિણામો નથી
@@ -6068,7 +6075,6 @@ apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +21,"In
 DocType: Appointment Type,Physician,ફિઝિશિયન
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1080,Batch {0} of Item {1} has expired.,વસ્તુ બેચ {0} {1} સમયસીમા સમાપ્ત થઈ ગઈ છે.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11,Consultations,પરામર્શ
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,કૃપા કરીને શિક્ષણ&gt; શિક્ષણ સેટિંગ્સમાં પ્રશિક્ષક નામકરણ સિસ્ટમ સેટ કરો
 apps/erpnext/erpnext/manufacturing/report/bom_variance_report/bom_variance_report.py +36,Finished Good,ગુડ સમાપ્ત
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +56,"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","આઇટમ પ્રાઈસ પ્રાઈસ લિસ્ટ, સપ્લાયર્સ / કસ્ટમર, કરન્સી, આઈટમ, યુઓએમ, યુક્યુએલ અને તારીખોના આધારે ઘણી વખત દેખાય છે."
 DocType: Sales Invoice,Commission,કમિશન
@@ -6083,7 +6089,7 @@ DocType: Production Plan,Get Items For Work Order,વર્ક ઓર્ડર �
 DocType: Salary Detail,Default Amount,મૂળભૂત રકમ
 DocType: Lab Test Template,Descriptive,વર્ણનાત્મક
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,વેરહાઉસ સિસ્ટમમાં મળ્યા નથી
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,This Month's Summary,આ મહિનો સારાંશ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +123,This Month's Summary,આ મહિનો સારાંશ
 DocType: Quality Inspection Reading,Quality Inspection Reading,ગુણવત્તા નિરીક્ષણ વાંચન
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`કરતા જૂનો સ્થિર સ્ટોક'  %d દિવસ કરતાં ઓછો હોવો જોઈએ
 DocType: Tax Rule,Purchase Tax Template,ટેક્સ ઢાંચો ખરીદી
@@ -6198,6 +6204,7 @@ apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +38,Valid till date 
 apps/erpnext/erpnext/stock/stock_ledger.py +382,{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.,{0} {1} જરૂરી {2} પર {3} {4} {5} આ સોદો પૂર્ણ કરવા માટે એકમો.
 DocType: Fee Schedule,Student Category,વિદ્યાર્થી વર્ગ
 DocType: Announcement,Student,વિદ્યાર્થી
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,આઇટમ કોડ&gt; આઇટમ જૂથ&gt; બ્રાન્ડ
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js +98,Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,વેરહાઉસમાં પ્રક્રિયા શરૂ કરવા માટેનો જથ્થો ઉપલબ્ધ નથી. શું તમે સ્ટોક ટ્રાન્સફર રેકોર્ડ કરવા માંગો છો?
 DocType: Shipping Rule,Shipping Rule Type,શિપિંગ નિયમ પ્રકાર
 apps/erpnext/erpnext/utilities/user_progress.py +239,Go to Rooms,રૂમ પર જાઓ
@@ -6205,7 +6212,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Pa
 DocType: Company,Budget Detail,બજેટ વિગતવાર
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,મોકલતા પહેલા સંદેશ દાખલ કરો
 DocType: Purchase Invoice,DUPLICATE FOR SUPPLIER,સપ્લાયર માટે DUPLICATE
-DocType: Email Digest,Pending Quotations,સુવાકયો બાકી
 DocType: Delivery Note,Distance (KM),અંતર (કેએમ)
 DocType: Asset,Custodian,કસ્ટોડિયન
 apps/erpnext/erpnext/config/accounts.py +346,Point-of-Sale Profile,પોઇન્ટ ઓફ સેલ પ્રોફાઇલ
@@ -6390,7 +6396,7 @@ apps/erpnext/erpnext/config/setup.py +56,Setting up Email,ઇમેઇલ સુ
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +57,Guardian1 Mobile No,Guardian1 મોબાઇલ કોઈ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +134,Please enter default currency in Company Master,કંપની માસ્ટર મૂળભૂત ચલણ દાખલ કરો
 DocType: Stock Entry Detail,Stock Entry Detail,સ્ટોક એન્ટ્રી વિગતવાર
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +111,Daily Reminders,દૈનિક રીમાઇન્ડર્સ
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,Daily Reminders,દૈનિક રીમાઇન્ડર્સ
 apps/erpnext/erpnext/templates/pages/help.html +56,See all open tickets,બધા ખુલ્લા ટિકિટ જુઓ
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_service_unit.js +21,Healthcare Service Unit Tree,હેલ્થકેર સેવા એકમ વૃક્ષ
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +270,Product,ઉત્પાદન
