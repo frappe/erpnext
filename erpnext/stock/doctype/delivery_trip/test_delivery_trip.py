@@ -9,7 +9,7 @@ import erpnext
 import frappe
 from erpnext.stock.doctype.delivery_trip.delivery_trip import get_contact_and_address, notify_customers
 from erpnext.tests.utils import create_test_contact_and_address
-from frappe.utils import add_days, now_datetime
+from frappe.utils import add_days, now_datetime, nowdate
 
 
 class TestDeliveryTrip(unittest.TestCase):
@@ -26,8 +26,9 @@ class TestDeliveryTrip(unittest.TestCase):
 			delivery_trip = frappe.get_doc({
 				"doctype": "Delivery Trip",
 				"company": erpnext.get_default_company(),
+				"date": add_days(nowdate(), 5),
 				"departure_time": add_days(now_datetime(), 5),
-				"driver": "DRIVER-00001",
+				"driver": frappe.db.get_value('Driver', {"full_name": "Newton Scmander"}),
 				"vehicle": "JB 007",
 				"delivery_stops": [{
 					"customer": "_Test Customer",
