@@ -373,7 +373,6 @@ DocType: Shift Assignment,Shift Request,Turnus igénylés
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +79,Installation date cannot be before delivery date for Item {0},"A telepítés időpontja nem lehet korábbi, mint a szállítási határidő erre a Tételre: {0}"
 DocType: Pricing Rule,Discount on Price List Rate (%),Kedvezmény az Árlista ár értékén (%)
 apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +112,Item Template,Tétel sablon
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Állítsa be a Naming sorozat {0} beállítását a Beállítás&gt; Beállítások&gt; Nevezési sorozatok segítségével
 DocType: Job Offer,Select Terms and Conditions,Válasszon Feltételeket
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +80,Out Value,Értéken kívül
 DocType: Bank Statement Settings Item,Bank Statement Settings Item,Banki kivonat beállítás tételei
@@ -575,7 +574,7 @@ DocType: Volunteer,Morning,Reggel
 apps/erpnext/erpnext/accounts/utils.py +374,Payment Entry has been modified after you pulled it. Please pull it again.,"Fizetés megadása módosításra került, miután lehívta. Kérjük, hívja le újra."
 DocType: Program Enrollment Tool,New Student Batch,Új diák csoport
 apps/erpnext/erpnext/stock/doctype/item/item.py +496,{0} entered twice in Item Tax,{0} kétszer bevitt a tétel adójába
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +115,Summary for this week and pending activities,Összefoglaló erre a hétre és a folyamatban lévő tevékenységekre
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +121,Summary for this week and pending activities,Összefoglaló erre a hétre és a folyamatban lévő tevékenységekre
 DocType: Student Applicant,Admitted,Belépést nyer
 DocType: Workstation,Rent Cost,Bérleti díj
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +89,Amount After Depreciation,Összeg az értékcsökkenési leírás után
@@ -698,7 +697,6 @@ DocType: Purchase Invoice,01-Sales Return,01-Értékesítés vissza
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +15,Temporarily on Hold,Ideiglenesen tartásba
 DocType: Account,Is Group,Ez Csoport
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +324,Credit Note {0} has been created automatically,A (z) {0} jóváírási jegyzet automatikusan létrehozásra került
-DocType: Email Digest,Pending Purchase Orders,Függő Beszerzési megrendelések
 DocType: Stock Settings,Automatically Set Serial Nos based on FIFO,Automatikusan beállítja a Sorozat számot a FIFO alapján /ElőszörBeElöszörKi/
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,Ellenőrizze a Beszállítói Számlák számait Egyediségre
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +34,Primary Address Details,Elsődleges cím adatok
@@ -748,7 +746,7 @@ DocType: Student Report Generation Tool,Attended by Parents,Résztvevők szülő
 apps/erpnext/erpnext/hr/doctype/shift_assignment/shift_assignment.py +39,Employee {0} has already applied for {1} on {2} : ,A (z) {0} alkalmazott már {1} {2} -ra bejelentkezett:
 DocType: Inpatient Record,AB Positive,AB Pozitív
 DocType: Job Opening,Description of a Job Opening,Leírás egy Állásajánlathoz
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +112,Pending activities for today,Függő tevékenységek mára
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Pending activities for today,Függő tevékenységek mára
 DocType: Salary Structure,Salary Component for timesheet based payroll.,Bér összetevők a munkaidő jelenléti ív alapú bérhez.
 DocType: Sales Order Item,Used for Production Plan,Termelési tervhez használja
 DocType: Loan,Total Payment,Teljes fizetés
@@ -936,6 +934,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +243,Opening
 apps/erpnext/erpnext/stock/doctype/item/item.py +930,Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,"Alapértelmezett mértékegységét a {0} tételnek nem lehet megváltoztatni közvetlenül, mert már végzett néhány tranzakció(t) másik mértékegységgel. Szükséges lesz egy új tétel létrehozására, hogy egy másik alapértelmezett mértékegységet használhasson."
 apps/erpnext/erpnext/accounts/utils.py +378,Allocated amount can not be negative,Elkülönített összeg nem lehet negatív
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +11,Please set the Company,"Kérjük, állítsa be a Vállalkozást"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Ügyfél&gt; Ügyfélcsoport&gt; Terület
 DocType: Share Balance,Share Balance,Egyenleg megosztása
 DocType: Amazon MWS Settings,AWS Access Key ID,AWS hozzáférési kulcs azonosítója
 DocType: Employee Tax Exemption Declaration,Monthly House Rent,Havi bérleti díj
@@ -1236,7 +1235,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +13,Biotechnology,
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1125,"Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
 						 to fullfill Sales Order {2}.","A (z) {0} (Serial No: {1}) tétel nem használható fel, mivel a teljes értékesítési rendelés {2} tartja fenn."
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +116,Office Maintenance Expenses,Irodai karbantartási költségek
-apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","A kezdő dátum és a befejező dátum átfedésben van a munkakártyával <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/utilities/user_progress.py +54,Go to ,Menjen
 DocType: Shopify Settings,Update Price from Shopify To ERPNext Price List,Frissítse az árat a Shopify-tól az ERPNext árlistájához
 apps/erpnext/erpnext/config/learn.py +47,Setting up Email Account,E-mail fiók beállítása
@@ -1324,6 +1322,7 @@ DocType: Item,Allow over delivery or receipt upto this percent,Szállítás cím
 DocType: Upload Attendance,Import Attendance,Jelenlét Import
 apps/erpnext/erpnext/public/js/pos/pos.html +124,All Item Groups,Összes tétel csoport
 DocType: Work Order,Item To Manufacture,Tétel gyártáshoz
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +213,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Állítsa be a Naming sorozat {0} beállítását a Beállítás&gt; Beállítások&gt; Nevezési sorozatok segítségével
 apps/erpnext/erpnext/buying/utils.py +80,{0} {1} status is {2},{0} {1} állapota {2}
 DocType: Water Analysis,Collection Temperature ,Gyűjtés hőmérséklete
 DocType: Employee,Provide Email Address registered in company,Adjon meg a cégben bejegyzett E-mail címet
@@ -1503,6 +1502,7 @@ DocType: Amazon MWS Settings,BR,BR
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +198,From Place,Helyből
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +460,Net Pay cannnot be negative,Net fizetendő nem lehet negatív
 DocType: Student Admission,Publish on website,Közzéteszi honlapján
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,Szállító&gt; Szállító típusa
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +738,Supplier Invoice Date cannot be greater than Posting Date,"Beszállítói Számla dátuma nem lehet nagyobb, mint Beküldés dátuma"
 DocType: Installation Note,MAT-INS-.YYYY.-,MAT-INS-.YYYY.-
 DocType: Subscription,Cancelation Date,Visszavonás dátuma
@@ -1667,6 +1667,7 @@ DocType: Sales Order Item,Work Order Qty,Munka megrendelés mennyisége
 DocType: Item Default,Default Selling Cost Center,Alapértelmezett Értékesítési költséghely
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +594,Disc,Kedv
 DocType: Buying Settings,Material Transferred for Subcontract,Alvállalkozásra átadott anyag
+DocType: Email Digest,Purchase Orders Items Overdue,Vásárlási rendelések tétel lejárt
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1640,ZIP Code,Irányítószám
 apps/erpnext/erpnext/controllers/selling_controller.py +261,Sales Order {0} is {1},Vevői rendelés {0} az ez {1}
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +256,Select interest income account in loan {0},Válassza ki a kamatjövedelem számlát a hitelben: {0}
@@ -1753,6 +1754,7 @@ apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Nyitó Köny
 ,GST Sales Register,GST értékesítés  regisztráció
 DocType: Sales Invoice Advance,Sales Invoice Advance,Kimenő értékesítési számla előleg
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +552,Nothing to request,Nincs mit igényelni
+DocType: Stock Settings,Default Return Warehouse,Alapértelmezett visszatérítési raktár
 apps/erpnext/erpnext/public/js/setup_wizard.js +18,Select your Domains,Válassza ki a domainjeit
 apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/sync_product.py +228,Shopify Supplier,Shopify beszállító
 DocType: Bank Statement Transaction Entry,Payment Invoice Items,Fizetési számlák tételei
@@ -2145,6 +2147,7 @@ DocType: Support Search Source,Response Options,Válaszbeállítások
 DocType: HR Settings,Employee Settings,Alkalmazott beállítások
 apps/erpnext/erpnext/templates/pages/integrations/gocardless_checkout.html +13,Loading Payment System,Fizetési rendszer betöltés
 ,Batch-Wise Balance History,Köteg-Szakaszos mérleg előzmények
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Szállító&gt; szállító csoport
 apps/erpnext/erpnext/controllers/accounts_controller.py +1062,Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.,"A(z) {0} sor: nem lehet beállítani az árat, ha az összeg nagyobb, mint a(z) {1} tétel számlázott összege."
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +73,Print settings updated in respective print format,Nyomtatási beállítások frissítve a mindenkori nyomtatási formátumban
 DocType: Package Code,Package Code,Csomag kód
@@ -2621,6 +2624,7 @@ DocType: Sales Team,Contribution to Net Total,Hozzájárulás a netto összeghez
 DocType: Sales Invoice Item,Customer's Item Code,Vevői tétel cikkszáma
 DocType: Stock Reconciliation,Stock Reconciliation,Készlet egyeztetés
 DocType: Territory,Territory Name,Terület neve
+DocType: Email Digest,Purchase Orders to Receive,Vételi megbízások fogadni
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +197,Work-in-Progress Warehouse is required before Submit,"Munkavégzés raktárra van szükség, beküldés előtt"
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +71,You can only have Plans with the same billing cycle in a Subscription,"Csak olyan előfizetési számlázási ciklusokat vehet igénybe, egyenlő számlázási ciklusa van"
 DocType: Bank Statement Transaction Settings Item,Mapped Data,Leképezett adatok
@@ -2639,7 +2643,6 @@ apps/erpnext/erpnext/config/selling.py +179,Track Leads by Lead Source.,Érdekl�
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,Egy Szállítási szabály feltételei
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +175,Please enter ,Kérlek lépj be
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +64,Maintenance Log,Karbantartás napló
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Szállító&gt; szállító csoport
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +242,Please set filter based on Item or Warehouse,"Kérjük, adja meg a szűrési feltételt a tétel vagy  Raktár alapján"
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),A nettó súlya ennek a csomagnak. (Automatikusan kiszámítja a tételek nettó súlyainak összegéből)
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +43,Make Inter Company Journal Entry,Legyen az Inter Company Journal Entry
@@ -2729,6 +2732,9 @@ apps/erpnext/erpnext/public/js/utils.js +498,You have already selected items fro
 DocType: Monthly Distribution,Name of the Monthly Distribution,Havi Felbontás neve
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +100,Batch ID is mandatory,Kötegazonosító kötelező
 DocType: Sales Person,Parent Sales Person,Fő Értékesítő
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Kérjük, törölje a Munkavállalót <a href=""#Form/Employee/{0}"">{0}</a> \ törölni ezt a dokumentumot"
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +102,No items to be received are overdue,A beérkező tárgyak nem esedékesek
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +101,The seller and the buyer cannot be the same,Eladó és a vevő nem lehet ugyanaz
 DocType: Project,Collect Progress,Folyamatok összegyűjtése
 DocType: Delivery Note,MAT-DN-.YYYY.-,MAT-DN-.YYYY.-
@@ -2975,7 +2981,6 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Workstation,Wages per hour,Bérek óránként
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Készlet egyenleg ebben a kötegben: {0} negatívvá válik {1} erre a tételre: {2} ebben a raktárunkban: {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,Következő Anyag igénylések merültek fel  automatikusan a Tétel újra-rendelés szinje alpján
-DocType: Email Digest,Pending Sales Orders,Függő Vevői rendelések
 apps/erpnext/erpnext/controllers/accounts_controller.py +361,Account {0} is invalid. Account Currency must be {1},A {0} számla érvénytelen. A számla pénzneme legyen {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py +31,From Date {0} cannot be after employee's relieving Date {1},A(z) {0} dátumtól kezdve nem lehet a munkavállaló mentesítési dátuma  {1} utáni
 DocType: Supplier,Is Internal Supplier,Ő belső beszállító
@@ -3241,6 +3246,7 @@ DocType: Supplier Scorecard Scoring Standing,Min Grade,Min osztályzat
 DocType: Healthcare Service Unit Type,Healthcare Service Unit Type,Egészségügyi szolgáltatási egység típus
 apps/erpnext/erpnext/projects/doctype/project/project.py +278,You have been invited to collaborate on the project: {0},Ön meghívást kapott ennek a projeknek a közreműködéséhez: {0}
 DocType: Supplier Group,Parent Supplier Group,Fő beszállítói csoport
+DocType: Email Digest,Purchase Orders to Bill,Vásárlási megbízásokat Bill
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js +47,Accumulated Values in Group Company,Csoport vállalat összesített értékei
 DocType: Leave Block List Date,Block Date,Zárolás dátuma
 DocType: Crop,Crop,Termés
@@ -3374,7 +3380,6 @@ apps/erpnext/erpnext/controllers/buying_controller.py +706,Specified BOM {0} doe
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +301,Course: ,Tanfolyam:
 DocType: Soil Texture,Sandy Loam,Homokos termőföld
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +242,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,"Ezt a karbantartási ütemtervet:  {0}, törölni kell mielőtt lemondaná ezt a Vevői rendelést"
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Kérjük, állítsa be az alkalmazottak elnevezési rendszerét az emberi erőforrás&gt; HR beállításoknál"
 DocType: POS Profile,Applicable for Users,Alkalmazható a felhasználókra
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,PUR-SQTN-.YYYY.-
 DocType: Notification Control,Expense Claim Approved,Költség igény jóváhagyva
@@ -3388,7 +3393,6 @@ DocType: Employee Separation,Employee Separation Template,Munkavállalói elvál
 DocType: Selling Settings,Sales Order Required,Vevői rendelés szükséges
 apps/erpnext/erpnext/public/js/hub/marketplace.js +107,Become a Seller,Legyél eladó
 DocType: Purchase Invoice,Credit To,Követelés ide
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Tételkód&gt; Tételcsoport&gt; Márka
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +31,Active Leads / Customers,Aktív Érdeklődések / Vevők
 DocType: Employee Education,Post Graduate,Diplomázás után
 DocType: Maintenance Schedule Detail,Maintenance Schedule Detail,Karbantartási ütemterv részletei
@@ -3405,7 +3409,6 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +232,For Job
 DocType: Warranty Claim,Raised By,Felvetette
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +1551,Prescriptions,előírások
 DocType: Payment Gateway Account,Payment Account,Fizetési számla
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +169,Supplier &gt; Supplier Type,Szállító&gt; Szállító típusa
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +1041,Please specify Company to proceed,"Kérjük, adja meg a vállalkozást a folytatáshoz"
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +81,Net Change in Accounts Receivable,Nettó Vevői számla tartozások változása
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +91,Compensatory Off,Kompenzációs Ki
@@ -3830,6 +3833,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Quotation {
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +132,Total Outstanding Amount,Teljes fennálló kintlévő összeg
 DocType: Sales Partner,Targets,Célok
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +40,Please register the SIREN number in the company information file,"Kérjük, regisztrálja a SIREN számot a céginformációs fájlban"
+DocType: Email Digest,Sales Orders to Bill,Értékesítési megrendelések Bill
 DocType: Price List,Price List Master,Árlista törzsadat
 DocType: GST Account,CESS Account,CESS számla
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,"Minden értékesítési tranzakció címkézhető több ** Értékesítő személy** felé, így beállíthat és követhet célokat."
@@ -3990,6 +3994,7 @@ DocType: Payment Request,Mute Email,E-mail elnémítás
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +29,"Food, Beverage & Tobacco","Élelmiszerek, italok és dohány"
 DocType: Account,Account Number,Számla száma
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +795,Can only make payment against unbilled {0},Fizetni a csak még ki nem szálázott ellenében tud: {0}
+apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","A kezdő dátum és a befejező dátum átfedésben van a munkakártyával <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/controllers/selling_controller.py +110,Commission rate cannot be greater than 100,"Jutalék árértéke nem lehet nagyobb, mint a 100"
 DocType: Sales Invoice,Allocate Advances Automatically (FIFO),Automatikusan felosztott előlegek (FIFO)
 DocType: Volunteer,Volunteer,Önkéntes
@@ -4041,8 +4046,6 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Rename Tool,Rename Log,Átnevezési napló
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Diák csoport vagy Kurzus  menetrend kötelező
 DocType: HR Settings,Maintain Billing Hours and Working Hours Same on Timesheet,A Számlázoztt órák és a Munkaórák ugyanolyan kezelése a munkaidő jelenléti íven
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Kérjük, törölje a Munkavállalót <a href=""#Form/Employee/{0}"">{0}</a> \ törölni ezt a dokumentumot"
 DocType: Maintenance Visit Purpose,Against Document No,Ellen Dokument sz.
 DocType: BOM,Scrap,Hulladék
 apps/erpnext/erpnext/utilities/user_progress.py +217,Go to Instructors,Menjen az oktatókhoz
@@ -4576,6 +4579,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Gross Purchase Amount is 
 apps/erpnext/erpnext/setup/doctype/company/company.js +115,Company name not same,A vállalkozás neve nem azonos
 DocType: Lead,Address Desc,Cím leírása
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +114,Party is mandatory,Ügyfél kötelező
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Kérjük, állítsa be a számozási sorozatot a részvételhez a Beállítás&gt; Számozási sorozatok segítségével"
 DocType: Topic,Topic Name,Téma neve
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +312,Please set default template for Leave Approval Notification in HR Settings.,"Kérjük, állítsa be az alapértelmezett sablont a jóváhagyási értesítéshez a HR beállításoknál."
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +38,Atleast one of the Selling or Buying must be selected,Legalább az Értékesítést vagy Beszerzést választani kell
@@ -4857,6 +4861,7 @@ DocType: Chapter,Members,Tagok
 DocType: Student,Student Email Address,Tanuló email címe
 DocType: Item,Hub Warehouse,Hub raktár
 DocType: Cashier Closing,From Time,Időtől
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Kérjük, állítsd be az oktatónevezési rendszert az oktatásban&gt; Oktatási beállítások"
 DocType: Hotel Settings,Hotel Settings,Szálloda beállítások
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock: ,Raktáron:
 DocType: Notification Control,Custom Message,Egyedi üzenet
@@ -4919,7 +4924,6 @@ apps/erpnext/erpnext/crm/doctype/contract/contract.py +38,End Date cannot be bef
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +33,Student is already enrolled.,Tanuló már részt.
 DocType: Fiscal Year,Year Name,Év Neve
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,"Jelenleg több a szabadság, mint a  munkanap ebben a hónapban."
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Kérjük, állítsa be a számozási sorozatot a részvételhez a Beállítás&gt; Számozási sorozatok segítségével"
 apps/erpnext/erpnext/controllers/buying_controller.py +759,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,A (z) {0} elemek nem szerepelnek {1} elemként. Engedélyezheti őket {1} tételként a tétel mesterként
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,Gyártmány tétel csomag
@@ -5089,6 +5093,7 @@ DocType: Healthcare Settings,Clinical Procedure Consumable Item,Klinikai eljár�
 apps/erpnext/erpnext/utilities/activation.py +99,Create Users,Felhasználók létrehozása
 apps/erpnext/erpnext/utilities/user_progress.py +147,Gram,Gramm
 apps/erpnext/erpnext/accounts/doctype/subscriber/subscriber_dashboard.py +10,Subscriptions,Előfizetői
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Kérjük, állítsa be az alkalmazottak elnevezési rendszerét az emberi erőforrás&gt; HR beállításoknál"
 DocType: Supplier Scorecard,Per Month,Havonta
 DocType: Education Settings,Make Academic Term Mandatory,A tudományos kifejezés kötelezővé tétele
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +414,Quantity to Manufacture must be greater than 0.,"Gyártáshoz a mennyiségnek nagyobbnak kell lennie, mint 0."
@@ -5114,7 +5119,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +383,Transa
 apps/erpnext/erpnext/setup/doctype/supplier_group/supplier_group.js +5,There is nothing to edit.,Nincs semmi szerkesztenivaló.
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +542,Form View,Űrlap nézet
 DocType: HR Settings,Expense Approver Mandatory In Expense Claim,Költségvetési jóváhagyó kötelezõ a költségigénylésben
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +118,Summary for this month and pending activities,"Összefoglaló erre a hónapra, és folyamatban lévő tevékenységek"
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +124,Summary for this month and pending activities,"Összefoglaló erre a hónapra, és folyamatban lévő tevékenységek"
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py +91,Please set Unrealized Exchange Gain/Loss Account in Company {0},"Kérjük, állítsa be a nem realizált árfolyamnyereség / veszteség számlát a (z) {0} vállalkozáshoz"
 apps/erpnext/erpnext/utilities/user_progress.py +248,"Add users to your organization, other than yourself.","Felhasználók hozzáadása a szervezetéhez, kivéve saját magát."
 DocType: Customer Group,Customer Group Name,Vevő csoport neve
@@ -5179,6 +5184,7 @@ DocType: Item Alternative,Alternative Item Name,Alternatív tétel név
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +24,Parent Item {0} must not be a Stock Item,Fő tétel {0} nem lehet Készletezett tétel
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +187,Website Listing,Weboldal listázás
 apps/erpnext/erpnext/config/selling.py +57,All Products or Services.,Összes termékek vagy szolgáltatások.
+DocType: Email Digest,Open Quotations,Idézetek megnyitása
 DocType: Expense Claim,More Details,Részletek
 DocType: Supplier Quotation,Supplier Address,Beszállító címe
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +168,{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5},"{0} költségvetés ehhez a főkönyvi számlához {1}, ez ellen {2} {3} ami {4}. Ez meg fogja haladni ennyivel {5}"
@@ -5213,7 +5219,6 @@ DocType: Employee Benefit Claim,Benefit Type and Amount,Juttatási típus és ö
 apps/erpnext/erpnext/hotels/report/hotel_room_occupancy/hotel_room_occupancy.py +19,Rooms Booked,Foglalható szobák
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +57,Ends On date cannot be before Next Contact Date.,Befejező dátum nem lehet a következő kapcsolat dátuma előtt.
 DocType: Journal Entry,Pay To / Recd From,Fizetni neki / követelni tőle
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Ügyfél&gt; Ügyfélcsoport&gt; Terület
 DocType: Naming Series,Setup Series,Sorszámozás telepítése
 DocType: Payment Reconciliation,To Invoice Date,A számla keltétől
 DocType: Bank Account,Contact HTML,Kapcsolattartó HTML leírása
@@ -5336,6 +5341,7 @@ DocType: Repayment Schedule,Payment Date,Fizetés dátuma
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +122,New Batch Qty,Új köteg menny.
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +10,Apparel & Accessories,Megjelenés és kiegészítők
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.py +91,Could not solve weighted score function. Make sure the formula is valid.,"Nem sikerült megoldani a súlyozott pontszám feladatot. Győződjön meg arról, hogy a képlet érvényes."
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +186,Purchase Order Items not received on time,Vásárlási rendelés Az időben nem érkezett elemek
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +67,Number of Order,Számú rendelés
 DocType: Item Group,HTML / Banner that will show on the top of product list.,HTML / Szalagcím a tételek listájának tetején fog megjelenni.
 DocType: Shipping Rule,Specify conditions to calculate shipping amount,Adja meg a feltételeket a szállítási költség kiszámításához
@@ -5650,7 +5656,7 @@ DocType: Agriculture Task,End Day,Befejezés napja
 DocType: Batch,Batch ID,Köteg ID
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +386,Note: {0},Megjegyzés: {0}
 ,Delivery Note Trends,Szállítólevelek alakulása
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +114,This Week's Summary,Összefoglaló erről a hétről
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +120,This Week's Summary,Összefoglaló erről a hétről
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +22,In Stock Qty,Készleten mennyiség
 ,Daily Work Summary Replies,Napi munka összefoglaló válaszok
 DocType: Delivery Trip,Calculate Estimated Arrival Times,Számítsa ki a becsült érkezési időket
@@ -5694,6 +5700,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +198,Item {0} is not s
 DocType: Accounts Settings,Accounts Settings,Könyvelés beállításai
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,Jóváhagy
 DocType: Loyalty Program,Customer Territory,Ügyfélterület
+DocType: Email Digest,Sales Orders to Deliver,Értékesítési megrendelések
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Number of new Account, it will be included in the account name as a prefix","Az új számla száma, a számla nevében előtagként fog szerepelni"
 DocType: Maintenance Team Member,Team Member,Csoport tag
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +151,No Result to submit,Nem érkezik eredmény
@@ -6073,7 +6080,6 @@ apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +21,"In
 DocType: Appointment Type,Physician,Orvos
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1080,Batch {0} of Item {1} has expired.,Köteg {0} ebből a tételből: {1} lejárt.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment_dashboard.py +11,Consultations,Konzultációk
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Kérjük, állítsd be az oktatónevezési rendszert az oktatásban&gt; Oktatási beállítások"
 apps/erpnext/erpnext/manufacturing/report/bom_variance_report/bom_variance_report.py +36,Finished Good,Létrehozott áru
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +56,"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","A tétel ára többször is megjelenik az Árlista, a Szállító / Ügyfél, a Valuta, a Tétel, a UOM, a Mennyiség és a Napok alapján."
 DocType: Sales Invoice,Commission,Jutalék
@@ -6088,7 +6094,7 @@ DocType: Production Plan,Get Items For Work Order,Szerezd meg a tételeket a mun
 DocType: Salary Detail,Default Amount,Alapértelmezett Összeg
 DocType: Lab Test Template,Descriptive,Leíró
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,Raktár nem található a rendszerben
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,This Month's Summary,Összefoglaló erről a hónapról
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +123,This Month's Summary,Összefoglaló erről a hónapról
 DocType: Quality Inspection Reading,Quality Inspection Reading,Minőség-ellenőrzés olvasás
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,"`Zárolja azon készleteket, amelyek régebbiek, mint` kisebbnek kell lennie,  %d napnál."
 DocType: Tax Rule,Purchase Tax Template,Beszerzési megrendelés Forgalmi adót sablon
@@ -6203,6 +6209,7 @@ apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +38,Valid till date 
 apps/erpnext/erpnext/stock/stock_ledger.py +382,{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.,"{0} darab ebből: {1} szükséges ebben: {2}, erre: {3} {4} ehhez: {5} ; a tranzakció befejezéséhez."
 DocType: Fee Schedule,Student Category,Tanuló kategória
 DocType: Announcement,Student,Diák
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Tételkód&gt; Tételcsoport&gt; Márka
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js +98,Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,A raktárban nem áll rendelkezésre készletmennyiség az indítási eljáráshoz. Szeretne készíteni egy készlet mozgást?
 DocType: Shipping Rule,Shipping Rule Type,Szállítási szabály típus
 apps/erpnext/erpnext/utilities/user_progress.py +239,Go to Rooms,Menjen a szobákba
@@ -6210,7 +6217,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Pa
 DocType: Company,Budget Detail,Költségvetés Részletei
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,"Kérjük, elküldés előtt adja meg az üzenetet"
 DocType: Purchase Invoice,DUPLICATE FOR SUPPLIER,ISMÉTLŐDŐ BESZÁLLÍTÓRA
-DocType: Email Digest,Pending Quotations,Függő árajánlatok
 DocType: Delivery Note,Distance (KM),Távolság (KM)
 DocType: Asset,Custodian,Gondnok
 apps/erpnext/erpnext/config/accounts.py +346,Point-of-Sale Profile,Értékesítési hely profil
@@ -6395,7 +6401,7 @@ apps/erpnext/erpnext/config/setup.py +56,Setting up Email,E-mail beállítása
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +57,Guardian1 Mobile No,Helyettesítő1 Mobil szám
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +134,Please enter default currency in Company Master,"Kérjük, adja meg az alapértelmezett pénznemet a Vállalkozás törzsadatban"
 DocType: Stock Entry Detail,Stock Entry Detail,Készlet bejegyzés részletei
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +111,Daily Reminders,Napi emlékeztetők
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,Daily Reminders,Napi emlékeztetők
 apps/erpnext/erpnext/templates/pages/help.html +56,See all open tickets,Az összes el nem adott jegy megtekintése
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_service_unit.js +21,Healthcare Service Unit Tree,Egészségügyi szolgáltatási egység fa
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +270,Product,Termék
