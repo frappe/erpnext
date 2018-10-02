@@ -72,12 +72,13 @@ class SalaryStructure(Document):
 
 		return employees
 
-	def assign_salary_structure(self, grade=None, department=None, designation=None,
+	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
 			from_date=None, base=None,variable=None):
 		employees = self.get_employees({
 			"grade": grade,
 			"department": department,
 			"designation": designation,
+			"name":employee
 		})
 
 		if employees:
