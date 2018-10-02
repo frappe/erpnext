@@ -34,6 +34,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Web Academy Applicant"
+				},
+				{
+					"type": "doctype",
 					"name": "Student Admission"
 				},
 				{
@@ -181,11 +185,15 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Program"
+				},
+				{
+					"type": "doctype",
 					"name": "Course"
 				},
 				{
 					"type": "doctype",
-					"name": "Program"
+					"name": "Content"
 				},
 				{
 					"type": "doctype",
