@@ -321,6 +321,23 @@ class Subscription(Document):
 
 		self.save()
 
+	@property
+	def is_postpaid_to_invoice(self):
+		return getdate(nowdate()) > getdate(self.current_invoice_end) or \
+			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
+			not self.has_outstanding_invoice()
+
+	@property
+	def is_prepaid_to_invoice(self):
+		if not self.generate_invoice_at_period_start:
+			return False
+
+		if self.is_new_subscription():
+			return True
+
+		# Check invoice dates and make sure it doesn't have outstanding invoices
+		return getdate(nowdate()) >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
+
 	def process_for_active(self):
 		"""
 		Called by `process` if the status of the `Subscription` is 'Active'.
@@ -330,7 +347,7 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if getdate(nowdate()) > getdate(self.current_invoice_end) or (getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and not self.has_outstanding_invoice():
+		if self.is_postpaid_to_invoice or self.is_prepaid_to_invoice:
 			self.generate_invoice()
 			if self.current_invoice_is_past_due():
 				self.status = 'Past Due Date'
@@ -338,7 +355,7 @@ class Subscription(Document):
 		if self.current_invoice_is_past_due() and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.status = 'Past Due Date'
 
-		if self.cancel_at_period_end and getdate(nowdate()) > self.current_invoice_end:
+		if self.cancel_at_period_end and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
 
 	def cancel_subscription_at_period_end(self):
