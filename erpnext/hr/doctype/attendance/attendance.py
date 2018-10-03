@@ -13,7 +13,7 @@ from frappe.utils import cstr
 class Attendance(Document):
 	def validate_duplicate_record(self):
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and attendance_date = %s
-			and name != %s and docstatus = 1""",
+			and name != %s and docstatus != 2""",
 			(self.employee, self.attendance_date, self.name))
 		if res:
 			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
