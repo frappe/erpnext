@@ -18,18 +18,19 @@ export default {
 	},
 	methods: {
 		make_input() {
-			this.message_input = new frappe.ui.CommentArea({
+			this.message_input = frappe.ui.form.make_control({
 				parent: this.$refs['comment-input'],
 				on_submit: (message) => {
 					this.message_input.reset();
 					this.$emit('change', message);
 				},
+				only_input: true,
 				no_wrapper: true
 			});
 		},
 		submit_input() {
 			if (!this.message_input) return;
-			const value = this.message_input.val();
+			const value = this.message_input.get_value();
 			if (!value) return;
 			this.message_input.submit();
 		}
