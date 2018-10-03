@@ -484,13 +484,13 @@ class PurchaseInvoice(BuyingController):
 		if (self.update_stock and voucher_wise_stock_value.get(item.name) and
 			warehouse_debit_amount != flt(voucher_wise_stock_value.get(item.name), net_amt_precision)):
 
-			stock_adjustment_account = self.get_company_default("stock_adjustment_account")
+			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
 			stock_amount = flt(voucher_wise_stock_value.get(item.name), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": stock_adjustment_account,
+					"account": cost_of_goods_sold_account,
 					"against": item.expense_account,
 					"debit": stock_adjustment_amt,
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
