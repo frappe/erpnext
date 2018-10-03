@@ -40,6 +40,7 @@ class BuyingController(StockController):
 
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
+		self.set_alt_uom_qty()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
 
@@ -405,6 +406,11 @@ class BuyingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+
+	def set_alt_uom_qty(self):
+		for d in self.get("items"):
+			if d.meta.get_field("alt_uom_qty"):
+				d.alt_uom_qty = flt(d.stock_qty) * flt(d.alt_uom_size)
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):
