@@ -40,6 +40,7 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
+		self.set_alt_uom_qty()
 		self.set_po_nos()
 		set_default_income_account_for_item(self)
 
@@ -151,6 +152,11 @@ class SellingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+
+	def set_alt_uom_qty(self):
+		for d in self.get("items"):
+			if d.meta.get_field("alt_uom_qty"):
+				d.alt_uom_qty = flt(d.stock_qty) * flt(d.alt_uom_size)
 
 	def validate_selling_price(self):
 		def throw_message(item_name, rate, ref_rate_field):
