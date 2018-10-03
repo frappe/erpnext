@@ -132,6 +132,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.credit_to:
 			billing_party_type, billing_party = self.get_billing_party()
 			self.credit_to = get_party_account(billing_party_type, billing_party, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.credit_to, "account_currency", cache=True)
 		if not self.due_date:
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company,  self.bill_date)
 

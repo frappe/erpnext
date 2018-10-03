@@ -295,7 +295,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									me.frm.set_value("taxes", r.message.taxes);
 								}
 							},
-							() => me.set_dynamic_labels(true),
+							() => me.set_dynamic_labels(),
 							() => me.calculate_taxes_and_totals()
 						]);
 					}
@@ -855,21 +855,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.shipping_rule();
 	},
 
-	set_dynamic_labels: function(force = false) {
+	set_dynamic_labels: function() {
 		// What TODO? should we make price list system non-mandatory?
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		if(force || this.frm.doc_currency!==this.frm.doc.currency
-			|| this.frm.doc_currency!==this.frm.doc.price_list_currency) {
-			// reset names only when the currency is different
-
-			var company_currency = this.get_company_currency();
-			this.change_form_labels(company_currency);
-			this.change_grid_labels(company_currency);
-			this.frm.refresh_fields();
-			this.frm.doc_currency = this.frm.doc.currency;
-		}
+		var company_currency = this.get_company_currency();
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
+		this.frm.refresh_fields();
 	},
 
 	change_form_labels: function(company_currency) {
