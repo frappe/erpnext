@@ -211,8 +211,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	make_payment_request: function() {
-		const me = this;
-		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], me.frm.doc.doctype))
+		var me = this;
+		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
 		frappe.call({
