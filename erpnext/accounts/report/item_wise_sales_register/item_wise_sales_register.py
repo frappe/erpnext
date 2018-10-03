@@ -14,10 +14,10 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	filters.update({"from_date": filters.get("date_range")[0], "to_date": filters.get("date_range")[1]})
+	filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0], "to_date": filters.get("date_range") and filters.get("date_range")[1]})
 	columns = get_columns(additional_table_columns)
 
-	company_currency = erpnext.get_company_currency(filters.company)
+	company_currency = erpnext.get_company_currency(filters.get('company'))
 
 	item_list = get_items(filters, additional_query_columns)
 	if item_list:
