@@ -58,7 +58,6 @@ class CostCenter(NestedSet):
 		# Validate properties before merging
 		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")
 		if not merge:
-			from erpnext.accounts.doctype.account.account import get_name_with_number
 			new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
 		return new_cost_center
@@ -89,3 +88,8 @@ class CostCenter(NestedSet):
 
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])
+
+def get_name_with_number(new_account, account_number):
+	if account_number and not new_account[0].isdigit():
+		new_account = account_number + " - " + new_account
+	return new_account
