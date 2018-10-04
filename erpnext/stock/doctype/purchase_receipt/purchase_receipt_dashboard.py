@@ -7,7 +7,7 @@ def get_data():
 			'Purchase Invoice': 'purchase_receipt',
 			'Asset': 'purchase_receipt',
 			'Landed Cost Voucher': 'receipt_document',
-			'Auto Repeat': 'reference_document'
+			'Auto Repeat': 'reference_document',
 			'Purchase Receipt': 'return_against'
 		},
 		'internal_links': {
