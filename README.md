@@ -60,7 +60,7 @@ Frappé Technologies Pvt. Ltd. (Frappé) owns and oversees the trademarks for th
 
 ### Frappé Trademark Usage Policy
 
-Permission from Frappé is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
+Permission from Frappe is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
 
 We will grant permission to use the ERPNext name and logo for projects that meet the following criteria:
 
