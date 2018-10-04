@@ -238,6 +238,9 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	for d in reversed(accounts):
 		if d.parent_account:
 			account = d.parent_account.split('-')[0].strip()
+			if not accounts_by_name.get(account):
+				continue
+
 			for company in companies:
 				accounts_by_name[account][company] = \
 					accounts_by_name[account].get(company, 0.0) + d.get(company, 0.0)
@@ -268,8 +271,7 @@ def get_companies(filters):
 	return all_companies, companies
 
 def get_subsidiary_companies(company):
-	lft, rgt = frappe.get_cached_value('Company', 
-		company,  ["lft", "rgt"])
+	lft, rgt = frappe.db.get_value('Company', company,  ["lft", "rgt"])
 
 	return frappe.db.sql_list("""select name from `tabCompany`
 		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(lft, rgt))

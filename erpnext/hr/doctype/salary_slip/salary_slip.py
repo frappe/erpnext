@@ -384,8 +384,8 @@ class SalarySlip(TransactionBase):
 				and t2.is_lwp = 1
 				and t1.docstatus = 1
 				and t1.employee = %(employee)s
-				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
+				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
 				END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 			if leave:

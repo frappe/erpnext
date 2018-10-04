@@ -94,6 +94,12 @@ frappe.ui.form.on('Asset', {
 				}, __("Make"));
 			}
 
+			if (!frm.doc.calculate_depreciation) {
+				frm.add_custom_button(__("Depreciation Entry"), function() {
+					frm.trigger("make_journal_entry");
+				}, __("Make"));
+			}
+
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 			frm.trigger("setup_chart");
 		}
@@ -101,6 +107,21 @@ frappe.ui.form.on('Asset', {
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
+	},
+
+	make_journal_entry: function(frm) {
+		frappe.call({
+			method: "erpnext.assets.doctype.asset.asset.make_journal_entry",
+			args: {
+				asset_name: frm.doc.name
+			},
+			callback: function(r) {
+				if (r.message) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		})
 	},
 
 	setup_chart: function(frm) {

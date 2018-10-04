@@ -28,6 +28,24 @@ frappe.query_reports["Item-wise Sales Register"] = {
 			"label": __("Mode of Payment"),
 			"fieldtype": "Link",
 			"options": "Mode of Payment"
+		},
+		{
+			"fieldname":"warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname":"brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
+		},
+		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
 		}
 	]
 }
