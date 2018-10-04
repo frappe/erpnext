@@ -10,7 +10,6 @@ from requests_oauthlib import OAuth2Session
 import json, requests
 from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.model.naming import append_number_if_name_exists
 
 
 client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
