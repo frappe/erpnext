@@ -12,7 +12,8 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '11.x.x-develop'
-staging_version = '11.0.3-beta.2'
+staging_version = '11.0.3-beta.4'
+
 saif_version = staging_version
 
 error_report_email = "saifi0102@gmail.com"
