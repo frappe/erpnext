@@ -199,11 +199,11 @@ def save_customer(customer):
 				"doctype": "Customer",
 				"quickbooks_id": customer["Id"],
 				"customer_name" : encode_company_abbr(customer["DisplayName"], company),
-				"customer_type" : _("Individual"),
-				"customer_group" : _("Commercial"),
+				"customer_type" : "Individual",
+				"customer_group" : "Commercial",
 				"default_currency": customer["CurrencyRef"]["value"],
 				"accounts": [{"company": company, "account": receivable_account}],
-				"territory" : _("All Territories"),
+				"territory" : "All Territories",
 				"company": company,
 			}).insert(ignore_permissions=True)
 			if "BillAddr" in customer:
@@ -246,7 +246,7 @@ def save_vendor(vendor):
 				"doctype": "Supplier",
 				"quickbooks_id": vendor["Id"],
 				"supplier_name" : encode_company_abbr(vendor["DisplayName"], company),
-				"supplier_group" : _("All Supplier Groups"),
+				"supplier_group" : "All Supplier Groups",
 				"company": company,
 			}).insert(ignore_permissions=True)
 			if "BillAddr" in vendor:
