@@ -21,7 +21,6 @@ default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
 
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
-authorization_endpoint = "https://appcenter.intuit.com/connect/oauth2"
 @frappe.whitelist()
 def get_authorization_url():
 	return {"url": oauth.authorization_url(authorization_endpoint)[0]}
@@ -66,7 +65,6 @@ def fetch_data():
 def publish(*args, **kwargs):
 	frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
 
-token_endpoint = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 def get_access_token():
 	code = frappe.cache().get("quickbooks_code").decode()
 	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)
