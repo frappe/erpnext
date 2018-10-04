@@ -32,9 +32,19 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		})
 
-		frm.set_query('transporter_name', function(doc) {
+		frm.set_query('transporter', function() {
 			return {
-				filters: { 'supplier_group': "transporter" }
+				filters: {
+					'is_transporter': 1
+				}
+			}
+		});
+
+		frm.set_query('driver', function(doc) {
+			return {
+				filters: {
+					'transporter': doc.transporter
+				}
 			}
 		});
 

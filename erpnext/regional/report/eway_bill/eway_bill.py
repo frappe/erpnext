@@ -21,7 +21,7 @@ def get_data(filters):
 
 	data = frappe.db.sql("""
 		SELECT
-			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.transport_mode, dn.distance, dn.transporter_name, dn.transporter, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.vehicle_type, dn.company_address, dn.shipping_address_name
+			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.mode_of_transport, dn.distance, dn.transporter_name, dn.gst_transporter_id, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.gst_vehicle_type, dn.company_address, dn.shipping_address_name
 		FROM
 			`tabDelivery Note` AS dn join `tabDelivery Note Item` AS dni on (dni.parent = dn.name)
 		WHERE
@@ -51,6 +51,9 @@ def get_data(filters):
 		# Eway Bill accepts date as dd/mm/yyyy and not dd-mm-yyyy
 		row.posting_date = '/'.join(str(row.posting_date).replace("-", "/").split('/')[::-1])
 		row.lr_date = '/'.join(str(row.lr_date).replace("-", "/").split('/')[::-1])
+
+		if row.gst_vehicle_type == 'Over Dimensional Cargo (ODC)':
+			row.gst_vehicle_type = 'ODC'
 
 		row.item_name = re.sub(special_characters, " ", row.item_name)
 		row.description = row.item_name
@@ -333,8 +336,8 @@ def get_columns():
 			"width": 100
 		},
 		{
-			"fieldname": "transport_mode",
-			"label": _("Transport Mode"),
+			"fieldname": "mode_of_transport",
+			"label": _("Mode of Transport"),
 			"fieldtype": "Data",
 			"width": 100
 		},
@@ -351,20 +354,20 @@ def get_columns():
 			"width": 120
 		},
 		{
-			"fieldname": "transporter_id",
+			"fieldname": "gst_transporter_id",
 			"label": _("Transporter ID"),
 			"fieldtype": "Data",
 			"width": 100
 		},
 		{
 			"fieldname": "lr_no",
-			"label": _("Transporter Doc No"),
+			"label": _("Transport Receipt No"),
 			"fieldtype": "Data",
 			"width": 120
 		},
 		{
 			"fieldname": "lr_date",
-			"label": _("Transporter Date"),
+			"label": _("Transport Receipt Date"),
 			"fieldtype": "Data",
 			"width": 120
 		},
@@ -375,7 +378,7 @@ def get_columns():
 			"width": 100
 		},
 		{
-			"fieldname": "vehicle_type",
+			"fieldname": "gst_vehicle_type",
 			"label": _("Vehicle Type"),
 			"fieldtype": "Data",
 			"width": 100

@@ -24,11 +24,9 @@ class DeliveryTrip(Document):
 		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
 
 		update_fields = {
-			"transporter": self.driver,
-			"transporter_name": self.driver_name,
-			"transport_mode": "Road",
+			"driver": self.driver,
+			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
-			"vehicle_type": "Regular",
 			"lr_no": self.name,
 			"lr_date": self.date
 		}
@@ -40,6 +38,7 @@ class DeliveryTrip(Document):
 				value = None if delete else value
 				setattr(note_doc, field, value)
 
+			note_doc.flags.ignore_validate_update_after_submit = True
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
