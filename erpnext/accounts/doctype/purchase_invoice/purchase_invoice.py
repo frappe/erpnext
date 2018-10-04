@@ -403,16 +403,20 @@ class PurchaseInvoice(BuyingController):
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		warehouse_account = get_warehouse_account_map()
 
+		voucher_wise_stock_value = {}
+		if self.update_stock:
+			for d in frappe.get_all('Stock Ledger Entry',
+				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
+				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 
 				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
-					val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
-
 					# warehouse account
-					warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision)
-						* flt(item.qty)	* flt(item.conversion_factor), item.precision("base_net_amount"))
+					warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
+						item, voucher_wise_stock_value, account_currency)
 
 					gl_entries.append(
 						self.get_gl_dict({
@@ -551,6 +555,36 @@ class PurchaseInvoice(BuyingController):
 						}))
 
 		return gl_entries
+
+	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
+		net_amt_precision = item.precision("base_net_amount")
+		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
+
+		warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision)
+			* flt(item.qty)	* flt(item.conversion_factor), net_amt_precision)
+
+		# Stock ledger value is not matching with the warehouse amount
+		if (self.update_stock and voucher_wise_stock_value.get(item.name) and
+			warehouse_debit_amount != flt(voucher_wise_stock_value.get(item.name), net_amt_precision)):
+
+			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
+			stock_amount = flt(voucher_wise_stock_value.get(item.name), net_amt_precision)
+			stock_adjustment_amt = warehouse_debit_amount - stock_amount
+
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": cost_of_goods_sold_account,
+					"against": item.expense_account,
+					"debit": stock_adjustment_amt,
+					"remarks": self.get("remarks") or _("Stock Adjustment"),
+					"cost_center": item.cost_center,
+					"project": item.project
+				}, account_currency)
+			)
+
+			warehouse_debit_amount = stock_amount
+
+		return warehouse_debit_amount
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries

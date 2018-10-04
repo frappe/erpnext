@@ -379,7 +379,7 @@ class StockEntry(StockController):
 
 	def calculate_rate_and_amount(self, force=False,
 			update_finished_item_rate=True, raise_error_if_no_rate=True):
-		self.set_basic_rate(force, update_finished_item_rate)
+		self.set_basic_rate(force, update_finished_item_rate, raise_error_if_no_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
