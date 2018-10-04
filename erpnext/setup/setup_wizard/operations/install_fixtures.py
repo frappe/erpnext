@@ -320,7 +320,7 @@ def add_sale_stages():
 		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
 		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")}
 	]
- 	make_fixture_records(records)
+	make_fixture_records(records)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub
