@@ -31,14 +31,6 @@ def is_authenticated():
 	return frappe.cache().exists("quickbooks_refresh_token") and frappe.cache().exists("quickbooks_access_token")
 
 @frappe.whitelist()
-def are_accounts_synced():
-    # Check if there is any existing Account with Quickbooks ID
-	return bool(frappe.get_all("Account",
-		filters=[["quickbooks_id", "not like", ""]],
-		fields=["count(name) as count"]
-	)[0]["count"])
-
-@frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
 	frappe.cache().set("quickbooks_code", kwargs.get("code"))

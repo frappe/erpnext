@@ -18,7 +18,6 @@ frappe.ui.form.on('QuickBooks Migrator', {
 	onload: function(frm){
 		frm.python_path = "erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator";
 		frm.is_authenticated = false;
-		frm.are_accounts_synced = false;
 		frappe.call({
 			method: `${frm.python_path}.is_authenticated`,
 			callback: function(authentication_result) {
