@@ -12,81 +12,18 @@ from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 
-client_id = frappe.db.get_value("Quickbooks Migrator", None, "client_id")
-client_secret = frappe.db.get_value("Quickbooks Migrator", None, "client_secret")
-scope = frappe.db.get_value("Quickbooks Migrator", None, "scope")
-redirect_uri = frappe.db.get_value("Quickbooks Migrator", None, "redirect_url")
-company = frappe.db.get_value("Quickbooks Migrator", None, "company")
-default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
-
-oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
-
-@frappe.whitelist()
-def get_authorization_url():
-	return {"url": oauth.authorization_url(authorization_endpoint)[0]}
-
-@frappe.whitelist()
-def is_authenticated():
-	return frappe.cache().exists("quickbooks_refresh_token") and frappe.cache().exists("quickbooks_access_token")
-
 @frappe.whitelist()
 def callback(*args, **kwargs):
 	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
-	frappe.cache().set("quickbooks_code", kwargs.get("code"))
-	company_id = kwargs.get("realmId")
-	frappe.cache().set("quickbooks_company_id", company_id)
-	get_access_token()
-	frappe.publish_realtime("quickbooks_authenticated")
-
-def fetch_accounts():
-	company_id = frappe.cache().get("quickbooks_company_id").decode()
-	make_custom_fields()
-	make_root_accounts()
-	fetch_all_entries(entity="Account", company_id=company_id)
-	fetch_all_entries(entity="TaxRate", company_id=company_id)
-	fetch_all_entries(entity="TaxCode", company_id=company_id)
-	frappe.clear_messages()
-	frappe.publish_realtime("quickbooks_accounts_synced")
-
-@frappe.whitelist()
-def fetch_data():
-	fetch_accounts()
-	company_id = frappe.cache().get("quickbooks_company_id").decode()
-	make_custom_fields()
-	fetch_general_ledger(company_id=company_id)
-	relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
-	for entity in relevant_entities:
-		fetch_all_entries(entity=entity, company_id=company_id)
-	relevant_entities = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment"]
-	for entity in relevant_entities:
-		fetch_all_entries_from_gl(entity=entity, company_id=company_id)
-	frappe.clear_messages()
+	migrator = frappe.get_doc("QuickBooks Migrator")
+	migrator.code = kwargs.get("code")
+	migrator.quickbooks_company_id = kwargs.get("realmId")
+	migrator.save()
+	migrator._get_tokens()
 
 def publish(*args, **kwargs):
 	frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
 
-def get_access_token():
-	code = frappe.cache().get("quickbooks_code").decode()
-	token = oauth.fetch_token(token_endpoint, client_secret=client_secret, code=code)
-	frappe.cache().set("quickbooks_access_token", token["access_token"])
-	frappe.cache().set("quickbooks_refresh_token", token["refresh_token"])
-
-def make_root_accounts():
-	roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
-	for root in roots:
-		try:
-			if not frappe.db.exists({"doctype": "Account", "name": encode_company_abbr("{} - QB".format(root), company), "company": company}):
-				frappe.get_doc({
-					"doctype": "Account",
-					"account_name": "{} - QB".format(root),
-					"root_type": root,
-					"is_group": "1",
-					"company": company,
-				}).insert(ignore_permissions=True, ignore_mandatory=True)
-		except:
-			import traceback
-			traceback.print_exc()
-	frappe.db.commit()
 
 mapping = {
 	"Bank": "Asset",
@@ -757,7 +694,7 @@ def get_items(invoice, is_return=False):
 					"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
 					"qty": line["SalesItemLineDetail"]["Qty"],
 					"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
-					"cost_center": default_cost_center,
+					"cost_center": self.default_cost_center,
 					"item_tax_rate": json.dumps(get_item_taxes(tax_code))
 				})
 			else:
@@ -770,7 +707,7 @@ def get_items(invoice, is_return=False):
 					"income_account": get_shipping_account(),
 					"qty": 1,
 					"price_list_rate": line["Amount"],
-					"cost_center": default_cost_center,
+					"cost_center": self.default_cost_center,
 					"item_tax_rate": json.dumps(get_item_taxes(tax_code))
 				})
 			if is_return:
@@ -807,7 +744,7 @@ def get_pi_items(purchase_invoice, is_return=False):
 				"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
 				"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
 				"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
-				"cost_center": default_cost_center,
+				"cost_center": self.default_cost_center,
 				"item_tax_rate": json.dumps(get_item_taxes(tax_code)),
 			})
 		elif line["DetailType"] == "AccountBasedExpenseLineDetail":
@@ -826,7 +763,7 @@ def get_pi_items(purchase_invoice, is_return=False):
 				"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
 				"qty": 1,
 				"price_list_rate": line["Amount"],
-				"cost_center": default_cost_center,
+				"cost_center": self.default_cost_center,
 				"item_tax_rate": json.dumps(get_item_taxes(tax_code)),
 			})
 		if is_return:
@@ -860,7 +797,7 @@ def get_taxes(entry):
 				"charge_type": "On Net Total",
 				"account_head": account_head,
 				"description": account_head,
-				"cost_center": default_cost_center,
+				"cost_center": self.default_cost_center,
 				"rate": 0,
  			})
 		else:
@@ -871,7 +808,7 @@ def get_taxes(entry):
 				"row_id": parent_row_id,
 				"account_head": account_head,
 				"description": account_head,
-				"cost_center": default_cost_center,
+				"cost_center": self.default_cost_center,
 				"rate": line["TaxLineDetail"]["TaxPercent"],
 			})
 	return taxes
@@ -920,131 +857,217 @@ def create_address(entity, doctype, address, address_type):
 		import traceback
 		traceback.print_exc()
 
-def make_custom_fields():
-	relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
-	for doctype in relevant_doctypes:
-		make_custom_quickbooks_id_field(doctype)
 
-	relevant_doctypes = ["Customer", "Item", "Supplier"]
-	for doctype in relevant_doctypes:
-		make_custom_company_field(doctype)
 
-def make_custom_quickbooks_id_field(doctype):
-	if not frappe.get_meta(doctype).has_field("quickbooks_id"):
-		frappe.get_doc({
-			"doctype": "Custom Field",
-			"label": "QuickBooks ID",
-			"dt": doctype,
-			"fieldname": "quickbooks_id",
-			"fieldtype": "Data",
-		}).insert(ignore_permissions=True)
+class QuickBooksMigrator(Document):
+	def __init__(self, *args, **kwargs):
+		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
+		from pprint import pprint
+		self.oauth = OAuth2Session(
+			client_id=self.client_id,
+			redirect_uri=self.redirect_url,
+			scope=self.scope
+		)
+		if self.company:
+			self.default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
-def make_custom_company_field(doctype):
-	if not frappe.get_meta(doctype).has_field("company"):
-		frappe.get_doc({
-			"doctype": "Custom Field",
-			"label": "Company",
-			"dt": doctype,
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-		}).insert(ignore_permissions=True)
+		if not self.authorization_url:
+			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
-save_methods = {
-	"Account": save_account,
-	"Customer": save_customer,
-	"Item": save_item,
-	"Vendor": save_vendor,
-	"Invoice": save_invoice,
-	"JournalEntry": save_journal_entry,
-	"Bill": save_bill,
-	"Payment": save_payment,
-	"BillPayment": save_bill_payment,
-	"TaxRate": save_tax_rate,
-	"TaxCode": save_tax_code,
-	"Purchase": save_purchase,
-	"Deposit": save_deposit,
-	"VendorCredit": save_vendor_credit,
-	"CreditMemo": save_credit_memo,
-	"SalesReceipt": save_sales_receipt,
-	"Advance Payment": save_advance_payment,
-	"Preferences": save_preference,
-	"Tax Payment": save_tax_payment,
-	"Sales Tax Payment": save_tax_payment,
-	"Purchase Tax Payment": save_tax_payment,
-}
+	def migrate(self):
+		self._migrate_accounts()
+		self._make_custom_fields()
 
-def save_entries(doctype, entries):
-	total = len(entries)
-	save = save_methods[doctype]
-	for index, entry in enumerate(entries):
-		publish({"event": "save", "doctype": doctype, "count": index, "total": total})
-		save(entry)
-	frappe.db.commit()
+		relevant_entities = ["Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill", "BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"]
+		for entity in relevant_entities:
+			self._migrate_entries(entity)
 
-# A quickbooks api contraint
-MAX_RESULT_COUNT = 1000
-BASE_QUERY_URL = "https://sandbox-quickbooks.api.intuit.com/v3/company/{}/{}"
+		self._fetch_general_ledger()
+		relevant_entities = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment"]
+		for entity in relevant_entities:
+			self._migrate_entries_from_gl(entity)
 
-def get(*args, **kwargs):
-	refresh_tokens()
-	token = frappe.cache().get("quickbooks_access_token").decode()
-	kwargs["headers"] = get_headers(token)
-	response = requests.get(*args, **kwargs)
-	if response.status_code == 401:
-		refresh_tokens()
-		get(*args, **kwargs)
-	return response
+	def _get_tokens(self):
+		token = self.oauth.fetch_token(
+			token_url=self.token_endpoint,
+			client_secret=self.client_secret,
+			code=self.code
+		)
+		self.access_token = token["access_token"]
+		self.refresh_token = token["refresh_token"]
+		self.save()
 
-def refresh_tokens():
-	refresh_token = frappe.cache().get("quickbooks_refresh_token").decode()
-	code = frappe.cache().get("quickbooks_code").decode()
-	token = oauth.refresh_token(token_endpoint, client_id=client_id, refresh_token=refresh_token, client_secret=client_secret, code=code)
-	frappe.cache().set("quickbooks_refresh_token", token["refresh_token"])
-	frappe.cache().set("quickbooks_access_token", token["access_token"])
+	def _refresh_tokens(self):
+		token = self.oauth.refresh_token(
+			token_url=self.token_endpoint,
+			client_id=self.client_id,
+			refresh_token=self.refresh_token,
+			client_secret=self.client_secret,
+			code=self.code
+		)
+		self.access_token = token["access_token"]
+		self.refresh_token = token["refresh_token"]
+		self.save()
 
-def fetch_all_entries(entity="", company_id=1):
-	query_uri = BASE_QUERY_URL.format(company_id, "query")
+	def _migrate_accounts(self):
+		self._make_root_accounts()
+		for entity in ["Account", "TaxRate", "TaxCode"]:
+			self._migrate_entries(entity)
 
-	cache_key = "quickbooks-cached-{}".format(entity)
-	if not frappe.cache().exists(cache_key):
-		# Count number of entries
-		entry_count = get(query_uri,
-			params={
-				"query": """SELECT COUNT(*) FROM {}""".format(entity)
-			}
-		).json()["QueryResponse"]["totalCount"]
+	def _make_root_accounts(self):
+		roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
+		for root in roots:
+			try:
+				if not frappe.db.exists({"doctype": "Account", "name": encode_company_abbr("{} - QB".format(root), self.company), "company": self.company}):
+					frappe.get_doc({
+						"doctype": "Account",
+						"account_name": "{} - QB".format(root),
+						"root_type": root,
+						"is_group": "1",
+						"company": self.company,
+					}).insert(ignore_mandatory=True)
+			except:
+				import traceback
+				traceback.print_exc()
+		frappe.db.commit()
 
-		# fetch pages and accumulate
-		entries = []
-		for start_position in range(1, entry_count + 1, MAX_RESULT_COUNT):
-			publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
-			response = get(query_uri,
+	def _make_custom_fields(self):
+		relevant_doctypes = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice", "Payment Entry"]
+		for doctype in relevant_doctypes:
+			self._make_custom_quickbooks_id_field(doctype)
+
+		relevant_doctypes = ["Customer", "Item", "Supplier"]
+		for doctype in relevant_doctypes:
+			self._make_custom_company_field(doctype)
+
+	def _make_custom_quickbooks_id_field(self, doctype):
+		if not frappe.get_meta(doctype).has_field("quickbooks_id"):
+			frappe.get_doc({
+				"doctype": "Custom Field",
+				"label": "QuickBooks ID",
+				"dt": doctype,
+				"fieldname": "quickbooks_id",
+				"fieldtype": "Data",
+			}).insert()
+
+	def _make_custom_company_field(self, doctype):
+		if not frappe.get_meta(doctype).has_field("company"):
+			frappe.get_doc({
+				"doctype": "Custom Field",
+				"label": "Company",
+				"dt": doctype,
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+			}).insert()
+
+	def _migrate_entries(self, entity):
+		query_uri = "{}/company/{}/query".format(
+			self.api_endpoint,
+			self.quickbooks_company_id,
+		)
+		max_result_count = 1000
+		cache_key = "quickbooks-cached-{}".format(entity)
+		if not frappe.cache().exists(cache_key):
+			# Count number of entries
+			entry_count = self._get(query_uri,
 				params={
-					"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(entity, start_position, MAX_RESULT_COUNT)
+					"query": """SELECT COUNT(*) FROM {}""".format(entity)
 				}
-			).json()["QueryResponse"][entity]
-			entries.extend(response)
-		frappe.cache().set(cache_key, json.dumps(entries))
-		publish({"event": "finish"})
-	entries = json.loads(frappe.cache().get(cache_key).decode())
-	save_entries(entity, entries)
-	publish({"event": "finish"})
-	publish({"event": "message", "message": "Fetched {}".format(entity)})
+			).json()["QueryResponse"]["totalCount"]
 
-def fetch_all_entries_from_gl(company_id=None, entity=None):
-	general_ledger = get_general_ledger()
-	if entity in general_ledger:
-		save_entries(entity, general_ledger[entity].values())
+			# fetch pages and accumulate
+			entries = []
+			for start_position in range(1, entry_count + 1, max_result_count):
+				publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
+				response = self._get(query_uri,
+					params={
+						"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(
+							entity, start_position, max_result_count
+						)
+					}
+				).json()["QueryResponse"][entity]
+				entries.extend(response)
+			frappe.cache().set(cache_key, json.dumps(entries))
+			publish({"event": "finish"})
+		entries = json.loads(frappe.cache().get(cache_key).decode())
+		self._save_entries(entity, entries)
 		publish({"event": "finish"})
 		publish({"event": "message", "message": "Fetched {}".format(entity)})
 
-def get_headers(token):
-	return {"Accept": "application/json",
-	"Authorization": "Bearer {}".format(token)}
+	def _fetch_general_ledger(self):
+		if not frappe.cache().exists("quickbooks-cached-General-Ledger"):
+			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint ,self.quickbooks_company_id)
+			general_ledger = self._get(query_uri,
+				params={
+					"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt" , "subt_nat_amount"]),
+					"date_macro": "All",
+					"minorversion": 3,
+				}
+			).json()
+			for section in general_ledger["Rows"]["Row"]:
+				if section["type"] == "Section":
+					get_gl_entries_from_section(section)
+			general_ledger = {}
+			for account in gl_entries.values():
+				for line in account:
+					type_dict = general_ledger.setdefault(line["type"], {})
+					if line["id"] not in type_dict:
+						type_dict[line["id"]] = {
+							"id": line["id"],
+							"date": line["date"],
+							"lines": [],
+						}
+					type_dict[line["id"]]["lines"].append(line)
+			self.general_ledger = general_ledger
 
-class QuickBooksMigrator(Document):
-	pass
+	def _migrate_entries_from_gl(entity):
+		if entity in self.general_ledger:
+			self._save_entries(entity, self.general_ledger[entity].values())
+			publish({"event": "finish"})
+			publish({"event": "message", "message": "Fetched {}".format(entity)})
+
+	def _get(self, *args, **kwargs):
+		kwargs["headers"] = {
+			"Accept": "application/json",
+			"Authorization": "Bearer {}".format(self.access_token)
+		}
+		response = requests.get(*args, **kwargs)
+		if response.status_code == 401:
+			self._refresh_tokens()
+			response = self._get(*args, **kwargs)
+		return response
+
+	def _save_entries(self, doctype, entries):
+		entity_method_map = {
+			"Account": save_account,
+			"Customer": save_customer,
+			"Item": save_item,
+			"Vendor": save_vendor,
+			"Invoice": save_invoice,
+			"JournalEntry": save_journal_entry,
+			"Bill": save_bill,
+			"Payment": save_payment,
+			"BillPayment": save_bill_payment,
+			"TaxRate": save_tax_rate,
+			"TaxCode": save_tax_code,
+			"Purchase": save_purchase,
+			"Deposit": save_deposit,
+			"VendorCredit": save_vendor_credit,
+			"CreditMemo": save_credit_memo,
+			"SalesReceipt": save_sales_receipt,
+			"Advance Payment": save_advance_payment,
+			"Preferences": save_preference,
+			"Tax Payment": save_tax_payment,
+			"Sales Tax Payment": save_tax_payment,
+			"Purchase Tax Payment": save_tax_payment,
+		}
+		total = len(entries)
+		for index, entry in enumerate(entries):
+			publish({"event": "save", "doctype": doctype, "count": index, "total": total})
+			entity_method_map[doctype](entry)
+		frappe.db.commit()
+
 
 def get_account_name_by_id(quickbooks_id):
 	return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id, "company": company})[0]["name"]
@@ -1122,28 +1145,6 @@ def get_gl_entries_from_section(section, account=None):
 			get_gl_entries_from_section(row, account)
 	gl_entries.setdefault(account, []).extend(entries)
 
-def fetch_general_ledger(company_id):
-	if not frappe.cache().exists("quickbooks-cached-General-Ledger"):
-		general_ledger = get((BASE_QUERY_URL + "/{}").format(company_id, "reports", "GeneralLedger"), params={
-			"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt" , "subt_nat_amount"]),
-			"date_macro": "All",
-			"minorversion": 3,
-		}).json()
-		for section in general_ledger["Rows"]["Row"]:
-			if section["type"] == "Section":
-				get_gl_entries_from_section(section)
-		general_ledger = {}
-		for account in gl_entries.values():
-			for line in account:
-				type_dict = general_ledger.setdefault(line["type"], {})
-				if line["id"] not in type_dict:
-					type_dict[line["id"]] = {
-						"id": line["id"],
-						"date": line["date"],
-						"lines": [],
-					}
-				type_dict[line["id"]]["lines"].append(line)
-		frappe.cache().set("quickbooks-cached-General-Ledger", json.dumps(general_ledger))
 
 def get_general_ledger():
 	return json.loads(frappe.cache().get("quickbooks-cached-General-Ledger").decode())
