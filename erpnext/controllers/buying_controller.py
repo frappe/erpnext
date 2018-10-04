@@ -661,7 +661,7 @@ class BuyingController(StockController):
 		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
 			return
 
-		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
+		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
