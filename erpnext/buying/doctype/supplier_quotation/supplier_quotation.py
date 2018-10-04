@@ -60,7 +60,13 @@ class SupplierQuotation(BuyingController):
 		for rfq in rfq_list:
 			doc = frappe.get_doc('Request for Quotation', rfq)
 			doc_sup = frappe.get_all('Request for Quotation Supplier', filters=
-				{'parent': doc.name, 'supplier': self.supplier}, fields=['name', 'quote_status'])[0]
+				{'parent': doc.name, 'supplier': self.supplier}, fields=['name', 'quote_status'])
+
+			doc_sup = doc_sup[0] if doc_sup else None
+			if not doc_sup:
+				frappe.throw(_("Supplier {0} not found in the linked \
+					<a href='desk#Form/Request for Quotation/{1}'> Request for Quotation #{1} </a>")
+					.format(self.supplier, doc.name))
 
 			quote_status = _('Received')
 			for item in doc.items:
