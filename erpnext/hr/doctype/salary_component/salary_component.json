@@ -770,7 +770,7 @@
    "collapsible": 1, 
    "collapsible_depends_on": "", 
    "columns": 0, 
-   "depends_on": "eval:doc.is_flexible_benefit != 1 && doc.variable_based_on_taxable_salary != 1 && doc.is_additional_component != 1", 
+   "depends_on": "eval:doc.is_flexible_benefit != 1 && doc.variable_based_on_taxable_salary != 1", 
    "fieldname": "condition_and_formula", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -835,7 +835,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "1", 
+   "default": "", 
    "fieldname": "amount_based_on_formula", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -1003,7 +1003,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-02 16:55:44.467519", 
+ "modified": "2018-09-20 16:44:58.876044", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Component", 
@@ -1056,5 +1056,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

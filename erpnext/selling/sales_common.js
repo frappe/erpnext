@@ -264,7 +264,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		{
 			row.incentives = flt(
 					row.allocated_amount * row.commission_rate / 100.0,
-					precision("incentives", sales_person));
+					precision("incentives", row));
 		}
 	},
 

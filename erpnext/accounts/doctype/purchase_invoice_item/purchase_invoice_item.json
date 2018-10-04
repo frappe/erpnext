@@ -1742,7 +1742,7 @@
   },
   {
    "allow_bulk_edit": 0,
-   "allow_on_submit": 0,
+   "allow_on_submit": 1,
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
@@ -2544,7 +2544,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-09-04 10:11:28.246395",
+ "modified": "2018-10-04 09:05:43.166721",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Item", 
