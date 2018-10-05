@@ -6,10 +6,7 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		window.open(frm.doc.authorization_url)
 	},
 	fetch_data: function(frm) {
-		frappe.call({
-			method: "erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator.fetch_data",
-			freeze: true,
-		});
+		frm.call("migrate")
 	},
 	onload: function(frm) {
 		frappe.realtime.on("quickbooks_progress_update", function (data) {
@@ -22,7 +19,6 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		});
 	},
 	refresh: function(frm){
-		console.log("Refrehing")
 		if (!frm.doc.access_token) {
 			// Not connected yet
 			// Need some details for connection though
