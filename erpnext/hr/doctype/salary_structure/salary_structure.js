@@ -77,45 +77,50 @@ frappe.ui.form.on('Salary Structure', {
 			},
 			callback: function(r) {
 				var employees = r.message;
-				var d = new frappe.ui.Dialog({
-					title: __("Preview Salary Slip"),
-					fields: [
-						{
-							"label":__("Employee"),
-							"fieldname":"employee",
-							"fieldtype":"Select",
-							options: employees
-						}, {
-							fieldname:"fetch",
-							"label":__("Show Salary Slip"),
-							"fieldtype":"Button"
-						}
-					]
-				});
-				d.get_input("fetch").on("click", function() {
-					var values = d.get_values();
-					if(!values) return;
-					var print_format;
-					frm.doc.salary_slip_based_on_timesheet ?
-						print_format="Salary Slip based on Timesheet" :
-						print_format="Salary Slip Standard";
-
-					frappe.call({
-						method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
-						args: {
-							source_name: frm.doc.name,
-							employee: values.employee,
-							as_print: 1,
-							print_format: print_format
-						},
-						callback: function(r) {
-							var new_window = window.open();
-							new_window.document.write(r.message);
-							// frappe.msgprint(r.message);
-						}
+				if (!employees) return;
+				if (employees.length==1) {
+					frm.events.open_salary_slip(frm, employees[0]);
+				} else {
+					var d = new frappe.ui.Dialog({
+						title: __("Preview Salary Slip"),
+						fields: [
+							{
+								"label":__("Employee"),
+								"fieldname":"employee",
+								"fieldtype":"Select",
+								options: employees
+							}, {
+								fieldname:"fetch",
+								"label":__("Show Salary Slip"),
+								"fieldtype":"Button"
+							}
+						]
 					});
-				});
-				d.show();
+
+					d.get_input("fetch").on("click", function() {
+						var values = d.get_values();
+						if(!values) return;
+						frm.events.open_salary_slip(frm, values.employee);
+					});
+					d.show();
+				}
+			}
+		});
+	},
+
+	open_salary_slip: function(frm, employee) {
+		var print_format = frm.doc.salary_slip_based_on_timesheet ? "Salary Slip based on Timesheet" : "Salary Slip Standard";
+		frappe.call({
+			method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
+			args: {
+				source_name: frm.doc.name,
+				employee: employee,
+				as_print: 1,
+				print_format: print_format
+			},
+			callback: function(r) {
+				var new_window = window.open();
+				new_window.document.write(r.message);
 			}
 		});
 	},
@@ -206,6 +211,7 @@ frappe.ui.form.on('Salary Detail', {
 						}
 						frappe.model.set_value(cdt, cdn, 'statistical_component', result.statistical_component);
 						frappe.model.set_value(cdt, cdn, 'depends_on_lwp', result.depends_on_lwp);
+						frappe.model.set_value(cdt, cdn, 'prorated_based_on_attendance', result.prorated_based_on_attendance);
 						frappe.model.set_value(cdt, cdn, 'do_not_include_in_total', result.do_not_include_in_total);
 						frappe.model.set_value(cdt, cdn, 'variable_based_on_taxable_salary', result.variable_based_on_taxable_salary);
 						frappe.model.set_value(cdt, cdn, 'is_tax_applicable', result.is_tax_applicable);

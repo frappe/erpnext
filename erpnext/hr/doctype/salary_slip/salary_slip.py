@@ -14,9 +14,11 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary.additional_salary import get_additional_salary_component
-from erpnext.hr.utils import get_payroll_period
+from erpnext.hr.utils import get_payroll_period, calculate_leaves
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
+
+class NegativeSalaryError(frappe.ValidationError): pass
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -136,6 +138,7 @@ class SalarySlip(TransactionBase):
 				'amount': amount,
 				'default_amount': amount,
 				'depends_on_lwp' : struct_row.depends_on_lwp,
+				'prorated_based_on_attendance': struct_row.prorated_based_on_attendance,
 				'salary_component' : struct_row.salary_component,
 				'abbr' : struct_row.abbr,
 				'do_not_include_in_total' : struct_row.do_not_include_in_total,
@@ -144,7 +147,8 @@ class SalarySlip(TransactionBase):
 				'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
 				'is_additional_component': struct_row.is_additional_component,
 				'tax_on_flexible_benefit': benefit_tax,
-				'tax_on_additional_salary': additional_tax
+				'tax_on_additional_salary': additional_tax,
+				'bank': struct_row.get("bank")
 			})
 		else:
 			if overwrite:
@@ -167,7 +171,7 @@ class SalarySlip(TransactionBase):
 			if d.amount_based_on_formula:
 				formula = d.formula.strip() if d.formula else None
 				if formula:
-					amount = frappe.safe_eval(formula, self.whitelisted_globals, data)
+					amount = rounded(frappe.safe_eval(formula, self.whitelisted_globals, data))
 			if amount:
 				data[d.abbr] = amount
 
@@ -316,7 +320,8 @@ class SalarySlip(TransactionBase):
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
 		working_days = date_diff(self.end_date, self.start_date) + 1
-		actual_lwp = self.calculate_lwp(holidays, working_days)
+		total_leaves, actual_lwp = calculate_leaves(self.employee, self.start_date, holidays, working_days)
+
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)
 			if working_days < 0:
@@ -329,6 +334,7 @@ class SalarySlip(TransactionBase):
 
 		self.total_working_days = working_days
 		self.leave_without_pay = lwp
+		self.total_leaves = total_leaves
 
 		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
@@ -372,26 +378,6 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
-	def calculate_lwp(self, holidays, working_days):
-		lwp = 0
-		holidays = "','".join(holidays)
-		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql("""
-				select t1.name, t1.half_day
-				from `tabLeave Application` t1, `tabLeave Type` t2
-				where t2.name = t1.leave_type
-				and t2.is_lwp = 1
-				and t1.docstatus = 1
-				and t1.employee = %(employee)s
-				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
-				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
-				END
-				""".format(holidays), {"employee": self.employee, "dt": dt})
-			if leave:
-				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
-		return lwp
-
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
 			ret_exist = frappe.db.sql("""select name from `tabSalary Slip`
@@ -417,19 +403,19 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		for d in self.get(component_type):
-			if (self.salary_structure and
-				cint(d.depends_on_lwp) and
-				(not
+			if (self.salary_structure 
+				and (cint(d.depends_on_lwp) or cint(d.prorated_based_on_attendance))
+				and (not
 				    self.salary_slip_based_on_timesheet or
 					getdate(self.start_date) < joining_date or
 					getdate(self.end_date) > relieving_date
 				)):
 
-				d.amount = rounded(
-					(flt(d.default_amount) * flt(self.payment_days)
-					/ cint(self.total_working_days)), self.precision("amount", component_type)
-				)
+				payment_days = flt(self.payment_days)
+				if cint(d.prorated_based_on_attendance):
+					payment_days = cint(self.total_working_days) - flt(self.total_leaves)
 
+				d.amount = rounded((flt(d.default_amount) * flt(payment_days) / cint(self.total_working_days)))
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet and \
 				cint(d.depends_on_lwp):
 				d.amount = 0
@@ -457,7 +443,7 @@ class SalarySlip(TransactionBase):
 			self.precision("net_pay") if disable_rounded_total else 0)
 		
 		if self.net_pay < 0:
-			frappe.throw(_("Net Pay cannnot be negative"))
+			frappe.throw(_("Net Pay cannnot be negative"), NegativeSalaryError)
 
 	def set_loan_repayment(self):
 		self.set('loans', [])
@@ -512,8 +498,9 @@ class SalarySlip(TransactionBase):
 		salary_slip = self.name if self.docstatus==1 else None
 		frappe.db.sql("""
 			update `tabAdditional Salary` set salary_slip=%s
-			where employee=%s and payroll_date between %s and %s and docstatus=1
-		""", (salary_slip, self.employee, self.start_date, self.end_date))
+			where employee=%s and docstatus=1
+			and ((from_date between %s and %s) or (to_date between %s and %s) or (%s between from_date and to_date))
+		""", (salary_slip, self.employee, self.start_date, self.end_date, self.start_date, self.end_date, self.start_date))
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
@@ -785,6 +772,7 @@ class SalarySlip(TransactionBase):
 		# Data for update_component_row
 		struct_row = {}
 		struct_row['depends_on_lwp'] = component.depends_on_lwp
+		struct_row['prorated_based_on_attendance'] = component.prorated_based_on_attendance
 		struct_row['salary_component'] = component.name
 		struct_row['abbr'] = component.salary_component_abbr
 		struct_row['do_not_include_in_total'] = component.do_not_include_in_total

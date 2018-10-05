@@ -8,8 +8,6 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
-	make_deduction_salary_component, make_employee_salary_slip
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 
@@ -39,6 +37,7 @@ class TestSalaryStructure(unittest.TestCase):
 			holiday_list.save()
 
 	def test_amount_totals(self):
+		from erpnext.hr.doctype.salary_slip.test_salary_slip import make_employee_salary_slip
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee_2@salary.com"})
 		if not sal_slip:
 			sal_slip = make_employee_salary_slip("test_employee_2@salary.com", "Monthly", "Salary Structure Sample")
@@ -73,6 +72,7 @@ class TestSalaryStructure(unittest.TestCase):
 
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
+	from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component, make_deduction_salary_component
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 	if not frappe.db.exists('Salary Structure', salary_structure):

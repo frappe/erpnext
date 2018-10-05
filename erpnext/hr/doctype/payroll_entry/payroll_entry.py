@@ -483,6 +483,8 @@ def payroll_entry_has_bank_entries(name):
 	return response
 
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
+	from erpnext.hr.doctype.salary_slip.salary_slip import NegativeSalaryError
+
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count=0
 	for emp in employees:
@@ -491,8 +493,11 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 				"doctype": "Salary Slip",
 				"employee": emp
 			})
-			ss = frappe.get_doc(args)
-			ss.insert()
+			try:
+				ss = frappe.get_doc(args)
+				ss.insert()
+			except NegativeSalaryError:
+				pass
 			count+=1
 			if publish_progress:
 				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),

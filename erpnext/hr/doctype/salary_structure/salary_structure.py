@@ -18,7 +18,7 @@ class SalaryStructure(Document):
 		self.validate_max_benefits_with_flexi()
 
 	def set_missing_values(self):
-		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit", "prorated_based_on_attendance"]
 		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
@@ -66,7 +66,7 @@ class SalaryStructure(Document):
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
 @frappe.whitelist()
-def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
+def make_salary_slip(source_name, target_doc = None, employee = None, from_date=None, to_date=None, as_print = False, print_format = None):
 	def postprocess(source, target):
 		if employee:
 			employee_details = frappe.db.get_value("Employee", employee,
@@ -76,6 +76,10 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 			target.branch = employee_details.branch
 			target.designation = employee_details.designation
 			target.department = employee_details.department
+		if from_date:
+			target.from_date = from_date
+		if to_date:
+			target.to_date = to_date
 		target.run_method('process_salary_structure')
 
 	doc = get_mapped_doc("Salary Structure", source_name, {

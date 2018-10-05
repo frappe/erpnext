@@ -9,7 +9,8 @@ from frappe.utils import date_diff, getdate, rounded, add_days, cstr, cint, flt
 from frappe.model.document import Document
 from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period_days
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, get_previous_claimed_amount
+from erpnext.hr.utils import get_sal_slip_total_benefit_given, get_holidays_for_employee, \
+	get_previous_claimed_amount, calculate_leaves
 
 class EmployeeBenefitApplication(Document):
 	def validate(self):
@@ -140,32 +141,12 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 			if have_depends_on_lwp and per_day_amount_total > 0:
 				holidays = get_holidays_for_employee(employee, payroll_period_obj.start_date, on_date)
 				working_days = date_diff(on_date, payroll_period_obj.start_date) + 1
-				leave_days = calculate_lwp(employee, payroll_period_obj.start_date, holidays, working_days)
-				leave_days_amount = leave_days * per_day_amount_total
-				prev_sal_slip_flexi_total += leave_days_amount
+				lwp_days = calculate_leaves(employee, payroll_period_obj.start_date, holidays, working_days)[1]
+				lwp_days_amount = lwp_days * per_day_amount_total
+				prev_sal_slip_flexi_total += lwp_days_amount
 
 			return max_benefits - prev_sal_slip_flexi_total
 	return max_benefits
-
-def calculate_lwp(employee, start_date, holidays, working_days):
-	lwp = 0
-	holidays = "','".join(holidays)
-	for d in range(working_days):
-		dt = add_days(cstr(getdate(start_date)), d)
-		leave = frappe.db.sql("""
-			select t1.name, t1.half_day
-			from `tabLeave Application` t1, `tabLeave Type` t2
-			where t2.name = t1.leave_type
-			and t2.is_lwp = 1
-			and t1.docstatus = 1
-			and t1.employee = %(employee)s
-			and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-			WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
-			END
-			""".format(holidays), {"employee": employee, "dt": dt})
-		if leave:
-			lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
-	return lwp
 
 def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal_struct, period_length, frequency):
 	payroll_period, period_factor, actual_payroll_days = get_payroll_period_days(start_date, end_date, employee)
