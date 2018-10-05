@@ -76,4 +76,5 @@ var set_value_for_condition_and_formula = function(frm) {
 	frm.set_value("statistical_component", 0);
 	frm.set_value("do_not_include_in_total", 0);
 	frm.set_value("depends_on_lwp", 0);
+	frm.set_value("prorated_based_on_attendance", 0);
 };
