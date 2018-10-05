@@ -4,7 +4,8 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr
+from frappe.utils import formatdate, format_datetime, getdate, add_days, \
+	get_datetime, nowdate, flt, cstr, cint
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -389,3 +390,24 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
+
+def calculate_leaves(employee, start_date, holidays, working_days):
+	total_leaves, lwp = 0.0, 0.0
+	for d in range(working_days):
+		dt = add_days(cstr(getdate(start_date)), d)
+		leave = frappe.db.sql("""
+			select t1.name, t1.half_day, t1.half_day_date, t2.is_lwp
+			from `tabLeave Application` t1, `tabLeave Type` t2
+			where t2.name = t1.leave_type
+			and t1.docstatus = 1
+			and t1.employee = %(employee)s
+			and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+			WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+			END
+			""".format("','".join(holidays)), {"employee": employee, "dt": dt}, as_dict=1)
+		if leave:
+			count = 0.5 if (cint(leave[0].half_day) and dt==getdate(leave[0].half_day_date)) else 1
+			total_leaves += count
+			if cint(leave[0].is_lwp):
+				lwp += count
+	return total_leaves, lwp
