@@ -111,6 +111,7 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.set_value('appointment_time', selected_slot);
 					frm.set_value('duration', data.time_per_appointment);
 					d.hide();
+					frm.enable_save();
 					frm.save();
 				}
 			});
