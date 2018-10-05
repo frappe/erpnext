@@ -11,7 +11,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils.make_random import get_random
 from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day, rounded
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
+from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period, create_exemption_category
@@ -183,8 +183,6 @@ class TestSalarySlip(unittest.TestCase):
 		for doc in delete_docs:
 			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
 
-		from erpnext.hr.doctype.salary_structure.test_salary_structure import \
-			make_salary_structure, create_salary_structure_assignment
 		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
 			other_details={"max_benefits": 100000}, test_tax=True)
 		create_salary_structure_assignment(employee, salary_structure.name,
@@ -267,7 +265,7 @@ class TestSalarySlip(unittest.TestCase):
 		create_salary_component_if_missing(salary_component="Additional Allowance", prorated_based_on_attendance=1)
 		create_additional_salary(salary_component="Additional Allowance", employee=employee)
 
-		leave_application = make_leave_application(employee=employee, leave_type="_Test Leave Type Negative", allow_negative=1, include_holiday=1)
+		make_leave_application(employee=employee, leave_type="_Test Leave Type Negative", allow_negative=1, include_holiday=1)
 
 		salary_slip = make_salary_slip(salary_structure.name, employee=employee)
 

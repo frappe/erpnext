@@ -33,7 +33,7 @@ frappe.ui.form.on('Bulk Leave Application', {
 
 						$.each(["employee", "employee_name", "department", "branch"], function(i, field) {
 							frm.set_value(field, "");
-						})
+						});
 
 						frm.clear_table("periods");
 						refresh_field("periods");
@@ -65,7 +65,7 @@ frappe.ui.form.on('Leave Application Period', {
 	half_day_date(frm, cdt, cdn) {
 		calculate_total_days(frm, cdt, cdn);
 	}
-})
+});
 
 var calculate_total_days = function(frm, cdt, cdn) {
 	let row = locals[cdt][cdn];
@@ -97,4 +97,4 @@ var calculate_total_days = function(frm, cdt, cdn) {
 			}
 		});
 	}
-}
+};

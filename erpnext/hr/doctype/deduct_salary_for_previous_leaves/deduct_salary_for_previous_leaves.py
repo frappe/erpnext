@@ -18,18 +18,18 @@ class DeductSalaryforPreviousLeaves(Document):
 	def on_submit(self):
 		self.create_additional_salary()
 		self.create_leave_applications()
-	
+
 	def on_cancel(self):
 		self.cancel_additional_salary()
 		self.cancel_leave_applications()
-	
+
 	def calculate_total_leaves(self):
 		self.total_leaves, self.total_leaves_without_pay = 0.0, 0.0
 		for d in self.leave_periods:
 			if cint(d.is_lwp):
 				self.total_leaves_without_pay += flt(d.total_days)
 			self.total_leaves += flt(d.total_days)
-	
+
 	def calculate_deduction_amount(self):
 		self.total_deduction_amount = 0.0
 		for d in self.leave_periods:
