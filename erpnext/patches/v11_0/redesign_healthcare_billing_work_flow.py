@@ -15,7 +15,7 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'loyalty_program')
 	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_item')
 
-	if "healthcare" not in frappe.get_active_domains():
+	if "Healthcare" not in frappe.get_active_domains():
 		return
 
 	healthcare_custom_field_in_sales_invoice()
@@ -34,24 +34,25 @@ def execute():
 					frappe.reload_doc(get_doctype_module("Sales Invoice"), 'doctype', 'sales_invoice')
 					for doc_id in doc_list:
 						invoice_id = frappe.db.get_value(si_ref_doc, doc_id[0], sales_invoice_referenced_doc[si_ref_doc])
-						invoice = frappe.get_doc("Sales Invoice", invoice_id)
-						if invoice.items:
-							marked = False
-							if not marked:
+						if frappe.db.exists("Sales Invoice", invoice_id):
+							if si_ref_doc == "Lab Test":
+								template = frappe.db.get_value("Lab Test", doc_id[0], "template")
+								if template:
+									item = frappe.db.get_value("Lab Test Template", template, "item")
+									if item:
+										frappe.db.sql("""update `tabSales Invoice Item` set reference_dt = '{0}',
+										reference_dn = '{1}' where parent = '{2}' and item_code='{3}'""".format\
+										(si_ref_doc, doc_id[0], invoice_id, item))
+							else:
+								invoice = frappe.get_doc("Sales Invoice", invoice_id)
 								for item_line in invoice.items:
-									marked = True
-									frappe.db.sql("""
-												update `tabSales Invoice Item`
-												set reference_dt = '{0}', reference_dn = '{1}'
-												where name = '{2}'
-											""".format(si_ref_doc, doc_id[0], item_line.name))
-
+									if not item_line.reference_dn:
+										item_line.db_set({"reference_dt":si_ref_doc, "reference_dn": doc_id[0]})
+										break
 				# Documents mark invoiced for submitted sales invoice
-				frappe.db.sql("""
-							update `tab{0}` doc, `tabSales Invoice` si
-							set doc.invoiced = 1
-							where si.docstatus = 1 and doc.{1} = si.name
-						""".format(si_ref_doc, sales_invoice_referenced_doc[si_ref_doc]))
+				frappe.db.sql("""update `tab{0}` doc, `tabSales Invoice` si
+					set doc.invoiced = 1 where si.docstatus = 1 and doc.{1} = si.name
+					""".format(si_ref_doc, sales_invoice_referenced_doc[si_ref_doc]))
 
 def healthcare_custom_field_in_sales_invoice():
 	frappe.reload_doc('healthcare', 'doctype', 'patient')
