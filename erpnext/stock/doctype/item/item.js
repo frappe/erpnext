@@ -271,7 +271,7 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['deferred_revenue_account'].get_query = function(doc) {
+		frm.fields_dict['deferred_revenue_account'].get_query = function() {
 			return {
 				filters: {
 					'root_type': 'Liability',
@@ -280,7 +280,7 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['deferred_expense_account'].get_query = function(doc) {
+		frm.fields_dict['deferred_expense_account'].get_query = function() {
 			return {
 				filters: {
 					'root_type': 'Asset',
