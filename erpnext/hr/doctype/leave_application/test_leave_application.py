@@ -458,7 +458,7 @@ def make_leave_application(**args):
 			"leave_type_name": args.leave_type,
 			"allow_negative": args.allow_negative
 		}).insert()
-	
+
 	la = frappe.get_doc(dict(
 		doctype = 'Leave Application',
 		employee = args.employee,

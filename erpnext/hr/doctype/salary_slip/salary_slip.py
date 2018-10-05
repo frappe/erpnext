@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, getdate
+from frappe.utils import cint, cstr, flt, getdate, rounded, date_diff, money_in_words, getdate
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -403,7 +403,7 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		for d in self.get(component_type):
-			if (self.salary_structure 
+			if (self.salary_structure
 				and (cint(d.depends_on_lwp) or cint(d.prorated_based_on_attendance))
 				and (not
 				    self.salary_slip_based_on_timesheet or

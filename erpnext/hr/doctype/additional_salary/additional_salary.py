@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, date_diff
+from frappe.utils import getdate
 
 class AdditionalSalary(Document):
 	def validate(self):
@@ -24,7 +24,7 @@ class AdditionalSalary(Document):
 			frappe.throw(_("From date can not be less than employee's joining date"))
 		elif relieving_date and getdate(self.to_date) > getdate(relieving_date):
  			frappe.throw(_("To date can not greater than employee's relieving date"))
-	
+
 	def on_cancel(self):
 		if self.salary_slip:
 			frappe.throw(_("Cannot cancel, Salary Slip {0} has been created against this").format(self.salary_slip))

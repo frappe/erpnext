@@ -3,7 +3,7 @@
 # See license.txt
 from __future__ import unicode_literals
 import unittest
-import frappe, random, erpnext
+import frappe, erpnext
 from frappe.utils import nowdate, get_first_day, get_last_day
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -14,7 +14,7 @@ class TestAdditionalSalary(unittest.TestCase):
 	def setUp(self):
 		from erpnext.hr.doctype.salary_slip.test_salary_slip import make_holiday_list
 		frappe.db.sql("delete from `tabAdditional Salary`")
-		
+
 		make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
 

@@ -23,7 +23,7 @@ frappe.ui.form.on('Previous Leave Period', {
 	to_date: function(frm, cdt, cdn) {
 		calculate_total_days(frm, cdt, cdn);
 	},
-})
+});
 
 var calculate_total_days = function(frm, cdt, cdn) {
 	let row = locals[cdt][cdn];
@@ -52,4 +52,4 @@ var calculate_total_days = function(frm, cdt, cdn) {
 			}
 		});
 	}
-}
+};

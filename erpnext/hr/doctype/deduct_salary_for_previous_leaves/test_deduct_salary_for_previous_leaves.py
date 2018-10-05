@@ -29,7 +29,7 @@ class TestDeductSalaryforPreviousLeaves(unittest.TestCase):
 		employee = make_employee("test_email@erpnext.org")
 		salary_component = "Salary Deduction for Previous Leaves"
 
-		prev_salary_structure = create_salary_structure(employee)
+		create_salary_structure(employee)
 		create_salary_component_if_missing(salary_component=salary_component, type="Deduction")
 
 		dt = getdate(nowdate())
