@@ -41,8 +41,10 @@ def get_result(filters):
 	for supplier in filters.supplier:
 		tds = frappe.get_doc("Tax Withholding Category", supplier.tax_withholding_category)
 		rate = [d.tax_withholding_rate for d in tds.rates if d.fiscal_year == filters.fiscal_year][0]
-		account = [d.account for d in tds.accounts if d.company == filters.company][0]
-
+		try:
+			account = [d.account for d in tds.accounts if d.company == filters.company][0]
+		except IndexError:
+			account = []
 		total_invoiced_amount, tds_deducted = get_invoice_and_tds_amount(supplier.name, account,
 			filters.company, filters.from_date, filters.to_date)
 
