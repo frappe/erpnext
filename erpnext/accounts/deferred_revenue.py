@@ -157,6 +157,7 @@ def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 				"credit": base_amount,
 				"credit_in_account_currency": amount,
 				"cost_center": item.cost_center,
+				"voucher_detail_no": item.name,
 				'posting_date': booking_end_date,
 				'project': project
 			}, account_currency)
