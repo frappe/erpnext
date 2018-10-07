@@ -108,7 +108,6 @@ def get_healthcare_service_unit():
 			service_unit.parent_healthcare_service_unit = parent_service_unit.name
 		else:
 			service_unit.parent_healthcare_service_unit = service_unit_parent_name[0][0]
-
 		service_unit.save(ignore_permissions = True)
 		return service_unit.name
 	return service_unit
