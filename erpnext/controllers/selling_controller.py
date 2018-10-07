@@ -62,7 +62,8 @@ class SellingController(StockController):
 			party_details = _get_party_details(self.customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
-				fetch_payment_terms_template=fetch_payment_terms_template, customer_address=self.customer_address)
+				fetch_payment_terms_template=fetch_payment_terms_template,
+				party_address=self.customer_address, shipping_address=self.shipping_address)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 			self.update_if_missing(party_details)
