@@ -19,6 +19,9 @@ def get_party_tax_withholding_details(ref_doc):
 
 	fy = get_fiscal_year(ref_doc.posting_date, company=ref_doc.company)
 	tax_details = get_tax_withholding_details(tax_withholding_category, fy[0], ref_doc.company)
+	if not tax_details:
+		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
+			.format(tax_withholding_category, ref_doc.company))
 	tds_amount = get_tds_amount(ref_doc, tax_details, fy)
 	tax_row = get_tax_row(tax_details, tds_amount)
 	return tax_row
