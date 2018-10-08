@@ -15,7 +15,6 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.manufacturing.doctype.job_card.job_card import update_job_card_reference
 
 from six import string_types
 
@@ -93,9 +92,6 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type == 'Purchase':
 			self.validate_budget()
 
-		if self.job_card:
-			update_job_card_reference(self.job_card, 'material_request', self.name)
-
 	def before_save(self):
 		self.set_status(update=True)
 
@@ -148,8 +144,6 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
-		if self.job_card:
-			update_job_card_reference(self.job_card, 'material_request', None)
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
