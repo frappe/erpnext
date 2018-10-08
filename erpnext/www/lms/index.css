@@ -1,0 +1,101 @@
+.page-content {
+	padding-bottom: 0px !important;
+}
+
+.dashboard-section {
+	margin: auto;
+	max-width: 90%;
+}
+
+.dashboard-section h1 {
+	font-size: 1.5em;
+}
+
+@media(min-width: 768px) {
+	.dashboard-section {
+		max-width: 80%;
+	}
+}
+
+@media(min-width: 992px) {
+	.dashboard-section {
+		max-width: 65%;
+	}
+}
+
+.hero-content h1 {
+	font-size: 1.85em;
+	font-weight: 300;
+}
+
+.hero {
+	border-bottom: 0px;
+}
+
+.erp-hero {
+	border-bottom: 1px solid #e1e9f0;
+}
+
+.hero-content p {
+	margin-bottom: 100px;
+}
+
+.navbar {
+	border-bottom: 0px;
+}
+
+.main-illustration {
+	margin: -90px 0 -60px -32px;
+	min-height: 420px;
+}
+
+.hero-title {
+	font-size: 32px;
+}
+
+@media screen and (max-width: 750px) {
+	.main-illustration {
+		min-height: inherit;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	.main-illustration {
+		margin: -60px 0 -20px -16px;
+	}
+
+	.hero-title {
+		font-size: 26px;
+	}
+
+	.hero-title+p {
+		font-size: 16px;
+	}
+}
+
+
+.modal-dialog {
+	max-width: 800px;
+	margin: 30px auto;
+}
+
+.modal-body {
+	position: relative;
+	padding: 0px;
+	background-color: black;
+}
+
+.close {
+	position: absolute;
+	right: -30px;
+	top: 0;
+	z-index: 999;
+	font-size: 2rem;
+	font-weight: normal;
+	color: #fff;
+	opacity: 1;
+}
+
+.video-btn {
+	color: white !important;
+}
