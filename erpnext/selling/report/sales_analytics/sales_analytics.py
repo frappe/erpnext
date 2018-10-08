@@ -103,7 +103,7 @@ def get_period(date,duration):
 def get_data_list(entry,filters):
 	data_list = {}
 	for d in entry:
-		date_field = filters["doc_type"] == 'Sales Order' and d.transaction_date or d.posting_date
+		date_field = filters["doc_type"] in ['Sales Order','Purchase Order'] and d.transaction_date or d.posting_date
 		period = get_period(date_field,filters["range"])
 
 		if data_list.get(d.name) :
@@ -130,8 +130,7 @@ def get_customer_data(filters):
 		filters={
 			"docstatus": 1,
 			"company": filters["company"],
-			date_field: ('>=', filters['from_date']),
-			date_field: ('<=', filters['to_date']),
+			date_field: ('between', [filters["from_date"],filters["to_date"]])
 		}
 	)
 
@@ -163,7 +162,7 @@ def get_customer_data(filters):
 def get_item_data(filters):
 	data=[]
 
-	date_field = filters["doc_type"] == 'Sales Order' and 'transaction_date' or 'posting_date'
+	date_field = filters["doc_type"] in ['Sales Order', 'Purchase Order'] and 'transaction_date' or 'posting_date'
 	
 	if filters["value_quantity"] == 'Value':
 		select = 'base_amount'
@@ -171,7 +170,7 @@ def get_item_data(filters):
 		select = 'qty'
 
 	entry = frappe.db.sql("""
-				select i.item_name as name, i.{select} as select_field,s.{date_field} 
+				select i.item_code as name, i.{select} as select_field,s.{date_field} 
 				from `tab{doctype} Item` i ,`tab{doctype}` s
 				where s.name = i.parent and i.docstatus = 1 and s.company = %s
 				and s.{date_field} between %s and %s
@@ -195,8 +194,8 @@ def get_item_data(filters):
 		item["code"] = d.name
 		for dummy, end_date in ranges:
 			period = get_period(end_date, filters["range"])
-			if data_list.get(d.item_name) and data_list.get(d.item_name).get(period) :
-				item[period] = data_list.get(d.item_name).get(period)
+			if data_list.get(d.name) and data_list.get(d.name).get(period) :
+				item[period] = data_list.get(d.name).get(period)
 			else:
 				item[period] = 0.0
 			total += item[period]
@@ -263,6 +262,8 @@ def get_depth_map(filters, group,depth, depth_map):
 		condition = "parent_territory"
 	if filters["tree_type"] == 'Item Group':
 		condition = "parent_item_group"
+	if filters["tree_type"] == 'Supplier Group':
+		condition = "parent_supplier_group"
 
 	for g in group:
 		gr = {}
@@ -326,12 +327,12 @@ def get_by_item_group(filters):
 
 def get_chart_data(filters, columns, data):
 
-	labels = [d.get("label") for d in columns[2:]]
+	labels = [d.get("label") for d in columns[3:]]
 	chart = {
 		"data": {
 			'labels': labels,
 			'datasets':[
-				{ "values": ['0' for d in columns[2:]] }
+				{ "values": ['0' for d in columns[3:]] }
 			]
 		}
 	}

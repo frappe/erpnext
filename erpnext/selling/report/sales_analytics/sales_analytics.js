@@ -87,7 +87,7 @@ frappe.query_reports["Sales Analytics"] = {
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					row_values = data.slice(4).map(function (column) {
+					row_values = data.slice(5).map(function (column) {
 						return column.content;
 					})
 
@@ -96,7 +96,7 @@ frappe.query_reports["Sales Analytics"] = {
 						'values':row_values
 					}
 
-					let raw_data = frappe.query_report.raw_chart_data;
+					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
 					var found = false;
@@ -117,7 +117,7 @@ frappe.query_reports["Sales Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets
 					}
-					console.log(new_data);
+					
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
 					},200)
