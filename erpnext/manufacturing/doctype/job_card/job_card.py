@@ -141,9 +141,6 @@ class JobCard(Document):
 
 		self.db_set('status', status)
 
-def update_job_card_reference(name, fieldname, value):
-	frappe.db.set_value('Job Card', name, fieldname, value)
-
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
