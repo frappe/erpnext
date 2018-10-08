@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
- "autoname": "format:{content_type}-{title}", 
+ "autoname": "field:title", 
  "beta": 0, 
  "creation": "2018-10-01 13:17:45.939706", 
  "custom": 0, 
@@ -110,7 +110,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "translatable": 0, 
-   "unique": 0
+   "unique": 1
   }, 
   {
    "allow_bulk_edit": 0, 
@@ -480,7 +480,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-10-01 16:09:29.505488", 
+ "modified": "2018-10-08 14:15:06.001140", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Content", 
