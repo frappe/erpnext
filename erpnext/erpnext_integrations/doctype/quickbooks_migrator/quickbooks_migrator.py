@@ -11,16 +11,21 @@ import json, requests
 from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
-
+# QuickBooks requires a redirect URL, User will be redirect to this URL
+# This will be a GET request
+# Request parameters will have two parameters `code` and `realmId`
+# `code` is required to acquire refresh_token and access_token
+# `realmId` is the QuickBooks Company ID. It is Needed to actually fetch data.
 @frappe.whitelist()
 def callback(*args, **kwargs):
-	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
 	migrator = frappe.get_doc("QuickBooks Migrator")
 	migrator.code = kwargs.get("code")
 	migrator.quickbooks_company_id = kwargs.get("realmId")
 	migrator.save()
 	migrator.get_tokens()
 	frappe.db.commit()
+	# We need this page to automatically close afterwards
+	frappe.respond_as_web_page("Quickbooks Authentication", html="<script>window.close()</script>")
 
 
 class QuickBooksMigrator(Document):
@@ -39,16 +44,30 @@ class QuickBooksMigrator(Document):
 
 	def on_update(self):
 		if self.company:
+			# We need a Cost Center corresponding to the selected erpnext Company
 			self.default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 
 	def migrate(self):
 		try:
-			self._migrate_accounts()
+			# Add quickbooks_id field to every document so that we can lookup by Id reference
+			# provided by documents in API responses.
+			# Also add a company field to Customer Supplier and Item
 			self._make_custom_fields()
 
+			self._migrate_accounts()
+
+			# Some Quickbooks Entities like Advance Payment, Payment aren't available firectly from API
+			# Sales Invoice also sometimes needs to be saved as a Journal Entry
+			# (When Item table is not present, This appens when Invoice is attached with a "StatementCharge" "ReimburseCharge
+			# Details of both of these cannot be fetched from API)
+			# Their GL entries need to be generated from GeneralLedger Report.
 			self._fetch_general_ledger()
 
+			self._allow_fraction_in_unit()
+
+			# Following entities are directly available from API
+			# Invoice can be an exception sometimes though (as explained above).
 			entities_for_normal_transform = [
 				"Customer", "Item", "Vendor", "JournalEntry", "Preferences", "Invoice", "Payment", "Bill",
 				"BillPayment", "Purchase", "Deposit", "VendorCredit", "CreditMemo", "SalesReceipt"
@@ -56,14 +75,17 @@ class QuickBooksMigrator(Document):
 			for entity in entities_for_normal_transform:
 				self._migrate_entries(entity)
 
+			# Following entries are not available directly from API, Need to be regenrated from GeneralLedger Report
 			entities_for_gl_transform = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment"]
 			for entity in entities_for_gl_transform:
 				self._migrate_entries_from_gl(entity)
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e)
+
+		# Failures and Warnings during migration need not be shown to user.
 		frappe.clear_messages()
 		frappe.db.commit()
+
 
 	def get_tokens(self):
 		token = self.oauth.fetch_token(
@@ -107,9 +129,8 @@ class QuickBooksMigrator(Document):
 						"is_group": "1",
 						"company": self.company,
 					}).insert(ignore_mandatory=True)
-			except:
-				import traceback
-				traceback.print_exc()
+			except Exception as e:
+				self._log_error(e, root)
 		frappe.db.commit()
 
 
@@ -163,7 +184,7 @@ class QuickBooksMigrator(Document):
 		# fetch pages and accumulate
 		entries = []
 		for start_position in range(1, entry_count + 1, max_result_count):
-			self._publish({"event": "fetch", "doctype": entity, "count": start_position, "total": entry_count, "des":entry_count})
+			self._publish({"event": "progress", "message": _("Fetching {0}").format(entity), "count": start_position, "total": entry_count})
 			response = self._get(query_uri,
 				params={
 					"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(
@@ -172,11 +193,11 @@ class QuickBooksMigrator(Document):
 				}
 			).json()["QueryResponse"][entity]
 			entries.extend(response)
-		self._publish({"event": "finish"})
+		self._publish({"event": "progress", "message": _("Fetching {0}").format(entity), "count": entry_count, "total": entry_count})
+		self._publish({"event": "finish", "message": _("Fetching {0}").format(entity)})
 		entries = self._preprocess_entries(entity, entries)
 		print("Save", entity)
 		self._save_entries(entity, entries)
-		self._publish({"event": "finish"})
 
 
 	def _fetch_general_ledger(self):
@@ -208,7 +229,6 @@ class QuickBooksMigrator(Document):
 	def _migrate_entries_from_gl(self, entity):
 		if entity in self.general_ledger:
 			self._save_entries(entity, self.general_ledger[entity].values())
-			self._publish({"event": "finish"})
 
 
 	def _get(self, *args, **kwargs):
@@ -217,13 +237,16 @@ class QuickBooksMigrator(Document):
 			"Authorization": "Bearer {}".format(self.access_token)
 		}
 		response = requests.get(*args, **kwargs)
+		# HTTP Status code 401 here means that the access_token is expired
+		# We can refresh tokens and retry
+		# However limitless recursion does look dangerous
 		if response.status_code == 401:
 			self._refresh_tokens()
 			response = self._get(*args, **kwargs)
 		return response
 
 
-	def _save_entries(self, doctype, entries):
+	def _save_entries(self, entity, entries):
 		entity_method_map = {
 			"Account": self._save_account,
 			"Customer": self._save_customer,
@@ -249,8 +272,9 @@ class QuickBooksMigrator(Document):
 		}
 		total = len(entries)
 		for index, entry in enumerate(entries, start=1):
-			self._publish({"event": "save", "doctype": doctype, "count": index, "total": total})
-			entity_method_map[doctype](entry)
+			self._publish({"event": "progress", "message": _("Saving {0}").format(entity), "count": index, "total": total})
+			entity_method_map[entity](entry)
+		self._publish({"event": "finish", "message": _("Saving {0}").format(entity)})
 		frappe.db.commit()
 
 
@@ -264,6 +288,7 @@ class QuickBooksMigrator(Document):
 		if preprocessor:
 			entries = preprocessor(entries)
 		return entries
+
 
 	def _get_account_name_by_id(self, quickbooks_id):
 		return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id, "company": self.company})[0]["name"]
@@ -381,9 +406,8 @@ class QuickBooksMigrator(Document):
 				if account.get("AccountSubType") == "UndepositedFunds":
 					self.undeposited_funds_account = self._get_account_name_by_id(account["Id"])
 					self.save()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, account)
 
 
 	def _get_account_type(self, account):
@@ -412,9 +436,8 @@ class QuickBooksMigrator(Document):
 					"is_group": "0",
 					"company": self.company,
 				}).insert()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, tax_rate)
 
 
 	def _preprocess_tax_codes(self, tax_codes):
@@ -425,6 +448,7 @@ class QuickBooksMigrator(Document):
 	def _save_tax_code(self, tax_code):
 		pass
 
+
 	def _save_customer(self, customer):
 		try:
 			if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"], "company": self.company}):
@@ -434,7 +458,7 @@ class QuickBooksMigrator(Document):
 						"account_currency": customer["CurrencyRef"]["value"],
 						"company": self.company,
 					})[0]["name"]
-				except:
+				except Exception as e:
 					receivable_account = None
 				erpcustomer = frappe.get_doc({
 					"doctype": "Customer",
@@ -451,10 +475,9 @@ class QuickBooksMigrator(Document):
 					self._create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
 				if "ShipAddr" in customer:
 					self._create_address(erpcustomer, "Customer", customer["ShipAddr"], "Shipping")
-		except:
-			print(customer)
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, customer)
+
 
 	def _save_item(self, item):
 		try:
@@ -477,9 +500,13 @@ class QuickBooksMigrator(Document):
 						income_account = self._get_account_name_by_id(item["IncomeAccountRef"]["value"])
 						item_dict["item_defaults"][0]["income_account"] = income_account
 					frappe.get_doc(item_dict).insert()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, item)
+
+
+	def _allow_fraction_in_unit(self):
+		frappe.db.set_value("UOM", "Unit", "must_be_whole_number", 0)
+
 
 	def _save_vendor(self, vendor):
 		try:
@@ -495,9 +522,9 @@ class QuickBooksMigrator(Document):
 					self._create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
 				if "ShipAddr" in vendor:
 					self._create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e)
+
 
 	def _save_preference(self, preference):
 		try:
@@ -505,9 +532,9 @@ class QuickBooksMigrator(Document):
 				default_shipping_account_id = preference["SalesFormsPrefs"]["DefaultShippingAccount"]
 				self.default_shipping_account = self._get_account_name_by_id(self, default_shipping_account_id)
 				self.save()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, preference)
+
 
 	def _save_invoice(self, invoice):
 		try:
@@ -553,9 +580,9 @@ class QuickBooksMigrator(Document):
 							invoice_dict["apply_discount_on"] = "Grand Total"
 						invoice_dict["discount_amount"] = discount["Amount"]
 					frappe.get_doc(invoice_dict).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, invoice)
+
 
 	def _get_discount(self, lines):
 		for line in lines:
@@ -640,9 +667,8 @@ class QuickBooksMigrator(Document):
 					"is_return": 1,
 					"company": self.company,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, credit_memo)
 
 
 	def _save_journal_entry(self, journal_entry):
@@ -656,9 +682,8 @@ class QuickBooksMigrator(Document):
 					"posting_date": journal_entry["TxnDate"],
 					"accounts": self._get_accounts(journal_entry["Line"]),
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, journal_entry)
 
 
 	def _save_bill(self, bill):
@@ -684,9 +709,8 @@ class QuickBooksMigrator(Document):
 					"set_posting_time": 1,
 					"disable_rounded_total": 1,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, bill)
 
 
 	def _save_vendor_credit(self, vendor_credit):
@@ -714,9 +738,8 @@ class QuickBooksMigrator(Document):
 					"company": self.company,
 					"is_return": 1
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, vendor_credit)
 
 
 	def _save_payment(self, payment):
@@ -759,9 +782,8 @@ class QuickBooksMigrator(Document):
 
 					elif frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Invoice - {}".format(payment["Line"][0]["LinkedTxn"][0]["TxnId"]), "company": self.company}):
 						self._save_payment_as_journal_entry(payment)
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, payment)
 
 
 	def _save_bill_payment(self, bill_payment):
@@ -789,9 +811,8 @@ class QuickBooksMigrator(Document):
 					erp_pe.posting_date = bill_payment["TxnDate"]
 					erp_pe.reference_date = bill_payment["TxnDate"]
 					erp_pe.insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, bill_payment)
 
 
 	def _save_purchase(self, purchase):
@@ -842,9 +863,8 @@ class QuickBooksMigrator(Document):
 					"posting_date": purchase["TxnDate"],
 					"accounts": accounts,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, purchase)
 
 
 	def _save_deposit(self, deposit):
@@ -885,9 +905,8 @@ class QuickBooksMigrator(Document):
 					"posting_date": deposit["TxnDate"],
 					"accounts": accounts,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, deposit)
 
 
 	def _save_sales_receipt(self, sales_receipt):
@@ -920,9 +939,8 @@ class QuickBooksMigrator(Document):
 				}).insert()
 				invoice.payments[0].amount = invoice.grand_total
 				invoice.submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, sales_receipt)
 
 
 	def _save_advance_payment(self, advance_payment):
@@ -945,9 +963,8 @@ class QuickBooksMigrator(Document):
 					"posting_date": advance_payment["date"],
 					"accounts": accounts,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, advance_payment)
 
 
 	def _save_tax_payment(self, tax_payment):
@@ -970,9 +987,8 @@ class QuickBooksMigrator(Document):
 					"posting_date": tax_payment["date"],
 					"accounts": accounts,
 				}).insert().submit()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, tax_payment)
 
 
 	def _get_accounts(self, lines):
@@ -1183,6 +1199,22 @@ class QuickBooksMigrator(Document):
 					"city": address["City"],
 					"links": [{"link_doctype": doctype, "link_name": entity.name}]
 				}).insert()
-		except:
-			import traceback
-			traceback.print_exc()
+		except Exception as e:
+			self._log_error(e, address)
+
+
+	def _log_error(self, execption, data=""):
+		import json, traceback
+		traceback.print_exc()
+		frappe.log_error(title="QuickBooks Migration Error",
+			message="\n".join([
+				"Data",
+				json.dumps(data,
+					sort_keys=True,
+					indent=4,
+					separators=(',', ': ')
+				),
+				"Exception",
+				traceback.format_exc()
+			])
+		)
