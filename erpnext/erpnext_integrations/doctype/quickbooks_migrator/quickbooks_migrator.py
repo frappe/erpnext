@@ -76,7 +76,7 @@ class QuickBooksMigrator(Document):
 				self._migrate_entries(entity)
 
 			# Following entries are not available directly from API, Need to be regenrated from GeneralLedger Report
-			entities_for_gl_transform = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment"]
+			entities_for_gl_transform = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment", "Refund"]
 			for entity in entities_for_gl_transform:
 				self._migrate_entries_from_gl(entity)
 		except Exception as e:
@@ -269,6 +269,7 @@ class QuickBooksMigrator(Document):
 			"Tax Payment": self._save_tax_payment,
 			"Sales Tax Payment": self._save_tax_payment,
 			"Purchase Tax Payment": self._save_tax_payment,
+			"Refund": self._save_refund,
 		}
 		total = len(entries)
 		for index, entry in enumerate(entries, start=1):
@@ -989,6 +990,35 @@ class QuickBooksMigrator(Document):
 				}).insert().submit()
 		except Exception as e:
 			self._log_error(e, tax_payment)
+
+
+	def _save_refund(self, refund):
+		try:
+			if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": "Refund - {}".format(refund["id"]), "company": self.company}):
+				accounts = []
+				for line in refund["lines"]:
+					account_line = {"account": line["account"]}
+					if line["credit"]:
+						account_line["credit_in_account_currency"] = line["credit"]
+					else:
+						account_line["debit_in_account_currency"] = line["debit"]
+					if frappe.db.get_value("Account", line["account"], "account_type") == "Receivable":
+						account_line["party_type"] = "Customer"
+						account_line["party"] = frappe.get_all("Customer",
+							filters={"quickbooks_id": payment["CustomerRef"]["value"], "company": self.company}
+						)[0]["name"]
+					accounts.append(account_line)
+
+				frappe.get_doc({
+					"doctype": "Journal Entry",
+					"quickbooks_id": "Refund - {}".format(refund["id"]),
+					"naming_series": "JV-",
+					"company": self.company,
+					"posting_date": refund["date"],
+					"accounts": accounts,
+				}).insert().submit()
+		except Exception as e:
+			self._log_error(e, refund)
 
 
 	def _get_accounts(self, lines):
