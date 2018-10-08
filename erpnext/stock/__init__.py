@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 install_docs = [
 	{"doctype":"Role", "role_name":"Stock Manager", "name":"Stock Manager"},
