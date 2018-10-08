@@ -1,0 +1,70 @@
+{% extends "frappe_theme/templates/base.html" %}
+{% block title %}ERPNext Academy{% endblock %}
+
+{% block head_include %}
+<meta name="description" content="ERPNext Academy is a learnig platform to gain expertise in the world's top 100% open source ERP software." />
+<meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
+{% endblock %}
+
+{% macro course_card(name) %}
+<div class="card mt-3" data-list="getting-started">
+    <div class='card-body'>
+        <div class="row">
+            <div class="course-details col-xs-8 col-sm-9 col-md-10">
+                <h5>{{ name }}</h5>
+                <span class="course-list text-muted" id="getting-started">
+                    Course Content
+                    <ul class="mb-0 mt-1">
+                        {% for content in course_data[name] %}
+                        <li>{{ content }}</li>
+                        {% endfor %}
+                    </ul>
+                </span>
+            </div>
+            <div class='text-center col-xs-4 col-sm-3 col-md-2'>
+                <a class='btn btn-primary btn-sm btn-block' href="/course?course={{ name }}&content=Getting Started">Start Course</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class='top-section'>
+    <div class='container'>
+        <div class='text-center'>
+            <!-- <img class="main-illustration" src='/assets/academy/img/expert.png' style='width: 700px;'> -->
+        </div>
+        <h1>{{ program.program_name }}</h1>
+        <p class='lead'>{{ program.description }}</p>
+        <p class="mt-4">
+            <a class="btn btn-primary btn-lg" href="/program/course">
+                Continue with Course 2</a>
+        </p>
+</section>
+
+<section class='section-padding section-bg'>
+    <div class='container'>
+        <h3 class='text-center'>Courses</h3>
+        <p class='lead text-center'>Master ERPNext with our Expert Learning Paths</p>
+        {% for course_item in course_list %}
+        {{ course_card(course_item) }}
+        {% endfor %}
+    </div>
+</section>
+
+{% include "www/lms/templates/includes/highlights.html" %}
+
+<style>
+    .footer-message {
+        display: none;
+    }
+
+    @media (max-width: 767px) {
+        .course-details {
+            margin-bottom: 1rem !important;
+        }
+    }
+</style>
+
+{% endblock %}

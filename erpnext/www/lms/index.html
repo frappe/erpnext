@@ -1,0 +1,87 @@
+{% extends "frappe_theme/templates/base.html" %}
+{% block title %}ERPNext Academy{% endblock %}
+
+{% from "templates/includes/media.html" import media %}
+
+{% block head_include %}
+<meta name="description" content="ERPNext Academy is a learnig platform to gain expertise in the world's top 100% open source ERP software." />
+<meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
+{% endblock %}
+
+{% macro featured_card(program_name, description, hero_image, code) %}
+<div class='card-deck mt-5'>
+	<div class="card">
+		<img src="{{ hero_image }}" style='height: 150px'>
+		<div class='card-body'>
+			<a href="/lms/program?code={{ code }}">
+				<h5 class='card-title'>{{ program_name }}</h5>
+			</a>
+			<div>{{ description }}</div>
+		</div>
+		<div class='card-footer text-right'>
+			<!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch -->
+				<!-- Intro</a>&nbsp;&nbsp; -->
+			<a class='btn btn-secondary btn-sm' href="/enroll?course=user">Enroll Now</a>
+		</div>
+	</div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class='top-section'>
+	<div class='container'>
+		<div class='text-center'>
+			<!-- <img class="main-illustration" src='/assets/erpnext_com/img/erpnext_com_illustration.png'
+			style='width: 700px;'> -->
+		</div>
+		<h1>Become an ERPNext Expert</h1>
+		<ul class="list-group">
+		</ul>
+		<p class='lead'>
+			A platform for enterpreneurs, developers and implementors to learn the world's leading 100% Open
+			Source ERP</p>
+		<p class="mt-4">
+			<a class="btn btn-primary btn-lg" href="/enroll">
+				Enroll Now</a>
+		</p>
+</section>
+
+<section class='section-padding section-bg'>
+	<div class='container'>
+		<h3 class='text-center'>Featured Programs</h3>
+		<p class='lead text-center'>Master ERPNext with our Expert Learning Paths</p>
+		{% for program in featured %}
+			{{ featured_card(program.program_name, program.description, program.hero_image, program.program_code) }}
+		{% endfor %}
+		<div class='mt-4 text-center'>
+			<a class="btn btn-primary btn-lg" href="/program">View All</a>
+		</div>
+	</div>
+</section>
+
+{% include "www/lms/templates/includes/highlights.html" %}
+<div class="container">
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<!-- 16:9 aspect ratio -->
+					<div class="embed-responsive embed-responsive-16by9">
+						<iframe id="ytplayer" type="text/html" class="embed-responsive-item" allowscriptaccess="always"></iframe>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+	.footer-message {
+		display: none;
+	}
+</style>
+
+{% endblock %}
