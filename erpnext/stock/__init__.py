@@ -30,9 +30,11 @@ def get_warehouse_account_map():
 	return frappe.flags.warehouse_account_map
 
 def get_warehouse_account(warehouse, warehouse_account=None):
+
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
+			if warehouse_account.get('company') != warehouse.get('company'): return
 			account = warehouse_account.get(warehouse.parent_warehouse).account
 		else:
 			account = frappe.db.sql("""
