@@ -54,3 +54,13 @@ def execute():
 				update `tabPractitioner Service Unit Schedule` set parentfield = 'practitioner_schedules'
 				where parentfield = 'physician_schedules' and parenttype = 'Healthcare Practitioner'
 			""")
+
+	if frappe.db.exists("DocType", "Healthcare Practitioner"):
+		frappe.reload_doc("healthcare", "doctype", "healthcare_practitioner")
+		frappe.reload_doc("healthcare", "doctype", "practitioner_service_unit_schedule")
+		if frappe.db.has_column('Healthcare Practitioner', 'physician_schedule'):
+			for doc in frappe.get_all('Healthcare Practitioner'):
+				_doc = frappe.get_doc('Healthcare Practitioner', doc.name)
+				if _doc.physician_schedule:
+					_doc.append('practitioner_schedules', {'schedule': _doc.physician_schedule})
+					_doc.save()
