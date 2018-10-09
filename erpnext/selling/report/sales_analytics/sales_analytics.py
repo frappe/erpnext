@@ -148,7 +148,7 @@ def get_customer_data(filters):
 		customer["code"] = d.customer_name
 		for dummy, end_date in ranges:
 			period = get_period(end_date, filters["range"])
-				
+
 			if data_list.get(d.name) and data_list.get(d.name).get(period) :
 				customer[period] = data_list.get(d.name).get(period)
 			else:
