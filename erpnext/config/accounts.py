@@ -227,6 +227,11 @@ def get_data():
 					"name": "GST Itemised Purchase Register",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Eway Bill",
+					"is_query_report": True
+				},
 			]
 		},
 		{
