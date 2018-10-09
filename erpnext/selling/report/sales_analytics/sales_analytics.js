@@ -32,14 +32,6 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "fiscal_year",
-			label: __("Fiscal Year"),
-			fieldtype: "Link",
-			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year,
-			reqd: 1
-		},
-		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",

@@ -41,7 +41,7 @@ def get_columns(filters):
 			"width": 120
 		}]
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 
 	for dummy, end_date in ranges:
 
@@ -74,7 +74,7 @@ def get_customer_by_group(filters):
 
 def get_item_by_group():
 
-	return frappe.db.sql("""select i.name, i.item_name, i.item_group,g.lft ,g.rgt from `tabItem` i,`tabItem Group` g
+	return frappe.db.sql("""select i.name, i.item_name, i.item_group, i.stock_uom, g.lft , g.rgt from `tabItem` i,`tabItem Group` g
 						where i.item_group = g.name """,as_dict=1)
 
 def get_customer():
@@ -139,7 +139,7 @@ def get_customer_data(filters):
 	if filters["tree_type"] == 'Territory' or filters["tree_type"] == 'Customer Group':
 		return data_list
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 
 	for d in get_customer():
 		customer = {}
@@ -185,7 +185,7 @@ def get_item_data(filters):
 	if filters["tree_type"] == 'Item Group':
 		return data_list
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 
 	for d in get_items():
 		item = {}
@@ -207,14 +207,13 @@ def get_item_data(filters):
 def get_by_group(filters):
 	data = []
 
-	group = frappe.db.sql("""select name,lft,rgt from `tab{tree}` where lft = 1  """.format(tree=filters["tree_type"]),as_dict=1)
+	group = frappe.db.sql("""select name,lft,rgt from `tab{tree}` where lft = 1  """.format(tree=filters["tree_type"]), as_dict=1)
 
 	depth_map = get_depth_map(filters,group,0,[])
 
 	data_list = get_customer_data(filters)
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
-
+	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 	cust = get_customer_by_group(filters)
 
 	for g in depth_map:
@@ -295,7 +294,8 @@ def get_by_item_group(filters):
 		group["name"] = g.get("name")
 		group["indent"] = g.get("depth")
 		group["code"] = g.get("name")
-		ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+
+		ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 		
 		for d in items:
 			if d.lft >= g.get("lft") and d.rgt <= g.get("rgt") :
@@ -341,7 +341,7 @@ def get_chart_data(filters, columns, data):
 
 	return chart
 
-def get_period_date_ranges(period, fiscal_year=None, year_start_date=None,year_end_date=None):
+def get_period_date_ranges(period, fiscal_year=None, year_start_date=None, year_end_date=None):
 	from dateutil.relativedelta import relativedelta
 
 	if not (year_start_date and year_end_date) :
@@ -357,7 +357,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None,year_e
 
 	period_date_ranges = []
 	if period == 'Weekly':
-		for dummy in range(1,52):
+		for dummy in range(1,53):
 			period_end_date = getdate(year_start_date) + relativedelta(days=6)
 			period_date_ranges.append([year_start_date, period_end_date])
 			year_start_date = getdate(period_end_date) + relativedelta(days=1)
