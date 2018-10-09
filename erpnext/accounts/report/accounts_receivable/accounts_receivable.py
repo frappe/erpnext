@@ -111,7 +111,6 @@ class ReceivablePayableReport(object):
 				"width": 100,
 			})
 			columns += [_("Delivery Note") + ":Data:100"]
-
 		if args.get("party_type") == "Customer":
 			columns += [
 				_("Territory") + ":Link/Territory:80",
