@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-import json
-import re
 from frappe import _
 from frappe.utils import nowdate
+import json
+import re
 
 def execute(filters=None):
 	if not filters: filters.setdefault('posting_date', [nowdate(), nowdate()])
@@ -18,15 +18,18 @@ def execute(filters=None):
 def get_data(filters):
 	
 	conditions = get_conditions(filters)
+	doctype = filters.get('doc_type') or ""
 
 	data = frappe.db.sql("""
 		SELECT
-			dn.name as dn_id, dn.posting_date, dn.company, dn.company_gstin, dn.customer, dn.customer_gstin, dni.item_code, dni.item_name, dni.description, dni.gst_hsn_code, dni.uom, dni.qty, dni.amount, dn.transport_mode, dn.distance, dn.transporter_name, dn.transporter, dn.lr_no, dn.lr_date, dn.vehicle_no, dn.vehicle_type, dn.company_address, dn.shipping_address_name
+			parent.name as doc_name, parent.posting_date, parent.company, parent.company_gstin, parent.customer, parent.customer_gstin, child.item_code, child.item_name, child.gst_hsn_code, child.uom, sum(child.qty) as qty, sum(child.amount) as amount, parent.transport_mode, parent.distance, parent.transporter_name, parent.transporter, parent.lr_no, parent.lr_date, parent.vehicle_no, parent.vehicle_type, parent.company_address, parent.shipping_address_name
 		FROM
-			`tabDelivery Note` AS dn join `tabDelivery Note Item` AS dni on (dni.parent = dn.name)
+			`tab{doctype}` AS parent join `tab{doctype} Item` AS child on (child.parent = parent.name)
 		WHERE
-			dn.docstatus < 2 
-			%s """ % conditions, as_dict=1)
+			parent.docstatus < 2 
+			{conditions}
+		GROUP BY
+			child.item_code """.format(doctype=doctype, conditions=conditions), as_dict=1)
 
 	unit = {
 		'Bag': "BAGS",
@@ -47,8 +50,13 @@ def get_data(filters):
 		set_defaults(row)
 		set_taxes(row, filters)
 		set_address_details(row, special_characters)
-		
-		# Eway Bill accepts date as dd/mm/yyyy and not dd-mm-yyyy
+
+		if filters.get('doc_type') == "Delivery Note":
+			row.doc_type = "Delivery Challan"
+		else:
+			row.doc_type = "Tax Invoice"
+
+		# Eway Bill accepts date as dd/mm/yyyy and not dd-mm-yyyy		
 		row.posting_date = '/'.join(str(row.posting_date).replace("-", "/").split('/')[::-1])
 		row.lr_date = '/'.join(str(row.lr_date).replace("-", "/").split('/')[::-1])
 
@@ -66,25 +74,24 @@ def get_conditions(filters):
 	
 	conditions = ""
 
-	conditions += filters.get('company') and " AND dn.company = '%s' " % filters.get('company') or ""
-	conditions += filters.get('posting_date') and " AND dn.posting_date >= '%s' AND dn.posting_date <= '%s' " % (filters.get('posting_date')[0], filters.get('posting_date')[1]) or ""
-	conditions += filters.get('delivery_note') and " AND dn.name = '%s' " % filters.get('delivery_note') or ""
-	conditions += filters.get('customer') and " AND dn.customer = '%s' " % filters.get('customer').replace("'", "\'") or ""
+	conditions += filters.get('company') and " AND parent.company = '%s' " % filters.get('company') or ""
+	conditions += filters.get('posting_date') and " AND parent.posting_date >= '%s' AND parent.posting_date <= '%s' " % (filters.get('posting_date')[0], filters.get('posting_date')[1]) or ""
+	conditions += filters.get('doc_name') and " AND parent.name = '%s' " % filters.get('doc_name') or ""
+	conditions += filters.get('customer') and " AND parent.customer = '%s' " % filters.get('customer').replace("'", "\'") or ""
 
 	return conditions
 
 def set_defaults(row):
 	row.setdefault(u'supply_type', "Outward")
 	row.setdefault(u'sub_type', "Supply")
-	row.setdefault(u'doc_type', "Delivery Challan")
 
 def set_address_details(row, special_characters):
 
 	if row.get('company_address'):
 		address_line1, address_line2, city, pincode, state = frappe.db.get_value("Address", row.get('company_address'), ['address_line1', 'address_line2', 'city', 'pincode', 'state'])
 
-		row.update({'from_address_1': re.sub(special_characters, "", address_line1 or '')})
-		row.update({'from_address_2': re.sub(special_characters, "", address_line2 or '')})
+		row.update({'from_address_1': re.sub(special_characters, "", address_line1 or '').replace("\n","")})
+		row.update({'from_address_2': re.sub(special_characters, "", address_line2 or '').replace("\n","")})
 		row.update({'from_place': city and city.upper() or ''})
 		row.update({'from_pin_code': pincode and pincode.replace(" ", "") or ''})
 		row.update({'from_state': state and state.upper() or ''})
@@ -93,8 +100,8 @@ def set_address_details(row, special_characters):
 	if row.get('shipping_address_name'):
 		address_line1, address_line2, city, pincode, state = frappe.db.get_value("Address", row.get('shipping_address_name'), ['address_line1', 'address_line2', 'city', 'pincode', 'state'])
 
-		row.update({'to_address_1': re.sub(special_characters, "", address_line1 or '')})
-		row.update({'to_address_2': re.sub(special_characters, "", address_line2 or '')})
+		row.update({'to_address_1': re.sub(special_characters, "", address_line1 or '').replace("\n","")})
+		row.update({'to_address_2': re.sub(special_characters, "", address_line2 or '').replace("\n","")})
 		row.update({'to_place': city and city.upper() or ''})
 		row.update({'to_pin_code': pincode and pincode.replace(" ", "") or ''})
 		row.update({'to_state': state and state.upper() or ''})
@@ -103,7 +110,7 @@ def set_address_details(row, special_characters):
 def set_taxes(row, filters):
 	taxes = frappe.get_list("Sales Taxes and Charges", 
 				filters={
-					'parent': row.dn_id
+					'parent': row.doc_name
 				}, 
 				fields=('item_wise_tax_detail', 'account_head'))
 
@@ -132,7 +139,7 @@ def set_taxes(row, filters):
 		row.update({key[:5] + "amount": round(item_tax_rate.get(tax[key], 0.0)[1], 2)})
 		item_tax_rate.pop(tax[key])
 
-	row.amount = float(row.amount) + sum(i[1] for i in item_tax_rate.values())
+	row.amount = round(float(row.amount) + sum(i[1] for i in item_tax_rate.values()), 2)
 	row.update({'tax_rate': '+'.join(tax_rate)})
 
 def get_columns():
@@ -156,10 +163,10 @@ def get_columns():
 			"width": 100
 		},
 		{
-			"fieldname": "dn_id",
+			"fieldname": "doc_name",
 			"label": _("Doc Name"),
-			"fieldtype": "Link",
-			"options": "Delivery Note",
+			"fieldtype": "Dynamic Link",
+			"options": "doc_type",
 			"width": 140
 		},
 		{
@@ -300,7 +307,8 @@ def get_columns():
 			"fieldname": "amount",
 			"label": _("Accessable Value"),
 			"fieldtype": "Float",
-			"width": 120
+			"width": 120,
+			"precision": 2
 		},
 		{
 			"fieldname": "tax_rate",
@@ -351,7 +359,7 @@ def get_columns():
 			"width": 120
 		},
 		{
-			"fieldname": "transporter_id",
+			"fieldname": "transporter",
 			"label": _("Transporter ID"),
 			"fieldtype": "Data",
 			"width": 100
