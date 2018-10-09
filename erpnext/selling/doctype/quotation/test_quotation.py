@@ -129,8 +129,8 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order = make_sales_order(quotation.name)
 		sales_order.naming_series = "_T-Quotation-"
-		sales_order.transaction_date = "2016-01-01"
-		sales_order.delivery_date = "2016-01-02"
+		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = add_months(nowdate(), 1)
 
 		sales_order.insert()
 

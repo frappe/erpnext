@@ -14,6 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.controllers.accounts_controller import get_due_date
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -630,6 +631,11 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.cost_center = item.get("selling_cost_center") \
 				or item_group.get("selling_cost_center")
 
+	def update_due_date(source, target, source_parent):
+		if source.payment_term:
+			term = frappe.get_doc("Payment Term", source.payment_term)
+			target.due_date = get_due_date(term)
+
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
@@ -657,6 +663,11 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Sales Team": {
 			"doctype": "Sales Team",
 			"add_if_empty": True
+		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"add_if_empty": True,
+			"postprocess": update_due_date
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, add_days
+from frappe.utils import flt, add_days, getdate
 import frappe.permissions
 import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
@@ -51,6 +51,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(si.get("items")), len(so.get("items")))
 		self.assertEqual(len(si.get("items")), 1)
 
+		self.assertEqual(len(si.get("payment_schedule")), len(so.get("payment_schedule")))
+
 		si.insert()
 		si.submit()
 
@@ -89,9 +91,9 @@ class TestSalesOrder(unittest.TestCase):
 		si.insert()
 
 		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
-		self.assertEqual(si.payment_schedule[0].due_date, so.transaction_date)
+		self.assertEqual(si.payment_schedule[0].due_date.date(), getdate(so.transaction_date))
 		self.assertEqual(si.payment_schedule[1].payment_amount, 500.0)
-		self.assertEqual(si.payment_schedule[1].due_date, add_days(so.transaction_date, 30))
+		self.assertEqual(si.payment_schedule[1].due_date.date(), getdate(add_days(so.transaction_date, 30)))
 
 		si.submit()
 
@@ -545,13 +547,6 @@ class TestSalesOrder(unittest.TestCase):
 		so.insert()
 
 		self.assertTrue(so.get('payment_schedule'))
-
-	def test_terms_not_copied(self):
-		so = make_sales_order()
-		self.assertTrue(so.get('payment_schedule'))
-
-		si = make_sales_invoice(so.name)
-		self.assertFalse(si.get('payment_schedule'))
 
 	def test_terms_copied(self):
 		so = make_sales_order(do_not_copy=1, do_not_save=1)

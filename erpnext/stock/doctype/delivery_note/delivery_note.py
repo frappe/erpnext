@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.controllers.accounts_controller import get_due_date
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 from frappe import _
@@ -429,6 +430,17 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.update(get_company_address(target.company))
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
+		against_sales_order = target.get("items")[0].sales_order
+		if against_sales_order:
+			payment_terms = frappe.db.get_values('Payment Schedule',{'parent': against_sales_order},'name', as_dict=1)
+			if payment_terms:
+				for term in payment_terms:
+					term_details = frappe.get_doc('Payment Schedule', term.name)
+					term_details.payment_amount = flt(term_details.invoice_portion) * flt(target.grand_total) / 100
+					if term_details.payment_term:
+						term = frappe.get_doc("Payment Term", term_details.payment_term)
+						term_details.due_date = get_due_date(term)
+					target.append("payment_schedule", term_details)
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = (source_doc.qty -

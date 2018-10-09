@@ -655,6 +655,17 @@ class TestDeliveryNote(unittest.TestCase):
 		si = make_sales_invoice(dn.name)
 		self.assertEquals(si.items[0].qty, 1)
 
+	def test_si_from_dn_with_so(self):
+		so = make_sales_order()
+		dn = create_dn_against_so(so.name, delivered_qty=2)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.get("items")[0].against_sales_order, si.get("items")[0].sales_order)
+		self.assertEqual(len(so.get("payment_schedule")), len(si.get("payment_schedule")))
+
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
