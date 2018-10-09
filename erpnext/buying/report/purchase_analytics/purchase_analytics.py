@@ -4,17 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.selling.report.sales_analytics.sales_analytics import (get_columns, get_period,
-	get_period_date_ranges, get_chart_data, get_items, get_item_by_group, get_data_list, get_item_data,get_depth_map,get_by_item_group)
+	get_period_date_ranges, get_chart_data, get_item_by_group, get_data_list, get_item_data,get_depth_map,get_by_item_group)
 
 
 def execute(filters=None):
 	columns = get_columns(filters)
 
 	data = gen_data(filters)
-	
+
 	chart = get_chart_data(filters,columns,data)
 
-	return columns, data, None, chart 
+	return columns, data, None, chart
 
 def get_supplier_by_group(filters):
 
