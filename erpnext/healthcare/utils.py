@@ -342,6 +342,8 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 def appointments_valid_in_fee_validity(appointment, invoiced):
 	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
 	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
+	if int(max_visit) < 1:
+		max_visit = 1
 	valid_days_date = add_days(getdate(appointment.appointment_date), int(valid_days))
 	return frappe.get_list("Patient Appointment",{'patient': appointment.patient, 'invoiced': invoiced,
 	'appointment_date':("<=", valid_days_date), 'appointment_date':(">=", getdate(appointment.appointment_date)),
