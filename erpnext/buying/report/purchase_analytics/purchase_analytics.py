@@ -49,7 +49,7 @@ def get_supplier_data(filters):
 	if filters["tree_type"] == 'Supplier Group':
 		return data_list
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
 
 	for d in get_supplier():
 		supplier = {}
@@ -78,7 +78,7 @@ def get_by_group(filters):
 
 	data_list = get_supplier_data(filters)
 
-	ranges = get_period_date_ranges(filters["range"], filters["fiscal_year"],filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
 
 	supp = get_supplier_by_group(filters)
 
