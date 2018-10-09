@@ -73,7 +73,7 @@ def get_data_list(entry,filters):
 			qty_diff = d.qty_after_transaction - bal_qty
 		else:
 			qty_diff = d.actual_qty
-		
+
 
 		if filters["value_quantity"] == 'Quantity':
 			value = qty_diff
