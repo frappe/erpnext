@@ -203,17 +203,19 @@ class StatusUpdater(Document):
 			self.limits_crossed_error(args, item)
 
 	def limits_crossed_error(self, args, item):
-		'''Raise exception for limits crossed'''
-		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
-			.format(
-				frappe.bold(_(item["target_ref_field"].title())),
-				frappe.bold(item["reduce_by"]),
-				frappe.bold(_(args.get('target_dt'))),
-				frappe.bold(_(self.doctype)),
-				frappe.bold(item.get('item_code'))
-			) + '<br><br>' +
-				_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
-			title = _('Limit Crossed'))
+		# ESO Change
+		pass
+		# '''Raise exception for limits crossed'''
+		# frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
+		# 	.format(
+		# 		frappe.bold(_(item["target_ref_field"].title())),
+		# 		frappe.bold(item["reduce_by"]),
+		# 		frappe.bold(_(args.get('target_dt'))),
+		# 		frappe.bold(_(self.doctype)),
+		# 		frappe.bold(item.get('item_code'))
+		# 	) + '<br><br>' +
+		# 		_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
+		# 	title = _('Limit Crossed'))
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
