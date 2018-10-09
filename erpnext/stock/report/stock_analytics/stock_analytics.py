@@ -11,7 +11,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = get_data(filters)
 	chart = get_chart_data(filters,columns,data)
-	
+
 	return columns, data, None, chart
 
 def get_columns(filters):
@@ -64,11 +64,11 @@ def get_data_list(entry,filters):
 	for d in entry:
 
 		period = get_period(d.posting_date,filters["range"])
-		bal_qty =0 
+		bal_qty =0
 
 		if d.voucher_type == "Stock Reconciliation":
 			if data_list.get(d.item_code):
- 				bal_qty = data_list[d.item_code]["balance"] 
+ 				bal_qty = data_list[d.item_code]["balance"]
 
 			qty_diff = d.qty_after_transaction - bal_qty
 		else:
@@ -78,7 +78,7 @@ def get_data_list(entry,filters):
 		if filters["value_quantity"] == 'Quantity':
 			value = qty_diff
 		else:
-			value = d.stock_value_difference 
+			value = d.stock_value_difference
 
 
 		if data_list.get(d.item_code) :
@@ -121,7 +121,7 @@ def get_data(filters):
 		
 		for d in items_by_group:
 			if d.lft >= g.get("lft") and d.rgt <= g.get("rgt") :
-				has_items = 1 
+				has_items = 1
 				item = {}
 				total = 0
 				item["name"] = d.name
@@ -141,7 +141,7 @@ def get_data(filters):
 					else:
 						group[period] = item[period]
 				item["total"] = total
-				g_total += total 
+				g_total += total
 				if d.item_group == g.get("name"):
 					out.append(item)
 		group["total"] = g_total
@@ -158,7 +158,7 @@ def get_item_by_group(filters):
 	if filters.get("brand"):
 		conditions.append("i.brand=%(brand)s")
 		
-	items = frappe.db.sql("""select i.name,i.item_name,i.item_group,i.stock_uom,i.brand,g.lft,g.rgt 
+	items = frappe.db.sql("""select i.name,i.item_name,i.item_group,i.stock_uom,i.brand,g.lft,g.rgt
 							from `tabItem` i ,`tabItem Group` g  where {}"""
 		.format(" and ".join(conditions)), filters,as_dict=1)
 
