@@ -115,7 +115,7 @@ def create_logo(args):
 			_file.save()
 			fileurl = _file.file_url
 			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
-				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")	))
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")))
 
 def create_website(args):
 	website_maker(args)
