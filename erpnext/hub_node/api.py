@@ -10,7 +10,6 @@ import requests
 from frappe import _
 from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
-from frappe.utils.file_manager import get_file_path
 from six import string_types
 
 current_user = frappe.session.user

@@ -405,9 +405,9 @@ def get_transaction_entries(filename, headers):
 		from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
 		rows = read_xlsx_file_from_attached_file(file_id=filename)
 	elif (filename.lower().endswith("csv")):
-		from frappe.utils.file_manager import get_file_path
 		from frappe.utils.csvutils import read_csv_content
-		filepath = get_file_path(filename)
+		_file = frappe.get_doc("File", {"file_name": filename})
+		filepath = _file.get_full_path()
 		with open(filepath,'rb') as csvfile:
 			rows = read_csv_content(csvfile.read())
 	elif (filename.lower().endswith("xls")):
@@ -427,8 +427,8 @@ def get_transaction_entries(filename, headers):
 	return transactions
 
 def get_rows_from_xls_file(filename):
-	from frappe.utils.file_manager import get_file_path
-	filepath = get_file_path(filename)
+	_file = frappe.get_doc("File", {"file_name": filename})
+	filepath = _file.get_full_path()
 	import xlrd
 	book = xlrd.open_workbook(filepath)
 	sheets = book.sheets()

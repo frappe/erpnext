@@ -2,7 +2,7 @@ from __future__ import print_function, unicode_literals
 import frappe
 import os
 from frappe.utils import get_files_path
-from frappe.utils.file_manager import get_content_hash
+from frappe.core.doctype.file.file import get_content_hash
 
 def execute():
 	files_path = get_files_path()
