@@ -568,3 +568,4 @@ erpnext.patches.v11_0.remove_land_unit_icon
 erpnext.patches.v11_0.add_default_dispatch_notification_template
 erpnext.patches.v11_0.add_market_segments
 erpnext.patches.v11_0.add_sales_stages
+erpnext.patches.v11_0.change_healthcare_desktop_icons
