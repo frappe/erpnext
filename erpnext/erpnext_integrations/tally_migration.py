@@ -12,6 +12,7 @@ from frappe.utils.nestedset import rebuild_tree
 
 @frappe.whitelist()
 def create_chart_of_accounts(company, accounts):
+	frappe.flags.in_migrate = True
 	accounts = json.loads(accounts)
 
 	frappe.local.flags.ignore_on_update = True
@@ -25,6 +26,7 @@ def create_chart_of_accounts(company, accounts):
 
 @frappe.whitelist()
 def create_parties(company, parties):
+	frappe.flags.in_migrate = True
 	parties = json.loads(parties)
 	make_custom_fields(["Customer", "Supplier"], "company")
 	saved_parties = list(_create_parties(company, parties))
@@ -35,8 +37,9 @@ def create_parties(company, parties):
 
 @frappe.whitelist()
 def create_items(company, items):
+	frappe.flags.in_migrate = True
 	items = json.loads(items)
-	make_custom_fields(["Item"], "company")
+	make_custom_fields(["Item"], "company", "Link", "Company")
 	saved_items = list(_create_items(items))
 	frappe.db.commit()
 	frappe.clear_messages()
@@ -46,10 +49,27 @@ def create_items(company, items):
 def create_vouchers(company, vouchers):
 	vouchers = json.loads(vouchers)
 	make_custom_fields(["Journal Entry", "Purchase Invoice", "Sales Invoice"], "tally_id")
-	saved_vouchers = list(_create_vouchers(vouchers))
+	frappe.enqueue(method="erpnext.erpnext_integrations.tally_migration._create_vouchers", timeout=3600, **{"entries": vouchers})
 	frappe.db.commit()
 	frappe.clear_messages()
-	return saved_vouchers
+
+
+def log(title="Some Error", data="Some Data"):
+	import json, traceback
+	traceback.print_exc()
+	frappe.log_error(title=title,
+		message="\n".join([
+			"Data",
+			json.dumps(data,
+				sort_keys=True,
+				indent=4,
+				separators=(',', ': ')
+			),
+			"Exception",
+			traceback.format_exc()
+		])
+	)
+	frappe.db.commit()
 
 def create_root_accounts(company):
 	root_accounts = [
@@ -70,8 +90,7 @@ def create_root_accounts(company):
 					"company": company,
 				}).insert(ignore_mandatory=True)
 		except:
-			traceback.print_exc()
-			print(account)
+			log(title="Root Account Error", data=[account, account_name, root_type])
 
 
 def create_accounts(company, accounts):
@@ -90,11 +109,10 @@ def create_accounts(company, accounts):
 					"company": company,
 				}).insert().as_dict()
 		except:
-			traceback.print_exc()
-			print(account)
+			log(title="Account Error", data=[account, account_name, account_type])
 
 
-def make_custom_fields(doctypes, field_name):
+def make_custom_fields(doctypes, field_name="tally_id", field_type="Data", options=None):
 	for doctype in doctypes:
 		if not frappe.db.exists({"doctype": "Custom Field", "dt": doctype, "fieldname": field_name}):
 			frappe.get_doc({
@@ -102,7 +120,8 @@ def make_custom_fields(doctypes, field_name):
 				"label": "Tally ID",
 				"dt": doctype,
 				"fieldname": field_name,
-				"fieldtype": "Data",
+				"fieldtype": field_type,
+				"options": options,
 			}).insert()
 
 
@@ -131,8 +150,7 @@ def _create_parties(company, parties):
 						"company": company,
 					}).insert()
 		except:
-			traceback.print_exc()
-			print(party)
+			log(title="Party Error", data=party)
 
 
 def _create_items(items):
@@ -141,72 +159,86 @@ def _create_items(items):
 			if not frappe.db.exists("Item", item["item_code"]):
 				yield frappe.get_doc(item).insert().as_dict()
 		except:
-			traceback.print_exc()
-			print(item)
+			log(title="Item Error", data=item)
 
 
 def _create_vouchers(entries):
+	try:
+		frappe.flags.in_migrate = True
+		entries = filter_entries(entries)
+		for entry in entries:
+			try:
+				{
+					"Journal Entry": create_journal_entry,
+					"Sales Invoice": create_invoice,
+					"Purchase Invoice": create_invoice,
+				}[entry["doctype"]](entry)
+				frappe.db.commit()
+			except:
+				log(title="Voucher Error", data=entry)
+	except:
+		import traceback
+		traceback.print_exc()
+
+
+def filter_entries(entries):
+	queries = {}
 	for entry in entries:
-		try:
-			saved_entry = {
-				"Journal Entry": create_journal_entry,
-				"Sales Invoice": create_invoice,
-				"Purchase Invoice": create_invoice,
-			}[entry["doctype"]](entry)
-			if saved_entry:
-				yield saved_entry
-		except:
-			import traceback
-			traceback.print_exc()
+		queries.setdefault(entry["doctype"], []).append(entry["tally_id"])
+
+	existing_ids = set()
+	for doctype, tally_ids in queries.items():
+		existing_ids.update(frappe.get_all(doctype,
+			fields=["tally_id"],
+			filters={
+				"tally_id": ("in", tally_ids),
+				"company": entries[0]["company"]
+			}
+		))
+
+	entries = list(filter(lambda e: e["tally_id"] not in existing_ids, entries))
+	return entries
 
 
 def create_journal_entry(voucher):
 	try:
-		if not frappe.db.exists({"doctype": "Journal Entry", "tally_id": voucher["tally_id"], "company": voucher["company"]}):
-			for account in voucher["accounts"]:
-				if account["is_party"]:
-					if frappe.db.exists({"doctype": "Customer", "customer_name": account["account"], "company": voucher["company"]}):
-						account["party_type"] = "Customer"
-						account["party"] = account["account"]
-						account["account"] = "Sundry Debtors"
-					elif frappe.db.exists({"doctype": "Supplier", "supplier_name": account["account"], "company": voucher["company"]}):
-						account["party_type"] = "Supplier"
-						account["party"] = account["account"]
-						account["account"] = "Sundry Creditors"
-				account["account"] = encode_company_abbr(account["account"], voucher["company"])
+		for account in voucher["accounts"]:
+			if account["is_party"]:
+				if frappe.db.exists({"doctype": "Customer", "customer_name": account["account"], "company": voucher["company"]}):
+					account["party_type"] = "Customer"
+					account["party"] = account["account"]
+					account["account"] = "Sundry Debtors"
+				elif frappe.db.exists({"doctype": "Supplier", "supplier_name": account["account"], "company": voucher["company"]}):
+					account["party_type"] = "Supplier"
+					account["party"] = account["account"]
+					account["account"] = "Sundry Creditors"
+			account["account"] = encode_company_abbr(account["account"], voucher["company"])
 
-			entry = frappe.get_doc(voucher).insert()
-			entry.submit()
-			return entry.as_dict()
-		else:
-			print("Already Exists : {}".format(voucher["tally_id"]))
+		entry = frappe.get_doc(voucher).insert()
+		entry.submit()
+		return entry.as_dict()
 	except:
-		traceback.print_exc()
-		print(voucher)
+		log(title="JE Error", data=voucher)
 
 
 def create_invoice(voucher):
 	try:
-		if not frappe.db.exists({"doctype": voucher["doctype"], "tally_id": voucher["tally_id"], "company": voucher["company"]}):
-			if voucher["doctype"] == "Sales Invoice":
-				account_field = "income_account"
-			elif voucher["doctype"] == "Purchase Invoice":
-				account_field = "expense_account"
+		if voucher["doctype"] == "Sales Invoice":
+			account_field = "income_account"
+		elif voucher["doctype"] == "Purchase Invoice":
+			account_field = "expense_account"
 
-			for item in voucher["items"]:
-				item[account_field] = encode_company_abbr(item[account_field], voucher["company"])
+		for item in voucher["items"]:
+			item[account_field] = encode_company_abbr(item[account_field], voucher["company"])
 
-			for tax in voucher["taxes"]:
-				tax["account_head"] = encode_company_abbr(tax["account_head"], voucher["company"])
+		for tax in voucher["taxes"]:
+			tax["account_head"] = encode_company_abbr(tax["account_head"], voucher["company"])
 
-			entry = frappe.get_doc(voucher).insert()
-			entry.submit()
-			return entry.as_dict()
-		else:
-			print("Already Exists : {}".format(voucher["tally_id"]))
+		entry = frappe.get_doc(voucher).insert()
+		entry.submit()
+		return entry.as_dict()
 	except:
-		traceback.print_exc()
-		print(voucher)
+		log(title="Invoice Error", data=voucher)
 
 
 def resolve_name_conflicts(accounts):
@@ -220,49 +252,3 @@ def resolve_name_conflicts(accounts):
 			else:
 				account["parent_account"] = "{} - Group".format(account["parent_account"])
 	return accounts
-
-
-@frappe.whitelist()
-def null():
-	pass
-
-
-@frappe.whitelist()
-def clean_all():
-	frappe.db.sql("""DELETE FROM `tabAccount`""")
-
-	frappe.db.sql("""DELETE FROM `tabCustomer`""")
-	frappe.db.sql("""DELETE FROM `tabSupplier`""")
-
-	frappe.db.sql("""DELETE FROM `tabItem`""")
-	frappe.db.sql("""DELETE FROM `tabItem Default`""")
-
-	frappe.db.sql("""DELETE FROM `tabSales Invoice`""")
-	frappe.db.sql("""DELETE FROM `tabSales Invoice Item`""")
-	frappe.db.sql("""DELETE FROM `tabSales Taxes and Charges`""")
-
-	frappe.db.sql("""DELETE FROM `tabPurchase Invoice`""")
-	frappe.db.sql("""DELETE FROM `tabPurchase Invoice Item`""")
-	frappe.db.sql("""DELETE FROM `tabPurchase Taxes and Charges`""")
-
-	frappe.db.sql("""DELETE FROM `tabJournal Entry`""")
-	frappe.db.sql("""DELETE FROM `tabJournal Entry Account`""")
-
-	frappe.db.sql("""DELETE FROM `tabGL Entry`""")
-	frappe.db.commit()
-
-@frappe.whitelist()
-def clean_entries():
-	frappe.db.sql("""DELETE FROM `tabSales Invoice`""")
-	frappe.db.sql("""DELETE FROM `tabSales Invoice Item`""")
-	frappe.db.sql("""DELETE FROM `tabSales Taxes and Charges`""")
-
-	frappe.db.sql("""DELETE FROM `tabPurchase Invoice`""")
-	frappe.db.sql("""DELETE FROM `tabPurchase Invoice Item`""")
-	frappe.db.sql("""DELETE FROM `tabPurchase Taxes and Charges`""")
-
-	frappe.db.sql("""DELETE FROM `tabJournal Entry`""")
-	frappe.db.sql("""DELETE FROM `tabJournal Entry Account`""")
-
-	frappe.db.sql("""DELETE FROM `tabGL Entry`""")
-	frappe.db.commit()
