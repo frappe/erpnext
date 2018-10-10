@@ -24,7 +24,7 @@ def execute(filters=None):
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher, 
+		row = [d.voucher_type, d.voucher_no, d.party_type, d.party,d.party_name, d.posting_date, d.against_voucher, 
 			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
 
 		if d.against_voucher:
@@ -50,6 +50,7 @@ def get_columns(filters):
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
 		_("Party Type") + "::100", 
 		_("Party") + ":Dynamic Link/Party Type:140",
+		_("Party Name") + ":: 100",
 		_("Posting Date") + ":Date:100",
 		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Invoice Posting Date") + ":Date:130", 
@@ -94,7 +95,7 @@ def get_conditions(filters):
 
 def get_entries(filters):
 	return frappe.db.sql("""select 
-		voucher_type, voucher_no, party_type, party, posting_date, debit, credit, remarks, against_voucher
+		voucher_type, voucher_no, party_type, party,party_name, posting_date, debit, credit, remarks, against_voucher
 		from `tabGL Entry`
 		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') {0}
 	""".format(get_conditions(filters)), filters, as_dict=1)
