@@ -6,6 +6,8 @@ import frappe, erpnext
 import json
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
+from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -1059,24 +1061,79 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+	"""
+	Returns a Sales Order Item child item containing the default values
+	"""
+	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Sales Order Item', p_doctype, child_docname)
+	item = frappe.get_doc("Item", item_code)
+	child_item.item_code = item.item_code
+	child_item.item_name = item.item_name
+	child_item.description = item.description
+	child_item.reqd_by_date = p_doctype.delivery_date
+	child_item.uom = item.stock_uom
+	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	return child_item
+
+
+def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+	"""
+	Returns a Purchase Order Item child item containing the default values
+	"""
+	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Purchase Order Item', p_doctype, child_docname)
+	conversion_rate = flt(p_doctype.get('conversion_rate')) or 1.0
+
+	item = frappe.get_doc("Item", item_code)
+	child_item.item_code = item.item_code
+	child_item.item_name = item.item_name
+	child_item.description = item.description
+	child_item.schedule_date = p_doctype.schedule_date
+	child_item.uom = item.stock_uom
+	child_item.company = p_doctype.company
+	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.base_rate = 1 # Initiallize value will update in parent validation
+	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	return child_item
+
 
 @frappe.whitelist()
-def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
+def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	data = json.loads(trans_items)
-	for d in data:
-		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
-		child_item.qty = flt(d.get("qty"))
 
+	for d in data:
+		new_child_flag = False
+		if not d.get("docname"):
+			new_child_flag = True
+			if parent_doctype == "Sales Order":
+				child_item  = set_sales_order_defaults(parent_doctype,
+													   parent_doctype_name,
+													   child_docname,
+													   d.get("item_code"))
+			if parent_doctype == "Purchase Order":
+				child_item = set_purchase_order_defaults(parent_doctype,
+														 parent_doctype_name,
+														 child_docname,
+														 d.get("item_code"))
+
+		else:
+			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		child_item.qty = flt(d.get("qty"))
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
 		child_item.flags.ignore_validate_update_after_submit = True
-		child_item.save()
+		if new_child_flag:
+			child_item.insert()
+			frappe.db.commit()
+		else:
+			child_item.save()
 
 	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-
 	p_doctype.flags.ignore_validate_update_after_submit = True
 	p_doctype.set_qty_as_per_stock_uom()
 	p_doctype.calculate_taxes_and_totals()
