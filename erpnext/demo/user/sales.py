@@ -3,23 +3,23 @@
 
 from __future__ import unicode_literals
 
-import frappe, random
+import frappe, random, erpnext
 from frappe.utils import flt
 from frappe.utils.make_random import add_random_children, get_random
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
 
-def work():
+def work(domain="Manufacturing"):
 	frappe.set_user(frappe.db.get_global('demo_sales_user_2'))
 
 	for i in range(random.randint(1,7)):
 		if random.random() < 0.5:
-			make_opportunity()
+			make_opportunity(domain)
 
 	for i in range(random.randint(1,3)):
 		if random.random() < 0.5:
-			make_quotation()
+			make_quotation(domain)
 
 	# lost quotations / inquiries
 	if random.random() < 0.3:
@@ -53,7 +53,7 @@ def work():
 		except Exception:
 			pass
 
-def make_opportunity():
+def make_opportunity(domain):
 	b = frappe.get_doc({
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
@@ -65,13 +65,13 @@ def make_opportunity():
 
 	add_random_children(b, "items", rows=4, randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"has_variants": 0, "is_fixed_asset": 0})
+		"item_code": ("Item", {"has_variants": 0, "is_fixed_asset": 0, "domain": domain})
 	}, unique="item_code")
 
 	b.insert()
 	frappe.db.commit()
 
-def make_quotation():
+def make_quotation(domain):
 	# get open opportunites
 	opportunity = get_random("Opportunity", {"status": "Open", "with_items": 1})
 
@@ -88,8 +88,8 @@ def make_quotation():
 		# get customer, currency and exchange_rate
 		customer = get_random("Customer")
 
-		company_currency = frappe.get_cached_value('Company',  "Wind Power LLC",  "default_currency")
-		party_account_currency = get_party_account_currency("Customer", customer, "Wind Power LLC")
+		company_currency = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "default_currency")
+		party_account_currency = get_party_account_currency("Customer", customer, erpnext.get_default_company())
 		if company_currency == party_account_currency:
 			exchange_rate = 1
 		else:
@@ -108,7 +108,7 @@ def make_quotation():
 
 		add_random_children(qtn, "items", rows=3, randomize = {
 			"qty": (1, 5),
-			"item_code": ("Item", {"has_variants": "0", "is_fixed_asset": 0})
+			"item_code": ("Item", {"has_variants": "0", "is_fixed_asset": 0, "domain": domain})
 		}, unique="item_code")
 
 		qtn.insert()

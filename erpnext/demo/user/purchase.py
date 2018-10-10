@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe, random, json
+import frappe, random, json, erpnext
 from frappe.utils.make_random import how_many, get_random
 from frappe.desk import query_report
 from erpnext.setup.utils import get_exchange_rate
@@ -51,8 +51,8 @@ def work():
 	# get supplier details
 	supplier = get_random("Supplier")
 
-	company_currency = frappe.get_cached_value('Company', "Wind Power LLC", "default_currency")
-	party_account_currency = get_party_account_currency("Supplier", supplier, "Wind Power LLC")
+	company_currency = frappe.get_cached_value('Company', erpnext.get_default_company(), "default_currency")
+	party_account_currency = get_party_account_currency("Supplier", supplier, erpnext.get_default_company())
 	if company_currency == party_account_currency:
 		exchange_rate = 1
 	else:
