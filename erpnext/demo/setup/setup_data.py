@@ -5,6 +5,7 @@ import frappe, erpnext
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import flt, now_datetime, cstr, random_string
 from frappe.utils.make_random import add_random_children, get_random
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.demo.domains import data
 from frappe import _
 
@@ -17,6 +18,7 @@ def setup(domain):
 	setup_employee()
 	setup_user_roles()
 	setup_role_permissions()
+	setup_custom_field_for_domain()
 
 	employees = frappe.get_all('Employee',  fields=['name', 'date_of_joining'])
 
@@ -120,7 +122,7 @@ def setup_user():
 		user = frappe.new_doc("User")
 		user.update(u)
 		user.flags.no_welcome_mail = True
-		user.new_password = 'demo'
+		user.new_password = 'Demo1234567!!!'
 		user.insert()
 
 def setup_employee():
@@ -136,6 +138,8 @@ def setup_employee():
 		salary_component.save()
 
 	import_json('Employee')
+	holiday_list = frappe.db.get_value("Holiday List", {"holiday_list_name": str(now_datetime().year)}, 'name')
+	frappe.db.sql('''update tabEmployee set holiday_list={0}'''.format(holiday_list))
 
 def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 	ss = frappe.new_doc('Salary Structure')
@@ -423,3 +427,14 @@ def update_employee_department(user_id, department):
 	employee = frappe.db.get_value('Employee', {"user_id": user_id}, 'name')
 	department = frappe.db.get_value('Department', {'department_name': department}, 'name')
 	frappe.db.set_value('Employee', employee, 'department', department)
+
+def setup_custom_field_for_domain():
+	field = {
+		"Item": [
+			dict(fieldname='domain', label='Domain',
+				fieldtype='Select', hidden=1, default="Manufacturing",
+				options="Manufacturing\nService\nDistribution\nRetail"
+			)
+		]
+	}
+	create_custom_fields(field)
