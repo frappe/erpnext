@@ -12,7 +12,6 @@ apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be se
 DocType: Item Default,Default Selling Cost Center,Standard Selling Cost center
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-Above
 DocType: Pricing Rule,Selling,Selling
-apps/erpnext/erpnext/accounts/page/pos/pos.js +79, to ,Ultima Actualización : Fecha inválida
 DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
 apps/erpnext/erpnext/controllers/stock_controller.py +240,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
