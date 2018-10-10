@@ -14,6 +14,15 @@ from frappe.utils import cint, get_datetime, get_link_to_form
 
 
 class DeliveryTrip(Document):
+	def __init__(self, *args, **kwargs):
+		super(DeliveryTrip, self).__init__(*args, **kwargs)
+
+		# Google Maps returns distances in meters by default
+		self.default_distance_uom = frappe.db.get_single_value("Global Defaults", "default_distance_unit") or "Meter"
+		self.uom_conversion_factor = frappe.db.get_value("UOM Conversion Factor",
+														{"from_uom": "Meter", "to_uom": self.default_distance_uom},
+														"value")
+
 	def on_submit(self):
 		self.update_delivery_notes()
 
@@ -80,14 +89,26 @@ class DeliveryTrip(Document):
 
 				# Google Maps returns the legs in the optimized order
 				for leg in legs:
-					duration = leg.get("duration").get("value")
+					delivery_stop = self.delivery_stops[idx]
 
+					delivery_stop.lat, delivery_stop.lng = leg.get("end_location", {}).values()
+					delivery_stop.uom = self.default_distance_uom
+					distance = leg.get("distance", {}).get("value", 0.0)  # in meters
+					delivery_stop.distance = distance * self.uom_conversion_factor
+
+					duration = leg.get("duration", {}).get("value", 0)
 					estimated_arrival = departure_datetime + datetime.timedelta(seconds=duration)
-					self.delivery_stops[idx].estimated_arrival = estimated_arrival
+					delivery_stop.estimated_arrival = estimated_arrival
 
 					stop_delay = frappe.db.get_single_value("Delivery Settings", "stop_delay")
 					departure_datetime = estimated_arrival + datetime.timedelta(minutes=cint(stop_delay))
 					idx += 1
+
+				# Include last leg in the final distance calculation
+				self.uom = self.default_distance_uom
+				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
+											for leg in directions.get("legs")])  # in meters
+				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
 
