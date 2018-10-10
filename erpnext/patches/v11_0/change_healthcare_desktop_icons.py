@@ -61,7 +61,6 @@ def change_healthcare_desktop_icons():
 			where _doctype = '{7}'
 		""".format(spec['module_name'], spec['color'], spec['icon'], spec['doctype'], spec['type'], spec['link'], spec['label'], spec['doctype']))
 
-	label = _("Healthcare")
 	frappe.db.sql("""
 		update `tabDesktop Icon`
 		set color = '#FF888B', icon = 'fa fa-heartbeat'
