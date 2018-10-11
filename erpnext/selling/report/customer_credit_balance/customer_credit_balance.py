@@ -42,7 +42,6 @@ def execute(filters=None):
 
 def get_columns(customer_naming_type):
 	columns = [
-		_("Name") + ":Link/Customer:120",
 		_("Customer") + ":Link/Customer:120",
 		_("Credit Limit") + ":Currency:120",
 		_("Outstanding Amt") + ":Currency:100",
