@@ -106,6 +106,8 @@ def get_series():
 			continue
 		if not frappe.db.has_column(doctype, 'naming_series'):
 			continue
+		if not frappe.get_meta(doctype).has_field('naming_series'):
+			continue
 		series_to_preserve = list(filter(None, get_series_to_preserve(doctype)))
 		default_series = get_default_series(doctype)
 
