@@ -49,6 +49,13 @@ class SMSCenter(Document):
 				on `tabSales Person`.employee = tabEmployee.name
 				where ifnull(tabEmployee.cell_number,'')!=''""")
 
+		elif self.send_to == 'To Student Group':
+			where_clause = self.student_group and " and studentgroup.name = '%s'" % \
+				self.student_group.replace("'", "\'") or ""
+			rec = frappe.db.sql(""" select student.first_name, student.student_mobile_number from `tabStudent` as student, `tabStudent Group` as studentgroup, `tabStudent Group Student` as studentgroupdata
+			where  studentgroupdata.parent = studentgroup.name and student.name =  studentgroupdata.student   %s
+			""" % where_clause)
+
 		rec_list = ''
 
 		for d in rec:
