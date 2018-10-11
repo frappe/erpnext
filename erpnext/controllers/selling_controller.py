@@ -45,6 +45,7 @@ class SellingController(StockController):
 		set_default_income_account_for_item(self)
 
 	def set_missing_values(self, for_validate=False):
+
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -62,10 +63,10 @@ class SellingController(StockController):
 			party_details = _get_party_details(self.customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
-				fetch_payment_terms_template=fetch_payment_terms_template)
+				fetch_payment_terms_template=fetch_payment_terms_template,
+				party_address=self.customer_address, shipping_address=self.shipping_address_name)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
-
 			self.update_if_missing(party_details)
 
 		elif getattr(self, "lead", None):

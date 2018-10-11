@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 install_docs = [
 	{"doctype":"Role", "role_name":"Stock Manager", "name":"Stock Manager"},
@@ -33,7 +34,11 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
-			account = warehouse_account.get(warehouse.parent_warehouse).account
+			if warehouse_account.get(warehouse.parent_warehouse):
+				account = warehouse_account.get(warehouse.parent_warehouse).account
+			else:
+				from frappe.utils.nestedset import rebuild_tree
+				rebuild_tree("Warehouse", "parent_warehouse")
 		else:
 			account = frappe.db.sql("""
 				select
@@ -48,6 +53,9 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)
 
+	if not account:
+		frappe.throw(_("Please set Account in Warehouse {0} or Default Inventory Account in Company {1}")
+			.format(warehouse, warehouse.company))
 	return account
 	
 def get_company_default_inventory_account(company):

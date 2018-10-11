@@ -235,6 +235,69 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.get_terms();
 	},
 
+	link_to_mrs: function() {
+		var my_items = [];
+		for (var i in cur_frm.doc.items) {
+			if(!cur_frm.doc.items[i].material_request){
+				my_items.push(cur_frm.doc.items[i].item_code);
+			}
+		}
+		frappe.call({
+			method: "erpnext.buying.utils.get_linked_material_requests",
+			args:{
+				items: my_items
+			},
+			callback: function(r) {
+				if(!r.message) {
+					frappe.throw(__("No pending Material Requests found to link for the given items."))
+				}
+				else {
+					var i = 0;
+					var item_length = cur_frm.doc.items.length;
+					while (i < item_length) {
+						var qty = cur_frm.doc.items[i].qty;
+						(r.message[0] || []).forEach(function(d) {
+							if (d.qty > 0 && qty > 0 && cur_frm.doc.items[i].item_code == d.item_code && !cur_frm.doc.items[i].material_request_item)
+							{
+								cur_frm.doc.items[i].material_request = d.mr_name;
+								cur_frm.doc.items[i].material_request_item = d.mr_item;
+								var my_qty = Math.min(qty, d.qty);
+								qty = qty - my_qty;
+								d.qty = d.qty  - my_qty;
+								cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
+								cur_frm.doc.items[i].qty = my_qty;
+	
+								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
+								if (qty > 0)
+								{
+									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+									var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
+									item_length++;
+	
+									for (var key in cur_frm.doc.items[i])
+									{
+										newrow[key] = cur_frm.doc.items[i][key];
+									}
+	
+									newrow.idx = item_length;
+									newrow["stock_qty"] = newrow.conversion_factor*qty;
+									newrow["qty"] = qty;
+	
+									newrow["material_request"] = "";
+									newrow["material_request_item"] = "";
+	
+								}
+							}
+						});
+						i++;
+					}
+					refresh_field("items");
+					//cur_frm.save();
+				}
+			}
+		});
+	},
+
 	make_landed_cost_voucher: function() {
 		return frappe.call({
 			method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_landed_cost_voucher",
