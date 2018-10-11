@@ -163,7 +163,7 @@ def get_item_data(filters):
 	data=[]
 
 	date_field = filters["doc_type"] in ['Sales Order', 'Purchase Order'] and 'transaction_date' or 'posting_date'
-	
+
 	if filters["value_quantity"] == 'Value':
 		select = 'base_amount'
 	else:
