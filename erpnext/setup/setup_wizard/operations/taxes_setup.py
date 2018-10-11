@@ -30,7 +30,7 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
 	except frappe.NameError:
-		frappe.message_log.pop()
+		if frappe.message_log: frappe.message_log.pop()
 	except RootNotEditable:
 		pass
 

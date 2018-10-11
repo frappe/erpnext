@@ -22,14 +22,14 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
-	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True, party_address=None):
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
 	if not party:
 		return {}
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type,
-		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address)
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address, shipping_address)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
@@ -96,7 +96,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 	elif doctype and doctype == "Purchase Invoice":
 		out.update(get_company_address(company))
 		if out.company_address:
-			out["shipping_address"] = out["company_address"]
+			out["shipping_address"] = shipping_address or out["company_address"]
+			out.shipping_address_display = get_address_display(out["shipping_address"])
 			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
 		get_regional_address_details(out, doctype, company)
 
