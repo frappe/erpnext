@@ -43,7 +43,7 @@ def get_supplier_data(filters):
 			date_field: ('between', [filters["from_date"],filters["to_date"]])
 		}
 	)
-	
+
 	data_list = get_data_list(entry,filters)
 
 	if filters["tree_type"] == 'Supplier Group':
@@ -58,7 +58,7 @@ def get_supplier_data(filters):
 		supplier["code"] = d.supplier_name
 		for dummy, end_date in ranges:
 			period = get_period(end_date, filters["range"])
-				
+
 			if data_list.get(d.name) and data_list.get(d.name).get(period) :
 				supplier[period] = data_list.get(d.name).get(period)
 			else:
@@ -119,7 +119,7 @@ def get_by_group(filters):
 
 
 def gen_data(filters):
-	
+
 	if filters["tree_type"] == 'Supplier':
 		return get_supplier_data(filters)
 		
