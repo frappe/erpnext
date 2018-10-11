@@ -118,7 +118,7 @@ def get_data(filters):
 		group["code"] = g.get("name")
 
 		ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
-		
+
 		for d in items_by_group:
 			if d.lft >= g.get("lft") and d.rgt <= g.get("rgt") :
 				has_items = 1
@@ -154,10 +154,10 @@ def get_data(filters):
 def get_item_by_group(filters):
 
 	conditions = ["i.item_group = g.name"]
-	
+
 	if filters.get("brand"):
 		conditions.append("i.brand=%(brand)s")
-		
+
 	items = frappe.db.sql("""select i.name,i.item_name,i.item_group,i.stock_uom,i.brand,g.lft,g.rgt
 							from `tabItem` i ,`tabItem Group` g  where {}"""
 		.format(" and ".join(conditions)), filters,as_dict=1)
