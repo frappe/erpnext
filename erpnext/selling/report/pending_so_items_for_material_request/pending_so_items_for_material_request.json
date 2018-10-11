@@ -1,0 +1,36 @@
+{
+ "add_total_row": 1,
+ "creation": "2018-09-26 17:23:01.749540",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2018-10-11 12:21:44.887980",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Pending SO Items for Material Request",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT \n\tso.`name` AS \"Sales Order ID:Link/Sales Order:120\",  \t \n\tso_item.item_code AS \"Item Code:Link/Item:120\",\n\tmr_sum.name AS \"Material Request ID:Link/Material Request:120\",\n\tso_item.qty AS \"Sales Order Qty:Float:100 \",\n\tmr_sum.qty AS \"Material Request Qty:Float:100\"\nFROM\n\t`tabSales Order` so \n \tLEFT JOIN `tabSales Order Item` AS so_item \n\t\tON so.`name` = so_item.`parent` \n \tLEFT JOIN (Select mr_item.qty, mr.name, mr_item.sales_order, mr_item.item_code \n\t\tfrom  `tabMaterial Request` AS mr, `tabMaterial Request Item` AS mr_item \n\t\twhere mr.status != \"Cancelled\"\n\t\tAND mr.status != \"Stopped\" \n\t\tAND  mr_item.parent = mr.name) AS mr_sum \n\t\tON so_item.item_code = mr_sum.item_code\n\t\tAND  so.`name` = mr_sum.sales_order\n\t\t\t\t\t \t\nWHERE \n\tso.docstatus = 1 \n\tAND so.status != \"Closed\"\n\tAND so.per_delivered < 100\n\tAND COALESCE(so_item.qty,0)> COALESCE(mr_sum.qty,0)  \nGROUP BY so.name, so_item.item_code\nORDER BY so.name desc, so_item.item_code asc; \n\n\n",
+ "ref_doctype": "Sales Order",
+ "report_name": "Pending SO Items for Material Request",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Maintenance User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Stock User"
+  }
+ ]
+}
