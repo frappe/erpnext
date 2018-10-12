@@ -1,56 +1,62 @@
-{% macro quiz(question, opt1, opt2, opt3, opt4) %}
-<div class="question mt-4">
-        <h5>{{ question }}</h5>
-        <div class="options ml-2">
-            <div class="form-check pb-1">
-                <input class="form-check-input" type="radio" name="{{ question }}" id="{{ opt1 }}" value="{{ opt1 }}">
-                <label class="form-check-label" for="{{ opt1 }}">
-                    {{ opt1 }}
-                </label>
-            </div>
-            <div class="form-check pb-1">
-                <input class="form-check-input" type="radio" name="{{ question }}" id="{{ opt2 }}" value="{{ opt2 }}">
-                <label class="form-check-label" for="{{ opt2 }}">
-                    {{ opt2 }}
-                </label>
-            </div>
-            <div class="form-check pb-1">
-                <input class="form-check-input" type="radio" name="{{ question }}" id="{{ opt3 }}" value="{{ opt3 }}">
-                <label class="form-check-label" for="{{ opt3 }}">
-                    {{ opt3 }}
-                </label>
-            </div>
-            <div class="form-check pb-1">
-                <input class="form-check-input" type="radio" name="{{ question }}" id="{{ opt3 }}" value="{{ opt4 }}">
-                <label class="form-check-label" for="{{ opt3 }}">
-                    {{ opt4 }}
-                </label>
-            </div>
+{% macro quiz(loop_index, question_id, question, options) %}
+<div class="question mt-4" id="question" data-question="{{ question_id }}">
+    <h5>{{ loop_index }}{{ question }}</h5>
+    <div class="options ml-2">
+        <div class="form-check pb-1 hidden">
+            <input class="form-check-input" type="radio" name="{{ question_id }}" value="0" checked>
         </div>
+        {% for option in options %}
+        <div class="form-check pb-1">
+            <input class="form-check-input" type="radio" name="{{ question_id }}" id="{{loop_index}}-{{ option }}" value="{{ loop.index|str }}">
+            <label class="form-check-label" for="{{loop_index}}-{{ option }}">
+                {{ option }}
+            </label>
+        </div>
+        {% endfor %}
     </div>
+</div>
 {% endmacro %}
 
-<section class="article-section">
-        <div class='container'>
-            <div class="mt-3 row">
-                <div class="col-md-8">
-                    <h2>Quiz &mdash; Accounting with ERPNext</h2>
-                </div>
-            </div>
-            <div class="content">
-                <hr>
-                <form>
-                    {{ quiz('1. What is a Sales Invoice?','The bills that you raise to your Customers for the products or services you provide.','Bills that your Suppliers give you for their products or services.','The bills for accounting entries, like payments, credit and other types.','The bills that were recovered from an oblivion of files and folders stacked in a old and rusty closet.') }}
-                    {{ quiz('2. How to create a Sales Invoice?','Accounts > Billing > Sales Invoice > New Sales Invoice','Accounts > Buying > New Sales Invoice','Accounts > CRM > New Sales Invoice','Accounts > Purchases > New Sales Invoice') }}
-                    {{ quiz('3. The long term assets that have no physical existence but are rights that have value is known as','Current Assets','Fixed Assets','Intangible Assets','Investments') }}
-                    <div class="text-right">
-                        <button class='btn btn-outline-secondary' type="reset">Reset</button>
-                        <button class='btn btn-primary' type="submit">Submit</button>
-                    </div>
-                </form>
-            </div>
-            <div class="mt-3 text-right">
-                <a class="text-muted" href="/report"><i class="octicon octicon-issue-opened" title="Report"></i> Report a Mistake</a>
+<section class="quiz-section">
+    <div class='container'>
+        <div class="mt-3 row">
+            <div class="col-md-8">
+                <h2>Quiz: {{ current_content.name }}</h2>
             </div>
         </div>
-    </section>
+        <div class="content">
+            <hr>
+            <form id="quiz" name="{{ current_content.name }}">
+                <div id="quiz-body">
+                    {% for quiz_item in current_content.quiz %}
+                    {{ quiz(loop.index|str +". ", quiz_item.name, quiz_item.question, [ quiz_item.option_1, quiz_item.option_2,
+                    quiz_item.option_3, quiz_item.option_4]) }}
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <div id="quiz-actions" class="text-right">
+                        <button class='btn btn-outline-secondary' type="reset">Reset</button>
+                        <button class='btn btn-primary' type="button" onclick="submitQuiz()">Submit</button>
+                    </div>
+                    <div id="post-quiz-actions" class="row" hidden="hidden">
+                        <div class="col-md-8 text-left">
+                            <h3>Your Score: <span id="result"></span></h3>
+                        </div>
+                        <div class="col-md-4 text-right">
+                                <a class='btn btn-outline-secondary' href="#">Previous</a>
+                                {% if next_content != None %}
+                                <a class='btn btn-primary' href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
+                                {% else %}
+                                <a class='btn btn-primary' href="/lms/program?program={{ program }}">Finish Course</a>
+                                {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="mt-3 text-right">
+            <a class="text-muted" href="/report"><i class="octicon octicon-issue-opened" title="Report"></i> Report a
+                Mistake</a>
+        </div>
+    </div>
+</section>
