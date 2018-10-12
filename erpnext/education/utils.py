@@ -2,7 +2,7 @@
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For lice
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 import frappe
 from frappe import _
 
@@ -51,3 +51,88 @@ def validate_duplicate_student(students):
 				.format(stud.student, stud.student_name, unique_students.index(stud.student)+1, stud.idx))
 		else:
 			unique_students.append(stud.student)
+
+def get_student_name(email=None):
+	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
+	
+	:param user: a user email address
+	"""
+	try:
+		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
+	except IndexError:
+		return None
+
+@frappe.whitelist()
+def evaluate_quiz(quiz_response, **kwargs):
+	"""LMS Function: Evaluates a simple multiple choice quiz.  It recieves arguments from `www/lms/course.js` as dictionary using FormData[1].
+	
+
+	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
+	[1]: https://developer.mozilla.org/en-US/docs/Web/API/FormData
+	"""
+	import json
+	quiz_response = json.loads(quiz_response)
+	correct_answers = [frappe.get_value('Question', name, 'correct_options') for name in quiz_response.keys()]
+	selected_options = quiz_response.values()
+	result = [selected == correct for selected, correct in zip(selected_options, correct_answers)]
+	try:
+		score = int((result.count(True)/len(selected_options))*100)
+	except ZeroDivisionError:
+		score = 0
+
+	kwargs['selected_options'] = selected_options
+	kwargs['result'] = result
+	kwargs['score'] = score
+	add_activity('Quiz', **kwargs)
+	return score
+
+@frappe.whitelist()
+def add_activity(content_type, **kwargs):
+	activity_does_not_exists, activity = check_entry_exists(kwargs.get('program'))
+	if activity_does_not_exists:
+		current_activity = frappe.get_doc({
+			"doctype": "Student Course Activity",
+			"student_id": frappe.session.user,
+			"program_name": kwargs.get('program'),
+			"lms_activity": [{
+				"course_name": kwargs.get('course'),
+				"content_name": kwargs.get('content'),
+				"status": "Completed"
+				}]
+			})
+		if content_type == "Quiz":
+			activity = current_activity.lms_activity[-1]
+			activity.quiz_score = kwargs.get('score')
+			activity.selected_options = ", ".join(kwargs.get('selected_options'))
+			activity.result = ", ".join([str(item) for item in kwargs.get('result')]),
+			activity.status = "Passed"
+		current_activity.save()
+		frappe.db.commit()
+	else:
+		if content_type in ("Article", "Video"):
+			lms_activity_list = [[data.course_name, data.content_name] for data in activity.lms_activity]
+			if not [kwargs.get('course'), kwargs.get('content')] in lms_activity_list:
+				activity.append("lms_activity", {
+					"course_name": kwargs.get('course'),
+					"content_name": kwargs.get('content'),
+					"status": "Completed"
+				})
+		else:
+			activity.append("lms_activity", {
+				"course_name": kwargs.get('course'),
+				"content_name": kwargs.get('content'),
+				"status": "Passed",
+				"quiz_score": kwargs.get('score'),
+				"selected_options": ", ".join(kwargs.get('selected_options')),
+				"result": ", ".join([str(item) for item in kwargs.get('result')])
+			})
+		activity.save()
+		frappe.db.commit()
+
+def check_entry_exists(program):
+	try:
+		activity_name = frappe.get_all("Student Course Activity", filters={"student_id": frappe.session.user, "program_name": program})[0]
+	except IndexError:
+		return True, None
+	else:
+		return None, frappe.get_doc("Student Course Activity", activity_name)
