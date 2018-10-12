@@ -13,7 +13,11 @@
             </div>
             <div class="col-md-4 text-right">
                 <a class='btn btn-outline-secondary' href="#">Previous</a>
-                <a class='btn btn-primary' href="#s">Next</a>
+                {% if next_content != None %}
+                <a class='btn btn-primary' onclick="addActivity()" href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
+                {% else %}
+                <a class='btn btn-primary' onclick="addActivity()" href="/lms/program?program={{ program }}">Finish Course</a>
+                {% endif %}
             </div>
         </div>
         <hr>

@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
+from erpnext.education.utils import get_student_name
 import frappe
 
 
 def get_context(context):
-    context.program = frappe.get_doc("Program", frappe.form_dict["code"])
+    print(get_student_name(frappe.session.user))
+    context.program = frappe.get_doc("Program", frappe.form_dict["program"])
     context.course_list, context.course_data = get_courses(context)
 
 def get_courses(context):
