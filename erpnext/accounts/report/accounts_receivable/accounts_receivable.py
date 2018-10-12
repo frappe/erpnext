@@ -105,9 +105,13 @@ class ReceivablePayableReport(object):
 		]
 
 		if args.get('party_type') == 'Customer':
-			columns += [_("Customer LPO") + ":Data:100"]
+			columns.append({
+				"label": _("Customer LPO"),
+				"fieldtype": "Data",
+				"fieldname": "po_no",
+				"width": 100,
+			})
 			columns += [_("Delivery Note") + ":Data:100"]
-
 		if args.get("party_type") == "Customer":
 			columns += [
 				_("Territory") + ":Link/Territory:80",

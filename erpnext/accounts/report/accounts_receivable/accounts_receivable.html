@@ -175,7 +175,7 @@
 					{% if(filters.show_pdc_in_print) { %}
 						{% if(report.report_name === "Accounts Receivable") { %}
 							<td style="text-align: right">
-								{%= data[i][__("Customer LPO")] %}</td>
+								{%= data[i]["po_no"] %}</td>
 						{% } %}
 						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
 						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>
