@@ -83,6 +83,7 @@ class ReceivablePayableReport(object):
 			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
 				columns.append({
 					"label": label,
+					"fieldname":label,
 					"fieldtype": "Currency",
 					"options": "currency",
 					"width": 120
