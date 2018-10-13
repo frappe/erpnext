@@ -31,7 +31,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 	return _get_party_details(party, account, party_type, letter_of_credit,
 		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address, shipping_address)
 
-def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
+def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
 	fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
