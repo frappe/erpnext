@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0, 
+ "creation": "2018-10-11 19:28:37.085066", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Gadgets International", 
+ "modified": "2018-10-11 19:28:37.085066", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "Production Analytics", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Work Order", 
+ "report_name": "Production Analytics", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  }, 
+  {
+   "role": "Stock User"
+  }
+ ]
+}
