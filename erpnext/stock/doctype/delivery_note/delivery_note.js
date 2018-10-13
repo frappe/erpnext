@@ -4,6 +4,7 @@
 {% include 'erpnext/selling/sales_common.js' %};
 
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
+cur_frm.add_fetch('customer', 'tax_ntn_cnic', 'tax_ntn_cnic');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
