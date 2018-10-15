@@ -91,7 +91,7 @@ def add_activity(content_type, **kwargs):
 	activity_does_not_exists, activity = check_entry_exists(kwargs.get('program'))
 	if activity_does_not_exists:
 		current_activity = frappe.get_doc({
-			"doctype": "Student Course Activity",
+			"doctype": "Course Activity",
 			"student_id": get_student_id(frappe.session.user),
 			"program_name": kwargs.get('program'),
 			"lms_activity": [{
@@ -131,13 +131,13 @@ def add_activity(content_type, **kwargs):
 
 def check_entry_exists(program):
 	try:
-		activity_name = frappe.get_all("Student Course Activity", filters={"student_id": get_student_id(frappe.session.user), "program_name": program})[0]
+		activity_name = frappe.get_all("Course Activity", filters={"student_id": get_student_id(frappe.session.user), "program_name": program})[0]
 	except IndexError:
 		print("------ Got No Doc ------")
 		return True, None
 	else:
 		print("------ Got A Doc ------")
-		return None, frappe.get_doc("Student Course Activity", activity_name)
+		return None, frappe.get_doc("Course Activity", activity_name)
 
 def get_student_id(email):
 	"""Returns Student ID, example EDU-STU-2018-00001 from email address
@@ -148,3 +148,24 @@ def get_student_id(email):
 		return student
 	except IndexError:
 		frappe.throw("Student Account with email:{0} does not exist".format(email))
+
+def get_quiz(content):
+	"""Helper Function to get questions for a quiz
+	
+	:params content: name of a Content doctype with content_type quiz"""
+	try:
+		quiz_doc = frappe.get_doc("Content", content)
+		if quiz_doc.content_type == "Quiz":
+			import json
+			quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
+			data = []
+			for question in quiz:
+				d = {}
+				d['Options'] = [{'option':item.option,'is_correct':item.is_correct} for item in quiz[0].options]
+				d['Question'] = question.question
+				data.append(d)
+			return json.dumps(data)
+		else:
+			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
+	except frappe.DoesNotExistError:
+		return None
