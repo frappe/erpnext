@@ -197,11 +197,28 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Question"
+				},
+				{
+					"type": "doctype",
 					"name": "Instructor"
 				},
 				{
 					"type": "doctype",
 					"name": "Room"
+				}
+			]
+		},
+		{
+			"label": _("LMS Activity"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Course Enrollment"
+				},
+				{
+					"type": "doctype",
+					"name": "Course Activity"
 				}
 			]
 		},
