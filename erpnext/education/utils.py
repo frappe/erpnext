@@ -92,7 +92,7 @@ def add_activity(content_type, **kwargs):
 	if activity_does_not_exists:
 		current_activity = frappe.get_doc({
 			"doctype": "Student Course Activity",
-			"student_id": frappe.session.user,
+			"student_id": get_student_id(frappe.session.user),
 			"program_name": kwargs.get('program'),
 			"lms_activity": [{
 				"course_name": kwargs.get('course'),
@@ -131,8 +131,20 @@ def add_activity(content_type, **kwargs):
 
 def check_entry_exists(program):
 	try:
-		activity_name = frappe.get_all("Student Course Activity", filters={"student_id": frappe.session.user, "program_name": program})[0]
+		activity_name = frappe.get_all("Student Course Activity", filters={"student_id": get_student_id(frappe.session.user), "program_name": program})[0]
 	except IndexError:
+		print("------ Got No Doc ------")
 		return True, None
 	else:
+		print("------ Got A Doc ------")
 		return None, frappe.get_doc("Student Course Activity", activity_name)
+
+def get_student_id(email):
+	"""Returns Student ID, example EDU-STU-2018-00001 from email address
+	
+	:params email: email address of the student"""
+	try:
+		student = frappe.get_list('Student', filters={'student_email_id': email})[0].name
+		return student
+	except IndexError:
+		frappe.throw("Student Account with email:{0} does not exist".format(email))
