@@ -354,7 +354,8 @@ class BOM(WebsiteGenerator):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.on_update()
+			bom_obj.check_recursion()
+			bom_obj.update_exploded_items()
 
 		return bom_list
 
