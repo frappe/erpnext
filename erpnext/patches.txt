@@ -506,3 +506,4 @@ erpnext.patches.v10_0.update_address_template_for_india
 erpnext.patches.v10_0.set_discount_amount
 erpnext.patches.v10_0.recalculate_gross_margin_for_project
 erpnext.patches.v10_0.delete_hub_documents
+erpnext.patches.v10_0.update_user_image_in_employee
