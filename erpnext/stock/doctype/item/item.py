@@ -256,7 +256,7 @@ class Item(WebsiteGenerator):
 						"file_url": self.website_image,
 						"attached_to_doctype": "Item",
 						"attached_to_name": self.name
-					}).insert()
+					}).save()
 
 				except IOError:
 					self.website_image = None
