@@ -53,6 +53,10 @@ def execute():
 	change_healthcare_desktop_icons()
 
 def change_healthcare_desktop_icons():
+	doctypes = ["patient", "patient_encounter", "healthcare_practitioner",
+		"patient_appointment", "lab_test"]
+	for doctype in doctypes:
+		frappe.reload_doc("healthcare", "doctype", doctype)
 	for spec in change_icons_map:
 		frappe.db.sql("""
 			delete from `tabDesktop Icon`
