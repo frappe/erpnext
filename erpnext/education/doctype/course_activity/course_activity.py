@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class StudentCourseActivity(Document):
+class CourseActivity(Document):
 	def validate(self):
 		self.check_if_enrolled()
 		# self.check_if_course_present()
