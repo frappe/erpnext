@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.modules import scrub
 
 change_icons_map = [
 	{
@@ -50,6 +51,8 @@ change_icons_map = [
 ]
 
 def execute():
+	if "Healthcare" not in frappe.get_active_domains():
+		return
 	change_healthcare_desktop_icons()
 
 def change_healthcare_desktop_icons():
@@ -58,6 +61,7 @@ def change_healthcare_desktop_icons():
 	for doctype in doctypes:
 		frappe.reload_doc("healthcare", "doctype", doctype)
 	for spec in change_icons_map:
+		frappe.reload_doc('healthcare', 'doctype', scrub(spec['doctype']))
 		frappe.db.sql("""
 			delete from `tabDesktop Icon`
 			where _doctype = '{0}'
