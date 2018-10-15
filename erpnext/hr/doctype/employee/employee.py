@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today, add_years
+from frappe.utils import getdate, validate_email_add, today, add_years, format_datetime
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -49,8 +49,7 @@ class Employee(NestedSet):
 			self.validate_onboarding_process()
 
 		if self.user_id:
-			self.validate_for_enabled_user_id()
-			self.validate_duplicate_user_id()
+			self.validate_user_details()
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
@@ -59,6 +58,14 @@ class Employee(NestedSet):
 
 	def set_employee_name(self):
 		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
+
+	def validate_user_details(self):
+		data = frappe.db.get_value('User',
+			self.user_id, ['enabled', 'user_image'], as_dict=1)
+
+		self.image = data.get("user_image")
+		self.validate_for_enabled_user_id(data.get("enabled", 0))
+		self.validate_duplicate_user_id()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
@@ -143,10 +150,10 @@ class Employee(NestedSet):
 		if self.status == 'Left' and not self.relieving_date:
 			throw(_("Please enter relieving date."))
 
-	def validate_for_enabled_user_id(self):
+	def validate_for_enabled_user_id(self, enabled):
 		if not self.status == 'Active':
 			return
-		enabled = frappe.db.get_value("User", self.user_id, "enabled")
+
 		if enabled is None:
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
 		if enabled == 0:
@@ -223,27 +230,63 @@ def send_birthday_reminders():
 	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
 		return
 
-	from frappe.utils.user import get_enabled_system_users
-	users = None
-
 	birthdays = get_employees_who_are_born_today()
 
 	if birthdays:
-		if not users:
-			users = [u.email_id or u.name for u in get_enabled_system_users()]
+		employee_list = frappe.get_all('Employee',
+			fields=['name','employee_name'],
+			filters={'status': 'Active',
+				'company': birthdays[0]['company']
+		 	}
+		)
+		employee_emails = get_employee_emails(employee_list)
+		birthday_names = [name["employee_name"] for name in birthdays]
+		birthday_emails = [email["user_id"] or email["personal_email"] or email["company_email"] for email in birthdays]
+
+		birthdays.append({'company_email': '','employee_name': '','personal_email': '','user_id': ''})
 
 		for e in birthdays:
-			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email, e.user_id), users),
-				subject=_("Birthday Reminder for {0}").format(e.employee_name),
-				message=_("""Today is {0}'s birthday!""").format(e.employee_name),
-				reply_to=e.company_email or e.personal_email or e.user_id)
+			if e['company_email'] or e['personal_email'] or e['user_id']:
+				if len(birthday_names) == 1:
+					continue
+				recipients = e['company_email'] or e['personal_email'] or e['user_id']
+
+
+			else:
+				recipients = list(set(employee_emails) - set(birthday_emails))
+
+			frappe.sendmail(recipients=recipients,
+				subject=_("Birthday Reminder"),
+				message=get_birthday_reminder_message(e, birthday_names),
+				header=['Birthday Reminder', 'green'],
+			)
+
+def get_birthday_reminder_message(employee, employee_names):
+	"""Get employee birthday reminder message"""
+	pattern = "</Li><Br><Li>"
+	message = pattern.join(filter(lambda u: u not in (employee['employee_name']), employee_names))
+	message = message.title()
+
+	if pattern not in message:
+		message = "Today is {0}'s birthday \U0001F603".format(message)
+
+	else:
+		message = "Today your colleagues are celebrating their birthdays \U0001F382<br><ul><strong><li> " + message +"</li></strong></ul>"
+
+	return message
+
 
 def get_employees_who_are_born_today():
 	"""Get Employee properties whose birthday is today."""
-	return frappe.db.sql("""select name, personal_email, company_email, user_id, employee_name
-		from tabEmployee where day(date_of_birth) = day(%(date)s)
-		and month(date_of_birth) = month(%(date)s)
-		and status = 'Active'""", {"date": today()}, as_dict=True)
+	return frappe.db.get_values("Employee",
+		fieldname=["name", "personal_email", "company", "company_email", "user_id", "employee_name"],
+		filters={
+			"date_of_birth": ("like", "%{}".format(format_datetime(getdate(), "-MM-dd"))),
+			"status": "Active",
+		},
+		as_dict=True
+	)
+
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
 	if employee:
@@ -319,10 +362,11 @@ def get_employee_emails(employee_list):
 	for employee in employee_list:
 		if not employee:
 			continue
-		user, email = frappe.db.get_value('Employee', employee, ['user_id', 'company_email'])
-		if user or email:
-			employee_emails.append(user or email)
-
+		user, company_email, personal_email = frappe.db.get_value('Employee', employee,
+											['user_id', 'company_email', 'personal_email'])
+		email = user or company_email or personal_email
+		if email:
+			employee_emails.append(email)
 	return employee_emails
 
 @frappe.whitelist()
