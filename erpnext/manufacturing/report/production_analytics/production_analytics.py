@@ -32,7 +32,7 @@ def get_columns(filters):
 			{
 			"label": _(label),
 			"field_name":field_name,
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		},
 		)
@@ -41,13 +41,13 @@ def get_columns(filters):
 
 def get_data_list(filters,entry):
 
-	data_list = {}
-
-	data_list.setdefault("all_work_orders",{})
-	data_list.setdefault("not_started",{})
-	data_list.setdefault("overdue",{})
-	data_list.setdefault("pending",{})
-	data_list.setdefault("completed",{})
+	data_list = {
+		"All Work Orders" : {},
+		"Not Started" : {},
+		"Overdue" : {},
+		"Pending" : {},
+		"Completed" : {}
+	}
 
 	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 
@@ -55,61 +55,66 @@ def get_data_list(filters,entry):
 		period = get_period(end_date,filters["range"])
 		for d in entry:
 			if getdate(d.creation) <= getdate(from_date) or getdate(d.creation) <= getdate(end_date) :
-				if data_list.get("all_work_orders").get(period):
-					data_list["all_work_orders"][period] += 1
+				if data_list.get("All Work Orders").get(period):
+					data_list["All Work Orders"][period] += 1
 				else:
-					data_list["all_work_orders"][period] = 1
+					data_list["All Work Orders"][period] = 1
 
 				if d.status == 'Completed':
 					if getdate(d.actual_end_date) < getdate(from_date) or getdate(d.modified) < getdate(from_date):
-						if data_list.get("completed").get(period):
-							data_list["completed"][period] += 1
+						if data_list.get("Completed").get(period):
+							data_list["Completed"][period] += 1
 						else:
-							data_list["completed"][period] = 1
+							data_list["Completed"][period] = 1
+
 					elif getdate(d.actual_start_date) < getdate(from_date) :
-						if data_list.get("pending").get(period):
-							data_list["pending"][period] += 1
-						else:
-							data_list["pending"][period] = 1
+						data_list = get_pending(data_list, period)
+
 					elif getdate(d.planned_start_date) < getdate(from_date) :
-						if data_list.get("overdue").get(period):
-							data_list["overdue"][period] += 1
-						else:
-							data_list["overdue"][period] = 1
+						data_list = get_overdue(data_list, period)
+						
 					else:
-						if data_list.get("not_started").get(period):
-							data_list["not_started"][period] += 1
-						else:
-							data_list["not_started"][period] = 1
+						data_list = get_not_started(data_list, period)
 
 				elif d.status == 'In Process':
-					if getdate(d.actual_start_date) < getdate(from_date):
-						if data_list.get("pending").get(period):
-							data_list["pending"][period] += 1
-						else:
-							data_list["pending"][period] = 1
-					elif getdate(d.planned_start_date) < getdate(from_date):
-						if data_list.get("overdue").get(period):
-							data_list["overdue"][period] += 1
-						else:
-							data_list["overdue"][period] = 1
+					if getdate(d.actual_start_date) < getdate(from_date) :
+						data_list = get_pending(data_list,period)
+
+					elif getdate(d.planned_start_date) < getdate(from_date) :
+						data_list = get_overdue(data_list, period)
+
 					else:
-						if data_list.get("not_started").get(period):
-							data_list["not_started"][period] += 1
-						else:
-							data_list["not_started"][period] = 1
+						data_list = get_not_started(data_list, period)
 
 				elif d.status == 'Not Started':
-					if getdate(d.planned_start_date) < getdate(from_date):
-						if data_list.get("overdue").get(period):
-							data_list["overdue"][period] += 1
-						else:
-							data_list["overdue"][period] = 1
+					if getdate(d.planned_start_date) < getdate(from_date) :
+						data_list = get_overdue(data_list, period)
+
 					else:
-						if data_list.get("not_started").get(period):
-							data_list["not_started"][period] += 1
-						else:
-							data_list["not_started"][period] = 1
+						data_list = get_not_started(data_list, period)
+	return data_list
+
+def get_pending(data_list, period):
+	if data_list.get("Pending").get(period):
+		data_list["Pending"][period] += 1
+	else:
+		data_list["Pending"][period] = 1
+
+	return data_list
+
+def get_overdue(data_list, period):
+	if data_list.get("Overdue").get(period):
+		data_list["Overdue"][period] += 1
+	else:
+		data_list["Overdue"][period] = 1
+
+	return data_list
+
+def get_not_started(data_list, period):
+	if data_list.get("Not Started").get(period):
+		data_list["Not Started"][period] += 1
+	else:
+		data_list["Not Started"][period] = 1
 
 	return data_list
 
@@ -120,33 +125,12 @@ def get_data(filters,columns):
 	data = []
 
 	entry = frappe.get_all("Work Order",
-					fields=["creation", "modified", "actual_start_date", "actual_end_date", "planned_start_date", "planned_end_date", "status"],
-					filters={"docstatus" : 1, "company" : filters["company"] })
+		fields=["creation", "modified", "actual_start_date", "actual_end_date", "planned_start_date", "planned_end_date", "status"],
+		filters={"docstatus" : 1, "company" : filters["company"] })
 
 	data_list = get_data_list(filters,entry)
 
-	labels = [
-		{
-			"name":"All Work Orders",
-			"fieldname":"all_work_orders"
-		},
-		{
-			"name":"Not Started",
-			"fieldname":"not_started"
-		},
-		{
-			"name":"Overdue(Not Started)",
-			"fieldname":"overdue"
-		},
-		{
-			"name":"Pending",
-			"fieldname":"pending"
-		},
-		{
-			"name":"Completed",
-			"fieldname":"completed"
-		},
-	]
+	labels = ["All Work Orders", "Not Started", "Overdue", "Pending", "Completed"]
 
 	chart_data = get_chart_data(data_list,columns)
 
@@ -154,11 +138,11 @@ def get_data(filters,columns):
 
 	for label in labels:
 		work = {}
-		work["Status"] = label.get("name")
+		work["Status"] = label
 		for dummy,end_date in ranges:
 			period = get_period(end_date,filters["range"])
-			if data_list.get(label.get("fieldname")).get(period):
-				work[period] = data_list.get(label.get("fieldname")).get(period)
+			if data_list.get(label).get(period):
+				work[period] = data_list.get(label).get(period)
 			else:
 				work[period] = 0.0
 		data.append(work)
@@ -173,11 +157,11 @@ def get_chart_data(data_list,columns):
 	datasets = []
 
 	for d in labels:
-		all_data.append(data_list.get("all_work_orders").get(d))
-		not_start.append(data_list.get("not_started").get(d))
-		overdue.append(data_list.get("overdue").get(d))
-		pending.append(data_list.get("pending").get(d))
-		completed.append(data_list.get("completed").get(d))
+		all_data.append(data_list.get("All Work Orders").get(d))
+		not_start.append(data_list.get("Not Started").get(d))
+		overdue.append(data_list.get("Overdue").get(d))
+		pending.append(data_list.get("Pending").get(d))
+		completed.append(data_list.get("Completed").get(d))
 
 	datasets.append({'name':'All Work Orders', 'values': all_data})
 	datasets.append({'name':'Not Started', 'values': not_start})
