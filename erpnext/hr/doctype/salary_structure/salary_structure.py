@@ -65,14 +65,14 @@ class SalaryStructure(Document):
 		if not have_a_flexi and flt(self.max_benefits) > 0:
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
-	def get_employees(self, args):
+	def get_employees(self, **kwargs):
 		conditions, values = [], []
-		for field, value in iteritems(args):
+		for field, value in kwargs.items():
 			if value:
 				conditions.append("{0}=%s".format(field))
 				values.append(value)
 
-		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
+		condition_str = " and " + " and ".join(conditions) if conditions else ""
 
 		employees = frappe.db.sql_list("select name from tabEmployee where status='Active' {condition}"
 			.format(condition=condition_str), tuple(values))
@@ -81,12 +81,7 @@ class SalaryStructure(Document):
 
 	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
 			from_date=None, base=None,variable=None):
-		employees = self.get_employees({
-			"grade": grade,
-			"department": department,
-			"designation": designation,
-			"name":employee
-		})
+		employees = self.get_employees(grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:
@@ -110,11 +105,10 @@ def assign_salary_structure_for_employees(employees, salary_structure,from_date=
 
 		salary_structures_assignment = create_salary_structures_assignment(employee, salary_structure, from_date, base, variable)
 		salary_structures_assignments.append(salary_structures_assignment)
-		frappe.db.commit()
 		frappe.publish_progress(count*100/len(set(employees) - set(existing_assignments_for)), title = _("Assigning Structures..."))
 
 	if salary_structures_assignments:
-		frappe.msgprint(_("Structures has been assigned successfully"))
+		frappe.msgprint(_("Structures have been assigned successfully"))
 
 
 def create_salary_structures_assignment(employee, salary_structure, from_date, base, variable):
