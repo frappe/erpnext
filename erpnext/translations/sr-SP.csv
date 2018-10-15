@@ -66,11 +66,11 @@ apps/erpnext/erpnext/hr/doctype/employee/employee.py +211,Please set User ID fie
 DocType: Project,Task Completion,Završenost zadataka
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +184,Set as Lost,Obilježi kao izgubljenu
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +29,Buy,Kupovina
-apps/erpnext/erpnext/accounts/party.py +428,{0} {1} is not active,{0} {1} nije aktivan
+apps/erpnext/erpnext/accounts/party.py +429,{0} {1} is not active,{0} {1} nije aktivan
 DocType: Bin,Reserved Quantity,Rezervisana količina
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +866,Return / Credit Note,Povraćaj / knjižno odobrenje
 DocType: SMS Center,All Employee (Active),Svi zaposleni (aktivni)
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +921,Get Items from BOM,Dodaj stavke iz  БОМ
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +984,Get Items from BOM,Dodaj stavke iz  БОМ
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2052,Please select customer,Odaberite kupca
 apps/erpnext/erpnext/public/js/templates/address_list.html +22,New Address,Nova adresa
 ,Stock Summary,Pregled zalihe
@@ -183,7 +183,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +530,[Error
 DocType: Supplier,Supplier Details,Detalji o dobavljaču
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Forum zajednice
 ,Batch Item Expiry Status,Pregled artikala sa rokom trajanja
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +817,Payment,Plaćanje
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +880,Payment,Plaćanje
 ,Sales Partners Commission,Provizija za prodajne partnere
 DocType: C-Form Invoice Detail,Territory,Teritorija
 DocType: Notification Control,Sales Order Message,Poruka prodajnog naloga
@@ -454,7 +454,7 @@ DocType: Stock Entry,Additional Costs,Dodatni troškovi
 DocType: Project Task,Pending Review,Čeka provjeru
 DocType: Item Default,Default Selling Cost Center,Podrazumijevani centar troškova
 apps/erpnext/erpnext/public/js/pos/pos.html +109,No Customers yet!,Još uvijek nema kupaca!
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +896,Sales Return,Povraćaj prodaje
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +906,Sales Return,Povraćaj prodaje
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +628,No Items added to cart,Nema dodatih artikala na računu
 apps/erpnext/erpnext/selling/doctype/customer/customer_dashboard.py +6,This is based on transactions against this Customer. See timeline below for details,Ovo je zasnovano na transkcijama ovog klijenta. Pogledajte vremensku liniju ispod za dodatne informacije
 DocType: Project Task,Make Timesheet,Kreiraj potrošeno vrijeme
@@ -478,7 +478,7 @@ DocType: HR Settings,Employee Settings,Podešavanja zaposlenih
 apps/erpnext/erpnext/templates/pages/home.html +32,View All Products,Pogledajte sve proizvode
 DocType: Patient Medical Record,Patient Medical Record,Medicinski karton pacijenta
 DocType: Student Attendance Tool,Batch,Serija
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +858,Purchase Receipt,Prijem robe
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +921,Purchase Receipt,Prijem robe
 DocType: Item,Warranty Period (in days),Garantni rok (u danima)
 apps/erpnext/erpnext/config/selling.py +28,Customer database.,Korisnička baza podataka
 DocType: Attendance,Attendance Date,Datum prisustva
@@ -614,7 +614,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +78,In Value,Pr
 DocType: Expense Claim,Employees Email Id,ID email Zaposlenih
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +54,Tree Type,Tip stabla
 DocType: Stock Entry,Update Rate and Availability,Izmijenite cijenu i dostupnost
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1086,Supplier Quotation,Ponuda dobavljača
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1149,Supplier Quotation,Ponuda dobavljača
 DocType: Material Request Item,Quantity and Warehouse,Količina i skladište
 DocType: Purchase Invoice,Taxes and Charges Added,Porezi i naknade dodate
 DocType: Work Order,Warehouses,Skladišta
@@ -676,7 +676,7 @@ apps/erpnext/erpnext/stock/doctype/batch/batch.js +84,To Warehouse,U skladište
 DocType: Account,Is Group,Je grupa
 DocType: Purchase Invoice,Contact Person,Kontakt osoba
 DocType: Item,Item Code for Suppliers,Dobavljačeva šifra
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +823,Return / Debit Note,Povraćaj / knjižno zaduženje
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +886,Return / Debit Note,Povraćaj / knjižno zaduženje
 DocType: Request for Quotation Supplier,Request for Quotation Supplier,Zahtjev za ponudu dobavljača
 ,LeaderBoard,Tabla
 DocType: Lab Test Groups,Lab Test Groups,Labaratorijske grupe
@@ -830,7 +830,7 @@ apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Buying Amo
 DocType: Purchase Invoice Item,Valuation Rate,Prosječna nab. cijena
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,ID Projekta
 DocType: Purchase Invoice,Invoice Copy,Kopija Fakture
-apps/erpnext/erpnext/projects/doctype/project/project.py +278,You have been invited to collaborate on the project: {0},Позвани сте да сарађујете на пројекту: {0}
+apps/erpnext/erpnext/projects/doctype/project/project.py +279,You have been invited to collaborate on the project: {0},Позвани сте да сарађујете на пројекту: {0}
 DocType: Journal Entry Account,Purchase Order,Porudžbenica
 DocType: Sales Invoice Item,Rate With Margin,Cijena sa popustom
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1182,"Search by item code, serial number, batch no or barcode","Pretraga po šifri, serijskom br. ili bar kodu"
@@ -852,7 +852,7 @@ DocType: Purchase Invoice,Return,Povraćaj
 DocType: Sales Order Item,Delivery Warehouse,Skladište dostave
 DocType: Purchase Invoice,Total (Company Currency),Ukupno bez PDV-a (Valuta)
 DocType: Sales Invoice,Change Amount,Kusur
-apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1013,Opportunity,Prilika
+apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1076,Opportunity,Prilika
 DocType: Sales Order,Fully Delivered,Kompletno isporučeno
 DocType: Leave Control Panel,Leave blank if considered for all employee types,Ostavite prazno ako se podrazumijeva za sve tipove Zaposlenih
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +594,Disc,Popust
