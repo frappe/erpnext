@@ -224,10 +224,11 @@ class ExpenseClaim(AccountsController):
 			self.total_advance_amount += flt(d.allocated_amount)
 
 		if self.total_advance_amount:
-			if flt(self.total_advance_amount) > flt(self.total_claimed_amount):
+			precision = self.precision("total_advance_amount")
+			if flt(self.total_advance_amount, precision) > flt(self.total_claimed_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
 			if self.total_sanctioned_amount \
-					and flt(self.total_advance_amount) > flt(self.total_sanctioned_amount):
+					and flt(self.total_advance_amount, precision) > flt(self.total_sanctioned_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
