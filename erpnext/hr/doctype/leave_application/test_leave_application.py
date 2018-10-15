@@ -449,3 +449,23 @@ def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, el
 	}).insert()
 
 	allocate_leave.submit()
+
+def make_leave_application(**args):
+	args = frappe._dict(args)
+	if args.leave_type and not frappe.db.exists("Leave Type", args.leave_type):
+		frappe.get_doc({
+			"doctype": "Leave Type",
+			"leave_type_name": args.leave_type,
+			"allow_negative": args.allow_negative
+		}).insert()
+
+	la = frappe.get_doc(dict(
+		doctype = 'Leave Application',
+		employee = args.employee,
+		leave_type = args.leave_type,
+		from_date = args.from_date or nowdate(),
+		to_date = args.to_date or nowdate(),
+		company = "_Test Company",
+		status = "Approved"
+	))
+	la.submit()

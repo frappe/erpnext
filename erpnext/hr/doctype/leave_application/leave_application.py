@@ -57,6 +57,8 @@ class LeaveApplication(Document):
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()
+		if self.salary_slip:
+			frappe.throw(_("Cannot cancel, Salary Slip {0} has been created against this").format(self.salary_slip))
 
 	def validate_applicable_after(self):
 		if self.leave_type:
@@ -195,10 +197,7 @@ class LeaveApplication(Document):
 					consider_all_leaves_in_the_allocation_period=True)
 
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
-					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
-						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
-							.format(self.leave_type))
-					else:
+					if not frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.throw(_("There is not enough leave balance for Leave Type {0}")
 							.format(self.leave_type))
 
