@@ -239,7 +239,7 @@ class Subscription(Document):
 		invoice = frappe.new_doc('Sales Invoice')
 		invoice.set_posting_time = 1
 		invoice.posting_date = self.current_invoice_start
-		invoice.customer = self.get_customer(self.subscriber)
+		invoice.customer = self.customer
 
 		# Subscription is better suited for service items. I won't update `update_stock`
 		# for that reason
@@ -282,13 +282,6 @@ class Subscription(Document):
 
 		return invoice
 
-	@staticmethod
-	def get_customer(subscriber_name):
-		"""
-		Returns the `Customer` linked to the `Subscriber`
-		"""
-		return frappe.db.get_value('Subscriber', subscriber_name, 'customer')
-
 	def get_items_from_plans(self, plans, prorate=0):
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
@@ -297,7 +290,7 @@ class Subscription(Document):
 			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 		items = []
-		customer = self.get_customer(self.subscriber)
+		customer = self.customer
 		for plan in plans:
 			item_code = frappe.db.get_value("Subscription Plan", plan.plan, "item")
 			if not prorate:
