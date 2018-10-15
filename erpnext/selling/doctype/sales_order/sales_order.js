@@ -324,7 +324,16 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				for_raw_material_request: 1
 			},
 			callback: function(r) {
-				me.make_raw_material_request_dialog(r);
+				if(!r.message) {
+					frappe.msgprint({
+						message: __('No Items with Bill of Materials.'),
+						indicator: 'orange'
+					});
+					return;
+				}
+				else {
+					me.make_raw_material_request_dialog(r);
+				}
 			}
 		});
 	},
