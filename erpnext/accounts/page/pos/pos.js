@@ -1,6 +1,14 @@
 frappe.provide("erpnext.pos");
 {% include "erpnext/public/js/controllers/taxes_and_totals.js" %}
 
+/**
+ * Returns a randon number.
+ * @param {Number} max maximum random number that can be generated
+ */
+function getRandomInt(max = 999) {
+	return Math.floor(Math.random() * Math.floor(max));
+  }
+
 frappe.pages['pos'].on_page_load = function (wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -1639,7 +1647,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (this.frm.doc.offline_pos_name) {
 			this.update_invoice();
 		} else {
-			this.frm.doc.offline_pos_name = $.now();
+			this.frm.doc.offline_pos_name = `${getRandomInt()}-${$.now()}`;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
 			this.frm.doc.pos_profile = this.pos_profile_data['name'];
