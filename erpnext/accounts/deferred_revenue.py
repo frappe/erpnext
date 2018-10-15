@@ -35,8 +35,8 @@ def validate_service_stop_date(doc):
 def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 	# check for the purchase invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
-		select parent from `tabPurchase Invoice Item` where service_start_date<=%s and service_end_date>=%s
-		and enable_deferred_expense = 1 and docstatus = 1
+		select distinct parent from `tabPurchase Invoice Item` where service_start_date<=%s and service_end_date>=%s
+		and enable_deferred_expense = 1 and docstatus = 1 and ifnull(amount, 0) > 0
 	''', (end_date or today(), start_date or add_months(today(), -1)))
 
 	# For each invoice, book deferred expense
@@ -47,8 +47,8 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 	# check for the sales invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
-		select parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
-		and enable_deferred_revenue = 1 and docstatus = 1
+		select distinct parent from `tabSales Invoice Item` where service_start_date<=%s and service_end_date>=%s
+		and enable_deferred_revenue = 1 and docstatus = 1 and ifnull(amount, 0) > 0
 	''', (end_date or today(), start_date or add_months(today(), -1)))
 
 	# For each invoice, book deferred revenue
@@ -157,6 +157,7 @@ def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 				"credit": base_amount,
 				"credit_in_account_currency": amount,
 				"cost_center": item.cost_center,
+				"voucher_detail_no": item.name,
 				'posting_date': booking_end_date,
 				'project': project
 			}, account_currency)

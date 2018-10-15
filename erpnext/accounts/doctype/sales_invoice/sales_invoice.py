@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -54,9 +54,18 @@ class SalesInvoice(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.outstanding_amount > 0:
+		if cint(self.is_return) == 1:
+			self.indicator_title = _("Return")
+			self.indicator_color = "darkgrey"
+		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
 			self.indicator_title = _("Unpaid")
+		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+			self.indicator_color = "red"
+			self.indicator_title = _("Overdue")
+		elif self.outstanding_amount < 0:
+			self.indicator_title = _("Credit Note Issued")
+			self.indicator_color = "darkgrey"
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")

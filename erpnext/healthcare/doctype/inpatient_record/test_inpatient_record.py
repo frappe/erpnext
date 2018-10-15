@@ -105,7 +105,9 @@ def get_healthcare_service_unit():
 			parent_service_unit.healthcare_service_unit_name = "All Healthcare Service Units"
 			parent_service_unit.is_group = 1
 			parent_service_unit.save(ignore_permissions = True)
-		service_unit.parent_healthcare_service_unit = "All Healthcare Service Units"
+			service_unit.parent_healthcare_service_unit = parent_service_unit.name
+		else:
+			service_unit.parent_healthcare_service_unit = service_unit_parent_name[0][0]
 		service_unit.save(ignore_permissions = True)
 		return service_unit.name
 	return service_unit

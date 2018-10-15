@@ -334,14 +334,15 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-		duplicate_items = list(get_duplicates(check_list))
-		if duplicate_items:
-			li = []
-			for i in duplicate_items:
-				li.append("{0} on row {1}".format(i.item_code, i.idx))
-			duplicate_list = '<br>' + '<br>'.join(li)
+		if not self.allow_same_item_multiple_times:
+			duplicate_items = list(get_duplicates(check_list))
+			if duplicate_items:
+				li = []
+				for i in duplicate_items:
+					li.append("{0} on row {1}".format(i.item_code, i.idx))
+				duplicate_list = '<br>' + '<br>'.join(li)
 
-			frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
+				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""

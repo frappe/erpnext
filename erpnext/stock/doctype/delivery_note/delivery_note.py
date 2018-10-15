@@ -460,6 +460,7 @@ def make_delivery_trip(source_name, target_doc=None):
 		target_doc.customer_address = source_parent.shipping_address
 		target_doc.contact = source_parent.contact_person
 		target_doc.customer_contact = source_parent.contact_display
+		target_doc.grand_total = source_parent.grand_total
 
 		# Append unique Delivery Notes in Delivery Trip
 		delivery_notes.append(target_doc.delivery_note)

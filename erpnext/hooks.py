@@ -12,7 +12,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '12.x.x-develop'
-staging_version = '11.0.3-beta.2'
+staging_version = '11.0.3-beta.11'
 
 error_report_email = "support@erpnext.com"
 
@@ -25,6 +25,7 @@ web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
+	"Event": "public/js/event.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"

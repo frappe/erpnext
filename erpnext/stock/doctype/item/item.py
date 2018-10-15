@@ -122,6 +122,7 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
 
 		if not self.get("__islocal"):
@@ -256,7 +257,7 @@ class Item(WebsiteGenerator):
 						"file_url": self.website_image,
 						"attached_to_doctype": "Item",
 						"attached_to_name": self.name
-					}).insert()
+					}).save()
 
 				except IOError:
 					self.website_image = None
@@ -662,6 +663,12 @@ class Item(WebsiteGenerator):
 					template_item.flags.dont_update_variants = True
 					template_item.flags.ignore_permissions = True
 					template_item.save()
+
+	def validate_item_defaults(self):
+		companies = list(set([row.company for row in self.item_defaults]))
+
+		if len(companies) != len(self.item_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""

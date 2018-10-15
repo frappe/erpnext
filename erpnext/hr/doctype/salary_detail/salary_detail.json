@@ -385,7 +385,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "1", 
+   "default": "0", 
    "depends_on": "eval:doc.parenttype=='Salary Structure'", 
    "fetch_from": "", 
    "fieldname": "amount_based_on_formula", 
@@ -692,7 +692,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-07-04 16:28:32.314907", 
+ "modified": "2018-09-20 16:59:33.622652", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Detail", 
@@ -706,5 +706,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

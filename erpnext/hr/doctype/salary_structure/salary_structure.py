@@ -18,14 +18,21 @@ class SalaryStructure(Document):
 		self.validate_max_benefits_with_flexi()
 
 	def set_missing_values(self):
-		fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
-				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component), fields, as_dict=1)
+				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component),
+					overwritten_fields + overwritten_fields_if_missing, as_dict=1)
 				if component_default_value:
-					for fieldname, value in iteritems(component_default_value):
+					for fieldname in overwritten_fields:
+						value = component_default_value.get(fieldname)
 						if d.get(fieldname) != value:
-							d[fieldname] = value		
+							d.set(fieldname, value)
+
+					if not (d.get("amount") or d.get("formula")):
+						for fieldname in overwritten_fields_if_missing:
+							d.set(fieldname, component_default_value.get(fieldname))
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
