@@ -133,19 +133,68 @@ def check_entry_exists(program):
 	try:
 		activity_name = frappe.get_all("Course Activity", filters={"student_id": get_student_id(frappe.session.user), "program_name": program})[0]
 	except IndexError:
-		print("------ Got No Doc ------")
 		return True, None
 	else:
-		print("------ Got A Doc ------")
 		return None, frappe.get_doc("Course Activity", activity_name)
+
+def get_contents_in_course(course_name):
+	try:
+		course_doc = frappe.get_doc("Course", {"name":course_name, "is_published": True})
+		return [frappe.get_doc("Content", content.content) for content in course_doc.get_all_children()]
+	except frappe.DoesNotExistError:
+		return None
+
+def get_courses_in_program(program):
+	try:
+		program_doc = frappe.get_doc("Program", program)
+		if program_doc.is_published:
+			course_list = [frappe.get_doc("Course", course.course_name) for course in program_doc.get_all_children()]
+			return [course for course in course_list if course.is_published == True]
+		else:
+			return None
+	except frappe.DoesNotExistError:
+		return None
+
+def get_program():
+	program_list = frappe.get_list("Program", filters={"is_published": is_published})
+	if program_list:
+		return program_list
+	else:
+		return None
+
+def get_featured_program():
+	featured_list = frappe.get_list("Program", filters={"is_published": True, "is_featured": True})
+	if featured_list:
+		return featured_list
+	else:
+		return None
+
+@frappe.whitelist()
+def add_course_enrollment(course, email):
+	student_id = get_student_id(email)
+	if not get_course_enrollment(course, email):
+		enrollment = frappe.get_doc({
+			"doctype": "Course Enrollment",
+			"student": student_id,
+			"course": course
+		})
+		enrollment.save()
+		frappe.db.commit()
+		return enrollment
+
+def get_course_enrollment(course, email):
+	student_id = get_student_id(email)
+	try:
+		return frappe.get_list("Course Enrollment", filters={'course':course, 'student':student_id})[0]
+	except IndexError:
+		return None
 
 def get_student_id(email):
 	"""Returns Student ID, example EDU-STU-2018-00001 from email address
 	
 	:params email: email address of the student"""
 	try:
-		student = frappe.get_list('Student', filters={'student_email_id': email})[0].name
-		return student
+		return frappe.get_list('Student', filters={'student_email_id': email})[0].name
 	except IndexError:
 		frappe.throw("Student Account with email:{0} does not exist".format(email))
 
