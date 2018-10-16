@@ -17,10 +17,10 @@ frappe.query_reports["BOM Stock Report"] = {
 			"label": __("Show exploded view"),
 			"fieldtype": "Check"
 		}, {
-					"fieldname": "qty_to_produce",
-					"label": __("Quantity to Produce"),
-					"fieldtype": "Int",
-					"default": "1"
+			"fieldname": "qty_to_produce",
+			"label": __("Quantity to Produce"),
+			"fieldtype": "Int",
+			"default": "1"
 		 },
 	],
 	"formatter": function(value, row, column, data, default_formatter) {
