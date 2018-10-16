@@ -155,17 +155,17 @@ def get_quiz(content):
 	:params content: name of a Content doctype with content_type quiz"""
 	try:
 		quiz_doc = frappe.get_doc("Content", content)
-		if quiz_doc.content_type == "Quiz":
-			import json
-			quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
-			data = []
-			for question in quiz:
-				d = {}
-				d['Options'] = [{'option':item.option,'is_correct':item.is_correct} for item in quiz[0].options]
-				d['Question'] = question.question
-				data.append(d)
-			return json.dumps(data)
-		else:
+		if quiz_doc.content_type != "Quiz":
 			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
+		
+		import json
+		quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
+		data = []
+		for question in quiz:
+			d = {}
+			d['Question'] = question.question
+			d['Options'] = [item.option for item in quiz[0].options]
+			data.append(d)
+		return data
 	except frappe.DoesNotExistError:
-		return None
+		frappe.throw("The quiz \"{0}\" does not exist".format(content))
