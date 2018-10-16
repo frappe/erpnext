@@ -75,7 +75,7 @@ class DeliveryNote(SellingController):
 		item_meta = frappe.get_meta("Delivery Note Item")
 		print_hide_fields = {
 			"parent": ["grand_total", "rounded_total", "in_words", "currency", "total", "taxes"],
-			"items": ["rate", "amount", "price_list_rate", "discount_percentage"]
+			"items": ["rate", "amount", "discount_amount", "price_list_rate", "discount_percentage"]
 		}
 
 		for key, fieldname in print_hide_fields.items():
