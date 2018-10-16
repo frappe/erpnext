@@ -161,21 +161,21 @@
 					</td>
 					{% } %}
 					<td style="text-align: right">
-						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"]) %}</td>
+						{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}</td>
 
 					{% if(!filters.show_pdc_in_print) { %}
 						<td style="text-align: right">
-							{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
+							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
 						<td style="text-align: right">
-							{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["Credit Note"], data[i]["currency"]) : format_currency(data[i]["Debit Note"], data[i]["currency"])  %}</td>
+							{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"]) : format_currency(data[i]["debit_note"], data[i]["currency"])  %}</td>
 					{% } %}
 					<td style="text-align: right">
-						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
+						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 
 					{% if(filters.show_pdc_in_print) { %}
 						{% if(report.report_name === "Accounts Receivable") { %}
 							<td style="text-align: right">
-								{%= data[i][__("Customer LPO")] %}</td>
+								{%= data[i]["po_no"] %}</td>
 						{% } %}
 						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
 						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>

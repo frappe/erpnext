@@ -83,6 +83,7 @@ class ReceivablePayableReport(object):
 			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
 				columns.append({
 					"label": label,
+					"fieldname":label,
 					"fieldtype": "Currency",
 					"options": "currency",
 					"width": 120
@@ -104,9 +105,13 @@ class ReceivablePayableReport(object):
 		]
 
 		if args.get('party_type') == 'Customer':
-			columns += [_("Customer LPO") + ":Data:100"]
+			columns.append({
+				"label": _("Customer LPO"),
+				"fieldtype": "Data",
+				"fieldname": "po_no",
+				"width": 100,
+			})
 			columns += [_("Delivery Note") + ":Data:100"]
-
 		if args.get("party_type") == "Customer":
 			columns += [
 				_("Territory") + ":Link/Territory:80",
