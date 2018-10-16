@@ -162,8 +162,9 @@ def get_program():
 	else:
 		return None
 
-def get_featured_program():
-	featured_list = frappe.get_list("Program", filters={"is_published": True, "is_featured": True})
+def get_featured_programs():
+	featured_programs_name = frappe.get_list("Program", filters={"is_published": True, "is_featured": True})
+	featured_list = [frappe.get_doc("Program", program["name"]) for program in featured_programs_name]
 	if featured_list:
 		return featured_list
 	else:
