@@ -514,7 +514,8 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 		if default_price_list:
 			target.buying_price_list = default_price_list
 
-		target.payment_terms_template = ""
+		if target.get('payment_terms_template'): del target['payment_terms_template']
+		if target.get('address_display'): del target['address_display']
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
