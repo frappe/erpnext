@@ -72,6 +72,33 @@ class TestDeliveryTrip(unittest.TestCase):
 		self.assertEqual(len(route_list[0]), 2)  # [home_address, locked_stop]
 		self.assertEqual(len(route_list[1]), 3)  # [locked_stop, second_stop, home_address]
 
+	def test_delivery_trip_status_draft(self):
+		self.assertEqual(self.delivery_trip.status, "Draft")
+
+	def test_delivery_trip_status_scheduled(self):
+		self.delivery_trip.submit()
+		self.assertEqual(self.delivery_trip.status, "Scheduled")
+
+	def test_delivery_trip_status_cancelled(self):
+		self.delivery_trip.submit()
+		self.delivery_trip.cancel()
+		self.assertEqual(self.delivery_trip.status, "Cancelled")
+
+	def test_delivery_trip_status_in_transit(self):
+		self.delivery_trip.submit()
+		self.delivery_trip.delivery_stops[0].visited = 1
+		self.delivery_trip.save()
+		self.assertEqual(self.delivery_trip.status, "In Transit")
+
+	def test_delivery_trip_status_completed(self):
+		self.delivery_trip.submit()
+
+		for stop in self.delivery_trip.delivery_stops:
+			stop.visited = 1
+
+		self.delivery_trip.save()
+		self.assertEqual(self.delivery_trip.status, "Completed")
+
 
 def create_driver():
 	if not frappe.db.exists("Driver", "Newton Scmander"):
