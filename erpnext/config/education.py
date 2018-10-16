@@ -219,6 +219,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Course Activity"
+				},
+				{
+					"type": "doctype",
+					"name": "Quiz Activity"
 				}
 			]
 		},
