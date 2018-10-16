@@ -134,6 +134,7 @@ var check_and_set_availability = function(frm) {
 	}
 
 	function show_availability(data) {
+		let selected_practitioner = '';
 		var d = new frappe.ui.Dialog({
 			title: __("Available slots"),
 			fields: [
@@ -162,8 +163,8 @@ var check_and_set_availability = function(frm) {
 		});
 
 		d.set_values({
-			'practitioner': frm.doc.practitioner,
 			'department': frm.doc.department,
+			'practitioner': frm.doc.practitioner,
 			'appointment_date': frm.doc.appointment_date
 		});
 
@@ -191,10 +192,13 @@ var check_and_set_availability = function(frm) {
 		var fd = d.fields_dict;
 
 		d.fields_dict["appointment_date"].df.onchange = () => {
-			show_slots(d, fd)
+			show_slots(d, fd);
 		}
 		d.fields_dict["practitioner"].df.onchange = () => {
-			show_slots(d, fd)
+			if(d.get_value('practitioner') && d.get_value('practitioner') != selected_practitioner){
+				selected_practitioner = d.get_value('practitioner');
+				show_slots(d, fd);
+			}
 		}
 		d.show();
 	}
