@@ -453,7 +453,7 @@ def get_pdc_details(party_type, report_date):
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus=1 and pent.posting_date > %s
+			pent.docstatus < 2 and pent.posting_date > %s
 			and pent.party_type = %s
 			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
@@ -474,7 +474,7 @@ def get_pdc_details(party_type, report_date):
 		on
 			(jea.parent = je.name)
 		where
-			je.docstatus=1 and je.posting_date > %s
+			je.docstatus < 2 and je.posting_date > %s
 			and jea.party_type = %s
 			group by jea.party, jea.reference_name""".format(amount_field), (report_date, party_type), as_dict=1):
 			if (pdc.invoice_no, pdc.party) in pdc_details:
