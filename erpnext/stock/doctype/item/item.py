@@ -123,6 +123,7 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_item_defaults()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -686,6 +687,12 @@ class Item(WebsiteGenerator):
 					template_item.flags.dont_update_variants = True
 					template_item.flags.ignore_permissions = True
 					template_item.save()
+
+	def validate_item_defaults(self):
+		companies = list(set([row.company for row in self.item_defaults]))
+
+		if len(companies) != len(self.item_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
