@@ -50,6 +50,8 @@ change_icons_map = [
 ]
 
 def execute():
+	if "Healthcare" not in frappe.get_active_domains():
+		return
 	change_healthcare_desktop_icons()
 
 def change_healthcare_desktop_icons():
