@@ -1127,7 +1127,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
 			child_item.insert()
-			frappe.db.commit()
 		else:
 			child_item.save()
 
