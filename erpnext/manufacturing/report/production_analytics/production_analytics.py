@@ -55,70 +55,46 @@ def get_data_list(filters,entry):
 		period = get_period(end_date,filters["range"])
 		for d in entry:
 			if getdate(d.creation) <= getdate(from_date) or getdate(d.creation) <= getdate(end_date) :
-				if data_list.get("All Work Orders").get(period):
-					data_list["All Work Orders"][period] += 1
-				else:
-					data_list["All Work Orders"][period] = 1
+				data_list = update_data_list(data_list,"All Work Orders",period)
 
 				if d.status == 'Completed':
 					if getdate(d.actual_end_date) < getdate(from_date) or getdate(d.modified) < getdate(from_date):
-						if data_list.get("Completed").get(period):
-							data_list["Completed"][period] += 1
-						else:
-							data_list["Completed"][period] = 1
+						data_list = update_data_list(data_list, "Completed",period)
 
 					elif getdate(d.actual_start_date) < getdate(from_date) :
-						data_list = get_pending(data_list, period)
+						data_list = update_data_list(data_list, "Pending", period)
 
 					elif getdate(d.planned_start_date) < getdate(from_date) :
-						data_list = get_overdue(data_list, period)
+						data_list = update_data_list(data_list, "Overdue", period)
 						
 					else:
-						data_list = get_not_started(data_list, period)
+						data_list = update_data_list(data_list, "Not Started", period)
 
 				elif d.status == 'In Process':
 					if getdate(d.actual_start_date) < getdate(from_date) :
-						data_list = get_pending(data_list,period)
+						data_list = update_data_list(data_list, "Pending", period)
 
 					elif getdate(d.planned_start_date) < getdate(from_date) :
-						data_list = get_overdue(data_list, period)
+						data_list = update_data_list(data_list, "Overdue", period)
 
 					else:
-						data_list = get_not_started(data_list, period)
+						data_list = update_data_list(data_list, "Not Started", period)
 
 				elif d.status == 'Not Started':
 					if getdate(d.planned_start_date) < getdate(from_date) :
-						data_list = get_overdue(data_list, period)
+						data_list = update_data_list(data_list, "Overdue", period)
 
 					else:
-						data_list = get_not_started(data_list, period)
+						data_list = update_data_list(data_list, "Not Started", period)
 	return data_list
 
-def get_pending(data_list, period):
-	if data_list.get("Pending").get(period):
-		data_list["Pending"][period] += 1
+def update_data_list(data_list, status, period):
+	if data_list.get(status).get(period):
+		data_list[status][period] += 1
 	else:
-		data_list["Pending"][period] = 1
+		data_list[status][period] = 1
 
 	return data_list
-
-def get_overdue(data_list, period):
-	if data_list.get("Overdue").get(period):
-		data_list["Overdue"][period] += 1
-	else:
-		data_list["Overdue"][period] = 1
-
-	return data_list
-
-def get_not_started(data_list, period):
-	if data_list.get("Not Started").get(period):
-		data_list["Not Started"][period] += 1
-	else:
-		data_list["Not Started"][period] = 1
-
-	return data_list
-
-
 
 def get_data(filters,columns):
 
