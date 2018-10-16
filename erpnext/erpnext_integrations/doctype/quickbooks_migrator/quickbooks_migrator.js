@@ -15,15 +15,20 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		// Instead of changing percentage width and message of single progress bar
 		// Show a different porgress bar for every action after some time remove the finished progress bar
  		// Former approach causes the progress bar to dance back and forth.
-		frm.dashboard.hide_progress = frappe.utils.debounce(frm.dashboard.hide_progress, 1000)
  		frappe.realtime.on("quickbooks_progress_update", function (data) {
-			if (data.event == "finish") {
-				frm.dashboard.hide_progress(data.message)
+			frm.dashboard.show_progress(data.message, (data.count / data.total) * 100, data.message)
+			if (data.count == data.total) {
+				window.setTimeout( function(message) {frm.dashboard.hide_progress(message)}, 1500, data.messsage)
 			}
-			else if (data.event == "progress") {
-				frm.dashboard.show_progress(data.message, (data.count / data.total) * 100, data.message)
-			}
-		});
+		})
+		frappe.realtime.on("quickbooks_indicator_status_update", function (data) {
+			var label = data[1]
+			var color = data[0]
+			frm.page.set_indicator(label, color)
+		})
+		frappe.realtime.on("quickbooks_migration_status_complete", function (data) {
+			frappe.msgprint(__("Migration Complete"), __("QuickBooks Migrator"))
+		})
 	},
 	refresh: function(frm){
 		if (!frm.doc.access_token) {
@@ -41,9 +46,11 @@ frappe.ui.form.on('QuickBooks Migrator', {
 
 			frm.toggle_display("company_settings", 1)
 			frm.set_df_property("company", "reqd", 1)
-			frm.add_custom_button(__("Fetch Data"), function () {
-				frm.trigger("fetch_data")
-			});
+			if (frm.doc.company) {
+					frm.add_custom_button(__("Fetch Data"), function () {
+					frm.trigger("fetch_data")
+				});
+			}
 		}
 	}
 });
