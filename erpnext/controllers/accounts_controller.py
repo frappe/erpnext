@@ -1083,8 +1083,6 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	"""
 	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
 	child_item = frappe.new_doc('Purchase Order Item', p_doctype, child_docname)
-	conversion_rate = flt(p_doctype.get('conversion_rate')) or 1.0
-
 	item = frappe.get_doc("Item", item_code)
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
