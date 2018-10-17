@@ -123,7 +123,7 @@ class PaymentRequest(Document):
 			"reference_doctype": "Payment Request",
 			"reference_docname": self.name,
 			"payer_email": self.email_to or frappe.session.user,
-			"payer_name": data.customer_name,
+			"payer_name": frappe.safe_decode(data.customer_name),
 			"order_id": self.name,
 			"currency": self.currency
 		})
