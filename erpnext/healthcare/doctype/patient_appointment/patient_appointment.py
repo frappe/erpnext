@@ -337,11 +337,12 @@ def get_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Patient Appointment", filters)
 
-	data = frappe.db.sql("""select name, patient, practitioner, status,
-		duration, timestamp(appointment_date, appointment_time) as
-		'start' from `tabPatient Appointment` where
-		(appointment_date between %(start)s and %(end)s)
-		and docstatus < 2 {conditions}""".format(conditions=conditions),
+	data = frappe.db.sql("""select p.name, p.patient, p.practitioner, p.status,
+		p.duration, timestamp(p.appointment_date, p.appointment_time) as
+		'start', at.color from `tabPatient Appointment` p left join `tabAppointment Type` at
+		on p.appointment_type=at.name
+		where (p.appointment_date between %(start)s and %(end)s)
+		and p.docstatus < 2 {conditions}""".format(conditions=conditions),
 		{"start": start, "end": end}, as_dict=True, update={"allDay": 0})
 
 	for item in data:
