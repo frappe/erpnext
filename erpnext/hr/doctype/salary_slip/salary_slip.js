@@ -175,10 +175,11 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].depends_on_lwp) == 1) {
-			tbl[i].amount =  Math.round(tbl[i].default_amount)*(flt(doc.payment_days) /
-				cint(doc.total_working_days)*100)/100;
+			tbl[i].amount = Math.round(tbl[i].default_amount) * (flt(doc.payment_days) /
+				cint(doc.total_working_days_in_payroll_frequency) * 100) / 100;
 		} else if(reset_amount) {
-			tbl[i].amount = tbl[i].default_amount;
+			tbl[i].amount = Math.round(tbl[i].default_amount) * (flt(doc.total_working_days) /
+				cint(doc.total_working_days_in_payroll_frequency) * 100) / 100;
 		}
 		if(!tbl[i].do_not_include_in_total) {
 			total_earn += flt(tbl[i].amount);
@@ -197,9 +198,11 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].depends_on_lwp) == 1) {
-			tbl[i].amount = Math.round(tbl[i].default_amount)*(flt(doc.payment_days)/cint(doc.total_working_days)*100)/100;
-		} else if(reset_amount) {
-			tbl[i].amount = tbl[i].default_amount;
+			tbl[i].amount = Math.round(tbl[i].default_amount) * (flt(doc.payment_days) /
+				cint(doc.total_working_days_in_payroll_frequency) * 100) / 100;
+		} else if (reset_amount) {
+			tbl[i].amount = Math.round(tbl[i].default_amount) * (flt(doc.total_working_days) /
+				cint(doc.total_working_days_in_payroll_frequency) * 100) / 100;
 		}
 		if(!tbl[i].do_not_include_in_total) {
 			total_ded += flt(tbl[i].amount);
