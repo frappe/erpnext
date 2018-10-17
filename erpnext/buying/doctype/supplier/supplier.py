@@ -9,6 +9,7 @@ from frappe.model.naming import make_autoname
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext import get_default_company
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -48,3 +49,26 @@ class Supplier(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('supp_master_name') == 'Supplier Name':
 			frappe.db.set(self, "supplier_name", newdn)
+
+	def after_insert(self):
+		if frappe.db.get_single_value('Accounts Settings', 'create_supplier_account_after_insert'):
+			parent_account = frappe.db.get_single_value('Accounts Settings', 'supplier_parent_account')
+			self.create_supplier_account(parent_account)
+
+	def create_supplier_account(self,parent_account):
+		account = frappe.get_doc({
+			"doctype": "Account",
+			"account_name": self.supplier_name,
+			"parent_account":parent_account,
+			"company": get_default_company(),
+			"is_group": 0,
+			"account_type": "Payable",
+		}).insert()
+
+		account_party = frappe.get_doc({
+			"doctype": "Party Account",
+			"company": get_default_company(),
+			"account":  account.name
+		})
+		self.append("accounts", account_party)
+		self.save()
