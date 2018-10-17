@@ -112,9 +112,11 @@ def update_cart(item_code, qty, with_items=False):
 	quotation.payment_schedule = []
 	if not empty_card:
 		quotation.save()
+		cart_count = cstr(len(quotation.get("items")))
 	else:
 		quotation.delete()
 		quotation = None
+		cart_count = 0
 
 	set_cart_count(quotation)
 
@@ -126,11 +128,13 @@ def update_cart(item_code, qty, with_items=False):
 				context),
 			"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
 				context),
+			"cart_count": cart_count
 		}
 	else:
 		return {
 			'name': quotation.name,
-			'shopping_cart_menu': get_shopping_cart_menu(context)
+			'shopping_cart_menu': get_shopping_cart_menu(context),
+			'cart_count': cart_count
 		}
 
 @frappe.whitelist()
