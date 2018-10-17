@@ -314,7 +314,7 @@
    "in_standard_filter": 0,
    "label": "Offline POS Name",
    "length": 0,
-   "no_copy": 0,
+   "no_copy": 1,
    "permlevel": 0,
    "precision": "",
    "print_hide": 1,
@@ -325,7 +325,7 @@
    "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
-   "unique": 0
+   "unique": 1
   },
   {
    "allow_bulk_edit": 0,
@@ -4773,7 +4773,7 @@
  "istable": 0,
  "max_attachments": 0,
  "menu_index": 0,
- "modified": "2018-07-17 13:46:52.449142",
+ "modified": "2018-10-17 18:28:52.449142",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
