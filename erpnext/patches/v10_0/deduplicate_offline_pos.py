@@ -3,16 +3,20 @@ import frappe
 
 def execute():
     duplicates = frappe.db.sql(
-        'select name, offline_pos_name from `tabSales Invoice` where '
-        'offline_pos_name is not null group by '
-        'offline_pos_name having count(*) > 1'
+        """
+        SELECT name, offline_pos_name FROM `tabSales Invoice`
+        WHERE offline_pos_name IS NOT NULL
+        GROUP BY offline_pos_name having count(*) > 1
+        """
     )
 
     for duplicate in duplicates:
         keep, offline_pos_name = duplicate
         duplicate_list = frappe.db.sql(
-            'select name from `tabSales Invoice` where '
-            'offline_pos_name=%s',
+            """
+            SELECT name FROM `tabSales Invoice` WHERE
+            offline_pos_name=%s
+            """,
             offline_pos_name
         )
 
