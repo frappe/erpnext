@@ -12,6 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.rename_doc import update_linked_doctypes
+from erpnext import get_default_company
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -48,6 +49,9 @@ class Customer(TransactionBase):
 	def after_insert(self):
 		'''If customer created from Lead, update customer id in quotations, opportunities'''
 		self.update_lead_status()
+		if frappe.db.get_single_value('Accounts Settings', 'create_customer_account_after_insert'):
+			parent_account = frappe.db.get_single_value('Accounts Settings', 'customer_parent_account')
+			self.create_customer_account(parent_account)
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
@@ -180,6 +184,24 @@ class Customer(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':
 			frappe.db.set(self, "customer_name", newdn)
+
+	def create_customer_account(self,parent_account):
+		account = frappe.get_doc({
+			"doctype": "Account",
+			"account_name": self.customer_name,
+			"parent_account":parent_account,
+			"company": get_default_company(),
+			"is_group": 0,
+			"account_type": "Receivable",
+		}).insert()
+
+		account_party = frappe.get_doc({
+			"doctype": "Party Account",
+			"company": get_default_company(),
+			"account":  account.name
+		})
+		self.append("accounts", account_party)
+		self.save()
 
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
