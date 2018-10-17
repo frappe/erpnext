@@ -1,13 +1,13 @@
-{% macro quiz(loop_index, question_id, question, options) %}
-<div class="question mt-4" id="question" data-question="{{ question_id }}">
-    <h5>{{ loop_index }}{{ question }}</h5>
+{% macro quiz(loop_index, question) %}
+<div class="question mt-4" id="question['question']" data-question="{{ question['id'] }}">
+    <h5>{{ loop_index }}{{ question['question'] }}</h5>
     <div class="options ml-2">
         <div class="form-check pb-1 hidden">
-            <input class="form-check-input" type="radio" name="{{ question_id }}" value="0" checked>
+            <input class="form-check-input" type="radio" name="{{ question['id'] }}" value="0" checked>
         </div>
-        {% for option in options %}
+        {% for option in question['options'] %}
         <div class="form-check pb-1">
-            <input class="form-check-input" type="radio" name="{{ question_id }}" id="{{loop_index}}-{{ option }}" value="{{ loop.index|str }}">
+            <input class="form-check-input" type="radio" name="{{ question['id'] }}" id="{{loop_index}}-{{ option }}" value="{{ option }}">
             <label class="form-check-label" for="{{loop_index}}-{{ option }}">
                 {{ option }}
             </label>
@@ -16,7 +16,6 @@
     </div>
 </div>
 {% endmacro %}
-
 <section class="quiz-section">
     <div class='container'>
         <div class="mt-3 row">
@@ -28,9 +27,8 @@
             <hr>
             <form id="quiz" name="{{ current_content.name }}">
                 <div id="quiz-body">
-                    {% for quiz_item in current_content.quiz %}
-                    {{ quiz(loop.index|str +". ", quiz_item.name, quiz_item.question, [ quiz_item.option_1, quiz_item.option_2,
-                    quiz_item.option_3, quiz_item.option_4]) }}
+                    {% for q in questions %}
+                    {{ quiz(loop.index|str +". ", q) }}
                     {% endfor %}
                 </div>
                 <div class="mt-3">
@@ -43,12 +41,12 @@
                             <h3>Your Score: <span id="result"></span></h3>
                         </div>
                         <div class="col-md-4 text-right">
-                                <a class='btn btn-outline-secondary' href="#">Previous</a>
-                                {% if next_content != None %}
-                                <a class='btn btn-primary' href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
-                                {% else %}
-                                <a class='btn btn-primary' href="/lms/program?program={{ program }}">Finish Course</a>
-                                {% endif %}
+                            <a class='btn btn-outline-secondary' href="#">Previous</a>
+                            {% if next_content != None %}
+                            <a class='btn btn-primary' href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
+                            {% else %}
+                            <a class='btn btn-primary' href="/lms/program?program={{ program }}">Finish Course</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -10,7 +10,7 @@
 
 {% block content %}
 <div id="content-holder" data-type="{{current_content.content_type}}" data-content="{{ current_content.name }}" data-course="{{ current_course.name }}" data-program="{{ current_program }}">
-{% with current_content = current_content, next_content = next_content, course_name = current_course.name, program=current_program%}
+{% with quiz = quiz, current_content = current_content, next_content = next_content, course_name = course_name, program=current_program%}
 {% include "www/lms/templates/includes/" + current_content.content_type.lower() + ".html" %}
 {% endwith %}
 </div>
@@ -23,7 +23,7 @@
         padding-top: 3rem !important;
         padding-bottom: 1rem !important;
     }
-    
+
     .video-description-section {
         padding-top: 0em !important;
     }
