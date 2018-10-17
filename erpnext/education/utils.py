@@ -10,19 +10,19 @@ class OverlapError(frappe.ValidationError): pass
 
 def validate_overlap_for(doc, doctype, fieldname, value=None):
 	"""Checks overlap for specified field.
-	
-	:param fieldname: Checks Overlap for this field 
+
+	:param fieldname: Checks Overlap for this field
 	"""
-	
+
 	existing = get_overlap_for(doc, doctype, fieldname, value)
 	if existing:
 		frappe.throw(_("This {0} conflicts with {1} for {2} {3}").format(doc.doctype, existing.name,
 			doc.meta.get_label(fieldname) if not value else fieldname , value or doc.get(fieldname)), OverlapError)
-	
+
 def get_overlap_for(doc, doctype, fieldname, value=None):
 	"""Returns overlaping document for specified field.
-	
-	:param fieldname: Checks Overlap for this field 
+
+	:param fieldname: Checks Overlap for this field
 	"""
 
 	existing = frappe.db.sql("""select name, from_time, to_time from `tab{0}`
@@ -42,7 +42,7 @@ def get_overlap_for(doc, doctype, fieldname, value=None):
 		}, as_dict=True)
 
 	return existing[0] if existing else None
-	
+
 def validate_duplicate_student(students):
 	unique_students= []
 	for stud in students:
@@ -54,7 +54,7 @@ def validate_duplicate_student(students):
 
 def get_student_name(email=None):
 	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
-	
+
 	:param user: a user email address
 	"""
 	try:
@@ -65,7 +65,7 @@ def get_student_name(email=None):
 @frappe.whitelist()
 def evaluate_quiz(quiz_response, **kwargs):
 	"""LMS Function: Evaluates a simple multiple choice quiz.  It recieves arguments from `www/lms/course.js` as dictionary using FormData[1].
-	
+
 
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
 	[1]: https://developer.mozilla.org/en-US/docs/Web/API/FormData
@@ -192,7 +192,7 @@ def get_course_enrollment(course, email):
 
 def get_student_id(email):
 	"""Returns Student ID, example EDU-STU-2018-00001 from email address
-	
+
 	:params email: email address of the student"""
 	try:
 		return frappe.get_list('Student', filters={'student_email_id': email})[0].name
@@ -200,21 +200,32 @@ def get_student_id(email):
 		frappe.throw("Student Account with email:{0} does not exist".format(email))
 
 def get_quiz(content):
+	try:
+		quiz_doc = frappe.get_doc("Content", content)
+		if quiz_doc.content_type != "Quiz":
+			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
+		quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
+		return quiz
+	except frappe.DoesNotExistError:
+		frappe.throw("The quiz \"{0}\" does not exist".format(content))
+
+def get_quiz_as_dict(content):
 	"""Helper Function to get questions for a quiz
-	
+
 	:params content: name of a Content doctype with content_type quiz"""
 	try:
 		quiz_doc = frappe.get_doc("Content", content)
 		if quiz_doc.content_type != "Quiz":
 			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
-		
+
 		import json
 		quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
 		data = []
 		for question in quiz:
 			d = {}
-			d['Question'] = question.question
-			d['Options'] = [item.option for item in quiz[0].options]
+			d['id'] = question.name
+			d['question'] = question.question
+			d['options'] = [item.option for item in quiz[0].options]
 			data.append(d)
 		return data
 	except frappe.DoesNotExistError:
