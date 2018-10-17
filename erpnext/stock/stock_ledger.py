@@ -8,6 +8,8 @@ from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
 
+from six import iteritems
+
 # future reposting
 class NegativeStockError(frappe.ValidationError): pass
 
@@ -87,7 +89,7 @@ class update_entries_after(object):
 				"allow_negative_stock"))
 
 		self.args = args
-		for key, value in args.iteritems():
+		for key, value in iteritems(args):
 			setattr(self, key, value)
 
 		self.previous_sle = self.get_sle_before_datetime()
@@ -98,7 +100,7 @@ class update_entries_after(object):
 
 		self.company = frappe.db.get_value("Warehouse", self.warehouse, "company")
 		self.precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
-			currency=frappe.db.get_value("Company", self.company, "default_currency", cache=True))
+			currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))
 
 		self.prev_stock_value = self.previous_sle.stock_value or 0.0
 		self.stock_queue = json.loads(self.previous_sle.stock_queue or "[]")
@@ -223,9 +225,10 @@ class update_entries_after(object):
 				tuple(serial_no))[0][0])
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
+
 		if new_stock_qty > 0:
 			new_stock_value = (self.qty_after_transaction * self.valuation_rate) + stock_value_change
-			if new_stock_value > 0:
+			if new_stock_value >= 0:
 				# calculate new valuation rate only if stock value is positive
 				# else it remains the same as that of previous entry
 				self.valuation_rate = new_stock_value / new_stock_qty
@@ -434,7 +437,7 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 		}, previous_sle, as_dict=1, debug=debug)
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
-	allow_zero_rate=False, currency=None, company=None):
+	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
 	# Get valuation rate from last sle for the same item and warehouse
 	if not company:
 		company = erpnext.get_default_company()
@@ -469,7 +472,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 				dict(item_code=item_code, buying=1, currency=currency),
 				'price_list_rate')
 
-	if not allow_zero_rate and not valuation_rate \
+	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
 		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry").format(item_code, voucher_type, voucher_no))

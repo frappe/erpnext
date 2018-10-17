@@ -26,7 +26,6 @@ class ProgramEnrollment(Document):
 			"student": self.student,
 			"program": self.program,
 			"academic_year": self.academic_year,
-			"academic_term": self.academic_term,
 			"docstatus": ("<", 2),
 			"name": ("!=", self.name)
 		})
@@ -85,7 +84,6 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 					"_txt": txt.replace('%', ''),
 					"program": filters['program']
 				})
-
 
 @frappe.whitelist()
 def get_students(doctype, txt, searchfield, start, page_len, filters):

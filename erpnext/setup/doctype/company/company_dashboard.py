@@ -2,9 +2,6 @@ from frappe import _
 
 def get_data():
 	return {
-		'heatmap': True,
-		'heatmap_message': _('This is based on transactions against this Company. See timeline below for details'),
-
 		'graph': True,
 		'graph_method': "frappe.utils.goal.get_monthly_goal_graph_data",
 		'graph_method_args': {

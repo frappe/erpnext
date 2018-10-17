@@ -152,8 +152,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
 		var me = this;
 
-		this.setup_quality_inspection();
-
 		if(this.frm.doc.__islocal) {
 			var currency = frappe.defaults.get_user_default("currency");
 
@@ -205,10 +203,35 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				filters: {
 					docstatus: 1,
 					inspection_type: inspection_type,
+					reference_name: doc.name,
 					item_code: d.item_code
 				}
 			}
 		});
+	},
+
+	make_payment_request: function() {
+		var me = this;
+		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
+			? "Inward" : "Outward";
+
+		frappe.call({
+			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			args: {
+				dt: me.frm.doc.doctype,
+				dn: me.frm.doc.name,
+				recipient_id: me.frm.doc.contact_email,
+				payment_request_type: payment_request_type,
+				party_type: payment_request_type == 'Outward' ? "Supplier" : "Customer",
+				party: payment_request_type == 'Outward' ? me.frm.doc.supplier : me.frm.doc.customer
+			},
+			callback: function(r) {
+				if(!r.exc){
+					var doc = frappe.model.sync(r.message);
+					frappe.set_route("Form", r.message.doctype, r.message.name);
+				}
+			}
+		})
 	},
 
 	onload_post_render: function() {
@@ -229,6 +252,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
+		this.setup_quality_inspection();
 	},
 
 	apply_default_taxes: function() {
@@ -295,7 +319,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
-
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -304,7 +327,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
@@ -344,7 +366,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
-							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
+							uom : item.uom,
+							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
+							cost_center: item.cost_center
 						}
 					},
 
@@ -519,6 +543,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					args: {
 						"posting_date": me.frm.doc.posting_date,
 						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
+						"bill_date": me.frm.doc.bill_date,
 						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
 						"company": me.frm.doc.company
 					},
@@ -562,9 +587,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	bill_date: function() {
+		this.posting_date();
+	},
+
 	recalculate_terms: function() {
 		const doc = this.frm.doc;
-
 		if (doc.payment_terms_template) {
 			this.payment_terms_template();
 		} else if (doc.payment_schedule) {
@@ -596,14 +624,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
 		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
 		/* end manqala */
-
 		var me = this;
 		this.set_dynamic_labels();
-
 		var company_currency = this.get_company_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !this.frm.doc.ignore_pricing_rule) {
+
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
@@ -665,13 +692,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		var args;
+		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].includes(this.frm.doctype)) {
+			args = "for_selling";
+		}
+		else if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
+			args = "for_buying";
+		}
+
 		if (!transaction_date || !from_currency || !to_currency) return;
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
 				transaction_date: transaction_date,
 				from_currency: from_currency,
-				to_currency: to_currency
+				to_currency: to_currency,
+				args: args
 			},
 			callback: function(r) {
 				callback(flt(r.message));
@@ -730,7 +766,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if(doc.doctype != 'Material Request' && frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
@@ -750,7 +786,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-				(item.uom != item.stock_uom)? true: false);
+				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
 
 	},
@@ -758,6 +794,38 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+	},
+
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	},
+
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
+				}
+			})
+		}
 	},
 
 	calculate_net_weight: function(){
@@ -975,7 +1043,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,
-			"supplier_type": me.frm.doc.supplier_type,
+			"supplier_group": me.frm.doc.supplier_group,
 			"currency": me.frm.doc.currency,
 			"conversion_rate": me.frm.doc.conversion_rate,
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
@@ -1006,6 +1074,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"item_group": d.item_group,
 					"brand": d.brand,
 					"qty": d.qty,
+					"uom": d.uom,
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rule": d.pricing_rule,
@@ -1273,16 +1342,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template) {
-			var posting_date = this.frm.doc.bill_date ||
-				this.frm.doc.posting_date || this.frm.doc.transaction_date;
-
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
+			var posting_date = doc.posting_date || doc.transaction_date;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
-					terms_template: this.frm.doc.payment_terms_template,
+					terms_template: doc.payment_terms_template,
 					posting_date: posting_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					grand_total: doc.rounded_total || doc.grand_total,
+					bill_date: doc.bill_date
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {
@@ -1300,6 +1369,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
 					term: row.payment_term,
+					bill_date: this.frm.doc.bill_date,
 					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
@@ -1308,6 +1378,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						for (var d in r.message) {
 							frappe.model.set_value(cdt, cdn, d, r.message[d]);
 						}
+					}
+				}
+			})
+		}
+	},
+
+	blanket_order: function(doc, cdt, cdn) {
+		var me = this;
+		var item = locals[cdt][cdn];
+		if (item.blanket_order && (item.parenttype=="Sales Order" || item.parenttype=="Purchase Order")) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_blanket_order_details",
+				args: {
+					args:{
+						item_code: item.item_code,
+						customer: doc.customer,
+						supplier: doc.supplier,
+						company: doc.company,
+						transaction_date: doc.transaction_date,
+						blanket_order: item.blanket_order
+					}
+				},
+				callback: function(r) {
+					if (!r.message) {
+						frappe.throw(__("Invalid Blanket Order for the selected Customer and Item"));
+					} else {
+						frappe.run_serially([
+							() => frappe.model.set_value(cdt, cdn, "blanket_order_rate", r.message.blanket_order_rate),
+							() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn)
+						]);
 					}
 				}
 			})

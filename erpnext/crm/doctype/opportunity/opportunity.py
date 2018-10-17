@@ -194,7 +194,7 @@ class Opportunity(TransactionBase):
 				self.customer = None
 		elif self.enquiry_from == 'Customer':
 			if not self.customer:
-				msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
+				msgprint(_("Customer is mandatory if 'Opportunity From' is selected as Customer"), raise_exception=1)
 			else:
 				self.lead = None
 
@@ -217,7 +217,7 @@ def make_quotation(source_name, target_doc=None):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
 
-		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
+		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
 		party_account_currency = get_party_account_currency("Customer", quotation.customer,
 			quotation.company) if quotation.customer else company_currency
 
@@ -227,7 +227,7 @@ def make_quotation(source_name, target_doc=None):
 			exchange_rate = 1
 		else:
 			exchange_rate = get_exchange_rate(quotation.currency, company_currency,
-				quotation.transaction_date)
+				quotation.transaction_date, args="for_selling")
 
 		quotation.conversion_rate = exchange_rate
 

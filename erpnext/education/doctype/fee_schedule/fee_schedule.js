@@ -31,7 +31,8 @@ frappe.ui.form.on('Fee Schedule', {
 			return {
 				"program": frm.doc.program,
 				"academic_term": frm.doc.academic_term,
-				"academic_year": frm.doc.academic_year
+				"academic_year": frm.doc.academic_year,
+				"disabled": 0
 			};
 		});
 		frappe.realtime.on("fee_schedule_progress", function(data) {

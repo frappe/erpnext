@@ -5,7 +5,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, add_days, date_diff
+from frappe.utils import cstr, add_days, date_diff, getdate
 from frappe import _
 from frappe.utils.csvutils import UnicodeWriter
 from frappe.model.document import Document
@@ -48,8 +48,9 @@ def add_data(w, args):
 		for employee in employees:
 			existing_attendance = {}
 			if existing_attendance_records \
-				and tuple([date, employee.name]) in existing_attendance_records:
-					existing_attendance = existing_attendance_records[tuple([date, employee.name])]
+				and tuple([getdate(date), employee.name]) in existing_attendance_records:
+					existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
+
 			row = [
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
@@ -98,7 +99,7 @@ def upload():
 	from frappe.modules import scrub
 
 	rows = read_csv_content_from_uploaded_file()
-	rows = filter(lambda x: x and any(x), rows)
+	rows = list(filter(lambda x: x and any(x), rows))
 	if not rows:
 		msg = [_("Please select a csv file")]
 		return {"messages": msg, "error": msg}
@@ -114,6 +115,7 @@ def upload():
 		if not row: continue
 		row_idx = i + 5
 		d = frappe._dict(zip(columns, row))
+
 		d["doctype"] = "Attendance"
 		if d.name:
 			d["docstatus"] = frappe.db.get_value("Attendance", d.name, "docstatus")
@@ -121,6 +123,8 @@ def upload():
 		try:
 			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
+		except AttributeError:
+			pass
 		except Exception as e:
 			error = True
 			ret.append('Error for row (#%d) %s : %s' % (row_idx,

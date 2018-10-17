@@ -33,6 +33,10 @@ class StockController(AccountsController):
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
 					warehouse_account)
+		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
+			gl_entries = []
+			gl_entries = self.get_asset_gl_entry(gl_entries)
+			make_gl_entries(gl_entries, from_repost=from_repost)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -320,17 +324,28 @@ class StockController(AccountsController):
 		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
 			inspection_required_fieldname = "inspection_required_before_delivery"
 
-		if not inspection_required_fieldname or \
-			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock):
+		if ((not inspection_required_fieldname and self.doctype != "Stock Entry") or
+			(self.doctype == "Stock Entry" and not self.inspection_required) or
+			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock)):
 				return
 
 		for d in self.get('items'):
-			if (frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)
-				and not d.quality_inspection):
+			raise_exception = False
+			if (inspection_required_fieldname and not d.quality_inspection and
+				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
+				raise_exception = True
+			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
+				raise_exception = True
 
+			if raise_exception:
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
 					raise frappe.ValidationError
+
+	def update_blanket_order(self):
+		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+		for blanket_order in blanket_orders:
+			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

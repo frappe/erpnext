@@ -6,6 +6,13 @@ cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
 
 frappe.ui.form.on("Salary Slip", {
 	setup: function(frm) {
+		$.each(["earnings", "deductions"], function(i, table_fieldname) {
+			frm.get_field(table_fieldname).grid.editable_fields = [
+				{fieldname: 'salary_component', columns: 6},
+				{fieldname: 'amount', columns: 4}
+			];
+		})
+
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
 			return {
 				filters: {
@@ -32,8 +39,11 @@ frappe.ui.form.on("Salary Slip", {
 	start_date: function(frm, dt, dn){
 		if(frm.doc.start_date){
 			frm.trigger("set_end_date");
-			get_emp_and_leave_details(frm.doc, dt, dn);
 		}
+	},
+
+	end_date: function(frm, dt, dn) {
+		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
 
 	set_end_date: function(frm){
@@ -61,21 +71,20 @@ frappe.ui.form.on("Salary Slip", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.trigger("toggle_reqd_fields")
-		var salary_detail_fields = ['formula', 'abbr', 'statistical_component']
+		var salary_detail_fields = ["formula", "abbr", "statistical_component", "is_tax_applicable",
+			"is_flexible_benefit", "variable_based_on_taxable_salary", "is_additional_component"]
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-	},	
+	},
 
 	salary_slip_based_on_timesheet: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
-	
+
 	payroll_frequency: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		frm.set_value('end_date', '');
-		frm.set_value('start_date', '');
-		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
 
 	employee: function(frm, dt, dn) {
@@ -89,7 +98,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
 	}
-	
+
 })
 
 frappe.ui.form.on('Salary Detail', {
@@ -113,20 +122,17 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 // Get leave details
 //---------------------------------------------------------------------
 var get_emp_and_leave_details = function(doc, dt, dn) {
-	if(!doc.start_date){
-		return frappe.call({
-			method: 'get_emp_and_leave_details',
-			doc: locals[dt][dn],
-			callback: function(r, rt) {
-				cur_frm.refresh();
-				calculate_all(doc, dt, dn);
-			}
-		});
-	}
+	return frappe.call({
+		method: 'get_emp_and_leave_details',
+		doc: locals[dt][dn],
+		callback: function(r, rt) {
+			cur_frm.refresh();
+			calculate_all(doc, dt, dn);
+		}
+	});
 }
 
 cur_frm.cscript.employee = function(doc,dt,dn){
-	doc.salary_structure = ''
 	get_emp_and_leave_details(doc, dt, dn);
 }
 

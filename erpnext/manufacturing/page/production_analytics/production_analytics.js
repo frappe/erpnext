@@ -19,16 +19,14 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 			title: __("Production Analytics"),
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Item", "Company", "Fiscal Year", "Production Order"]
+			doctypes: ["Item", "Company", "Fiscal Year", "Work Order"]
 		});
 
 	},
 	setup_columns: function() {
 
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
-			{id: "name", name: __("Status"), field: "name", width: 100},
+			{id: "name", name: __("Status"), field: "name", width: 100}
 		];
 
 		this.make_date_range_columns();
@@ -51,8 +49,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		this.trigger_refresh_on_change(["company"]);
 		this.trigger_refresh_on_change(["range"]);
 
-		this.show_zero_check()
-		this.setup_chart_check();
+		this.show_zero_check();
 
 	},
 	init_filter_values: function() {
@@ -64,7 +61,9 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 
 		var chart_data = this.get_chart_data ? this.get_chart_data() : null;
 
-		this.chart = new frappeChart.Chart(".chart", {
+		const parent = this.wrapper.find('.chart')[0];
+		this.chart = new Chart(parent, {
+			height: 200,
 			data: chart_data,
 			type: 'line'
 		});
@@ -86,7 +85,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		// add Opening, Closing, Totals rows
 		// if filtered by account and / or voucher
 		var me = this;
-		var all_open_orders = {name:"All Production Orders", "id": "all-open-pos",
+		var all_open_orders = {name:"All Work Orders", "id": "all-open-pos",
 			checked:true};
 		var not_started = {name:"Not Started", "id":"not-started-pos",
 			checked:true};
@@ -97,7 +96,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		var completed = {name:"Completed", "id":"completed-pos",
 			checked:true};
 
-		$.each(frappe.report_dump.data["Production Order"], function(i, d) {
+		$.each(frappe.report_dump.data["Work Order"], function(i, d) {
 			var dateobj = frappe.datetime.str_to_obj(d.creation);
 			var date = frappe.datetime.str_to_user(d.creation.split(" ")[0]);
 

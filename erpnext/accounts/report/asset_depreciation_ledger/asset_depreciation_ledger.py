@@ -2,48 +2,83 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
+from frappe.utils import flt
 from frappe import _
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
-	
+
 def get_data(filters):
-	data = frappe.db.sql("""
-		select 
-			a.name as asset, a.asset_category, a.status, 
-			a.depreciation_method, a.purchase_date, a.gross_purchase_amount,
-			ds.schedule_date as depreciation_date, ds.depreciation_amount, 
-			ds.accumulated_depreciation_amount, 
-			(a.gross_purchase_amount - ds.accumulated_depreciation_amount) as amount_after_depreciation,
-			ds.journal_entry as depreciation_entry
-		from
-			`tabAsset` a, `tabDepreciation Schedule` ds
-		where
-			a.name = ds.parent
-			and a.docstatus=1
-			and ifnull(ds.journal_entry, '') != ''
-			and ds.schedule_date between %(from_date)s and %(to_date)s
-			and a.company = %(company)s
-			{conditions}
-		order by
-			a.name asc, ds.schedule_date asc
-	""".format(conditions=get_filter_conditions(filters)), filters, as_dict=1)
-		
-	return data
-	
-def get_filter_conditions(filters):
-	conditions = ""
-	
+	data = []
+	depreciation_accounts = frappe.db.sql_list(""" select name from tabAccount
+		where ifnull(account_type, '') = 'Depreciation' """)
+
+	filters_data = [["company", "=", filters.get('company')],
+		["posting_date", ">=", filters.get('from_date')],
+		["posting_date", "<=", filters.get('to_date')],
+		["against_voucher_type", "=", "Asset"],
+		["account", "in", depreciation_accounts]]
+
 	if filters.get("asset"):
-		conditions += " and a.name = %(asset)s"
-	
+		filters_data.append(["against_voucher", "=", filters.get("asset")])
+
 	if filters.get("asset_category"):
-		conditions += " and a.asset_category = %(asset_category)s"
-		
-	return conditions
-	
+
+		assets = frappe.db.sql_list("""select name from tabAsset
+			where asset_category = %s and docstatus=1""", filters.get("asset_category"))
+
+		filters_data.append(["against_voucher", "in", assets])
+
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+	if (not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book)):
+		filters_data.append(["finance_book", "in", ['', filters.get('finance_book')]])
+	elif filters.get("finance_book"):
+		filters_data.append(["finance_book", "=", filters.get('finance_book')])
+
+	gl_entries = frappe.get_all('GL Entry',
+		filters= filters_data,
+		fields = ["against_voucher", "debit_in_account_currency as debit", "voucher_no", "posting_date"],
+		order_by= "against_voucher, posting_date")
+
+	if not gl_entries:
+		return data
+
+	assets = [d.against_voucher for d in gl_entries]
+	assets_details = get_assets_details(assets)
+
+	for d in gl_entries:
+		asset_data = assets_details.get(d.against_voucher)
+		if not asset_data.get("accumulated_depreciation_amount"):
+			asset_data.accumulated_depreciation_amount = d.debit
+		else:
+			asset_data.accumulated_depreciation_amount += d.debit
+
+		row = frappe._dict(asset_data)
+		row.update({
+			"depreciation_amount": d.debit,
+			"depreciation_date": d.posting_date,
+			"amount_after_depreciation": (flt(row.gross_purchase_amount) -
+				flt(row.accumulated_depreciation_amount)),
+			"depreciation_entry": d.voucher_no
+		})
+
+		data.append(row)
+
+	return data
+
+def get_assets_details(assets):
+	assets_details = {}
+
+	fields = ["name as asset", "gross_purchase_amount",
+		"asset_category", "status", "depreciation_method", "purchase_date"]
+
+	for d in frappe.get_all("Asset", fields = fields, filters = {'name': ('in', assets)}):
+		assets_details.setdefault(d.asset, d)
+
+	return assets_details
+
 def get_columns():
 	return [
 		{

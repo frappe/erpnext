@@ -68,6 +68,15 @@ frappe.ui.form.on("BOM", {
 		frm.toggle_enable("item", frm.doc.__islocal);
 		toggle_operations(frm);
 
+		frm.set_indicator_formatter('item_code',
+			function(doc) {
+				if (doc.original_item){
+					return (doc.item_code != doc.original_item) ? "orange" : ""
+				}
+				return ""
+			}
+		)
+
 		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
 				frm.events.update_cost(frm);
@@ -85,6 +94,24 @@ frappe.ui.form.on("BOM", {
 				frm.copy_doc();
 			});
 		}
+
+		if(frm.doc.items && frm.doc.allow_alternative_item) {
+			const has_alternative = frm.doc.items.find(i => i.allow_alternative_item === 1);
+			if (frm.doc.docstatus == 0 && has_alternative) {
+				frm.add_custom_button(__('Alternate Item'), () => {
+					erpnext.utils.select_alternate_items({
+						frm: frm,
+						child_docname: "items",
+						warehouse_field: "source_warehouse",
+						child_doctype: "BOM Item",
+						original_item_field: "original_item",
+						condition: (d) => {
+							if (d.allow_alternative_item) {return true;}
+						}
+					})
+				});
+			}
+		}
 	},
 
 	update_cost: function(frm) {
@@ -100,6 +127,23 @@ frappe.ui.form.on("BOM", {
 				if(!r.exc) frm.refresh_fields();
 			}
 		});
+	},
+
+	routing: function(frm) {
+		if (frm.doc.routing) {
+			frappe.call({
+				doc: frm.doc,
+				method: "get_routing",
+				freeze: true,
+				callback: function(r) {
+					if (!r.exc) {
+						frm.refresh_fields();
+						erpnext.bom.calculate_op_cost(frm.doc);
+						erpnext.bom.calculate_total(frm.doc);
+					}
+				}
+			});
+		}
 	}
 });
 
@@ -336,6 +380,14 @@ frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	d.stock_qty = d.qty * d.conversion_factor;
 	refresh_field("stock_qty", d.name, d.parentfield);
+});
+
+frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.db.get_value('Item', {name: d.item_code}, 'allow_alternative_item', (r) => {
+		d.allow_alternative_item = r.allow_alternative_item
+	})
+	refresh_field("allow_alternative_item", d.name, d.parentfield);
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {

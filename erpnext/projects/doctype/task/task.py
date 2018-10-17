@@ -50,7 +50,7 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def validate_progress(self):
-		if self.progress > 100:
+		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
 	def update_depends_on(self):
@@ -69,6 +69,7 @@ class Task(NestedSet):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
+		self.populate_depends_on()
 
 	def unassign_todo(self):
 		if self.status == "Closed" or self.status == "Cancelled":
@@ -77,7 +78,7 @@ class Task(NestedSet):
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
-			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))[0][0]
+			where project = %s and task = %s and docstatus=1""",(self.project, self.name))[0][0]
 
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
@@ -132,10 +133,21 @@ class Task(NestedSet):
 					task.flags.ignore_recursion_check = True
 					task.save()
 
-	def has_webform_permission(doc):
-		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
+	def has_webform_permission(self):
+		project_user = frappe.db.get_value("Project User", {"parent": self.project, "user":frappe.session.user} , "user")
 		if project_user:
 			return True
+
+	def populate_depends_on(self):
+		if self.parent_task:
+			parent = frappe.get_doc('Task', self.parent_task)
+			if not self.name in [row.task for row in parent.depends_on]:
+				parent.append("depends_on", {
+					"doctype": "Task Depends On",
+					"task": self.name,
+					"subject": self.subject
+				})
+				parent.save()
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
@@ -175,27 +187,25 @@ def set_tasks_as_overdue():
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
-	conditions = ''
+
+	filters = [['docstatus', '<', '2']]
 
 	if task:
-		# via filters
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(task))
+		filters.append(['parent_task', '=', task])
 	elif parent and not is_root:
 		# via expand child
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(parent))
+		filters.append(['parent_task', '=', parent])
 	else:
-		conditions += ' and ifnull(parent_task, "")=""'
+		filters.append(['ifnull(`parent_task`, "")', '=', ''])
 
 	if project:
-		conditions += ' and project = "{0}"'.format(frappe.db.escape(project))
+		filters.append(['project', '=', project])
 
-	tasks = frappe.db.sql("""select name as value,
-		subject as title,
-		is_group as expandable
-		from `tabTask`
-		where docstatus < 2
-		{conditions}
-		order by name""".format(conditions=conditions), as_dict=1)
+	tasks = frappe.get_list(doctype, fields=[
+		'name as value',
+		'subject as title',
+		'is_group as expandable'
+	], filters=filters, order_by='name')
 
 	# return tasks
 	return tasks
@@ -216,12 +226,15 @@ def add_node():
 
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
-	data = json.loads(data)['tasks']
-	tasks = data.split('\n')
-	new_doc = {'doctype': 'Task', 'parent_task': parent}
-	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project')
+	data = json.loads(data)
+	new_doc = {'doctype': 'Task', 'parent_task': parent if parent!="All Tasks" else ""}
+	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project') or ""
 
-	for d in tasks:
-		new_doc['subject'] = d
+	for d in data:
+		if not d.get("subject"): continue
+		new_doc['subject'] = d.get("subject")
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
+
+def on_doctype_update():
+	frappe.db.add_index("Task", ["lft", "rgt"])

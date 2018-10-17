@@ -4,64 +4,39 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, cint, getdate
+from frappe.utils import flt, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
+from six import iteritems
 
 class SalaryStructure(Document):
-	
 	def validate(self):
+		self.set_missing_values()
 		self.validate_amount()
-		for e in self.get('employees'):
-			set_employee_name(e)
-		self.validate_date()
 		self.strip_condition_and_formula_fields()
+		self.validate_max_benefits_with_flexi()
 
-	def get_ss_values(self,employee):
-		basic_info = frappe.db.sql("""select bank_name, bank_ac_no
-			from `tabEmployee` where name =%s""", employee)
-		ret = {'bank_name': basic_info and basic_info[0][0] or '',
-			'bank_ac_no': basic_info and basic_info[0][1] or ''}
-		return ret
+	def set_missing_values(self):
+		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
+		for table in ["earnings", "deductions"]:
+			for d in self.get(table):
+				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component),
+					overwritten_fields + overwritten_fields_if_missing, as_dict=1)
+				if component_default_value:
+					for fieldname in overwritten_fields:
+						value = component_default_value.get(fieldname)
+						if d.get(fieldname) != value:
+							d.set(fieldname, value)
+
+					if not (d.get("amount") or d.get("formula")):
+						for fieldname in overwritten_fields_if_missing:
+							d.set(fieldname, component_default_value.get(fieldname))
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
-
-	def validate_date(self):
-		for employee in self.get('employees'):
-			joining_date, relieving_date = frappe.db.get_value("Employee", employee.employee,
-				["date_of_joining", "relieving_date"])
-
-			if employee.from_date and joining_date and getdate(employee.from_date) < joining_date:
-				frappe.throw(_("From Date {0} for Employee {1} cannot be before employee's joining Date {2}")
-					    .format(employee.from_date, employee.employee, joining_date))
-
-		st_name = frappe.db.sql("""select parent from `tabSalary Structure Employee`
-			where
-			employee=%(employee)s
-			and (
-				(%(from_date)s between from_date and ifnull(to_date, '2199-12-31'))
-				or (%(to_date)s between from_date and ifnull(to_date, '2199-12-31'))
-				or (from_date between %(from_date)s and %(to_date)s)
-			)
-			and (
-				exists (select name from `tabSalary Structure`
-				where name = `tabSalary Structure Employee`.parent and is_active = 'Yes')
-			)
-			and parent != %(salary_struct)s""",
-			{
-				'employee': employee.employee,
-				'from_date': employee.from_date,
-				'to_date': (employee.to_date or '2199-12-31'),
-				'salary_struct': self.name
-			})
-
-		if st_name:
-			frappe.throw(_("Active Salary Structure {0} found for employee {1} for the given dates")
-				.format(st_name[0][0], employee.employee))
 
 	def strip_condition_and_formula_fields(self):
 		# remove whitespaces from condition and formula fields
@@ -73,12 +48,29 @@ class SalaryStructure(Document):
 			row.condition = row.condition.strip() if row.condition else ""
 			row.formula = row.formula.strip() if row.formula else ""
 
+	def validate_max_benefits_with_flexi(self):
+		have_a_flexi = False
+		if self.earnings:
+			flexi_amount = 0
+			for earning_component in self.earnings:
+				if earning_component.is_flexible_benefit == 1:
+					have_a_flexi = True
+					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
+					flexi_amount += max_of_component
+			if have_a_flexi and flt(self.max_benefits) == 0:
+				frappe.throw(_("Max benefits should be greater than zero to dispense benefits"))
+			if have_a_flexi and flt(self.max_benefits) > flexi_amount:
+				frappe.throw(_("Total flexible benefit component amount {0} should not be less \
+				than max benefits {1}").format(flexi_amount, self.max_benefits))
+		if not have_a_flexi and flt(self.max_benefits) > 0:
+			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
+
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
 	def postprocess(source, target):
 		if employee:
-			employee_details = frappe.db.get_value("Employee", employee, 
-							["employee_name", "branch", "designation", "department"], as_dict=1)
+			employee_details = frappe.db.get_value("Employee", employee,
+				["employee_name", "branch", "designation", "department"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name
 			target.branch = employee_details.branch
@@ -104,5 +96,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 
 
 @frappe.whitelist()
-def get_employees(**args):
-	return frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name'])
+def get_employees(salary_structure):
+	employees = frappe.get_list('Salary Structure Assignment',
+		filters={'salary_structure': salary_structure}, fields=['employee'])
+	return list(set([d.employee for d in employees]))

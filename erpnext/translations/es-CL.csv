@@ -5,8 +5,8 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Assessment Group,Parent Assessment Group,Grupo de Evaluación Padre
 DocType: Student,Guardians,Guardianes
 DocType: Fee Schedule,Fee Schedule,Programa de Tarifas
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +684,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +929,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +673,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +945,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
 DocType: Homepage,Company Tagline for website homepage,Lema de la empresa para la página de inicio del sitio web
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Student,Guardian Details,Detalles del Guardián
@@ -26,7 +26,7 @@ DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Course Scheduling Tool,Course Scheduling Tool,Herramienta de Programación de cursos
 DocType: Shopping Cart Settings,Checkout Settings,Ajustes de Finalización de Pedido
 DocType: Guardian Interest,Guardian Interest,Interés del Guardián
-apps/erpnext/erpnext/utilities/user_progress.py +227,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
-apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +18,Checkout,Finalizando pedido
+apps/erpnext/erpnext/utilities/user_progress.py +230,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
+apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +6,Checkout,Finalizando pedido
 DocType: Guardian Student,Guardian Student,Guardián del Estudiante
 DocType: BOM Operation,Base Hour Rate(Company Currency),Tarifa Base por Hora (Divisa de Compañía)

@@ -8,7 +8,6 @@ from frappe.utils.make_random import add_random_children
 import frappe.utils
 import random, os, json
 from frappe import _
-from markdown2 import markdown
 
 def make_sample_data(domains, make_dependent = False):
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
@@ -29,7 +28,7 @@ def make_sample_data(domains, make_dependent = False):
 			make_material_request(frappe.get_all("Item"))
 
 	make_projects(domains)
-	import_email_alert()
+	import_notification()
 
 def make_opportunity(items, customer):
 	b = frappe.get_doc({
@@ -152,26 +151,26 @@ def make_projects(domains):
 
 	for t in tasks:
 		with open (os.path.join(os.path.dirname(__file__), "tasks", t['file'])) as f:
-			t['description'] = markdown(f.read())
+			t['description'] = frappe.utils.md_to_html(f.read())
 			del t['file']
 
 		project.append('tasks', t)
 
 	project.insert(ignore_permissions=True)
 
-def import_email_alert():
-	'''Import email alert for task start'''
+def import_notification():
+	'''Import notification for task start'''
 	with open (os.path.join(os.path.dirname(__file__), "tasks/task_alert.json")) as f:
-		email_alert = frappe.get_doc(json.loads(f.read())[0])
-		email_alert.insert()
+		notification = frappe.get_doc(json.loads(f.read())[0])
+		notification.insert()
 
 	# trigger the first message!
-	from frappe.email.doctype.email_alert.email_alert import trigger_daily_alerts
+	from frappe.email.doctype.notification.notification import trigger_daily_alerts
 	trigger_daily_alerts()
 
 def test_sample():
-	frappe.db.sql('delete from `tabEmail Alert`')
+	frappe.db.sql('delete from `tabNotification`')
 	frappe.db.sql('delete from tabProject')
 	frappe.db.sql('delete from tabTask')
 	make_projects('Education')
-	import_email_alert()
+	import_notification()

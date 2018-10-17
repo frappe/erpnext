@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
+from .operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -56,6 +56,11 @@ def get_setup_stages(args=None):
 				'fail_msg': 'Failed to set defaults',
 				'tasks': [
 					{
+						'fn': setup_post_company_fixtures,
+						'args': args,
+						'fail_msg': _("Failed to setup post company fixtures")
+					},
+					{
 						'fn': stage_three,
 						'args': args,
 						'fail_msg': _("Failed to set defaults")
@@ -92,12 +97,15 @@ def setup_complete(args=None):
 	stage_fixtures(args)
 	setup_company(args)
 	setup_taxes(args)
+	setup_post_company_fixtures(args)
 	stage_three(args)
 	stage_four(args)
 	fin(args)
 
 def stage_fixtures(args):
 	install_fixtures.install(args.get("country"))
+	install_fixtures.add_market_segments()
+	install_fixtures.add_sale_stages()
 
 def setup_company(args):
 	defaults_setup.create_price_lists(args)
@@ -107,6 +115,9 @@ def setup_company(args):
 
 def setup_taxes(args):
 	taxes_setup.create_sales_tax(args)
+
+def setup_post_company_fixtures(args):
+	install_fixtures.install_post_company_fixtures(args.get("company_name"))
 
 def stage_three(args):
 	defaults_setup.create_employee_for_self(args)

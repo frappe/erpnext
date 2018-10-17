@@ -42,6 +42,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -50,6 +51,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_name.asset_category",
    "fieldname": "asset_category", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -62,7 +64,7 @@
    "label": "Asset Category", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_name.asset_category", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -73,6 +75,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -81,6 +84,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_name.item_code",
    "fieldname": "item_code", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -93,7 +97,7 @@
    "label": "Item Code", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_name.item_code", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -104,6 +108,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -112,6 +117,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "asset_name.item_name",
    "fieldname": "item_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -124,7 +130,7 @@
    "label": "Item Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "asset_name.item_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -135,6 +141,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -164,6 +171,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -195,6 +203,71 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
+   "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "select_serial_no", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "label": "Select Serial No", 
+   "length": 0, 
+   "no_copy": 0, 
+   "options": "Serial No", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "translatable": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "serial_no", 
+   "fieldtype": "Small Text", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "label": "Serial No", 
+   "length": 0, 
+   "no_copy": 0, 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -224,6 +297,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -255,6 +329,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -284,6 +359,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -292,6 +368,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "maintenance_team.maintenance_manager",
    "fieldname": "maintenance_manager", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -304,7 +381,7 @@
    "label": "Maintenance Manager", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "maintenance_team.maintenance_manager", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -315,6 +392,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -323,6 +401,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "maintenance_team.maintenance_manager_name",
    "fieldname": "maintenance_manager_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -335,7 +414,7 @@
    "label": "Maintenance Manager Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "maintenance_team.maintenance_manager_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -346,6 +425,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -376,6 +456,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -407,6 +488,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -420,7 +502,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-01 15:13:29.816396", 
+ "modified": "2018-05-22 17:20:54.711885",
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset Maintenance", 
@@ -429,7 +511,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -449,7 +530,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

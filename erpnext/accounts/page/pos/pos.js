@@ -123,6 +123,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.sync_sales_invoice()
 		});
 
+		this.page.add_menu_item(__("Cashier Closing"), function () {
+			frappe.set_route('List', 'Cashier Closing');
+		});		
+
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
@@ -131,7 +135,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	email_prompt: function() {
 		var me = this;
 		var fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
-			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
+			{fieldtype: "Section Break", collapsible: 1, label: "CC & Email Template"},
 			{fieldtype: "Section Break"},
 			{label:__("Subject"), fieldtype:"Data", reqd: 1,
 				fieldname:"subject",length:524288},
@@ -288,6 +292,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (callback) {
 					callback();
 				}
+			},
+			error: () => {
+				setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
 			}
 		})
 	},
@@ -301,6 +308,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.customers = r.message.customers;
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
+		this.barcode_data = r.message.barcode_data;
 		this.tax_data = r.message.tax_data;
 		this.contacts = r.message.contacts;
 		this.address = r.message.address || {};
@@ -404,10 +412,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_search: function () {
 		var me = this;
-		this.serach_item = frappe.ui.form.make_control({
+		this.search_item = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
-				"label": "Item",
+				"label": __("Item"),
 				"fieldname": "pos_item",
 				"placeholder": __("Search Item")
 			},
@@ -415,16 +423,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			only_input: true,
 		});
 
-		this.serach_item.make_input();
-		
-		this.serach_item.$input.on("keypress", function (event) {
+		this.search_item.make_input();
+
+		this.search_item.$input.on("keypress", function (event) {
 
 			clearTimeout(me.last_search_timeout);
 			me.last_search_timeout = setTimeout(() => {
-				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+				if((me.search_item.$input.val() != "") || (event.which == 13)) {
 					me.items = me.get_items();
 					me.make_item_list();
-				}				
+				}
 			}, 400);
 		});
 
@@ -678,7 +686,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
 			this.set_customer_value_in_party_field();
-			this.serach_item.$input.focus();
+			this.search_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();
 		}
@@ -1050,6 +1058,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
 						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
+						item_uom: obj.stock_uom,
 						color: frappe.get_palette(obj.item_name),
 						abbr: frappe.get_abbr(obj.item_name)
 					})).tooltip().appendTo($wrap);
@@ -1072,8 +1081,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		if (this.items.length == 1
-			&& this.serach_item.$input.val()) {
-			this.serach_item.$input.val("");
+			&& this.search_item.$input.val()) {
+			this.search_item.$input.val("");
 			this.add_to_cart();
 		}
 	},
@@ -1095,7 +1104,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.items_list = this.apply_category();
 
-		key = this.serach_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
+		key = this.search_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
@@ -1103,17 +1112,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.serach_item.$input.val())) {
+					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
-						return me.item_batch_no[item.item_code] = me.serach_item.$input.val()
+						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
-						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.serach_item.$input.val())) {
+						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search_item.$input.val())) {
 						search_status = false;
-						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
+						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (item.barcode == me.serach_item.$input.val()) {
+					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
-						return item.barcode == me.serach_item.$input.val();
+						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
 						reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase())) {
 						return true
@@ -1185,7 +1194,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					message: __('Discount amount cannot be greater than 100%')
 				});
 				me.update_discount(item_code, discount);
-			}else{	
+			}else{
 				me.update_discount(item_code, discount);
 				me.update_value();
 			}
@@ -1300,10 +1309,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			}
 		});
-
-		if (field == 'qty') {
-			this.remove_zero_qty_item();
-		}
 
 		this.update_paid_amount_status(false)
 	},
@@ -1444,6 +1449,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.set_taxes();
 		this.calculate_outstanding_amount(update_paid_amount);
 		this.set_totals();
+		this.update_total_qty();
 	},
 
 	get_company_currency: function () {
@@ -1514,6 +1520,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 	},
 
+	update_total_qty: function() {
+		var me = this;
+		var qty_total = 0;
+			$.each(this.frm.doc["items"] || [], function (i, d) {
+				if (d.item_code) {
+					qty_total += d.qty;
+				}
+			});
+		this.frm.doc.qty_total = qty_total;
+		this.wrapper.find('.qty-total').text(this.frm.doc.qty_total);
+	},
+
 	set_primary_action: function () {
 		var me = this;
 		this.page.set_primary_action(__("New Cart"), function () {
@@ -1528,8 +1546,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.print_document(html)
 			})
 		}
-		
-		if (this.frm.doc.docstatus == 1) {	
+
+		if (this.frm.doc.docstatus == 1) {
 			this.page.add_menu_item(__("Email"), function () {
 				me.email_prompt()
 			})
@@ -1636,12 +1654,21 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var invoice_data = {};
 		this.si_docs = this.get_doc_from_localstorage();
+
 		if (this.frm.doc.offline_pos_name) {
-			this.update_invoice();
+			this.update_invoice()
+			//to retrieve and set the default payment
+			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
+			invoice_data[this.frm.doc.offline_pos_name].payments[0].amount = this.frm.doc.net_total
+			invoice_data[this.frm.doc.offline_pos_name].payments[0].base_amount = this.frm.doc.net_total
+
+			this.frm.doc.paid_amount = this.frm.doc.net_total
+			this.frm.doc.outstanding_amount = 0
 		} else {
 			this.frm.doc.offline_pos_name = $.now();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
+			this.frm.doc.pos_total_qty = this.frm.doc.qty_total;
 			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
 			this.si_docs.push(invoice_data);

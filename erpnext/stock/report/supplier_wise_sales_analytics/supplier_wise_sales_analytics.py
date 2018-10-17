@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -13,7 +14,7 @@ def execute(filters=None):
 	material_transfer_vouchers = get_material_transfer_vouchers()
 	data = []
 
-	for item_code, suppliers in supplier_details.items():
+	for item_code, suppliers in iteritems(supplier_details):
 		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
 		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
@@ -33,7 +34,7 @@ def execute(filters=None):
 
 				row = [cd.item_code, cd.item_name, cd.description, cd.stock_uom, \
 					consumed_qty, consumed_amount, delivered_qty, delivered_amount, \
-					total_qty, total_amount, list(set(suppliers))]
+					total_qty, total_amount, ','.join(list(set(suppliers)))]
 				data.append(row)
 
 	return columns, data
@@ -85,7 +86,7 @@ def get_suppliers_details(filters):
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
 	if supplier:
-		for item_code, suppliers in item_supplier_map.items():
+		for item_code, suppliers in iteritems(item_supplier_map):
 			if supplier not in suppliers:
 				del item_supplier_map[item_code]
 

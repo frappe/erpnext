@@ -4,7 +4,6 @@ from frappe.email import sendmail_to_system_managers
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item')
 	frappe.reload_doc("stock", "doctype", "customs_tariff_number")
-	frappe.reload_doc("hub_node", "doctype", "hub_category")
 	frappe.reload_doc("accounts", "doctype", "payment_terms_template")
 	frappe.reload_doc("accounts", "doctype", "payment_schedule")
 

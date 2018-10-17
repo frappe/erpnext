@@ -9,13 +9,13 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Production Order",
+					"name": "Work Order",
 					"description": _("Orders released for production."),
 				},
 				{
 					"type": "doctype",
-					"name": "Production Planning Tool",
-					"description": _("Generate Material Requests (MRP) and Production Orders."),
+					"name": "Production Plan",
+					"description": _("Generate Material Requests (MRP) and Work Orders."),
 				},
 				{
 					"type": "doctype",
@@ -92,26 +92,26 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Open Production Orders",
-					"doctype": "Production Order"
+					"name": "Open Work Orders",
+					"doctype": "Work Order"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Production Orders in Progress",
-					"doctype": "Production Order"
+					"name": "Work Orders in Progress",
+					"doctype": "Work Order"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Issued Items Against Production Order",
-					"doctype": "Production Order"
+					"name": "Issued Items Against Work Order",
+					"doctype": "Work Order"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Completed Production Orders",
-					"doctype": "Production Order"
+					"name": "Completed Work Orders",
+					"doctype": "Work Order"
 				},{ 
 					"type": "page",
 					"name": "production-analytics",
@@ -143,12 +143,7 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Production Planning Tool"),
-					"youtube_id": "CzatSl4zJ2Y"
-				},
-				{
-					"type": "help",
-					"label": _("Production Order"),
+					"label": _("Work Order"),
 					"youtube_id": "ZotgLyp2YFY"
 				},
 			]

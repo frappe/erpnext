@@ -16,8 +16,8 @@
   }, 
   {
    "is_child_table": 0, 
-   "local_fieldname": "eval:frappe.db.get_default(\"company\")", 
-   "remote_fieldname": "company_name"
+   "local_fieldname": "eval:frappe.db.get_value('Hub Settings' , 'Hub Settings', 'company_email')", 
+   "remote_fieldname": "hub_seller"
   }, 
   {
    "is_child_table": 0, 
@@ -26,18 +26,18 @@
   }, 
   {
    "is_child_table": 0, 
+   "local_fieldname": "image_list", 
+   "remote_fieldname": "image_list"
+  }, 
+  {
+   "is_child_table": 0, 
    "local_fieldname": "item_group", 
    "remote_fieldname": "item_group"
   }, 
   {
    "is_child_table": 0, 
-   "local_fieldname": "eval:frappe.session.user", 
-   "remote_fieldname": "seller"
-  }, 
-  {
-   "is_child_table": 0, 
-   "local_fieldname": "eval:frappe.db.get_default(\"country\")", 
-   "remote_fieldname": "country"
+   "local_fieldname": "hub_category", 
+   "remote_fieldname": "hub_category"
   }
  ], 
  "idx": 1, 
@@ -45,7 +45,7 @@
  "mapping_name": "Item to Hub Item", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-10-09 17:30:17.890337", 
+ "modified": "2018-08-19 22:20:25.727581", 
  "modified_by": "Administrator", 
  "name": "Item to Hub Item", 
  "owner": "Administrator", 

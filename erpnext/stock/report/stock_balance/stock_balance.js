@@ -27,6 +27,12 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "Item Group"
 		},
 		{
+			"fieldname":"brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
+		},
+		{
 			"fieldname": "item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",

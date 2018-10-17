@@ -18,15 +18,14 @@ class TestPOSProfile(unittest.TestCase):
 			doc.append('item_groups', {'item_group': '_Test Item Group'})
 			doc.append('customer_groups', {'customer_group': '_Test Customer Group'})
 			doc.save()
-
-			items = get_items_list(doc)
+			items = get_items_list(doc, doc.company)
 			customers = get_customers_list(doc)
 
 			products_count = frappe.db.sql(""" select count(name) from tabItem where item_group = '_Test Item Group'""", as_list=1)
 			customers_count = frappe.db.sql(""" select count(name) from tabCustomer where customer_group = '_Test Customer Group'""")
 
-			self.assertEquals(len(items), products_count[0][0])
-			self.assertEquals(len(customers), customers_count[0][0])
+			self.assertEqual(len(items), products_count[0][0])
+			self.assertEqual(len(customers), customers_count[0][0])
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
@@ -53,3 +52,5 @@ def make_pos_profile():
 
 	if not frappe.db.exists("POS Profile", "_Test POS Profile"):
 		pos_profile.insert()
+
+	return pos_profile

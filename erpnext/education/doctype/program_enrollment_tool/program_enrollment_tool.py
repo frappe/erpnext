@@ -7,8 +7,13 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from erpnext.education.api import enroll_student
+from frappe.utils import cint
 
 class ProgramEnrollmentTool(Document):
+	def onload(self):
+		academic_term_reqd = cint(frappe.db.get_single_value('Education Settings', 'academic_term_reqd'))
+		self.set_onload("academic_term_reqd", academic_term_reqd)
+
 	def get_students(self):
 		students = []
 		if not self.get_students_from:
@@ -63,4 +68,4 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment.academic_term = self.academic_term
 				prog_enrollment.student_batch_name = stud.student_batch_name if stud.student_batch_name else self.new_student_batch
 				prog_enrollment.save()
-		frappe.msgprint("{0} Students have been enrolled.".format(total))
+		frappe.msgprint(_("{0} Students have been enrolled").format(total))

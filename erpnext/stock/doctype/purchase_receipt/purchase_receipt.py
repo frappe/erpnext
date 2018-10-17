@@ -13,6 +13,8 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.assets.doctype.asset.asset import get_asset_account
+from six import iteritems
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -123,6 +125,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.status = "Completed"
 
+		
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -254,6 +257,7 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
+		self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -282,7 +286,7 @@ class PurchaseReceipt(BuyingController):
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in valuation_tax.items():
+			for cost_center, amount in iteritems(valuation_tax):
 				if i == len(valuation_tax):
 					applicable_amount = amount_including_divisional_loss
 				else:
@@ -306,6 +310,43 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
+		
+	def get_asset_gl_entry(self, gl_entries):
+		for d in self.get("items"):
+			if d.is_fixed_asset:
+				arbnb_account = self.get_company_default("asset_received_but_not_billed")
+
+				# CWIP entry
+				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
+					company = self.company)
+
+				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
+				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
+
+				cwip_account_currency = get_account_currency(cwip_account)
+				gl_entries.append(self.get_gl_dict({
+					"account": cwip_account,
+					"against": arbnb_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"debit": base_asset_amount,
+					"debit_in_account_currency": (base_asset_amount
+						if cwip_account_currency == self.company_currency else asset_amount)
+				}))
+
+				# Asset received but not billed
+				asset_rbnb_currency = get_account_currency(arbnb_account)
+				gl_entries.append(self.get_gl_dict({
+					"account": arbnb_account,
+					"against": cwip_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+					"credit": base_asset_amount,
+					"credit_in_account_currency": (base_asset_amount
+						if asset_rbnb_currency == self.company_currency else asset_amount)
+				}))
+
+		return gl_entries
 
 	def update_status(self, status):
 		self.set_status(update=True, status = status)
@@ -380,6 +421,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
+			"field_map": {
+				"supplier_warehouse":"supplier_warehouse"
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			},
@@ -391,6 +435,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"parent": "purchase_receipt",
 				"purchase_order_item": "po_detail",
 				"purchase_order": "purchase_order",
+				"is_fixed_asset": "is_fixed_asset",
+				"asset": "asset",
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0

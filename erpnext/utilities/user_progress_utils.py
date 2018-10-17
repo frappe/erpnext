@@ -18,7 +18,7 @@ def set_sales_target(args_data):
 def create_customers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in xrange(1,4):
+	for i in range(1,4):
 		customer = args.get("customer_" + str(i))
 		if customer:
 			try:
@@ -56,14 +56,14 @@ def create_letterhead(args_data):
 def create_suppliers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in xrange(1,4):
+	for i in range(1,4):
 		supplier = args.get("supplier_" + str(i))
 		if supplier:
 			try:
 				doc = frappe.get_doc({
 					"doctype":"Supplier",
 					"supplier_name": supplier,
-					"supplier_type": _("Local"),
+					"supplier_group": _("Local"),
 					"company": defaults.get("company")
 				}).insert()
 
@@ -89,7 +89,7 @@ def create_contact(contact, party_type, party):
 def create_items(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in xrange(1,4):
+	for i in range(1,4):
 		item = args.get("item_" + str(i))
 		if item:
 			default_warehouse = ""
@@ -108,9 +108,12 @@ def create_items(args_data):
 					"is_sales_item": 1,
 					"is_purchase_item": 1,
 					"is_stock_item": 1,
-					"item_group": "Products",
+					"item_group": _("Products"),
 					"stock_uom": _(args.get("item_uom_" + str(i))),
-					"default_warehouse": default_warehouse
+					"item_defaults": [{
+						"default_warehouse": default_warehouse,
+						"company": defaults.get("company_name")
+					}]
 				}).insert()
 
 			except frappe.NameError:
@@ -137,7 +140,7 @@ def make_item_price(item, price_list_name, item_price):
 @frappe.whitelist()
 def create_program(args_data):
 	args = json.loads(args_data)
-	for i in xrange(1,4):
+	for i in range(1,4):
 		if args.get("program_" + str(i)):
 			program = frappe.new_doc("Program")
 			program.program_code = args.get("program_" + str(i))
@@ -150,7 +153,7 @@ def create_program(args_data):
 @frappe.whitelist()
 def create_course(args_data):
 	args = json.loads(args_data)
-	for i in xrange(1,4):
+	for i in range(1,4):
 		if args.get("course_" + str(i)):
 			course = frappe.new_doc("Course")
 			course.course_code = args.get("course_" + str(i))
@@ -163,7 +166,7 @@ def create_course(args_data):
 @frappe.whitelist()
 def create_instructor(args_data):
 	args = json.loads(args_data)
-	for i in xrange(1,4):
+	for i in range(1,4):
 		if args.get("instructor_" + str(i)):
 			instructor = frappe.new_doc("Instructor")
 			instructor.instructor_name = args.get("instructor_" + str(i))
@@ -175,7 +178,7 @@ def create_instructor(args_data):
 @frappe.whitelist()
 def create_room(args_data):
 	args = json.loads(args_data)
-	for i in xrange(1,4):
+	for i in range(1,4):
 		if args.get("room_" + str(i)):
 			room = frappe.new_doc("Room")
 			room.room_name = args.get("room_" + str(i))
@@ -191,7 +194,7 @@ def create_users(args_data):
 		return
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in xrange(1,4):
+	for i in range(1,4):
 		email = args.get("user_email_" + str(i))
 		fullname = args.get("user_fullname_" + str(i))
 		if email:
@@ -231,6 +234,6 @@ def create_users(args_data):
 
 @frappe.whitelist()
 def update_default_domain_actions_and_get_state():
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	update_domain_actions(domain)
 	return get_domain_actions_state(domain)

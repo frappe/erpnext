@@ -9,7 +9,7 @@ from frappe.utils import flt,cstr
 from erpnext.accounts.report.financial_statements import get_period_list
 
 def execute(filters=None):
-	columns, data = [], []
+	columns, data, chart = [], [], []
 	if filters.get('fiscal_year'):
 		company = erpnext.get_default_company()
 		period_list = get_period_list(filters.get('fiscal_year'), filters.get('fiscal_year'),"Monthly", company)
@@ -69,12 +69,12 @@ def get_chart_data(data,period_list):
 	datasets = []
 	if fuel_exp_data:
 		datasets.append({
-			'title': 'Fuel Expenses',
+			'name': 'Fuel Expenses',
 			'values': fuel_exp_data
 		})
 	if service_exp_data:
 		datasets.append({
-			'title': 'Service Expenses',
+			'name': 'Service Expenses',
 			'values': service_exp_data
 		})
 	chart = {

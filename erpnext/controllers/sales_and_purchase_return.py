@@ -12,41 +12,39 @@ def validate_return(doc):
 	if not doc.meta.get_field("is_return") or not doc.is_return:
 		return
 
-	validate_return_against(doc)
-	validate_returned_items(doc)
+	if doc.return_against:
+		validate_return_against(doc)
+		validate_returned_items(doc)
 
 def validate_return_against(doc):
-	if not doc.return_against:
-		frappe.throw(_("{0} is mandatory for Return").format(doc.meta.get_label("return_against")))
+	filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
+	if doc.meta.get_field("customer") and doc.customer:
+		filters["customer"] = doc.customer
+	elif doc.meta.get_field("supplier") and doc.supplier:
+		filters["supplier"] = doc.supplier
+
+	if not frappe.db.exists(filters):
+			frappe.throw(_("Invalid {0}: {1}")
+				.format(doc.meta.get_label("return_against"), doc.return_against))
 	else:
-		filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-		if doc.meta.get_field("customer") and doc.customer:
-			filters["customer"] = doc.customer
-		elif doc.meta.get_field("supplier") and doc.supplier:
-			filters["supplier"] = doc.supplier
+		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
-		if not frappe.db.exists(filters):
-				frappe.throw(_("Invalid {0}: {1}")
-					.format(doc.meta.get_label("return_against"), doc.return_against))
-		else:
-			ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
+		# validate posting date time
+		return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
+		ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
 
-			# validate posting date time
-			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
-			ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
+		if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
+			frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
-			if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
-				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
+		# validate same exchange rate
+		if doc.conversion_rate != ref_doc.conversion_rate:
+			frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
+				.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
 
-			# validate same exchange rate
-			if doc.conversion_rate != ref_doc.conversion_rate:
-				frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
-					.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
-
-			# validate update stock
-			if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
-					frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
-						.format(doc.return_against))
+		# validate update stock
+		if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
+				frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
+					.format(doc.return_against))
 
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -139,7 +137,7 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 					.format(args.item_code), StockOverReturnError)
 			elif abs(current_stock_qty) > max_returnable_qty:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
-					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
+					.format(args.idx, max_returnable_qty, args.item_code), StockOverReturnError)
 
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -151,6 +149,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
+		"conversion_factor": ref_item_row.get("conversion_factor", 1),
 		"batch_no": []
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
@@ -225,11 +224,16 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if doc.doctype == 'Sales Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
+					paid_amount = 0.00
+					base_paid_amount = 0.00
+					data.base_amount = flt(data.amount*source.conversion_rate, source.precision("base_paid_amount"))
+					paid_amount += data.amount
+					base_paid_amount += data.base_amount
 					doc.append('payments', {
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
-						'amount': -1 * data.amount,
-						'base_amount': -1 * data.base_amount
+						'amount': -1 * paid_amount,
+						'base_amount': -1 * base_paid_amount
 					})
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount

@@ -59,5 +59,11 @@ frappe.query_reports["Sales Person-wise Transaction Summary"] = {
 			fieldtype: "Link",
 			options: "Territory",
 		},
+		{
+			fieldname:"show_return_entries",
+			label: __("Show Return Entries"),
+			fieldtype: "Check",
+			default: 0,
+		},
 	]
 }
