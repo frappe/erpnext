@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 from frappe.utils import flt
 from frappe.utils.make_random import get_random
 from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
@@ -19,7 +19,7 @@ def run_projects(current_date):
 def make_timesheet_for_projects(current_date	):
 	for data in frappe.get_all("Task", ["name", "project"], {"status": "Open", "exp_end_date": ("<", current_date)}):
 		employee = get_random("Employee")
-		ts = make_timesheet(employee, simulate = True, billable = 1,
+		ts = make_timesheet(employee, simulate = True, billable = 1, company = erpnext.get_default_company(),
 			activity_type=get_random("Activity Type"), project=data.project, task =data.name)
 
 		if flt(ts.total_billable_amount) > 0.0:
