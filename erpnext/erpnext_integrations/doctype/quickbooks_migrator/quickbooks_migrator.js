@@ -12,25 +12,25 @@ frappe.ui.form.on('QuickBooks Migrator', {
 		frm.call("migrate")
 	},
 	onload: function(frm) {
+		frm.trigger("set_indicator")
+		var domain = frappe.urllib.get_base_url()
+		var redirect_url = `${domain}/api/method/erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator.callback`
+		if (frm.doc.redirect_url != redirect_url) {
+			frm.set_value("redirect_url", redirect_url)
+		}
 		// Instead of changing percentage width and message of single progress bar
 		// Show a different porgress bar for every action after some time remove the finished progress bar
  		// Former approach causes the progress bar to dance back and forth.
+		frm.trigger("set_indicator")
  		frappe.realtime.on("quickbooks_progress_update", function (data) {
 			frm.dashboard.show_progress(data.message, (data.count / data.total) * 100, data.message)
 			if (data.count == data.total) {
 				window.setTimeout( function(message) {frm.dashboard.hide_progress(message)}, 1500, data.messsage)
 			}
 		})
-		frappe.realtime.on("quickbooks_indicator_status_update", function (data) {
-			var label = data[1]
-			var color = data[0]
-			frm.page.set_indicator(label, color)
-		})
-		frappe.realtime.on("quickbooks_migration_status_complete", function (data) {
-			frappe.msgprint(__("Migration Complete"), __("QuickBooks Migrator"))
-		})
 	},
-	refresh: function(frm){
+	refresh: function(frm) {
+		frm.trigger("set_indicator")
 		if (!frm.doc.access_token) {
 			// Unset access_token signifies that we don't have enough information to connect to quickbooks api and fetch data
 			if (frm.doc.authorization_url) {
@@ -52,5 +52,20 @@ frappe.ui.form.on('QuickBooks Migrator', {
 				});
 			}
 		}
-	}
+	},
+	set_indicator: function(frm) {
+		var indicator_map = {
+			"Connecting to QuickBooks": [__("Connecting to QuickBooks"), "orange"],
+			"Connected to QuickBooks": [__("Connected to QuickBooks"), "green"],
+			"In Progress": [__("In Progress"), "orange"],
+			"Complete": [__("Complete"), "green"],
+			"Failed": [__("Failed"), "red"],
+		}
+		if (frm.doc.status) {
+			var indicator = indicator_map[frm.doc.status]
+			var label = indicator[0]
+			var color = indicator[1]
+			frm.page.set_indicator(label, color)
+		}
+	},
 });

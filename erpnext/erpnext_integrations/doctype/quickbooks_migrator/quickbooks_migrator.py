@@ -99,7 +99,6 @@ class QuickBooksMigrator(Document):
 			self.set_indicator("Failed")
 			self._log_error(e)
 
-		frappe.publish_realtime("quickbooks_migration_status_complete")
 		frappe.db.commit()
 
 
@@ -1270,12 +1269,6 @@ class QuickBooksMigrator(Document):
 
 
 	def set_indicator(self, status):
-		indicator_map = {
-			"Connecting to QuickBooks": ["orange", _("Connecting to QuickBooks")],
-			"Connected to QuickBooks": ["green", _("Connected to QuickBooks")],
-			"In Progress": ["orange", _("In Progress")],
-			"Complete": ["green", _("Complete")],
-			"Failed": ["red", _("Failed")],
-		}
-		frappe.publish_realtime("quickbooks_indicator_status_update", indicator_map[status])
-
+		self.status = status
+		self.save()
+		frappe.db.commit()
