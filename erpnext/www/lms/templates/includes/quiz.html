@@ -1,15 +1,15 @@
 {% macro quiz(loop_index, question) %}
-<div class="question mt-4" id="question['question']" data-question="{{ question['id'] }}">
-    <h5>{{ loop_index }}{{ question['question'] }}</h5>
+<div class="question mt-4" id="{{ question.question }}" data-question="{{ question.name }}">
+    <h5>{{ loop_index }}{{ question.question }}</h5>
     <div class="options ml-2">
         <div class="form-check pb-1 hidden">
             <input class="form-check-input" type="radio" name="{{ question['id'] }}" value="0" checked>
         </div>
-        {% for option in question['options'] %}
+        {% for option in question.options %}
         <div class="form-check pb-1">
-            <input class="form-check-input" type="radio" name="{{ question['id'] }}" id="{{loop_index}}-{{ option }}" value="{{ option }}">
-            <label class="form-check-label" for="{{loop_index}}-{{ option }}">
-                {{ option }}
+            <input class="form-check-input" type="radio" name="{{ question.name }}" id="{{loop_index}}-{{ option.option }}" value="{{ option.option }}">
+            <label class="form-check-label" for="{{loop_index}}-{{ option.option }}">
+                {{ option.option }}
             </label>
         </div>
         {% endfor %}
