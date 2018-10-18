@@ -193,15 +193,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Content"
+					"name": "Article"
 				},
 				{
 					"type": "doctype",
-					"name": "Question"
+					"name": "Video"
 				},
 				{
 					"type": "doctype",
-					"name": "Instructor"
+					"name": "Quiz"
 				},
 				{
 					"type": "doctype",
