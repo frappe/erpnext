@@ -11,7 +11,7 @@
     <div class='card-body'>
         <div class="row">
             <div class="course-details col-xs-8 col-sm-9 col-md-10">
-                <h5>{{ course.name }}</h5>
+                <h5>{{ course.course_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
                     Course Content
                     <ul class="mb-0 mt-1">
@@ -22,7 +22,7 @@
                 </span>
             </div>
             <div class='text-center col-xs-4 col-sm-3 col-md-2'>
-                <a class='btn btn-primary btn-sm btn-block' href="/lms/course?program={{ program.program_code }}&course={{ course.name }}&content={{ course.course_content[0].content }}">Start Course</a>
+                <a class='btn btn-primary btn-sm btn-block' href="/lms/course?program={{ program.program_code }}&course={{ course.name }}&type={{course.course_content[0].content_type}}&content={{ course.course_content[0].content }}">Start Course</a>
             </div>
         </div>
     </div>
