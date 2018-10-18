@@ -123,6 +123,7 @@ class PurchaseInvoice(BuyingController):
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.credit_to, "account_currency", cache=True)
 		if not self.due_date:
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company,  self.bill_date)
 
