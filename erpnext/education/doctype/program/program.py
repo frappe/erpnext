@@ -7,4 +7,8 @@ import frappe
 from frappe.model.document import Document
 
 class Program(Document):
-	pass
+
+	def get_course_list(self):
+		course_content_list = self.get_all_children()
+		course_list = [frappe.get_doc("Course", course_item.course) for course_item in course_content_list]
+		return course_list

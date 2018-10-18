@@ -44,6 +44,16 @@ class Student(Document):
 		if self.student_applicant:
 			frappe.db.set_value("Student Applicant", self.student_applicant, "application_status", "Admitted")
 
+	def get_course_enrollments(self):
+		"""Returns a list of course enrollments linked with the current student"""
+		enrollments_name_list = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['name'])
+		if not enrollments_name_list:
+			frappe.throw("Student {0} has not enrolled in any course".format(self.name))
+			return None
+		else:
+			enrollments= [frappe.get_doc("Course Enrollment", enrollment.name) for enrollment in enrollments_name_list]
+			return enrollments
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(`date`), count(*)
