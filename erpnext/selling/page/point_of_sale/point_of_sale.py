@@ -11,12 +11,9 @@ from six import string_types
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, search_value="", pos_profile=None):
-	serial_no = ""
-	batch_no = ""
-	barcode = ""
+	data = dict()
 	warehouse = ""
 	display_items_in_stock = 0
-	item_code = search_value
 
 	if pos_profile:
 		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
@@ -25,20 +22,13 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		item_group = get_root_of('Item Group')
 
 	if search_value:
-		# search serial no
-		serial_no_data = frappe.db.get_value('Serial No', search_value, ['name', 'item_code'])
-		if serial_no_data:
-			serial_no, item_code = serial_no_data
+		data = search_serial_or_batch_or_barcode_number(search_value)
 
-		if not serial_no:
-			batch_no_data = frappe.db.get_value('Batch', search_value, ['name', 'item'])
-			if batch_no_data:
-				batch_no, item_code = batch_no_data
-
-		if not serial_no and not batch_no:
-			barcode_data = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['parent', 'barcode'])
-			if barcode_data:
-				item_code, barcode = barcode_data
+	item_code = data.get("item_code") if data.get("item_code") else search_value
+	serial_no = data.get("serial_no") if data.get("serial_no") else ""
+	batch_no = data.get("batch_no") if data.get("batch_no") else ""
+	barcode = data.get("barcode") if data.get("barcode") else ""
+	frappe.errprint([item_code, serial_no, batch_no, barcode])
 
 	item_code, condition = get_conditions(item_code, serial_no, batch_no, barcode)
 
@@ -118,6 +108,23 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		})
 
 	return res
+
+@frappe.whitelist()
+def search_serial_or_batch_or_barcode_number(search_value):
+	# search serial no
+	serial_no_data = frappe.db.get_value('Serial No', search_value, ['name as serial_no', 'item_code'], as_dict=True)
+	if serial_no_data:
+		return serial_no_data
+
+	# search batch no
+	batch_no_data = frappe.db.get_value('Batch', search_value, ['name as batch_no', 'item as item_code'], as_dict=True)
+	if batch_no_data:
+		return batch_no_data
+
+	# search barcode no
+	barcode_data = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['barcode', 'parent as item_code'], as_dict=True)
+	if barcode_data:
+		return barcode_data
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
