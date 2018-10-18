@@ -17,6 +17,11 @@ class Quiz(Document):
 		pass
 
 
-	def get_question(self):
-		pass
+	def get_questions(self):
+		quiz_question = self.get_all_children()
+		if quiz_question:
+			questions = [frappe.get_doc('Question', question.question_link) for question in quiz_question]
+			return questions
+		else:
+			return None
 
