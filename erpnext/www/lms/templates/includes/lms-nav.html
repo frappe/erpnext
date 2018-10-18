@@ -1,0 +1,6 @@
+<a class='btn btn-outline-secondary' href="#">Previous</a>
+{% if next_content != None %}
+<a class='btn btn-primary' onclick="addActivity()" href="/lms/course?program={{ program_name }}&course={{ course_name }}&type={{ next_content_type }}&content={{ next_content }}">Next</a>
+{% else %}
+<a class='btn btn-primary' onclick="addActivity()" href="/lms/program?program={{ program_name }}">Finish Course</a>
+{% endif %}
