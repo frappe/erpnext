@@ -6,10 +6,10 @@
 <meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
 {% endblock %}
 {% block content %}
-<div id="content-holder" data-type="{{ content_type }}" data-content="{{ current_content.name }}" data-course="{{ course_name }}" data-program="{{ program_name }}">
-    {% with content = current_content, next_content = next_content, course_name = course_name, program_name = program_name %}
-    {% include "www/lms/templates/includes/" + content_type.lower() + ".html" %}
-    {% endwith %}
+<div id="content-holder" data-type="{{ content_type }}" data-content="{{ content.name }}" data-course="{{ course_name }}" data-program="{{ program_name }}">
+
+{% include "www/lms/templates/includes/" + content_type.lower() + ".html" %}
+
 </div>
 <style>
 .footer-message {
@@ -35,7 +35,8 @@
 }
 
 .quiz-section {
-    padding-top: 0rem !important;
+    padding-top: 3rem !important;
+    padding-bottom: 0rem !important;
 }
 </style>
 {% endblock %}
