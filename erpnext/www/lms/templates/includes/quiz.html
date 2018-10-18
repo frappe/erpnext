@@ -18,14 +18,14 @@
 {% endmacro %}
 <section class="quiz-section">
     <div class='container'>
-        <div class="mt-3 row">
+        <div class="row">
             <div class="col-md-8">
-                <h2>Quiz: {{ current_content.name }}</h2>
+                <h2>{{ content.title }}</h2>
             </div>
         </div>
         <div class="content">
             <hr>
-            <form id="quiz" name="{{ current_content.name }}">
+            <form id="quiz" name="{{ content.name }}">
                 <div id="quiz-body">
                     {% for q in questions %}
                     {{ quiz(loop.index|str +". ", q) }}
@@ -41,12 +41,7 @@
                             <h3>Your Score: <span id="result"></span></h3>
                         </div>
                         <div class="col-md-4 text-right">
-                            <a class='btn btn-outline-secondary' href="#">Previous</a>
-                            {% if next_content != None %}
-                            <a class='btn btn-primary' href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
-                            {% else %}
-                            <a class='btn btn-primary' href="/lms/program?program={{ program }}">Finish Course</a>
-                            {% endif %}
+                            {% include "www/lms/templates/includes/lms-nav.html" %}
                         </div>
                     </div>
                 </div>
