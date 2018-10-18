@@ -52,6 +52,7 @@ $.extend(shopping_cart, {
 				},
 				btn: opts.btn,
 				callback: function(r) {
+					document.cookie = 'cart_count='+r.message.cart_count.toString();
 					shopping_cart.set_cart_count();
 					if (r.message.shopping_cart_menu) {
 						$('.shopping-cart-menu').html(r.message.shopping_cart_menu);
