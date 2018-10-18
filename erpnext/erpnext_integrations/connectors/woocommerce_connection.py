@@ -23,7 +23,7 @@ def verify_request():
 
 @frappe.whitelist(allow_guest=True)
 def order(data=None):
-	if not data:
+	if data:
 		verify_request()
 
 	if frappe.request and frappe.request.data:
