@@ -17,7 +17,7 @@ def get_context(context):
         current_content = frappe.get_doc(content_type, content_name)
 
         # Saving context variables for Jinja
-        context.current_content = current_content
+        context.content = current_content
         context.course_name = course_name
         context.program_name = program_name
         context.content_type = content_type
