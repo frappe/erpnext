@@ -1,6 +1,11 @@
 {% extends "frappe_theme/templates/base.html" %}
 {% block title %}ERPNext Academy{% endblock %}
 
+{% block head_include %}
+<meta name="description" content="ERPNext Academy is a learnig platform to gain expertise in the world's top 100% open source ERP software." />
+<meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
+{% endblock %}
+
 {% macro course_card(course) %}
 <div class="card mt-3" data-list="getting-started">
     <div class='card-body'>
