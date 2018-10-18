@@ -41,12 +41,9 @@
                             <h3>Your Score: <span id="result"></span></h3>
                         </div>
                         <div class="col-md-4 text-right">
-                            <a class='btn btn-outline-secondary' href="#">Previous</a>
-                            {% if next_content != None %}
-                            <a class='btn btn-primary' href="/lms/course?program={{ program }}&course={{ course_name }}&content={{ next_content }}">Next</a>
-                            {% else %}
-                            <a class='btn btn-primary' href="/lms/program?program={{ program }}">Finish Course</a>
-                            {% endif %}
+                            {% with next_content = next_content, course_name = course_name, program_name = program_name %}
+                                {% include "www/lms/templates/includes/lms-nav.html" %}
+                            {% endwith %}
                         </div>
                     </div>
                 </div>
