@@ -24,9 +24,6 @@ def get_context(context):
         context.next_content_type, context.next_content = get_next_content(content_name, content_type, current_course.get_content_info())
         if content_type == "Quiz":
             context.questions = current_content.get_questions()
-            print(content_type)
-            print(current_content.title)
-            print(context.questions)
 
 def get_next_content(c_name, c_type, content_list):
     try:
