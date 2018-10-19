@@ -5,27 +5,18 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, today
+from erpnext.stock.utils import update_included_uom_in_report
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	return get_columns(), get_data(filters)
-
-def get_columns():
-	return [_("Item Code") + ":Link/Item:140", _("Item Name") + "::100", _("Description") + "::200",
-		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100", _("Warehouse") + ":Link/Warehouse:120",
-		_("UOM") + ":Link/UOM:100", _("Actual Qty") + ":Float:100", _("Planned Qty") + ":Float:100",
-		_("Requested Qty") + ":Float:110", _("Ordered Qty") + ":Float:100",
-		_("Reserved Qty") + ":Float:100", _("Reserved Qty for Production") + ":Float:100",
-		_("Reserved for sub contracting") + ":Float:100",
-		_("Projected Qty") + ":Float:100", _("Reorder Level") + ":Float:100", _("Reorder Qty") + ":Float:100",
-		_("Shortage Qty") + ":Float:100"]
-
-def get_data(filters):
+	include_uom = filters.get("include_uom")
+	columns = get_columns()
 	bin_list = get_bin_list(filters)
-	item_map = get_item_map(filters.get("item_code"))
+	item_map = get_item_map(filters.get("item_code"), include_uom)
+
 	warehouse_company = {}
 	data = []
-
+	conversion_factors = []
 	for bin in bin_list:
 		item = item_map.get(bin.item_code)
 
@@ -60,7 +51,35 @@ def get_data(filters):
 			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract,
 			bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
 
-	return data
+		if include_uom:
+			conversion_factors.append(item.conversion_factor)
+
+	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+	return columns, data
+
+def get_columns():
+	return [
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 140},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
+		{"label": _("UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+		{"label": _("Actual Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Planned Qty"), "fieldname": "planned_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
+		{"label": _("Ordered Qty"), "fieldname": "ordered_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Reserved Qty"), "fieldname": "reserved_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Reserved Qty for Production"), "fieldname": "reserved_qty_for_production", "fieldtype": "Float",
+			"width": 100, "convertible": "qty"},
+		{"label": _("Reserved for sub contracting"), "fieldname": "reserved_qty_for_sub_contract", "fieldtype": "Float",
+			"width": 100, "convertible": "qty"},
+		{"label": _("Projected Qty"), "fieldname": "projected_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Reorder Level"), "fieldname": "re_order_level", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Reorder Qty"), "fieldname": "re_order_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Shortage Qty"), "fieldname": "shortage_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"}
+	]
 
 def get_bin_list(filters):
 	conditions = []
@@ -83,20 +102,29 @@ def get_bin_list(filters):
 
 	return bin_list
 
-def get_item_map(item_code):
+def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
 
 	condition = ""
 	if item_code:
 		condition = 'and item_code = {0}'.format(frappe.db.escape(item_code, percent=False))
 
-	items = frappe.db.sql("""select * from `tabItem` item
-		where is_stock_item = 1
-		and disabled=0
+	cf_field = cf_join = ""
+	if include_uom:
+		cf_field = ", ucd.conversion_factor"
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+
+	items = frappe.db.sql("""
+		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		from `tabItem` item
+		{cf_join}
+		where item.is_stock_item = 1
+		and item.disabled=0
 		{condition}
-		and (end_of_life > %(today)s or end_of_life is null or end_of_life='0000-00-00')
+		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
 		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
-		.format(condition=condition), {"today": today()}, as_dict=True)
+		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
+		{"today": today(), "include_uom": include_uom}, as_dict=True)
 
 	condition = ""
 	if item_code:
