@@ -716,7 +716,9 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		grand_total = self.rounded_total or self.grand_total
+		# Checked both rounding_adjustment and rounded_total 
+		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		if grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
