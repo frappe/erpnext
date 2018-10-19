@@ -181,7 +181,7 @@ var check_and_set_availability = function(frm) {
 					};
 				};
 			}
-		}
+		};
 
 		// disable dialog action initially
 		d.get_primary_btn().attr('disabled', true);
@@ -192,13 +192,13 @@ var check_and_set_availability = function(frm) {
 
 		d.fields_dict["appointment_date"].df.onchange = () => {
 			show_slots(d, fd);
-		}
+		};
 		d.fields_dict["practitioner"].df.onchange = () => {
 			if(d.get_value('practitioner') && d.get_value('practitioner') != selected_practitioner){
 				selected_practitioner = d.get_value('practitioner');
 				show_slots(d, fd);
 			}
-		}
+		};
 		d.show();
 	}
 
