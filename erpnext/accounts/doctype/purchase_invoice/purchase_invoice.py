@@ -231,7 +231,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock:
 			self.validate_item_code()
 			self.validate_warehouse()
-			warehouse_account = get_warehouse_account_map()
+			if auto_accounting_for_stock:
+				warehouse_account = get_warehouse_account_map()
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -427,7 +428,10 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
-		grand_total = self.rounded_total or self.grand_total
+		# Checked both rounding_adjustment and rounded_total 
+		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+
 		if grand_total:
 			billing_party_type, billing_party = self.get_billing_party()
 
@@ -453,7 +457,8 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		warehouse_account = get_warehouse_account_map()
+		if self.update_stock and self.auto_accounting_for_stock:
+			warehouse_account = get_warehouse_account_map()
 		billing_party_type, billing_party = self.get_billing_party()
 
 		voucher_wise_stock_value = {}
