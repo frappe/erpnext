@@ -358,11 +358,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
 						label: __('Qty'), in_list_view:1},
 					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
-						label: __('For Warehouse')},
-					{fieldtype:'Check', fieldname:'include_exploded_items',
-						label: __('Include Exploded Items')},
-					{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
-						label: __('Ignore Existing Ordered Qty')}
+						label: __('For Warehouse')}
 				],
 				data: r.message,
 				get_data: function() {
@@ -396,9 +392,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			},
 			primary_action_label: __('Make')
 		});
-		d.fields_dict["include_exploded_items"].df.onchange = () => {
-			console.log(d)
-		}
 		d.show();
 	},
 

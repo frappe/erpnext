@@ -7,6 +7,7 @@ import json
 import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
+from six import string_types
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
@@ -913,7 +914,15 @@ def get_default_bom_item(item_code):
 def make_raw_material_request(items, company, sales_order, project=None):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
-	raw_materials = get_items_for_material_requests(items, company)
+
+	if isinstance(items, string_types):
+		items = frappe._dict(json.loads(items))
+
+	for item in items.get('items'):
+		item["include_exploded_items"] = items.get('include_exploded_items')
+		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
+
+	raw_materials = get_items_for_material_requests(items, company) 
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
 
