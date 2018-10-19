@@ -341,9 +341,9 @@ var show_procedure_templates = function(frm, result){
 			return false;
 		});
 	});
-	if(!result){
-		var msg = "There are no procedure prescribed for "+frm.doc.patient;
-		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+	if(!result || result.length < 1){
+		var msg = "There are no procedure prescribed for patient "+frm.doc.patient;
+		$(repl('<div class="text-left">%(msg)s</div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
 };
