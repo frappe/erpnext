@@ -8,7 +8,7 @@ function submitQuiz() {
         method: "erpnext.education.utils.evaluate_quiz",
         args: {
             "quiz_response": form_object,
-            "content": $('#content-holder').data('content'),
+            "quiz": $('#content-holder').data('content'),
             "course": $('#content-holder').data('course'),
             "program": $('#content-holder').data('program')
         },
