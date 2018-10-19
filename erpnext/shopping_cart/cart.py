@@ -112,7 +112,7 @@ def update_cart(item_code, qty, with_items=False):
 	quotation.payment_schedule = []
 	if not empty_card:
 		quotation.save()
-		cart_count = cstr(len(quotation.get("items")))
+		cart_count = cint(len(quotation.get("items")))
 	else:
 		quotation.delete()
 		quotation = None
