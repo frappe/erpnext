@@ -23,11 +23,19 @@ class DeliveryTrip(Document):
 														{"from_uom": "Meter", "to_uom": self.default_distance_uom},
 														"value")
 
+	def validate(self):
+		self.validate_stop_addresses()
+
 	def on_submit(self):
 		self.update_delivery_notes()
 
 	def on_cancel(self):
 		self.update_delivery_notes(delete=True)
+
+	def validate_stop_addresses(self):
+		for stop in self.delivery_stops:
+			if not stop.customer_address:
+				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
 
 	def update_delivery_notes(self, delete=False):
 		"""
@@ -269,6 +277,9 @@ def sanitize_address(address):
 	Returns:
 		(str): Sanitized address
 	"""
+
+	if not address:
+		return
 
 	address = address.split('<br>')
 
