@@ -316,6 +316,8 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	for docs in doc_list:
 		for name, doc in docs.items():
 			print('offline pos name:{0}:{1}:{2}'.format(name, doc.get('grand_total'), doc.get('owner')))
+			for item in doc.get('items'):
+				print item.get('item_code')
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
