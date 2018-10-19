@@ -922,7 +922,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		item["include_exploded_items"] = items.get('include_exploded_items')
 		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
 
-	raw_materials = get_items_for_material_requests(items, company) 
+	raw_materials = get_items_for_material_requests(items, company)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
 
