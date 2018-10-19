@@ -72,19 +72,26 @@ def evaluate_quiz(quiz_response, **kwargs):
 	"""
 	import json
 	quiz_response = json.loads(quiz_response)
-	correct_answers = [frappe.get_value('Question', name, 'correct_options') for name in quiz_response.keys()]
-	selected_options = quiz_response.values()
-	result = [selected == correct for selected, correct in zip(selected_options, correct_answers)]
+	quiz_name = kwargs.get('quiz')
 	try:
-		score = int((result.count(True)/len(selected_options))*100)
-	except ZeroDivisionError:
-		score = 0
+		quiz = frappe.get_doc("Quiz", quiz_name)
+		result = quiz.evaluate(quiz_response)
+		return "Hello"
+	except frappe.DoesNotExistError:
+		frappe.throw("Quiz {0} does not exist".format(quiz_name))
+	# correct_answers = [frappe.get_value('Question', name, 'correct_options') for name in quiz_response.keys()]
+	# selected_options = quiz_response.values()
+	# result = [selected == correct for selected, correct in zip(selected_options, correct_answers)]
+	# try:
+	# 	score = int((result.count(True)/len(selected_options))*100)
+	# except ZeroDivisionError:
+	# 	score = 0
 
-	kwargs['selected_options'] = selected_options
-	kwargs['result'] = result
-	kwargs['score'] = score
-	add_activity('Quiz', **kwargs)
-	return score
+	# kwargs['selected_options'] = selected_options
+	# kwargs['result'] = result
+	# kwargs['score'] = score
+	# add_activity('Quiz', **kwargs)
+	# return score
 
 @frappe.whitelist()
 def add_activity(content_type, **kwargs):

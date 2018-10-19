@@ -13,8 +13,13 @@ class Quiz(Document):
 		pass
 
 
-	def evaluate_quiz(self):
-		pass
+	def evaluate(self, response_dict):
+		self.get_questions()
+		answers = {q.name:q.get_answer() for q in self.get_questions()}
+		print(response_dict)
+		print(type(response_dict))
+		print(answers)
+		print(type(answers))
 
 
 	def get_questions(self):
