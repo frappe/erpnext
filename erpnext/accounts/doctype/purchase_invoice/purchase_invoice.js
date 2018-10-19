@@ -131,6 +131,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+
+		// sales order
+		if (doc.docstatus == 1 && !doc.is_return) {
+			this.frm.add_custom_button(__('Sales Order'), function() { me.make_sales_order() }, __("Make"));
+		}
 	},
 
 	unblock_invoice: function() {
@@ -158,6 +163,38 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		} else {
 			return true;
 		}
+	},
+
+	make_sales_order: function(){
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Customer"),
+			fields: [
+				{"fieldtype": "Link", "label": __("Customer"), "fieldname": "customer", "options":"Customer", "mandatory":true},
+				{"fieldtype": "Button", "label": __("Make Sales Order"), "fieldname": "make_sales_order", "cssClass": "btn-primary"},
+			]
+		});
+
+		dialog.fields_dict.make_sales_order.$input.click(function() {
+			var args = dialog.get_values();
+			dialog.hide();
+			return frappe.call({
+				type: "GET",
+				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_sales_order",
+				args: {
+					"customer": args.customer,
+					"source_name": me.frm.doc.name
+				},
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", r.message.doctype, r.message.name);
+					}
+				}
+			})
+		});
+		dialog.show();
 	},
 
 	make_comment_dialog_and_block_invoice: function(){
@@ -494,7 +531,8 @@ frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Purchase Invoice': 'Debit Note',
-			'Payment Entry': 'Payment'
+			'Payment Entry': 'Payment',
+			'Sales Order': 'Sales Order'
 		}
 
 		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {

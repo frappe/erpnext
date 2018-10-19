@@ -507,6 +507,8 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 		target.discount_amount = 0.0
 		target.update_stock = 1
 
+		if target.get('taxes_and_charges'): target.taxes_and_charges = ""
+		if target.get('taxes'): target.taxes = []
 		default_tax = get_default_taxes_and_charges("Purchase Taxes and Charges Template", company=target.company)
 		target.update(default_tax)
 
@@ -516,11 +518,13 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 
 		if target.get('payment_terms_template'): target.payment_terms_template = ""
 		if target.get('address_display'): target.address_display = ""
+		if target.get('shipping_address'): target.shipping_address = ""
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
+		target.discount_percentage = 0
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
 		target.project = source_parent.project
