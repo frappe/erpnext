@@ -8,6 +8,7 @@ from frappe import _, throw
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_pr
@@ -901,6 +902,58 @@ def make_stock_entry(source_name, target_doc=None):
 			},
 		}
 	}, target_doc)
+
+	return doc
+
+@frappe.whitelist()
+def make_sales_order(customer, source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.customer = customer
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
+
+		if target.get('taxes_and_charges'): target.taxes_and_charges = ""
+		if target.get('taxes'): target.taxes = []
+		default_tax = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=target.company)
+		target.update(default_tax)
+
+		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
+		if default_price_list:
+			target.selling_price_list = default_price_list
+
+		sales_team = frappe.db.get_list("Sales Team", fields=['sales_person', 'allocated_percentage'], filters=[
+			["parenttype", "=", "Customer"],
+			["parent", "=", customer]
+		])
+		if sales_team:
+			target.sales_team = []
+			for sales_person in sales_team:
+				d = target.append("sales_team")
+				d.update(sales_person)
+
+		if target.get('payment_terms_template'): target.payment_terms_template = ""
+		if target.get('address_display'): target.address_display = ""
+		if target.get('shipping_address'): target.shipping_address = ""
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.discount_percentage = 0
+
+	doc = get_mapped_doc("Purchase Invoice", source_name, {
+		"Purchase Invoice": {
+			"doctype": "Sales Order",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Purchase Invoice Item": {
+			"doctype": "Sales Order Item",
+			"postprocess": update_item
+		}
+	}, target_doc, set_missing_values)
 
 	return doc
 
