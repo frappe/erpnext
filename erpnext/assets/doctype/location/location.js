@@ -11,7 +11,7 @@ frappe.ui.form.on('Location', {
 			};
 		});
 	},
-	refresh: function (frm, doc) {
+	refresh: function (frm) {
 		if (frm.doc.is_group) {
 			cur_frm.set_read_only();
 			frm.set_intro(__('This is a root Location Group and cannot be edited.'));

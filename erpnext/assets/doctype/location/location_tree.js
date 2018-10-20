@@ -41,7 +41,7 @@ frappe.treeview_settings["Location"] = {
 
 				});
 		} else {
-			//Get the total of all locations in square meters
+			// Get the total of all locations in square meters
 			frappe.call({
 				method: "erpnext.assets.doctype.location.utils_location.get_total_location",
 				callback: function (r) {
@@ -52,7 +52,7 @@ frappe.treeview_settings["Location"] = {
 			});
 		}
 	},
-	onload: function (treeview, node) {
+	onload: function (treeview) {
 		treeview.make_tree();
 	}
 };
