@@ -750,6 +750,9 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
                                     .format(self.stock_uom, template_uom))
 
+		if self.alt_uom == self.stock_uom:
+			frappe.throw(_("Contents UOM cannot be the same as Container UOM. Please leave Contents UOM as empty if the item has only one UOM"))
+
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
 			for d in self.uoms:
