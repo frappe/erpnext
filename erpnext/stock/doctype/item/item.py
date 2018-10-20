@@ -744,7 +744,9 @@ class Item(WebsiteGenerator):
                                     .format(self.stock_uom, template_uom))
 
 		if self.alt_uom == self.stock_uom:
-			frappe.throw(_("Contents UOM cannot be the same as Container UOM. Please leave Contents UOM as empty if the item has only one UOM"))
+			self.alt_uom = ""
+		if not self.alt_uom:
+			self.alt_uom_size = None
 
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
