@@ -117,9 +117,7 @@ frappe.ui.form.on("Item", {
 		});
 
 		const alt_uom_readonly = (!frm.doc.__islocal && frm.doc.alt_uom && flt(frm.doc.alt_uom_size)) ? 1 : 0;
-		['alt_uom', 'alt_uom_size'].forEach((fieldname) => {
-			frm.set_df_property(fieldname, 'read_only', alt_uom_readonly);
-		})
+		frm.set_df_property('alt_uom_size', 'read_only', alt_uom_readonly);
 	},
 
 	validate: function(frm){
