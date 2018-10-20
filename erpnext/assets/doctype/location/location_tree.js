@@ -27,7 +27,32 @@ frappe.treeview_settings["Location"] = {
 			condition: 'frappe.boot.user.can_create.indexOf("Location") !== -1'
 		}
 	],
-	onload: function (treeview) {
+	onrender: function (node) {
+		let page = $(document);
+
+		if (!node.is_root) {
+			frappe.db.get_value("Location", node.data.value, "area")
+				.then((r) => {
+
+					if (r.message.area) {
+						let x = page.find(`span[data-label="${node.data.value}"] .tree-label`);
+						x.text(`${x.text()} ( ${((flt(r.message.area)).toLocaleString('en') + ' Square Meters ')})`);
+					}
+
+				});
+		} else {
+			//Get the total of all locations in square meters
+			frappe.call({
+				method: "erpnext.assets.doctype.location.utils_location.get_total_location",
+				callback: function (r) {
+					// console.log(r.message);
+					let x2 = page.find(`span[data-label="All Locations"] .tree-label`);
+					x2.text(`${x2.text()} - ( ${((flt(r.message[0][0])).toLocaleString('en') + ' Square Meters in Total ')})`);
+				}
+			});
+		}
+	},
+	onload: function (treeview, node) {
 		treeview.make_tree();
 	}
 };

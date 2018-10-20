@@ -11,7 +11,14 @@ frappe.ui.form.on('Location', {
 			};
 		});
 	},
-
+	refresh: function (frm, doc) {
+		if (frm.doc.is_group) {
+			cur_frm.set_read_only();
+			frm.set_intro(__('This is a root Location Group and cannot be edited.'));
+		} else {
+			frm.set_intro(null);
+		}
+	},
 	onload_post_render(frm) {
 		if (!frm.doc.location && frm.doc.latitude && frm.doc.longitude) {
 			frm.fields_dict.location.map.setView([frm.doc.latitude, frm.doc.longitude], 13);
