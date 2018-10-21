@@ -211,8 +211,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	make_payment_request: function() {
-		const me = this;
-		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], me.frm.doc.doctype))
+		var me = this;
+		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
 		frappe.call({
@@ -286,6 +286,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									me.frm.set_value("taxes", r.message.taxes);
 								}
 							},
+							() => me.set_dynamic_labels(),
 							() => me.calculate_taxes_and_totals()
 						]);
 					}
@@ -845,16 +846,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		if(this.frm.doc_currency!==this.frm.doc.currency
-			|| this.frm.doc_currency!==this.frm.doc.price_list_currency) {
-			// reset names only when the currency is different
-
-			var company_currency = this.get_company_currency();
-			this.change_form_labels(company_currency);
-			this.change_grid_labels(company_currency);
-			this.frm.refresh_fields();
-			this.frm.doc_currency = this.frm.doc.currency;
-		}
+		var company_currency = this.get_company_currency();
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
+		this.frm.refresh_fields();
 	},
 
 	change_form_labels: function(company_currency) {

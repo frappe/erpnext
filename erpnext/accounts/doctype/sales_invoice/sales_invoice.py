@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -54,9 +54,18 @@ class SalesInvoice(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.outstanding_amount > 0:
+		if cint(self.is_return) == 1:
+			self.indicator_title = _("Return")
+			self.indicator_color = "darkgrey"
+		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
 			self.indicator_title = _("Unpaid")
+		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+			self.indicator_color = "red"
+			self.indicator_title = _("Overdue")
+		elif self.outstanding_amount < 0:
+			self.indicator_title = _("Credit Note Issued")
+			self.indicator_color = "darkgrey"
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
@@ -301,6 +310,7 @@ class SalesInvoice(SellingController):
 
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)
 		if not self.due_date and self.customer:
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
@@ -706,7 +716,9 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		grand_total = self.rounded_total or self.grand_total
+		# Checked both rounding_adjustment and rounded_total 
+		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		if grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,

@@ -35,6 +35,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	refresh: function(doc, dt, dn) {
+		const me = this;
 		this._super();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
@@ -82,9 +83,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment Request'),
-					this.make_payment_request, __("Make"));
+			if (doc.outstanding_amount>0 && !cint(doc.is_return)) {
+				cur_frm.add_custom_button(__('Payment Request'), function() {
+					me.make_payment_request();
+				}, __("Make"));
 			}
 
 			if(!doc.auto_repeat) {
@@ -102,7 +104,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
-		var me = this;
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);

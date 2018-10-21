@@ -500,3 +500,51 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(invoice.apply_discount_on, 'Grand Total')
 
 		subscription.delete()
+
+	def test_prepaid_subscriptions(self):
+		# Create a non pre-billed subscription, processing should not create
+		# invoices.
+		subscription = frappe.new_doc('Subscription')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
+		subscription.save()
+		subscription.process()
+
+		self.assertEqual(len(subscription.invoices), 0)
+
+		# Change the subscription type to prebilled and process it.
+		# Prepaid invoice should be generated
+		subscription.generate_invoice_at_period_start = True
+		subscription.save()
+		subscription.process()
+
+		self.assertEqual(len(subscription.invoices), 1)
+
+	def test_prepaid_subscriptions_with_prorate_true(self):
+		settings = frappe.get_single('Subscription Settings')
+		to_prorate = settings.prorate
+		settings.prorate = 1
+		settings.save()
+
+		subscription = frappe.new_doc('Subscription')
+		subscription.subscriber = '_Test Customer'
+		subscription.generate_invoice_at_period_start = True
+		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
+		subscription.save()
+		subscription.cancel_subscription()
+
+		self.assertEqual(len(subscription.invoices), 1)
+
+		current_inv = subscription.get_current_invoice()
+		self.assertEqual(current_inv.status, "Unpaid")
+
+		diff = flt(date_diff(nowdate(), subscription.current_invoice_start) + 1)
+		plan_days = flt(date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1)
+		prorate_factor = flt(diff / plan_days)
+
+		self.assertEqual(flt(current_inv.grand_total, 2), flt(prorate_factor * 900, 2))
+
+		settings.prorate = to_prorate
+		settings.save()
+
+		subscription.delete()

@@ -25,6 +25,10 @@ def get_data():
 			{
 				'label': _('Pricing'),
 				'items': ['Pricing Rule']
+			},
+			{
+				'label': _('Subscriptions'),
+				'items': ['Subscription']
 			}
 		]
 	}

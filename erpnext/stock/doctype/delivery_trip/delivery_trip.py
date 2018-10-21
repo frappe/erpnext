@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_link_to_form
+from frappe.utils import get_datetime, get_link_to_form, cstr
 
 
 class DeliveryTrip(Document):
@@ -24,11 +24,9 @@ class DeliveryTrip(Document):
 		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
 
 		update_fields = {
-			"transporter": self.driver,
-			"transporter_name": self.driver_name,
-			"transport_mode": "Road",
+			"driver": self.driver,
+			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
-			"vehicle_type": "Regular",
 			"lr_no": self.name,
 			"lr_date": self.date
 		}
@@ -40,6 +38,7 @@ class DeliveryTrip(Document):
 				value = None if delete else value
 				setattr(note_doc, field, value)
 
+			note_doc.flags.ignore_validate_update_after_submit = True
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
@@ -172,6 +171,10 @@ def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 
 	context = delivery_trip.as_dict()
+	context.update({
+		"departure_time": cstr(context.get("departure_time")),
+		"estimated_arrival": cstr(context.get("estimated_arrival"))
+	})
 
 	if delivery_trip.driver:
 		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))

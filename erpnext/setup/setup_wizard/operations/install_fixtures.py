@@ -231,7 +231,7 @@ def install(country=None):
 
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
-		{"doctype": "Share Type", "title": _("Preference")},
+		{"doctype": "Share Type", "title": _("Preference")}
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
@@ -297,6 +297,30 @@ def add_uom_data():
 			"to_uom": _(d.get("to_uom")),
 			"value": d.get("value")
 		}).insert(ignore_permissions=True)
+
+def add_market_segments():
+	records = [
+		# Market Segments
+		{"doctype": "Market Segment", "market_segment": _("Lower Income")},
+		{"doctype": "Market Segment", "market_segment": _("Middle Income")},
+		{"doctype": "Market Segment", "market_segment": _("Upper Income")}
+	]
+
+	make_fixture_records(records)
+
+def add_sale_stages():
+	# Sale Stages
+	records = [
+		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
+		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
+		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
+		{"doctype": "Sales Stage", "stage_name": _("Value Proposition")},
+		{"doctype": "Sales Stage", "stage_name": _("Identifying Decision Makers")},
+		{"doctype": "Sales Stage", "stage_name": _("Perception Analysis")},
+		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
+		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")}
+	]
+	make_fixture_records(records)
 
 def make_fixture_records(records):
 	from frappe.modules import scrub

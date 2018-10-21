@@ -122,16 +122,14 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 // Get leave details
 //---------------------------------------------------------------------
 var get_emp_and_leave_details = function(doc, dt, dn) {
-	if(!doc.start_date){
-		return frappe.call({
-			method: 'get_emp_and_leave_details',
-			doc: locals[dt][dn],
-			callback: function(r, rt) {
-				cur_frm.refresh();
-				calculate_all(doc, dt, dn);
-			}
-		});
-	}
+	return frappe.call({
+		method: 'get_emp_and_leave_details',
+		doc: locals[dt][dn],
+		callback: function(r, rt) {
+			cur_frm.refresh();
+			calculate_all(doc, dt, dn);
+		}
+	});
 }
 
 cur_frm.cscript.employee = function(doc,dt,dn){
