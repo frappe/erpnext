@@ -116,6 +116,18 @@ frappe.ui.form.on('Pricing Rule', {
 		};
 	},
 
+	onload: function(frm) {
+		if(frm.doc.__islocal && !frm.doc.applicable_for && (frm.doc.customer || frm.doc.supplier)) {
+			if(frm.doc.customer) {
+				frm.doc.applicable_for = "Customer";
+				frm.doc.selling = 1
+			} else {
+				frm.doc.applicable_for = "Supplier";
+				frm.doc.buying = 1
+			}
+		}
+	},
+
 	refresh: function(frm) {
 		var help_content =
 			`<table class="table table-bordered" style="background-color: #f9f9f9;">

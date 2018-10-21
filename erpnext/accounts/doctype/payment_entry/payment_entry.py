@@ -299,12 +299,12 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.base_received_amount + total_deductions - 
+					self.unallocated_amount = (self.base_received_amount + total_deductions -
 						self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
@@ -589,10 +589,11 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		voucher_type = None
 
 	# Add cost center condition
-	doc = frappe.get_doc({"doctype": voucher_type})
-	condition = ""
-	if doc and hasattr(doc, 'cost_center'):
-		condition = " and cost_center='%s'" % cost_center
+	if voucher_type:
+		doc = frappe.get_doc({"doctype": voucher_type})
+		condition = ""
+		if doc and hasattr(doc, 'cost_center'):
+			condition = " and cost_center='%s'" % cost_center
 
 	orders = []
 	if voucher_type:
@@ -789,7 +790,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
-
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
@@ -876,7 +876,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
-
+	pe.contact_person = doc.get("contact_person")
+	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account

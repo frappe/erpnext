@@ -35,9 +35,19 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		})
 
-		frm.set_query('transporter_name', function(doc) {
+		frm.set_query('transporter', function() {
 			return {
-				filters: { 'supplier_group': "transporter" }
+				filters: {
+					'is_transporter': 1
+				}
+			}
+		});
+
+		frm.set_query('driver', function(doc) {
+			return {
+				filters: {
+					'transporter': doc.transporter
+				}
 			}
 		});
 
@@ -265,13 +275,13 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 	var dn_item_fields = frappe.meta.docfield_map['Delivery Note Item'];
 	var dn_fields_copy = dn_fields;
 	var dn_item_fields_copy = dn_item_fields;
-
 	if (doc.print_without_amount) {
 		dn_fields['currency'].print_hide = 1;
 		dn_item_fields['rate'].print_hide = 1;
 		dn_item_fields['discount_percentage'].print_hide = 1;
 		dn_item_fields['price_list_rate'].print_hide = 1;
 		dn_item_fields['amount'].print_hide = 1;
+		dn_item_fields['discount_amount'].print_hide = 1;
 		dn_fields['taxes'].print_hide = 1;
 	} else {
 		if (dn_fields_copy['currency'].print_hide != 1)
@@ -280,6 +290,8 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 			dn_item_fields['rate'].print_hide = 0;
 		if (dn_item_fields_copy['amount'].print_hide != 1)
 			dn_item_fields['amount'].print_hide = 0;
+		if (dn_item_fields_copy['discount_amount'].print_hide != 1)
+			dn_item_fields['discount_amount'].print_hide = 0;
 		if (dn_fields_copy['taxes'].print_hide != 1)
 			dn_fields['taxes'].print_hide = 0;
 	}

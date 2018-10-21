@@ -35,6 +35,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	refresh: function(doc, dt, dn) {
+		const me = this;
 		this._super();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
@@ -82,9 +83,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment Request'),
-					this.make_payment_request, __("Make"));
+			if (doc.outstanding_amount>0 && !cint(doc.is_return)) {
+				cur_frm.add_custom_button(__('Payment Request'), function() {
+					me.make_payment_request();
+				}, __("Make"));
 			}
 
 			if(!doc.auto_repeat) {
@@ -102,7 +104,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
-		var me = this;
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
@@ -786,39 +787,6 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 	}
 })
 
-frappe.ui.form.on('Sales Invoice Item', {
-	service_stop_date: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-
-		if(child.service_stop_date) {
-			let start_date = Date.parse(child.service_start_date);
-			let end_date = Date.parse(child.service_end_date);
-			let stop_date = Date.parse(child.service_stop_date);
-
-			if(stop_date < start_date) {
-				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
-				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
-			} else if (stop_date > end_date) {
-				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
-				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
-			}
-		}
-	},
-	service_start_date: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-
-		if(child.service_start_date) {
-			frappe.call({
-				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
-				args: {"args": child},
-				callback: function(r) {
-					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
-				}
-			})
-		}
-	}
-})
-
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
@@ -1034,7 +1002,7 @@ var get_drugs_to_invoice = function(frm) {
 				description:'Quantity will be calculated only for items which has "Nos" as UoM. You may change as required for each invoice item.',
 				get_query: function(doc) {
 					return {
-						filters: { patient :dialog.get_value("patient") }
+						filters: { patient: dialog.get_value("patient"), docstatus: 1 }
 					};
 				}
 			},

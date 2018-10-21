@@ -107,6 +107,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
 			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
 				{ company:frappe.defaults.get_user_default("Company") });
+		if(!this.frm.doc.currency)
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { currency:frappe.defaults.get_user_default("Currency") });
 
 		this.setup_queries();
 	},

@@ -214,8 +214,9 @@ def get_loyalty_programs(doc):
 			"ifnull(to_date, '2500-01-01')": [">=", today()]})
 
 	for loyalty_program in loyalty_programs:
-		customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)]
-		customer_territories = [d.value for d in get_children("Territory", loyalty_program.customer_territory)]
+		customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)] + [loyalty_program.customer_group]
+		customer_territories = [d.value for d in get_children("Territory", loyalty_program.customer_territory)] + [loyalty_program.customer_territory]
+
 		if (not loyalty_program.customer_group or doc.customer_group in customer_groups)\
 			and (not loyalty_program.customer_territory or doc.territory in customer_territories):
 			lp_details.append(loyalty_program.name)

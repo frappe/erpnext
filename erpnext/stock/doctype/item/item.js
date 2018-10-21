@@ -271,6 +271,24 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.fields_dict['deferred_revenue_account'].get_query = function() {
+			return {
+				filters: {
+					'root_type': 'Liability',
+					"is_group": 0
+				}
+			}
+		}
+
+		frm.fields_dict['deferred_expense_account'].get_query = function() {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					"is_group": 0
+				}
+			}
+		}
+
 		frm.fields_dict.customer_items.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.customer_query" }
 		}
