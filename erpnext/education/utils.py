@@ -52,16 +52,6 @@ def validate_duplicate_student(students):
 		else:
 			unique_students.append(stud.student)
 
-def get_student_name(email=None):
-	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
-
-	:param user: a user email address
-	"""
-	try:
-		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
-	except IndexError:
-		return None
-
 @frappe.whitelist()
 def evaluate_quiz(quiz_response, **kwargs):
 	"""LMS Function: Evaluates a simple multiple choice quiz.  It recieves arguments from `www/lms/course.js` as dictionary using FormData[1].
@@ -73,25 +63,33 @@ def evaluate_quiz(quiz_response, **kwargs):
 	import json
 	quiz_response = json.loads(quiz_response)
 	quiz_name = kwargs.get('quiz')
+	course_name = kwargs.get('course')
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
-		result = quiz.evaluate(quiz_response)
-		return "Hello"
+		result, score = quiz.evaluate(quiz_response)
+		add_quiz_activity(course_name, quiz_name, result, score)
+		return score
 	except frappe.DoesNotExistError:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))
-	# correct_answers = [frappe.get_value('Question', name, 'correct_options') for name in quiz_response.keys()]
-	# selected_options = quiz_response.values()
-	# result = [selected == correct for selected, correct in zip(selected_options, correct_answers)]
-	# try:
-	# 	score = int((result.count(True)/len(selected_options))*100)
-	# except ZeroDivisionError:
-	# 	score = 0
+		return None
 
-	# kwargs['selected_options'] = selected_options
-	# kwargs['result'] = result
-	# kwargs['score'] = score
-	# add_activity('Quiz', **kwargs)
-	# return score
+
+def add_quiz_activity(course, quiz, result, score):
+	print(course, quiz, result, score)
+	enrollment = get_course_enrollment(course, frappe.session.user)
+	if not enrollment:
+		enrollment = add_course_enrollment(course, frappe.session.user)
+	activity = frappe.get_doc({
+		"doctype": "Quiz Activity",
+		"enrollment": enrollment.name,
+		"quiz": quiz,
+		"score": score,
+		# "date": frappe.getdate(),
+		})
+	for response in result:
+		activity.append("result", response)
+	activity.save()
+	frappe.db.commit()
 
 @frappe.whitelist()
 def add_activity(content_type, **kwargs):
@@ -144,24 +142,6 @@ def check_entry_exists(program):
 	else:
 		return None, frappe.get_doc("Course Activity", activity_name)
 
-def get_contents_in_course(course_name):
-	try:
-		course_doc = frappe.get_doc("Course", {"name":course_name, "is_published": True})
-		return [frappe.get_doc("Content", content.content) for content in course_doc.get_all_children()]
-	except frappe.DoesNotExistError:
-		return None
-
-def get_courses_in_program(program):
-	try:
-		program_doc = frappe.get_doc("Program", program)
-		if program_doc.is_published:
-			course_list = [frappe.get_doc("Course", course.course_name) for course in program_doc.get_all_children()]
-			return [course for course in course_list if course.is_published == True]
-		else:
-			return None
-	except frappe.DoesNotExistError:
-		return None
-
 def get_program():
 	program_list = frappe.get_list("Program", filters={"is_published": is_published})
 	if program_list:
@@ -184,7 +164,8 @@ def add_course_enrollment(course, email):
 		enrollment = frappe.get_doc({
 			"doctype": "Course Enrollment",
 			"student": student_id,
-			"course": course
+			"course": course,
+			"enrollment_date": frappe.getdate()
 		})
 		enrollment.save()
 		frappe.db.commit()
@@ -197,43 +178,14 @@ def get_course_enrollment(course, email):
 	except IndexError:
 		return None
 
-def get_student_id(email):
-	"""Returns Student ID, example EDU-STU-2018-00001 from email address
+def get_student_id(email=None):
+	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
 
-	:params email: email address of the student"""
+	:param user: a user email address
+	"""
 	try:
-		return frappe.get_list('Student', filters={'student_email_id': email})[0].name
+		print("email is",email)
+		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
 	except IndexError:
-		frappe.throw("Student Account with email:{0} does not exist".format(email))
-
-def get_quiz(content):
-	try:
-		quiz_doc = frappe.get_doc("Content", content)
-		if quiz_doc.content_type != "Quiz":
-			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
-		quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
-		return quiz
-	except frappe.DoesNotExistError:
-		frappe.throw("The quiz \"{0}\" does not exist".format(content))
-
-def get_quiz_as_dict(content):
-	"""Helper Function to get questions for a quiz
-
-	:params content: name of a Content doctype with content_type quiz"""
-	try:
-		quiz_doc = frappe.get_doc("Content", content)
-		if quiz_doc.content_type != "Quiz":
-			frappe.throw("<b>{0}</b> is not a Quiz".format(content))
-
-		import json
-		quiz = [frappe.get_doc("Question", item.question_link) for item in quiz_doc.questions]
-		data = []
-		for question in quiz:
-			d = {}
-			d['id'] = question.name
-			d['question'] = question.question
-			d['options'] = [item.option for item in quiz[0].options]
-			data.append(d)
-		return data
-	except frappe.DoesNotExistError:
-		frappe.throw("The quiz \"{0}\" does not exist".format(content))
+		frappe.throw("Student with email {0} does not exist".format(email))
+		return None
