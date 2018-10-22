@@ -306,19 +306,20 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, f
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
+	accounts = frappe.db.sql_list("""select name from `tabAccount`
+		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
+	additional_conditions += " and account in ('{}')"\
+		.format("', '".join([frappe.db.escape(d) for d in accounts]))
+
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
-		and account in (select name from `tabAccount`
-			where lft >= %(lft)s and rgt <= %(rgt)s)
 		order by account, posting_date""".format(additional_conditions=additional_conditions),
 		{
 			"company": company,
 			"from_date": from_date,
 			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt
 		},
 		as_dict=True)
 
