@@ -147,9 +147,14 @@ cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 }
 
 var calculate_all = function(doc, dt, dn) {
-	calculate_earning_total(doc, dt, dn);
-	calculate_ded_total(doc, dt, dn);
-	calculate_net_pay(doc, dt, dn);
+	if(doc.total_working_days_in_payroll_frequency <= 0){
+		doc.total_deduction = doc.total_earn = doc.net_pay = doc.gross_pay = doc.rounded_total = doc.loan_repayment = 0;
+	}
+	else {
+		calculate_earning_total(doc, dt, dn);
+		calculate_ded_total(doc, dt, dn);
+		calculate_net_pay(doc, dt, dn);
+	}
 }
 
 cur_frm.cscript.amount = function(doc,dt,dn){

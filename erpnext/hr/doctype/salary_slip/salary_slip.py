@@ -47,6 +47,9 @@ class SalarySlip(TransactionBase):
 		else:
 			self.get_leave_details(lwp = self.leave_without_pay)
 
+		if self.total_working_days_in_payroll_frequency <= 0:
+			frappe.throw(_("Total working days in this period should not be less or equal than 0"))
+
 		# if self.salary_slip_based_on_timesheet or not self.net_pay:
 		self.calculate_net_pay()
 
@@ -215,7 +218,7 @@ class SalarySlip(TransactionBase):
 				["date_of_joining", "relieving_date"])
 
 			self.get_leave_details(joining_date, relieving_date)
-			self.get_total_working_days_in_paroll_frequency()
+			self.get_total_working_days_in_payroll_frequency()
 			struct = self.check_sal_struct(joining_date, relieving_date)
 
 			if struct:
@@ -310,16 +313,15 @@ class SalarySlip(TransactionBase):
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 
-	def get_total_working_days_in_paroll_frequency(self):
+	def get_total_working_days_in_payroll_frequency(self):
 		date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
 		holidays = self.get_holidays_for_employee(date_details.start_date, date_details.end_date)
 		total_working_days_in_payroll_frequency = date_diff(date_details.end_date, date_details.start_date) + 1
-		actual_lwp = self.calculate_lwp(holidays, total_working_days_in_payroll_frequency, date_details.start_date)
 
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			total_working_days_in_payroll_frequency -= len(holidays)
 			if total_working_days_in_payroll_frequency < 0:
-				frappe.throw(_("There are more holidays than working days this frequency."))
+				frappe.throw(_("There are more holidays than working days this period."))
 
 		self.total_working_days_in_payroll_frequency = total_working_days_in_payroll_frequency
 
@@ -334,7 +336,7 @@ class SalarySlip(TransactionBase):
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)
 			if working_days < 0:
-				frappe.throw(_("There are more holidays than working days this month."))
+				frappe.throw(_("There are more holidays than working days this period."))
 
 		if not lwp:
 			lwp = actual_lwp
@@ -436,8 +438,8 @@ class SalarySlip(TransactionBase):
 				    self.salary_slip_based_on_timesheet or
 					getdate(self.start_date) < joining_date or
 					getdate(self.end_date) > relieving_date
-				)):
-				if (not cint(d.depends_on_lwp)):
+				)and self.total_working_days_in_payroll_frequency > 0):
+				if (cint(d.depends_on_lwp)):
 					d.amount = rounded(
 						(flt(d.default_amount) * flt(self.payment_days)
 						/ cint(self.total_working_days_in_payroll_frequency)), self.precision("amount", component_type)
