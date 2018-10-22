@@ -183,7 +183,8 @@ def create_procedure(appointment):
 	procedure.patient_age = appointment.patient_age
 	procedure.patient_sex = appointment.patient_sex
 	procedure.procedure_template = appointment.procedure_template
-	procedure.procedure_prescription = appointment.procedure_prescription
+	procedure.prescription = appointment.procedure_prescription
+	procedure.practitioner = appointment.practitioner
 	procedure.invoiced = appointment.invoiced
 	procedure.medical_department = appointment.department
 	procedure.start_date = appointment.appointment_date
@@ -203,7 +204,9 @@ def create_procedure(appointment):
 	return procedure.as_dict()
 
 def insert_clinical_procedure_to_medical_record(doc):
-	subject = cstr(doc.procedure_template) +" "+ doc.practitioner
+	subject = cstr(doc.procedure_template)
+	if doc.practitioner:
+		subject += " "+doc.practitioner
 	if subject and doc.notes:
 		subject += "<br/>"+doc.notes
 
