@@ -286,6 +286,44 @@ def make_custom_fields(update=True):
 				'insert_after': 'supplier_type',
 				'depends_on': 'eval:doc.is_transporter'
 			}
+		],
+		'Salary Component': [
+			{
+				'fieldname': 'component_type',
+				'label': 'Component Type',
+				'fieldtype': 'Select',
+				'insert_after': '',
+				'options': 'Provident Fund\nAdditional Provident Fund\nProvident Fund Loan\nIncome Tax\nProfessional Tax\nDefined Contribution Pension Scheme\nLife Insurance'
+			}
+		],
+		'Employee': [
+			{
+				'fieldname': 'provident_fund_account',
+				'label': 'Provident Fund Account',
+				'fieldtype': 'Data',
+				'insert_after': 'image'
+			},
+			{
+				'fieldname': 'pan_number',
+				'label': 'PAN Number',
+				'fieldtype': 'Data',
+				'insert_after': 'provident_fund_account'
+			},
+			{
+				'fieldname': 'dcps_account',
+				'label': 'DCPS Account',
+				'fieldtype': 'Data',
+				'insert_after': 'pan_number'
+			}
+		],
+		'Department': [
+			{
+				'fieldname': 'department_type',
+				'label': 'Department Type',
+				'fieldtype': 'Select',
+				'insert_after': '',
+				'options': 'Cheque\nSWP\nDEP\nKAL\nALL'
+			}
 		]
 	}
 
