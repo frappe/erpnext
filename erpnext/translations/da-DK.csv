@@ -1,4 +1,4 @@
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +135,'Opening','Åbning'
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +153,'Opening','Åbning'
 DocType: Lead,Lead,Bly
 apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
 DocType: Timesheet,% Amount Billed,% Beløb Billed
