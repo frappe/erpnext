@@ -66,8 +66,8 @@ def evaluate_quiz(quiz_response, **kwargs):
 	course_name = kwargs.get('course')
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
-		result, score = quiz.evaluate(quiz_response)
-		add_quiz_activity(course_name, quiz_name, result, score)
+		score = quiz.evaluate(quiz_response)
+		# add_quiz_activity(course_name, quiz_name, result, score)
 		return score
 	except frappe.DoesNotExistError:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))

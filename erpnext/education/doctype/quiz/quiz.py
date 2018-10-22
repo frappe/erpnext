@@ -16,9 +16,8 @@ class Quiz(Document):
 	def evaluate(self, response_dict):
 		self.get_questions()
 		answers = {q.name:q.get_answer() for q in self.get_questions()}
-		correct_answers = [{'question':question,'selected_option':response_dict[question],'result':(answers[question] == response_dict[question])} for question in response_dict.keys()]
-		print(correct_answers)
-		return correct_answers, (sum(answer['result'] for answer in correct_answers) * 100 ) / len(answers)
+		correct_answers = [answers[question] == response_dict[question] for question in response_dict.keys()]
+		return (sum(correct_answers) * 100 ) / len(answers)
 
 
 	def get_questions(self):
