@@ -9,11 +9,22 @@ from frappe.model.document import Document
 class Quiz(Document):
 
 
+	def validate_quiz_attempts(self, enrollment, quiz_name):
+		print(enrollment, quiz_name)
+		if self.max_attempts > 0:
+			try:
+				if len(frappe.get_all("Quiz Activity", {'enrollment': enrollment.name, 'quiz': quiz_name})) >= self.max_attempts:
+					frappe.throw('Maximum attempts reached!')
+			except:
+				pass
+
+
 	def get_quiz(self):
 		pass
 
 
-	def evaluate(self, response_dict):
+	def evaluate(self, response_dict, enrollment, quiz_name):
+		self.validate_quiz_attempts(enrollment, quiz_name)
 		self.get_questions()
 		answers = {q.name:q.get_answer() for q in self.get_questions()}
 		correct_answers = {question: (answers[question] == response_dict[question]) for question in response_dict.keys()}

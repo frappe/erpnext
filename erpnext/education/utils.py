@@ -43,6 +43,7 @@ def get_overlap_for(doc, doctype, fieldname, value=None):
 
 	return existing[0] if existing else None
 
+
 def validate_duplicate_student(students):
 	unique_students= []
 	for stud in students:
@@ -64,20 +65,19 @@ def evaluate_quiz(quiz_response, **kwargs):
 	quiz_response = json.loads(quiz_response)
 	quiz_name = kwargs.get('quiz')
 	course_name = kwargs.get('course')
+	enrollment = get_course_enrollment(course_name, frappe.session.user)
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
-		answers, score = quiz.evaluate(quiz_response)
-		add_quiz_activity(course_name, quiz_name, score, answers, quiz_response)
+		answers, score = quiz.evaluate(quiz_response, enrollment, quiz_name)
+		add_quiz_activity(enrollment, quiz_name, score, answers, quiz_response)
 		return score
 	except frappe.DoesNotExistError:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))
 		return None
 
 
-def add_quiz_activity(course, quiz, score, answers, quiz_response):
-	print(course, quiz, result, score)
-	enrollment = get_course_enrollment(course, frappe.session.user)
-	answer_list = list(answers.values())
+def add_quiz_activity(enrollment, quiz, score, answers, quiz_response):
+	print(quiz, answers, score)
 	if not enrollment:
 		frappe.throw("The user is not enrolled for the course {course}".format(course=course))
 	activity = frappe.get_doc({
@@ -85,13 +85,15 @@ def add_quiz_activity(course, quiz, score, answers, quiz_response):
 		"enrollment": enrollment.name,
 		"quiz": quiz,
 		"score": score,
-		"date": frappe.getdate()
+		"date": frappe.utils.datetime.datetime.now()
 		})
-	for i in len(quiz_response):
+	for question in quiz_response.keys():
 		activity.append("result",
 			{
-			"selected_option": quiz_response[i],
-			"result": answer_list[i]})
+			"question": question,
+			"selected_option": quiz_response[question],
+			"quiz_result": 'Correct' if answers[question] else 'Wrong'
+			})
 	activity.save()
 	frappe.db.commit()
 

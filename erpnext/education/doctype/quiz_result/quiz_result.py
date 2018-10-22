@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class quiz_result(Document):
+class QuizResult(Document):
 	pass
