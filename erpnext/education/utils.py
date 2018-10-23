@@ -98,55 +98,28 @@ def add_quiz_activity(enrollment, quiz, score, answers, quiz_response):
 	frappe.db.commit()
 
 @frappe.whitelist()
-def add_activity(content_type, **kwargs):
-	activity_does_not_exists, activity = check_entry_exists(kwargs.get('program'))
-	if activity_does_not_exists:
-		current_activity = frappe.get_doc({
-			"doctype": "Course Activity",
-			"student_id": get_student_id(frappe.session.user),
-			"program_name": kwargs.get('program'),
-			"lms_activity": [{
-				"course_name": kwargs.get('course'),
-				"content_name": kwargs.get('content'),
-				"status": "Completed"
-				}]
-			})
-		if content_type == "Quiz":
-			activity = current_activity.lms_activity[-1]
-			activity.quiz_score = kwargs.get('score')
-			activity.selected_options = ", ".join(kwargs.get('selected_options'))
-			activity.result = ", ".join([str(item) for item in kwargs.get('result')]),
-			activity.status = "Passed"
-		current_activity.save()
-		frappe.db.commit()
+def add_activity(content_type, content, course, program):
+	enrollment = get_course_enrollment(course, frappe.session.user)
+	if check_activity_exists(enrollment['name'], content_type, content):
+		pass
 	else:
-		if content_type in ("Article", "Video"):
-			lms_activity_list = [[data.course_name, data.content_name] for data in activity.lms_activity]
-			if not [kwargs.get('course'), kwargs.get('content')] in lms_activity_list:
-				activity.append("lms_activity", {
-					"course_name": kwargs.get('course'),
-					"content_name": kwargs.get('content'),
-					"status": "Completed"
-				})
-		else:
-			activity.append("lms_activity", {
-				"course_name": kwargs.get('course'),
-				"content_name": kwargs.get('content'),
-				"status": "Passed",
-				"quiz_score": kwargs.get('score'),
-				"selected_options": ", ".join(kwargs.get('selected_options')),
-				"result": ", ".join([str(item) for item in kwargs.get('result')])
+		course_actvity = frappe.get_doc({
+			"doctype": "Course Activity",
+			"enrollment": enrollment['name'],
+			"content_type": content_type,
+			"content": content,
+			"date": frappe.utils.datetime.datetime.now()
 			})
-		activity.save()
+		course_actvity.save()
 		frappe.db.commit()
 
-def check_entry_exists(program):
-	try:
-		activity_name = frappe.get_all("Course Activity", filters={"student_id": get_student_id(frappe.session.user), "program_name": program})[0]
-	except IndexError:
-		return True, None
+def check_activity_exists(enrollment, content_type, content):
+	activity = frappe.get_list("Course Activity", filters={"enrollment": enrollment, "content_type": content_type, "content": content})
+	if activity:
+		return True
 	else:
-		return None, frappe.get_doc("Course Activity", activity_name)
+		return False
+
 
 def get_program():
 	program_list = frappe.get_list("Program", filters={"is_published": is_published})
@@ -182,6 +155,7 @@ def get_course_enrollment(course, email):
 	try:
 		return frappe.get_list("Course Enrollment", filters={'course':course, 'student':student_id})[0]
 	except IndexError:
+		frappe.throw("The user is not enrolled for the course {course}".format(course=course))
 		return None
 
 def get_student_id(email=None):
@@ -190,7 +164,6 @@ def get_student_id(email=None):
 	:param user: a user email address
 	"""
 	try:
-		print("email is",email)
 		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
 	except IndexError:
 		frappe.throw("Student with email {0} does not exist".format(email))
