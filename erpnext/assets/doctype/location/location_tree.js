@@ -28,7 +28,6 @@ frappe.treeview_settings["Location"] = {
 		}
 	],
 	onrender: function (node) {
-		let page = $(document);
 
 		if (!node.is_root) {
 			frappe.db.get_value("Location", node.data.value, "area")
