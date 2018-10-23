@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
 import frappe
 from frappe import _
@@ -24,6 +25,7 @@ class DeliveryTrip(Document):
 
 	def validate(self):
 		self.validate_stop_addresses()
+		self.update_status()
 
 	def on_submit(self):
 		self.update_status()
@@ -353,6 +355,22 @@ def sanitize_address(address):
 
 	# Only get the first 3 blocks of the address
 	return ', '.join(address[:3])
+
+
+@frappe.whitelist()
+def validate_unique_delivery_notes(delivery_stops):
+	delivery_stops = json.loads(delivery_stops)
+	delivery_notes = [stop["delivery_note"] for stop in delivery_stops if stop["delivery_note"]]
+
+	if not delivery_notes:
+		return []
+
+	existing_trips = frappe.get_all("Delivery Stop",
+									filters={"delivery_note": ["IN", delivery_notes]},
+									fields=["distinct(parent)"])
+	existing_trips = [stop.parent for stop in existing_trips]
+
+	return existing_trips
 
 
 @frappe.whitelist()

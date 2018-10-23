@@ -66,6 +66,49 @@ frappe.ui.form.on('Delivery Trip', {
 		}
 	},
 
+	validate: function (frm) {
+		if (frm.doc.delivery_stops) {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.validate_unique_delivery_notes",
+				args: {
+					delivery_stops: frm.doc.delivery_stops
+				},
+				async: false,
+				freeze: false,
+				freeze_message: "Test",
+				callback: function (r) {
+					if (r) {
+						let confirm_message = `The entered Delivery Notes already exist in the following
+												Delivery Trips: ${r.message.join(", ")}. Do you want to
+												continue?`;
+
+						frappe.confirm(__(confirm_message), function () {
+							return;
+						});
+					};
+				}
+			});
+		};
+	},
+
+	driver: function (frm) {
+		if (frm.doc.driver) {
+			frappe.db.get_value("Delivery Trip", {
+				driver: frm.doc.driver,
+				departure_time: [">", frappe.datetime.nowdate()]
+			}, "name", (r) => {
+				if (r) {
+					let confirm_message = `${frm.doc.driver_name} has already been assigned a Delivery Trip
+											today (${r.name}). Do you want to modify that instead?`;
+
+					frappe.confirm(__(confirm_message), function () {
+						frappe.set_route("Form", "Delivery Trip", r.name);
+					});
+				};
+			});
+		};
+	},
+
 	calculate_arrival_time: function (frm) {
 		if (!frm.doc.driver_address) {
 			frappe.throw(__("Cannot Calculate Arrival Time as Driver Address is Missing."));
