@@ -11,6 +11,8 @@ from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 
+from frappe.model.naming import set_name_by_naming_series
+
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
@@ -69,6 +71,14 @@ class SalesInvoice(SellingController):
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
+
+	def autoname(self):
+		if not self.stin:
+			set_name_by_naming_series(self)
+		else:
+			abbr = self.get_company_abbr()
+			nstr = str(self.stin).zfill(5)
+			self.name = "STINV-{0}-{1}".format(abbr, nstr)
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
