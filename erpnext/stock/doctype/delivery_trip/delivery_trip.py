@@ -43,8 +43,11 @@ class DeliveryTrip(Document):
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
 
 	def update_status(self):
-		status_map = ["Draft", "Scheduled", "Cancelled"]
-		status = status_map[self.docstatus]
+		status = {
+			0: "Draft",
+			1: "Scheduled",
+			2: "Cancelled"
+		}[self.docstatus]
 
 		if self.docstatus == 1:
 			visited_stops = [stop.visited for stop in self.delivery_stops]

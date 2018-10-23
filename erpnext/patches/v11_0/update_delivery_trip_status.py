@@ -10,8 +10,11 @@ def execute():
 	for trip in frappe.get_all("Delivery Trip"):
 		trip_doc = frappe.get_doc("Delivery Trip", trip.name)
 
-		status_map = ["Draft", "Scheduled", "Cancelled"]
-		status = status_map[trip_doc.docstatus]
+		status = {
+			0: "Draft",
+			1: "Scheduled",
+			2: "Cancelled"
+		}[trip_doc.docstatus]
 
 		if trip_doc.docstatus == 1:
 			visited_stops = [stop.visited for stop in trip_doc.delivery_stops]
