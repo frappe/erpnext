@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
@@ -14,7 +15,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
-   "allow_in_quick_entry": 0, 
+   "allow_in_quick_entry": 1, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -156,7 +157,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-09-25 13:27:37.090157", 
+ "modified": "2018-10-23 23:18:06.067612", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
