@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
 import frappe
 from frappe import _
@@ -89,7 +90,7 @@ class DeliveryTrip(Document):
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
+		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))), alert=True)
 
 	def process_route(self, optimize):
 		"""
@@ -344,6 +345,22 @@ def get_directions(route, optimize):
 		frappe.throw(_(e.message))
 
 	return directions[0] if directions else False
+
+@frappe.whitelist()
+def validate_unique_delivery_notes(delivery_stops):
+	delivery_stops = json.loads(delivery_stops)
+	delivery_notes = [stop.get("delivery_note") for stop in delivery_stops if stop.get("delivery_note")]
+
+	if not delivery_notes:
+		return []
+
+	existing_trips = frappe.get_all("Delivery Stop",
+									filters={"delivery_note": ["IN", delivery_notes],
+											"docstatus": ["<", 2]},
+									fields=["distinct(parent)"])
+	existing_trips = [stop.parent for stop in existing_trips]
+
+	return existing_trips
 
 
 @frappe.whitelist()
