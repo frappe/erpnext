@@ -33,24 +33,24 @@ frappe.treeview_settings["Location"] = {
 		if (!node.is_root) {
 			frappe.db.get_value("Location", node.data.value, "area")
 				.then((r) => {
-
-					if (r.message.area) {
-						let x = page.find(`span[data-label="${node.data.value}"] .tree-label`);
-						x.text(`${x.text()} ( ${((flt(r.message.area)).toLocaleString('en') + ' Square Meters ')})`);
-					}
-
+					// console.log(r.message);
+					$('<span class="balance-area pull-right text-muted small">'
+						+ (`${((flt(r.message.area)).toLocaleString('en') + ' Square Meters ')}`)
+						+ '</span>').insertBefore(node.$ul);
 				});
 		} else {
 			// Get the total of all locations in square meters
 			frappe.call({
-				method: "erpnext.assets.doctype.location.utils_location.get_total_location",
+				method: "erpnext.assets.doctype.location.location.get_total_location",
 				callback: function (r) {
 					// console.log(r.message);
-					let x2 = page.find(`span[data-label="All Locations"] .tree-label`);
-					x2.text(`${x2.text()} - ( ${((flt(r.message[0][0])).toLocaleString('en') + ' Square Meters in Total ')})`);
+					$('<span class="balance-area pull-right text-muted small">'
+						+ (`${((flt(r.message)).toLocaleString('en') + ' Square Meters in Total')}`)
+						+ '</span>').insertBefore(node.$ul);
 				}
 			});
 		}
+
 	},
 	onload: function (treeview) {
 		treeview.make_tree();

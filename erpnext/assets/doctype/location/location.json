@@ -1,5 +1,6 @@
 {
  "allow_copy": 0,
+ "allow_events_in_timeline": 0,
  "allow_guest_to_view": 0,
  "allow_import": 1,
  "allow_rename": 1,
@@ -345,6 +346,7 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
+   "default": "Square Meter",
    "depends_on": "eval:doc.area",
    "fieldname": "area_uom",
    "fieldtype": "Link",
@@ -574,7 +576,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
- "modified": "2018-07-11 13:36:30.999405",
+ "modified": "2018-10-22 21:40:18.193709",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
