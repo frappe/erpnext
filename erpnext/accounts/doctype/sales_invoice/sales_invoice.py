@@ -78,7 +78,7 @@ class SalesInvoice(SellingController):
 		else:
 			abbr = self.get_company_abbr()
 			nstr = str(self.stin).zfill(5)
-			self.name = "STINV-{0}-{1}".format(abbr, nstr)
+			self.name = "{0}-{1}".format(abbr, nstr)
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
