@@ -20,7 +20,7 @@ def execute(filters=None):
 	for d in entries:
 		if d.stock_qty > 0 or filters.get('show_return_entries', 0):
 			data.append([
-				d.name, d.customer, d.territory, item_details.get(d.item_code, {}).get("website_warehouse"), d.posting_date, d.item_code,
+				d.name, d.customer, d.territory, d.warehouse, d.posting_date, d.item_code,
 				item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
 				d.stock_qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt, company_currency
 			])
@@ -144,10 +144,10 @@ def get_entries(filters):
 	conditions, values = get_conditions(filters, date_field)
 
 	entries = frappe.db.sql("""
-		select
+		SELECT
 			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
-			st.sales_person, st.allocated_percentage,
-		CASE 
+			st.sales_person, st.allocated_percentage, dt_item.warehouse,
+		CASE
 			WHEN dt.status = "Closed" THEN dt_item.%s * dt_item.conversion_factor
 			ELSE dt_item.stock_qty
 		END as stock_qty,
@@ -159,9 +159,9 @@ def get_entries(filters):
 			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor) * st.allocated_percentage/100)
 			ELSE dt_item.base_net_amount * st.allocated_percentage/100
 		END as contribution_amt
-		from
+		FROM
 			`tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
-		where
+		WHERE
 			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
 			and dt.docstatus = 1 %s order by st.sales_person, dt.name desc
 		""" %(date_field, qty_field, qty_field, qty_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
@@ -211,7 +211,7 @@ def get_items(filters):
 
 def get_item_details():
 	item_details = {}
-	for d in frappe.db.sql("""select name, item_group, brand, website_warehouse from `tabItem`""", as_dict=1):
+	for d in frappe.db.sql("""SELECT `name`, `item_group`, `brand` FROM `tabItem`""", as_dict=1):
 		item_details.setdefault(d.name, d)
 
 	return item_details
