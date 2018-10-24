@@ -158,6 +158,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Taxes and Charges",
 				"add_if_empty": True
 			},
+			"Payment Schedule": {
+				"doctype": "Payment Schedule",
+				"add_if_empty": True
+			},
 			"Sales Team": {
 				"doctype": "Sales Team",
 				"add_if_empty": True
