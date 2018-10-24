@@ -123,9 +123,9 @@ var btn_invoice_registration = function (frm) {
 
 frappe.ui.form.on('Patient Relation', {
 	patient_relation_add: function(frm){
-		cur_frm.fields_dict['patient_relation'].grid.get_field('patient').get_query = function(frm){
+		frm.fields_dict['patient_relation'].grid.get_field('patient').get_query = function(frm){
 			var patient_list = [];
-			if(!cur_frm.doc.__islocal) patient_list.push(frm.doc.name);
+			if(!frm.doc.__islocal) patient_list.push(frm.doc.name);
 			$.each(frm.doc.patient_relation, function(idx, val){
 				if (val.patient) patient_list.push(val.patient);
 			});
