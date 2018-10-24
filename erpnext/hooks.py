@@ -219,6 +219,9 @@ doc_events = {
 	},
 	"Contact":{
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
+	},
+	"Salary Slip":{
+		"validate": "erpnext.hr.doctype.salary_slip.salary_slip_utils.get_current_leave_dates"
 	}
 }
 
