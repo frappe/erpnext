@@ -67,24 +67,27 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	validate: function (frm) {
-		if (frm.doc.delivery_stops) {
+		if (frm.is_new() && frm.doc.delivery_stops) {
 			frappe.call({
 				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.validate_unique_delivery_notes",
 				args: {
 					delivery_stops: frm.doc.delivery_stops
 				},
-				async: false,
-				freeze: false,
-				freeze_message: "Test",
 				callback: function (r) {
 					if (r) {
-						let confirm_message = `The entered Delivery Notes already exist in the following
-												Delivery Trips: ${r.message.join(", ")}. Do you want to
-												continue?`;
+						let confirm_message = `Atleast one of the entered Delivery Notes already exist in
+												the following Delivery Trips: ${r.message.join(", ")}.
+												Do you still want to continue?`;
 
-						frappe.confirm(__(confirm_message), function () {
-							return;
-						});
+						frappe.confirm(
+							__(confirm_message),
+							function () { return; }, // If "Yes" is selected
+							function () {
+								// If "No" is selected
+								frappe.db.delete_doc(frm.doc.doctype, frm.doc.name);
+								frappe.set_route("List", frm.doc.doctype)
+							}
+						);
 					};
 				}
 			});
@@ -94,6 +97,7 @@ frappe.ui.form.on('Delivery Trip', {
 	driver: function (frm) {
 		if (frm.doc.driver) {
 			frappe.db.get_value("Delivery Trip", {
+				docstatus: ["<", 2],
 				driver: frm.doc.driver,
 				departure_time: [">", frappe.datetime.nowdate()]
 			}, "name", (r) => {
