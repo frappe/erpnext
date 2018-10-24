@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import erpnext.education.utils as utils
-from urlparse import urlparse, parse_qs
 import frappe
 
 
