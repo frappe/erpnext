@@ -1,13 +1,8 @@
 {% extends "frappe_theme/templates/base.html" %}
 {% block title %}ERPNext Academy{% endblock %}
 {% from "templates/includes/media.html" import media %}
-{% block head_include %}
-<meta name="description" content="ERPNext Academy is a learnig platform to gain expertise in the world's top 100% open source ERP software." />
-<meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
-{% endblock %}
 {% block content %}
 <div id="content-holder" data-type="{{ content_type }}" data-content="{{ content.name }}" data-course="{{ course_name }}" data-program="{{ program_name }}">
-
 {% include "www/lms/templates/includes/" + content_type.lower() + ".html" %}
 
 </div>
