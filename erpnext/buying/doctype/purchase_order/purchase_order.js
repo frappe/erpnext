@@ -315,7 +315,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					args: args,
+					args: me.args,
 					setters: {
 						company: me.frm.doc.company
 					},
