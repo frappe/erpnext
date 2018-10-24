@@ -713,7 +713,7 @@ class StockEntry(StockController):
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
-					print(item_dict)
+
 					#Get PO Supplied Items Details
 					if self.purchase_order and self.purpose == "Subcontract":
 						#Get PO Supplied Items Details
