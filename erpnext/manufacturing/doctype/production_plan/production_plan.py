@@ -419,8 +419,8 @@ class ProductionPlan(Document):
 		for item in self.mr_items:
 			item_doc = frappe.get_cached_doc('Item', item.item_code)
 
-			# key for Sales Order:Material Request Type
-			key = '{}:{}'.format(item.sales_order, item_doc.default_material_request_type)
+			# key for Sales Order:Material Request Type:Customer
+			key = '{}:{}:{}'.format(item.sales_order, item_doc.default_material_request_type,item_doc.customer or '')
 			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
