@@ -31,7 +31,7 @@ def get_columns(filters):
 		columns.append(
 			{
 			"label": _(label),
-			"field_name":field_name,
+			"fieldname":field_name,
 			"fieldtype": "Float",
 			"width": 120
 		},
