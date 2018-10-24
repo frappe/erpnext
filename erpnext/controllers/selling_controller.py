@@ -191,6 +191,7 @@ class SellingController(StockController):
 				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
 
 			if self.has_product_bundle(d.item_code):
+				qty = frappe.db.sql('Select sum(pbi.qty) as qty from `tabProduct Bundle Item` pbi where pbi.parent = %(pb)s ', {'pb': d.item_code}, as_dict=1)[0].qty
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
@@ -201,6 +202,7 @@ class SellingController(StockController):
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
+							'base_rate': (d.base_rate / qty),
 							'name': d.name,
 							'target_warehouse': p.target_warehouse,
 							'company': self.company,
@@ -218,6 +220,7 @@ class SellingController(StockController):
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name,
+					'base_rate': d.base_rate,
 					'target_warehouse': d.target_warehouse,
 					'company': self.company,
 					'voucher_type': self.doctype,
@@ -329,6 +332,7 @@ class SellingController(StockController):
 							target_warehouse_sle.update({
 								"outgoing_rate": return_rate
 							})
+
 					sl_entries.append(target_warehouse_sle)
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
