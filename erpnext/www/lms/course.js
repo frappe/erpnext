@@ -35,3 +35,13 @@ function addActivity() {
         }
     })
 }
+
+function addFinalActivity() {
+    addActivity()
+    frappe.call({
+        method: "erpnext.education.utils.mark_course_complete",
+        args: {
+            "course": $('#content-holder').data('course'),
+        },
+    })
+}

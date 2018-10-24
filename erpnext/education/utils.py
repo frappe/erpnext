@@ -99,6 +99,8 @@ def add_quiz_activity(enrollment, quiz, score, answers, quiz_response):
 
 @frappe.whitelist()
 def add_activity(content_type, content, course, program):
+	if content_type == "Quiz":
+		pass
 	enrollment = get_course_enrollment(course, frappe.session.user)
 	if check_activity_exists(enrollment['name'], content_type, content):
 		pass
@@ -167,4 +169,18 @@ def get_student_id(email=None):
 		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
 	except IndexError:
 		frappe.throw("Student with email {0} does not exist".format(email))
+		return None
+
+@frappe.whitelist()
+def mark_course_complete(course):
+	try:
+		enrollment_name = get_course_enrollment(course, frappe.session.user)
+		enrollment = frappe.get_doc("Course Enrollment", enrollment_name)
+		enrollment.completed = 1
+		enrollment.save()
+		pass
+	except:
+		import traceback
+		traceback.print_exc()
+		frappe.throw("The user is not enrolled for the course {course}".format(course=course))
 		return None
