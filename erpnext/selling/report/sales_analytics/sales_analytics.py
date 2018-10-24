@@ -37,7 +37,7 @@ def get_columns(filters):
 		{
 			"label": _("Total"),
 			"fieldname": "total",
-			"fieldtype": "Data",
+			"fieldtype": "Float",
 			"width": 120
 		}]
 
@@ -50,8 +50,8 @@ def get_columns(filters):
 		columns.append(
 			{
 			"label": _(label),
-			"field_name":field_name,
-			"fieldtype": "Date",
+			"fieldname":field_name,
+			"fieldtype": "Float",
 			"width": 120
 		},
 		)
