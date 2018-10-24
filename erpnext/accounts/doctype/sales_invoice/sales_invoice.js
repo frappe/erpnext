@@ -663,6 +663,14 @@ frappe.ui.form.on('Sales Invoice', {
 
 	onload: function(frm) {
 		frm.redemption_conversion_factor = null;
+
+		if(frm.doc.__islocal) {
+			if(frm.doc.payment_terms_template) {
+				var ptt = frm.doc.payment_terms_template;
+				setTimeout(() => {frm.set_value("payment_terms_template", ptt);}, 100);
+			}
+			frm.doc.customer && frm.trigger("customer");
+		}
 	},
 
 	redeem_loyalty_points: function(frm) {
