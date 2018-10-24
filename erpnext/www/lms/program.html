@@ -1,11 +1,6 @@
 {% extends "frappe_theme/templates/base.html" %}
 {% block title %}ERPNext Academy{% endblock %}
 
-{% block head_include %}
-<meta name="description" content="ERPNext Academy is a learnig platform to gain expertise in the world's top 100% open source ERP software." />
-<meta name="keywords" content="ERP Software, Cloud ERP, Open Source ERP, Accounting Software, Online ERP, Online Accounting, ERP for small business, Learn ERP, ERPNext Academy, Learn ERPNext, Learn Accounting" />
-{% endblock %}
-
 {% macro course_card(course) %}
 <div class="card mt-3" data-list="getting-started">
     <div class='card-body'>
@@ -22,7 +17,11 @@
                 </span>
             </div>
             <div class='text-center col-xs-4 col-sm-3 col-md-2'>
+                {% if not check_complete(course.name) %}
                 <a class='btn btn-primary btn-sm btn-block' href="/lms/course?program={{ program.program_code }}&course={{ course.name }}&type={{course.course_content[0].content_type}}&content={{ course.course_content[0].content }}">Start Course</a>
+                {% else %}
+                <a class='btn btn-success btn-sm btn-block' href="/lms/course?program={{ program.program_code }}&course={{ course.name }}&type={{course.course_content[0].content_type}}&content={{ course.course_content[0].content }}">Complete</a>
+                {% endif %}
             </div>
         </div>
     </div>
