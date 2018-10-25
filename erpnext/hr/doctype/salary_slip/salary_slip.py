@@ -47,6 +47,7 @@ class SalarySlip(TransactionBase):
 		else:
 			self.get_leave_details(lwp = self.leave_without_pay)
 
+		self.get_total_working_days_in_payroll_frequency()
 		if self.total_working_days_in_payroll_frequency <= 0:
 			frappe.throw(_("Total working days in this period should not be less or equal than 0"))
 
