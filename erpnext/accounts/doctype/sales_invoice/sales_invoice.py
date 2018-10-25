@@ -310,6 +310,7 @@ class SalesInvoice(SellingController):
 
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)
 		if not self.due_date and self.customer:
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
@@ -715,7 +716,9 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		grand_total = self.rounded_total or self.grand_total
+		# Checked both rounding_adjustment and rounded_total 
+		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		if grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,

@@ -123,6 +123,7 @@ class PurchaseInvoice(BuyingController):
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.credit_to, "account_currency", cache=True)
 		if not self.due_date:
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company,  self.bill_date)
 
@@ -208,7 +209,8 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock:
 			self.validate_item_code()
 			self.validate_warehouse()
-			warehouse_account = get_warehouse_account_map()
+			if auto_accounting_for_stock:
+				warehouse_account = get_warehouse_account_map()
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -377,7 +379,10 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
-		grand_total = self.rounded_total or self.grand_total
+		# Checked both rounding_adjustment and rounded_total 
+		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+
 		if grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
@@ -401,7 +406,8 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		warehouse_account = get_warehouse_account_map()
+		if self.update_stock and self.auto_accounting_for_stock:
+			warehouse_account = get_warehouse_account_map()
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:

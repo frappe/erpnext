@@ -191,9 +191,8 @@ class LeaveApplication(Document):
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
-				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date,
+				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, docname=self.name,
 					consider_all_leaves_in_the_allocation_period=True)
-
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
@@ -385,26 +384,24 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
+def get_leave_balance_on(employee, leave_type, date, allocation_records=None, docname=None,
 		consider_all_leaves_in_the_allocation_period=False, consider_encashed_leaves=True):
+
 	if allocation_records == None:
 		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
-
 	allocation = allocation_records.get(leave_type, frappe._dict())
-
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
-	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved")
-
+	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved", docname=docname)
 	leaves_encashed = 0
 	if frappe.db.get_value("Leave Type", leave_type, 'allow_encashment') and consider_encashed_leaves:
 		leaves_encashed = flt(allocation.total_leaves_encashed)
 
 	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
 
-def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
+def get_leaves_for_period(employee, leave_type, from_date, to_date, status, docname=None):
 	leave_applications = frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, total_leave_days
+		select name, employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
 			and status = %(status)s and docstatus != 2
@@ -418,9 +415,10 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
 		"status": status,
 		"leave_type": leave_type
 	}, as_dict=1)
-
 	leave_days = 0
 	for leave_app in leave_applications:
+		if docname and leave_app.name == docname:
+			continue
 		if leave_app.from_date >= getdate(from_date) and leave_app.to_date <= getdate(to_date):
 			leave_days += leave_app.total_leave_days
 		else:
@@ -450,7 +448,6 @@ def get_leave_allocation_records(date, employee=None):
 			"total_leaves_allocated": d.total_leaves_allocated,
 			"total_leaves_encashed":d.total_leaves_encashed
 		}))
-
 	return allocated_leaves
 
 @frappe.whitelist()
