@@ -483,7 +483,6 @@ def make_stock_entry(source_name, target_doc=None):
 		stock_entry.append("items", {
 			"item_code": item.get('item_code'),
 			"s_warehouse": item.get('warehouse'),
-			"t_warehouse": "",
 			"qty": item.get("qty"),
 			"basic_rate": item.get('valuation_rate'),
 			'uom': item.get('uom'),
