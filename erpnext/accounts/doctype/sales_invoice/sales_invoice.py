@@ -589,9 +589,6 @@ class SalesInvoice(SellingController):
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 
-		if not self.grand_total:
-			return
-
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
