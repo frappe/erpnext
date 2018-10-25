@@ -432,7 +432,8 @@ class ProductionPlan(Document):
 					"status": "Draft",
 					"company": self.company,
 					"requested_by": frappe.session.user,
-					'material_request_type': item_doc.default_material_request_type
+					'material_request_type': item_doc.default_material_request_type,
+					'customer': item_doc.customer or ''
 				})
 				material_request_list.append(material_request)
 			else:
