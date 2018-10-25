@@ -285,7 +285,7 @@ var check_and_set_availability = function(frm) {
 			fd.available_slots.html("Appointment date and Healthcare Practitioner are Mandatory".bold());
 		}
 	}
-}
+};
 
 var get_procedure_prescribed = function(frm){
 	if(frm.doc.patient){
