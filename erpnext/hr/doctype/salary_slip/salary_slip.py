@@ -391,19 +391,14 @@ class SalarySlip(TransactionBase):
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 
-		consider_absent_as_lwp = cint(frappe.db.get_value("HR Settings", None, "consider_absent_as_lwp"))		
-		
-		if (consider_absent_as_lwp==1):
+		if cint(frappe.db.get_value("HR Settings", None, "consider_absent_as_lwp")):		
 			lwp = self.calculate_lwp_based_on_attendance_log(lwp)
-			print lwp
 		return lwp
 
 
 	def calculate_lwp_based_on_attendance_log(self,lwp):
-		print 'before'
-		print lwp
 
-		absent_count=leave = frappe.db.sql("""
+		absent_count = frappe.db.sql("""
 				select count(status) 
 				from `tabAttendance` as t1 
 				where t1.docstatus = 1 
@@ -413,33 +408,29 @@ class SalarySlip(TransactionBase):
 				and attendance_date between %(st_dt)s and %(end_dt)s""",
 				{"employee": self.employee, "st_dt": self.start_date,"end_dt": self.end_date})[0][0]
 
-		print absent_count
 
-		half_day_count=leave = frappe.db.sql("""
+		half_day_count = frappe.db.sql("""
 				select count(status) 
 				from `tabAttendance` as t1 
                 where t1.docstatus = 1 
 				and status='Half Day' 
-                and exists (select is_lwp from `tabLeave Type` where name = 'Leave Without Pay' and is_lwp=1)
+                and exists (select is_lwp from `tabLeave Type` where is_lwp=1)
 				and employee = %(employee)s
 				and attendance_date between %(st_dt)s and %(end_dt)s""",
 				{"employee": self.employee, "st_dt": self.start_date,"end_dt": self.end_date})[0][0]
-		print half_day_count
 
-		leave_count=leave = frappe.db.sql("""
+		leave_without_pay_count = frappe.db.sql("""
 				select count(status) 
 				from `tabAttendance` as t1 
                 where t1.docstatus = 1 
 				and status='On Leave' 
-                and exists (select is_lwp from `tabLeave Type` where name = 'Leave Without Pay' and is_lwp=1)
+				and leave_type ='Leave Without Pay'
+                and exists (select is_lwp from `tabLeave Type` where is_lwp=1)
 				and employee = %(employee)s
 				and attendance_date between %(st_dt)s and %(end_dt)s""",
 				{"employee": self.employee, "st_dt": self.start_date,"end_dt": self.end_date})[0][0]
-		print leave_count
 		
-		lwp = lwp + absent_count + (half_day_count * 0.5) + leave_count
-		print 'after'
-		print lwp						
+		lwp = lwp + absent_count + (half_day_count * 0.5) + leave_without_pay_count
 		return lwp
 
 
