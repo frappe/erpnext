@@ -72,7 +72,10 @@ class Fees(AccountsController):
 
 	def on_submit(self):
 
-		self.make_gl_entries()
+		if not self.check_for_individual_heads():
+			self.make_gl_entries()
+		else:
+			self.make_gl_entries_fees_component_head()
 
 		if self.send_payment_request and self.student_email:
 			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.student_email,
@@ -107,6 +110,52 @@ class Fees(AccountsController):
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries([student_gl_entries, fee_gl_entry], cancel=(self.docstatus == 2),
 			update_outstanding="Yes", merge_entries=False)
+	
+	def check_for_individual_heads(self):
+		linked_fs = frappe.get_doc("Fee Structure", self.fee_structure)
+		if linked_fs.process_fees_category_account_heads :
+			return linked_fs.process_fees_category_account_heads
+		else: 
+			return False
+	
+	def make_gl_entries_fees_component_head(self):
+		if not self.grand_total:
+			return
+		
+		gl_entries = self.create_gl_entries_fees_component_head()
+
+		from erpnext.accounts.general_ledger import make_gl_entries
+		make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
+			update_outstanding="Yes", merge_entries=False)
+
+		
+
+
+	def create_gl_entries_fees_component_head(self):
+		gl_entries = []
+		student_gl_entries =  self.get_gl_dict({
+			"account": self.receivable_account,
+			"party_type": "Student",
+			"party": self.student,
+			"against": self.income_account,
+			"debit": self.grand_total,
+			"debit_in_account_currency": self.grand_total,
+			"against_voucher": self.name,
+			"against_voucher_type": self.doctype
+		})
+		gl_entries.append(student_gl_entries)
+		## iterate over components for getting the account head
+		for d in self.components:
+			fee_gl_entry = self.get_gl_dict({
+                            "account": d.income_account,
+                            "against": self.student,
+                            "credit": d.amount,
+                            "credit_in_account_currency": self.income_account,
+                            "cost_center": self.cost_center
+			})
+			gl_entries.append(fee_gl_entry)
+		
+		return gl_entries
 
 def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user

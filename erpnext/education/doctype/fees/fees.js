@@ -160,6 +160,10 @@ frappe.ui.form.on("Fees", {
 							var row = frappe.model.add_child(frm.doc, "Fee Component", "components");
 							row.fees_category = d.fees_category;
 							row.amount = d.amount;
+							if (d.income_account){
+								row.income_account = d.income_account
+							}
+
 						});
 					}
 					refresh_field("components");
