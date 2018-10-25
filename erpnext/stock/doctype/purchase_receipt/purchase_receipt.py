@@ -471,3 +471,23 @@ def make_purchase_return(source_name, target_doc=None):
 def update_purchase_receipt_status(docname, status):
 	pr = frappe.get_doc("Purchase Receipt", docname)
 	pr.update_status(status)
+
+@frappe.whitelist()
+def make_stock_entry(source_name, target_doc=None):
+	source_doc = frappe.get_doc("Purchase Receipt", source_name)
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.company = source_doc.company
+	stock_entry.purpose = "Material Transfer"
+	stock_entry.from_warehouse = source_doc.items[0].get('warehouse')
+	for item in source_doc.items:
+		stock_entry.append("items", {
+			"item_code": item.get('item_code'),
+			"s_warehouse": item.get('warehouse'),
+			"t_warehouse": "",
+			"qty": item.get("qty"),
+			"basic_rate": item.get('valuation_rate'),
+			'uom': item.get('uom'),
+			'stock_uom': item.get('stock_uom'),
+		})
+
+	return stock_entry

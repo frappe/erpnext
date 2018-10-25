@@ -7,7 +7,7 @@ import unittest
 import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt, cstr, today, random_string
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice, make_stock_entry
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -404,6 +404,16 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		set_perpetual_inventory(0, pr.company)
+
+	def test_make_stock_entry(self):
+		pr = make_purchase_receipt(do_not_save=True)
+		self.assertRaises(frappe.ValidationError, make_stock_entry, pr.name)
+		pr.submit()
+
+		se = make_stock_entry(pr.name)
+
+		self.assertEqual(se.doctype, "Stock Entry")
+		self.assertEqual(len(se.get("items")), len(pr.get("items")))
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center

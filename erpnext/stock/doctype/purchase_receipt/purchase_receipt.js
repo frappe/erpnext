@@ -124,6 +124,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __("Make"));
+				cur_frm.add_custom_button(__('Stock Entry'), this.make_stock_entry, __("Make"));
 
 				if(!this.frm.doc.auto_repeat) {
 					cur_frm.add_custom_button(__('Subscription'), function() {
@@ -182,6 +183,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				}
 			}
 		});
+	},
+
+	make_stock_entry: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_stock_entry",
+			frm: cur_frm
+		})
 	},
 
 });
