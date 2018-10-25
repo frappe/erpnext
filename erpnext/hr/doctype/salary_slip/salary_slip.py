@@ -374,39 +374,44 @@ class SalarySlip(TransactionBase):
 
 	def calculate_lwp(self, holidays, working_days):
 		lwp = 0
-		holidays = "','".join(holidays)
-		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql("""
-				select t1.name, t1.half_day
-				from `tabLeave Application` t1, `tabLeave Type` t2
-				where t2.name = t1.leave_type
-				and t2.is_lwp = 1
-				and t1.docstatus = 1
-				and t1.employee = %(employee)s
-				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
-				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
-				END
-				""".format(holidays), {"employee": self.employee, "dt": dt})
-			if leave:
-				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 
-		if cint(frappe.db.get_value("HR Settings", None, "consider_absent_as_lwp")):		
+		if (cstr(frappe.db.get_value("HR Settings", None, "salary_slip_based_on")) == 'Leave Application'):		
+			holidays = "','".join(holidays)
+			for d in range(working_days):
+				dt = add_days(cstr(getdate(self.start_date)), d)
+				leave = frappe.db.sql("""
+					select t1.name, t1.half_day
+					from `tabLeave Application` t1, `tabLeave Type` t2
+					where t2.name = t1.leave_type
+					and t2.is_lwp = 1
+					and t1.docstatus = 1
+					and t1.employee = %(employee)s
+					and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+					WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+					END
+					""".format(holidays), {"employee": self.employee, "dt": dt})
+				if leave:
+					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+				return lwp	
+					
+		if (cstr(frappe.db.get_value("HR Settings", None, "salary_slip_based_on")) == 'Attendance'):			
 			lwp = self.calculate_lwp_based_on_attendance_log(lwp)
-		return lwp
+			return lwp
 
 
 	def calculate_lwp_based_on_attendance_log(self,lwp):
 
-		absent_count = frappe.db.sql("""
-				select count(status) 
-				from `tabAttendance` as t1 
-				where t1.docstatus = 1 
-				and status='Absent' 
-				and leave_type is NULL
-				and employee = %(employee)s
-				and attendance_date between %(st_dt)s and %(end_dt)s""",
-				{"employee": self.employee, "st_dt": self.start_date,"end_dt": self.end_date})[0][0]
+		absent_count=0
+		if cint(frappe.db.get_value("HR Settings", None, "consider_absent_as_lwp")):
+			absent_count = frappe.db.sql("""
+					select count(status) 
+					from `tabAttendance` as t1 
+					where t1.docstatus = 1 
+					and status='Absent' 
+					and leave_type is NULL
+					and employee = %(employee)s
+					and attendance_date between %(st_dt)s and %(end_dt)s""",
+					{"employee": self.employee, "st_dt": self.start_date,"end_dt": self.end_date})[0][0]
 
 
 		half_day_count = frappe.db.sql("""
