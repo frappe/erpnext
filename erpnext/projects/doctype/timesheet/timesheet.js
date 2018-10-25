@@ -90,7 +90,7 @@ frappe.ui.form.on("Timesheet", {
 		}
 	},
 
-	company: function( frm,cdt,cdn ) {
+	company: function(frm) {
 		frappe.db.get_value('Company', { 'company_name' : frm.doc.company }, 'standard_working_hours')
 			.then(({ message }) => {
 				(frappe.working_hours = message.standard_working_hours || 0);
@@ -153,8 +153,8 @@ frappe.ui.form.on("Timesheet Detail", {
 		var std_working_hours = 0;
 
 		if(frm._setting_hours) return;
-		
-		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600
+
+		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
 		std_working_hours = time_diff * frappe.working_hours;
 
 		if (std_working_hours < hours && std_working_hours > 0) {
