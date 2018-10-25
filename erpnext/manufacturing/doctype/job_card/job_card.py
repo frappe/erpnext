@@ -16,7 +16,7 @@ class JobCard(Document):
 		self.set_time_in_mins()
 
 	def validate_actual_dates(self):
-		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
+		if self.actual_end_date and get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
 			frappe.throw(_("Actual start date must be less than actual end date"))
 
 		if not (self.employee and self.actual_start_date and self.actual_end_date):
@@ -112,7 +112,8 @@ class JobCard(Document):
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {'job_card': self.name,
 				'work_order': self.work_order, 'docstatus': 1}, 'sum(fg_completed_qty)')
 
-		self.db_set("transferred_qty", self.transferred_qty)
+		if self.transferred_qty:
+			self.db_set("transferred_qty", self.transferred_qty)
 
 		qty = 0
 		if self.work_order:
