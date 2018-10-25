@@ -375,7 +375,7 @@ class SalarySlip(TransactionBase):
 	def calculate_lwp(self, holidays, working_days):
 		lwp = 0
 
-		if (cstr(frappe.db.get_value("HR Settings", None, "salary_slip_based_on")) == 'Leave Application'):		
+		if (cstr(frappe.db.get_value("HR Settings", None, "salary_slip_based_on")) == 'Leave Application'):
 			holidays = "','".join(holidays)
 			for d in range(working_days):
 				dt = add_days(cstr(getdate(self.start_date)), d)
@@ -392,7 +392,7 @@ class SalarySlip(TransactionBase):
 					""".format(holidays), {"employee": self.employee, "dt": dt})
 				if leave:
 					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
-				return lwp	
+			return lwp	
 					
 		if (cstr(frappe.db.get_value("HR Settings", None, "salary_slip_based_on")) == 'Attendance'):			
 			lwp = self.calculate_lwp_based_on_attendance_log(lwp)
