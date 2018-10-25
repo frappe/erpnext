@@ -24,6 +24,13 @@ class SellingController(StockController):
 				"taxes": "templates/print_formats/includes/taxes.html"
 			}
 
+	def before_print(self):
+		def toggle_print_hide(meta, fieldname):
+			df = meta.get_field(fieldname)
+			df.set("print_hide", 1 if self.get("taxes") else 0)
+
+		toggle_print_hide(self.meta, "discount_amount")
+
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
 			self.grand_total)
