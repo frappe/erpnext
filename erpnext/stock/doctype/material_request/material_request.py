@@ -239,6 +239,18 @@ def update_item(obj, target, source_parent):
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
 
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Material Request'),
+	})
+
+	return list_context
+
 @frappe.whitelist()
 def update_status(name, status):
 	material_request = frappe.get_doc('Material Request', name)
