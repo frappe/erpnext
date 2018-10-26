@@ -40,12 +40,13 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		self.validate_cheque_info()
+		self.create_remarks()
+
 		if not self.title:
 			self.title = self.get_title()
 
 	def on_submit(self):
-		self.validate_cheque_info()
-		self.create_remarks()
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
