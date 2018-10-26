@@ -19,12 +19,13 @@ class BankReconciliation(Document):
 
 		condition = ""
 		if not self.include_reconciled_entries:
-			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
+			condition = "and ({0}clearance_date is null or {0}clearance_date='0000-00-00')"
 
 
 		journal_entries = frappe.db.sql("""
 			select 
-				"Journal Entry Account" as payment_document, t2.name as payment_entry, 
+				"Journal Entry" as payment_document, t1.name as payment_entry,
+				"Journal Entry Account" as payment_detail_dt, t2.name as payment_detail_dn,
 				t2.cheque_no as cheque_number, t2.cheque_date, 
 				t2.debit_in_account_currency as debit, t2.credit_in_account_currency as credit, 
 				t1.posting_date, t2.against_account, t2.clearance_date, t2.account_currency 
@@ -35,11 +36,11 @@ class BankReconciliation(Document):
 				and t1.posting_date >= %s and t1.posting_date <= %s 
 				and ifnull(t1.is_opening, 'No') = 'No' {0}
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+		""".format(condition.format("t2.")), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
 		payment_entries = frappe.db.sql("""
 			select 
-				"Payment Entry" as payment_document, name as payment_entry, 
+				"Payment Entry" as payment_document, name as payment_entry,
 				reference_no as cheque_number, reference_date as cheque_date, 
 				if(paid_from=%(account)s, paid_amount, "") as credit, 
 				if(paid_from=%(account)s, "", received_amount) as debit, 
@@ -51,7 +52,7 @@ class BankReconciliation(Document):
 				and posting_date >= %(from)s and posting_date <= %(to)s {0}
 			order by 
 				posting_date ASC, name DESC
-		""".format(condition), 
+		""".format(condition.format("")),
 		        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
 		pos_entries = []
@@ -67,7 +68,7 @@ class BankReconciliation(Document):
 					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s {0}
 				order by
 					si.posting_date ASC, si.name DESC
-			""".format(condition),
+			""".format(condition.format("sip.")),
 			        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
 		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
@@ -103,8 +104,8 @@ class BankReconciliation(Document):
 
 				frappe.db.set_value(d.payment_document, d.payment_entry, "clearance_date", d.clearance_date)
 				frappe.db.sql("""update `tab{0}` set clearance_date = %s, modified = %s 
-					where name=%s""".format(d.payment_document), 
-				(d.clearance_date, nowdate(), d.payment_entry))
+					where name=%s""".format(d.get("payment_detail_dt") or d.payment_document),
+				(d.clearance_date, nowdate(), d.get("payment_detail_dn") or d.payment_entry))
 				
 				clearance_date_updated = True
 
