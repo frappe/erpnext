@@ -24,10 +24,10 @@ class BankReconciliation(Document):
 
 		journal_entries = frappe.db.sql("""
 			select 
-				"Journal Entry" as payment_document, t1.name as payment_entry, 
-				t1.cheque_no as cheque_number, t1.cheque_date, 
+				"Journal Entry Account" as payment_document, t2.name as payment_entry, 
+				t2.cheque_no as cheque_number, t2.cheque_date, 
 				t2.debit_in_account_currency as debit, t2.credit_in_account_currency as credit, 
-				t1.posting_date, t2.against_account, t1.clearance_date, t2.account_currency 
+				t1.posting_date, t2.against_account, t2.clearance_date, t2.account_currency 
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where

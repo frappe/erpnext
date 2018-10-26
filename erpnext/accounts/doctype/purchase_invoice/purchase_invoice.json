@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
@@ -4258,6 +4259,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
+   "collapsible_depends_on": "remarks", 
    "columns": 0, 
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
@@ -4760,7 +4762,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-10-13 13:39:31.280237", 
+ "modified": "2018-10-26 20:08:06.112480", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

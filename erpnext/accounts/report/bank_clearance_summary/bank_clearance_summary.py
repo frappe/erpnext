@@ -36,7 +36,7 @@ def get_conditions(filters):
 def get_entries(filters):
 	conditions = get_conditions(filters)
 	journal_entries =  frappe.db.sql("""select "Journal Entry", jv.name, jv.posting_date,
-		jv.cheque_no, jv.clearance_date, jvd.against_account, (jvd.debit - jvd.credit)
+		jvd.cheque_no, jvd.clearance_date, jvd.against_account, (jvd.debit - jvd.credit)
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {0}
 		order by posting_date DESC, jv.name DESC""".format(conditions), filters, as_list=1)

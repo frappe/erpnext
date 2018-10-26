@@ -462,7 +462,9 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"reference_no": self.reference_no,
+					"reference_date": self.reference_date
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -473,7 +475,9 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"reference_no": self.reference_no,
+					"reference_date": self.reference_date
 				})
 			)
 
