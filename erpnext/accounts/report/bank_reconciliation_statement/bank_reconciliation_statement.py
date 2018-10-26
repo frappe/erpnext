@@ -115,12 +115,12 @@ def get_entries(filters):
 		select "Journal Entry" as payment_document, jv.posting_date, 
 			jv.name as payment_entry, jvd.debit_in_account_currency as debit, 
 			jvd.credit_in_account_currency as credit, jvd.against_account, 
-			jv.cheque_no as reference_no, jv.cheque_date as ref_date, jv.clearance_date, jvd.account_currency
+			jvd.cheque_no as reference_no, jvd.cheque_date as ref_date, jvd.clearance_date, jvd.account_currency
 		from
 			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
-			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
+			and ifnull(jvd.clearance_date, '4000-01-01') > %(report_date)s
 			and ifnull(jv.is_opening, 'No') = 'No'""", filters, as_dict=1)
 			
 	payment_entries = frappe.db.sql("""
@@ -162,7 +162,7 @@ def get_amounts_not_reflected_in_system(filters):
 		select sum(jvd.debit_in_account_currency - jvd.credit_in_account_currency)
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%(account)s
-		and jv.posting_date > %(report_date)s and jv.clearance_date <= %(report_date)s 
+		and jv.posting_date > %(report_date)s and jvd.clearance_date <= %(report_date)s 
 		and ifnull(jv.is_opening, 'No') = 'No' """, filters)
 
 	je_amount = flt(je_amount[0][0]) if je_amount else 0.0
