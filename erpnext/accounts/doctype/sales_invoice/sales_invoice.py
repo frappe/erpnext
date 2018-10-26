@@ -1259,6 +1259,15 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	if not cint(frappe.db.get_default('maintain_packed_items_list')):
+		if hasattr(target_doc, 'packed_items'):
+			# remove packed_items suggested from sales order
+			del target_doc.packed_items[0:]
+
+		# make packed_items from product bundle
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(target_doc)
+
 	return doclist
 
 @frappe.whitelist()
