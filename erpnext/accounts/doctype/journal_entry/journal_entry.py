@@ -405,7 +405,7 @@ class JournalEntry(AccountsController):
 				ref_strs.append(_("{0} dated {1}").format(ref[0], formatdate(ref[1])))
 			else:
 				ref_strs.append(ref[0])
-		if self.ref_strs:
+		if ref_strs:
 			r.append(_("Reference #: {0}").format(", ".join(ref_strs)))
 
 		# Reference documents
