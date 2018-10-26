@@ -23,7 +23,9 @@ class JournalEntry(AccountsController):
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening='No'
-		self.clearance_date = None
+
+		for d in self.accounts:
+			d.clearance_date = None
 
 		self.validate_party()
 		self.validate_entries_for_advance()
@@ -33,7 +35,6 @@ class JournalEntry(AccountsController):
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
-		self.create_remarks()
 		self.set_print_format_fields()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
@@ -45,6 +46,7 @@ class JournalEntry(AccountsController):
 
 	def on_submit(self):
 		self.validate_cheque_info()
+		self.create_remarks()
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
@@ -145,13 +147,19 @@ class JournalEntry(AccountsController):
 				check_credit_limit(customer, self.company)
 
 	def validate_cheque_info(self):
-		if self.voucher_type in ['Bank Entry']:
-			if not self.cheque_no or not self.cheque_date:
-				msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
-					raise_exception=1)
+		for row in self.accounts:
+			account_type = frappe.get_cached_value("Account", row.account, "account_type")
+			if account_type == "Bank":
+				if not row.cheque_no:
+					row.cheque_no = self.cheque_no
+				if not row.cheque_date:
+					row.cheque_date = self.cheque_date
 
-		if self.cheque_date and not self.cheque_no:
-			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
+			if self.voucher_type in ['Bank Entry'] and (not row.cheque_no or not row.cheque_date):
+				frappe.throw(_("Row #{0}: Reference No & Reference Date is required for {1}").format(row.idx, self.voucher_type))
+
+			if row.cheque_date and not row.cheque_no:
+				frappe.throw(_("Row #{0}: Reference No is mandatory if you entered Reference Date").format(row.idx))
 
 	def validate_entries_for_advance(self):
 		for d in self.get('accounts'):
@@ -385,12 +393,22 @@ class JournalEntry(AccountsController):
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
 
-		if self.cheque_no:
-			if self.cheque_date:
-				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
-			else:
-				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
+		# Reference numbers string
+		refs = set([d.cheque_no for d in self.accounts if d.cheque_no])
+		self.reference_numbers = ", ".join(refs)
 
+		# Reference number and dates string
+		refs = set([(d.cheque_no, d.cheque_date) for d in self.accounts if d.cheque_no])
+		ref_strs = []
+		for ref in refs:
+			if ref[0] and ref[1]:
+				ref_strs.append(_("{0} dated {1}").format(ref[0], formatdate(ref[1])))
+			else:
+				ref_strs.append(ref[0])
+		if self.ref_strs:
+			r.append(_("Reference #: {0}").format(", ".join(ref_strs)))
+
+		# Reference documents
 		for d in self.get('accounts'):
 			if d.reference_type=="Sales Invoice" and d.credit:
 				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
@@ -401,19 +419,19 @@ class JournalEntry(AccountsController):
 					d.reference_name))
 
 			if d.reference_type == "Purchase Invoice" and d.debit:
-				bill_no = frappe.db.sql("""select bill_no, bill_date
-					from `tabPurchase Invoice` where name=%s""", d.reference_name)
-				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
-						not in ['na', 'not applicable', 'none']:
-					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=self.company_currency), bill_no[0][0],
-						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
+				bill_no = frappe.db.sql("""select bill_no, bill_date from `tabPurchase Invoice` where name=%s""", d.reference_name)
+				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() not in ['na', 'not applicable', 'none']:
+					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=self.company_currency), \
+						bill_no[0][0], bill_no[0][1] and formatdate(bill_no[0][1])))
+				else:
+					r.append(_("{0} against Purchase Invoice {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
+						d.reference_name))
 
 			if d.reference_type == "Purchase Order" and d.debit:
-				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
+				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
 					d.reference_name))
 
-		if r:
-			self.remark = ("\n").join(r) #User Remarks is not mandatory
+		self.remark = "\n".join(r) if r else "" # User Remarks is not mandatory
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
@@ -454,8 +472,11 @@ class JournalEntry(AccountsController):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
-				r = [d.user_remark, self.remark]
-				r = [x for x in r if x]
+				r = []
+				if d.user_remark:
+					r.append(d.user_remark)
+				if self.remark:
+					r.append(_("Note: {0}").format(self.user_remark))
 				remarks = "\n".join(r)
 
 				gl_map.append(
@@ -472,6 +493,8 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": remarks,
+						"reference_no": d.cheque_no,
+						"reference_date": d.cheque_date,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book

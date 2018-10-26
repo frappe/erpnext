@@ -77,7 +77,7 @@ def get_gl_entries(filters):
 			gl.party_type, gl.party,
 			inv.name as InvName, inv.title as InvTitle, inv.posting_date as InvPostDate, 
 			pur.name as PurName, pur.title as PurTitle, pur.posting_date as PurPostDate,
-			jnl.cheque_no as JnlRef, jnl.posting_date as JnlPostDate, jnl.title as JnlTitle,
+			jnl.reference_numbers as JnlRef, jnl.posting_date as JnlPostDate, jnl.title as JnlTitle,
 			pay.name as PayName, pay.posting_date as PayPostDate, pay.title as PayTitle,
 			cus.customer_name, cus.name as cusName,
 			sup.supplier_name, sup.name as supName
