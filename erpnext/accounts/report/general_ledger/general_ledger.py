@@ -131,7 +131,7 @@ def get_gl_entries(filters):
 			debit, credit,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening {select_fields}
+			remarks, against, is_opening, reference_no, reference_date {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		order by {order_by_fields}
@@ -160,6 +160,12 @@ def get_conditions(filters):
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+
+	if filters.get("against_voucher"):
+		conditions.append("against_voucher=%(against_voucher)s")
+
+	if filters.get("reference_no"):
+		conditions.append("reference_no=%(reference_no)s")
 
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
@@ -349,11 +355,34 @@ def get_columns(filters):
 			"width": 90
 		},
 		{
+			"label": _("Ref Date"),
+			"fieldname": "reference_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 180
+			"width": 120
+		},
+		{
+			"label": _("Party"),
+			"fieldname": "party",
+			"width": 120,
+			"fieldtype": "Dynamic Link",
+			"options": "party_type"
+		},
+		{
+			"label": _("Ref No"),
+			"fieldname": "reference_no",
+			"width": 80
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 200
 		},
 		{
 			"label": _("Debit ({0})".format(currency)),
@@ -371,22 +400,7 @@ def get_columns(filters):
 			"label": _("Balance ({0})".format(currency)),
 			"fieldname": "balance",
 			"fieldtype": "Float",
-			"width": 130
-		}
-	]
-
-	columns.extend([
-		{
-			"label": _("Voucher Type"),
-			"fieldname": "voucher_type",
 			"width": 120
-		},
-		{
-			"label": _("Voucher No"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 180
 		},
 		{
 			"label": _("Against Account"),
@@ -394,14 +408,21 @@ def get_columns(filters):
 			"width": 120
 		},
 		{
-			"label": _("Party Type"),
-			"fieldname": "party_type",
-			"width": 100
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 150
 		},
+	]
+
+	columns.extend([
 		{
-			"label": _("Party"),
-			"fieldname": "party",
-			"width": 100
+			"label": _("Against Voucher"),
+			"fieldname": "against_voucher",
+			"fieldtype": "Dynamic Link",
+			"options": "against_voucher_type",
+			"width": 150
 		},
 		{
 			"label": _("Project"),
@@ -416,27 +437,25 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Against Voucher Type"),
-			"fieldname": "against_voucher_type",
-			"width": 100
-		},
-		{
-			"label": _("Against Voucher"),
-			"fieldname": "against_voucher",
-			"fieldtype": "Dynamic Link",
-			"options": "against_voucher_type",
-			"width": 100
-		},
-		{
 			"label": _("Supplier Invoice No"),
 			"fieldname": "bill_no",
 			"fieldtype": "Data",
 			"width": 100
 		},
 		{
-			"label": _("Remarks"),
-			"fieldname": "remarks",
-			"width": 400
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120
+		},
+		{
+			"label": _("Against Voucher Type"),
+			"fieldname": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 100
 		}
 	])
 
