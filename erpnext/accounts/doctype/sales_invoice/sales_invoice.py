@@ -506,7 +506,7 @@ class SalesInvoice(SellingController):
 		for d in self.get('items'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
-		self.against_income_account = ','.join(against_acc)
+		self.against_income_account = ', '.join(against_acc)
 
 	def add_remarks(self):
 		if not self.remarks: self.remarks = 'No Remarks'
