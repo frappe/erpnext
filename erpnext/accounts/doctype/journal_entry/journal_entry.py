@@ -507,6 +507,8 @@ class JournalEntry(AccountsController):
 					r.append(d.user_remark)
 				if self.user_remark:
 					r.append(_("Note: {0}").format(self.user_remark))
+				if self.reference_account:
+					r.append(_('Reference Account: {0}').format(self.reference_account))
 				remarks = "\n".join(r)
 
 				gl_map.append(
