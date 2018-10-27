@@ -120,8 +120,6 @@ class PurchaseInvoice(BuyingController):
 			if self.bill_no and self.bill_date:
 				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no,
 					formatdate(self.bill_date))
-			else:
-				self.remarks = _("No Remarks")
 
 	def set_title(self):
 		if self.letter_of_credit:
