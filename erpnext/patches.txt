@@ -572,3 +572,4 @@ erpnext.patches.v11_0.ewaybill_fields_gst_india
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
+erpnext.patches.v11_0.migrate_reference_and_clearance_to_journal_entry_accounts_table
