@@ -117,8 +117,6 @@ class PurchaseInvoice(BuyingController):
 			if self.bill_no and self.bill_date:
 				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no,
 					formatdate(self.bill_date))
-			else:
-				self.remarks = _("No Remarks")
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
