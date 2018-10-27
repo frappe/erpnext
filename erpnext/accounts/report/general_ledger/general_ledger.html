@@ -64,37 +64,42 @@ for(var i=0, l=data.length; i<l; i++) {
 			<tr>
 			{% if(data[i].posting_date) { %}
 				<td class="text-center">
-					<strong>{%= data[i].voucher_no %}</strong><br>
-					{%= frappe.datetime.str_to_user(data[i].posting_date) %}<br>
+					<strong><a href="#Form/{%= data[i].voucher_type %}/{%= data[i].voucher_no %}" target="_blank">{%= data[i].voucher_no %}</a></strong>
+					<br />{%= frappe.datetime.str_to_user(data[i].posting_date) %}
 				</td>
 
 				{% if(show_ref_col) { %}
 				<td class="text-center">
-					<strong>{%= data[i].reference_no %}</strong><br>
+					<strong>{%= data[i].reference_no %}</strong><br />
 					{%= data[i].reference_date %}
 				</td>
 				{% } %}
 
 				{% if(!(filters.party || filters.account)) { %}
 				<td>
-					{%= data[i].account %}
-					{% if(data[i].party) { %} <br>{%= data[i].party %} {% } %}
+					<a href="#Form/Account/{%= data[i].account %}" target="_blank">{%= data[i].account %}</a>
+					{% if(data[i].party) { %}
+					<br /><a href="#Form/{%= data[i].party_type %}/{%= data[i].party %}" target="_blank">{%= data[i].party %}</a>
+					{% } %}
 				</td>
 				{% } %}
 
 				{% if(filters.against_in_print) { %}
 				<td>
-					{%= data[i].against.split(", ").join("<br>") %}
+					{%= data[i].against.split(", ").join("<br />") %}
 				</td>
 				{% } %}
 
 				<td>
-					{%= data[i].remarks.split("\n").join("<br>") %}
+					{%= data[i].remarks.split("\n").join("<br />") %}
 					{% if(data[i].against_voucher) { %}
-						<br>{%= __("Against {0}: {1}", [data[i].against_voucher_type, data[i].against_voucher]) %}
+						{% if(data[i].remarks) { %}<br />{% } %}
+						{%= __("Against") %}
+						{%= data[i].against_voucher_type %}:
+						<a href="#Form/{%= data[i].against_voucher_type %}/{%= data[i].against_voucher %}" target="_blank">{%= data[i].against_voucher %}</a>
 					{% } %}
 					{% if(data[i].bill_no) { %}
-						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+						<br />{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
 					{% } %}
 				</td>
 
