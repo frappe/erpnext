@@ -354,9 +354,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
-	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Entry");
-	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Entry");
-
 	if(!doc.company) return;
 
 	var update_jv_details = function(doc, r) {
