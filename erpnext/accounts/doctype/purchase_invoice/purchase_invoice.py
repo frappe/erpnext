@@ -236,7 +236,7 @@ class PurchaseInvoice(BuyingController):
 			if item.expense_account not in against_accounts:
 				against_accounts.append(item.expense_account)
 
-		self.against_expense_account = ",".join(against_accounts)
+		self.against_expense_account = ", ".join(against_accounts)
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
