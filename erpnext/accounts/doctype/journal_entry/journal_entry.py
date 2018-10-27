@@ -505,7 +505,7 @@ class JournalEntry(AccountsController):
 				r = []
 				if d.user_remark:
 					r.append(d.user_remark)
-				if self.remark:
+				if self.user_remark:
 					r.append(_("Note: {0}").format(self.user_remark))
 				remarks = "\n".join(r)
 
