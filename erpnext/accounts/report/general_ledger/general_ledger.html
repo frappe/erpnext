@@ -1,3 +1,13 @@
+{%
+var show_ref_col = false;
+for(var i=0, l=data.length; i<l; i++) {
+	if(data[i].reference_no || data[i].reference_date) {
+		show_ref_col = true;
+		break;
+	}
+}
+%}
+
 <style>
 .print-format {
 	padding:10mm;
@@ -34,7 +44,9 @@
 	<thead>
 		<tr>
 			<th class="text-center">{%= __("Voucher") %}</th>
+			{% if(show_ref_col) { %}
 			<th class="text-center">{%= __("Cheque/Reference") %}</th>
+			{% } %}
 			{% if(!(filters.party || filters.account)) { %}
 			<th class="text-center">{%= __("Account") %}</th>
 			{% } %}
@@ -56,10 +68,12 @@
 					{%= frappe.datetime.str_to_user(data[i].posting_date) %}<br>
 				</td>
 
+				{% if(show_ref_col) { %}
 				<td class="text-center">
 					<strong>{%= data[i].reference_no %}</strong><br>
 					{%= data[i].reference_date %}
 				</td>
+				{% } %}
 
 				{% if(!(filters.party || filters.account)) { %}
 				<td>
@@ -97,12 +111,14 @@
 				</td>
 			{% } else { %}
 				{% if(!data[i].debit && !data[i].credit && !data[i].balance && !data[i].account) { %}
-					{% var colspan = 6 %}
+					{% var colspan = 5 %}
+					{% if(show_ref_col) { colspan++; } %}
 					{% if(!(filters.party || filters.account)) { colspan++; } %}
 					{% if(filters.against_in_print) { colspan++; } %}
 					<td colspan="{%= colspan %}"></td>
 				{% } else { %}
-					{% var colspan = 3 %}
+					{% var colspan = 2 %}
+					{% if(show_ref_col) { colspan++; } %}
 					{% if(!(filters.party || filters.account)) { colspan++; } %}
 					{% if(filters.against_in_print) { colspan++; } %}
 					<td class="text-right" colspan="{%= colspan %}"><strong>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</strong></td>
