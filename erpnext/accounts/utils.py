@@ -734,7 +734,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 			)
 
 	outstanding_invoices = sorted(outstanding_invoices,
-		key=lambda k: (k['due_date'] or getdate(nowdate()), k['posting_date']))
+		key=lambda k: k['due_date'] or k['posting_date'] or getdate(nowdate()))
 
 	return outstanding_invoices
 
