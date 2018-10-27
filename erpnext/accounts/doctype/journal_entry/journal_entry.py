@@ -446,13 +446,13 @@ class JournalEntry(AccountsController):
 					d.reference_name))
 
 			if d.reference_type == "Purchase Invoice" and d.debit:
+				r.append(_("{0} against Purchase Invoice {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
+					d.reference_name))
+
 				bill_no = frappe.db.sql("""select bill_no, bill_date from `tabPurchase Invoice` where name=%s""", d.reference_name)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() not in ['na', 'not applicable', 'none']:
 					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=self.company_currency), \
 						bill_no[0][0], bill_no[0][1] and formatdate(bill_no[0][1])))
-				else:
-					r.append(_("{0} against Purchase Invoice {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
-						d.reference_name))
 
 			if d.reference_type == "Purchase Order" and d.debit:
 				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.debit), currency = self.company_currency), \
