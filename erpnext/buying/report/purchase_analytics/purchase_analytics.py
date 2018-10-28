@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.selling.report.sales_analytics.sales_analytics import (get_columns, get_period,
-	get_period_date_ranges, get_chart_data, get_item_by_group, get_data_list, get_item_data,get_depth_map,get_by_item_group)
+	get_period_date_ranges, get_chart_data, get_item_by_group, get_data_list, get_item_data,get_groups,get_by_item_group)
 
 
 def execute(filters=None):
@@ -12,7 +12,7 @@ def execute(filters=None):
 
 	data = gen_data(filters)
 
-	chart = get_chart_data(filters,columns,data)
+	chart = get_chart_data(columns)
 
 	return columns, data, None, chart
 
@@ -72,9 +72,7 @@ def get_supplier_data(filters):
 def get_by_group(filters):
 	data = []
 
-	group = frappe.db.sql("""select name,lft,rgt from `tab{tree}` where lft = 1  """.format(tree=filters["tree_type"]),as_dict=1)
-
-	depth_map = get_depth_map(filters,group,0,[])
+	groups = get_groups(filters)
 
 	data_list = get_supplier_data(filters)
 
@@ -82,20 +80,30 @@ def get_by_group(filters):
 
 	supp = get_supplier_by_group(filters)
 
-	for g in depth_map:
+	previous_lft = 0
+	previous_rgt = 10000000000
+	indent = -1 
+
+	for g in groups:
 		out = []
+
+		if g.lft > previous_lft and g.rgt < previous_rgt:
+			indent += 1
+		else:
+			indent -= 1
+
 		group = {}
 		g_total = 0
-		group["name"] = g.get("name")
-		group["indent"] = g.get("depth")
-		group["code"] = g.get("name")
+		group["name"] = g.name
+		group["indent"] = indent
+		group["code"] = g.name
 		for d in supp:
-			if d.lft >= g.get("lft") and d.rgt <= g.get("rgt") :
+			if d.lft >= g.lft and d.rgt <= g.rgt :
 				supplier = {}
 				total = 0
 				supplier["name"] = d.name
 				supplier["code"] = d.supplier_name
-				supplier["indent"] = g.get("depth")+1
+				supplier["indent"] = indent + 1
 				for dummy, end_date in ranges:
 					period = get_period(end_date, filters["range"])
 					if data_list.get(d.name) and data_list.get(d.name).get(period) :
@@ -109,11 +117,13 @@ def get_by_group(filters):
 						group[period] = supplier[period]
 				supplier["total"] = total
 				g_total += total
-				if d.supplier_group== g.get("name"):
+				if d.supplier_group== g.name:
 					out.append(supplier)
 		group["total"] = g_total
 		data.append(group)
 		data += out
+		previous_lft = g.lft
+		previous_rgt = g.rgt
 
 	return data
 
