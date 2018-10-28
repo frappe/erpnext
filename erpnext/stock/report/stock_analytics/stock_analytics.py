@@ -4,13 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.selling.report.sales_analytics.sales_analytics import(get_period_date_ranges, get_period,get_depth_map)
+from erpnext.selling.report.sales_analytics.sales_analytics import(get_period_date_ranges, get_period,get_groups)
 from erpnext.stock.report.stock_balance.stock_balance import (get_items, get_stock_ledger_entries)
 
 def execute(filters=None):
 	columns = get_columns(filters)
 	data = get_data(filters)
-	chart = get_chart_data(filters,columns,data)
+	chart = get_chart_data(columns)
 
 	return columns, data, None, chart
 
@@ -19,14 +19,16 @@ def get_columns(filters):
 	columns =[
 		{
 			"label": _("Item"),
+			"options":"Item",
 			"fieldname": "name",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
 			"width": 140
 		},
 		{
 			"label": _("Item Name"),
+			"options":"Item",
 			"fieldname": "code",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
 			"width": 140
 		},
 		{
@@ -42,7 +44,7 @@ def get_columns(filters):
 			"width": 120
 		}]
 
-	ranges = get_period_date_ranges(filters["range"],None, filters["from_date"],filters["to_date"])
+	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
 
 	for dummy, end_date in ranges:
 
@@ -51,8 +53,8 @@ def get_columns(filters):
 		columns.append(
 			{
 			"label": _(label),
-			"field_name":field_name,
-			"fieldtype": "Date",
+			"fieldname":field_name,
+			"fieldtype": "Float",
 			"width": 120
 		},
 		)
@@ -68,7 +70,7 @@ def get_data_list(entry,filters):
 
 		if d.voucher_type == "Stock Reconciliation":
 			if data_list.get(d.item_code):
- 				bal_qty = data_list[d.item_code]["balance"]
+				bal_qty = data_list[d.item_code]["balance"]
 
 			qty_diff = d.qty_after_transaction - bal_qty
 		else:
@@ -103,32 +105,44 @@ def get_data(filters):
 
 	grp_dict ={"tree_type":"Item Group"}
 
-	group = frappe.db.sql("""select name,lft,rgt from `tabItem Group` where lft = 1  """,as_dict=1)
+	groups = get_groups(grp_dict)
 
-	depth_map = get_depth_map(grp_dict,group,0,[])
+	ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
 
 	items_by_group = get_item_by_group(filters)
-	for g in depth_map:
+
+	previous_lft = 0
+	previous_rgt = 10000000000
+	indent = -1
+
+	for g in groups:
+
+		if g.lft > previous_lft and g.rgt < previous_rgt:
+			indent += 1
+		else:
+			indent -= 1
+
 		has_items = 0
-		group = {}
+		group = {
+			"name":g.name,
+			"indent":indent,
+			"code":g.name
+		}
 		g_total= 0
 		out = []
-		group["name"] = g.get("name")
-		group["indent"] = g.get("depth")
-		group["code"] = g.get("name")
-
-		ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
 
 		for d in items_by_group:
-			if d.lft >= g.get("lft") and d.rgt <= g.get("rgt") :
+			if d.lft >= g.lft and d.rgt <= g.rgt :
 				has_items = 1
-				item = {}
+				item = {
+					"name":d.name,
+					"code":d.item_name,
+					"uom":d.stock_uom,
+					"brand":d.brand,
+					"indent":indent +1
+				}
 				total = 0
-				item["name"] = d.name
-				item["code"] = d.item_name
-				item["uom"] = d.stock_uom
-				item["brand"] = d.brand
-				item["indent"] = g.get("depth")+1
+
 				for dummy, end_date in ranges:
 					period = get_period(end_date, filters["range"])
 					if data_list.get(d.name) and data_list.get(d.name).get(period) :
@@ -142,12 +156,14 @@ def get_data(filters):
 						group[period] = item[period]
 				item["total"] = total
 				g_total += total
-				if d.item_group == g.get("name"):
+				if d.item_group == g.name:
 					out.append(item)
 		group["total"] = g_total
 		if has_items:
 			data.append(group)
 		data += out
+		previous_lft = g.lft
+		previous_rgt = g.rgt
 
 	return data
 
@@ -159,12 +175,12 @@ def get_item_by_group(filters):
 		conditions.append("i.brand=%(brand)s")
 
 	items = frappe.db.sql("""select i.name,i.item_name,i.item_group,i.stock_uom,i.brand,g.lft,g.rgt
-							from `tabItem` i ,`tabItem Group` g  where {}"""
+		from `tabItem` i ,`tabItem Group` g  where {}"""
 		.format(" and ".join(conditions)), filters,as_dict=1)
 
 	return items
 
-def get_chart_data(filters, columns, data):
+def get_chart_data(columns):
 
 	labels = [d.get("label") for d in columns[4:]]
 	chart = {
