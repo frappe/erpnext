@@ -130,6 +130,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+		frm.events.set_naming_series_bbr_bbp(frm);
 	},
 
 	company: function(frm) {
@@ -229,6 +230,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	payment_type: function(frm) {
+		frm.events.set_naming_series_bbr_bbp(frm);
 		if(frm.doc.payment_type == "Internal Transfer") {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"references", "total_allocated_amount"], function(i, field) {
@@ -243,6 +245,26 @@ frappe.ui.form.on('Payment Entry', {
 				frm.events.mode_of_payment(frm);
 			}
 		}
+	},
+
+	set_naming_series_bbr_bbp: function(frm) {
+		frm.set_df_property("naming_series", "read_only", false);
+		var ns = frm.fields_dict.naming_series.df.options.split("\n");
+		$.each(ns, function(i, series) {
+			var parts = series.split("-");
+			if(frm.doc.payment_type == "Pay") {
+				if(parts[0] == "BP") {
+					frm.set_value("naming_series", series);
+					frm.set_df_property("naming_series", "read_only", true);
+				}
+			} else if (frm.doc.payment_type == "Receive")
+			{
+				if(parts[0] == "BR") {
+					frm.set_value("naming_series", series);
+					frm.set_df_property("naming_series", "read_only", true);
+				}
+			}
+		});
 	},
 
 	party_type: function(frm) {
