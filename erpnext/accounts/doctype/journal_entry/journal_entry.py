@@ -46,8 +46,10 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
-	def on_submit(self):
+	def before_submit(self):
 		self.validate_cheque_info()
+
+	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
@@ -156,8 +158,8 @@ class JournalEntry(AccountsController):
 				if not row.cheque_date:
 					row.cheque_date = self.cheque_date
 
-			if self.voucher_type in ['Bank Entry'] and (not row.cheque_no or not row.cheque_date):
-				frappe.throw(_("Row #{0}: Reference No & Reference Date is required for {1}").format(row.idx, self.voucher_type))
+				if self.voucher_type in ['Bank Entry'] and (not row.cheque_no or not row.cheque_date):
+					frappe.throw(_("Row #{0}: Reference No & Reference Date is required for {1}").format(row.idx, self.voucher_type))
 
 			if row.cheque_date and not row.cheque_no:
 				frappe.throw(_("Row #{0}: Reference No is mandatory if you entered Reference Date").format(row.idx))
