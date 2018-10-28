@@ -91,6 +91,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.load_manual_distribution_data();
 		this.update_manual_distribution();
 
+		if (this.frm.doc.party && !this.frm.doc.credit_to) {
+			this.party();
+		}
+
 		var help_content =
 			`<br><br>
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
