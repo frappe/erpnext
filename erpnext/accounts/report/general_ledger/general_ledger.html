@@ -71,7 +71,7 @@ for(var i=0, l=data.length; i<l; i++) {
 				{% if(show_ref_col) { %}
 				<td class="text-center">
 					<strong>{%= data[i].reference_no %}</strong><br />
-					{%= data[i].reference_date %}
+					{%= frappe.datetime.str_to_user(data[i].reference_date) %}
 				</td>
 				{% } %}
 
