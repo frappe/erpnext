@@ -15,10 +15,12 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -31,7 +33,7 @@
    "label": "Series", 
    "length": 0, 
    "no_copy": 1, 
-   "options": "SR/", 
+   "options": "MAT-RECO-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -47,6 +49,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -78,6 +81,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -111,6 +115,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -140,6 +145,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -173,6 +179,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -205,6 +212,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -236,6 +244,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -266,6 +275,7 @@
   }, 
   {
    "allow_bulk_edit": 1, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -298,6 +308,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -328,6 +339,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -360,6 +372,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -392,6 +405,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -422,6 +436,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -452,6 +467,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -484,6 +500,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -526,7 +543,7 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2018-04-26 12:01:25.377081", 
+ "modified": "2018-08-21 14:44:33.347915", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation", 
@@ -560,5 +577,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

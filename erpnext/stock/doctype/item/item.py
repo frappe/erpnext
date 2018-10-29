@@ -76,8 +76,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		if self.is_sales_item and not self.get('is_item_from_hub'):
-			self.publish_in_hub = 1
+		# if self.is_sales_item and not self.get('is_item_from_hub'):
+		# 	self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -122,6 +122,7 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
 
 		if not self.get("__islocal"):
@@ -256,7 +257,7 @@ class Item(WebsiteGenerator):
 						"file_url": self.website_image,
 						"attached_to_doctype": "Item",
 						"attached_to_name": self.name
-					}).insert()
+					}).save()
 
 				except IOError:
 					self.website_image = None
@@ -663,6 +664,12 @@ class Item(WebsiteGenerator):
 					template_item.flags.ignore_permissions = True
 					template_item.save()
 
+	def validate_item_defaults(self):
+		companies = list(set([row.company for row in self.item_defaults]))
+
+		if len(companies) != len(self.item_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
 		if self.item_group and not self.item_defaults:
@@ -951,7 +958,7 @@ def set_item_default(item_code, company, fieldname, value):
 			return
 
 	# no row found, add a new row for the company
-	d = item.append('item_defaults', {fieldname: value, company: company})
+	d = item.append('item_defaults', {fieldname: value, "company": company})
 	d.db_insert()
 	item.clear_cache()
 
@@ -961,7 +968,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	value = ""
 	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
 		where to_uom in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in uoms])), as_dict=True)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
 
 	for d in uom_details:
 		if d.from_uom == stock_uom and d.to_uom == uom:
@@ -978,3 +985,11 @@ def get_uom_conv_factor(uom, stock_uom):
 				value = flt(uom_stock.value) * 1/flt(uom_row.value)
 
 	return value
+
+@frappe.whitelist()
+def get_item_attribute(parent, attribute_value=''):
+	if not frappe.has_permission("Item"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
+
+	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
+		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})

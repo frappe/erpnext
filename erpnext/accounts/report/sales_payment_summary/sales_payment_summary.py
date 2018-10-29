@@ -37,7 +37,6 @@ def get_columns(filters):
 			_("Sales and Returns") + ":Currency/currency:120",
 			_("Taxes") + ":Currency/currency:120",
 			_("Payments") + ":Currency/currency:120",
-			_("Warehouse") + ":Data:200"
 		]
 
 

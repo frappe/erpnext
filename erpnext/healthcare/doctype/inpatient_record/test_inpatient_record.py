@@ -7,10 +7,11 @@ import frappe
 import unittest
 from frappe.utils import now_datetime, today
 from frappe.utils.make_random import get_random
-from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient
+from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
 
 class TestInpatientRecord(unittest.TestCase):
 	def test_admit_and_discharge(self):
+		frappe.db.sql("""delete from `tabInpatient Record`""")
 		patient = get_patient()
 		# Schedule Admission
 		ip_record = create_inpatient(patient)
@@ -22,13 +23,21 @@ class TestInpatientRecord(unittest.TestCase):
 		service_unit = get_healthcare_service_unit()
 		admit_patient(ip_record, service_unit, now_datetime())
 		self.assertEqual("Admitted", frappe.db.get_value("Patient", patient, "inpatient_status"))
-		self.assertEqual(1, frappe.db.get_value("Healthcare Service Unit", service_unit, "occupied"))
+		self.assertEqual("Occupied", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		# Discharge
-		discharge_patient(ip_record)
+		schedule_discharge(patient=patient)
+		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
+
+		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
+		# Validate Pending Invoices
+		self.assertRaises(frappe.ValidationError, ip_record.discharge)
+		mark_invoiced_inpatient_occupancy(ip_record1)
+
+		discharge_patient(ip_record1)
+
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_record"))
 		self.assertEqual(None, frappe.db.get_value("Patient", patient, "inpatient_status"))
-		self.assertEqual(0, frappe.db.get_value("Healthcare Service Unit", service_unit, "occupied"))
 
 	def test_validate_overlap_admission(self):
 		frappe.db.sql("""delete from `tabInpatient Record`""")
@@ -44,6 +53,12 @@ class TestInpatientRecord(unittest.TestCase):
 		ip_record_new = create_inpatient(patient)
 		self.assertRaises(frappe.ValidationError, ip_record_new.save)
 		frappe.db.sql("""delete from `tabInpatient Record`""")
+
+def mark_invoiced_inpatient_occupancy(ip_record):
+	if ip_record.inpatient_occupancies:
+		for inpatient_occupancy in ip_record.inpatient_occupancies:
+			inpatient_occupancy.invoiced = 1
+		ip_record.save(ignore_permissions = True)
 
 def create_inpatient(patient):
 	patient_obj = frappe.get_doc('Patient', patient)
@@ -78,7 +93,7 @@ def get_healthcare_service_unit():
 		service_unit.healthcare_service_unit_name = "Test Service Unit Ip Occupancy"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
-		service_unit.occupied = 0
+		service_unit.occupancy_status = "Vacant"
 		service_unit.is_group = 0
 		service_unit_parent_name = frappe.db.exists({
 				"doctype": "Healthcare Service Unit",
@@ -90,7 +105,9 @@ def get_healthcare_service_unit():
 			parent_service_unit.healthcare_service_unit_name = "All Healthcare Service Units"
 			parent_service_unit.is_group = 1
 			parent_service_unit.save(ignore_permissions = True)
-		service_unit.parent_healthcare_service_unit = "All Healthcare Service Units"
+			service_unit.parent_healthcare_service_unit = parent_service_unit.name
+		else:
+			service_unit.parent_healthcare_service_unit = service_unit_parent_name[0][0]
 		service_unit.save(ignore_permissions = True)
 		return service_unit.name
 	return service_unit

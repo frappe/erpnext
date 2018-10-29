@@ -73,53 +73,6 @@ class TestWorkOrder(unittest.TestCase):
 
 		self.assertRaises(StockOverProductionError, s.submit)
 
-	def test_make_time_sheet(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import make_timesheet
-		wo_order = make_wo_order_test_record(item="_Test FG Item 2",
-			planned_start_date=now(), qty=1, do_not_save=True)
-
-		wo_order.set_work_order_operations()
-		wo_order.insert()
-		wo_order.submit()
-
-		d = wo_order.operations[0]
-		d.completed_qty = flt(d.completed_qty)
-
-		name = frappe.db.get_value('Timesheet', {'work_order': wo_order.name}, 'name')
-		time_sheet_doc = frappe.get_doc('Timesheet', name)
-		self.assertEqual(wo_order.company, time_sheet_doc.company)
-		time_sheet_doc.submit()
-
-		self.assertEqual(wo_order.name, time_sheet_doc.work_order)
-		self.assertEqual((wo_order.qty - d.completed_qty),
-			sum([d.completed_qty for d in time_sheet_doc.time_logs]))
-
-		manufacturing_settings = frappe.get_doc({
-			"doctype": "Manufacturing Settings",
-			"allow_production_on_holidays": 0
-		})
-
-		manufacturing_settings.save()
-
-		wo_order.load_from_db()
-		self.assertEqual(wo_order.operations[0].status, "Completed")
-		self.assertEqual(wo_order.operations[0].completed_qty, wo_order.qty)
-
-		self.assertEqual(wo_order.operations[0].actual_operation_time, 60)
-		self.assertEqual(wo_order.operations[0].actual_operating_cost, 6000)
-
-		time_sheet_doc1 = make_timesheet(wo_order.name, wo_order.company)
-		self.assertEqual(len(time_sheet_doc1.get('time_logs')), 0)
-
-		time_sheet_doc.cancel()
-
-		wo_order.load_from_db()
-		self.assertEqual(wo_order.operations[0].status, "Pending")
-		self.assertEqual(flt(wo_order.operations[0].completed_qty), 0)
-
-		self.assertEqual(flt(wo_order.operations[0].actual_operation_time), 0)
-		self.assertEqual(flt(wo_order.operations[0].actual_operating_cost), 0)
-
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item 2",
 			planned_start_date=now(), qty=1, do_not_save=True)

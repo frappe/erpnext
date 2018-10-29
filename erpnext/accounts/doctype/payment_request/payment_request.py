@@ -7,16 +7,19 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate, get_url
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from frappe.model.mapper import get_mapped_doc
 
 class PaymentRequest(Document):
 	def validate(self):
+		if self.get("__islocal"):
+			self.status = 'Draft'
 		self.validate_reference_document()
 		self.validate_payment_request()
 		self.validate_currency()
@@ -52,6 +55,10 @@ class PaymentRequest(Document):
 				frappe.msgprint(_("The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.".format(self.grand_total, amount)))
 
 	def on_submit(self):
+		if self.payment_request_type == 'Outward':
+			self.db_set('status', 'Initiated')
+			return
+
 		send_mail = self.payment_gateway_validation()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
@@ -116,7 +123,7 @@ class PaymentRequest(Document):
 			"reference_doctype": "Payment Request",
 			"reference_docname": self.name,
 			"payer_email": self.email_to or frappe.session.user,
-			"payer_name": data.customer_name,
+			"payer_name": frappe.safe_encode(data.customer_name),
 			"order_id": self.name,
 			"currency": self.currency
 		})
@@ -186,7 +193,7 @@ class PaymentRequest(Document):
 			"now": True,
 			"attachments": [frappe.attach_print(self.reference_doctype, self.reference_name,
 				file_name=self.reference_name, print_format=self.print_format)]}
-		enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+		enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
 
 	def get_message(self):
 		"""return message with payment gateway link"""
@@ -277,6 +284,9 @@ def make_payment_request(**args):
 	existing_payment_request = frappe.db.get_value("Payment Request",
 		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ["!=", 2]})
 
+	bank_account = (get_party_bank_account(args.get('party_type'), args.get('party'))
+		if args.get('party_type') else '')
+
 	if existing_payment_request:
 		frappe.db.set_value("Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False)
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
@@ -287,13 +297,17 @@ def make_payment_request(**args):
 			"payment_gateway_account": gateway_account.get("name"),
 			"payment_gateway": gateway_account.get("payment_gateway"),
 			"payment_account": gateway_account.get("payment_account"),
+			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
 			"email_to": args.recipient_id or "",
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
-			"reference_name": args.dn
+			"reference_name": args.dn,
+			"party_type": args.get("party_type"),
+			"party": args.get("party"),
+			"bank_account": bank_account
 		})
 
 		if args.order_type == "Shopping Cart" or args.mute_email:
@@ -315,10 +329,10 @@ def make_payment_request(**args):
 
 def get_amount(ref_doc, dt):
 	"""get amount based on doctype"""
-	if dt == "Sales Order":
+	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
-	if dt == "Sales Invoice":
+	if dt in ["Sales Invoice", "Purchase Invoice"]:
 		if ref_doc.party_account_currency == ref_doc.currency:
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
@@ -408,3 +422,25 @@ def get_subscription_details(reference_doctype, reference_name):
 			for plan in plans:
 				subscription_plans.append(plan)
 		return subscription_plans
+
+@frappe.whitelist()
+def make_payment_order(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.append('references', {
+			'reference_doctype': source.reference_doctype,
+			'reference_name': source.reference_name,
+			'amount': source.grand_total,
+			'supplier': source.party,
+			'payment_request': source_name,
+			'mode_of_payment': source.mode_of_payment,
+			'bank_account': source.bank_account,
+			'account': source.account
+		})
+
+	doclist = get_mapped_doc("Payment Request", source_name,	{
+		"Payment Request": {
+			"doctype": "Payment Order",
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist

@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "ETEPS.#####", 
+ "autoname": "HR-TAX-PRF-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-04-13 17:24:11.456132", 
  "custom": 0, 
@@ -412,7 +412,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-05 18:11:46.385648", 
+ "modified": "2018-08-21 16:15:38.096846", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Tax Exemption Proof Submission", 
@@ -503,5 +503,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

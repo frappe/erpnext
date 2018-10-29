@@ -34,7 +34,7 @@ def execute(filters=None):
 
 				row = [cd.item_code, cd.item_name, cd.description, cd.stock_uom, \
 					consumed_qty, consumed_amount, delivered_qty, delivered_amount, \
-					total_qty, total_amount, list(set(suppliers))]
+					total_qty, total_amount, ','.join(list(set(suppliers)))]
 				data.append(row)
 
 	return columns, data

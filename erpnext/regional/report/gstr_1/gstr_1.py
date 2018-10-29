@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, formatdate
 from datetime import date
+from six import iteritems
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -73,12 +74,17 @@ class Gstr1Report(object):
 				row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
 			elif fieldname == "invoice_value":
 				row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
+			elif fieldname in ('posting_date', 'shipping_bill_date'):
+				row.append(formatdate(invoice_details.get(fieldname), 'dd-MMM-YY'))
+			elif fieldname == "export_type":
+				export_type = "WPAY" if invoice_details.get(fieldname)=="With Payment of Tax" else "WOPAY"
+				row.append(export_type)
 			else:
 				row.append(invoice_details.get(fieldname))
 
 		taxable_value = sum([abs(net_amount)
 			for item_code, net_amount in self.invoice_items.get(invoice).items() if item_code in items])
-		row += [tax_rate, taxable_value]
+		row += [tax_rate or 0, taxable_value]
 
 		return row, taxable_value
 
@@ -111,7 +117,7 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
-				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
+				and customer in ({0})""".format(", ".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
@@ -120,13 +126,13 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > {0} and is_return != 1 and customer in ('{1}')""".\
-					format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
+				and grand_total > {0} and is_return != 1 and customer in ({1})""".\
+					format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-					or grand_total <= {0}) and is_return != 1 and customer in ('{1}')""".\
-						format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
+					or grand_total <= {0}) and is_return != 1 and customer in ({1})""".\
+						format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
@@ -195,10 +201,16 @@ class Gstr1Report(object):
 		if unidentified_gst_accounts:
 			frappe.msgprint(_("Following accounts might be selected in GST Settings:")
 				+ "<br>" + "<br>".join(unidentified_gst_accounts), alert=True)
+		
+		# Build itemised tax for export invoices where tax table is blank
+		for invoice, items in iteritems(self.invoice_items):
+			if invoice not in self.items_based_on_tax_rate \
+				and frappe.db.get_value(self.doctype, invoice, "export_type") == "Without Payment of Tax":
+					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def get_gst_accounts(self):
 		self.gst_accounts = frappe._dict()
-		gst_settings_accounts = frappe.get_list("GST Account",
+		gst_settings_accounts = frappe.get_all("GST Account",
 			filters={"parent": "GST Settings", "company": self.filters.company},
 			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
@@ -250,7 +262,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice date",
-					"fieldtype": "Date",
+					"fieldtype": "Data",
 					"width":80
 				},
 				{
@@ -261,7 +273,7 @@ class Gstr1Report(object):
 				},
 				{
 					"fieldname": "place_of_supply",
-					"label": "Place of Supply",
+					"label": "Place Of Supply",
 					"fieldtype": "Data",
 					"width":100
 				},
@@ -303,7 +315,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice date",
-					"fieldtype": "Date",
+					"fieldtype": "Data",
 					"width": 100
 				},
 				{
@@ -314,7 +326,7 @@ class Gstr1Report(object):
 				},
 				{
 					"fieldname": "place_of_supply",
-					"label": "Place of Supply",
+					"label": "Place Of Supply",
 					"fieldtype": "Data",
 					"width": 120
 				},
@@ -357,7 +369,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice/Advance Receipt date",
-					"fieldtype": "Date",
+					"fieldtype": "Data",
 					"width": 120
 				},
 				{
@@ -368,12 +380,6 @@ class Gstr1Report(object):
 					"width":120
 				},
 				{
-					"fieldname": "posting_date",
-					"label": "Invoice/Advance Receipt date",
-					"fieldtype": "Date",
-					"width": 120
-				},
-				{
 					"fieldname": "reason_for_issuing_document",
 					"label": "Reason For Issuing document",
 					"fieldtype": "Data",
@@ -381,7 +387,7 @@ class Gstr1Report(object):
 				},
 				{
 					"fieldname": "place_of_supply",
-					"label": "Place of Supply",
+					"label": "Place Of Supply",
 					"fieldtype": "Data",
 					"width": 120
 				},
@@ -416,7 +422,7 @@ class Gstr1Report(object):
 			self.invoice_columns = [
 				{
 					"fieldname": "place_of_supply",
-					"label": "Place of Supply",
+					"label": "Place Of Supply",
 					"fieldtype": "Data",
 					"width": 120
 				},
@@ -459,7 +465,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice date",
-					"fieldtype": "Date",
+					"fieldtype": "Data",
 					"width": 120
 				},
 				{
@@ -483,7 +489,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "shipping_bill_date",
 					"label": "Shipping Bill Date",
-					"fieldtype": "Date",
+					"fieldtype": "Data",
 					"width": 120
 				}
 			]

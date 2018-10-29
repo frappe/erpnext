@@ -137,7 +137,7 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 					.format(args.item_code), StockOverReturnError)
 			elif abs(current_stock_qty) > max_returnable_qty:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
-					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
+					.format(args.idx, max_returnable_qty, args.item_code), StockOverReturnError)
 
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -149,6 +149,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
+		"conversion_factor": ref_item_row.get("conversion_factor", 1),
 		"batch_no": []
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
@@ -231,8 +232,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 					doc.append('payments', {
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
-						'paid_amount': -1 * paid_amount,
-						'base_paid_amount': -1 * base_paid_amount
+						'amount': -1 * paid_amount,
+						'base_amount': -1 * base_paid_amount
 					})
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
@@ -243,6 +244,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1* source_doc.qty
+		default_return_warehouse = frappe.db.get_single_value("Stock Settings", "default_return_warehouse")
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.received_qty
 			target_doc.rejected_qty = -1* source_doc.rejected_qty
@@ -267,6 +269,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.warehouse = default_return_warehouse if default_return_warehouse else source_doc.warehouse
 		elif doctype == "Sales Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note

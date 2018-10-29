@@ -136,7 +136,7 @@ frappe.ui.form.on("Expense Claim", {
 		frm.trigger("set_query_for_cost_center");
 		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_payable_account", "payable_account");
+		frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
 		frm.set_query("employee_advance", "advances", function(doc) {
 			return {
 				filters: [

@@ -72,6 +72,7 @@ class Project(Document):
 		self.tasks = []
 		self.load_tasks()
 		self.send_welcome_email()
+		self.update_percent_complete()
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -85,7 +86,7 @@ class Project(Document):
 	def validate_weights(self):
 		for task in self.tasks:
 			if task.task_weight is not None:
-				if task.task_weight > 0:
+				if task.task_weight < 0:
 					frappe.throw(_("Task weight cannot be negative"))
 
 	def sync_tasks(self):
@@ -186,6 +187,7 @@ class Project(Document):
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self):
+		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
 		if not total and self.percent_complete:
 			self.percent_complete = 0
@@ -207,7 +209,7 @@ class Project(Document):
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
-				pct_complete += row["progress"] * row["task_weight"] / weight_sum
+				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
 		if self.percent_complete == 100:
 			self.status = "Completed"
@@ -239,10 +241,13 @@ class Project(Document):
 		self.update_purchase_costing()
 		self.update_sales_amount()
 		self.update_billed_amount()
+		self.calculate_gross_margin()
 
-		self.gross_margin = flt(self.total_billed_amount) - (
-		flt(self.total_costing_amount) + flt(self.total_expense_claim) + flt(self.total_purchase_cost))
+	def calculate_gross_margin(self):
+		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
+			+ flt(self.total_purchase_cost) + flt(self.get('total_consumed_material_cost', 0)))
 
+		self.gross_margin = flt(self.total_billed_amount) - expense_amount
 		if self.total_billed_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) * 100
 

@@ -4,7 +4,6 @@ frappe.provide("erpnext.queries");
 frappe.ui.form.on('Patient Appointment', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Sales Invoice': 'Invoice',
 			'Vital Signs': 'Vital Signs',
 			'Patient Encounter': 'Patient Encounter'
 		};
@@ -84,20 +83,21 @@ frappe.ui.form.on('Patient Appointment', {
 				btn_update_status(frm, "Cancelled");
 			});
 		}
-
-		if(!frm.doc.__islocal){
-			if(frm.doc.sales_invoice && frappe.user.has_role("Accounts User")){
-				frm.add_custom_button(__('Invoice'), function() {
-					frappe.set_route("Form", "Sales Invoice", frm.doc.sales_invoice);
-				},__("View") );
-			}
-			else if(frm.doc.status != "Cancelled" && frappe.user.has_role("Accounts User")){
-				frm.add_custom_button(__('Invoice'), function() {
-					btn_invoice_encounter(frm);
-				},__("Create"));
-			}
-		}
 		frm.set_df_property("get_procedure_from_encounter", "read_only", frm.doc.__islocal ? 0 : 1);
+		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'manage_appointment_invoice_automatically', (r) => {
+			if(r.manage_appointment_invoice_automatically == 1){
+				frm.set_df_property("mode_of_payment", "hidden", 0);
+				frm.set_df_property("paid_amount", "hidden", 0);
+				frm.set_df_property("mode_of_payment", "reqd", 1);
+				frm.set_df_property("paid_amount", "reqd", 1);
+			}
+			else{
+				frm.set_df_property("mode_of_payment", "hidden", 1);
+				frm.set_df_property("paid_amount", "hidden", 1);
+				frm.set_df_property("mode_of_payment", "reqd", 0);
+				frm.set_df_property("paid_amount", "reqd", 0);
+			}
+		});
 	},
 	check_availability: function(frm) {
 		var { practitioner, appointment_date } = frm.doc;
@@ -142,6 +142,7 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.set_value('service_unit', btn_selected.attr('data-service-unit') || '');
 					frm.set_value('duration', btn_selected.attr('data-duration'));
 					d.hide();
+					frm.enable_save();
 					frm.save();
 					frm.enable_save();
 				}
@@ -339,21 +340,6 @@ var btn_update_status = function(frm, status){
 	);
 };
 
-var btn_invoice_encounter = function(frm){
-	frappe.call({
-		doc: frm.doc,
-		method:"create_invoice",
-		callback: function(data){
-			if(!data.exc){
-				if(data.message){
-					frappe.set_route("Form", "Sales Invoice", data.message);
-				}
-				cur_frm.reload_doc();
-			}
-		}
-	});
-};
-
 frappe.ui.form.on("Patient Appointment", "practitioner", function(frm) {
 	if(frm.doc.practitioner){
 		frappe.call({
@@ -364,6 +350,7 @@ frappe.ui.form.on("Patient Appointment", "practitioner", function(frm) {
 			},
 			callback: function (data) {
 				frappe.model.set_value(frm.doctype,frm.docname, "department",data.message.department);
+				frappe.model.set_value(frm.doctype,frm.docname, "paid_amount",data.message.op_consulting_charge);
 			}
 		});
 	}

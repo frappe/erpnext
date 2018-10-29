@@ -1438,6 +1438,69 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doc = frappe.get_doc('Sales Invoice', si.name)
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
+	def test_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
+		self.assertEqual(si.cost_center, cost_center)
+
+		expected_values = {
+			"Debtors - _TC": {
+				"cost_center": cost_center
+			},
+			"Sales - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center - _TC"
+		si =  create_sales_invoice(debit_to="Debtors - _TC")
+
+		expected_values = {
+			"Debtors - _TC": {
+				"cost_center": None
+			},
+			"Sales - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+		
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1477,6 +1540,48 @@ def create_sales_invoice(**args):
 		si.payment_schedule = []
 
 	return si
+
+def create_sales_invoice_against_cost_center(**args):
+	si = frappe.new_doc("Sales Invoice")
+	args = frappe._dict(args)
+	if args.posting_date:
+		si.set_posting_time = 1
+	si.posting_date = args.posting_date or nowdate()
+
+	si.company = args.company or "_Test Company"
+	si.cost_center = args.cost_center or "_Test Cost Center - _TC"
+	si.customer = args.customer or "_Test Customer"
+	si.debit_to = args.debit_to or "Debtors - _TC"
+	si.update_stock = args.update_stock
+	si.is_pos = args.is_pos
+	si.is_return = args.is_return
+	si.return_against = args.return_against
+	si.currency=args.currency or "INR"
+	si.conversion_rate = args.conversion_rate or 1
+
+	si.append("items", {
+		"item_code": args.item or args.item_code or "_Test Item",
+		"gst_hsn_code": "999800",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 1,
+		"rate": args.rate or 100,
+		"income_account": "Sales - _TC",
+		"expense_account": "Cost of Goods Sold - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
+		"serial_no": args.serial_no
+	})
+
+	if not args.do_not_save:
+		si.insert()
+		if not args.do_not_submit:
+			si.submit()
+		else:
+			si.payment_schedule = []
+	else:
+		si.payment_schedule = []
+
+	return si
+
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')

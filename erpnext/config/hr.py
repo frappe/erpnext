@@ -35,24 +35,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Leave Period",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Policy",
-				},
-				{
-					"type": "doctype",
-					"name": "Job Opening",
-					"description": _("Opening for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
-					"description": _("Applicant for a Job."),
-				},
-				{
-					"type": "doctype",
 					"name": "Leave Application",
 				},
 				{
@@ -66,6 +48,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Leave Encashment",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Period",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Policy",
 				},
 				{
 					"type": "doctype",

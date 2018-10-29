@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "EBAD.#####", 
+ "autoname": "", 
  "beta": 0, 
  "creation": "2018-04-13 16:36:18.389786", 
  "custom": 0, 
@@ -157,7 +157,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-06-13 17:34:57.783584", 
+ "modified": "2018-08-21 16:15:42.111118", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Benefit Application Detail", 
@@ -172,5 +172,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

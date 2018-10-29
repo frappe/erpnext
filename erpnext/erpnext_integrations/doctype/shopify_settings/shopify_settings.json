@@ -49,7 +49,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "1", 
+   "default": "",
    "fieldname": "enable_shopify", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -1219,7 +1219,7 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-11 19:04:53.396557", 
+ "modified": "2018-09-07 09:11:49.403176",
  "modified_by": "Administrator", 
  "module": "ERPNext Integrations", 
  "name": "Shopify Settings", 
@@ -1253,5 +1253,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0,
+ "track_views": 0
 }

@@ -103,7 +103,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, name
@@ -114,7 +114,7 @@ class ProductionPlan(Document):
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
@@ -138,7 +138,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code ='{0}'".format(frappe.db.escape(self.item_code))
+			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -280,7 +280,7 @@ class ProductionPlan(Document):
 				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
 
 		return item_dict
-		
+
 	def get_items_for_material_requests(self):
 		self.mr_items = []
 
@@ -295,15 +295,15 @@ class ProductionPlan(Document):
 						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
 						item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
 					from
-						`tabBOM Explosion Item` bei 
+						`tabBOM Explosion Item` bei
 						JOIN `tabBOM` bom ON bom.name = bei.parent
 						JOIN `tabItem` item ON item.name = bei.item_code
 						LEFT JOIN `tabItem Default` item_default
 							ON item_default.parent = item.name and item_default.company=%s
 					where
-						bei.docstatus < 2 
+						bei.docstatus < 2
 						and bom.name=%s and item.is_stock_item in (1, {0})
-					group by bei.item_code, bei.stock_uom""".format(self.include_non_stock_items),
+					group by bei.item_code, bei.stock_uom""".format(0 if self.include_non_stock_items else 1),
 					(self.company, data.bom_no), as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
@@ -332,7 +332,7 @@ class ProductionPlan(Document):
 				bom.name = %(bom)s
 				and bom_item.docstatus < 2
 				and item.is_stock_item in (1, {0})
-			group by bom_item.item_code""".format(self.include_non_stock_items),{
+			group by bom_item.item_code""".format(0 if self.include_non_stock_items else 1),{
 				'bom': bom_no,
 				'parent_qty': parent_qty,
 				'company': self.company
@@ -412,60 +412,59 @@ class ProductionPlan(Document):
 			pass
 
 	def make_material_request(self):
+		'''Create Material Requests grouped by Sales Order and Material Request Type'''
 		material_request_list = []
+		material_request_map = {}
 
-		item_details = self.get_itemwise_qty()
-		for item_code, rows in item_details.items():
-			item_doc = frappe.get_doc("Item", item_code)
+		for item in self.mr_items:
+			item_doc = frappe.get_cached_doc('Item', item.item_code)
+
+			# key for Sales Order:Material Request Type
+			key = '{}:{}'.format(item.sales_order, item_doc.default_material_request_type)
 			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
 
-			material_request = frappe.new_doc("Material Request")
-			material_request.update({
-				"transaction_date": nowdate(),
-				"status": "Draft",
-				"company": self.company,
-				"requested_by": frappe.session.user,
+			if not key in material_request_map:
+				# make a new MR for the combination
+				material_request_map[key] = frappe.new_doc("Material Request")
+				material_request = material_request_map[key]
+				material_request.update({
+					"transaction_date": nowdate(),
+					"status": "Draft",
+					"company": self.company,
+					"requested_by": frappe.session.user,
+					'material_request_type': item_doc.default_material_request_type
+				})
+				material_request_list.append(material_request)
+			else:
+				material_request = material_request_map[key]
+
+			# add item
+			material_request.append("items", {
+				"item_code": item.item_code,
+				"qty": item.quantity,
 				"schedule_date": schedule_date,
-				'material_request_type': item_doc.default_material_request_type
+				"warehouse": item.warehouse,
+				"sales_order": item.sales_order,
+				'production_plan': self.name,
+				'material_request_plan_item': item.name,
+				"project": frappe.db.get_value("Sales Order", item.sales_order, "project") \
+					if item.sales_order else None
 			})
 
-			for idx in rows:
-				child = self.mr_items[cint(idx)-1]
-				material_request.append("items", {
-					"item_code": item_code,
-					"qty": child.quantity,
-					"schedule_date": schedule_date,
-					"warehouse": child.warehouse,
-					"sales_order": child.sales_order,
-					'production_plan': self.name,
-					'material_request_plan_item': child.name,
-					"project": frappe.db.get_value("Sales Order", child.sales_order, "project") \
-						if child.sales_order else None
-				})
-
+		for material_request in material_request_list:
+			# submit
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
 			material_request.submit()
-			material_request_list.append(material_request.name)
-		
+
 		frappe.flags.mute_messages = False
 
 		if material_request_list:
-			material_request_list = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in material_request_list]
+			material_request_list = ["""<a href="#Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
+				for m in material_request_list]
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
 		else :
 			msgprint(_("No material request created"))
-
-	def get_itemwise_qty(self):
-		item_details = {}
-		for data in self.get('mr_items'):
-			if data.item_code in item_details:
-				item_details[data.item_code].append(data.idx)
-			else:
-				item_details.setdefault(data.item_code, [data.idx])
-
-		return item_details
 
 def get_sales_orders(self):
 	so_filter = item_filter = ""
@@ -513,10 +512,10 @@ def get_bin_details(row):
 	conditions = ""
 	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
 	if warehouse:
-		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
+		conditions = " and warehouse={0}".format(frappe.db.escape(warehouse))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
-		ifnull(sum(actual_qty),0) as actual_qty from `tabBin` 
+		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`
 		where item_code = %(item_code)s {conditions}
 	""".format(conditions=conditions), { "item_code": row.item_code }, as_list=1)
 

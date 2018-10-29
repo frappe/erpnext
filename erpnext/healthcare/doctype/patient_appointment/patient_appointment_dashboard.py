@@ -10,10 +10,6 @@ def get_data():
 			{
 				'label': _('Consultations'),
 				'items': ['Patient Encounter', 'Vital Signs', 'Patient Medical Record']
-			},
-			{
-				'label': _('Billing'),
-				'items': ['Sales Invoice']
 			}
 		]
 	}

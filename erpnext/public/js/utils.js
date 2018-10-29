@@ -118,7 +118,7 @@ $.extend(erpnext.utils, {
 		return dict[party_type];
 	},
 
-	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
+	copy_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
 			var cl = doc[table_fieldname] || [];
@@ -144,9 +144,38 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	make_bank_account: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	make_pricing_rule: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -201,7 +230,18 @@ $.extend(erpnext.utils, {
 		} else {
 			return options[0];
 		}
-	}
+	},
+	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		var d = locals[dt][dn];
+		if(d[fieldname]){
+			var cl = doc[table_fieldname] || [];
+			for(var i = 0; i < cl.length; i++) {
+				cl[i][fieldname] = doc[parent_fieldname];
+			}
+		}
+		refresh_field(table_fieldname);
+	},
+
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
@@ -487,6 +527,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				"method": opts.method,
 				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
+				'args': opts.args
 			},
 			callback: function(r) {
 				if(!r.exc) {

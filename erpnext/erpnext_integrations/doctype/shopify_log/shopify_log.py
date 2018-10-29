@@ -43,11 +43,11 @@ def dump_request_data(data, event="create/order"):
 	}).insert(ignore_permissions=True)
 
 	frappe.db.commit()
-	frappe.enqueue(method=event_mapper[event], queue='short', timeout=300, async=True, 
+	frappe.enqueue(method=event_mapper[event], queue='short', timeout=300, is_async=True, 
 		**{"order": data, "request_id": log.name})
 
 @frappe.whitelist()
 def resync(method, name, request_data):
 	frappe.db.set_value("Shopify Log", name, "status", "Queued", update_modified=False)
-	frappe.enqueue(method=method, queue='short', timeout=300, async=True, 
+	frappe.enqueue(method=method, queue='short', timeout=300, is_async=True, 
 		**{"order": json.loads(request_data), "request_id": name})

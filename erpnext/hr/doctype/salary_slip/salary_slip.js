@@ -132,6 +132,10 @@ var get_emp_and_leave_details = function(doc, dt, dn) {
 	});
 }
 
+cur_frm.cscript.employee = function(doc,dt,dn){
+	get_emp_and_leave_details(doc, dt, dn);
+}
+
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.start_date && doc.end_date) {
 		return $c_obj(doc, 'get_leave_details', {"lwp": doc.leave_without_pay}, function(r, rt) {

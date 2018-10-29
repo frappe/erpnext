@@ -104,6 +104,8 @@ def setup_complete(args=None):
 
 def stage_fixtures(args):
 	install_fixtures.install(args.get("country"))
+	install_fixtures.add_market_segments()
+	install_fixtures.add_sale_stages()
 
 def setup_company(args):
 	defaults_setup.create_price_lists(args)

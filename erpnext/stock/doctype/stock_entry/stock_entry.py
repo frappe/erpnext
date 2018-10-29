@@ -58,6 +58,8 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
+		self.validate_fg_completed_qty()
+		self.set_job_card_data()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -86,7 +88,6 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
 
-
 	def on_cancel(self):
 
 		if self.purchase_order and self.purpose == "Subcontract":
@@ -99,6 +100,16 @@ class StockEntry(StockController):
 
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.update_cost_in_project()
+
+	def set_job_card_data(self):
+		if self.job_card and not self.work_order:
+			data = frappe.db.get_value('Job Card',
+				self.job_card, ['for_quantity', 'work_order', 'bom_no'], as_dict=1)
+			self.fg_completed_qty = data.for_quantity
+			self.work_order = data.work_order
+			self.from_bom = 1
+			self.bom_no = data.bom_no
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -129,8 +140,18 @@ class StockEntry(StockController):
 					se.docstatus = 1 and se.project = %s and sed.parent = se.name
 					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
 
-			if amount:
-				frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount[0][0])
+			amount = amount[0][0] if amount else 0
+			additional_costs = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
+				from
+					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
+				where
+					se.docstatus = 1 and se.project = %s and sed.parent = se.name
+					and se.purpose = 'Manufacture'""", self.project, as_list=1)
+
+			additional_cost_amt = additional_costs[0][0] if additional_costs else 0
+
+			amount += additional_cost_amt
+			frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount)
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
@@ -184,6 +205,13 @@ class StockEntry(StockController):
 						if req_items:
 							if stock_qty > trans_qty:
 								item_code.append(item.item_code)
+
+	def validate_fg_completed_qty(self):
+		if self.purpose == "Manufacture" and self.work_order:
+			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
+			for item in self.items:
+				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different").format(item.qty, self.fg_completed_qty))
 
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
@@ -343,7 +371,7 @@ class StockEntry(StockController):
 
 	def calculate_rate_and_amount(self, force=False,
 			update_finished_item_rate=True, raise_error_if_no_rate=True):
-		self.set_basic_rate(force, update_finished_item_rate)
+		self.set_basic_rate(force, update_finished_item_rate, raise_error_if_no_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
@@ -574,6 +602,10 @@ class StockEntry(StockController):
 
 			if pro_doc.status == 'Stopped':
 				frappe.throw(_("Transaction not allowed against stopped Work Order {0}").format(self.work_order))
+
+		if self.job_card:
+			job_doc = frappe.get_doc('Job Card', self.job_card)
+			job_doc.set_transferred_qty()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

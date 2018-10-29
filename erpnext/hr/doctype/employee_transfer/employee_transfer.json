@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "ET.#####", 
+ "autoname": "HR-EMP-TRN-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-04-13 18:20:01.603830", 
  "custom": 0, 
@@ -450,7 +450,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-22 11:27:37.120882", 
+ "modified": "2018-08-21 16:15:36.876312", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Transfer", 
@@ -523,5 +523,6 @@
  "sort_order": "DESC", 
  "title_field": "employee_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

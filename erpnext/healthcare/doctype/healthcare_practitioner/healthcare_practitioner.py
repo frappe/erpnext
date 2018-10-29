@@ -21,6 +21,10 @@ class HealthcarePractitioner(Document):
 
 	def validate(self):
 		validate_party_accounts(self)
+		if self.inpatient_visit_charge_item:
+			validate_service_item(self.inpatient_visit_charge_item, "Configure a service Item for Inpatient Visit Charge Item")
+		if self.op_consulting_charge_item:
+			validate_service_item(self.op_consulting_charge_item, "Configure a service Item for Out Patient Consulting Charge Item")
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -57,3 +61,7 @@ class HealthcarePractitioner(Document):
 
 	def on_trash(self):
 		delete_contact_and_address('Healthcare Practitioner', self.name)
+
+def validate_service_item(item, msg):
+	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
+		frappe.throw(_(msg))

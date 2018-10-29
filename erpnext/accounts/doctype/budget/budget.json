@@ -735,7 +735,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1,
    "search_index": 0, 
    "set_only_once": 0, 
    "translatable": 0, 
@@ -752,7 +752,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-15 17:09:01.430292", 
+ "modified": "2018-09-12 11:02:41.825923",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget", 
@@ -785,6 +785,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "track_changes": 0, 
- "track_seen": 0
+ "track_changes": 1,
+ "track_seen": 0,
+ "track_views": 0
 }

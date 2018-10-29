@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "EOB.#####", 
+ "autoname": "HR-EMP-ONB-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-05-09 04:57:20.016220", 
  "custom": 0, 
@@ -15,6 +15,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -42,11 +43,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -74,16 +76,17 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_from": "job_applicant.applicant_name",
+   "fetch_from": "job_applicant.applicant_name", 
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -107,11 +110,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -139,11 +143,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -170,11 +175,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -202,11 +208,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -232,11 +239,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -264,11 +272,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -296,11 +305,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -328,11 +338,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -360,11 +371,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -392,11 +404,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -424,11 +437,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -455,11 +469,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -487,11 +502,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -518,7 +534,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -532,7 +548,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-16 22:43:38.251845",
+ "modified": "2018-08-21 16:15:55.968224", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Onboarding", 
@@ -567,5 +583,6 @@
  "sort_order": "DESC", 
  "title_field": "employee_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

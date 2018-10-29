@@ -11,8 +11,7 @@ from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
-def get_stock_value_from_bin (warehouse=None, item_code=None):
-
+def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
 	conditions = ""
 	if warehouse:
@@ -28,14 +27,13 @@ def get_stock_value_from_bin (warehouse=None, item_code=None):
 	if item_code:
 		conditions += " and item_code = %(item_code)s"
 
-
 		values['item_code'] = item_code
 
-	query = "select sum(stock_value) from `tabBin` where 1 = 1" + conditions
+	query = "select sum(stock_value) from `tabBin` where 1 = 1 %s" % conditions
 
 	stock_value = frappe.db.sql(query, values)
 
-	return stock_value;
+	return stock_value
 
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if not posting_date: posting_date = nowdate()
@@ -248,3 +246,34 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+
+def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_cols = {}
+	for col_idx in reversed(range(0, len(columns))):
+		col = columns[col_idx]
+		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
+			convertible_cols[col_idx] = col['convertible']
+			columns.insert(col_idx+1, col.copy())
+			columns[col_idx+1]['fieldname'] += "_alt"
+			if convertible_cols[col_idx] == 'rate':
+				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
+			else:
+				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+
+	for row_idx, row in enumerate(result):
+		new_row = []
+		for col_idx, d in enumerate(row):
+			new_row.append(d)
+			if col_idx in convertible_cols:
+				if conversion_factors[row_idx]:
+					if convertible_cols[col_idx] == 'rate':
+						new_row.append(flt(d) * conversion_factors[row_idx])
+					else:
+						new_row.append(flt(d) / conversion_factors[row_idx])
+				else:
+					new_row.append(None)
+
+		result[row_idx] = new_row

@@ -16,6 +16,7 @@ install:
   - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
   - nvm install v7.10.0
+  - pip install python-coveralls
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
   - sudo python install.py --develop --user travis --without-bench-setup
   - sudo pip install -e ~/bench
@@ -44,7 +45,9 @@ jobs:
     - stage: test
       script:
         - set -e
-        - bench run-tests --app erpnext
+        - bench run-tests --app erpnext --coverage
+      after_script:
+        - coveralls -b apps/erpnext -d ../../sites/.coverage
       env: Server Side Test
     - # stage
       script:

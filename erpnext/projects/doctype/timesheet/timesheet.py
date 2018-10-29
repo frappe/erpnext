@@ -97,19 +97,13 @@ class Timesheet(Document):
 		self.set_status()
 
 	def on_cancel(self):
-		self.update_work_order(None)
 		self.update_task_and_project()
 
 	def on_submit(self):
 		self.validate_mandatory_fields()
-		self.update_work_order(self.name)
 		self.update_task_and_project()
 
 	def validate_mandatory_fields(self):
-		if self.work_order:
-			work_order = frappe.get_doc("Work Order", self.work_order)
-			pending_qty = flt(work_order.qty) - flt(work_order.produced_qty)
-
 		for data in self.time_logs:
 			if not data.from_time and not data.to_time:
 				frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
@@ -119,41 +113,6 @@ class Timesheet(Document):
 
 			if flt(data.hours) == 0.0:
 				frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(data.idx))
-
-			if self.work_order and flt(data.completed_qty) == 0:
-				frappe.throw(_("Row {0}: Completed Qty must be greater than zero.").format(data.idx))
-
-			if self.work_order and flt(pending_qty) < flt(data.completed_qty) and flt(pending_qty) > 0:
-				frappe.throw(_("Row {0}: Completed Qty cannot be more than {1} for operation {2}").format(data.idx, pending_qty, data.operation),
-					OverWorkLoggedError)
-
-	def update_work_order(self, time_sheet):
-		if self.work_order:
-			pro = frappe.get_doc('Work Order', self.work_order)
-
-			for timesheet in self.time_logs:
-				for data in pro.operations:
-					if data.name == timesheet.operation_id:
-						summary = self.get_actual_timesheet_summary(timesheet.operation_id)
-						data.time_sheet = time_sheet
-						data.completed_qty = summary.completed_qty
-						data.actual_operation_time = summary.mins
-						data.actual_start_time = summary.from_time
-						data.actual_end_time = summary.to_time
-
-			pro.flags.ignore_validate_update_after_submit = True
-			pro.update_operation_status()
-			pro.calculate_operating_cost()
-			pro.set_actual_dates()
-			pro.save()
-
-	def get_actual_timesheet_summary(self, operation_id):
-		"""Returns 'Actual Operating Time'. """
-		return frappe.db.sql("""select
-			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
-			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where
-			ts.work_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
-			(self.work_order, operation_id), as_dict=1)[0]
 
 	def update_task_and_project(self):
 		tasks, projects = [], []
@@ -176,16 +135,12 @@ class Timesheet(Document):
 
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
-			self.check_workstation_timings(data)
 			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
-		if self.work_order:
-			self.validate_overlap_for("workstation", data, data.workstation, settings.ignore_workstation_time_overlap)
-		else:
-			self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
-			self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
+		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
+		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:
@@ -226,48 +181,6 @@ class Timesheet(Document):
 				return self
 
 		return existing[0] if existing else None
-
-	def check_workstation_timings(self, args):
-		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
-		if args.workstation and args.from_time and args.to_time:
-			check_if_within_operating_hours(args.workstation, args.operation, args.from_time, args.to_time)
-
-	def schedule_for_work_order(self, index):
-		for data in self.time_logs:
-			if data.idx == index:
-				self.move_to_next_day(data) #check for workstation holiday
-				self.move_to_next_non_overlapping_slot(data) #check for overlap
-				break
-
-	def move_to_next_non_overlapping_slot(self, data):
-		overlapping = self.get_overlap_for("workstation", data, data.workstation)
-		if overlapping:
-			time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
-			data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
-			data.to_time = self.get_to_time(data)
-			self.check_workstation_working_day(data)
-
-	def get_last_working_slot(self, time_sheet, workstation):
-		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time
-			from `tabTimesheet Detail` where workstation = %(workstation)s""",
-			{'workstation': workstation}, as_dict=True)[0]
-
-	def move_to_next_day(self, data):
-		"""Move start and end time one day forward"""
-		self.check_workstation_working_day(data)
-
-	def check_workstation_working_day(self, data):
-		while True:
-			try:
-				self.check_workstation_timings(data)
-				break
-			except WorkstationHolidayError:
-				if frappe.message_log: frappe.message_log.pop()
-				data.from_time = get_datetime(data.from_time) + timedelta(hours=24)
-				data.to_time = self.get_to_time(data)
-
-	def get_to_time(self, data):
-		return get_datetime(data.from_time) + timedelta(hours=data.hours)
 
 	def update_cost(self):
 		for data in self.time_logs:
@@ -310,7 +223,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 			and tsd.parent LIKE %(txt)s {condition}
 			order by tsd.parent limit %(start)s, %(page_len)s"""
 			.format(condition=condition), {
-				"txt": "%%%s%%" % frappe.db.escape(txt),
+				'txt': '%' + txt + '%',
 				"start": start, "page_len": page_len, 'project': filters.get("project")
 			})
 

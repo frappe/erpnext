@@ -1,5 +1,7 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v11_0.refactor_naming_series
+erpnext.patches.v11_0.refactor_autoname_naming
 erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
@@ -71,7 +73,6 @@ erpnext.patches.v4_0.create_price_list_if_missing
 execute:frappe.db.sql("update `tabItem` set end_of_life=null where end_of_life='0000-00-00'") #2014-06-16
 erpnext.patches.v4_0.update_users_report_view_settings
 erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
-erpnext.patches.v4_0.set_naming_series_property_setter
 erpnext.patches.v4_1.set_outgoing_email_footer
 erpnext.patches.v4_1.fix_sales_order_delivered_status
 erpnext.patches.v4_1.fix_delivery_and_billing_status
@@ -433,7 +434,7 @@ erpnext.patches.v8_5.update_customer_group_in_POS_profile
 erpnext.patches.v8_6.update_timesheet_company_from_PO
 erpnext.patches.v8_6.set_write_permission_for_quotation_for_sales_manager
 erpnext.patches.v8_5.remove_project_type_property_setter
-erpnext.patches.v8_7.add_more_gst_fields #21-09-2017
+erpnext.patches.v8_7.sync_india_custom_fields
 erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
@@ -485,10 +486,8 @@ erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
 erpnext.patches.v10_0.fichier_des_ecritures_comptables_for_france
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
-erpnext.patches.v10_0.added_extra_gst_custom_field
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
 erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
-erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2 #2018-02-13
 erpnext.patches.v10_0.item_barcode_childtable_migrate
 erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
@@ -499,7 +498,6 @@ execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
-erpnext.patches.v10_0.remove_and_copy_fields_in_physician
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
@@ -520,6 +518,8 @@ erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
 erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
+erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
+erpnext.patches.v11_0.rename_supplier_type_to_supplier_group
 erpnext.patches.v10_1.transfer_subscription_to_auto_repeat
 erpnext.patches.v11_0.update_brand_in_item_price
 erpnext.patches.v11_0.create_default_success_action
@@ -530,13 +530,12 @@ erpnext.patches.v11_0.rename_field_max_days_allowed
 erpnext.patches.v11_0.create_salary_structure_assignments
 erpnext.patches.v11_0.rename_health_insurance
 erpnext.patches.v11_0.rebuild_tree_for_company
-erpnext.patches.v11_0.rename_supplier_type_to_supplier_group
 erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
 erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018
-erpnext.patches.v11_0.refactor_erpnext_shopify
+erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
 erpnext.patches.v10_0.update_status_in_purchase_receipt
@@ -553,6 +552,23 @@ erpnext.patches.v11_0.hr_ux_cleanups
 erpnext.patches.v11_0.skip_user_permission_check_for_department
 erpnext.patches.v11_0.set_department_for_doctypes
 erpnext.patches.v11_0.update_allow_transfer_for_manufacture
-erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
 erpnext.patches.v11_0.add_item_group_defaults
 erpnext.patches.v10_0.update_address_template_for_india
+erpnext.patches.v11_0.add_expense_claim_default_account
+execute:frappe.delete_doc("Page", "hub")
+erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
+erpnext.patches.v11_0.update_hub_url # 2018-08-31  # 2018-09-03
+erpnext.patches.v10_0.set_discount_amount
+erpnext.patches.v10_0.recalculate_gross_margin_for_project
+erpnext.patches.v11_0.make_job_card
+erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
+erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
+erpnext.patches.v11_0.rename_healthcare_fields
+erpnext.patches.v11_0.remove_land_unit_icon
+erpnext.patches.v11_0.add_default_dispatch_notification_template
+erpnext.patches.v11_0.add_market_segments
+erpnext.patches.v11_0.add_sales_stages
+erpnext.patches.v11_0.ewaybill_fields_gst_india
+erpnext.patches.v11_0.drop_column_max_days_allowed
+erpnext.patches.v11_0.change_healthcare_desktop_icons
+erpnext.patches.v10_0.update_user_image_in_employee

@@ -12,6 +12,11 @@ class BalanceMismatchError(frappe.ValidationError): pass
 
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
+	def on_update(self):
+		if frappe.local.flags.ignore_on_update:
+			return
+		else:
+			super(Account, self).on_update()
 
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
@@ -212,10 +217,13 @@ def validate_account_number(name, account_number, company):
 @frappe.whitelist()
 def update_account_number(name, account_name, account_number=None):
 
-	account = frappe.db.get_value("Account", name, ["company"], as_dict=True)
+	account = frappe.db.get_value("Account", name, "company", as_dict=True)
+	if not account: return
 	validate_account_number(name, account_number, account.company)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
+	else:
+		frappe.db.set_value("Account", name, "account_number", "")
 	frappe.db.set_value("Account", name, "account_name", account_name.strip())
 
 	new_name = get_account_autoname(account_number, account_name, account.company)

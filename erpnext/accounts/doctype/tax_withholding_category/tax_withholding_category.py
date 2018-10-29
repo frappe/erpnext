@@ -19,6 +19,9 @@ def get_party_tax_withholding_details(ref_doc):
 
 	fy = get_fiscal_year(ref_doc.posting_date, company=ref_doc.company)
 	tax_details = get_tax_withholding_details(tax_withholding_category, fy[0], ref_doc.company)
+	if not tax_details:
+		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
+			.format(tax_withholding_category, ref_doc.company))
 	tds_amount = get_tds_amount(ref_doc, tax_details, fy)
 	tax_row = get_tax_row(tax_details, tds_amount)
 	return tax_row
@@ -102,17 +105,25 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 
 	return tds_amount
 
-def get_advance_vouchers(supplier, fiscal_year):
+def get_advance_vouchers(supplier, fiscal_year=None, company=None, from_date=None, to_date=None):
+	condition = "fiscal_year=%s" % fiscal_year
+	if from_date and to_date:
+		condition = "company=%s and posting_date between %s and %s" % (company, from_date, to_date)
+
 	return frappe.db.sql_list("""
 		select distinct voucher_no
 		from `tabGL Entry`
-		where party=%s and fiscal_year=%s and debit > 0
-	""", (supplier, fiscal_year))
+		where party=%s and %s and debit > 0
+	""", (supplier, condition))
 
-def get_debit_note_amount(supplier, year_start_date, year_end_date):
+def get_debit_note_amount(supplier, year_start_date, year_end_date, company=None):
+	condition = ""
+	if company:
+		condition = " and company=%s " % company
+
 	return flt(frappe.db.sql("""
 		select abs(sum(net_total))
 		from `tabPurchase Invoice`
-		where supplier=%s and is_return=1 and docstatus=1
+		where supplier=%s %s and is_return=1 and docstatus=1
 			and posting_date between %s and %s
-	""", (supplier, year_start_date, year_end_date)))
+	""", (supplier, condition, year_start_date, year_end_date)))

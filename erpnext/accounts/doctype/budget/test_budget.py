@@ -18,7 +18,7 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Cost Center")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
@@ -33,7 +33,7 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC")
+			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", posting_date="2013-02-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 		
@@ -46,9 +46,9 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Cost Center")
 
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
-
+	
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC")
+			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", posting_date="2013-03-02")
 
 		self.assertRaises(BudgetError, jv.submit)
 
@@ -121,7 +121,7 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", project="_Test Project")
+			"_Test Bank - _TC", 40000, "_Test Cost Center - _TC", project="_Test Project", posting_date="2013-02-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 		
@@ -134,7 +134,7 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Cost Center")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 150000, "_Test Cost Center - _TC")
+			"_Test Bank - _TC", 150000, "_Test Cost Center - _TC", posting_date="2013-03-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 		
@@ -146,7 +146,7 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Project")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 150000, "_Test Cost Center - _TC", project="_Test Project")
+			"_Test Bank - _TC", 150000, "_Test Cost Center - _TC", project="_Test Project", posting_date="2013-03-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 		
@@ -158,13 +158,13 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Cost Center")
 				
 		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
 		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
@@ -182,13 +182,13 @@ class TestBudget(unittest.TestCase):
 		budget = make_budget(budget_against="Project")
 				
 		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True, project="_Test Project")
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
 		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", submit=True, project="_Test Project")
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
@@ -200,7 +200,6 @@ class TestBudget(unittest.TestCase):
 		budget.load_from_db()
 		budget.cancel()
 
-		
 	def test_monthly_budget_against_group_cost_center(self):
 		set_total_expense_zero("2013-02-28", "Cost Center")
 		set_total_expense_zero("2013-02-28", "Cost Center", "_Test Cost Center 2 - _TC")
@@ -209,7 +208,7 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, "_Test Cost Center 2 - _TC")
+			"_Test Bank - _TC", 40000, "_Test Cost Center 2 - _TC", posting_date="2013-02-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 		
@@ -232,7 +231,7 @@ class TestBudget(unittest.TestCase):
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", 40000, cost_center)
+			"_Test Bank - _TC", 40000, cost_center, posting_date="2013-02-28")
 
 		self.assertRaises(BudgetError, jv.submit)
 
@@ -261,10 +260,10 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 	if existing_expense:
 		if budget_against_field == "Cost Center":
 			make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 		elif budget_against_field == "Project":
 			make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True, project="_Test Project")
+			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True, project="_Test Project", posting_date="2013-02-28")
 
 def make_budget(**args):
 	args = frappe._dict(args)

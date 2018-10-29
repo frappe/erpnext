@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "SLA.######", 
+ "autoname": "EDU-SLA-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2016-11-28 15:38:54.793854", 
  "custom": 0, 
@@ -15,6 +15,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -42,16 +43,17 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_from": "student.title",
+   "fetch_from": "student.title", 
    "fieldname": "student_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -75,11 +77,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -106,11 +109,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -137,11 +141,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -168,11 +173,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -200,11 +206,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -230,11 +237,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -261,11 +269,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -292,7 +301,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -306,7 +315,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-16 22:42:40.945767",
+ "modified": "2018-08-21 16:15:50.807352", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Student Leave Application", 
@@ -361,5 +370,6 @@
  "sort_order": "DESC", 
  "title_field": "student_name", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

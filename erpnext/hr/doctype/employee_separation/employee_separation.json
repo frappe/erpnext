@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "autoname": "ES.#####", 
+ "autoname": "HR-EMP-SEP-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-05-10 02:29:16.740490", 
  "custom": 0, 
@@ -550,7 +550,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-20 14:21:54.707831", 
+ "modified": "2018-08-21 16:15:39.025898", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Separation", 
@@ -585,5 +585,6 @@
  "sort_order": "DESC", 
  "title_field": "employee_name", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

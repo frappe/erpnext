@@ -61,7 +61,7 @@ class StockReconciliation(StockController):
 					- flt(qty, item.precision("qty")) * flt(rate, item.precision("valuation_rate")))
 				return True
 
-		items = filter(lambda d: _changed(d), self.items)
+		items = list(filter(lambda d: _changed(d), self.items))
 
 		if not items:
 			frappe.throw(_("None of the items have any change in quantity or value."),
@@ -110,7 +110,7 @@ class StockReconciliation(StockController):
 				self.validation_messages.append(_get_msg(row_num,
 					_("Negative Valuation Rate is not allowed")))
 
-			if row.qty and not row.valuation_rate:
+			if row.qty and row.valuation_rate in ["", None]:
 				row.valuation_rate = get_stock_balance(row.item_code, row.warehouse,
 							self.posting_date, self.posting_time, with_valuation_rate=True)[1]
 				if not row.valuation_rate:
@@ -254,7 +254,7 @@ class StockReconciliation(StockController):
 
 	def get_items_for(self, warehouse):
 		self.items = []
-		for item in get_items(warehouse, self.posting_date, self.posting_time):
+		for item in get_items(warehouse, self.posting_date, self.posting_time, self.company):
 			self.append("items", item)
 
 	def submit(self):
@@ -271,28 +271,27 @@ class StockReconciliation(StockController):
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time, company):
-	items = [d.item_code for d in frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse})]
+	items = frappe.db.sql('''select i.name, i.item_name from `tabItem` i, `tabBin` bin where i.name=bin.item_code
+		and i.disabled=0 and bin.warehouse=%s''', (warehouse), as_dict=True)
 
-	items += frappe.db.sql_list('''select i.name from `tabItem` i, `tabItem Default` id where i.name = id.parent
+	items += frappe.db.sql('''select i.name, i.item_name from `tabItem` i, `tabItem Default` id where i.name = id.parent
 		and i.is_stock_item=1 and i.has_serial_no=0 and i.has_batch_no=0 and i.has_variants=0 and i.disabled=0
-		and id.default_warehouse=%s and id.company=%s''', (warehouse, company))
+		and id.default_warehouse=%s and id.company=%s group by i.name''', (warehouse, company), as_dict=True)
 
 	res = []
-	for item in set(items):
-		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time,
+	for item in items:
+		qty, rate = get_stock_balance(item.name, warehouse, posting_date, posting_time,
 			with_valuation_rate=True)
 
-		if frappe.db.get_value("Item",item[0],"disabled") == 0:
-
-			res.append({
-				"item_code": item[0],
-				"warehouse": warehouse,
-				"qty": stock_bal[0],
-				"item_name": frappe.db.get_value('Item', item[0], 'item_name'),
-				"valuation_rate": stock_bal[1],
-				"current_qty": stock_bal[0],
-				"current_valuation_rate": stock_bal[1]
-			})
+		res.append({
+			"item_code": item.name,
+			"warehouse": warehouse,
+			"qty": qty,
+			"item_name": item.item_name,
+			"valuation_rate": rate,
+			"current_qty": qty,
+			"current_valuation_rate": rate
+		})
 
 	return res
 

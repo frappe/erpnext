@@ -1,22 +1,19 @@
 {
- "creation": "2017-09-07 11:39:38.445902",
- "docstatus": 0,
- "doctype": "Data Migration Plan",
- "idx": 1,
+ "creation": "2017-09-07 11:39:38.445902", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Plan", 
+ "idx": 1, 
  "mappings": [
   {
-   "enabled": 1,
+   "enabled": 1, 
    "mapping": "Item to Hub Item"
-  },
-  {
-   "enabled": 1,
-   "mapping": "Hub Message to Lead"
   }
- ],
- "modified": "2018-02-14 15:57:05.519715",
- "modified_by": "achilles@erpnext.com",
- "module": "Hub Node",
- "name": "Hub Sync",
- "owner": "Administrator",
- "plan_name": "Hub Sync"
+ ], 
+ "modified": "2018-08-19 22:20:25.644602", 
+ "modified_by": "Administrator", 
+ "module": "Hub Node", 
+ "name": "Hub Sync", 
+ "owner": "Administrator", 
+ "plan_name": "Hub Sync", 
+ "postprocess_method": "erpnext.hub_node.api.item_sync_postprocess"
 }

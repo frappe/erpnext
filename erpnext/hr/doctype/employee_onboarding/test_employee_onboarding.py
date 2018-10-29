@@ -11,13 +11,12 @@ from erpnext.hr.doctype.employee_onboarding.employee_onboarding import Incomplet
 
 class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):
-		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Applicant'}):
-			return frappe.get_doc('Employee Onboarding', {'employee_name': 'Test Applicant'})
+		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Researcher'}):
+			return frappe.get_doc('Employee Onboarding', {'employee_name': 'Test Researcher'})
 		_set_up()
 		applicant = get_job_applicant()
 		onboarding = frappe.new_doc('Employee Onboarding')
 		onboarding.job_applicant = applicant.name
-		onboarding.employee_name = 'Test Applicant'
 		onboarding.company = '_Test Company'
 		onboarding.designation = 'Researcher'
 		onboarding.append('activities', {
@@ -32,23 +31,26 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.status = 'Pending'
 		onboarding.insert()
 		onboarding.submit()
-		self.assertEqual(onboarding.project, 'Employee Onboarding : Test Researcher - test@researcher.com')
-		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
-		return onboarding
 
-	def test_employee_onboarding_completed_task(self):
-		doc = self.test_employee_onboarding_incomplete_task()
-		project = frappe.get_doc('Project', doc.project)
+		self.assertEqual(onboarding.project, 'Employee Onboarding : Test Researcher - test@researcher.com')
+
+		# don't allow making employee if onboarding is not complete
+		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
+
+		# complete the task
+		project = frappe.get_doc('Project', onboarding.project)
 		project.tasks[0].status = 'Closed'
 		project.save()
-		doc.reload()
-		employee = make_employee(doc.name)
+
+		# make employee
+		onboarding.reload()
+		employee = make_employee(onboarding.name)
 		employee.first_name = employee.employee_name
 		employee.date_of_joining = nowdate()
 		employee.date_of_birth = '1990-05-08'
 		employee.gender = 'Female'
 		employee.insert()
-		self.assertEqual(employee.employee_name, 'Test Applicant')
+		self.assertEqual(employee.employee_name, 'Test Researcher')
 
 def get_job_applicant():
 	if frappe.db.exists('Job Applicant', 'Test Researcher - test@researcher.com'):
@@ -64,3 +66,8 @@ def get_job_applicant():
 def _set_up():
 	for doctype in ["Employee Onboarding"]:
 		frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
+
+	project = "Employee Onboarding : Test Researcher - test@researcher.com"
+	frappe.db.sql("delete from tabProject where name=%s", project)
+	frappe.db.sql("delete from tabTask where project=%s", project)
+	frappe.db.sql("delete from `tabProject Task` where parent=%s", project)

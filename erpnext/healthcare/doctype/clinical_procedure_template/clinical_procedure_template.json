@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:template", 
  "beta": 1, 
@@ -16,6 +16,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -43,11 +44,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
-   "unique": 0
+   "translatable": 0, 
+   "unique": 1
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -75,11 +77,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -107,11 +110,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -139,11 +143,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -169,11 +174,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -200,11 +206,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -232,11 +239,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -263,11 +271,12 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -294,11 +303,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -325,11 +335,12 @@
    "reqd": 0, 
    "search_index": 1, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -357,11 +368,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -389,11 +401,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
@@ -421,11 +434,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -453,16 +467,17 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_from": "sample.sample_uom",
+   "fetch_from": "sample.sample_uom", 
    "fieldname": "sample_uom", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -486,11 +501,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -517,11 +533,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -547,11 +564,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -578,11 +596,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -609,11 +628,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -640,11 +660,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -672,7 +693,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0,
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -686,7 +707,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-16 22:43:29.674822",
+ "modified": "2018-08-08 13:00:06.260997", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Clinical Procedure Template", 
@@ -780,5 +801,6 @@
  "sort_order": "DESC", 
  "title_field": "template", 
  "track_changes": 1, 
- "track_seen": 1
+ "track_seen": 1, 
+ "track_views": 0
 }

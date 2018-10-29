@@ -13,6 +13,21 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"reqd": 1
 			},
 			{
+				"fieldname":"cost_center",
+				"label": __("Cost Center"),
+				"fieldtype": "Link",
+				"options": "Cost Center",
+				"get_query": function() {
+					var company = frappe.query_report.get_filter_value('company');
+					return {
+						"doctype": "Cost Center",
+						"filters": {
+							"company": company,
+						}
+					}
+				}
+			},
+			{
 				"fieldname": "fiscal_year",
 				"label": __("Fiscal Year"),
 				"fieldtype": "Link",

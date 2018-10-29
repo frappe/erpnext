@@ -19,7 +19,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "AST", 
+   "default": "", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -32,7 +32,7 @@
    "label": "Naming Series", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "AST\nAT", 
+   "options": "ACC-ASS-.YYYY.-", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -506,10 +506,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1879,7 +1881,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-30 08:30:37.355749",
+ "modified": "2018-08-21 14:44:24.507215", 
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset", 
@@ -1933,5 +1935,6 @@
  "sort_order": "DESC", 
  "title_field": "asset_name", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

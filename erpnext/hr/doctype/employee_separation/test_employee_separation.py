@@ -26,4 +26,4 @@ class TestEmployeeSeparation(unittest.TestCase):
 		self.assertEqual(separation.project, "")
 
 def get_employee():
-	return frappe.get_doc('Employee', {'employee_name': 'Test Applicant'})
+	return frappe.get_doc('Employee', {'employee_name': 'Test Researcher'})

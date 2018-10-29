@@ -519,7 +519,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.frm.cscript.calculate_taxes_and_totals();
 
 					if (r.message) {
-						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 					}

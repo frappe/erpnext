@@ -271,6 +271,24 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.fields_dict['deferred_revenue_account'].get_query = function() {
+			return {
+				filters: {
+					'root_type': 'Liability',
+					"is_group": 0
+				}
+			}
+		}
+
+		frm.fields_dict['deferred_expense_account'].get_query = function() {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					"is_group": 0
+				}
+			}
+		}
+
 		frm.fields_dict.customer_items.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.customer_query" }
 		}
@@ -631,15 +649,10 @@ $.extend(erpnext.item, {
 				.on('input', function(e) {
 					var term = e.target.value;
 					frappe.call({
-						method:"frappe.client.get_list",
+						method:"erpnext.stock.doctype.item.item.get_item_attribute",
 						args:{
-							doctype:"Item Attribute Value",
-							filters: [
-								["parent","=", i],
-								["attribute_value", "like", term + "%"]
-							],
-							fields: ["attribute_value"],
-							parent: "Item"
+							parent: i,
+							attribute_value: term
 						},
 						callback: function(r) {
 							if (r.message) {

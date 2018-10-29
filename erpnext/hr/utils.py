@@ -80,7 +80,7 @@ class EmployeeBoardingController(Document):
 
 @frappe.whitelist()
 def get_onboarding_details(parent, parenttype):
-	return frappe.get_list("Employee Boarding Activity",
+	return frappe.get_all("Employee Boarding Activity",
 		fields=["activity_name", "role", "user", "required_for_employee_creation", "description"],
 		filters={"parent": parent, "parenttype": parenttype},
 		order_by= "idx")

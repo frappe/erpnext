@@ -472,10 +472,10 @@ frappe.ui.form.on('Stock Entry Detail', {
 		}
 	},
 	expense_account: function(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "expense_account");
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
 	},
 	cost_center: function(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center");
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
 	},
 	sample_quantity: function(frm, cdt, cdn) {
 		validate_sample_quantity(frm, cdt, cdn);
@@ -654,7 +654,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	work_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		if(!me.frm.doc.work_order) {
+		if(!me.frm.doc.work_order || me.frm.doc.job_card) {
 			return;
 		}
 

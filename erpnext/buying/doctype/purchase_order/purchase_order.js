@@ -64,7 +64,7 @@ frappe.ui.form.on("Purchase Order Item", {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
 			if(!frm.doc.schedule_date) {
-				erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "schedule_date");
+				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 			} else {
 				set_schedule_date(frm);
 			}
@@ -140,6 +140,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
 			}
+
+			if(flt(doc.per_billed)==0) {
+				this.frm.add_custom_button(__('Payment Request'),
+					function() { me.make_payment_request() }, __("Make"));
+			}
+
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
@@ -309,6 +315,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
+					args: args,
 					setters: {
 						company: me.frm.doc.company
 					},
@@ -319,7 +326,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						per_ordered: ["<", 99.99],
 					}
 				})
-			}, __("Add items from"));
+			}, __("Get items from"));
 
 		this.frm.add_custom_button(__('Supplier Quotation'),
 			function() {
@@ -335,7 +342,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						status: ["!=", "Stopped"],
 					}
 				})
-			}, __("Add items from"));
+			}, __("Get items from"));
 
 		this.frm.add_custom_button(__('Update rate as per last purchase'),
 			function() {
@@ -364,7 +371,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				},
 				callback: function(r) {
 					if(r.exc) return;
-	
+
 					var i = 0;
 					var item_length = me.frm.doc.items.length;
 					while (i < item_length) {
@@ -379,17 +386,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 								d.qty = d.qty  - my_qty;
 								me.frm.doc.items[i].stock_qty = my_qty * me.frm.doc.items[i].conversion_factor;
 								me.frm.doc.items[i].qty = my_qty;
-	
+
 								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + me.frm.doc.items[i].idx + ")");
 								if (qty > 0) {
 									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
 									var new_row = frappe.model.add_child(me.frm.doc, me.frm.doc.items[i].doctype, "items");
 									item_length++;
-	
+
 									for (var key in me.frm.doc.items[i]) {
 										new_row[key] = me.frm.doc.items[i][key];
 									}
-	
+
 									new_row.idx = item_length;
 									new_row["stock_qty"] = new_row.conversion_factor * qty;
 									new_row["qty"] = qty;
@@ -477,7 +484,7 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){
-		erpnext.utils.copy_value_in_all_row(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
 	}
 }
 

@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:appointment_type", 
  "beta": 1, 
@@ -152,7 +152,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-13 00:04:24.597019", 
+ "modified": "2018-08-08 12:57:54.544216", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Appointment Type", 
@@ -208,5 +208,6 @@
  "sort_order": "DESC", 
  "title_field": "", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

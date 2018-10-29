@@ -12,6 +12,8 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
+		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
+		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
 	},
 
 	onload: function() {
@@ -28,8 +30,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	setup_queries: function() {
 		var me = this;
-
-		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 
 		$.each([["customer", "customer"],
 			["lead", "lead"]],
@@ -171,17 +171,26 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	allocated_percentage: function(doc, cdt, cdn) {
 		var sales_person = frappe.get_doc(cdt, cdn);
-
 		if(sales_person.allocated_percentage) {
+
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
 				precision("allocated_percentage", sales_person));
+
 			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
 				sales_person.allocated_percentage / 100.0,
 				precision("allocated_amount", sales_person));
+				refresh_field(["allocated_amount"], sales_person);
 
-			refresh_field(["allocated_percentage", "allocated_amount"], sales_person.name,
+			this.calculate_incentive(sales_person);
+			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
 				sales_person.parentfield);
-		}
+		}	
+	},
+
+	sales_person: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.calculate_incentive(row);
+		refresh_field("incentives",row.name,row.parentfield);
 	},
 
 	warehouse: function(doc, cdt, cdn) {
@@ -250,6 +259,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 	},
 
+	calculate_incentive: function(row) {
+		if(row.allocated_amount)
+		{
+			row.incentives = flt(
+					row.allocated_amount * row.commission_rate / 100.0,
+					precision("incentives", row));
+		}
+	},
+
 	batch_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
@@ -297,23 +315,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
-	},
-
-	make_payment_request: function() {
-		frappe.call({
-			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
-			args: {
-				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name,
-				"recipient_id": cur_frm.doc.contact_email
-			},
-			callback: function(r) {
-				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
-					frappe.set_route("Form", r.message.doctype, r.message.name);
-				}
-			}
-		})
 	},
 
 	margin_rate_or_amount: function(doc, cdt, cdn) {

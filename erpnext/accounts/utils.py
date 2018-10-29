@@ -84,7 +84,7 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 			throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
-def get_balance_on(account=None, date=None, party_type=None, party=None, company=None, in_account_currency=True):
+def get_balance_on(account=None, date=None, party_type=None, party=None, company=None, in_account_currency=True, cost_center=None):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
 	if not date and frappe.form_dict.get("date"):
@@ -93,10 +93,13 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		party_type = frappe.form_dict.get("party_type")
 	if not party and frappe.form_dict.get("party"):
 		party = frappe.form_dict.get("party")
+	if not cost_center and frappe.form_dict.get("cost_center"):
+		cost_center = frappe.form_dict.get("cost_center")
+
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -113,17 +116,36 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
+	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
+
+	if cost_center and allow_cost_center_in_entry_of_bs_account:
+		cc = frappe.get_doc("Cost Center", cost_center)
+		if cc.is_group:
+			cond.append(""" exists (
+				select 1 from `tabCost Center` cc where cc.name = gle.cost_center
+				and cc.lft >= %s and cc.rgt <= %s
+			)""" % (cc.lft, cc.rgt))
+
+		else:
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
+
+
 	if account:
+
 		acc = frappe.get_doc("Account", account)
 
 		if not frappe.flags.ignore_account_permission:
 			acc.check_permission("read")
 
-		# for pl accounts, get balance within a fiscal year
-		if acc.report_type == 'Profit and Loss':
+
+		if not allow_cost_center_in_entry_of_bs_account and acc.report_type == 'Profit and Loss':
+			# for pl accounts, get balance within a fiscal year
 			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 				% year_start_date)
-
+		elif allow_cost_center_in_entry_of_bs_account:
+			# for all accounts, get balance within a fiscal year if maintain cost center in balance account is checked
+			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
+				% year_start_date)
 		# different filter for group and ledger - improved performance
 		if acc.is_group:
 			cond.append("""exists (
@@ -136,14 +158,14 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			if acc.account_currency == frappe.get_cached_value('Company',  acc.company,  "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 	if party_type and party:
-		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+		cond.append("""gle.party_type = %s and gle.party = %s """ %
 			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if company:
-		cond.append("""gle.company = "%s" """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -161,7 +183,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -196,7 +218,7 @@ def get_count_on(account, fieldname, date):
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 		entries = frappe.db.sql("""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -830,3 +852,10 @@ def get_coa(doctype, parent, is_root, chart=None):
 	accounts = [d for d in accounts if d['parent_account']==parent]
 
 	return accounts
+
+def get_allow_cost_center_in_entry_of_bs_account():
+	def generator():
+		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
+	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
+
+

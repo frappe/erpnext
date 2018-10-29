@@ -258,7 +258,9 @@ class SalarySlip(TransactionBase):
 			'end_date': self.end_date, 'joining_date': joining_date})
 
 		if st_name:
-			return st_name and st_name[0][0] or ''
+			self.salary_structure = st_name[0][0]
+			return self.salary_structure
+
 		else:
 			self.salary_structure = None
 			frappe.msgprint(_("No active or default Salary Structure found for employee {0} for the given dates")
@@ -382,8 +384,8 @@ class SalarySlip(TransactionBase):
 				and t2.is_lwp = 1
 				and t1.docstatus = 1
 				and t1.employee = %(employee)s
-				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
+				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
 				END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 			if leave:
@@ -526,7 +528,7 @@ class SalarySlip(TransactionBase):
 				"reference_name": self.name
 				}
 			if not frappe.flags.in_test:
-				enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
+				enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
 			else:
 				frappe.sendmail(**email_args)
 		else:

@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
- "autoname": "RB-.####", 
+ "autoname": "HR-RTB-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2018-05-13 14:59:42.038964", 
  "custom": 0, 
@@ -319,7 +319,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-12 16:28:11.071680", 
+ "modified": "2018-08-21 16:15:38.710684", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Retention Bonus", 
@@ -410,5 +410,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

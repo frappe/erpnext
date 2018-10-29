@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "autoname": "TR.####", 
+ "autoname": "ACC-TAX-RULE-.YYYY.-.#####", 
  "beta": 0, 
  "creation": "2015-08-07 02:33:52.670866", 
  "custom": 0, 
@@ -1030,8 +1030,8 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-22 00:39:44.028076", 
- "modified_by": "sushant@digithinkit.com", 
+ "modified": "2018-08-21 16:15:51.095450", 
+ "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Tax Rule", 
  "name_case": "", 
@@ -1064,5 +1064,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
