@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.nestedset import NestedSet, get_root_of
-from erpnext.utilities.transaction_base import delete_events
 from frappe.model.document import Document
 
 class Department(NestedSet):
@@ -35,7 +34,6 @@ class Department(NestedSet):
 
 	def on_trash(self):
 		super(Department, self).on_trash()
-		delete_events(self.doctype, self.name)
 
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
