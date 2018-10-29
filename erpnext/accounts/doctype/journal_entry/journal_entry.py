@@ -34,7 +34,6 @@ class JournalEntry(AccountsController):
 		self.validate_total_debit_and_credit()
 		self.validate_reference_doc()
 		self.set_against_account()
-		self.create_remarks()
 		self.set_print_format_fields()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
@@ -47,6 +46,7 @@ class JournalEntry(AccountsController):
 
 	def before_submit(self):
 		self.validate_cheque_info()
+		self.create_remarks()
 
 	def on_submit(self):
 		self.check_credit_limit()
