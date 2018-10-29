@@ -498,11 +498,13 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	set_naming_series_bbr_bbp: function(frm) {
-		frm.set_df_property("voucher_type", "read_only", false);
-		var parts = frm.doc.naming_series.split("-");
-		if(parts[0] == "BBP" || parts[0] == "BBR") {
-			frm.set_value("voucher_type", "Bank Entry");
-			frm.set_df_property("voucher_type", "read_only", true);
+		if (frm.doc.__islocal) {
+			frm.set_df_property("voucher_type", "read_only", false);
+			var parts = frm.doc.naming_series.split("-");
+			if(parts[0] == "BBP" || parts[0] == "BBR") {
+				frm.set_value("voucher_type", "Bank Entry");
+				frm.set_df_property("voucher_type", "read_only", true);
+			}
 		}
 	},
 

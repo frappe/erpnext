@@ -248,23 +248,24 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_naming_series_bbr_bbp: function(frm) {
-		frm.set_df_property("naming_series", "read_only", false);
-		var ns = frm.fields_dict.naming_series.df.options.split("\n");
-		$.each(ns, function(i, series) {
-			var parts = series.split("-");
-			if(frm.doc.payment_type == "Pay") {
-				if(parts[0] == "BP") {
-					frm.set_value("naming_series", series);
-					frm.set_df_property("naming_series", "read_only", true);
+		if (frm.doc.__islocal) {
+			frm.set_df_property("naming_series", "read_only", false);
+			var ns = frm.fields_dict.naming_series.df.options.split("\n");
+			$.each(ns, function(i, series) {
+				var parts = series.split("-");
+				if(frm.doc.payment_type == "Pay") {
+					if(parts[0] == "BP") {
+						frm.set_value("naming_series", series);
+						frm.set_df_property("naming_series", "read_only", true);
+					}
+				} else if(frm.doc.payment_type == "Receive") {
+					if(parts[0] == "BR") {
+						frm.set_value("naming_series", series);
+						frm.set_df_property("naming_series", "read_only", true);
+					}
 				}
-			} else if (frm.doc.payment_type == "Receive")
-			{
-				if(parts[0] == "BR") {
-					frm.set_value("naming_series", series);
-					frm.set_df_property("naming_series", "read_only", true);
-				}
-			}
-		});
+			});
+		}
 	},
 
 	party_type: function(frm) {
