@@ -119,6 +119,17 @@ frappe.ui.form.on("Project Task", {
 	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
+
+	task_description:function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.task_description){
+			erpnext.utils.get_description(child, "Task Description", child.task_description,"task_description", function(r){
+				if(!r.exc){
+						frappe.model.set_value(cdt,cdn,"description",r.message);
+					}
+			});
+		}
+	}
 });
 
 frappe.ui.form.on("Project", "validate", function (frm) {

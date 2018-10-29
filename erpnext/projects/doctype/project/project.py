@@ -43,6 +43,7 @@ class Project(Document):
 				"start_date": task.exp_start_date,
 				"end_date": task.exp_end_date,
 				"description": task.description,
+				"task_description": task.task_description,
 				"task_id": task.name,
 				"task_weight": task.task_weight
 			}
@@ -99,7 +100,7 @@ class Project(Document):
 
 		existing_task_data = {}
 
-		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"]
+		fields = ["title", "status", "start_date", "end_date", "task_description", "description", "task_weight", "task_id"]
 		exclude_fieldtype = ["Button", "Column Break",
 			"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
 
@@ -128,6 +129,7 @@ class Project(Document):
 					"exp_start_date": t.start_date,
 					"exp_end_date": t.end_date,
 					"description": t.description,
+					"task_description": t.task_description,
 					"task_weight": t.task_weight
 				})
 

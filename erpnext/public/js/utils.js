@@ -144,6 +144,24 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	get_description: function(doc, dt, dn, template_name, callback) {
+		// Fetch jinja templated description text from backend.
+		if(template_name) {
+			return frappe.call({
+				method:"erpnext.templates.utils.get_description",
+				args:{
+					doc:doc,
+					dt:dt,
+					dn:dn,
+					template_field:template_name
+				},
+				callback:function(r){
+					callback(r);
+				}
+			});
+		}
+	},
+
 	make_bank_account: function(doctype, docname) {
 		frappe.call({
 			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
