@@ -37,18 +37,7 @@ class TransactionBase(StatusUpdater):
 			self._add_calendar_event(opts)
 
 	def delete_events(self):
-		participations = frappe.get_all("Event Participants", filters={"reference_doctype": self.doctype, "reference_docname": self.name,
-			"parenttype": "Event"}, fields=["name", "parent"])
-
-		if participations:
-			for participation in participations:
-				total_participants = frappe.get_all("Event Participants", filters={"parenttype": "Event", "parent": participation.parent})
-
-				if len(total_participants) <= 1:
-					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
-
-				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
-
+		delete_events(self.doctype, self.name)
 
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
@@ -145,9 +134,21 @@ class TransactionBase(StatusUpdater):
 
 		return ret
 
-def delete_events(ref_type, ref_name):
-	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
-		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
+def delete_events(ref_type, ref_name, delete_event=False):
+	participations = frappe.get_all("Event Participants", filters={"reference_doctype": ref_type, "reference_docname": ref_name,
+		"parenttype": "Event"}, fields=["parent", "name"])
+
+	if participations:
+		for participation in participations:
+			if delete_event:
+				frappe.delete_doc("Event", participation.parent, for_reload=True)
+			else:
+				total_participants = frappe.get_all("Event Participants", filters={"parenttype": "Event", "parent": participation.parent})
+
+				if len(total_participants) <= 1:
+					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
+
+				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, string_types):
