@@ -172,7 +172,7 @@ class Employee(NestedSet):
 
 	def on_trash(self):
 		self.update_nsm_model()
-		delete_events(self.doctype, self.name)
+		delete_events(self.doctype, self.name, delete_event=True)
 		if frappe.db.exists("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1}):
 			emp_transfer = frappe.get_doc("Employee Transfer", {'new_employee_id': self.name, 'docstatus': 1})
 			emp_transfer.db_set("new_employee_id", '')

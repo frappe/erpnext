@@ -67,16 +67,21 @@ class MaintenanceSchedule(TransactionBase):
 
 			for key in scheduled_date:
 				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)	
-				frappe.get_doc({
+				event = frappe.get_doc({
 					"doctype": "Event",
 					"owner": email_map.get(d.sales_person, self.owner),
 					"subject": description,
 					"description": description,
 					"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
 					"event_type": "Private",
-					"ref_type": self.doctype,
-					"ref_name": self.name
-				}).insert(ignore_permissions=1)
+				})
+
+				event.append('event_participants', {
+					"reference_doctype": self.doctype,
+					"reference_docname": self.name
+				})
+
+				event.insert(ignore_permissions=1)
 
 		frappe.db.set(self, 'status', 'Submitted')
 
@@ -235,10 +240,10 @@ class MaintenanceSchedule(TransactionBase):
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				self.update_amc_date(serial_nos)
 		frappe.db.set(self, 'status', 'Cancelled')
-		delete_events(self.doctype, self.name)
+		delete_events(self.doctype, self.name, delete_event=True)
 
 	def on_trash(self):
-		delete_events(self.doctype, self.name)
+		delete_events(self.doctype, self.name, delete_event=True)
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name, target_doc=None):
