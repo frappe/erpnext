@@ -421,6 +421,8 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"account_currency": self.party_account_currency,
 				"cost_center": self.cost_center,
+				"reference_no": self.reference_no,
+				"reference_date": self.reference_date,
 				"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
 			})
 
@@ -516,6 +518,8 @@ class PaymentEntry(AccountsController):
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
 						"cost_center": d.cost_center,
+						"reference_no": self.reference_no,
+						"reference_date": self.reference_date,
 						"remarks": remarks
 					})
 				)
