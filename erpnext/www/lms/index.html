@@ -1,5 +1,5 @@
 {% extends "frappe_theme/templates/base.html" %}
-{% block title %}ERPNext Academy{% endblock %}
+{% block title %}{{settings.portal_title}}{% endblock %}
 
 {% from "templates/includes/media.html" import media %}
 
@@ -29,22 +29,21 @@
 			<!-- <img class="main-illustration" src='/assets/erpnext_com/img/erpnext_com_illustration.png'
 			style='width: 700px;'> -->
 		</div>
-		<h1>Become an ERPNext Expert</h1>
+		<h1>{{settings.portal_title}}</h1>
 		<ul class="list-group">
 		</ul>
 		<p class='lead'>
-			A platform for enterpreneurs, developers and implementors to learn the world's leading 100% Open
-			Source ERP</p>
+			{{settings.description}}</p>
 		<p class="mt-4">
 			<a class="btn btn-primary btn-lg" href="/enroll">
-				Enroll Now</a>
+				Explore Courses</a>
 		</p>
 </section>
 
 <section class='section-padding section-bg'>
 	<div class='container'>
 		<h3 class='text-center'>Featured Programs</h3>
-		<p class='lead text-center'>Master ERPNext with our Expert Learning Paths</p>
+		<p class='lead text-center'>Master Engineering</p>
 		{% for program in featured %}
 			{{ featured_card(program.program_name, program.description, program.hero_image, program.program_code) }}
 		{% endfor %}
