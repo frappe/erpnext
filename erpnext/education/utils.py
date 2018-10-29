@@ -180,7 +180,5 @@ def mark_course_complete(course):
 		enrollment.save()
 		pass
 	except:
-		import traceback
-		traceback.print_exc()
 		frappe.throw("The user is not enrolled for the course {course}".format(course=course))
 		return None
