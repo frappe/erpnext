@@ -78,6 +78,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	validate: function() {
 		this.update_manual_distribution_json();
+		this.calculate_taxes_and_totals();
+		this.set_applicable_charges_for_item();
 	},
 
 	refresh: function(doc) {
@@ -137,11 +139,12 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 						me.frm.doc.taxes = [];
 						$.each(r.message, function(i, d) {
 							var tax = me.frm.add_child("taxes");
-							tax.description = d.description;
+							tax.remarks = d.remarks;
 							tax.account_head = d.account_head;
 							tax.amount = d.amount;
 						});
 						me.frm.refresh_field("taxes");
+						me.update_manual_distribution();
 						me.calculate_taxes_and_totals();
 					}
 				}
@@ -197,11 +200,6 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 	},
 
-	distribute_applicable_charges: function(frm) {
-		this.calculate_taxes_and_totals();
-		this.set_applicable_charges_for_item();
-	},
-
 	amount: function(frm) {
 		this.calculate_taxes_and_totals();
 	},
@@ -213,19 +211,18 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	calculate_taxes_and_totals: function() {
 		var total = 0.0;
 
-		frappe.model.round_floats_in(this.frm.doc.taxes);
 		$.each(this.frm.doc.taxes || [], function(i, d) {
-			total += flt(d.amount)
+			d.amount = flt(d.amount, precision("amount", d));
+			total += flt(d.amount);
 		});
 
 		var total_allocated_amount = frappe.utils.sum($.map(this.frm.doc["advances"] || [], function(adv) {
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
-		this.frm.set_value("grand_total", total);
-		this.frm.set_value("total_advance", total_allocated_amount);
-		this.frm.set_value("outstanding_amount", total - total_allocated_amount);
-		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "outstanding_amount"]);
+		this.frm.set_value("grand_total", flt(total, precision("grand_total")));
+		this.frm.set_value("total_advance", flt(total_allocated_amount, "total_advance"));
+		this.frm.set_value("outstanding_amount", flt(total - total_allocated_amount, "outstanding_amount"));
 	},
 
 	set_applicable_charges_for_item: function() {

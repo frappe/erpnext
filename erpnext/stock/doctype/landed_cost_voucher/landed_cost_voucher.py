@@ -57,7 +57,7 @@ class LandedCostVoucher(AccountsController):
 
 			if diff:
 				tax_amounts.append({
-					'description': _("Remaining balance"),
+					'remarks': _("Remaining balance"),
 					'amount': diff,
 					'account_head': None})
 
@@ -72,7 +72,7 @@ class LandedCostVoucher(AccountsController):
 				else:
 					po_detail_field = "purchase_order_item"
 
-				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description, pr_item.total_weight,
+				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.item_name, pr_item.total_weight,
 					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
 					pr_item.{po_detail_field}, pr_item.purchase_order, pr_item.cost_center
 					from `tab{doctype} Item` pr_item where parent = %s
@@ -83,7 +83,7 @@ class LandedCostVoucher(AccountsController):
 				for d in pr_items:
 					item = self.append("items")
 					item.item_code = d.item_code
-					item.description = d.description
+					item.item_name = d.item_name
 					item.qty = d.qty
 					item.weight = d.total_weight
 					item.rate = d.base_rate
@@ -213,21 +213,30 @@ class LandedCostVoucher(AccountsController):
 					"account": self.credit_to,
 					"credit": payable_amount,
 					"credit_in_account_currency": payable_amount,
-					"against": ",".join([d.account_head for d in self.taxes]),
+					"against": ", ".join(set([d.account_head for d in self.taxes])),
 					"party_type": self.party_type,
-					"party": self.party
+					"party": self.party,
+					"remarks": "Note: {0}".format(self.remarks) if self.remarks else ""
 				})
 			)
 
 		# expense entries
 		for tax in self.taxes:
+			r = []
+			if tax.remarks:
+				r.append(tax.remarks)
+			if self.remarks:
+				r.append("Note: {0}".format(self.remarks))
+			remarks = "\n".join(r)
+
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": tax.account_head,
 					"debit": tax.amount,
 					"debit_in_account_currency": tax.amount,
 					"against": self.party,
-					"cost_center": tax.cost_center
+					"cost_center": tax.cost_center,
+					"remarks": remarks
 				})
 			)
 
