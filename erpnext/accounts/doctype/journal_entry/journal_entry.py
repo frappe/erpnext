@@ -146,15 +146,14 @@ class JournalEntry(AccountsController):
 
 	def validate_cheque_info(self):
 		for row in self.accounts:
-			account_type = frappe.get_cached_value("Account", row.account, "account_type")
-			if account_type == "Bank":
-				if not row.cheque_no:
-					row.cheque_no = self.cheque_no
-				if not row.cheque_date:
-					row.cheque_date = self.cheque_date
+			if not row.cheque_no:
+				row.cheque_no = self.cheque_no
+			if not row.cheque_date:
+				row.cheque_date = self.cheque_date
 
-				if self.voucher_type in ['Bank Entry'] and (not row.cheque_no or not row.cheque_date):
-					frappe.throw(_("Row #{0}: Reference No & Reference Date is required for {1}").format(row.idx, self.voucher_type))
+			account_type = frappe.get_cached_value("Account", row.account, "account_type")
+			if account_type == "Bank" and self.voucher_type in ['Bank Entry'] and (not row.cheque_no or not row.cheque_date):
+				frappe.throw(_("Row #{0}: Reference No & Reference Date is required for {1}").format(row.idx, self.voucher_type))
 
 			if row.cheque_date and not row.cheque_no:
 				frappe.throw(_("Row #{0}: Reference No is mandatory if you entered Reference Date").format(row.idx))
