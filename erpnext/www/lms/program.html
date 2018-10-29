@@ -38,14 +38,14 @@
         <p class='lead'>{{ program.description }}</p>
         <p class="mt-4">
             <a class="btn btn-primary btn-lg" href="/program/course">
-                Continue with Course 2</a>
+                Continue Learning</a>
         </p>
 </section>
 
 <section class='section-padding section-bg'>
     <div class='container'>
         <h3 class='text-center'>Courses</h3>
-        <p class='lead text-center'>Master ERPNext with our Expert Learning Paths</p>
+        <p class='lead text-center'>Curated Courses and Content</p>
         {% for course_item in course_list %}
         {{ course_card(course_item) }}
         {% endfor %}
