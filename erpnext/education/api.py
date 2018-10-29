@@ -38,7 +38,7 @@ def enroll_student(source_name):
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title
 	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
-	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)
+	frappe.publish_realtime('enroll_student_progress', {"progress": [2, 4]}, user=frappe.session.user)
 	student_user = frappe.get_doc({
 		'doctype':'User',
 		'first_name': student.first_name,
@@ -48,6 +48,7 @@ def enroll_student(source_name):
 		})
 	student_user.add_roles("Student", "LMS User")
 	student_user.save()
+	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)
 	update_password_link = student_user.reset_password()
 	print(update_password_link)
 	return program_enrollment
@@ -80,7 +81,7 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 
 	present = json.loads(students_present)
 	absent = json.loads(students_absent)
-	
+
 	for d in present:
 		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_group, date)
 
@@ -100,7 +101,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	:param status: Status (Present/Absent)
 	"""
 	student_attendance = frappe.get_doc({
-		"doctype": "Student Attendance", 
+		"doctype": "Student Attendance",
 		"student": student,
 		"course_schedule": course_schedule,
 		"student_group": student_group,
@@ -123,7 +124,7 @@ def get_student_guardians(student):
 
 	:param student: Student.
 	"""
-	guardians = frappe.get_list("Student Guardian", fields=["guardian"] , 
+	guardians = frappe.get_list("Student Guardian", fields=["guardian"] ,
 		filters={"parent": student})
 	return guardians
 
@@ -364,7 +365,7 @@ def update_email_group(doctype, name):
 		for guard in get_student_guardians(stud.student):
 			email = frappe.db.get_value("Guardian", guard.guardian, "email_address")
 			if email:
-				email_list.append(email)	
+				email_list.append(email)
 	add_subscribers(name, email_list)
 
 @frappe.whitelist()
