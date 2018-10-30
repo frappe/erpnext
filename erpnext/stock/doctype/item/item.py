@@ -101,7 +101,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_uom()
 		self.validate_description()
-		self.set_absolute_uom_conversion_factors()
+		self.compute_uom_conversion_factors()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -419,10 +419,93 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
-	def set_absolute_uom_conversion_factors(self):
-		for d in self.get("uoms"):
-			d.conversion_factor = flt(d.factor) if d.multiply_or_divide == '/' else 1/flt(d.factor)
-			d.conversion_factor = flt(d.conversion_factor, d.precision("conversion_factor"))
+	def compute_uom_conversion_factors(self):
+		# Modified version of https://www.geeksforgeeks.org/find-paths-given-source-destination/
+		class Graph:
+			def __init__(self, vertices):
+				from collections import defaultdict
+				self.V = vertices
+				self.graph = defaultdict(list)
+
+			def add_edge(self, u, v, w):
+				self.graph[u].append((v, w))
+
+			def get_all_paths_util(self, u, d, visited, path, all_paths, w):
+				# Mark the current node as visited and store in path
+				visited[u] = True
+				path.append((u, w))
+
+				# If current vertex is same as destination, then print current path[]
+				if u == d:
+					all_paths.append(path[:])
+				else:  # If current vertex is not destination Recur for all the vertices adjacent to this vertex
+					for i, w in self.graph[u]:
+						if not visited[i]:
+							self.get_all_paths_util(i, d, visited, path, all_paths, w)
+
+				# Remove current vertex from path[] and mark it as unvisited
+				path.pop()
+				visited[u] = False
+
+			def get_all_paths(self, s, d):
+				visited = [False] * self.V
+				all_paths = []
+				path = []
+				self.get_all_paths_util(s, d, visited, path, all_paths, 1.0)
+				return all_paths
+
+		# Empty conversion factors first
+		self.uoms = []
+
+		# Get list of all UOMs, stock UOM being index 0
+		uoms = [self.stock_uom]
+		for d in self.uom_conversion_graph:
+			if not d.from_qty:
+				frappe.throw(_("Row {0}: UOM Conversion From Qty cannot be 0"))
+			if not d.to_qty:
+				frappe.throw(_("Row {0}: UOM Conversion To Qty cannot be 0"))
+
+			if d.from_uom not in uoms:
+				uoms.append(d.from_uom)
+			if d.to_uom not in uoms:
+				uoms.append(d.to_uom)
+
+		# Create a graph of UOMs
+		graph = Graph(len(uoms))
+		#graph.add_edge(0, 0, 1) # stock_uom -> stock_uom
+		for d in self.uom_conversion_graph:
+			src = uoms.index(d.from_uom)
+			dest = uoms.index(d.to_uom)
+			w = flt(d.from_qty) / flt(d.to_qty)
+			graph.add_edge(src, dest, 1/w)
+			graph.add_edge(dest, src, w)
+
+		# Get paths from all UOMs to stock UOM
+		conv_factors = []
+		for i in range(1, len(uoms)):
+			uom = uoms[i]
+			paths = graph.get_all_paths(i, 0)
+			if not paths:
+				frappe.throw(_("No conversion factor can be found from {0} to {1}").format(uom, self.stock_uom))
+
+			weights = [1] * len(paths)
+			for i, path in enumerate(paths):
+				for d in path:
+					weights[i] *= d[1]
+
+			conv = weights[0]
+			for w in weights:
+				if abs(w-conv) >= 1.0/10**self.precision("conversion_factor", "uoms"):
+					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
+						.format(uom, self.stock_uom))
+
+			conv_factors.append({
+				"uom": uom,
+				"conversion_factor": conv
+			})
+
+		for d in conv_factors:
+			self.append("uoms", d)
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
@@ -439,8 +522,6 @@ class Item(WebsiteGenerator):
 		if self.stock_uom not in uom_conv_list:
 			ch = self.append('uoms', {})
 			ch.uom = self.stock_uom
-			ch.factor = 1
-			ch.multiply_or_divide = '/'
 			ch.conversion_factor = 1
 
 		to_remove = []
