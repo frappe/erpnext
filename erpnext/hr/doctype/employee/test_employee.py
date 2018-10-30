@@ -32,6 +32,34 @@ class TestEmployee(unittest.TestCase):
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
 
+	def test_delete_events(self):
+		from frappe.utils import today
+		employee = frappe.get_doc({
+			"doctype":"Employee",
+			"first_name": "Test Delete",
+			"employee_number": "12345",
+			"gender": "Male",
+			"date_of_birth": "1995-07-20",
+			"date_of_joining": today(),
+		}).insert()
+
+		ev = frappe.get_doc({
+			"doctype":"Event",
+			"subject": "Test Delete Event",
+			"starts_on": today(),
+			"event_type": "Public",
+			'event_participants': [{
+				"reference_doctype": employee.doctype,
+				"reference_docname": employee.name
+			}]
+		}).insert()
+
+		self.assertTrue(frappe.db.exists('Event', ev.name))
+
+		# delete employee should delete event
+		frappe.delete_doc('Employee', employee.name)
+		self.assertFalse(frappe.db.exists('Event', ev.name))
+
 def make_employee(user):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
