@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-class TestCustomerFeedback(unittest.TestCase):	
+class TestCustomerFeedback(unittest.TestCase):
 	def test_customer_feedback(self):
 		test_create_feedback = create_feedback()
 		test_get_feedback = get_feedback()

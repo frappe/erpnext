@@ -7,7 +7,7 @@ import frappe
 from frappe.utils.nestedset import NestedSet
 
 class QualityProcedure(NestedSet):
-	nsm_parent_field = 'parent_quality_procedure'	
+	nsm_parent_field = 'parent_quality_procedure'
 	def before_save(self):
 		for data in self.procedure_step:
 			if data.procedure == 'Procedure' and data.procedure_name != '':
@@ -16,6 +16,8 @@ class QualityProcedure(NestedSet):
 				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
 				doc.parent_quality_procedure = self.name
 				doc.save()
+			else:
+				pass
 	
 	def after_insert(self):
 		for data in self.procedure_step:

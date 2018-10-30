@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 from frappe.model.document import Document
 
-class QualityAction(Document):	
+class QualityAction(Document):
 	def validate(self):
 		status_flag = ''
 		for value in self.description:
@@ -14,7 +14,6 @@ class QualityAction(Document):
 				status_flag = 'Under Review'
 			else:
 				value.status = 'Close'
-		
 		if status_flag == 'Under Review':
 			self.status = 'Under Review'
 		else:

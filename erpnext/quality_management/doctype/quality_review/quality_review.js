@@ -29,7 +29,7 @@ frappe.ui.form.on('Quality Review', {
 			$("div[data-fieldname='achieved']").show();
 			$("div[data-fieldname='target']").show();
 			$("div[data-fieldname='unit']").show();
-			$("div[data-fieldname='yes_no']").hide(); 
+			$("div[data-fieldname='yes_no']").hide();
 		}
 		else{
 			frm.fields_dict.values.grid.docfields[1].hidden = 1;
@@ -40,7 +40,7 @@ frappe.ui.form.on('Quality Review', {
 			$("div[data-fieldname='achieved']").hide();
 			$("div[data-fieldname='target']").hide();
 			$("div[data-fieldname='unit']").hide();
-			$("div[data-fieldname='yes_no']").show(); 
+			$("div[data-fieldname='yes_no']").show();
 		}
 	},
 	goal: function(frm) {
@@ -94,7 +94,7 @@ frappe.ui.form.on('Quality Review', {
 						$("div[data-fieldname='yes_no']").show();
 					}
 				}
-			})
+			});
 		}
 		else{
 			frm.doc.procedure = '';

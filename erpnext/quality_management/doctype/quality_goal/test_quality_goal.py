@@ -7,7 +7,6 @@ import frappe
 import unittest
 
 class TestQualityGoal(unittest.TestCase):
-	
 	def test_quality_goal(self):
 		test_create_goal = create_goal()
 		test_get_goal = get_goal()

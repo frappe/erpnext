@@ -35,7 +35,7 @@ frappe.ui.form.on('Quality Action', {
 						}
 					}
 					problems= problems.replace(/\n$/, "").split("\n");
-					for (var i = 0; i < problems.length; i++){
+					for (i = 0; i < problems.length; i++){
 						frm.add_child("description");
 						frm.fields_dict.description.get_value()[i].problem = problems[i];
 					}
@@ -81,8 +81,8 @@ frappe.ui.form.on('Quality Action', {
 					}
 					frm.refresh();
 				}
-			})
-		}	
+			});
+		}
 	},
 	type: function(frm){
 		if(frm.doc.description != null){

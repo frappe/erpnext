@@ -40,6 +40,6 @@ frappe.ui.form.on('Customer Feedback', {
 					frm.refresh();
 				}
 			});
-		} 
+		}
 	}
 });

@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import frappe
 import datetime
-from frappe.utils import nowdate
 
 def review():
 	now = datetime.datetime.now()

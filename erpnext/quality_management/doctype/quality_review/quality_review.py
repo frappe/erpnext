@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class QualityReview(Document):	
+class QualityReview(Document):
 	@frappe.whitelist()
 	def create_action(self):
 		if self.measurable == "Yes":

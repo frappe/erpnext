@@ -7,7 +7,6 @@ import frappe
 import unittest
 
 class TestCustomerFeedbackTemplate(unittest.TestCase):
-	
 	def test_customer_feedback_template(self):
 		test_create_template = create_template()
 		test_get_template = get_template()
