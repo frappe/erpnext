@@ -101,6 +101,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_uom()
 		self.validate_description()
+		self.add_alt_uom_in_conversion_table()
 		self.compute_uom_conversion_factors()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
@@ -507,18 +508,20 @@ class Item(WebsiteGenerator):
 		for d in conv_factors:
 			self.append("uoms", d)
 
-	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uoms")]
-
-		if self.alt_uom and self.alt_uom != self.stock_uom and self.alt_uom not in uom_conv_list:
+	def add_alt_uom_in_conversion_table(self):
+		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]
+		if self.alt_uom and self.alt_uom != self.stock_uom \
+				and (self.stock_uom, self.alt_uom) not in uom_conv_list and (self.alt_uom, self.stock_uom) not in uom_conv_list:
 			if not flt(self.alt_uom_size):
 				frappe.throw(_("Container Size is invalid"))
-			ch = self.append('uoms', {})
-			ch.uom = self.alt_uom
-			ch.factor = flt(self.alt_uom_size)
-			ch.multiply_or_divide = '*'
-			ch.conversion_factor = 1/flt(self.alt_uom_size)
+			ch = self.append('uom_conversion_graph', {})
+			ch.from_qty = 1.0
+			ch.from_uom = self.stock_uom
+			ch.to_qty = flt(self.alt_uom_size)
+			ch.to_uom = self.alt_uom
 
+	def add_default_uom_in_conversion_factor_table(self):
+		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
 			ch = self.append('uoms', {})
 			ch.uom = self.stock_uom
@@ -561,10 +564,7 @@ class Item(WebsiteGenerator):
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 			if self.alt_uom and d.uom == self.alt_uom:
-				if d.multiply_or_divide == "*":
-					self.alt_uom_size = d.factor
-				else:
-					self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
+				self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
