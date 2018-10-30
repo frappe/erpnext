@@ -5,9 +5,18 @@
 from __future__ import unicode_literals
 
 from frappe.utils.nestedset import NestedSet
+import frappe
 
 class HealthcareServiceUnit(NestedSet):
 	nsm_parent_field = 'parent_healthcare_service_unit'
+
+	def autoname(self):
+		if self.company:
+			suffix = " - " + frappe.get_cached_value('Company',  self.company,  "abbr")
+			if not self.healthcare_service_unit_name.endswith(suffix):
+				self.name = self.healthcare_service_unit_name + suffix
+		else:
+			self.name = self.healthcare_service_unit_name
 
 	def on_update(self):
 		super(HealthcareServiceUnit, self).on_update()

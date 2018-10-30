@@ -4,6 +4,7 @@ apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transac
 DocType: Timesheet,% Amount Billed,% Beløb Billed
 DocType: Purchase Order,% Billed,% Billed
 ,Lead Id,Bly Id
+apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.py +87,{0} {1} created,{0} {1} creado
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +215,'Total','Total'
 DocType: Selling Settings,Selling Settings,Salg af indstillinger
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Selling Amount,Selling Beløb

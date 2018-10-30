@@ -49,6 +49,10 @@ frappe.ui.form.on("Supplier", {
 				erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);
 			}, __("Make"));
 
+			frm.add_custom_button(__('Pricing Rule'), function () {
+				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+			}, __("Make"));
+
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}

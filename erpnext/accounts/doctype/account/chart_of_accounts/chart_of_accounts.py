@@ -6,6 +6,7 @@ import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
 from six import iteritems
+from frappe.utils.nestedset import rebuild_tree
 
 def create_charts(company, chart_template=None, existing_company=None):
 	chart = get_chart(chart_template, existing_company)
@@ -53,7 +54,12 @@ def create_charts(company, chart_template=None, existing_company=None):
 
 					_import_accounts(child, account.name, root_type)
 
+		# Rebuild NestedSet HSM tree for Account Doctype
+		# after all accounts are already inserted.
+		frappe.local.flags.ignore_on_update = True
 		_import_accounts(chart, None, None, root_account=True)
+		rebuild_tree("Account", "parent_account")
+		frappe.local.flags.ignore_on_update = False
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):
 	if account_number:

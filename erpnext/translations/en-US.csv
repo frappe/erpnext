@@ -33,7 +33,7 @@ DocType: Bank Reconciliation,Select account head of the bank where cheque was de
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
 apps/erpnext/erpnext/controllers/buying_controller.py +490,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Quotation {0} is cancelled,Quotation {0} is canceled
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +352,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +356,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py +136,Payment Cancelled. Please check your GoCardless Account for more details,Payment Canceled. Please check your GoCardless Account for more details
 apps/erpnext/erpnext/stock/doctype/item/item.py +820,Item {0} is cancelled,Item {0} is canceled
 DocType: Serial No,Is Cancelled,Is Canceled

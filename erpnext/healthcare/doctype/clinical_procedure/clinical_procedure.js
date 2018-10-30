@@ -48,6 +48,13 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			};
 		});
+		frm.set_query("practitioner", function() {
+			return {
+				filters: {
+					'department': frm.doc.medical_department
+				}
+			};
+		});
 		if(frm.doc.consume_stock){
 			frm.set_indicator_formatter('item_code',
 				function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" ; });
@@ -214,6 +221,20 @@ frappe.ui.form.on('Clinical Procedure', {
 					if(data.message){
 						frm.set_value("warehouse", data.message.warehouse);
 					}
+				}
+			});
+		}
+	},
+	practitioner: function(frm) {
+		if(frm.doc.practitioner){
+			frappe.call({
+				"method": "frappe.client.get",
+				args: {
+					doctype: "Healthcare Practitioner",
+					name: frm.doc.practitioner
+				},
+				callback: function (data) {
+					frappe.model.set_value(frm.doctype,frm.docname, "medical_department",data.message.department);
 				}
 			});
 		}

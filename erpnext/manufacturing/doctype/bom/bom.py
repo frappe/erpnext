@@ -334,14 +334,15 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-		duplicate_items = list(get_duplicates(check_list))
-		if duplicate_items:
-			li = []
-			for i in duplicate_items:
-				li.append("{0} on row {1}".format(i.item_code, i.idx))
-			duplicate_list = '<br>' + '<br>'.join(li)
+		if not self.allow_same_item_multiple_times:
+			duplicate_items = list(get_duplicates(check_list))
+			if duplicate_items:
+				li = []
+				for i in duplicate_items:
+					li.append("{0} on row {1}".format(i.item_code, i.idx))
+				duplicate_list = '<br>' + '<br>'.join(li)
 
-			frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
+				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
@@ -367,7 +368,8 @@ class BOM(WebsiteGenerator):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.on_update()
+			bom_obj.check_recursion()
+			bom_obj.update_exploded_items()
 
 		return bom_list
 
@@ -661,8 +663,8 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 			# extend bom_item dict with respective item dict
 			bom_item.update(
 				# returns an item dict from items list which matches with item_code
-				(item for item in items if item.get('name')
-					== bom_item.get('item_code')).next()
+				next(item for item in items if item.get('name')
+					== bom_item.get('item_code'))
 			)
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
 
@@ -701,7 +703,7 @@ def add_additional_cost(stock_entry, work_order):
 		items.setdefault(d.item_code, d.rate)
 
 	non_stock_items = frappe.get_all('Item',
-		fields="name", filters={'name': ('in', items.keys()), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
 
 	for name in non_stock_items:
 		stock_entry.append('additional_costs', {

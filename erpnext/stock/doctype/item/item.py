@@ -123,6 +123,7 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
 
 		if not self.get("__islocal"):
@@ -752,6 +753,12 @@ class Item(WebsiteGenerator):
 					template_item.flags.ignore_permissions = True
 					template_item.save()
 
+	def validate_item_defaults(self):
+		companies = list(set([row.company for row in self.item_defaults]))
+
+		if len(companies) != len(self.item_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
 		if self.item_group and not self.item_defaults:
@@ -1040,7 +1047,7 @@ def set_item_default(item_code, company, fieldname, value):
 			return
 
 	# no row found, add a new row for the company
-	d = item.append('item_defaults', {fieldname: value, company: company})
+	d = item.append('item_defaults', {fieldname: value, "company": company})
 	d.db_insert()
 	item.clear_cache()
 
