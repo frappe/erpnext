@@ -120,7 +120,7 @@ class AccountsController(TransactionBase):
 			df = self.meta.get_field("discount_amount")
 			if self.get("discount_amount") and hasattr(self, "taxes") and not len(self.taxes):
 				df.set("print_hide", 0)
-				df.set("negative", True)
+				self.discount_amount = -self.discount_amount
 			else:
 				df.set("print_hide", 1)
 
