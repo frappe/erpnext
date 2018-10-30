@@ -1,0 +1,16 @@
+[
+    {
+        "doctype": "Quality Review",
+        "scope": "Company",
+        "goal": "_Test Quality Goal 1",
+        "procedure": "_Test Quality Procedure 1",
+        "values": [
+            {
+				"objective": "_Test Quality Objective 1",
+                "target": "100",
+                "achieved": "4",
+                "unit": "_Test Unit 1"
+            }
+        ]
+    }
+]

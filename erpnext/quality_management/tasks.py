@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2018, Frappe and contributors
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
 import datetime
-class QualityReview(Document):
-	pass
+from frappe.utils import date_diff, nowdate, formatdate, add_days
 
 def review():
 	now = datetime.datetime.now()
@@ -27,6 +21,7 @@ def review():
 			if data.date == str(day):
 				create_review(data.name, data.measurable)
 
+
 		elif data.frequency == 'Quarterly':
 			if (month == 'January' or month == 'April' or month == 'July' or month == 'October') and str(day) == data.date:
 				create_review(data.name, data.measurable)
@@ -39,17 +34,19 @@ def review():
 			if month == data.yearly and str(day) == data.date:
 				create_review(data.name, data.measurable)
 
-		else:
+		elif data.frequency == 'None':
 			pass
 
 def create_review(name, measurable):
-	objectives = frappe.get_all("Quality Objective", filters={'parent': name }, fields=['objective', 'target', 'unit'])
+	objectives = frappe.get_all("Quality Objective", filters={'parent': ''+ name +''}, fields=['objective', 'target', 'unit'])
 	doc = frappe.get_doc({
 		"doctype": "Quality Review",
    		"goal": name,
-   		"date": frappe.as_unicode(frappe.utils.nowdate()),
+   		"date": frappe.utils.nowdate(),
 		"measurable": measurable,
 	})
+	for objective in objectives:
+		print(measurable, objective.objective, objective.target, objective.unit)
 	if measurable == 'Yes':
 		for objective in objectives:
 			doc.append("values",{
