@@ -25,7 +25,7 @@ QUnit.test("test: Task", function (assert) {
 			{task_description: 'Test Desc Two'}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.description, 'With Jinja subject = _Test Task2')
+			assert.equal(cur_frm.doc.description, 'With Jinja subject = _Test Task2');
 		},
 		() => done()
 	]);
