@@ -125,8 +125,8 @@ frappe.ui.form.on("Project Task", {
 		if(child.task_description){
 			erpnext.utils.get_description(child, "Task Description", child.task_description,"task_description", function(r){
 				if(!r.exc){
-						frappe.model.set_value(cdt,cdn,"description",r.message);
-					}
+					frappe.model.set_value(cdt,cdn,"description",r.message);
+				}
 			});
 		}
 	}

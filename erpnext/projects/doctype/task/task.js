@@ -104,8 +104,8 @@ frappe.ui.form.on("Task", {
 		if(frm.doc.task_description){
 			erpnext.utils.get_description(frm.doc, "Task Description", frm.doc.task_description,"task_description", function(r){
 				if(!r.exc){
-						frm.set_value("description", r.message);
-					}
+					frm.set_value("description", r.message);
+				}
 			});
 		}
 	}
