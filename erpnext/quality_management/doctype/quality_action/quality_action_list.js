@@ -12,4 +12,4 @@ frappe.listview_settings['Quality Action'] = {
 			return [__("Patched"), "blue", "status,=,Patched"];	
 		}
 	}	
-}
+};

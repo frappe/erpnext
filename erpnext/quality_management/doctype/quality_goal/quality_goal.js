@@ -8,11 +8,11 @@ frappe.ui.form.on('Quality Goal', {
 				frm.call({
 					method: "create_review",
 					doc: cur_frm.doc,
-					callback: function (data){
+					callback: function(){
 						frappe.msgprint("Quality Review has been initiated");
 						frm.refresh();
 					}
-				})
+				});
 			});
 		}
 	},

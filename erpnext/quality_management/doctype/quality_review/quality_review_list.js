@@ -1,6 +1,7 @@
 frappe.listview_settings['Quality Review'] = {
 	add_fields: ["action"],
-	get_indicator: function(doc) {
+	get_indicator: function(doc) 
+	{
 		if(doc.action == "No Action") {
 			return [__("No Action"), "green", "action,=,No Action"];
 		}
@@ -8,4 +9,4 @@ frappe.listview_settings['Quality Review'] = {
 			return [__("Action Initialised"), "red", "action,=,Action Initialised"];
 		}		
 	}	
-}
+};

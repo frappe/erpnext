@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class QualityGoal(Document):
-	
+class QualityGoal(Document):	
 	def create_review(self):
 		objectives = frappe.get_all("Quality Objective", filters={'parent': ''+ self.name +''}, fields=['objective', 'target', 'unit'])
 		doc = frappe.get_doc({

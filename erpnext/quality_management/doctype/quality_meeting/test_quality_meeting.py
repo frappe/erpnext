@@ -7,8 +7,6 @@ import frappe
 import unittest
 
 class TestQualityMeeting(unittest.TestCase):
-	pass
-
 	def test_quality_meeting(self):
 		test_create_meeting = create_meeting()
 		test_get_meeting = get_meeting()

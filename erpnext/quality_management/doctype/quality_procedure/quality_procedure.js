@@ -2,7 +2,4 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Quality Procedure', {
-	refresh: function(frm) {
-
-	}
 });

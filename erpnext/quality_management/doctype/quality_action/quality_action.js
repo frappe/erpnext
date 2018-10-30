@@ -2,27 +2,24 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Quality Action', {
-	refresh: function(frm) {
-
-	},
 	onload: function(frm) {
-		frm.set_value("date", frappe.datetime.get_today())
+		frm.set_value("date", frappe.datetime.get_today());
 		$(".grid-add-row").hide();
 		if (frm.doc.review != null){
-			frm.set_value("type", "Quality Review")
+			frm.set_value("type", "Quality Review");
 		}
 		else if(frm.doc.feedback != null){
-			frm.set_value("type", "Customer Feedback")
+			frm.set_value("type", "Customer Feedback");
 		}
 		else{
-			frm.set_value("type", "Quality Review")
+			frm.set_value("type", "Quality Review");
 		}
 	},
 	review: function(frm){
 		if(frm.doc.review != null){
 			var problems = "";
 			if (frm.doc.review != null){
-				frm.fields_dict.description.grid.remove_all()
+				frm.fields_dict.description.grid.remove_all();
 				frm.refresh();
 			}
 			frappe.call({
@@ -32,7 +29,7 @@ frappe.ui.form.on('Quality Action', {
 					name: frm.doc.review
 				},
 				callback: function (data) {
-					for (var i = 0; i < data.message.values.length; i++ ){
+					for (var i = 0; i < data.message.values.length; i++){
 						if (data.message.values[i].achieved < data.message.values[i].target){
 							problems += data.message.values[i].objective +"-"+ data.message.values[i].achieved + " " + data.message.values[i].unit + "\n";
 						}
@@ -42,9 +39,8 @@ frappe.ui.form.on('Quality Action', {
 						frm.add_child("description");
 						frm.fields_dict.description.get_value()[i].problem = problems[i];
 					}
-					//frm.refresh();
 				}
-			})
+			});
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
@@ -52,23 +48,22 @@ frappe.ui.form.on('Quality Action', {
 					name: frm.doc.goal
 				},
 				callback: function (data) {
-					console.log(data.message.procedure);
 					frm.doc.procedure = data.message.procedure;
 					frm.refresh();
 				}
-			})
+			});
 		}
 		else{
 			frm.doc.goal = '';
-			frm.doc.procedure = ''
-			frm.fields_dict.description.grid.remove_all()
+			frm.doc.procedure = '';
+			frm.fields_dict.description.grid.remove_all();
 			frm.refresh();
 		}
 	},
 	feedback: function(frm) {
 		if(frm.doc.feedback != null){
 			if (frm.doc.feedback != null){
-				frm.fields_dict.description.grid.remove_all()
+				frm.fields_dict.description.grid.remove_all();
 				frm.refresh();
 			}
 			frm.doc.description = [];
@@ -91,7 +86,7 @@ frappe.ui.form.on('Quality Action', {
 	},
 	type: function(frm){
 		if(frm.doc.description != null){
-			frm.fields_dict.description.grid.remove_all()
+			frm.fields_dict.description.grid.remove_all();
 			frm.doc.review = '';
 			frm.doc.feedback = '';
 			frm.doc.goal = '';

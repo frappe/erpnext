@@ -8,4 +8,4 @@ frappe.listview_settings['Customer Feedback'] = {
 			return [__("Action Initialised"), "red", "action,=,Action Initialised"];
 		}		
 	}	
-}
+};

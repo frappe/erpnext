@@ -12,13 +12,13 @@ frappe.ui.form.on('Customer Feedback', {
 						frappe.msgprint(data);
 						frm.refresh();
 					}
-				})
+				});
 			});
 		}
 	},
 	onload: function(frm){
 		if(frm.doc.date == null){
-			frm.set_value("date", frappe.datetime.get_today())
+			frm.set_value("date", frappe.datetime.get_today());
 		}
 	},
 	template: function(frm){
@@ -39,8 +39,7 @@ frappe.ui.form.on('Customer Feedback', {
 					}
 					frm.refresh();
 				}
-			 })
-		}
-		else{}	 
+			});
+		} 
 	}
 });

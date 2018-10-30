@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class CustomerFeedback(Document):
-	
+class CustomerFeedback(Document):	
 	def create_action(self):
 		if len(self.feedback) != 0:
 			query = frappe.get_list("Quality Action", filters={"feedback": ""+ self.name +""})

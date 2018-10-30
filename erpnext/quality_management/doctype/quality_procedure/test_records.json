@@ -1,11 +1,11 @@
 [
-    {
-        "doctype": "Quality Procedure",
+	{
+		"doctype": "Quality Procedure",
 		"procedure": "_Test Quality Procedure 1",
 		"procedure_step": [
 			{
 				"step": "_Test Quality Procedure Table 1"
 			}
-        ]
+		]
     }
 ]

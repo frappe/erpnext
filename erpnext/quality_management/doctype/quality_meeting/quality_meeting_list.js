@@ -8,4 +8,4 @@ frappe.listview_settings['Quality Meeting'] = {
 			return [__("Close"), "green", ",status=,Close"];
 		}		
 	}	
-}
+};

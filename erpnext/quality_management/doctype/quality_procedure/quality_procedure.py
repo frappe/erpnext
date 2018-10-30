@@ -4,12 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
 from frappe.utils.nestedset import NestedSet
 
 class QualityProcedure(NestedSet):
-	nsm_parent_field = 'parent_quality_procedure'
-	
+	nsm_parent_field = 'parent_quality_procedure'	
 	def before_save(self):
 		for data in self.procedure_step:
 			if data.procedure == 'Procedure' and data.procedure_name != '':

@@ -12,7 +12,7 @@ frappe.ui.form.on('Quality Review', {
 						frappe.msgprint(data);
 						frm.refresh();
 					}
-				})
+				});
 			});
 		}
 	},
@@ -20,7 +20,6 @@ frappe.ui.form.on('Quality Review', {
 		if(frm.doc.date == null){
 			frm.set_value("date", frappe.datetime.get_today());
 		}
-//		$(".grid-add-row").hide();
 		if(frm.doc.measurable == "Yes"){
 			frm.fields_dict.values.grid.docfields[1].hidden = 0;
 			frm.fields_dict.values.grid.docfields[2].hidden = 0;
@@ -29,7 +28,7 @@ frappe.ui.form.on('Quality Review', {
 			frm.refresh();
 			$("div[data-fieldname='achieved']").show();
 			$("div[data-fieldname='target']").show();
-			$("div[data-fieldname='unit']").show()
+			$("div[data-fieldname='unit']").show();
 			$("div[data-fieldname='yes_no']").hide(); 
 		}
 		else{
@@ -47,7 +46,7 @@ frappe.ui.form.on('Quality Review', {
 	goal: function(frm) {
 		if (frm.doc.goal != null){
 			if (frm.doc.values != null){
-				frm.fields_dict.values.grid.remove_all()
+				frm.fields_dict.values.grid.remove_all();
 				frm.refresh();
 			}
 			frappe.call({
@@ -85,7 +84,7 @@ frappe.ui.form.on('Quality Review', {
 					if(frm.doc.measurable == "Yes"){
 						$("div[data-fieldname='achieved']").show();
 						$("div[data-fieldname='target']").show();
-						$("div[data-fieldname='unit']").show()
+						$("div[data-fieldname='unit']").show();
 						$("div[data-fieldname='yes_no']").hide();
 					}
 					else{
@@ -98,11 +97,11 @@ frappe.ui.form.on('Quality Review', {
 			})
 		}
 		else{
-			frm.doc.procedure = ''
-			frm.doc.scope = ''
-			frm.doc.action = ''
-			frm.doc.measurable = ''
-			frm.fields_dict.values.grid.remove_all()
+			frm.doc.procedure = '';
+			frm.doc.scope = '';
+			frm.doc.action = '';
+			frm.doc.measurable = '';
+			frm.fields_dict.values.grid.remove_all();
 			frm.refresh();
 		}
 	},

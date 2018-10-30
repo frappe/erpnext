@@ -3,11 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 from frappe.model.document import Document
 
-class QualityAction(Document):
-	
+class QualityAction(Document):	
 	def validate(self):
 		status_flag = ''
 		for value in self.description:

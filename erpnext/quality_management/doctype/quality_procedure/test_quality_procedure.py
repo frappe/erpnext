@@ -7,7 +7,6 @@ import frappe
 import unittest
 
 class TestQualityProcedure(unittest.TestCase):
-	
 	def test_quality_procedure(self):		
 		test_create_procedure = create_procedure()
 		test_get_procedure = get_procedure()
