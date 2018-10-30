@@ -1,0 +1,12 @@
+[
+ {
+  "title": "_Test Task Description1",
+  "disabled": false,
+  "task_description":"Without jinja"
+ },
+ {
+  "title": "_Test Task Description2",
+  "disabled": false,
+  "task_description":"With jinja,subject= {{subject}}"
+ }
+]
