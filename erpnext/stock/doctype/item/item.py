@@ -455,9 +455,6 @@ class Item(WebsiteGenerator):
 				self.get_all_paths_util(s, d, visited, path, all_paths, 1.0)
 				return all_paths
 
-		# Empty conversion factors first
-		self.uoms = []
-
 		# Get list of all UOMs, stock UOM being index 0
 		uoms = [self.stock_uom]
 		for d in self.uom_conversion_graph:
@@ -507,6 +504,7 @@ class Item(WebsiteGenerator):
 				"conversion_factor": conv
 			})
 
+		self.uoms = []
 		for d in conv_factors:
 			self.append("uoms", d)
 
