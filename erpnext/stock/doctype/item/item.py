@@ -461,9 +461,11 @@ class Item(WebsiteGenerator):
 		uoms = [self.stock_uom]
 		for d in self.uom_conversion_graph:
 			if not d.from_qty:
-				frappe.throw(_("Row {0}: UOM Conversion From Qty cannot be 0"))
+				frappe.throw(_("Row {0}: UOM Conversion From Qty cannot be 0").format(d.idx))
 			if not d.to_qty:
-				frappe.throw(_("Row {0}: UOM Conversion To Qty cannot be 0"))
+				frappe.throw(_("Row {0}: UOM Conversion To Qty cannot be 0").format(d.idx))
+			if d.from_uom == d.to_uom:
+				frappe.throw(_("Row {0}: From UOM and To UOM must not be the same").format(d.idx))
 
 			if d.from_uom not in uoms:
 				uoms.append(d.from_uom)
