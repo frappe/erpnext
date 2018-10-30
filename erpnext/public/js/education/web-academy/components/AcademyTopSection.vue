@@ -1,0 +1,34 @@
+<template>
+<section class='top-section'>
+	<div class='container'>
+		<div class='text-center'>
+			<!-- <img class="main-illustration" src='/assets/erpnext_com/img/erpnext_com_illustration.png'
+			style='width: 700px;'> -->
+		</div>
+		<h1 v-html="title"></h1>
+		<ul class="list-group">
+		</ul>
+		<p class='lead' v-html="description"></p>
+		<p class="mt-4">
+			<a class="btn btn-primary btn-lg" href="/enroll">Explore Courses</a>
+		</p>
+	</div>
+</section>
+</template>
+<script>
+export default {
+    name: "AcademyTopSection",
+    data() {
+    	return {
+    		title: '',
+    		description: ''
+    	};
+    },
+    mounted() {
+    	frappe.call("erpnext.www.academy.get_portal_details").then(r => {
+    		this.title = r.message.title,
+    		this.description = r.message.description
+    	})
+    },
+};
+</script>

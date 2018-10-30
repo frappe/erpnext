@@ -54,5 +54,8 @@
         "stock/dashboard/item_dashboard.html",
         "stock/dashboard/item_dashboard_list.html",
         "stock/dashboard/item_dashboard.js"
+    ],
+    "js/web-academy.min.js": [
+        "public/js/education/web-academy.js"
     ]
 }
