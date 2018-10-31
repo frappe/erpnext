@@ -14,6 +14,14 @@ def get_data():
 			"link": "List/Item"
 		},
 		{
+			"module_name": "Legal",
+			"color": "#EA81E8",
+			"icon": "octicon octicon-law",
+			"_doctype": "Law",
+			"type": "module",
+			"label": _("Legal"),
+		},
+		{
 			"module_name": "Customer",
 			"_doctype": "Customer",
 			"color": "#1abc9c",
