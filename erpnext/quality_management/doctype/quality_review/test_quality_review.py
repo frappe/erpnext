@@ -19,7 +19,7 @@ def create_review():
 	review = frappe.get_doc({
 		"doctype": "Quality Review",
 		"goal": "_Test Quality Goal",
-		"procedure": "_Test Quality Procedure",
+		"procedure": "_Test Quality Procedure 1",
 		"scope": "Company",
 		"date": ""+ frappe.utils.nowdate() +"",
 		"values": [
