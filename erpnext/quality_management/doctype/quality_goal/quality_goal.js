@@ -2,20 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Quality Goal', {
-	refresh: function(frm) {
-		if(!frm.doc.__islocal){
-			frm.add_custom_button(__("Initialize Review"), function() {
-				frm.call({
-					method: "create_review",
-					doc: cur_frm.doc,
-					callback: function(){
-						frappe.msgprint("Quality Review has been initiated");
-						frm.refresh();
-					}
-				});
-			});
-		}
-	},
 	onload: function(frm){
 		if(frm.doc.measurable == "No"){
 			frm.fields_dict.objective.grid.docfields[1].hidden = 1;
