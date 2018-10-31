@@ -17,8 +17,7 @@ class AdditionalSalary(Document):
 	def validate_dates(self):
  		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
-
-		if getdate(self.from_date) > getdate(self.to_date):
+		if self.from_date and self.to_date and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To date can not be less than from date"))
 		elif date_of_joining and getdate(self.from_date) < getdate(date_of_joining):
 			frappe.throw(_("From date can not be less than employee's joining date"))
@@ -38,6 +37,7 @@ def get_additional_salary_component(employee, start_date, end_date):
 			and docstatus = 1
 			and (
 				(%(from_date)s between from_date and to_date)
+				or (ifnull(to_date, '') = '' and from_date <= %(to_date)s)
 				or (%(to_date)s between from_date and to_date)
 				or (from_date between %(from_date)s and %(to_date)s)
 			)
