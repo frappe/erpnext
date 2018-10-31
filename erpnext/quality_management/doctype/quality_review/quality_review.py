@@ -3,7 +3,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 from frappe.model.document import Document
 
 class QualityReview(Document):
@@ -15,7 +14,6 @@ class QualityReview(Document):
 					if int(value.achieved) < int(value.target):
 						problem = 'set'
 						break
-
 				if problem == 'set':
 					self.action = 'Action Initialised'
 				else:
@@ -26,8 +24,7 @@ class QualityReview(Document):
 				for value in self.values:
 					if value.yes_no == "No":
 						problem = 'set'
-
 				if problem == 'set':
 					self.action = 'Action Initialised'
 				else:
-					self.action = 'No Action'			
+					self.action = 'No Action'
