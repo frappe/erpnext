@@ -19,11 +19,6 @@ class QualityProcedure(NestedSet):
 			else:
 				pass
 
-	def after_insert(self):
-		for data in self.procedure_step:
-			if data.procedure == "Procedure":
-				pass
-				
 	def on_trash(self):
 		if(self.parent_quality_procedure):
 			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)

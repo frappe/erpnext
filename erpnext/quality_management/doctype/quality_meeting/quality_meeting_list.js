@@ -7,5 +7,5 @@ frappe.listview_settings['Quality Meeting'] = {
 		else if(doc.status == "Close") {
 			return [__("Close"), "green", ",status=,Close"];
 		}
-	}	
+	}
 };
