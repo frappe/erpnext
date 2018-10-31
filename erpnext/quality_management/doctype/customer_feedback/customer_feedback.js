@@ -2,20 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Customer Feedback', {
-	refresh: function(frm) {
-		if(!frm.doc.__islocal){
-			frm.add_custom_button(__("Initialize Action"), function() {
-				frm.call({
-					method: "create_action",
-					doc: cur_frm.doc,
-					callback: function (data){
-						frappe.msgprint(data);
-						frm.refresh();
-					}
-				});
-			});
-		}
-	},
 	onload: function(frm){
 		if(frm.doc.date == null){
 			frm.set_value("date", frappe.datetime.get_today());
