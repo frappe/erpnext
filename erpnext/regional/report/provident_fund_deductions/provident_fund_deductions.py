@@ -82,20 +82,42 @@ def get_conditions(filters):
 
 	return " and ".join(conditions)
 
+def prepare_data(entry,component_type_dict):
 
+	data_list = {}
+
+	employee_account_dict = frappe._dict(frappe.db.sql(""" select name, provident_fund_account from `tabEmployee`"""))
+
+	for d in entry:
+
+		component_type = component_type_dict.get(d.salary_component)
+
+		if data_list.get(d.name):
+			data_list[d.name][component_type] = d.amount
+		else:
+			data_list.setdefault(d.name,{
+				"employee": d.employee,
+				"employee_name": d.employee_name,
+				"pf_account": employee_account_dict.get(d.employee),
+				component_type : d.amount 
+			})
+
+	return data_list
 
 def get_data(filters):
 
 	data = []
 
-	employee_account_dict = frappe._dict(frappe.db.sql(""" select name, provident_fund_account from `tabEmployee`"""))
+	conditions = get_conditions(filters)
+
+	salary_slips = frappe.db.sql(""" select sal.name from `tabSalary Slip` sal 
+		where docstatus = 1 %s 
+		""" % (conditions), as_dict=1)
 
 	component_type_dict = frappe._dict(frappe.db.sql(""" select name, component_type from `tabSalary Component`
 		where component_type in ('Provident Fund', 'Additional Provident Fund', 'Provident Fund Loan')"""))
 
-	conditions = get_conditions(filters)
-
-	entry = frappe.db.sql(""" select sal.employee, sal.employee_name, ded.salary_component, ded.amount 
+	entry = frappe.db.sql(""" select sal.name, sal.employee, sal.employee_name, ded.salary_component, ded.amount 
 		from `tabSalary Slip` sal, `tabSalary Detail` ded
 		where sal.name = ded.parent
 		and ded.parentfield = 'deductions'
@@ -104,28 +126,31 @@ def get_data(filters):
 		and ded.salary_component in (%s)
 	""" % (conditions , ", ".join(['%s']*len(component_type_dict))), tuple(component_type_dict.keys()), as_dict=1)
 
-	for d in entry:
+	data_list = prepare_data(entry,component_type_dict)
+
+	for d in salary_slips:
 		total = 0
-		employee = {
-			"employee": d.employee,
-			"employee_name": d.employee_name,
-			"pf_account": employee_account_dict.get(d.employee)
-		}
+		if data_list.get(d.name):
+			employee = {
+				"employee": data_list.get(d.name).get("employee"),
+				"employee_name": data_list.get(d.name).get("employee_name"),
+				"pf_account": data_list.get(d.name).get("pf_account")
+			}
 
-		if component_type_dict.get(d.salary_component) == 'Provident Fund':
-			employee["pf_amount"] = d.amount
-			total += d.amount
+			if data_list.get(d.name).get("Provident Fund"):
+				employee["pf_amount"] = data_list.get(d.name).get("Provident Fund")
+				total += data_list.get(d.name).get("Provident Fund")
+			
+			if data_list.get(d.name).get("Additional Provident Fund") :
+				employee["additional_pf"] = data_list.get(d.name).get("Additional Provident Fund")
+				total += data_list.get(d.name).get("Additional Provident Fund")
+
+			if data_list.get(d.name).get("Provident Fund Loan") :
+				employee["pf_loan"] = data_list.get(d.name).get("Provident Fund Loan")
+				total += data_list.get(d.name).get("Provident Fund Loan")
 		
-		if component_type_dict.get(d.salary_component) == 'Additional Provident Fund':
-			employee["additional_pf"] = d.amount
-			total += d.amount
+			employee["total"] = total
 
-		if component_type_dict.get(d.salary_component) == 'Provident Fund Loan':
-			employee["pf_loan"] = d.amount
-			total += d.amount
-		
-		employee["total"] = total
-
-		data.append(employee)
+			data.append(employee)
 
 	return data
