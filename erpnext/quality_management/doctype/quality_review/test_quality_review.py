@@ -18,7 +18,7 @@ class TestQualityReview(unittest.TestCase):
 def create_review():
 	review = frappe.get_doc({
 		"doctype": "Quality Review",
-		"goal": "_Test Quality Goal",
+		"goal": "_Test Quality Goal 1",
 		"procedure": "_Test Quality Procedure 1",
 		"scope": "Company",
 		"date": ""+ frappe.utils.nowdate() +"",
