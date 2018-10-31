@@ -23,11 +23,10 @@ class QualityProcedure(NestedSet):
 				doc.save()
 
 	def on_trash(self):
-		if(self.parent_quality_procedure):
+		if self.parent_quality_procedure:
 			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
-			is_group_flag = "Unset"
 			for data in doc.procedure_step:
-				if self.name == data.procedure_name:
+				if data.procedure_name == self.name:
 					doc.procedure_step.remove(data)
 					doc.save()
 
