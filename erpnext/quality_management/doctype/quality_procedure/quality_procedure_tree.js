@@ -1,7 +1,7 @@
 frappe.treeview_settings["Quality Procedure"] = {
 	ignore_fields:["parent_quality_procedure"],
-	get_tree_nodes: 'quality_management.quality_management.doctype.quality_procedure.quality_procedure.get_children',
-	add_tree_node: 'quality_management.quality_management.doctype.quality_procedure.quality_procedure.add_node',
+	get_tree_nodes: 'erpnext.quality_management.doctype.quality_procedure.quality_procedure.get_children',
+	add_tree_node: 'erpnext.quality_management.doctype.quality_procedure.quality_procedure.add_node',
 	filters: [
 		{
 			fieldname: "Quality Procedure",
