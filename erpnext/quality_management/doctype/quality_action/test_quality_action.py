@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-test_dependencies = ["Quality Procedure","Measurement Unit" ,"Quality Goal", "Quality Review"]
+test_dependencies = ["Quality Procedure","Measurement Unit","Quality Goal", "Quality Review"]
 
 class TestQualityAction(unittest.TestCase):
 	def test_quality_action(self):
