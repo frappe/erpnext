@@ -103,7 +103,6 @@ class Item(WebsiteGenerator):
 		self.validate_description()
 		self.add_alt_uom_in_conversion_table()
 		self.compute_uom_conversion_factors()
-		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
 		self.check_for_active_boms()
@@ -488,25 +487,40 @@ class Item(WebsiteGenerator):
 			if not paths:
 				frappe.throw(_("No conversion factor can be found from {0} to {1}").format(uom, self.stock_uom))
 
+			# calculate the net conversion factor for each uom considering all paths
 			weights = [1] * len(paths)
 			for i, path in enumerate(paths):
 				for d in path:
 					weights[i] *= d[1]
 
+			# if there are multiple paths, make sure their conversion_factors are the same
 			conv = weights[0]
 			for w in weights:
 				if abs(w-conv) >= 1.0/10**self.precision("conversion_factor", "uoms"):
 					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
 						.format(uom, self.stock_uom))
 
+			if not conv:
+				frappe.throw(_("Conversion factor for UOM {0} is 0").format(uom))
+
 			conv_factors.append({
 				"uom": uom,
 				"conversion_factor": conv
 			})
 
-		self.uoms = []
-		for d in conv_factors:
-			self.append("uoms", d)
+		# Set Stock UOM's conversion_factor 1
+		if self.stock_uom not in [d['uom'] for d in conv_factors]:
+			conv_factors.append({
+				"uom": self.stock_uom,
+				"conversion_factor": 1
+			})
+
+		# Only update conversion factors if something has changed
+		old_conv_factors = [{"uom": d.uom, "conversion_factor": d.conversion_factor} for d in self.uoms]
+		if cmp(conv_factors, old_conv_factors) != 0:
+			self.uoms = []
+			for d in conv_factors:
+				self.append("uoms", d)
 
 	def add_alt_uom_in_conversion_table(self):
 		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]
@@ -519,20 +533,6 @@ class Item(WebsiteGenerator):
 			ch.from_uom = self.stock_uom
 			ch.to_qty = flt(self.alt_uom_size)
 			ch.to_uom = self.alt_uom
-
-	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uoms")]
-		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uoms', {})
-			ch.uom = self.stock_uom
-			ch.conversion_factor = 1
-
-		to_remove = []
-		for d in self.get("uoms"):
-			if not flt(d.conversion_factor):
-				to_remove.append(d)
-
-		[self.remove(d) for d in to_remove]
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
