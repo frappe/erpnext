@@ -22,7 +22,7 @@ def create_procedure():
 			}
 		]
 	})
-	procedure_exist = frappe.get_list("Quality Procedure", filters={"procedure": ""+ procedure.procedure +""}, fields=["name"])
+	procedure_exist = frappe.get_list("Quality Procedure", filters={"procedure": ""+ procedure.procedure +""})
 	if len(procedure_exist) == 0:
 		procedure.insert()
 		return procedure
