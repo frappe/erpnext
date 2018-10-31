@@ -15,7 +15,7 @@ class QualityProcedure(NestedSet):
 				data.step = data.procedure_name
 				self.is_group = 1
 
-	def after_insert(self):	
+	def after_insert(self):
 		for data in self.procedure_step:
 			if data.procedure == 'Procedure' and data.procedure_name != '':
 				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
@@ -34,7 +34,6 @@ class QualityProcedure(NestedSet):
 				i += 1
 				if data.procedure == "Procedure":
 					is_group = "Set"
-			
 			if is_group == "Set":
 				doc.is_group = 1
 			else:
@@ -49,12 +48,10 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 			name as value,
 			is_group as expandable
 		from
-			`tab{doctype}` comp
+			`tab%s` comp
 		where
-			ifnull(parent_quality_procedure, "")={parent}
-		""".format(
-			doctype = doctype,
-			parent=frappe.db.escape(parent)
+			ifnull(parent_quality_procedure, "")=%s
+		""" % (doctype, frappe.db.escape(parent)
 		), as_dict=1)
 
 @frappe.whitelist()
