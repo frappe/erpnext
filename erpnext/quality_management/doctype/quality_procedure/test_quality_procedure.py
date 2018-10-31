@@ -7,7 +7,7 @@ import frappe
 import unittest
 
 class TestQualityProcedure(unittest.TestCase):
-	def test_quality_procedure(self):		
+	def test_quality_procedure(self):	
 		test_create_procedure = create_procedure()
 		test_get_procedure = get_procedure()
 		self.assertEquals(test_create_procedure.name, test_get_procedure.name)

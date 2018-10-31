@@ -10,5 +10,5 @@ frappe.listview_settings['Quality Action'] = {
 		else if(doc.status == "Patched") {
 			return [__("Patched"), "blue", "status,=,Patched"];
 		}
-	}	
+	}
 };

@@ -18,7 +18,7 @@ class QualityProcedure(NestedSet):
 				doc.save()
 			else:
 				pass
-	
+
 	def after_insert(self):
 		for data in self.procedure_step:
 			if data.procedure == "Procedure":
