@@ -15,7 +15,7 @@ def get_data():
 		},
 		{
 			"module_name": "Legal",
-			"color": "#EA81E8",
+			"color": "#952C39",
 			"icon": "octicon octicon-law",
 			"_doctype": "Law",
 			"type": "module",
