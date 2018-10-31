@@ -250,7 +250,7 @@ class StockController(AccountsController):
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
-			"selling_rate": d.get('base_rate', 0) if not self.doctype.startswith("Purchase") else 0,
+			"selling_rate": d.get('base_rate', 0) if self.doctype in ('Delivery Note', 'Sales Invoice') else 0,
 			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.get("stock_qty")),
 			"stock_uom": frappe.db.get_value("Item", args.get("item_code") or d.get("item_code"), "stock_uom"),
 			"incoming_rate": 0,
