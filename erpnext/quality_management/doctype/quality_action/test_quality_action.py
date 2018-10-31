@@ -22,9 +22,9 @@ def create_action():
 		'type': 'Quality Review',
 		'review': ''+ review[0].name +'',
 		'date': ''+ frappe.utils.nowdate() +'',
-		'procedure': '_Test Quality Procedure'
+		'procedure': '_Test Quality Procedure 1'
 	})
-	action_exist = frappe.get_list("Quality Action", filters={"name": ""+ review[0].name +""})
+	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""})
 	if len(action_exist) == 0:
 		action.insert()
 		return action
@@ -33,5 +33,5 @@ def create_action():
 
 def get_action():
 	review = frappe.get_list("Quality Review")
-	action = frappe.get_list("Quality Action", filters={"name": ""+ review[0].name +""})
+	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""})
 	return action[0]
