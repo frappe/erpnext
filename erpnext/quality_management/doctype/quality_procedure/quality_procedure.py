@@ -28,13 +28,11 @@ class QualityProcedure(NestedSet):
 					doc.procedure_step.remove(data)
 					doc.save()
 				i += 1
-		
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
 	if parent == None or parent == "All Quality Procedures":
 		parent = ""
-
 	return frappe.db.sql("""
 		select
 			name as value,
@@ -53,8 +51,6 @@ def add_node():
 	from frappe.desk.treeview import make_tree_args
 	args = frappe.form_dict
 	args = make_tree_args(**args)
-
 	if args.parent_quality_procedure == 'All Quality Procedures':
 		args.parent_quality_procedure = None
-
 	frappe.get_doc(args).insert()
