@@ -18,7 +18,7 @@ class QualityProcedure(NestedSet):
 				doc.save()
 			else:
 				pass
-				
+
 	def on_trash(self):
 		if(self.parent_quality_procedure):
 			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
