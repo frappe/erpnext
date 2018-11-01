@@ -61,3 +61,22 @@ def get_next_content(content, content_type, course):
 		return content_list[current_index + 1]
 	except IndexError:
 		return None
+
+def get_quiz_with_answers(quiz_name):
+	try:
+		quiz = frappe.get_doc("Quiz", quiz_name).get_questions()
+		quiz_output = [{'name':question.name, 'question':question.question, 'options':[{'name': option.name, 'option':option.option, 'is_correct':option.is_correct} for option in question.options]} for question in quiz]
+		return quiz_output
+	except:
+		frappe.throw("Quiz {0} does not exist".format(quiz_name))
+		return None
+
+@frappe.whitelist()
+def get_quiz_without_answers(quiz_name):
+	try:
+		quiz = frappe.get_doc("Quiz", quiz_name).get_questions()
+		quiz_output = [{'name':question.name, 'question':question.question, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in quiz]
+		return quiz_output
+	except:
+		frappe.throw("Quiz {0} does not exist".format(quiz_name))
+		return None
