@@ -88,7 +88,6 @@ def create_review():
 		"scope": "Company",
 		"goal": "_Test Quality Goal 1",
 		"procedure": "_Test Quality Procedure 1",
-		"scope": "Company",
 		"date": ""+ frappe.utils.nowdate() +"",
 		"values": [
 			{
