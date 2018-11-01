@@ -1,10 +1,10 @@
 <template>
     <div class='card-deck mt-5'>
     <div class="card">
-        <img :src="program.hero_image" style='height: 150px'>
+        <img :src="program.hero_image" style='height: 150px; width: auto'>
         <div class='card-body'>
             <router-link :to="'/Program/' + program.name">
-                <h5 class='card-title'>{{ program.name }}</h5>
+                <h5 class='card-title'>{{ program.program_name }}</h5>
             </router-link>
             <div v-html="program.description"></div>
         </div>
@@ -17,7 +17,7 @@
 </template>
 <script>
 export default {
-    props: ['title'],
+    props: ['program_code'],
     name: "AcademyProgramCard",
     data() {
     	return {
@@ -28,7 +28,7 @@ export default {
     	frappe.call({
             method: "erpnext.www.academy.get_program_details",
             args: {
-                program_name: this.title
+                program_name: this.program_code
             }
         }).then(r => {
     		this.program = r.message
@@ -36,3 +36,9 @@ export default {
     },
 };
 </script>
+
+<style lang="css" scoped>
+    a {
+    text-decoration: none;
+}
+</style>
