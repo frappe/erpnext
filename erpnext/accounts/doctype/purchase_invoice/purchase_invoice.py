@@ -46,6 +46,7 @@ class PurchaseInvoice(BuyingController):
 			self.po_required()
 			self.pr_required()
 			self.validate_supplier_invoice()
+			self.validate_serial_numbers()
 
 
 		# validate cash purchase
@@ -259,7 +260,14 @@ class PurchaseInvoice(BuyingController):
 				if item.purchase_receipt:
 					frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}")
 						.format(item.purchase_receipt))
-
+	
+	def validate_serial_numbers(self):
+		"""
+			validate serial number agains purchase invoice
+		"""
+		
+		self.validate_serial_against_purchase_invoice() 
+		
 	def on_submit(self):
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
@@ -649,7 +657,20 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc):
 		self.due_date = None
+		
+	def validate_serial_against_purchase_invoice(self):
+		##""" check if serial number is already used in other Purchase Document """
+		for item in self.items:
+			if not item.serial_no:
+				continue
 
+			for serial_no in item.serial_no.split("\n"):
+				purchase_invoice = frappe.db.get_value("Serial No", serial_no, "purchase_document_no")
+				if purchase_invoice and self.name != purchase_invoice:
+					frappe.throw(_("Serial Number: {0} is already referenced in Purchase Document No: {1}".format(
+						serial_no, purchase_invoice
+					)))
+					
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
