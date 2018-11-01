@@ -15,6 +15,13 @@ class QualityProcedure(NestedSet):
 				data.step = data.procedure_name
 				self.is_group = 1
 
+	def on_update(self):
+		for data in self.procedure_step:
+			if data.procedure == 'Procedure' and data.procedure_name != '':
+				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
+				doc.parent_quality_procedure = self.name
+				doc.save()
+
 	def after_insert(self):
 		for data in self.procedure_step:
 			if data.procedure == 'Procedure' and data.procedure_name != '':
@@ -29,6 +36,14 @@ class QualityProcedure(NestedSet):
 				if data.procedure_name == self.name:
 					doc.procedure_step.remove(data)
 					doc.save()
+			flag_is_group = 0
+			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
+			for data in doc.procedure_step:
+				if data.procedure == "Procedure":
+					flag_is_group = 1
+			if flag_is_group == 0:
+				doc.is_group = 0
+				doc.save()
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
