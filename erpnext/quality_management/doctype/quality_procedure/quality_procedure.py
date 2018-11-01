@@ -49,17 +49,7 @@ class QualityProcedure(NestedSet):
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
 	if parent == None or parent == "All Quality Procedures":
 		parent = ""
-	doctype = doctype
-	parent = frappe.db.escape(parent)
-	return frappe.db.sql("""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tab%s` comp
-		where
-			ifnull(parent_quality_procedure, "")=%s
-		""" % (doctype, parent), as_dict=1)
+	return frappe.get_all(doctype, fields=["name as value", "is_group as expandable"], filters={"parent_quality_procedure": parent})
 
 @frappe.whitelist()
 def add_node():
