@@ -767,11 +767,7 @@ class StockEntry(StockController):
 					if stock_entry and self.name != stock_entry:
 						frappe.throw(_("Serial Number: {0} is already referenced in Stock Entry: {1}".format(
 							serial_no, stock_entry
-						)))
-
-
-							
-							
+						)))						
 @frappe.whitelist()
 def get_production_order_details(production_order):
 	production_order = frappe.get_doc("Production Order", production_order)
