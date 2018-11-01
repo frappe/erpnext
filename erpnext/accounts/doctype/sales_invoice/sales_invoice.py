@@ -756,9 +756,11 @@ class SalesInvoice(SellingController):
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.customer,
-						"credit": flt(tax.base_tax_amount_after_discount_amount),
-						"credit_in_account_currency": flt(tax.base_tax_amount_after_discount_amount) \
-							if account_currency==self.company_currency else flt(tax.tax_amount_after_discount_amount),
+						"credit": flt(tax.base_tax_amount_after_discount_amount,
+							tax.precision("tax_amount_after_discount_amount")),
+						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
+							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
 					}, account_currency)
 				)
@@ -766,7 +768,7 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
-			if flt(item.base_net_amount):
+			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
@@ -783,9 +785,10 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict({
 							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
 							"against": self.customer,
-							"credit": item.base_net_amount,
-							"credit_in_account_currency": item.base_net_amount \
-								if account_currency==self.company_currency else item.net_amount,
+							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
+							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+								if account_currency==self.company_currency
+								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center
 						}, account_currency)
 					)
@@ -884,7 +887,7 @@ class SalesInvoice(SellingController):
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
-		if self.write_off_account and self.write_off_amount:
+		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 
@@ -894,10 +897,11 @@ class SalesInvoice(SellingController):
 					"party_type": "Customer",
 					"party": self.customer,
 					"against": self.write_off_account,
-					"credit": self.base_write_off_amount,
-					"credit_in_account_currency": self.base_write_off_amount \
-						if self.party_account_currency==self.company_currency else self.write_off_amount,
-					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
+					"credit": flt(self.base_write_off_amount, self.precision("base_write_off_amount")),
+					"credit_in_account_currency": (flt(self.base_write_off_amount,
+						self.precision("base_write_off_amount")) if self.party_account_currency==self.company_currency
+						else flt(self.write_off_amount, self.precision("write_off_amount"))),
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
 				}, self.party_account_currency)
@@ -906,15 +910,16 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict({
 					"account": self.write_off_account,
 					"against": self.customer,
-					"debit": self.base_write_off_amount,
-					"debit_in_account_currency": self.base_write_off_amount \
-						if write_off_account_currency==self.company_currency else self.write_off_amount,
+					"debit": flt(self.base_write_off_amount, self.precision("base_write_off_amount")),
+					"debit_in_account_currency": (flt(self.base_write_off_amount,
+						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
+						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
-		if self.rounding_adjustment:
+		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")):
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
@@ -922,8 +927,10 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict({
 					"account": round_off_account,
 					"against": self.customer,
-					"credit_in_account_currency": self.base_rounding_adjustment,
-					"credit": self.base_rounding_adjustment,
+					"credit_in_account_currency": flt(self.rounding_adjustment,
+						self.precision("rounding_adjustment")),
+					"credit": flt(self.base_rounding_adjustment,
+						self.precision("base_rounding_adjustment")),
 					"cost_center": self.cost_center or round_off_cost_center,
 				}
 			))
