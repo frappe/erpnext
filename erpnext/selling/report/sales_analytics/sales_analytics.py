@@ -239,6 +239,8 @@ def get_groups(filters):
 		parent = 'parent_customer_group'
 	if filters["tree_type"] == "Item Group":
 		parent = 'parent_item_group'
+	if filters["tree_type"] == "Supplier Group":
+		parent = 'parent_supplier_group'
 
 	depth_map = {}
 
