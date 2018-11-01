@@ -85,7 +85,16 @@ class Asset(AccountsController):
 		elif not self.finance_books:
 			frappe.throw(_("Enter depreciation details"))
 
-		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(nowdate()):
+		if self.is_existing_asset:
+			return
+
+		date =  nowdate()
+		docname = self.purchase_receipt or self.purchase_invoice
+		if docname:
+			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
+			date = frappe.db.get_value(doctype, docname, 'posting_date')
+
+		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(date):
 			frappe.throw(_("Available-for-use Date is entered as past date"))
 
 	def make_depreciation_schedule(self):
