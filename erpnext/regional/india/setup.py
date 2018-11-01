@@ -314,16 +314,25 @@ def make_custom_fields(update=True):
 				'label': 'DCPS Account',
 				'fieldtype': 'Data',
 				'insert_after': 'pan_number'
-			}
-		],
-		'Department': [
+			},
 			{
-				'fieldname': 'department_type',
-				'label': 'Department Type',
-				'fieldtype': 'Select',
-				'insert_after': '',
-				'options': 'Cheque\nSWP\nDEP\nKAL\nALL'
+				'fieldname': 'salary_information_break',
+				'fieldtype': 'Column Break',
+				'insert_after': 'bank_ac_no'
+			},
+			{
+				'fieldname': 'ifsc_code',
+				'label': 'IFSC Code',
+				'fieldtype': 'Data',
+				'insert_after': 'salary_information_break'
+			},
+			{
+				'fieldname': 'micr',
+				'label': 'MICR',
+				'fieldtype': 'Data',
+				'insert_after': 'ifsc_code'
 			}
+
 		]
 	}
 
