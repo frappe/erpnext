@@ -17,18 +17,7 @@
 </template>
 <script>
 export default {
+	props: ['title', 'description'],
     name: "AcademyTopSection",
-    data() {
-    	return {
-    		title: '',
-    		description: ''
-    	};
-    },
-    mounted() {
-    	frappe.call("erpnext.www.academy.get_portal_details").then(r => {
-    		this.title = r.message.title,
-    		this.description = r.message.description
-    	})
-    },
 };
 </script>
