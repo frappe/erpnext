@@ -31,7 +31,6 @@ def get_feedback():
 	return feedback[0]
 
 def create_feedback_template():
-	print("Templte")
 	template = frappe.get_doc({
 		"doctype": "Customer Feedback Template",
 		"template": "_Test Customer Feedback Template",

@@ -1,4 +1,4 @@
-frappe.provide("frappe.treeview_settings")
+frappe.provide("frappe.treeview_settings");
 
 frappe.treeview_settings["Quality Procedure"] = {
 	ignore_fields:["parent_quality_procedure"],
@@ -32,7 +32,7 @@ frappe.treeview_settings["Quality Procedure"] = {
 	onload: function(treeview) {
 		treeview.make_tree();
 	},
-	onrender: function(node) {
+	onrender: function() {
 		$("button:contains('Add Child')").remove();
 	}
 };
