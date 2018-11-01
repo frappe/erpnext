@@ -61,10 +61,10 @@ class PurchaseInvoice(BuyingController):
 
 		self.validate_posting_time()
 
+		super(PurchaseInvoice, self).validate()
+
 		# apply tax withholding only if checked and applicable
 		self.set_tax_withholding()
-
-		super(PurchaseInvoice, self).validate()
 
 		if not self.is_return:
 			self.po_required()
@@ -838,6 +838,9 @@ class PurchaseInvoice(BuyingController):
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
