@@ -1,17 +1,36 @@
 <template>
 <div>
-	<AcademyTopSection/>
-	<AcademyCardList/>
+	<AcademyTopSection :title="title" :description="description"/>
+	<AcademyList :title="'Featured Programs'" :description="'Master ERPNext'">
+        <AcademyProgramCard v-for="program in featured_programs" :key="program.name" :program_code="program"/>
+    </AcademyList>
 </div>
 </template>
 <script>
 import AcademyTopSection from "../components/AcademyTopSection.vue"
-import AcademyCardList from "../components/AcademyCardList.vue"
+import AcademyList from "../components/AcademyList.vue"
+import AcademyProgramCard from "../components/AcademyProgramCard.vue"
 
 export default {
     name: "AcademyHome",
+    data() {
+    	return{
+    		title: '',
+    		description: '',
+            featured_programs: []
+    	}
+    },
     components: {
-		AcademyTopSection, AcademyCardList
-	}
+		AcademyTopSection, AcademyList, AcademyProgramCard
+	},
+	mounted() {
+    	frappe.call("erpnext.www.academy.get_portal_details").then(r => {
+    		this.title = r.message.title,
+    		this.description = r.message.description
+    	});
+        frappe.call("erpnext.www.academy.get_featured_programs").then(r => {
+            this.featured_programs = r.message
+        });
+    },
 };
 </script>
