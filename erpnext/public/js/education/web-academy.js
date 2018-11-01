@@ -8,9 +8,9 @@ import AcademyCoursePage from "./web-academy/pages/AcademyCoursePage.vue";
 Vue.use(VueRouter)
 
 const routes = [
-	{path: '', component: AcademyHome},
-	{path: '/Program/:code', component: AcademyProgramPage, props: true},
-	{path: '/Course', component: AcademyCoursePage},
+	{name: 'home', path: '', component: AcademyHome},
+	{name: 'program', path: '/Program/:code', component: AcademyProgramPage, props: true},
+	{name: 'content', path: '/Program/:code/:course/:type/:content', component: AcademyCoursePage, props: true},
 ];
 
 const router = new VueRouter({
@@ -18,7 +18,7 @@ const router = new VueRouter({
 });
 
 frappe.ready(() => {
-	new Vue({
+	window.v = new Vue({
 		el: "#web-academy",
 		router: router,
 		template: "<academy-root/>",
