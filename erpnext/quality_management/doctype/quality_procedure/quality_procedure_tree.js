@@ -1,3 +1,5 @@
+frappe.provide("frappe.treeview_settings")
+
 frappe.treeview_settings["Quality Procedure"] = {
 	ignore_fields:["parent_quality_procedure"],
 	get_tree_nodes: 'erpnext.quality_management.doctype.quality_procedure.quality_procedure.get_children',
@@ -29,5 +31,8 @@ frappe.treeview_settings["Quality Procedure"] = {
 	],
 	onload: function(treeview) {
 		treeview.make_tree();
+	},
+	onrender: function(node) {
+		$("button:contains('Add Child')").remove();
 	}
 };
