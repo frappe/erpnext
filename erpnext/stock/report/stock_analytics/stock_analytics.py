@@ -105,27 +105,18 @@ def get_data(filters):
 
 	grp_dict ={"tree_type":"Item Group"}
 
-	groups = get_groups(grp_dict)
+	groups, depth_map = get_groups(grp_dict)
 
 	ranges = get_period_date_ranges(filters["range"],year_start_date=filters["from_date"], year_end_date=filters["to_date"])
 
 	items_by_group = get_item_by_group(filters)
 
-	previous_lft = 0
-	previous_rgt = 10000000000
-	indent = -1
-
 	for g in groups:
-
-		if g.lft > previous_lft and g.rgt < previous_rgt:
-			indent += 1
-		else:
-			indent -= 1
 
 		has_items = 0
 		group = {
 			"name":g.name,
-			"indent":indent,
+			"indent":depth_map.get(g.name),
 			"code":g.name
 		}
 		g_total= 0
@@ -139,7 +130,7 @@ def get_data(filters):
 					"code":d.item_name,
 					"uom":d.stock_uom,
 					"brand":d.brand,
-					"indent":indent +1
+					"indent":depth_map.get(g.name) + 1
 				}
 				total = 0
 
@@ -162,8 +153,6 @@ def get_data(filters):
 		if has_items:
 			data.append(group)
 		data += out
-		previous_lft = g.lft
-		previous_rgt = g.rgt
 
 	return data
 
