@@ -50,6 +50,14 @@ class StockEntry(StockController):
 
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.validate_serial_numbers()
+		
+	def validate_serial_numbers(self):
+		"""
+			validate serial number stock entry
+		"""
+		
+		self.validate_serial_against_stock_entry()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -59,6 +67,7 @@ class StockEntry(StockController):
 		self.update_production_order()
 		self.validate_purchase_order()
 		self.make_gl_entries()
+		self.validate_serial_against_stock_entry()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
@@ -747,7 +756,22 @@ class StockEntry(StockController):
 					if expiry_date:
 						if getdate(self.posting_date) > getdate(expiry_date):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
+	def validate_serial_against_stock_entry(self):
+		##""" check if serial number is already used in other stock entry """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+			if (self.purpose=="Manufacture"):
+				for serial_no in item.serial_no.split("\n"):
+					stock_entry = frappe.db.get_value("Serial No", serial_no, "purchase_document_no")
+					if stock_entry and self.name != stock_entry:
+						frappe.throw(_("Serial Number: {0} is already referenced in Stock Entry: {1}".format(
+							serial_no, stock_entry
+						)))
 
+
+							
+							
 @frappe.whitelist()
 def get_production_order_details(production_order):
 	production_order = frappe.get_doc("Production Order", production_order)
