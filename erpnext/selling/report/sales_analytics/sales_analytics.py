@@ -63,20 +63,18 @@ def get_customer_by_group(filters):
 
 	if filters["tree_type"] == "Territory":
 		condition = 'territory'
-		parent = 'parent_territory'
 
 	if filters["tree_type"] == "Customer Group":
 		condition = 'customer_group'
-		parent = 'parent_customer_group'
 
-	return frappe.db.sql("""select c.name, c.customer_name as type_name, c.{condition} as grp ,g.{parent} as parent, g.lft, g.rgt
+	return frappe.db.sql("""select c.name, c.customer_name as type_name, c.{condition} as grp , g.lft, g.rgt
 		from `tabCustomer` c ,`tab{tree_type}` g
 		where c.{condition} = g.name"""
-		.format(tree_type=filters["tree_type"],condition=condition,parent=parent), as_dict=1)
+		.format(tree_type=filters["tree_type"],condition=condition), as_dict=1)
 
 def get_item_by_group():
 
-	return frappe.db.sql("""select i.name, i.item_name as type_name, i.item_group as grp,g.parent_item_group as parent, i.stock_uom, g.lft , g.rgt from `tabItem` i,`tabItem Group` g
+	return frappe.db.sql("""select i.name, i.item_name as type_name, i.item_group as grp, i.stock_uom, g.lft , g.rgt from `tabItem` i,`tabItem Group` g
 		where i.item_group = g.name """,as_dict=1)
 
 def get_customer():
@@ -183,117 +181,77 @@ def get_type_data(filters,entry,type_list):
 
 	return data
 
-# def get_item_data(filters):
-# 	data=[]
-
-# 	if filters["value_quantity"] == 'Value':
-# 		select = 'base_amount'
-# 	else:
-# 		select = 'qty'
-
-# 	entry = frappe.db.sql("""
-# 				select i.item_code as name, i.{select} as select_field,s.{date_field} 
-# 				from `tab{doctype} Item` i ,`tab{doctype}` s
-# 				where s.name = i.parent and i.docstatus = 1 and s.company = %s
-# 				and s.{date_field} between %s and %s
-# 			"""
-# 			.format(date_field=date_field,select = select,
-# 			doctype=filters["doc_type"]),
-# 			(filters["company"], filters["from_date"], filters["to_date"]), as_dict=1)
-
-
-# 	data_list = get_data_list(entry,filters)
-
-# 	if filters["tree_type"] == 'Item Group':
-# 		return data_list
-
-# 	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
-
-# 	for d in get_items():
-# 		item = {}
-# 		total = 0
-# 		item["name"] = d.item_name
-# 		item["code"] = d.name
-# 		for dummy, end_date in ranges:
-# 			period = get_period(end_date, filters["range"])
-# 			if data_list.get(d.name) and data_list.get(d.name).get(period) :
-# 				item[period] = data_list.get(d.name).get(period)
-# 			else:
-# 				item[period] = 0.0
-# 			total += item[period]
-# 		item["total"] = total
-# 		data.append(item)
-
-# 	return data
-
 def get_by_group(filters,type_list,entry):
 	data = []
 
 	data_list = get_data_list(entry,filters)
 
-	groups = get_groups(filters)
+	groups,depth_map = get_groups(filters)
 
 	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"],year_end_date=filters["to_date"])
-
-	previous_lft = 0
-	previous_rgt = 10000000000
-	indent = -1
-	prev_parent = ""
 
 	for g in groups:
 		out = []
 		g_total = 0
-		if g.lft >= previous_lft and g.rgt <= previous_rgt:
-			indent += 1
-		else:
-			indent -= 1
 
 		group = {
 			"name":g.name,
-			"indent":indent,
+			"indent":depth_map.get(g.name),
 			"code":g.name
 		}
 
 		for d in type_list:
 			total = 0
-			if d.parent == "" or d.parent == prev_parent:
-				if d.lft >= g.left and d.rgt <= g.rgt :
-					row = {
-						"name":d.name,
-						"code":d.type_name,
-						"indent":indent + 1 
-					}
+			if d.lft >= g.lft and d.rgt <= g.rgt :
+				row = {
+					"name":d.name,
+					"code":d.type_name,
+					"indent":depth_map.get(g.name) + 1 
+				}
 
-					for dummy, end_date in ranges:
-						period = get_period(end_date, filters["range"])
-						if data_list.get(d.name) and data_list.get(d.name).get(period) :
-							row[period] = data_list.get(d.name).get(period)
-						else:
-							row[period] = 0.0
-						total += row[period]
-						if group.get(period):
-							group[period] += row[period]
-						else:
-							group[period] = row[period]
-					row["total"] = total
-					g_total += total
-					if d.grp == g.name:
-						out.append(row)
+				for dummy, end_date in ranges:
+					period = get_period(end_date, filters["range"])
+					if data_list.get(d.name) and data_list.get(d.name).get(period) :
+						row[period] = data_list.get(d.name).get(period)
+					else:
+						row[period] = 0.0
+					total += row[period]
+					if group.get(period):
+						group[period] += row[period]
+					else:
+						group[period] = row[period]
+				row["total"] = total
+				g_total += total
+				if d.grp == g.name:
+					out.append(row)
 
-			prev_parent = d.parent
 		group["total"] = g_total
 		data.append(group)
 		data += out
-		previous_lft = g.lft
-		previous_rgt = g.rgt
 
 	return data
 
 def get_groups(filters):
 
-	entry = frappe.db.sql("""select name, lft, rgt from `tab{tree}` order by lft""" .format(tree=filters["tree_type"]), as_dict=1)
+	if filters["tree_type"] == "Territory":
+		parent = 'parent_territory'
+	if filters["tree_type"] == "Customer Group":
+		parent = 'parent_customer_group'
+	if filters["tree_type"] == "Item Group":
+		parent = 'parent_item_group'
 
-	return entry
+	depth_map = {}
+
+	entry = frappe.db.sql("""select name, lft, rgt , {parent} as parent from `tab{tree}` order by lft""" 
+	.format(tree=filters["tree_type"],parent=parent), as_dict=1)
+
+	for d in entry:
+		if d.parent:
+			depth_map.setdefault(d.name,depth_map.get(d.parent) + 1)
+		else:
+			depth_map.setdefault(d.name,0)
+
+	return entry,depth_map
 
 def get_chart_data(columns):
 
