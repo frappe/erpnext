@@ -34,5 +34,6 @@ frappe.treeview_settings["Quality Procedure"] = {
 	},
 	onrender: function() {
 		$("button:contains('Add Child')").remove();
+		$("button:contains('New')").remove();
 	}
 };
