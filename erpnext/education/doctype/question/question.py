@@ -10,7 +10,7 @@ class Question(Document):
 
 	def get_answer(self):
 		options = self.get_all_children()
-		answers = [item.option for item in options if item.is_correct == True]
+		answers = [item.name for item in options if item.is_correct == True]
 		if len(answers) == 0:
 			frappe.throw("No correct answer is set for {0}".format(self.name))
 			return None
