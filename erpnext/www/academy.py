@@ -82,18 +82,17 @@ def get_quiz_without_answers(quiz_name):
 		return None
 
 @frappe.whitelist()
-def evaluate_quiz(quiz_response):
-	"""LMS Function: Evaluates a simple multiple choice quiz.  It recieves arguments from `www/lms/course.js` as dictionary using FormData[1].
+def evaluate_quiz(quiz_response, quiz_name):
+	"""LMS Function: Evaluates a simple multiple choice quiz.
 
 
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
-	[1]: https://developer.mozilla.org/en-US/docs/Web/API/FormData
 	"""
 	import json
-	print("---------------------------")
-	print(quiz_response)
 	quiz_response = json.loads(quiz_response)
-	print(type(quiz_response))
+	quiz = frappe.get_doc("Quiz", quiz_name)
+	answers, score = quiz.evaluate(quiz_response, quiz_name)
+	return(score)
 	# quiz_name = kwargs.get('quiz')
 	# course_name = kwargs.get('course')
 	# enrollment = get_course_enrollment(course_name, frappe.session.user)
