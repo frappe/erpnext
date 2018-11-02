@@ -329,11 +329,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Health Insurance"
+					"name": "Staffing Plan",
+				}
+			]
+		},
+		{
+			"label": _("Employee Insurance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Insurance",
+				},
+								{
+					"type": "doctype",
+					"name": "Insurance Type",
 				},
 				{
 					"type": "doctype",
-					"name": "Staffing Plan",
+					"name": "Insurance Company",
 				}
 			]
 		},
