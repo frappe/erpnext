@@ -426,25 +426,25 @@ class Item(WebsiteGenerator):
 				self.V = vertices
 				self.graph = defaultdict(list)
 
-			def add_edge(self, u, v, w):
-				self.graph[u].append((v, w))
+			def add_edge(self, src, dest, weight):
+				self.graph[src].append((dest, weight))
 
-			def get_all_paths_util(self, u, d, visited, path, all_paths, w):
+			def get_all_paths_util(self, src, d, visited, path, all_paths, weight):
 				# Mark the current node as visited and store in path
-				visited[u] = True
-				path.append((u, w))
+				visited[src] = True
+				path.append((src, weight))
 
 				# If current vertex is same as destination, then print current path[]
-				if u == d:
+				if src == d:
 					all_paths.append(path[:])
 				else:  # If current vertex is not destination Recur for all the vertices adjacent to this vertex
-					for i, w in self.graph[u]:
+					for i, weight in self.graph[src]:
 						if not visited[i]:
-							self.get_all_paths_util(i, d, visited, path, all_paths, w)
+							self.get_all_paths_util(i, d, visited, path, all_paths, weight)
 
 				# Remove current vertex from path[] and mark it as unvisited
 				path.pop()
-				visited[u] = False
+				visited[src] = False
 
 			def get_all_paths(self, s, d):
 				visited = [False] * self.V
@@ -470,7 +470,6 @@ class Item(WebsiteGenerator):
 
 		# Create a graph of UOMs
 		graph = Graph(len(uoms))
-		#graph.add_edge(0, 0, 1) # stock_uom -> stock_uom
 		for d in self.uom_conversion_graph:
 			src = uoms.index(d.from_uom)
 			dest = uoms.index(d.to_uom)
