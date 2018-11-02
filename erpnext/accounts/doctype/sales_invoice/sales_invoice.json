@@ -1625,7 +1625,7 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "update_stock", 
-   "fieldname": "def_warehouse", 
+   "fieldname": "set_warehouse",
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
