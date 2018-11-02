@@ -79,7 +79,7 @@ export default {
 }
 
 .quiz-section {
-	padding-top: 3rem !important;
+	padding-top: 0.5em !important;
 	padding-bottom: 0rem !important;
 }
 </style>
