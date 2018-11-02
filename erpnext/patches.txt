@@ -574,4 +574,5 @@ erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.migrate_reference_and_clearance_to_journal_entry_accounts_table
 erpnext.patches.v11_0.item_uom_conversion_table
+erpnext.patches.saif.def_warehouse_to_set_warehouse
 
