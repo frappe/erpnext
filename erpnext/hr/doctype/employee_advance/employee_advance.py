@@ -60,7 +60,8 @@ class EmployeeAdvance(Document):
 			where employee_advance = %s and docstatus=1 and allocated_amount > 0
 		""", self.name)[0][0]
 
-		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", claimed_amount)
+		if claimed_amount:
+			frappe.db.set_value("Employee Advance", self.name, "claimed_amount", claimed_amount)
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
