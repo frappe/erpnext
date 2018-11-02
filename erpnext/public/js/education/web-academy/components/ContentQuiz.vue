@@ -6,11 +6,12 @@
                 <h2>{{ content }}</h2>
             </div>
         </div>
+        {{ quizResponse }}
         <div class="content">
             <hr>
             <form id="quiz" :name="content">
                 <div id="quiz-body">
-					<QuizSingleChoice v-for="question in quizData" :key="question.name" :question="question"/>
+					<QuizSingleChoice v-for="question in quizData" :key="question.name" :question="question" @updateResponse="updateResponse"/>
                 </div>
                 <div class="mt-3">
                     <div id="quiz-actions" class="text-right">
@@ -43,7 +44,8 @@ export default {
 	name: 'ContentQuiz',
 	data() {
     	return {
-    		quizData: ''
+    		quizData: '',
+    		quizResponse: {}
     	}
     },
     mounted() {
@@ -58,7 +60,12 @@ export default {
     },
     components: {
     	QuizSingleChoice,
-    }
+    },
+    methods: {
+		updateResponse(res) {
+			this.quizResponse[res.question] = (res.option)
+		}
+	}
 };
 </script>
 
