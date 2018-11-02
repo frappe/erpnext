@@ -80,3 +80,28 @@ def get_quiz_without_answers(quiz_name):
 	except:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))
 		return None
+
+@frappe.whitelist()
+def evaluate_quiz(quiz_response):
+	"""LMS Function: Evaluates a simple multiple choice quiz.  It recieves arguments from `www/lms/course.js` as dictionary using FormData[1].
+
+
+	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
+	[1]: https://developer.mozilla.org/en-US/docs/Web/API/FormData
+	"""
+	import json
+	print("---------------------------")
+	print(quiz_response)
+	quiz_response = json.loads(quiz_response)
+	print(type(quiz_response))
+	# quiz_name = kwargs.get('quiz')
+	# course_name = kwargs.get('course')
+	# enrollment = get_course_enrollment(course_name, frappe.session.user)
+	# try:
+	# 	quiz = frappe.get_doc("Quiz", quiz_name)
+	# 	answers, score = quiz.evaluate(quiz_response, enrollment, quiz_name)
+	# 	add_quiz_activity(enrollment, quiz_name, score, answers, quiz_response)
+	# 	return score
+	# except frappe.DoesNotExistError:
+	# 	frappe.throw("Quiz {0} does not exist".format(quiz_name))
+	# 	return None
