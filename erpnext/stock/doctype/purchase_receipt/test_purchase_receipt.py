@@ -207,9 +207,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		item_code = "_Test Purchase Return For Multi-UOM"
 		if not frappe.db.exists('Item', item_code):
 			item = make_item(item_code, {'stock_uom': 'Box'})
-			row = item.append('uoms', {
-				'uom': 'Unit',
-				'conversion_factor': 0.1
+			row = item.append('uom_conversion_graph', {
+				'from_qty': 1,
+				'from_uom': 'Unit',
+				'to_qty': 0.1, # conversion factor
+				'to_uom': item.stock_uom
 			})
 			row.db_update()
 

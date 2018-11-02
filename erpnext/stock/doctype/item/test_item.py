@@ -247,17 +247,19 @@ class TestItem(unittest.TestCase):
 
 		item_doc = make_item("Test Item UOM", {
 			"stock_uom": "Gram",
-			"uoms": [dict(uom='Carat'), dict(uom='Kg')]
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='Carat', to_uom='Gram', to_qty=get_uom_conv_factor('Carat', 'Gram')),
+				dict(from_qty=1, from_uom='Kg', to_uom='Gram', to_qty=get_uom_conv_factor('Kg', 'Gram'))
+			]
 		})
 
-		for d in item_doc.uoms:
-			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
-			d.conversion_factor = value
+		carat = filter(lambda d: d.uom == "Carat", item_doc.uoms)
+		self.assertEqual(len(carat), 1)
+		self.assertEqual(carat[0].conversion_factor, 0.2)
 
-		self.assertEqual(item_doc.uoms[0].uom, "Carat")
-		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
-		self.assertEqual(item_doc.uoms[1].uom, "Kg")
-		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
+		kg = filter(lambda d: d.uom == "Kg", item_doc.uoms)
+		self.assertEqual(len(kg), 1)
+		self.assertEqual(kg[0].conversion_factor, 1000)
 
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]

@@ -427,25 +427,25 @@ class Item(WebsiteGenerator):
 				self.V = vertices
 				self.graph = defaultdict(list)
 
-			def add_edge(self, u, v, w):
-				self.graph[u].append((v, w))
+			def add_edge(self, src, dest, weight):
+				self.graph[src].append((dest, weight))
 
-			def get_all_paths_util(self, u, d, visited, path, all_paths, w):
+			def get_all_paths_util(self, src, d, visited, path, all_paths, weight):
 				# Mark the current node as visited and store in path
-				visited[u] = True
-				path.append((u, w))
+				visited[src] = True
+				path.append((src, weight))
 
 				# If current vertex is same as destination, then print current path[]
-				if u == d:
+				if src == d:
 					all_paths.append(path[:])
 				else:  # If current vertex is not destination Recur for all the vertices adjacent to this vertex
-					for i, w in self.graph[u]:
+					for i, weight in self.graph[src]:
 						if not visited[i]:
-							self.get_all_paths_util(i, d, visited, path, all_paths, w)
+							self.get_all_paths_util(i, d, visited, path, all_paths, weight)
 
 				# Remove current vertex from path[] and mark it as unvisited
 				path.pop()
-				visited[u] = False
+				visited[src] = False
 
 			def get_all_paths(self, s, d):
 				visited = [False] * self.V
@@ -464,6 +464,15 @@ class Item(WebsiteGenerator):
 			if d.from_uom == d.to_uom:
 				frappe.throw(_("Row {0}: From UOM and To UOM must not be the same").format(d.idx))
 
+			predefined_conv_factor = get_uom_conv_factor(d.from_uom, d.to_uom)
+			if predefined_conv_factor:
+				input_conv_factor = flt(d.to_qty) / flt(d.from_qty)
+				if abs(predefined_conv_factor - input_conv_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Row {0}: Setting conversion quantities from {1} to {2} from UOM Conversion Factor"
+						.format(d.idx, d.from_uom, d.to_uom), alert=True)
+					d.from_qty = 1
+					d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
+
 			if d.from_uom not in uoms:
 				uoms.append(d.from_uom)
 			if d.to_uom not in uoms:
@@ -471,7 +480,6 @@ class Item(WebsiteGenerator):
 
 		# Create a graph of UOMs
 		graph = Graph(len(uoms))
-		#graph.add_edge(0, 0, 1) # stock_uom -> stock_uom
 		for d in self.uom_conversion_graph:
 			src = uoms.index(d.from_uom)
 			dest = uoms.index(d.to_uom)
@@ -512,7 +520,7 @@ class Item(WebsiteGenerator):
 		if self.stock_uom not in [d['uom'] for d in conv_factors]:
 			conv_factors.append({
 				"uom": self.stock_uom,
-				"conversion_factor": 1
+				"conversion_factor": 1.0
 			})
 
 		# Only update conversion factors if something has changed
@@ -561,7 +569,7 @@ class Item(WebsiteGenerator):
 
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 				frappe.throw(
-					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
+					_("Conversion factor for default Unit of Measure must be 1"))
 
 			if self.alt_uom and d.uom == self.alt_uom:
 				self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
@@ -840,7 +848,9 @@ class Item(WebsiteGenerator):
 		if self.uoms:
 			for d in self.uoms:
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value:
+				if value and abs(value - d.conversion_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Setting conversion factor for UOM {0} from UOM Conversion Factor Master as {1}"
+						.format(d.uom, value), alert=True)
 					d.conversion_factor = value
 
 	def validate_attributes(self):
