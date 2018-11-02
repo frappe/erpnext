@@ -463,6 +463,15 @@ class Item(WebsiteGenerator):
 			if d.from_uom == d.to_uom:
 				frappe.throw(_("Row {0}: From UOM and To UOM must not be the same").format(d.idx))
 
+			predefined_conv_factor = get_uom_conv_factor(d.from_uom, d.to_uom)
+			if predefined_conv_factor:
+				input_conv_factor = flt(d.to_qty) / flt(d.from_qty)
+				if abs(predefined_conv_factor - input_conv_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Row {0}: Setting conversion quantities from {1} to {2} from UOM Conversion Factor"
+						.format(d.idx, d.from_uom, d.to_uom), alert=True)
+					d.from_qty = 1
+					d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
+
 			if d.from_uom not in uoms:
 				uoms.append(d.from_uom)
 			if d.to_uom not in uoms:
@@ -510,7 +519,7 @@ class Item(WebsiteGenerator):
 		if self.stock_uom not in [d['uom'] for d in conv_factors]:
 			conv_factors.append({
 				"uom": self.stock_uom,
-				"conversion_factor": 1
+				"conversion_factor": 1.0
 			})
 
 		# Only update conversion factors if something has changed
@@ -547,7 +556,7 @@ class Item(WebsiteGenerator):
 
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 				frappe.throw(
-					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
+					_("Conversion factor for default Unit of Measure must be 1"))
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
@@ -839,7 +848,9 @@ class Item(WebsiteGenerator):
 		if self.uoms:
 			for d in self.uoms:
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value:
+				if value and abs(value - d.conversion_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Setting conversion factor for UOM {0} from UOM Conversion Factor Master as {1}"
+						.format(d.uom, value), alert=True)
 					d.conversion_factor = value
 
 	def validate_attributes(self):
