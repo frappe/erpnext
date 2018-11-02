@@ -6,7 +6,6 @@
                 <h2>{{ content }}</h2>
             </div>
         </div>
-        {{ quizResponse }}
         <div class="content">
             <hr>
             <form id="quiz" :name="content">
@@ -16,7 +15,7 @@
                 <div class="mt-3">
                     <div id="quiz-actions" class="text-right">
                         <button class='btn btn-outline-secondary' type="reset">Reset</button>
-                        <button class='btn btn-primary' type="button">Submit</button>
+                        <button class='btn btn-primary' @click="submitQuiz" type="button">Submit</button>
                     </div>
                     <div id="post-quiz-actions" class="row" hidden="hidden">
                         <div class="col-md-8 text-left">
@@ -64,6 +63,14 @@ export default {
     methods: {
 		updateResponse(res) {
 			this.quizResponse[res.question] = (res.option)
+		},
+		submitQuiz() {
+			frappe.call({
+				method: "erpnext.www.academy.evaluate_quiz",
+				args: {
+					quiz_response: this.quizResponse;
+				}
+			})
 		}
 	}
 };
