@@ -17,8 +17,9 @@ def execute():
     frappe.reload_doc('hr', 'doctype', 'insurance_company')
     frappe.reload_doc('hr', 'doctype', 'insurance_type')
     frappe.reload_doc('hr', 'doctype', 'employee')
+    frappe.reload_doc('hr', 'doctype', 'additional_salary')
 
-    if frappe.db.a_row_exists('employee_insurance'): return
+    if frappe.db.a_row_exists('Employee Insurance'): return
 
     health_ins_record = frappe.get_all("Employee", 
         fields = {"employee", "health_insurance_provider", "health_insurance_no"}, 

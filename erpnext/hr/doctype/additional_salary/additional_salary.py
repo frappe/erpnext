@@ -15,7 +15,7 @@ class AdditionalSalary(Document):
 			frappe.throw(_("Amount should be greater than zero."))
 
 	def validate_dates(self):
- 		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
+		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee, 
 			["date_of_joining", "relieving_date"])
 		if self.from_date and self.to_date and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To date can not be less than from date"))

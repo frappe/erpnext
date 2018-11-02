@@ -67,7 +67,8 @@ class EmployeeInsurance(Document):
 		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.employee = self.employee 
 		additional_salary.amount = self.monthly_premium 
-		additional_salary.payroll_date = self.premium_start_date
+		additional_salary.from_date = self.premium_start_date
+		additional_salary.to_date = self.premium_start_date
 		additional_salary.salary_component = self.salary_component
 		additional_salary.overwrite_salary_structure_amount = self.deduct_from_salary
 		additional_salary.reference_doctype = self.doctype

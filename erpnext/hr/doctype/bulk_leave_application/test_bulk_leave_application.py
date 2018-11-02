@@ -19,7 +19,7 @@ class TestBulkLeaveApplication(unittest.TestCase):
 				"include_holiday": 1
 			}).insert()
 
- 	def test_bulk_leave_application(self):
+	def test_bulk_leave_application(self):
 		leave_type = "_Test Leave Type Negative"
 		employee = make_employee("test_email@erpnext.org")
 

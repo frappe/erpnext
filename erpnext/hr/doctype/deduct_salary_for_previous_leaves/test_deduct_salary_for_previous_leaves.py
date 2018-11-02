@@ -24,7 +24,7 @@ class TestDeductSalaryforPreviousLeaves(unittest.TestCase):
 				"include_holiday": 1
 			}).insert()
 
- 	def test_salary_deduction_for_previous_leaves(self):
+	def test_salary_deduction_for_previous_leaves(self):
 		leave_type = "_Test Leave Type Negative"
 		employee = make_employee("test_email@erpnext.org")
 		salary_component = "Salary Deduction for Previous Leaves"
