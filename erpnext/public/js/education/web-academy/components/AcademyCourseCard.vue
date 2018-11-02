@@ -12,9 +12,7 @@
                 </span>
             </div>
             <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <button class='btn btn-primary btn-sm btn-block' @click="$router.push($route.path + '/' + course.name + '/' + nextContentType + '/' + nextContent)">Start Course</button>
-                <button class='btn btn-primary btn-sm btn-block'>Continue</button>
-                <button class='btn btn-success btn-sm btn-block'>Completed</button>
+                <AcademyCourseCardButton :course="course.name" :nextContent="nextContent" :nextContentType="nextContentType"/>
             </div>
         </div>
     </div>
@@ -22,6 +20,8 @@
 </template>
 
 <script>
+import AcademyCourseCardButton from './AcademyCourseCardButton.vue'
+
 export default {
     props: ['course'],
     name: "AcademyCourseCard",
@@ -41,6 +41,9 @@ export default {
             this.nextContent = r.message.content,
             this.nextContentType = r.message.content_type
         });
+    },
+    components: {
+        AcademyCourseCardButton
     }
 };
 </script>
