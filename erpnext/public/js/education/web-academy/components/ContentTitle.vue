@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <h2>{{ title }}</h2>
-                    <span v-if="typeof author !== 'undefined' || variable !== null" class="text-muted">
+                    <span v-if="typeof author !== 'undefined' || author !== null" class="text-muted">
                         Published on {{ publishDate }}, by {{ author }}
                     </span>
                 </div>
