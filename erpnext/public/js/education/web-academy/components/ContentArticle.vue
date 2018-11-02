@@ -1,21 +1,8 @@
 <template>
 <div>
-    <section class='article-top-section video-section-bg'>
-        <div class='container'>
-            <div class="row">
-                <div class="col-md-8">
-                    <h2>{{ contentData.title }}</h2>
-                    <span class="text-muted">
-                        Published on {{ contentData.publish_date }}, by {{ contentData.author }}
-                    </span>
-                </div>
-                <div class="col-md-4 text-right">
-                	<slot></slot>
-                </div>
-            </div>
-            <hr>
-        </div>
-    </section>
+    <ContentTitle :title="contentData.title" :author="contentData.author" :publishDate="contentData.publish_date">
+        <slot></slot>
+    </ContentTitle>
     <section class="article-content-section">
         <div class='container'>
             <div class="content" v-html="contentData.content"></div>
@@ -30,6 +17,7 @@
 </div>
 </template>
 <script>
+import ContentTitle from './ContentTitle.vue'
 export default {
 	props: ['content', 'type'],
 	name: 'ContentArticle',
@@ -48,6 +36,9 @@ export default {
     	}).then(r => {
     			this.contentData = r.message
     	});
+    },
+    components: {
+        ContentTitle
     }
 };
 </script>
