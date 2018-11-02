@@ -39,7 +39,6 @@
 </template>
 
 <script>
-debugger
 import QuizSingleChoice from "./Quiz/QuizSingleChoice.vue"
 export default {
 	props: ['content', 'type'],
