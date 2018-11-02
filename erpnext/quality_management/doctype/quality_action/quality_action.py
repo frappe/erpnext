@@ -17,4 +17,4 @@ class QualityAction(Document):
 		if status_flag == 'Under Review':
 			self.status = 'Under Review'
 		else:
-			self.status = 'Patched'
+			self.status = 'Closed'

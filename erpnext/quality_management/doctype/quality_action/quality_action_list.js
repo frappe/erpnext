@@ -7,8 +7,5 @@ frappe.listview_settings['Quality Action'] = {
 		else if(doc.status == "Under Review") {
 			return [__("Under Review"), "red", "status,=,Under Review"];
 		}
-		else if(doc.status == "Patched") {
-			return [__("Patched"), "blue", "status,=,Patched"];
-		}
 	}
 };
