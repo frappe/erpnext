@@ -11,6 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+
 develop_version = '12.x.x-develop'
 staging_version = '11.0.3-beta.20'
 
@@ -162,6 +163,10 @@ default_roles = [
 	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id'},
 	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'},
 ]
+
+role_home_page = {
+	"LMS User": "academy"
+}
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
