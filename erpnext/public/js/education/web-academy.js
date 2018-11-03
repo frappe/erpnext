@@ -17,66 +17,55 @@ const routes = [
 
 var store = {
 	debug: true,
-	state: {
-		completedCourses: new Set(),
-		enrolledPrograms: new Set(),
-		enrolledCourses: new Set(),
-		currentEnrollment: '',
-		student: '',
-		isLogin: false
-	},
-
-	setCurrentEnrollment (enrollment) {
-	    if (this.debug) console.log('setCourseEnrollment triggered with', enrollment)
-	    this.state.currentEnrollment = enrollment
-	},
-
-	getCurrentEnrollment () {
-	    if (this.debug) console.log('getCourseEnrollment triggered')
-	    return this.state.currentEnrollment
-	},
+	isLogin: false,
+	completedCourses: new Set(),
+	enrolledPrograms: new Set(),
+	enrolledCourses: {},
 
 	addCompletedCourses (courseName){
 		if (this.debug) console.log('addCompletedCourses triggered with', courseName)
-		this.state.completedCourses.add(courseName)
+		this.completedCourses.add(courseName)
 	},
 
 	checkCourseCompletion (courseName){
-		return this.state.completedCourses.has(courseName)
+		return this.completedCourses.has(courseName)
 	},
 
 	checkProgramEnrollment (programName){
-		return this.state.enrolledPrograms.has(programName)
+		return this.enrolledPrograms.has(programName)
+	},
+
+	checkCourseEnrollment (courseName){
+		course = new Set(Object.keys(enrolledCourses))
+		return course.has(courseName)
 	},
 
 	updateEnrolledPrograms (){
 		if (this.debug) console.log('Updating enrolledPrograms')
 		frappe.call("erpnext.www.academy.get_program_enrollments").then( r => {
 			for(var ii=0; ii < r.message.length; ii++){
-				this.state.enrolledPrograms.add(r.message[ii])
+				this.enrolledPrograms.add(r.message[ii])
 			}
 		})
-		if (this.debug) console.log('Updated State', this.state.enrolledPrograms)
+		if (this.debug) console.log('Updated State', this.enrolledPrograms)
 	},
 
 	updateEnrolledCourses (){
 		if (this.debug) console.log('Updating enrolledCourses')
 		frappe.call("erpnext.www.academy.get_course_enrollments").then( r => {
-			for(var ii=0; ii < r.message.length; ii++){
-				this.state.enrolledCourses.add(r.message[ii])
-			}
+			this.enrolledCourses = r.message
 		})
-		if (this.debug) console.log('Updated State', this.state.enrolledCourses)
+		if (this.debug) console.log('Updated State', this.enrolledCourses)
 	},
 
 	updateCompletedCourses (){
 		if (this.debug) console.log('Updating States')
 		frappe.call("erpnext.www.academy.get_completed_courses").then( r => {
 			for(var ii=0; ii < r.message.length; ii++){
-				this.state.completedCourses.add(r.message[ii])
+				this.completedCourses.add(r.message[ii])
 			}
 		})
-		if (this.debug) console.log('Updated State', this.state.completedCourses)
+		if (this.debug) console.log('Updated State', this.completedCourses)
 	},
 
 	checkLogin (){
