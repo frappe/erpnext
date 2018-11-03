@@ -10,7 +10,7 @@
         </div>
         <div class='card-footer text-right'>
             <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a class='btn btn-secondary btn-sm' href="/enroll?course=user">Enroll Now</a>
+            <a class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
         </div>
     </div>
 </div>
@@ -34,6 +34,18 @@ export default {
     		this.program = r.message
     	})
     },
+    methods: {
+        enroll() {
+            frappe.call({
+                method: "erpnext.www.academy.enroll",
+                args:{
+                    type: "Program",
+                    name: this.program_code,
+                    student_email_id: frappe.session.user
+                }
+            })
+        }
+    }
 };
 </script>
 
