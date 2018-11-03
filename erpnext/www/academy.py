@@ -105,8 +105,13 @@ def evaluate_quiz(quiz_response, quiz_name):
 	# 	return None
 
 @frappe.whitelist()
-def get_completed_courses():
-	return ['ECP-001', 'ECP-002']
+def get_completed_courses(email=frappe.session.user):
+	try:
+		print(email)
+		student = frappe.get_doc("Student", get_student_id(email))
+		return student.get_completed_courses()
+	except:
+		return None
 
 @frappe.whitelist()
 def get_continue_data(program_name):
@@ -127,15 +132,20 @@ def create_student(student_name=frappe.session.user):
 	return student_name
 
 @frappe.whitelist()
-def enroll(type, name, student_email_id):
+def enroll_all_courses_in_program(program_enrollment, student):
+	course_list = [course.name for course in get_courses(program_enrollment.program)]
+	for course_name in course_list:
+		student.enroll_in_course(course_name=course_name, program_enrollment=program_enrollment.name)
+
+@frappe.whitelist()
+def enroll_in_program(program_name, student_email_id):
 	if(not get_student_id(student_email_id)):
 		create_student(student_email_id)
 	student = frappe.get_doc("Student", get_student_id(student_email_id))
-	if type == "Program":
-		student.enroll_in_program(name)
-	if type == "Course":
-		pass
+	program_enrollment = student.enroll_in_program(program_name)
+	enroll_all_courses_in_program(program_enrollment, student)
 
+@frappe.whitelist()
 def get_student_id(email=None):
 	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
 
@@ -144,4 +154,20 @@ def get_student_id(email=None):
 	try:
 		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
 	except IndexError:
+		return None
+
+@frappe.whitelist()
+def get_program_enrollments(email=frappe.session.user):
+	try:
+		student = frappe.get_doc("Student", get_student_id(email))
+		return student.get_program_enrollments()
+	except:
+		return None
+
+@frappe.whitelist()
+def get_course_enrollments(email=frappe.session.user):
+	try:
+		student = frappe.get_doc("Student", get_student_id(email))
+		return student.get_course_enrollments()
+	except:
 		return None
