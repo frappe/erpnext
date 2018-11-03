@@ -10,7 +10,8 @@
         </div>
         <div class='card-footer text-right'>
             <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
+            <a v-if="this.$root.$data.checkProgramEnrollment(program_code)" class='btn btn-secondary btn-sm' @click="$router.push('/Program/' + program.name)">Start Course</a>
+            <a v-else class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
         </div>
     </div>
 </div>
@@ -37,10 +38,9 @@ export default {
     methods: {
         enroll() {
             frappe.call({
-                method: "erpnext.www.academy.enroll",
+                method: "erpnext.www.academy.enroll_in_program",
                 args:{
-                    type: "Program",
-                    name: this.program_code,
+                    program_name: this.program_code,
                     student_email_id: frappe.session.user
                 }
             })
