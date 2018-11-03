@@ -55,10 +55,10 @@ def create_procedure():
 
 def create_unit():
 	unit = frappe.get_doc({
-		"doctype": "Measurement Unit",
-		"unit": "_Test Unit 1"
+		"doctype": "UOM",
+		"uom_name": "_Test UOM",
 	})
-	unit_exist = frappe.get_list("Measurement Unit", filters={"unit": ""+ unit.unit +""}, fields=["name"])
+	unit_exist = frappe.get_list("UOM", filters={"uom_name": ""+ unit.uom_name +""}, fields=["name"])
 	if len(unit_exist) == 0:
 		unit.insert()
 
@@ -74,7 +74,7 @@ def create_goal():
 			{
 				"objective": "_Test Quality Objective 1",
 				"target": "100",
-				"unit": "_Test Unit 1"
+				"unit": "_Test UOM"
 			}
 		]
 	})
@@ -94,7 +94,7 @@ def create_review():
 				"objective": "_Test Quality Objective 1",
 				"target": "100",
 				"achieved": "4",
-				"unit": "_Test Unit 1"
+				"unit": "_Test UOM"
 			}
 		]
 	})
