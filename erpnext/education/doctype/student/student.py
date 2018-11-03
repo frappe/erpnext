@@ -46,13 +46,30 @@ class Student(Document):
 
 	def get_course_enrollments(self):
 		"""Returns a list of course enrollments linked with the current student"""
-		enrollments_name_list = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['name'])
-		if not enrollments_name_list:
-			frappe.throw("Student {0} has not enrolled in any course".format(self.name))
+		course_enrollments = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['name'])
+		if not course_enrollments:
 			return None
 		else:
-			enrollments= [frappe.get_doc("Course Enrollment", enrollment.name) for enrollment in enrollments_name_list]
+			enrollments = [item['name'] for item in course_enrollments]
 			return enrollments
+
+	def get_program_enrollments(self):
+		"""Returns a list of course enrollments linked with the current student"""
+		program_enrollments = frappe.get_list("Program Enrollment", filters={"student": self.name}, fields=['program'])
+		if not program_enrollments:
+			return None
+		else:
+			enrollments = [item['program'] for item in program_enrollments]
+			return enrollments
+
+	def get_completed_courses(self):
+		"""Returns a list of course enrollments linked with the current student"""
+		completed_courses = frappe.get_list("Course Enrollment", filters={"student": self.name, "completed":1}, fields=['course'])
+		if not completed_courses:
+			return None
+		else:
+			courses = [item['course'] for item in completed_courses]
+			return courses
 
 	def enroll_in_program(self, program_name):
 		enrollment = frappe.get_doc({
@@ -64,6 +81,18 @@ class Student(Document):
 			})
 		enrollment.save()
 		enrollment.submit()
+		frappe.db.commit()
+		return enrollment
+
+	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=frappe.utils.datetime.datetime.now()):
+		enrollment = frappe.get_doc({
+				"doctype": "Course Enrollment",
+				"student": self.name,
+				"course": course_name,
+				"program_enrollment": program_enrollment,
+				"enrollment_date": enrollment_date
+			})
+		enrollment.save()
 		frappe.db.commit()
 
 def get_timeline_data(doctype, name):
