@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -187,7 +188,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-10-22 15:07:47.701065", 
+ "modified": "2018-11-03 11:10:53.818818", 
  "modified_by": "Administrator", 
  "module": "Quality Management", 
  "name": "Quality Review Table", 
