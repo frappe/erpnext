@@ -20,6 +20,7 @@ var store = {
 	state: {
 		completedCourses: new Set(),
 		enrolledPrograms: new Set(),
+		enrolledCourses: new Set(),
 		currentEnrollment: '',
 		student: '',
 		isLogin: false
@@ -48,10 +49,29 @@ var store = {
 		return this.state.enrolledPrograms.has(programName)
 	},
 
+	updateEnrolledPrograms (){
+		if (this.debug) console.log('Updating enrolledPrograms')
+		frappe.call("erpnext.www.academy.get_program_enrollments").then( r => {
+			for(var ii=0; ii < r.message.length; ii++){
+				this.state.enrolledPrograms.add(r.message[ii])
+			}
+		})
+		if (this.debug) console.log('Updated State', this.state.enrolledPrograms)
+	},
+
+	updateEnrolledCourses (){
+		if (this.debug) console.log('Updating enrolledCourses')
+		frappe.call("erpnext.www.academy.get_course_enrollments").then( r => {
+			for(var ii=0; ii < r.message.length; ii++){
+				this.state.enrolledCourses.add(r.message[ii])
+			}
+		})
+		if (this.debug) console.log('Updated State', this.state.enrolledCourses)
+	},
+
 	updateCompletedCourses (){
 		if (this.debug) console.log('Updating States')
 		frappe.call("erpnext.www.academy.get_completed_courses").then( r => {
-			this.state.completedCourses.clear()
 			for(var ii=0; ii < r.message.length; ii++){
 				this.state.completedCourses.add(r.message[ii])
 			}
@@ -73,6 +93,8 @@ var store = {
 
 	updateState (){
 		this.updateCompletedCourses()
+		this.updateEnrolledPrograms()
+		this.updateEnrolledCourses()
 		this.checkLogin()
 
 	},
