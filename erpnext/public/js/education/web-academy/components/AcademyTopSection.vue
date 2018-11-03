@@ -10,7 +10,7 @@
 		</ul>
 		<p class='lead' v-html="description"></p>
 		<p class="mt-4">
-			<a class="btn btn-primary btn-lg" href="/enroll">Explore Courses</a>
+			<AcademyTopSectionButton/>
 		</p>
 	</div>
 </section>
@@ -18,7 +18,10 @@
 <script>
 import AcademyTopSectionButton from "./AcademyTopSectionButton.vue"
 export default {
-	props: ['title', 'description', 'buttonName'],
+	props: ['title', 'description'],
     name: "AcademyTopSection",
+    components: {
+    	AcademyTopSectionButton
+    }
 };
 </script>
