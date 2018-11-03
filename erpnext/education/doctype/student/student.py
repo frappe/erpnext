@@ -46,11 +46,11 @@ class Student(Document):
 
 	def get_course_enrollments(self):
 		"""Returns a list of course enrollments linked with the current student"""
-		course_enrollments = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['name'])
+		course_enrollments = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['course', 'name'])
 		if not course_enrollments:
 			return None
 		else:
-			enrollments = [item['name'] for item in course_enrollments]
+			enrollments = {item['course']:item['name'] for item in course_enrollments}
 			return enrollments
 
 	def get_program_enrollments(self):

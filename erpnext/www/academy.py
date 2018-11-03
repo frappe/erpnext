@@ -171,3 +171,15 @@ def get_course_enrollments(email=frappe.session.user):
 		return student.get_course_enrollments()
 	except:
 		return None
+
+@frappe.whitelist()
+def add_activity(enrollment, content_type, content):
+	activity = frappe.get_doc({
+		"doctype": "Course Activity",
+		"enrollment": enrollment,
+		"content_type": content_type,
+		"content": content,
+		"activity_date": frappe.utils.datetime.datetime.now()
+		})
+	activity.save()
+	frappe.db.commit()
