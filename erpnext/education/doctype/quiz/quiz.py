@@ -23,8 +23,8 @@ class Quiz(Document):
 		pass
 
 
-	def evaluate(self, response_dict, enrollment, quiz_name):
-		self.validate_quiz_attempts(enrollment, quiz_name)
+	def evaluate(self, response_dict, quiz_name):
+		# self.validate_quiz_attempts(enrollment, quiz_name)
 		self.get_questions()
 		answers = {q.name:q.get_answer() for q in self.get_questions()}
 		correct_answers = {question: (answers[question] == response_dict[question]) for question in response_dict.keys()}
