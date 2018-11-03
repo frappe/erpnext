@@ -1,6 +1,8 @@
 <template>
 <div>
-	<AcademyTopSection :title="title" :description="description"/>
+	<AcademyTopSection :title="title" :description="description">
+        <AcademyTopSectionButton/>
+    </AcademyTopSection>
 	<AcademyList :title="'Featured Programs'" :description="'Master ERPNext'">
         <AcademyProgramCard v-for="program in featured_programs" :key="program.name" :program_code="program"/>
     </AcademyList>
@@ -10,6 +12,7 @@
 import AcademyTopSection from "../components/AcademyTopSection.vue"
 import AcademyList from "../components/AcademyList.vue"
 import AcademyProgramCard from "../components/AcademyProgramCard.vue"
+import AcademyTopSectionButton from "../components/AcademyTopSectionButton.vue"
 
 export default {
     name: "AcademyHome",
@@ -21,7 +24,10 @@ export default {
     	}
     },
     components: {
-		AcademyTopSection, AcademyList, AcademyProgramCard
+		AcademyTopSection,
+        AcademyList,
+        AcademyProgramCard,
+        AcademyTopSectionButton
 	},
 	mounted() {
     	frappe.call("erpnext.www.academy.get_portal_details").then(r => {
