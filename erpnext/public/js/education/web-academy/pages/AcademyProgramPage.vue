@@ -1,6 +1,8 @@
 <template>
 <div>
-	<AcademyTopSection v-bind:title="program.program_name" v-bind:description="program.description"/>
+	<AcademyTopSection v-bind:title="program.program_name" v-bind:description="program.description">
+        <AcademyTopSectionButton/>
+    </AcademyTopSection>
 	<AcademyList :title="'Courses'" :description="''">
         <AcademyCourseCard v-for="course in course_list" :course="course" :key="course.name"/>
     </AcademyList>
@@ -10,6 +12,7 @@
 import AcademyTopSection from "../components/AcademyTopSection.vue"
 import AcademyList from "../components/AcademyList.vue"
 import AcademyCourseCard from "../components/AcademyCourseCard.vue"
+import AcademyTopSectionButton from "../components/AcademyTopSectionButton.vue"
 
 export default {
 	props: ['code'],
@@ -17,7 +20,8 @@ export default {
     components: {
 		AcademyTopSection,
 		AcademyList,
-		AcademyCourseCard
+		AcademyCourseCard,
+        AcademyTopSectionButton
 	},
 	data() {
 		return {
