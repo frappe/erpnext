@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import frappe
-import erpnext.education.utils as utils
 
 # Functions to get homepage details
 @frappe.whitelist(allow_guest=True)
@@ -108,3 +107,41 @@ def evaluate_quiz(quiz_response, quiz_name):
 @frappe.whitelist()
 def get_completed_courses():
 	return ['ECP-001', 'ECP-002']
+
+@frappe.whitelist()
+def get_continue_data(program_name):
+	program = frappe.get_doc("Program", program_name)
+	courses = program.get_all_children()
+	continue_data = get_starting_content(courses[0].course)
+	continue_data['course'] = courses[0].course
+	return continue_data
+
+def create_student(student_name=frappe.session.user):
+	student = frappe.get_doc({
+		"doctype": "Student",
+		"first_name": student_name,
+		"student_email_id": student_name,
+		})
+	student.save()
+	frappe.db.commit()
+	return student_name
+
+@frappe.whitelist()
+def enroll(type, name, student_email_id):
+	if(not get_student_id(student_email_id)):
+		create_student(student_email_id)
+	student = frappe.get_doc("Student", get_student_id(student_email_id))
+	if type == "Program":
+		student.enroll_in_program(name)
+	if type == "Course":
+		pass
+
+def get_student_id(email=None):
+	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
+
+	:param user: a user email address
+	"""
+	try:
+		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
+	except IndexError:
+		return None
