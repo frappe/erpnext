@@ -3,16 +3,16 @@ import frappe
 import erpnext.education.utils as utils
 
 # Functions to get homepage details
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_portal_details():
 	settings = frappe.get_doc("Education Settings")
 	title = settings.portal_title
 	description = settings.description
 	return dict(title=title, description=description)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_featured_programs():
-	featured_program_names = frappe.get_list("Program", filters={"is_published": True, "is_featured": True})
+	featured_program_names = frappe.get_all("Program", filters={"is_published": True, "is_featured": True})
 	featured_list = [program["name"] for program in featured_program_names]
 	if featured_list:
 		return featured_list
@@ -20,7 +20,7 @@ def get_featured_programs():
 		return None
 
 # Functions to get program & course details
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_program_details(program_name):
 	try:
 		program = frappe.get_doc('Program', program_name)
@@ -28,7 +28,7 @@ def get_program_details(program_name):
 	except:
 		return None
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_courses(program_name):
 	program = frappe.get_doc('Program', program_name)
 	courses = program.get_course_list()
@@ -104,3 +104,7 @@ def evaluate_quiz(quiz_response, quiz_name):
 	# except frappe.DoesNotExistError:
 	# 	frappe.throw("Quiz {0} does not exist".format(quiz_name))
 	# 	return None
+
+@frappe.whitelist()
+def get_completed_courses():
+	return ['ECP-001', 'ECP-002']

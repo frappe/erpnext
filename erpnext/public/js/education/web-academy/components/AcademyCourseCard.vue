@@ -32,15 +32,17 @@ export default {
         }
     },
     mounted() {
-        frappe.call({
-            method: "erpnext.www.academy.get_starting_content",
-            args: {
-                course_name: this.course.name
-            }
-        }).then(r => {
-            this.nextContent = r.message.content,
-            this.nextContentType = r.message.content_type
-        });
+        if(this.$root.$data.checkLogin()){
+            frappe.call({
+                method: "erpnext.www.academy.get_starting_content",
+                args: {
+                    course_name: this.course.name
+                }
+            }).then(r => {
+                this.nextContent = r.message.content,
+                this.nextContentType = r.message.content_type
+            });
+        }
     },
     components: {
         AcademyCourseCardButton

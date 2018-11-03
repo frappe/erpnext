@@ -19,30 +19,63 @@ var store = {
 	debug: true,
 	state: {
 		completedCourses: new Set(),
+		enrolledPrograms: new Set(),
 		currentEnrollment: '',
-		currentStudentID: '',
+		student: '',
+		isLogin: false
 	},
-	setCourseEnrollment (enrollment) {
+
+	setCurrentEnrollment (enrollment) {
 	    if (this.debug) console.log('setCourseEnrollment triggered with', enrollment)
 	    this.state.currentEnrollment = enrollment
 	},
+
+	getCurrentEnrollment () {
+	    if (this.debug) console.log('getCourseEnrollment triggered')
+	    return this.state.currentEnrollment
+	},
+
 	addCompletedCourses (courseName){
 		if (this.debug) console.log('addCompletedCourses triggered with', courseName)
 		this.state.completedCourses.add(courseName)
 	},
+
 	checkCourseCompletion (courseName){
 		return this.state.completedCourses.has(courseName)
 	},
-	updateState (){
+
+	checkProgramEnrollment (programName){
+		return this.state.enrolledPrograms.has(programName)
+	},
+
+	updateCompletedCourses (){
 		if (this.debug) console.log('Updating States')
-		frappe.call("erpnext.www.academy.get_state").then( r => {
+		frappe.call("erpnext.www.academy.get_completed_courses").then( r => {
 			this.state.completedCourses.clear()
 			for(var ii=0; ii < r.message.length; ii++){
 				this.state.completedCourses.add(r.message[ii])
 			}
 		})
 		if (this.debug) console.log('Updated State', this.state.completedCourses)
-	}
+	},
+
+	checkLogin (){
+		if(frappe.session.user === "Guest"){
+			if (this.debug) console.log('No Session')
+			this.isLogin = false
+		}
+		else {
+			if (this.debug) console.log('Current User: ', frappe.session.user)
+			this.isLogin = true
+		}
+		return this.isLogin
+	},
+
+	updateState (){
+		this.updateCompletedCourses()
+		this.checkLogin()
+
+	},
 }
 
 const router = new VueRouter({
@@ -57,7 +90,9 @@ frappe.ready(() => {
 		template: "<academy-root/>",
 		components: { AcademyRoot },
 		created: function() {
-			store.updateState()
+			if(store.checkLogin()){
+				store.updateState()
+			}
 		}
 	});
 })
