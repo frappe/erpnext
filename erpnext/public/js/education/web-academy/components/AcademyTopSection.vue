@@ -10,18 +10,15 @@
 		</ul>
 		<p class='lead' v-html="description"></p>
 		<p class="mt-4">
-			<AcademyTopSectionButton/>
+			<slot></slot>
 		</p>
 	</div>
 </section>
 </template>
 <script>
-import AcademyTopSectionButton from "./AcademyTopSectionButton.vue"
+
 export default {
 	props: ['title', 'description'],
     name: "AcademyTopSection",
-    components: {
-    	AcademyTopSectionButton
-    }
 };
 </script>

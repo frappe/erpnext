@@ -13,7 +13,6 @@ export default {
     },
     mounted() {
     	if(this.$root.$data.checkCourseCompletion(this.course)){
-    		console.log('Completed', this.course)
     		this.buttonName = 'Completed'
     		this.className = 'btn-success'
     	}
