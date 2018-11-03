@@ -16,8 +16,9 @@
 </section>
 </template>
 <script>
+import AcademyTopSectionButton from "./AcademyTopSectionButton.vue"
 export default {
-	props: ['title', 'description'],
+	props: ['title', 'description', 'buttonName'],
     name: "AcademyTopSection",
 };
 </script>
