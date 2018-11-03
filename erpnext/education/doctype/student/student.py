@@ -54,6 +54,18 @@ class Student(Document):
 			enrollments= [frappe.get_doc("Course Enrollment", enrollment.name) for enrollment in enrollments_name_list]
 			return enrollments
 
+	def enroll_in_program(self, program_name):
+		enrollment = frappe.get_doc({
+				"doctype": "Program Enrollment",
+				"student": self.name,
+				"academic_year": frappe.get_last_doc("Academic Year").name,
+				"program": program_name,
+				"enrollment_date": frappe.utils.datetime.datetime.now()
+			})
+		enrollment.save()
+		enrollment.submit()
+		frappe.db.commit()
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(`date`), count(*)
