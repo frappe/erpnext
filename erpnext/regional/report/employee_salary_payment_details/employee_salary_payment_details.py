@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.regional.report.provident_fund_deductions.provident_fund_deductions import get_conditions
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -38,7 +39,6 @@ def get_columns(filters):
 			"label": _("Gross Pay"),
 			"fieldname": "gross_pay",
 			"fieldtype": "Currency",
-			"options": "currency",
 			"width": 140
 		},
 		{
@@ -63,28 +63,11 @@ def get_columns(filters):
 
 	return columns
 
-def get_conditions(filters):
-	conditions = [""]
-
-	if filters.get("department"):
-		conditions.append("department = '%s' " % (filters["department"]) )
-
-	if filters.get("branch"):
-		conditions.append("branch = '%s' " % (filters["branch"]) )
-
-	if filters.get("company"):
-		conditions.append("company = '%s' " % (filters["company"]) )
-
-	if filters.get("period"):
-		conditions.append("month(start_date) = '%s' " % (filters["period"]))
-
-	return " and ".join(conditions)
-
 def get_data(filters):
-
 	data = []
 
-	employee_details = frappe.get_list("Employee", fields = ["employee", "branch", "bank_ac_no", "ifsc_code", "micr", "salary_mode"])
+	employee_details = frappe.get_list("Employee",
+		fields = ["employee", "branch", "bank_ac_no", "ifsc_code", "micr", "salary_mode"])
 
 	employee_data_dict = {}
 
@@ -101,18 +84,18 @@ def get_data(filters):
 
 	conditions = get_conditions(filters)
 
-	entry = frappe.db.sql(""" select employee, employee_name, gross_pay 
-		from `tabSalary Slip` 
+	entry = frappe.db.sql(""" select employee, employee_name, net_pay, mode_of_payment
+		from `tabSalary Slip` sal
 		where docstatus = 1 %s """
 		%(conditions), as_dict =1)
 
 	for d in entry:
-		
+
 		employee = {
-			"branch" : employee_data_dict.get(d.employee).get("branch"),
-			"employee_name" : d.employee_name,
-			"employee" : d.employee,
-			"gross_pay" : d.gross_pay,
+			"branch": employee_data_dict.get(d.employee).get("branch"),
+			"employee_name": d.employee_name,
+			"employee": d.employee,
+			"gross_pay": d.net_pay
 		}
 
 		if employee_data_dict.get(d.employee).get("salary_mode") == "Bank":
@@ -122,9 +105,6 @@ def get_data(filters):
 		else:
 			employee["account_no"] = employee_data_dict.get(d.employee).get("salary_mode")
 
-		if filters.get("type") and employee_data_dict.get(d.employee).get("salary_mode") == filters.get("type"):
-			data.append(employee)
-		elif not filters.get("type"):
-			data.append(employee)
+		data.append(employee)
 
 	return data

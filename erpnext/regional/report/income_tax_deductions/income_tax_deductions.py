@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.regional.report.provident_fund_deductions.provident_fund_deductions import get_conditions
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -37,40 +38,19 @@ def get_columns(filters):
 			"label": _("Income Tax Amount"),
 			"fieldname": "it_amount",
 			"fieldtype": "Currency",
-			"options": "currency",
 			"width": 140
 		},
 		{
 			"label": _("Gross Pay"),
 			"fieldname": "gross_pay",
 			"fieldtype": "Currency",
-			"options": "currency",
 			"width": 140
 		}
 	]
 
 	return columns
 
-def get_conditions(filters):
-	conditions = [""]
-
-	if filters.get("department"):
-		conditions.append("sal.department = '%s' " % (filters["department"]) )
-
-	if filters.get("branch"):
-		conditions.append("sal.branch = '%s' " % (filters["branch"]) )
-
-	if filters.get("company"):
-		conditions.append("sal.company = '%s' " % (filters["company"]) )
-
-	if filters.get("period"):
-		conditions.append("month(sal.start_date) = '%s' " % (filters["period"]))
-
-	return " and ".join(conditions)
-
-
 def get_data(filters):
-
 	data = []
 
 	employee_pan_dict = frappe._dict(frappe.db.sql(""" select employee, pan_number from `tabEmployee`"""))
@@ -80,7 +60,7 @@ def get_data(filters):
 
 	conditions = get_conditions(filters)
 
-	entry = frappe.db.sql(""" select sal.employee, sal.employee_name, ded.salary_component, ded.amount,sal.gross_pay 
+	entry = frappe.db.sql(""" select sal.employee, sal.employee_name, ded.salary_component, ded.amount,sal.gross_pay
 		from `tabSalary Slip` sal, `tabSalary Detail` ded
 		where sal.name = ded.parent
 		and ded.parentfield = 'deductions'

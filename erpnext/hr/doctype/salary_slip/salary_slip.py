@@ -287,7 +287,6 @@ class SalarySlip(TransactionBase):
 		'''Calculate salary after salary structure details have been updated'''
 		if not self.salary_slip_based_on_timesheet:
 			self.get_date_details()
-		self.pull_emp_details()
 		self.get_leave_details()
 		self.calculate_net_pay()
 
@@ -306,12 +305,6 @@ class SalarySlip(TransactionBase):
 				"amount": self.hour_rate * self.total_working_hours
 			}
 			doc.append('earnings', wages_row)
-
-	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
-		if emp:
-			self.bank_name = emp.bank_name
-			self.bank_account_no = emp.bank_ac_no
 
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not joining_date:

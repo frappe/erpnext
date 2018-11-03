@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0, 
+ "creation": "2018-11-02 12:04:38.374133", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-11-02 12:04:38.374133", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Total Payments Based On Payment Mode", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Salary Slip", 
+ "report_name": "Total Payments Based On Payment Mode", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "HR Manager"
+  }, 
+  {
+   "role": "Employee"
+  }
+ ]
+}

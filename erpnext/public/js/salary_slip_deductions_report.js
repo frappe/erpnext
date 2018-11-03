@@ -1,15 +1,14 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-/* eslint-disable */
+frappe.provide("erpnext.salary_slip_deductions_report");
 
-frappe.query_reports["ECS Check List"] = {
-	"filters": [
+erpnext.salary_slip_deductions_report = {
+	"filters":[
 		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1
 		},
 		{
 			fieldname: "department",
@@ -22,16 +21,6 @@ frappe.query_reports["ECS Check List"] = {
 			label: __("Barnch"),
 			fieldtype: "Link",
 			options: "Branch",
-		},
-		{
-			fieldname: "type",
-			label: __("Type"),
-			fieldtype: "Select",
-			options:[
-				{ "value": "Bank", "label": __("Bank") },
-				{ "value": "Cash", "label": __("Cash") },
-				{ "value": "Cheque", "label": __("Cheque") },
-			],
 		},
 		{
 			fieldname: "period",
@@ -50,7 +39,9 @@ frappe.query_reports["ECS Check List"] = {
 				{ "value": 10, "label": __("Oct") },
 				{ "value": 11, "label": __("Nov") },
 				{ "value": 12, "label": __("Dec") },
-			]
+			],
+			default: new Date().getMonth() + 1,
+			reqd: 1
 		}
 
 	]

@@ -3,6 +3,5 @@
 /* eslint-disable */
 
 frappe.require("assets/erpnext/js/salary_slip_deductions_report.js", function() {
-	frappe.query_reports["Provident Fund Deductions"] = erpnext.salary_slip_deductions_report;
+	frappe.query_reports["Total Payments Based On Payment Mode"] = erpnext.salary_slip_deductions_report;
 });
-
