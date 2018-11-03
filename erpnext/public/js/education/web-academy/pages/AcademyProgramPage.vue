@@ -43,10 +43,5 @@ export default {
     		this.course_list = r.message
     	})
 	},
-	watch: {
-   		'$route' (to, from) {
-      		// react to route changes...
-    	}
-	}
 };
 </script>
