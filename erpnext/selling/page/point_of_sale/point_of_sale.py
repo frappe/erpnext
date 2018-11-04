@@ -67,7 +67,8 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 					rgt=rgt,
 					condition=condition
 			), {
-				'price_list': price_list
+				'price_list': price_list,
+				'item_code': item_code
 			}, as_dict=1)
 
 		res = {
