@@ -78,7 +78,8 @@ class SalaryStructure(Document):
 			.format(condition=condition_str), tuple(values))
 
 		return employees
-
+	
+	@frappe.whitelist()
 	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
 			from_date=None, base=None,variable=None):
 		employees = self.get_employees(grade= grade,department= department,designation= designation,name=employee)
