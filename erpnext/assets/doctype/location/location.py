@@ -223,3 +223,10 @@ def add_node():
 
 def on_doctype_update():
 	frappe.db.add_index("Location", ["lft", "rgt"])
+
+@frappe.whitelist()
+def get_total_location():
+	# Get the total of all locations in square meters
+	total_location = frappe.db.get_value("Location", {"is_group": 0}, "sum(round(area, 3))")
+
+	return total_location
