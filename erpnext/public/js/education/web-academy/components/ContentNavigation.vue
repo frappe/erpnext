@@ -1,8 +1,8 @@
 <template>
 	<div class="nav-buttons">
 		<button class='btn btn-outline-secondary' @click="$router.go(-1)">Back</button>
-		<button v-if="nextContent" class='btn btn-primary' @click="goNext()">Next</button>
-		<button v-else class='btn btn-primary' @click="finish()">Finish Course</button>
+		<button v-show="nextContent" class='btn btn-primary' @click="goNext()">Next</button>
+		<button v-show="!nextContent" class='btn btn-primary' @click="finish()">Finish Course</button>
 	</div>
 </template>
 
