@@ -11,9 +11,6 @@ export default {
             className: 'btn-primary'
         }
     },
-    mounted() {
-        this.$root.$data.updateCompletedCourses()
-    }
     computed: {
         getButtonName: function() {
             if(this.$root.$data.checkCourseCompletion(this.course)){
