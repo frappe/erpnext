@@ -106,8 +106,8 @@ def evaluate_quiz(quiz_response, quiz_name):
 
 @frappe.whitelist()
 def get_completed_courses(email=frappe.session.user):
+	print("Get completed course ", email)
 	try:
-		print(email)
 		student = frappe.get_doc("Student", get_student_id(email))
 		return student.get_completed_courses()
 	except:
@@ -174,12 +174,26 @@ def get_course_enrollments(email=frappe.session.user):
 
 @frappe.whitelist()
 def add_activity(enrollment, content_type, content):
-	activity = frappe.get_doc({
-		"doctype": "Course Activity",
-		"enrollment": enrollment,
-		"content_type": content_type,
-		"content": content,
-		"activity_date": frappe.utils.datetime.datetime.now()
-		})
-	activity.save()
-	frappe.db.commit()
+	if(check_activity_exists(enrollment, content_type, content)):
+		pass
+	else:
+		activity = frappe.get_doc({
+			"doctype": "Course Activity",
+			"enrollment": enrollment,
+			"content_type": content_type,
+			"content": content,
+			"activity_date": frappe.utils.datetime.datetime.now()
+			})
+		activity.save()
+		frappe.db.commit()
+
+def check_activity_exists(enrollment, content_type, content):
+	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
+	if activity:
+		return True
+	else:
+		return False
+
+@frappe.whitelist()
+def add_quiz_activity(enrollment, quiz, score, answers):
+	pass
