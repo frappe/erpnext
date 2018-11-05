@@ -27,8 +27,19 @@ class Quiz(Document):
 		# self.validate_quiz_attempts(enrollment, quiz_name)
 		self.get_questions()
 		answers = {q.name:q.get_answer() for q in self.get_questions()}
-		correct_answers = {question: (answers[question] == response_dict[question]) for question in response_dict.keys()}
-		return correct_answers, (sum(correct_answers.values()) * 100 ) / len(answers)
+		correct_answers = {}
+		for key in answers:
+			try:
+				result = (response_dict[key] == answers[key])
+			except:
+				result = False
+			correct_answers[key] = result
+		score = (sum(correct_answers.values()) * 100 ) / len(answers)
+		if score >= self.passing_score:
+			status = "Pass"
+		else:
+			status = "Fail"
+		return correct_answers, score, status
 
 
 	def get_questions(self):

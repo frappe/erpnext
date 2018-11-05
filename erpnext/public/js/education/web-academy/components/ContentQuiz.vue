@@ -72,6 +72,7 @@ export default {
 			frappe.call({
 				method: "erpnext.www.academy.evaluate_quiz",
 				args: {
+                    enrollment: this.$root.$data.enrolledCourses[this.$route.params.course],
 					quiz_response: this.quizResponse,
                     quiz_name: this.content
 				}
