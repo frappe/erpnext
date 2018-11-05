@@ -29,8 +29,11 @@ export default {
 			course_list: []
 		}
 	},
-	mounted() {
+    beforeMount(){
+        console.log("Before Mount")
         if(this.$root.$data.isLogin) this.$root.$data.updateCompletedCourses()
+    },
+	mounted() {
 		frappe.call({
             method: "erpnext.www.academy.get_program_details",
             args: {
