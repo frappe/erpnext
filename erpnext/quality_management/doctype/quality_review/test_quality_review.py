@@ -19,8 +19,8 @@ class TestQualityReview(unittest.TestCase):
 def create_review():
 	review = frappe.get_doc({
 		"doctype": "Quality Review",
-		"goal": "_Test Quality Goal 1",
-		"procedure": "_Test Quality Procedure 1",
+		"goal": "_Test Quality Goal",
+		"procedure": "_Test Quality Procedure",
 		"scope": "Company",
 		"date": ""+ frappe.utils.nowdate() +"",
 		"values": [
@@ -32,7 +32,7 @@ def create_review():
 			}
 		]
 	})
-	review_exist = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal 1"})
+	review_exist = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal"})
 	if len(review_exist) == 0:
 		review.insert()
 		return review
@@ -40,7 +40,7 @@ def create_review():
 		return review_exist[0]
 
 def get_review():
-	review = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal 1"})
+	review = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal"})
 	return review[0]
 
 def create_procedure():
@@ -69,8 +69,8 @@ def create_unit():
 def create_goal():
 	goal = frappe.get_doc({
 		"doctype": "Quality Goal",
-		"goal": "_Test Quality Goal 1",
-		"procedure": "_Test Quality Procedure 1",
+		"goal": "_Test Quality Goal",
+		"procedure": "_Test Quality Procedure",
 		"revision": "1",
 		"frequency": "None",
 		"measurable": "Yes",

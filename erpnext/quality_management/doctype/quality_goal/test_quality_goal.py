@@ -20,7 +20,7 @@ def create_goal():
 		"doctype": "Quality Goal",
 		"goal": "_Test Quality Goal",
 		"revision": "1",
-		"procedure": "_Test Quality Procedure 1",
+		"procedure": "_Test Quality Procedure",
 		"frequency": "Daily",
 		"measureable": "Yes",
 		"objective": [

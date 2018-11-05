@@ -25,7 +25,7 @@ def create_action():
 		'type': 'Quality Review',
 		'review': ''+ review[0].name +'',
 		'date': ''+ frappe.utils.nowdate() +'',
-		'procedure': '_Test Quality Procedure 1'
+		'procedure': '_Test Quality Procedure'
 	})
 	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""})
 	if len(action_exist) == 0:
@@ -65,8 +65,8 @@ def create_unit():
 def create_goal():
 	goal = frappe.get_doc({
 		"doctype": "Quality Goal",
-		"goal": "_Test Quality Goal 1",
-		"procedure": "_Test Quality Procedure 1",
+		"goal": "_Test Quality Goal",
+		"procedure": "_Test Quality Procedure",
 		"revision": "1",
 		"frequency": "None",
 		"measurable": "Yes",
@@ -86,8 +86,8 @@ def create_review():
 	review = frappe.get_doc({
 		"doctype": "Quality Review",
 		"scope": "Company",
-		"goal": "_Test Quality Goal 1",
-		"procedure": "_Test Quality Procedure 1",
+		"goal": "_Test Quality Goal",
+		"procedure": "_Test Quality Procedure",
 		"date": ""+ frappe.utils.nowdate() +"",
 		"values": [
 			{
@@ -98,6 +98,6 @@ def create_review():
 			}
 		]
 	})
-	review_exist = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal 1"})
+	review_exist = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal"})
 	if len(review_exist) == 0:
 		review.insert()

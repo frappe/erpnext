@@ -11,7 +11,7 @@ class QualityProcedure(NestedSet):
 
 	def before_save(self):
 		for data in self.procedure_step:
-			if data.procedure == 'Procedure' and data.procedure_name != '':
+			if data.procedure == 'Procedure' and data.procedure_name:
 				data.step = data.procedure_name
 				self.is_group = 1
 
