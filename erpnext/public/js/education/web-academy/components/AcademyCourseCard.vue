@@ -11,7 +11,7 @@
                     </ul>
                 </span>
             </div>
-            <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
+            <div v-if="$root.$data.isLogin" class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
                 <AcademyCourseCardButton :course="course.name" :nextContent="nextContent" :nextContentType="nextContentType"/>
             </div>
         </div>

@@ -30,7 +30,7 @@ export default {
 		}
 	},
 	mounted() {
-        this.$root.$data.updateCompletedCourses()
+        if(this.$root.$data.isLogin) this.$root.$data.updateCompletedCourses()
 		frappe.call({
             method: "erpnext.www.academy.get_program_details",
             args: {
