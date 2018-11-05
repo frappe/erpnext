@@ -299,12 +299,12 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.base_received_amount + total_deductions - 
+					self.unallocated_amount = (self.base_received_amount + total_deductions -
 						self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
@@ -549,7 +549,7 @@ def get_outstanding_reference_documents(args):
 	# Get positive outstanding sales /purchase invoices/ Fees
 	condition = ""
 	if args.get("voucher_type") and args.get("voucher_no"):
-		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
+		condition = " and voucher_type={0} and voucher_no={1}"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
@@ -790,7 +790,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
-
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
@@ -877,7 +876,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
-
+	pe.contact_person = doc.get("contact_person")
+	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account

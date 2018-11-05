@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Trip', {
-	setup: function(frm) {
-		frm.set_query("driver", function() {
+	setup: function (frm) {
+		frm.set_query("driver", function () {
 			return {
 				filters: {
 					"status": "Active"
@@ -11,7 +11,7 @@ frappe.ui.form.on('Delivery Trip', {
 			};
 		});
 
-		frm.set_query("address", "delivery_stops", function(doc, cdt, cdn) {
+		frm.set_query("address", "delivery_stops", function (doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
 			if (row.customer) {
 				return {
@@ -24,7 +24,7 @@ frappe.ui.form.on('Delivery Trip', {
 			}
 		})
 
-		frm.set_query("contact", "delivery_stops", function(doc, cdt, cdn) {
+		frm.set_query("contact", "delivery_stops", function (doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
 			if (row.customer) {
 				return {
@@ -45,7 +45,7 @@ frappe.ui.form.on('Delivery Trip', {
 			});
 		}
 
-		if (frm.doc.docstatus===0) {
+		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Delivery Note'), () => {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
@@ -93,12 +93,8 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	notify_customers: function (frm) {
-		var owner_email = frm.doc.owner == "Administrator"
-			? frappe.user_info("Administrator").email
-			: frm.doc.owner;
-
 		$.each(frm.doc.delivery_stops || [], function (i, delivery_stop) {
-			if (!delivery_stop.delivery_notes) {
+			if (!delivery_stop.delivery_note) {
 				frappe.msgprint({
 					"message": __("No Delivery Note selected for Customer {}", [delivery_stop.customer]),
 					"title": __("Warning"),
@@ -107,34 +103,37 @@ frappe.ui.form.on('Delivery Trip', {
 				});
 			}
 		});
-		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
-			frappe.call({
-				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.notify_customers",
-				args: {
-					"docname": frm.doc.name,
-					"date": frm.doc.date,
-					"driver": frm.doc.driver,
-					"vehicle": frm.doc.vehicle,
-					"sender_email": owner_email,
-					"sender_name": frappe.user.full_name(owner_email),
-					"delivery_notification": frm.doc.delivery_notification
-				}
-			});
-			frm.doc.email_notification_sent = true;
-			frm.refresh_field('email_notification_sent');
+
+		frappe.db.get_value("Delivery Settings", { name: "Delivery Settings" }, "dispatch_template", (r) => {
+			if (!r.dispatch_template) {
+				frappe.throw(__("Missing email template for dispatch. Please set one in Delivery Settings."));
+			} else {
+				frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
+					frappe.call({
+						method: "erpnext.stock.doctype.delivery_trip.delivery_trip.notify_customers",
+						args: {
+							"delivery_trip": frm.doc.name
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								frm.doc.email_notification_sent = true;
+								frm.refresh_field('email_notification_sent');
+							}
+						}
+					});
+				});
+			}
 		});
 	}
 });
 
-
-
 frappe.ui.form.on('Delivery Stop', {
 	customer: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		if(row.customer) {
+		if (row.customer) {
 			frappe.call({
 				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_and_address",
-				args: {"name": row.customer},
+				args: { "name": row.customer },
 				callback: function (r) {
 					if (r.message) {
 						if (r.message["shipping_address"]) {
@@ -158,12 +157,13 @@ frappe.ui.form.on('Delivery Stop', {
 			});
 		}
 	},
+
 	address: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		if(row.address) {
+		if (row.address) {
 			frappe.call({
 				method: "frappe.contacts.doctype.address.address.get_address_display",
-				args: {"address_dict": row.address},
+				args: { "address_dict": row.address },
 				callback: function (r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, "customer_address", r.message);
@@ -177,10 +177,10 @@ frappe.ui.form.on('Delivery Stop', {
 
 	contact: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		if(row.contact) {
+		if (row.contact) {
 			frappe.call({
 				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_display",
-				args: {"contact": row.contact},
+				args: { "contact": row.contact },
 				callback: function (r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, "customer_contact", r.message);

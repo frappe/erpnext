@@ -211,8 +211,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	make_payment_request: function() {
-		const me = this;
-		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], me.frm.doc.doctype))
+		var me = this;
+		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
 		frappe.call({
@@ -286,6 +286,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									me.frm.set_value("taxes", r.message.taxes);
 								}
 							},
+							() => me.set_dynamic_labels(),
 							() => me.calculate_taxes_and_totals()
 						]);
 					}
@@ -796,6 +797,38 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
+	service_stop_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_stop_date) {
+			let start_date = Date.parse(child.service_start_date);
+			let end_date = Date.parse(child.service_end_date);
+			let stop_date = Date.parse(child.service_stop_date);
+
+			if(stop_date < start_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be before Service Start Date"));
+			} else if (stop_date > end_date) {
+				frappe.model.set_value(cdt, cdn, "service_stop_date", "");
+				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
+			}
+		}
+	},
+
+	service_start_date: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if(child.service_start_date) {
+			frappe.call({
+				"method": "erpnext.stock.get_item_details.calculate_service_end_date",
+				args: {"args": child},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "service_end_date", r.message.service_end_date);
+				}
+			})
+		}
+	},
+
 	calculate_net_weight: function(){
 		/* Calculate Total Net Weight then further applied shipping rule to calculate shipping charges.*/
 		var me = this;
@@ -813,16 +846,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		if(this.frm.doc_currency!==this.frm.doc.currency
-			|| this.frm.doc_currency!==this.frm.doc.price_list_currency) {
-			// reset names only when the currency is different
-
-			var company_currency = this.get_company_currency();
-			this.change_form_labels(company_currency);
-			this.change_grid_labels(company_currency);
-			this.frm.refresh_fields();
-			this.frm.doc_currency = this.frm.doc.currency;
-		}
+		var company_currency = this.get_company_currency();
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
+		this.frm.refresh_fields();
 	},
 
 	change_form_labels: function(company_currency) {

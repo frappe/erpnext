@@ -166,13 +166,12 @@ class NamingSeries(Document):
 
 	def parse_naming_series(self):
 		parts = self.prefix.split('.')
-		# If series contain date format like INV.YYYY.MM.#####
-		if len(parts) > 2:
-			del parts[-1] # Removed ### from the series
-			prefix = parse_naming_series(parts)
-		else:
-			prefix = parts[0]
 
+		# Remove ### from the end of series
+		if parts[-1] == "#" * len(parts[-1]):
+			del parts[-1]
+
+		prefix = parse_naming_series(parts)
 		return prefix
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):

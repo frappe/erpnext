@@ -18,7 +18,7 @@ def execute():
 
 	for department in departments:
 		# skip root node
-		if department.name == _("All Departments"):
+		if _(department.name) == _("All Departments"):
 			continue
 
 		# for each company, create a copy of the doc

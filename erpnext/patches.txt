@@ -498,7 +498,6 @@ execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
-erpnext.patches.v10_0.remove_and_copy_fields_in_physician
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
@@ -566,3 +565,10 @@ erpnext.patches.v11_0.redesign_healthcare_billing_work_flow
 erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
 erpnext.patches.v11_0.rename_healthcare_fields
 erpnext.patches.v11_0.remove_land_unit_icon
+erpnext.patches.v11_0.add_default_dispatch_notification_template
+erpnext.patches.v11_0.add_market_segments
+erpnext.patches.v11_0.add_sales_stages
+erpnext.patches.v11_0.ewaybill_fields_gst_india
+erpnext.patches.v11_0.drop_column_max_days_allowed
+erpnext.patches.v11_0.change_healthcare_desktop_icons
+erpnext.patches.v10_0.update_user_image_in_employee

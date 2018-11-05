@@ -8,6 +8,7 @@ frappe.query_reports["TDS Payable Monthly"] = {
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
+			"options": "Company",
 			"default": frappe.defaults.get_default('company')
 		},
 		{

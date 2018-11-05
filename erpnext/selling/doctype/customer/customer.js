@@ -106,6 +106,10 @@ frappe.ui.form.on("Customer", {
 				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
 			});
 
+			frm.add_custom_button(__('Pricing Rule'), function () {
+				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+			}, __("Make"));
+
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
