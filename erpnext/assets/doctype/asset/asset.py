@@ -95,7 +95,7 @@ class Asset(AccountsController):
 			date = frappe.db.get_value(doctype, docname, 'posting_date')
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(date):
-			frappe.throw(_("Available-for-use Date is entered as past date"))
+			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def make_depreciation_schedule(self):
 		if self.depreciation_method != 'Manual':
