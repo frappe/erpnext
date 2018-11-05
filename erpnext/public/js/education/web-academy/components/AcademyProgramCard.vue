@@ -10,8 +10,9 @@
         </div>
         <div class='card-footer text-right'>
             <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a v-if="this.$root.$data.checkProgramEnrollment(program_code)" class='btn btn-secondary btn-sm' @click="$router.push('/Program/' + program.name)">Start Course</a>
-            <a v-else class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
+            <a v-if="this.$root.$data.checkProgramEnrollment(program.name)" class='btn btn-secondary btn-sm' @click="$router.push('/Program/' + program.name)">Start Course</a>
+            <a v-else-if="this.$root.$data.isLogin" class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
+            <a v-else class='btn btn-secondary btn-sm' href="/login#signup">Sign Up</a>
         </div>
     </div>
 </div>
