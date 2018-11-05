@@ -528,7 +528,6 @@ erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
 erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
 erpnext.patches.v11_0.rename_field_max_days_allowed
 erpnext.patches.v11_0.create_salary_structure_assignments
-erpnext.patches.v11_0.rename_health_insurance
 erpnext.patches.v11_0.rebuild_tree_for_company
 erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
