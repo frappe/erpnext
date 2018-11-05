@@ -418,7 +418,7 @@ DocType: Sales Person,Sales Person Targets,Metas do Vendedor
 DocType: Work Order Operation,In minutes,Em Minutos
 DocType: Issue,Resolution Date,Data da Solução
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,Registro de Tempo criado:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1209,Please set default Cash or Bank account in Mode of Payment {0},Defina Caixa padrão ou conta bancária no Modo de pagamento {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1216,Please set default Cash or Bank account in Mode of Payment {0},Defina Caixa padrão ou conta bancária no Modo de pagamento {0}
 DocType: Selling Settings,Customer Naming By,Nomeação de Cliente por
 DocType: Depreciation Schedule,Depreciation Amount,Valor de Depreciação
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +105,Convert to Group,Converter em Grupo
@@ -1001,7 +1001,7 @@ DocType: Stock Reconciliation,This tool helps you to update or fix the quantity 
 DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,Por extenso será visível quando você salvar a Guia de Remessa.
 DocType: Purchase Receipt,Transporter Details,Detalhes da Transportadora
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1088,Possible Supplier,Possível Fornecedor
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,"Lista Receiver está vazio. Por favor, crie Lista Receiver"
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +72,Receiver List is empty. Please create Receiver List,"Lista Receiver está vazio. Por favor, crie Lista Receiver"
 apps/erpnext/erpnext/public/js/setup_wizard.js +31,Healthcare (beta),Serviço de Saúde (beta)
 DocType: Production Plan Sales Order,Production Plan Sales Order,Pedido de Venda do Plano de Produção
 DocType: Sales Partner,Sales Partner Target,Metas do Parceiro de Vendas
@@ -1397,7 +1397,7 @@ DocType: Job Applicant,Job Opening,Vaga de Trabalho
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +153,Please select Incharge Person's name,"Por favor, selecione a pessoa responsável"
 apps/erpnext/erpnext/public/js/utils.js +109,Total Unpaid: {0},Total a Pagar: {0}
 DocType: BOM Website Operation,BOM Website Operation,LDM da Operação do Site
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,Valor Total Faturado
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +26,Total Invoiced Amt,Valor Total Faturado
 DocType: Supplier,Warn RFQs,Alertar em Solicitações de Orçamentos
 DocType: Cashier Closing,To Time,Até o Horário
 DocType: Authorization Rule,Approving Role (above authorized value),Função de Aprovador (para autorização de valor excedente)
@@ -1456,7 +1456,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +448,Show S
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.","Especificar as operações, custos operacionais e dar um número único de operação às suas operações."
 apps/erpnext/erpnext/controllers/status_updater.py +207,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,Este documento está fora do limite {0} {1} para o item {4}. Você está fazendo outro(a) {3} relacionado(a) a(o) mesmo(a) {2}?
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1216,Please set recurring after saving,"Por favor, defina recorrentes depois de salvar"
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +874,Select change amount account,Selecione a conta de troco
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +877,Select change amount account,Selecione a conta de troco
 DocType: Naming Series,User must always select,O Usuário deve sempre selecionar
 DocType: Stock Settings,Allow Negative Stock,Permitir Estoque Negativo
 DocType: Topic,Topic,Tópico
@@ -2165,7 +2165,7 @@ DocType: Healthcare Settings,Healthcare Settings,Configurações de Serviço de 
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),Impostos e taxas acrescidos (moeda da empresa)
 apps/erpnext/erpnext/stock/doctype/item/item.py +494,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Item Imposto Row {0} deve ter em conta tipo de imposto ou de renda ou de despesa ou carregável
 apps/erpnext/erpnext/setup/doctype/company/company.js +109,Please re-type company name to confirm,"Por favor, digite novamente o nome da empresa para confirmar"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +234,Total Outstanding Amt,Total devido
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +29,Total Outstanding Amt,Total devido
 DocType: Journal Entry,Printing Settings,Configurações de impressão
 DocType: Employee Advance,Advance Account,Conta de Adiantamentos
 DocType: Sales Invoice,Include Payment (POS),Incluir pagamento (PDV)
@@ -2574,7 +2574,7 @@ DocType: Item Default,Default Expense Account,Conta Padrão de Despesa
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +53,Student Email ID,Email do Aluno
 DocType: Employee,Notice (days),Aviso Prévio ( dias)
 DocType: Tax Rule,Sales Tax Template,Modelo de Impostos sobre Vendas
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2521,Select items to save the invoice,Selecione os itens para salvar a nota
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2522,Select items to save the invoice,Selecione os itens para salvar a nota
 DocType: Employee,Encashment Date,Data da cobrança
 DocType: Account,Stock Adjustment,Ajuste do estoque
 apps/erpnext/erpnext/projects/doctype/activity_cost/activity_cost.py +34,Default Activity Cost exists for Activity Type - {0},Existe Atividade Custo Padrão para o Tipo de Atividade - {0}
@@ -2738,11 +2738,11 @@ DocType: Purchase Invoice Item,Amount (Company Currency),Total (moeda da empresa
 DocType: Fee Schedule,Student Category,Categoria do Aluno
 DocType: Announcement,Student,Aluno
 DocType: Company,Budget Detail,Detalhe do Orçamento
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,Por favor introduza a mensagem antes de enviá-
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +79,Please enter message before sending,Por favor introduza a mensagem antes de enviá-
 apps/erpnext/erpnext/config/accounts.py +356,Point-of-Sale Profile,Perfil do Ponto de Vendas
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +166,Unsecured Loans,Empréstimos não Garantidos
 DocType: Maintenance Schedule Detail,Scheduled Date,Data Agendada
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +232,Total Paid Amt,Quantia total paga
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,Total Paid Amt,Quantia total paga
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,Mensagens maiores do que 160 caracteres vão ser divididos em múltiplas mensagens
 DocType: Purchase Receipt Item,Received and Accepted,Recebeu e aceitou
 ,Serial No Service Contract Expiry,Vencimento do Contrato de Serviço com Nº de Série
