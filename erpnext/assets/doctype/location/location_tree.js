@@ -34,7 +34,7 @@ frappe.treeview_settings["Location"] = {
 				.then((r) => {
 					// Place the location area on the right side, tree accounts style.
 					$('<span class="balance-area pull-right text-muted small">'
-						+ (`${((flt(r.message.area)).toLocaleString('en') + ' Square Meters')}`)
+						+ (`${((flt(r.message.area)).toLocaleString('en') + ' Sq m')}`)
 						+ '</span>').insertBefore(node.$ul);
 				});
 		}
@@ -45,7 +45,7 @@ frappe.treeview_settings["Location"] = {
 				.then((r) => {
 					if (r.message) {
 						$('<span class="balance-area pull-right text-muted small">'
-							+ (`${((flt(r.message.area)).toLocaleString('en') + ' Square Meters in Total')}`)
+							+ (`${((flt(r.message.area)).toLocaleString('en') + ' Sq m')}`)
 							+ '</span>').insertBefore(node.$ul);
 					}
 				});
@@ -58,7 +58,7 @@ frappe.treeview_settings["Location"] = {
 				callback: function (r) {
 					// console.log(r.message);
 					$('<span class="balance-area pull-right text-muted small">'
-						+ (`${((flt(r.message)).toLocaleString('en') + ' Square Meters in Total')}`)
+						+ (`${((flt(r.message)).toLocaleString('en') + ' Sq m')}`)
 						+ '</span>').insertBefore(node.$ul);
 				}
 			});
