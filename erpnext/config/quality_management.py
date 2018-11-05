@@ -18,7 +18,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Quality Procedure",
 					"icon": "fa fa-sitemap",
-					"label": _("Chart of Procedures"),
+					"label": _("Tree of Procedures"),
 					"route": "Tree/Quality Procedure",
 					"description": _("Tree of Quality Procedures."),
 				},
