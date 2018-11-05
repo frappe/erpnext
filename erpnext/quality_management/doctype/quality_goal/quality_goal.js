@@ -4,18 +4,10 @@
 frappe.ui.form.on('Quality Goal', {
 	onload: function(frm){
 		if(frm.doc.measurable == "No"){
-			frm.fields_dict.objective.grid.docfields[1].hidden = 1;
-			frm.fields_dict.objective.grid.docfields[2].hidden = 1;
-			frm.refresh();
-			$("div[data-fieldname='target']").hide();
-			$("div[data-fieldname='unit']").hide();
+			hide_target_unit(frm);
 		}
 		else{
-			frm.fields_dict.objective.grid.docfields[1].hidden = 0;
-			frm.fields_dict.objective.grid.docfields[2].hidden = 0;
-			frm.refresh();
-			$("div[data-fieldname='target']").show();
-			$("div[data-fieldname='unit']").show();
+			show_target_unit(frm);
 		}
 	},
 	revision: function(frm) {
@@ -26,18 +18,26 @@ frappe.ui.form.on('Quality Goal', {
 	measurable: function(frm) {
 		frm.fields_dict.objective.grid.remove_all();
 		if(frm.doc.measurable == "No"){
-			frm.fields_dict.objective.grid.docfields[1].hidden = 1;
-			frm.fields_dict.objective.grid.docfields[2].hidden = 1;
-			frm.refresh();
-			$("div[data-fieldname='target']").hide();
-			$("div[data-fieldname='unit']").hide();
+			hide_target_unit(frm);
 		}
 		else{
-			frm.fields_dict.objective.grid.docfields[1].hidden = 0;
-			frm.fields_dict.objective.grid.docfields[2].hidden = 0;
-			frm.refresh();
-			$("div[data-fieldname='target']").show();
-			$("div[data-fieldname='unit']").show();
+			show_target_unit(frm);
 		}
 	}
 });
+
+function hide_target_unit(frm){
+	frm.fields_dict.objective.grid.docfields[1].hidden = 1;
+	frm.fields_dict.objective.grid.docfields[2].hidden = 1;
+	frm.refresh();
+	$("div[data-fieldname='target']").hide();
+	$("div[data-fieldname='unit']").hide();
+}
+
+function show_target_unit(frm){
+	frm.fields_dict.objective.grid.docfields[1].hidden = 0;
+	frm.fields_dict.objective.grid.docfields[2].hidden = 0;
+	frm.refresh();
+	$("div[data-fieldname='target']").show();
+	$("div[data-fieldname='unit']").show();
+}

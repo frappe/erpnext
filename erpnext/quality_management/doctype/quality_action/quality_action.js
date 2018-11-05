@@ -5,23 +5,18 @@ frappe.ui.form.on('Quality Action', {
 	onload: function(frm) {
 		frm.set_value("date", frappe.datetime.get_today());
 		$(".grid-add-row").hide();
-		if (frm.doc.review != null){
+		if (frm.doc.review){
 			frm.set_value("type", "Quality Review");
-		}
-		else if(frm.doc.feedback != null){
-			frm.set_value("type", "Customer Feedback");
 		}
 		else{
-			frm.set_value("type", "Quality Review");
+			frm.set_value("type", "Customer Feedback");
 		}
 	},
 	review: function(frm){
-		if(frm.doc.review != null){
+		if(frm.doc.review){
 			var problems = "";
-			if (frm.doc.review != null){
-				frm.fields_dict.description.grid.remove_all();
-				frm.refresh();
-			}
+			frm.fields_dict.description.grid.remove_all();
+			frm.refresh();
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
@@ -61,11 +56,9 @@ frappe.ui.form.on('Quality Action', {
 		}
 	},
 	feedback: function(frm) {
-		if(frm.doc.feedback != null){
-			if (frm.doc.feedback != null){
-				frm.fields_dict.description.grid.remove_all();
-				frm.refresh();
-			}
+		if(frm.doc.feedback){
+			frm.fields_dict.description.grid.remove_all();
+			frm.refresh();
 			frm.doc.description = [];
 			frm.refresh();
 			frappe.call({
@@ -83,9 +76,13 @@ frappe.ui.form.on('Quality Action', {
 				}
 			});
 		}
+		else{
+			frm.fields_dict.description.grid.remove_all();
+			frm.refresh();
+		}
 	},
 	type: function(frm){
-		if(frm.doc.description != null){
+		if(frm.doc.description){
 			frm.fields_dict.description.grid.remove_all();
 			frm.doc.review = '';
 			frm.doc.feedback = '';

@@ -44,8 +44,6 @@ def create_review(name, measurable):
    		"date": frappe.utils.nowdate(),
 		"measurable": measurable,
 	})
-	for objective in objectives:
-		print(measurable, objective.objective, objective.target, objective.unit)
 	if measurable == 'Yes':
 		for objective in objectives:
 			doc.append("values",{

@@ -16,18 +16,10 @@ class QualityProcedure(NestedSet):
 				self.is_group = 1
 
 	def on_update(self):
-		for data in self.procedure_step:
-			if data.procedure == 'Procedure' and data.procedure_name != '':
-				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
-				doc.parent_quality_procedure = self.name
-				doc.save()
+		set_parent(self)
 
 	def after_insert(self):
-		for data in self.procedure_step:
-			if data.procedure == 'Procedure' and data.procedure_name != '':
-				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
-				doc.parent_quality_procedure = self.name
-				doc.save()
+		set_parent(self)
 
 	def on_trash(self):
 		if self.parent_quality_procedure:
@@ -37,7 +29,7 @@ class QualityProcedure(NestedSet):
 					doc.procedure_step.remove(data)
 					doc.save()
 			flag_is_group = 0
-			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
+			doc.load_from_db()
 			for data in doc.procedure_step:
 				if data.procedure == "Procedure":
 					flag_is_group = 1
@@ -47,7 +39,7 @@ class QualityProcedure(NestedSet):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
-	if parent == None or parent == "All Quality Procedures":
+	if parent is None or parent == "All Quality Procedures":
 		parent = ""
 	return frappe.get_all(doctype, fields=["name as value", "is_group as expandable"], filters={"parent_quality_procedure": parent})
 
@@ -59,3 +51,10 @@ def add_node():
 	if args.parent_quality_procedure == 'All Quality Procedures':
 		args.parent_quality_procedure = None
 	frappe.get_doc(args).insert()
+
+def set_parent(self):
+	for data in self.procedure_step:
+		if data.procedure == 'Procedure' and data.procedure_name != '':
+			doc = frappe.get_doc("Quality Procedure", data.procedure_name)
+			doc.parent_quality_procedure = self.name
+			doc.save()
