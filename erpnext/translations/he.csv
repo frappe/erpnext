@@ -201,7 +201,7 @@ apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_recei
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +20,Please enter Company,נא להזין חברה
 DocType: Delivery Note Item,Against Sales Invoice Item,נגד פריט מכירות חשבונית
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +98,Net Cash from Financing,מזומנים נטו ממימון
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2386,"LocalStorage is full , did not save","LocalStorage מלא, לא הציל"
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2387,"LocalStorage is full , did not save","LocalStorage מלא, לא הציל"
 DocType: Lead,Address & Contact,כתובת ולתקשר
 DocType: Leave Allocation,Add unused leaves from previous allocations,להוסיף עלים שאינם בשימוש מהקצאות קודמות
 DocType: Sales Partner,Partner website,אתר שותף
@@ -406,7 +406,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +29,Buy,לִקְנוֹ
 DocType: Sales Invoice,Offline POS Name,שם קופה מנותקת
 DocType: Sales Order,To Deliver,כדי לספק
 DocType: Purchase Invoice Item,Item,פריט
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2566,Serial no item cannot be a fraction,אין פריט סידורי לא יכול להיות חלק
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2567,Serial no item cannot be a fraction,אין פריט סידורי לא יכול להיות חלק
 DocType: Journal Entry,Difference (Dr - Cr),"הבדל (ד""ר - Cr)"
 DocType: Account,Profit and Loss,רווח והפסד
 apps/erpnext/erpnext/config/stock.py +337,Managing Subcontracting,קבלנות משנה ניהול
@@ -504,7 +504,7 @@ DocType: Sales Person,Sales Person Targets,מטרות איש מכירות
 DocType: Work Order Operation,In minutes,בדקות
 DocType: Issue,Resolution Date,תאריך החלטה
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,גיליון נוצר:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1209,Please set default Cash or Bank account in Mode of Payment {0},אנא הגדר מזומנים ברירת מחדל או חשבון בנק במצב של תשלום {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1216,Please set default Cash or Bank account in Mode of Payment {0},אנא הגדר מזומנים ברירת מחדל או חשבון בנק במצב של תשלום {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,לְהִרָשֵׁם
 DocType: Selling Settings,Customer Naming By,Naming הלקוח על ידי
 DocType: Depreciation Schedule,Depreciation Amount,סכום הפחת
@@ -892,7 +892,7 @@ DocType: Stock Settings,Default Item Group,קבוצת ברירת מחדל של �
 apps/erpnext/erpnext/config/buying.py +38,Supplier database.,מסד נתוני ספק.
 DocType: Account,Balance Sheet,מאזן
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +797,Cost Center For Item with Item Code ',עלות מרכז לפריט עם קוד פריט '
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2527,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.","מצב תשלום אינו מוגדר. אנא קרא, אם חשבון הוגדר על מצב תשלומים או על פרופיל קופה."
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2528,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.","מצב תשלום אינו מוגדר. אנא קרא, אם חשבון הוגדר על מצב תשלומים או על פרופיל קופה."
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +30,"Further accounts can be made under Groups, but entries can be made against non-Groups","חשבונות נוספים יכולים להתבצע תחת קבוצות, אבל ערכים יכולים להתבצע נגד לא-קבוצות"
 DocType: Lead,Lead,לידים
 DocType: Email Digest,Payables,זכאי
@@ -1171,7 +1171,7 @@ DocType: Sales Invoice Item,Brand Name,שם מותג
 DocType: Purchase Receipt,Transporter Details,פרטי Transporter
 apps/erpnext/erpnext/utilities/user_progress.py +146,Box,תיבה
 DocType: Budget,Monthly Distribution,בחתך חודשי
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,מקלט רשימה ריקה. אנא ליצור מקלט רשימה
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +72,Receiver List is empty. Please create Receiver List,מקלט רשימה ריקה. אנא ליצור מקלט רשימה
 DocType: Production Plan Sales Order,Production Plan Sales Order,הפקת תכנית להזמין מכירות
 DocType: Sales Partner,Sales Partner Target,מכירות פרטנר יעד
 DocType: Pricing Rule,Pricing Rule,כלל תמחור
@@ -1623,7 +1623,7 @@ DocType: Job Applicant,Job Opening,פתיחת עבודה
 DocType: Payment Reconciliation,Payment Reconciliation,פיוס תשלום
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +153,Please select Incharge Person's name,אנא בחר את שמו של אדם Incharge
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +51,Technology,טכנולוגיה
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,"סה""כ חשבונית Amt"
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +26,Total Invoiced Amt,"סה""כ חשבונית Amt"
 DocType: Cashier Closing,To Time,לעת
 DocType: Authorization Rule,Approving Role (above authorized value),אישור תפקיד (מעל הערך מורשה)
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +147,Credit To account must be a Payable account,אשראי לחשבון חייב להיות חשבון לתשלום
@@ -2473,7 +2473,7 @@ DocType: Sales Order,Partly Billed,בחלק שחויב
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +54,Item {0} must be a Fixed Asset Item,פריט {0} חייב להיות פריט רכוש קבוע
 DocType: Item,Default BOM,BOM ברירת המחדל
 apps/erpnext/erpnext/setup/doctype/company/company.js +109,Please re-type company name to confirm,אנא שם חברה הקלד לאשר
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +234,Total Outstanding Amt,"סה""כ מצטיין Amt"
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +29,Total Outstanding Amt,"סה""כ מצטיין Amt"
 DocType: Journal Entry,Printing Settings,הגדרות הדפסה
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +324,Total Debit must be equal to Total Credit. The difference is {0},חיוב כולל חייב להיות שווה לסך אשראי. ההבדל הוא {0}
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +11,Automotive,רכב
@@ -2944,7 +2944,7 @@ DocType: Item Default,Default Expense Account,חשבון הוצאות ברירת
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +53,Student Email ID,מזהה אימייל סטודנטים
 DocType: Employee,Notice (days),הודעה (ימים)
 DocType: Tax Rule,Sales Tax Template,תבנית מס מכירות
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2521,Select items to save the invoice,בחר פריטים כדי לשמור את החשבונית
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2522,Select items to save the invoice,בחר פריטים כדי לשמור את החשבונית
 DocType: Employee,Encashment Date,תאריך encashment
 DocType: Account,Stock Adjustment,התאמת מלאי
 apps/erpnext/erpnext/projects/doctype/activity_cost/activity_cost.py +34,Default Activity Cost exists for Activity Type - {0},עלות פעילות ברירת המחדל קיימת לסוג פעילות - {0}
@@ -3138,13 +3138,13 @@ DocType: Purchase Invoice Item,Amount (Company Currency),הסכום (חברת מ
 apps/erpnext/erpnext/stock/stock_ledger.py +382,{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.,{0} יחידות של {1} צורך {2} על {3} {4} עבור {5} כדי להשלים את העסקה הזו.
 DocType: Announcement,Student,תלמיד
 DocType: Company,Budget Detail,פרטי תקציב
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,נא להזין את ההודעה לפני השליחה
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +79,Please enter message before sending,נא להזין את ההודעה לפני השליחה
 apps/erpnext/erpnext/config/accounts.py +356,Point-of-Sale Profile,נקודה-של-מכירת פרופיל
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +166,Unsecured Loans,"הלוואות בחו""ל"
 DocType: Cost Center,Cost Center Name,שם מרכז עלות
 DocType: Student,B+,B +
 DocType: Maintenance Schedule Detail,Scheduled Date,תאריך מתוכנן
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +232,Total Paid Amt,"Amt שילם סה""כ"
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,Total Paid Amt,"Amt שילם סה""כ"
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,הודעות יותר מ -160 תווים יפוצלו למספר הודעות
 DocType: Purchase Receipt Item,Received and Accepted,קיבלתי ואשר
 ,Serial No Service Contract Expiry,שירות סידורי חוזה תפוגה
