@@ -89,11 +89,8 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	"""
 	import json
 	quiz_response = json.loads(quiz_response)
-	print(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
 	answers, score, status = quiz.evaluate(quiz_response, quiz_name)
-	print("-----------------")
-	print(answers)
 
 	result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
 	result_data = []
@@ -113,7 +110,6 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 
 @frappe.whitelist()
 def get_completed_courses(email=frappe.session.user):
-	print("Get completed course ", email)
 	try:
 		student = frappe.get_doc("Student", get_student_id(email))
 		return student.get_completed_courses()
@@ -208,5 +204,11 @@ def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
 		"status": status
 		})
 	quiz_activity.save()
-	print(quiz_activity)
+	frappe.db.commit()
+
+@frappe.whitelist()
+def mark_course_complete(enrollment):
+	course_enrollment = frappe.get_doc("Course Enrollment", enrollment)
+	course_enrollment.completed = True
+	course_enrollment.save()
 	frappe.db.commit()

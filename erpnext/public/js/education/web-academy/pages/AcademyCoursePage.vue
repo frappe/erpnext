@@ -16,7 +16,7 @@ export default {
 	name: "AcademyCoursePage",
 	data() {
 		return{
-			nextContent: true,
+			nextContent: '',
 			nextContentType: '',
 		}
 	},
