@@ -41,6 +41,8 @@ export default {
 						enrollment: this.$root.$data.enrolledCourses[this.$route.params.course]
 					}
 				})
+			this.$root.$data.addCompletedCourses(this.$route.params.course)
+			this.$root.$data.updateCompletedCourses()
 			this.$router.push({ name: 'program', params: { code: this.$route.params.code}})
 		}
 	}
