@@ -13,4 +13,4 @@ class QualityAction(Document):
 				self.status = 'Under Review'
 			else:
 				value.status = 'Close'
-				self.status = 'Closed'
+				self.status = 'Close'
