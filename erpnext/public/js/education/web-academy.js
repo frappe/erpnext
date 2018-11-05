@@ -42,7 +42,12 @@ var store = {
 
 	updateEnrolledPrograms (){
 		if (this.debug) console.log('Updating enrolledPrograms')
-		frappe.call("erpnext.www.academy.get_program_enrollments").then( r => {
+		frappe.call({
+			method: "erpnext.www.academy.get_program_enrollments",
+			args:{
+				email: frappe.session.user
+			}
+		}).then( r => {
 			for(var ii=0; ii < r.message.length; ii++){
 				this.enrolledPrograms.add(r.message[ii])
 			}
@@ -52,7 +57,12 @@ var store = {
 
 	updateEnrolledCourses (){
 		if (this.debug) console.log('Updating enrolledCourses')
-		frappe.call("erpnext.www.academy.get_course_enrollments").then( r => {
+		frappe.call({
+			method: "erpnext.www.academy.get_course_enrollments",
+			args:{
+				email: frappe.session.user
+			}
+		}).then( r => {
 			this.enrolledCourses = r.message
 		})
 		if (this.debug) console.log('Updated State', this.enrolledCourses)
@@ -60,7 +70,12 @@ var store = {
 
 	updateCompletedCourses (){
 		if (this.debug) console.log('Updating States')
-		frappe.call("erpnext.www.academy.get_completed_courses").then( r => {
+		frappe.call({
+			method: "erpnext.www.academy.get_completed_courses",
+			args:{
+				email: frappe.session.user
+			}
+		}).then( r => {
 			for(var ii=0; ii < r.message.length; ii++){
 				this.completedCourses.add(r.message[ii])
 			}
