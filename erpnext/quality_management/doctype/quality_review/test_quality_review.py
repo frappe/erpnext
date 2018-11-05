@@ -46,15 +46,15 @@ def get_review():
 def create_procedure():
 	procedure = frappe.get_doc({
 		"doctype": "Quality Procedure",
-		"procedure": "_Test Quality Procedure 1",
+		"procedure": "_Test Quality Procedure",
 		"procedure_step": [
 			{
-				"step": "_Test Quality Procedure Table 1"
+				"step": "_Test Quality Procedure Table",
 			}
 		]
 	})
-	procedure_exist = frappe.get_list("Quality Procedure", filters={"procedure": ""+ procedure.procedure +""})
-	if len(procedure_exist) == 0:
+	procedure_exist = frappe.db.exists("Quality Procedure",""+ procedure.procedure +"")
+	if not procedure_exist:
 		procedure.insert()
 
 def create_unit():
@@ -62,8 +62,8 @@ def create_unit():
 		"doctype": "UOM",
 		"uom_name": "_Test UOM",
 	})
-	unit_exist = frappe.get_list("UOM", filters={"uom_name": ""+ unit.uom_name +""}, fields=["name"])
-	if len(unit_exist) == 0:
+	unit_exist = frappe.db.exists("UOM", ""+ unit.uom_name +"")
+	if not unit_exist:
 		unit.insert()
 
 def create_goal():
@@ -82,6 +82,6 @@ def create_goal():
 			}
 		]
 	})
-	goal_exist = frappe.get_list("Quality Goal", filters={"goal": ""+ goal.goal +""}, fields=["name"])
-	if len(goal_exist) == 0:
+	goal_exist = frappe.db.exists("Quality Goal", ""+ goal.goal +"")
+	if not goal_exist:
 		goal.insert()

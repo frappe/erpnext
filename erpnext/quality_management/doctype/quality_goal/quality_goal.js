@@ -27,6 +27,7 @@ frappe.ui.form.on('Quality Goal', {
 });
 
 function hide_target_unit(frm){
+	//hides target and unit columns as the goal cannot be measured in numeric values
 	frm.fields_dict.objective.grid.docfields[1].hidden = 1;
 	frm.fields_dict.objective.grid.docfields[2].hidden = 1;
 	frm.refresh();
@@ -35,6 +36,7 @@ function hide_target_unit(frm){
 }
 
 function show_target_unit(frm){
+	//shows target and unit columns as the goal can be measured in numeric values
 	frm.fields_dict.objective.grid.docfields[1].hidden = 0;
 	frm.fields_dict.objective.grid.docfields[2].hidden = 0;
 	frm.refresh();

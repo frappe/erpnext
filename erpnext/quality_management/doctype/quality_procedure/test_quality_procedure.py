@@ -10,7 +10,7 @@ class TestQualityProcedure(unittest.TestCase):
 	def test_quality_procedure(self):
 		test_create_procedure = create_procedure()
 		test_get_procedure = get_procedure()
-		self.assertEquals(test_create_procedure.name, test_get_procedure.name)
+		self.assertEquals(test_create_procedure, test_get_procedure)
 
 def create_procedure():
 	procedure = frappe.get_doc({
@@ -22,13 +22,13 @@ def create_procedure():
 			}
 		]
 	})
-	procedure_exist = frappe.get_list("Quality Procedure", filters={"procedure": ""+ procedure.procedure +""})
-	if len(procedure_exist) == 0:
+	procedure_exist = frappe.db.exists("Quality Procedure",""+ procedure.procedure +"")
+	if not procedure_exist:
 		procedure.insert()
-		return procedure
+		return procedure.procedure
 	else:
-		return procedure_exist[0]
+		return procedure_exist
 
 def get_procedure():
-	procedure = frappe.get_list("Quality Procedure", filters={"procedure": "_Test Quality Procedure"})
-	return procedure[0]
+	procedure = frappe.db.exists("Quality Procedure", "_Test Quality Procedure")
+	return procedure
