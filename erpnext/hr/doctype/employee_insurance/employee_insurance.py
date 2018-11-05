@@ -27,12 +27,12 @@ class EmployeeInsurance(Document):
 			for d in addl_salary_list:
 				frappe.get_doc("Additional Salary", d.name).cancel()
 
-	def on_update(self):
+	def on_update_after_submit(self):
 		if self.deduct_from_salary:
-			addl_salary = frappe.get_doc("Additional Salary", 
-				{"reference_doctype": self.doctype, "reference_name": self.name})
-			addl_salary.to_date = self.premium_end_date
-			addl_salary.update()
+			frappe.db.set_value("Additional Salary", 
+				{"reference_doctype": self.doctype, "reference_name": self.name},
+				"to_date", self.premium_end_date
+				)
 
 	def validate_dates(self):
 		date_of_joining, relieving_date= frappe.db.get_value("Employee", self.employee, 
@@ -66,9 +66,10 @@ class EmployeeInsurance(Document):
 	def create_additional_salary(self):
 		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.employee = self.employee 
+		additional_salary.company = frappe.get_value("Employee", self.employee, "company")
 		additional_salary.amount = self.monthly_premium 
 		additional_salary.from_date = self.premium_start_date
-		additional_salary.to_date = self.premium_start_date
+		additional_salary.to_date = self.premium_end_date
 		additional_salary.salary_component = self.salary_component
 		additional_salary.overwrite_salary_structure_amount = self.deduct_from_salary
 		additional_salary.reference_doctype = self.doctype

@@ -15,8 +15,9 @@ class TestEmployeeInsurance(unittest.TestCase):
 		self.assertEqual(insurance_record.name, addl_sal_record.reference_name)
 		self.assertEqual(insurance_record.deduct_from_salary, addl_sal_record.overwrite_salary_structure_amount)
 		insurance_record.premium_end_date = add_months(nowdate(), 4)
-		insurance_record.update()
-		self.assertEqual(insurance_record.premium_end_date, addl_sal_record.to_date)
+		insurance_record.save()
+		addl_sal_record = frappe.get_doc("Additional Salary", {"salary_component": "_Test Employee Insurance"})
+		self.assertEqual(insurance_record.premium_end_date, addl_sal_record.to_date.strftime("%Y-%m-%d"))
 		insurance_record.cancel()
 		self.assertTrue(addl_sal_record.docstatus, 2)
 
@@ -59,7 +60,7 @@ def create_employee_insurance(**args):
 		"deduct_from_salary": args.deduct_from_salary or True,
 		"salary_component":"_Test Employee Insurance",
 		"premium_start_date": nowdate(),
-		"premium_end_date": add_months(nowdate(), 1),
+		"premium_end_date": args.premium_end_date or add_months(nowdate(), 1),
 		"policy_no": "342123443",
 		"monthly_premium": args.maturity_premium or 500
     })
