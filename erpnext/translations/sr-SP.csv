@@ -35,7 +35,7 @@ apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analys
 apps/erpnext/erpnext/public/js/pos/pos.html +20,Tap items to add them here,Pritisnite na artikal da bi ga dodali ovdje
 ,Sales Order Trends,Trendovi prodajnih naloga
 DocType: Sales Invoice,Offline POS Name,POS naziv  u režimu van mreže (offline)
-apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +37,You can only renew if your membership expires within 30 days,Можете обновити само ако ваше чланство истиче за мање од 30 дана
+apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +38,You can only renew if your membership expires within 30 days,Можете обновити само ако ваше чланство истиче за мање од 30 дана
 DocType: Request for Quotation Item,Project Name,Naziv Projekta
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.js +14,Material Transfer,Prenos robe
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +555,Change POS Profile,Promijenite POS korisnika
@@ -351,7 +351,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +49,Reserved for 
 DocType: POS Item Group,Item Group,Vrste artikala
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Starost (Dani)
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +236,Opening (Dr),Početno stanje (Du)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +234,Total Outstanding Amt,Preostalo za plaćanje
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +29,Total Outstanding Amt,Preostalo za plaćanje
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,Go to the Desktop and start using ERPNext,Idite na radnu površinu i krenite sa radom u programu
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +71,You can only have Plans with the same billing cycle in a Subscription,Сви Планови у Претплати морају имати исти циклус наплате
 DocType: Sales Person,Name and Employee ID,Ime i ID Zaposlenog
@@ -382,7 +382,7 @@ DocType: Project,Project will be accessible on the website to these users,Projek
 DocType: Upload Attendance,Upload HTML,Priloži HTML
 apps/erpnext/erpnext/public/js/setup_wizard.js +29,Services,Usluge
 apps/erpnext/erpnext/public/js/pos/pos.html +4,Item Cart,Korpa sa artiklima
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +232,Total Paid Amt,Ukupno plaćeno
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,Total Paid Amt,Ukupno plaćeno
 DocType: Warehouse,Warehouse Detail,Detalji o skldištu
 DocType: Quotation Item,Quotation Item,Stavka sa ponude
 DocType: Journal Entry Account,Employee Advance,Napredak Zaposlenog
@@ -394,7 +394,7 @@ DocType: Notification Control,Purchase Receipt Message,Poruka u Prijemu robe
 DocType: Purchase Invoice,Taxes and Charges Deducted,Umanjeni porezi i naknade
 DocType: Sales Invoice,Include Payment (POS),Uključi POS plaćanje
 DocType: Sales Invoice,Customer PO Details,Pregled porudžbine kupca
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,Ukupno fakturisano
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +26,Total Invoiced Amt,Ukupno fakturisano
 apps/erpnext/erpnext/public/js/stock_analytics.js +54,Select Brand...,Izaberite brend
 DocType: Item,Default Unit of Measure,Podrazumijevana jedinica mjere
 DocType: Purchase Invoice Item,Serial No,Serijski broj
@@ -862,7 +862,7 @@ DocType: Purchase Invoice,Apply Additional Discount On,Primijeni dodatni popust 
 apps/erpnext/erpnext/buying/doctype/supplier/supplier_dashboard.py +6,This is based on transactions against this Supplier. See timeline below for details,Ovo je zasnovano na transkcijama ovog dobavljača. Pogledajte vremensku liniju ispod za dodatne informacije
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,Iznad 90 dana
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py +49,You have already assessed for the assessment criteria {}.,Већ сте оценили за критеријум оцењивања {}.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +990,Serial Numbers in row {0} does not match with Delivery Note,Serijski broj na poziciji {0} se ne poklapa sa otpremnicom
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +997,Serial Numbers in row {0} does not match with Delivery Note,Serijski broj na poziciji {0} se ne poklapa sa otpremnicom
 apps/erpnext/erpnext/public/js/templates/contact_list.html +37,New Contact,Novi kontakt
 DocType: Purchase Invoice,Returns,Povraćaj
 DocType: Delivery Note,Delivery To,Isporuka za

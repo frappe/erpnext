@@ -36,6 +36,7 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js +26,Show Employee,ఉద�
 DocType: Exchange Rate Revaluation Account,New Exchange Rate,న్యూ ఎక్స్ఛేంజ్ రేట్
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +38,Currency is required for Price List {0},కరెన్సీ ధర జాబితా కోసం అవసరం {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* లావాదేవీ లెక్కించబడతాయి.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +181,Supplier &gt; Supplier Type,సరఫరాదారు&gt; సరఫరాదారు రకం
 DocType: Delivery Trip,MAT-DT-.YYYY.-,MAT-డిటి .YYYY.-
 DocType: Purchase Order,Customer Contact,కస్టమర్ సంప్రదించండి
 DocType: Patient Appointment,Check availability,లభ్యతను తనిఖీలు చేయండి
@@ -48,7 +49,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +362,Lega
 DocType: Delivery Note,Transport Receipt Date,రవాణా రసీదు తేదీ
 DocType: Shopify Settings,Sales Order Series,సేల్స్ ఆర్డర్ సీరీస్
 DocType: Vital Signs,Tongue,నాలుక
-apps/erpnext/erpnext/hr/utils.py +221,"More than one selection for {0} not \
+apps/erpnext/erpnext/hr/utils.py +222,"More than one selection for {0} not \
 			allowed",{0} కాదు \ అనుమతి కోసం ఒకటి కంటే ఎక్కువ ఎంపిక
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +204,Actual type tax cannot be included in Item rate in row {0},వాస్తవ రకం పన్ను వరుసగా అంశం రేటు చేర్చబడిన సాధ్యం {0}
 DocType: Allowed To Transact With,Allowed To Transact With,తో లావాదేవీ అనుమతించబడింది
@@ -117,7 +118,7 @@ DocType: Delivery Note,Issue Credit Note,ఇష్యూ క్రెడిట�
 DocType: Lab Prescription,Lab Prescription,ల్యాబ్ ప్రిస్క్రిప్షన్
 ,Delay Days,ఆలస్యం డేస్
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service Expense,సర్వీస్ ఖర్చుల
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1005,Serial Number: {0} is already referenced in Sales Invoice: {1},క్రమ సంఖ్య: {0} ఇప్పటికే సేల్స్ వాయిస్ లో రిఫరెన్సుగా ఉంటుంది: {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1012,Serial Number: {0} is already referenced in Sales Invoice: {1},క్రమ సంఖ్య: {0} ఇప్పటికే సేల్స్ వాయిస్ లో రిఫరెన్సుగా ఉంటుంది: {1}
 DocType: Bank Statement Transaction Invoice Item,Invoice,వాయిస్
 DocType: Purchase Invoice Item,Item Weight Details,అంశం బరువు వివరాలు
 DocType: Asset Maintenance Log,Periodicity,ఆవర్తకత
@@ -422,7 +423,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 DocType: Delivery Note Item,Against Sales Invoice Item,సేల్స్ వాయిస్ అంశం వ్యతిరేకంగా
 DocType: Agriculture Analysis Criteria,Linked Doctype,లింక్ చేసిన డాక్టప్
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +98,Net Cash from Financing,ఫైనాన్సింగ్ నుండి నికర నగదు
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2386,"LocalStorage is full , did not save","LocalStorage పూర్తి, సేవ్ లేదు"
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2387,"LocalStorage is full , did not save","LocalStorage పూర్తి, సేవ్ లేదు"
 DocType: Lead,Address & Contact,చిరునామా &amp; సంప్రదింపు
 DocType: Leave Allocation,Add unused leaves from previous allocations,మునుపటి కేటాయింపులు నుండి ఉపయోగించని ఆకులు జోడించండి
 DocType: Sales Partner,Partner website,భాగస్వామి వెబ్సైట్
@@ -438,6 +439,7 @@ DocType: Healthcare Practitioner,Practitioner Schedules,ప్రాక్టీ
 DocType: Cheque Print Template,Line spacing for amount in words,పదాలు లో మొత్తం కోసం పంక్తి అంతరం
 DocType: Vehicle,Additional Details,అదనపు వివరాలు
 apps/erpnext/erpnext/templates/generators/bom.html +85,No description given,ఇచ్చిన వివరణను
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,సరఫరాదారు&gt; సరఫరాదారు సమూహం
 apps/erpnext/erpnext/config/buying.py +13,Request for purchase.,కొనుగోలు కోసం అభ్యర్థన.
 DocType: POS Closing Voucher Details,Collected Amount,సేకరించిన మొత్తం
 DocType: Lab Test,Submitted Date,సమర్పించిన తేదీ
@@ -692,7 +694,7 @@ DocType: Lab Test Template,No Result,తోబుట్టువుల ఫలి
 DocType: Purchase Invoice Item,Quantity and Rate,పరిమాణ మరియు రేటు
 DocType: Delivery Note,% Installed,% వ్యవస్థాపించిన
 apps/erpnext/erpnext/utilities/user_progress.py +230,Classrooms/ Laboratories etc where lectures can be scheduled.,తరగతి / లాబొరేటరీస్ తదితర ఉపన్యాసాలు షెడ్యూల్ చేసుకోవచ్చు.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1304,Company currencies of both the companies should match for Inter Company Transactions.,రెండు సంస్థల కంపెనీ కరెన్సీలు ఇంటర్ కంపెనీ లావాదేవీలకు సరిపోలాలి.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1311,Company currencies of both the companies should match for Inter Company Transactions.,రెండు సంస్థల కంపెనీ కరెన్సీలు ఇంటర్ కంపెనీ లావాదేవీలకు సరిపోలాలి.
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +95,Please enter company name first,మొదటి కంపెనీ పేరును నమోదు చేయండి
 DocType: Travel Itinerary,Non-Vegetarian,బోథ్
 DocType: Purchase Invoice,Supplier Name,సరఫరా చేయువాని పేరు
@@ -821,7 +823,7 @@ apps/erpnext/erpnext/config/non_profit.py +48,Volunteer Type information.,వా
 DocType: Cash Flow Mapping Template,Cash Flow Mapping Template,నగదు ప్రవాహం మ్యాపింగ్ మూస
 DocType: Travel Request,Costing Details,ఖర్చు వివరాలు
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.js +64,Show Return Entries,చూపించు ఎంట్రీలు చూపించు
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2566,Serial no item cannot be a fraction,సీరియల్ ఏ అంశం ఒక భిన్నం ఉండకూడదు
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2567,Serial no item cannot be a fraction,సీరియల్ ఏ అంశం ఒక భిన్నం ఉండకూడదు
 DocType: Journal Entry,Difference (Dr - Cr),తేడా (డాక్టర్ - CR)
 DocType: Bank Guarantee,Providing,అందించడం
 DocType: Account,Profit and Loss,లాభం మరియు నష్టం
@@ -847,6 +849,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.py +74,Account {0} does not b
 apps/erpnext/erpnext/setup/doctype/company/company.py +56,Abbreviation already used for another company,సంక్షిప్త ఇప్పటికే మరొక సంస్థ కోసం ఉపయోగిస్తారు
 DocType: Selling Settings,Default Customer Group,డిఫాల్ట్ కస్టమర్ గ్రూప్
 DocType: Employee,IFSC Code,IFSC కోడ్
+apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","ప్రారంభ తేదీ మరియు ముగింపు తేదీ జాబ్ కార్డుతో అతివ్యాప్తి చెందుతుంది <a href=""#Form/Job Card/{0}"">{1}</a>"
 DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible in any transaction","ఆపివేసినా, &#39;నున్నటి మొత్తం&#39; రంగంలో ఏ లావాదేవీ లో కనిపించవు"
 DocType: BOM,Operating Cost,నిర్వహణ ఖర్చు
 DocType: Crop,Produced Items,ఉత్పత్తి అంశాలు
@@ -1027,7 +1030,7 @@ DocType: Student Batch Name,Batch Name,బ్యాచ్ పేరు
 DocType: Fee Validity,Max number of visit,సందర్శన యొక్క అత్యధిక సంఖ్య
 ,Hotel Room Occupancy,హోటల్ రూం ఆక్యుపెన్సీ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,Timesheet రూపొందించినవారు:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1209,Please set default Cash or Bank account in Mode of Payment {0},చెల్లింపు విధానం లో డిఫాల్ట్ నగదు లేదా బ్యాంక్ ఖాతా సెట్ దయచేసి {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1216,Please set default Cash or Bank account in Mode of Payment {0},చెల్లింపు విధానం లో డిఫాల్ట్ నగదు లేదా బ్యాంక్ ఖాతా సెట్ దయచేసి {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,నమోదు
 DocType: GST Settings,GST Settings,జిఎస్టి సెట్టింగులు
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +81,Currency should be same as Price List Currency: {0},కరెన్సీ ధర జాబితాలో సమానంగా ఉండాలి కరెన్సీ: {0}
@@ -1112,7 +1115,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py +665,Row #{0}: Asset {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +408,Preview Salary Slip,ప్రివ్యూ వేతనం స్లిప్
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +64,Account {0} has been entered multiple times,ఖాతా {0} అనేకసార్లు నమోదు చేసిన
 DocType: Account,Expenses Included In Valuation,ఖర్చులు విలువలో
-apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +37,You can only renew if your membership expires within 30 days,మీ సభ్యత్వం 30 రోజుల్లో ముగుస్తుంది ఉంటే మీరు మాత్రమే పునరుద్ధరించవచ్చు
+apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +38,You can only renew if your membership expires within 30 days,మీ సభ్యత్వం 30 రోజుల్లో ముగుస్తుంది ఉంటే మీరు మాత్రమే పునరుద్ధరించవచ్చు
 DocType: Shopping Cart Settings,Show Stock Availability,స్టాక్ లభ్యతను చూపించు
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +510,Set {0} in asset category {1} or company {2},ఆస్తి వర్గం {0} లేదా సంస్థ {0} లో {0}
 DocType: Location,Longitude,రేఖాంశం
@@ -1187,7 +1190,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +50,Reserved for 
 DocType: Soil Texture,Sand,ఇసుక
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +25,Energy,శక్తి
 DocType: Opportunity,Opportunity From,నుండి అవకాశం
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +993,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,వరుస {0}: {1} అంశం కోసం {2} క్రమ సంఖ్య అవసరం. మీరు {3} ను అందించారు.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1000,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,వరుస {0}: {1} అంశం కోసం {2} క్రమ సంఖ్య అవసరం. మీరు {3} ను అందించారు.
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +79,Please select a table,దయచేసి ఒక పట్టికను ఎంచుకోండి
 DocType: BOM,Website Specifications,వెబ్సైట్ లక్షణాలు
 DocType: Special Test Items,Particulars,వివరముల
@@ -1331,6 +1334,7 @@ DocType: Hotel Room Pricing Item,Hotel Room Pricing Item,హోటల్ గద�
 DocType: Loyalty Program Collection,Tier Name,టైర్ పేరు
 DocType: HR Settings,Enter retirement age in years,సంవత్సరాలలో విరమణ వయసు ఎంటర్
 DocType: Crop,Target Warehouse,టార్గెట్ వేర్హౌస్
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +212,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,దయచేసి సెటప్&gt; సెట్టింగులు&gt; నామకరణ సిరీస్ ద్వారా {0} నామకరణ సిరీస్ను సెట్ చేయండి
 DocType: Payroll Employee Detail,Payroll Employee Detail,పేరోల్ ఉద్యోగి వివరాలు
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +135,Please select a warehouse,దయచేసి ఒక గిడ్డంగి ఎంచుకోండి
 DocType: Cheque Print Template,Starting location from left edge,ఎడమ అంచు నుండి నగర ప్రారంభిస్తోంది
@@ -1424,7 +1428,6 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +427,No Ite
 DocType: Employee Boarding Activity,Activity Name,కార్యాచరణ పేరు
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +860,Change Release Date,విడుదల తేదీని మార్చండి
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +250,Closing (Opening + Total),మూసివేయడం (మొత్తం + తెరవడం)
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,అంశం కోడ్&gt; అంశం సమూహం&gt; బ్రాండ్
 DocType: Delivery Settings,Dispatch Notification Attachment,డిస్ప్లేట్ నోటిఫికేషన్ అటాచ్మెంట్
 DocType: Payroll Entry,Number Of Employees,ఉద్యోగుల సంఖ్య
 DocType: Journal Entry,Depreciation Entry,అరుగుదల ఎంట్రీ
@@ -1671,6 +1674,7 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +911,Delivery 
 DocType: Student,A-,ఒక-
 DocType: Share Transfer,Transfer Type,బదిలీ పద్ధతి
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +124,Sales Expenses,సేల్స్ ఖర్చులు
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,కస్టమర్&gt; కస్టమర్ గ్రూప్&gt; భూభాగం
 DocType: Diagnosis,Diagnosis,డయాగ్నోసిస్
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +18,Standard Buying,ప్రామాణిక కొనుగోలు
 DocType: Attendance Request,Explanation,వివరణ
@@ -1806,7 +1810,7 @@ DocType: Leave Type,Is Earned Leave,సంపాదించిన సెలవ�
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +797,Cost Center For Item with Item Code ',&#39;అంశం కోడ్ అంశం సెంటర్ ఖర్చు
 DocType: Fee Validity,Valid Till,చెల్లుతుంది టిల్
 DocType: Student Report Generation Tool,Total Parents Teacher Meeting,మొత్తం తల్లిదండ్రుల గురువు సమావేశం
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2527,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.",చెల్లింపు రకం కన్ఫిగర్ చేయబడలేదు. ఖాతా చెల్లింపులు మోడ్ మీద లేదా POS ప్రొఫైల్ సెట్ చేయబడ్డాయి వచ్చారో లేదో తనిఖీ చేయండి.
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2528,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.",చెల్లింపు రకం కన్ఫిగర్ చేయబడలేదు. ఖాతా చెల్లింపులు మోడ్ మీద లేదా POS ప్రొఫైల్ సెట్ చేయబడ్డాయి వచ్చారో లేదో తనిఖీ చేయండి.
 apps/erpnext/erpnext/buying/utils.py +74,Same item cannot be entered multiple times.,అదే అంశం అనేకసార్లు ఎంటర్ చేయలేరు.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +30,"Further accounts can be made under Groups, but entries can be made against non-Groups","మరింత ఖాతాల గుంపులు కింద తయారు చేయవచ్చు, కానీ ఎంట్రీలు కాని గుంపులు వ్యతిరేకంగా తయారు చేయవచ్చు"
 DocType: Lead,Lead,లీడ్
@@ -2330,11 +2334,11 @@ DocType: Patient,Tobacco Past Use,పొగాకు గత ఉపయోగం
 DocType: Travel Itinerary,Mode of Travel,ప్రయాణం మోడ్
 DocType: Sales Invoice Item,Brand Name,బ్రాండ్ పేరు
 DocType: Purchase Receipt,Transporter Details,ట్రాన్స్పోర్టర్ వివరాలు
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2711,Default warehouse is required for selected item,డిఫాల్ట్ గిడ్డంగిలో ఎంచుకున్న అంశం కోసం అవసరం
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2712,Default warehouse is required for selected item,డిఫాల్ట్ గిడ్డంగిలో ఎంచుకున్న అంశం కోసం అవసరం
 apps/erpnext/erpnext/utilities/user_progress.py +146,Box,బాక్స్
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +1088,Possible Supplier,సాధ్యమైన సరఫరాదారు
 DocType: Budget,Monthly Distribution,మంత్లీ పంపిణీ
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,స్వీకర్త జాబితా ఖాళీగా ఉంది. స్వీకర్త జాబితా సృష్టించడానికి దయచేసి
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +72,Receiver List is empty. Please create Receiver List,స్వీకర్త జాబితా ఖాళీగా ఉంది. స్వీకర్త జాబితా సృష్టించడానికి దయచేసి
 apps/erpnext/erpnext/public/js/setup_wizard.js +31,Healthcare (beta),హెల్త్కేర్ (బీటా)
 DocType: Production Plan Sales Order,Production Plan Sales Order,ఉత్పత్తి ప్రణాళిక అమ్మకాల ఆర్డర్
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +419,"No active BOM found for item {0}. Delivery by \
@@ -2484,7 +2488,6 @@ DocType: Student Applicant,EDU-APP-.YYYY.-,EDU-APP-.YYYY.-
 DocType: Journal Entry,Entry Type,ఎంట్రీ రకం
 ,Customer Credit Balance,కస్టమర్ క్రెడిట్ సంతులనం
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +82,Net Change in Accounts Payable,చెల్లించవలసిన అకౌంట్స్ నికర మార్పును
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +212,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,దయచేసి సెటప్&gt; సెట్టింగులు&gt; నామకరణ సిరీస్ ద్వారా {0} నామకరణ సిరీస్ను సెట్ చేయండి
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +257,Credit limit has been crossed for customer {0} ({1}/{2}),కస్టమర్ {0} ({1} / {2}) కోసం క్రెడిట్ పరిమితి దాటింది.
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,Customer required for 'Customerwise Discount',&#39;Customerwise డిస్కౌంట్&#39; అవసరం కస్టమర్
 apps/erpnext/erpnext/config/accounts.py +163,Update bank payment dates with journals.,పత్రికలు బ్యాంకు చెల్లింపు తేదీలు నవీకరించండి.
@@ -2770,7 +2773,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +229,Serial no {0} has
 DocType: Supplier,Supplier of Goods or Services.,"వస్తు, సేవల సరఫరాదారు."
 DocType: Budget,Fiscal Year,ఆర్థిక సంవత్సరం
 DocType: Asset Maintenance Log,Planned,ప్రణాళిక
-apps/erpnext/erpnext/hr/utils.py +198,A {0} exists between {1} and {2} (,A {0} {1} మరియు {2} మధ్య ఉంటుంది
+apps/erpnext/erpnext/hr/utils.py +199,A {0} exists between {1} and {2} (,A {0} {1} మరియు {2} మధ్య ఉంటుంది
 DocType: Vehicle Log,Fuel Price,ఇంధన ధర
 DocType: Bank Guarantee,Margin Money,మార్జిన్ మనీ
 DocType: Budget,Budget,బడ్జెట్
@@ -2965,7 +2968,7 @@ DocType: Woocommerce Settings,Enable Sync,సమకాలీకరణను ప�
 DocType: Tax Withholding Rate,Single Transaction Threshold,సింగిల్ ట్రాన్సాక్షన్ థ్రెషోల్డ్
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,ఈ విలువ డిఫాల్ట్ సేల్స్ ప్రైస్ జాబితాలో నవీకరించబడింది.
 DocType: Email Digest,New Expenses,న్యూ ఖర్చులు
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +103,PDC/LC Amount,PDC / LC మొత్తం
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,PDC / LC మొత్తం
 DocType: Shareholder,Shareholder,వాటాదారు
 DocType: Purchase Invoice,Additional Discount Amount,అదనపు డిస్కౌంట్ మొత్తం
 DocType: Cash Flow Mapper,Position,స్థానం
@@ -3153,7 +3156,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +400,{0} ag
 DocType: Account,Fixed Asset,స్థిర ఆస్తి
 DocType: Amazon MWS Settings,After Date,తేదీ తర్వాత
 apps/erpnext/erpnext/config/stock.py +327,Serialized Inventory,సీరియల్ ఇన్వెంటరీ
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1169,Invalid {0} for Inter Company Invoice.,ఇంటర్ కంపెనీ ఇన్వాయిస్ కోసం చెల్లని {0}.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1176,Invalid {0} for Inter Company Invoice.,ఇంటర్ కంపెనీ ఇన్వాయిస్ కోసం చెల్లని {0}.
 ,Department Analytics,డిపార్ట్మెంట్ ఎనలిటిక్స్
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74,Email not found in default contact,డిఫాల్ట్ పరిచయంలో ఇమెయిల్ కనుగొనబడలేదు
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +23,Generate Secret,సీక్రెట్ను రూపొందించండి
@@ -3171,7 +3174,6 @@ apps/erpnext/erpnext/config/selling.py +327,Sales Order to Payment,చెల్�
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +111,CEO,సియిఒ
 DocType: Purchase Invoice,With Payment of Tax,పన్ను చెల్లింపుతో
 DocType: Expense Claim Detail,Expense Claim Detail,ఖర్చు చెప్పడం వివరాలు
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,దయచేసి ఎడ్యుకేషన్&gt; ఎడ్యుకేషన్ సెట్టింగులలో ఇన్స్ట్రక్టర్ నేమింగ్ సిస్టం సెటప్ చేయండి
 DocType: Purchase Invoice,TRIPLICATE FOR SUPPLIER,సరఫరా కోసం మూడు ప్రతులు
 DocType: Exchange Rate Revaluation Account,New Balance In Base Currency,బేస్ కరెన్సీలో కొత్త సంతులనం
 DocType: Location,Is Container,కంటైనర్
@@ -3223,12 +3225,12 @@ DocType: Bank Statement Transaction Payment Item,outstanding_amount,చాలా
 DocType: Supplier Scorecard,Supplier Score,సరఫరాదారు స్కోరు
 apps/erpnext/erpnext/healthcare/doctype/patient_encounter/patient_encounter.js +37,Schedule Admission,షెడ్యూల్ అడ్మిషన్
 DocType: Tax Withholding Rate,Cumulative Transaction Threshold,సంచిత లావాదేవీల త్రెషోల్డ్
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,మొత్తం ఇన్వాయిస్ ఆంట్
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +26,Total Invoiced Amt,మొత్తం ఇన్వాయిస్ ఆంట్
 DocType: Supplier,Warn RFQs,RFQ లను హెచ్చరించండి
 DocType: BOM,Conversion Rate,మారకపు ధర
 apps/erpnext/erpnext/templates/pages/product_search.html +3,Product Search,ఉత్పత్తి శోధన
 DocType: Cashier Closing,To Time,సమయం
-apps/erpnext/erpnext/hr/utils.py +201,) for {0},{0}
+apps/erpnext/erpnext/hr/utils.py +202,) for {0},{0}
 DocType: Authorization Rule,Approving Role (above authorized value),(అధికారం విలువ పై) Role ఆమోదిస్తోంది
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +147,Credit To account must be a Payable account,ఖాతాకు క్రెడిట్ ఒక చెల్లించవలసిన ఖాతా ఉండాలి
 DocType: Loan,Total Amount Paid,మొత్తం చెల్లింపు మొత్తం
@@ -3273,8 +3275,6 @@ DocType: Shipping Rule,example: Next Day Shipping,ఉదాహరణకు: త�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +187,Serial No {0} not found,దొరకలేదు సీరియల్ లేవు {0}
 DocType: Fee Schedule Program,Fee Schedule Program,ఫీజు షెడ్యూల్ ప్రోగ్రామ్
 DocType: Fee Schedule Program,Student Batch,స్టూడెంట్ బ్యాచ్
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","దయచేసి ఈ పత్రాన్ని రద్దు చేయడానికి ఉద్యోగి <a href=""#Form/Employee/{0}"">{0}</a> ను తొలగించండి"
 apps/erpnext/erpnext/utilities/activation.py +119,Make Student,స్టూడెంట్ చేయండి
 DocType: Supplier Scorecard Scoring Standing,Min Grade,కనిష్ట గ్రేడ్
 DocType: Healthcare Service Unit Type,Healthcare Service Unit Type,హెల్త్కేర్ సర్వీస్ యూనిట్ పద్ధతి
@@ -3318,7 +3318,7 @@ DocType: Payment Request,Make Sales Invoice,సేల్స్ వాయిస�
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +62,Softwares,సాఫ్ట్వేర్పై
 apps/erpnext/erpnext/crm/doctype/lead/lead.py +53,Next Contact Date cannot be in the past,తదుపరి సంప్రదించండి తేదీ గతంలో ఉండకూడదు
 DocType: Company,For Reference Only.,సూచన ఓన్లి.
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2592,Select Batch No,బ్యాచ్ ఎంచుకోండి లేవు
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2593,Select Batch No,బ్యాచ్ ఎంచుకోండి లేవు
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +79,Invalid {0}: {1},చెల్లని {0}: {1}
 ,GSTR-1,GSTR -1
 DocType: Fee Validity,Reference Inv,సూచన ఆహ్వానం
@@ -3363,7 +3363,7 @@ DocType: Travel Request,Any other details,ఏదైనా ఇతర వివర
 DocType: Water Analysis,Origin,మూలం
 apps/erpnext/erpnext/controllers/status_updater.py +207,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,ఈ పత్రం పరిమితి {0} {1} అంశం {4}. మీరు తయారు మరొక {3} అదే వ్యతిరేకంగా {2}?
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1216,Please set recurring after saving,గండం పునరావృత సెట్ చెయ్యండి
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +874,Select change amount account,మార్పు ఎంచుకోండి మొత్తం ఖాతా
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +877,Select change amount account,మార్పు ఎంచుకోండి మొత్తం ఖాతా
 DocType: Purchase Invoice,Price List Currency,ధర జాబితా కరెన్సీ
 DocType: Naming Series,User must always select,వినియోగదారు ఎల్లప్పుడూ ఎంచుకోవాలి
 DocType: Stock Settings,Allow Negative Stock,ప్రతికూల స్టాక్ అనుమతించు
@@ -3468,7 +3468,7 @@ apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +76,View Fee
 apps/erpnext/erpnext/setup/doctype/company/company.js +55,Make Tax Template,పన్ను మూసను చేయండి
 apps/erpnext/erpnext/public/js/conf.js +28,User Forum,వాడుకరి ఫోరం
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +328,Raw Materials cannot be blank.,రా మెటీరియల్స్ ఖాళీ ఉండకూడదు.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1025,Row #{0} (Payment Table): Amount must be negative,వరుస # {0} (చెల్లింపు పట్టిక): మొత్తం ప్రతికూలంగా ఉండాలి
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1032,Row #{0} (Payment Table): Amount must be negative,వరుస # {0} (చెల్లింపు పట్టిక): మొత్తం ప్రతికూలంగా ఉండాలి
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +570,"Could not update stock, invoice contains drop shipping item.","స్టాక్ అప్డేట్ కాలేదు, ఇన్వాయిస్ డ్రాప్ షిప్పింగ్ అంశం కలిగి."
 DocType: Contract,Fulfilment Status,నెరవేర్చుట స్థితి
 DocType: Lab Test Sample,Lab Test Sample,ల్యాబ్ పరీక్ష నమూనా
@@ -3560,7 +3560,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,బదిలీ తేదీకి ముందు ఉద్యోగి బదిలీ సమర్పించబడదు
 DocType: Certification Application,USD,డాలర్లు
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,వాయిస్ చేయండి
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +104,Remaining Balance,మిగిలిన మొత్తం
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,మిగిలిన మొత్తం
 DocType: Selling Settings,Auto close Opportunity after 15 days,15 రోజుల తర్వాత ఆటో దగ్గరగా అవకాశం
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,{1} యొక్క స్కోర్కార్డ్ స్టాండింగ్ వల్ల {0} కొనుగోలు ఆర్డర్లు అనుమతించబడవు.
 apps/erpnext/erpnext/stock/doctype/item/item.py +516,Barcode {0} is not a valid {1} code,బార్ కోడ్ {0} చెల్లుబాటు అయ్యే {1} కోడ్ కాదు
@@ -3607,7 +3607,7 @@ DocType: Purchase Receipt Item,Recd Quantity,Recd పరిమాణం
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +170,Doc Date,Doc తేదీ
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +64,Fee Records Created - {0},ఫీజు రికార్డ్స్ రూపొందించబడింది - {0}
 DocType: Asset Category Account,Asset Category Account,ఆస్తి వర్గం ఖాతా
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1020,Row #{0} (Payment Table): Amount must be positive,రో # {0} (చెల్లింపు టేబుల్): మొత్తాన్ని సానుకూలంగా ఉండాలి
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1027,Row #{0} (Payment Table): Amount must be positive,రో # {0} (చెల్లింపు టేబుల్): మొత్తాన్ని సానుకూలంగా ఉండాలి
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +137,Cannot produce more Item {0} than Sales Order quantity {1},అమ్మకాల ఆర్డర్ పరిమాణం కంటే ఎక్కువ అంశం {0} ఉత్పత్తి కాదు {1}
 apps/erpnext/erpnext/stock/doctype/item/item.js +440,Select Attribute Values,ఎంచుకోండి లక్షణం విలువలు
 DocType: Purchase Invoice,Reason For Issuing document,పత్రం జారీ కోసం కారణం
@@ -3620,7 +3620,6 @@ DocType: Salary Component Account,Salary Component Account,జీతం భా�
 DocType: Global Defaults,Hide Currency Symbol,కరెన్సీ మానవ చిత్ర దాచు
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.js +281,Sales Opportunities by Source,మూల ద్వారా సేల్స్ అవకాశాలు
 apps/erpnext/erpnext/config/non_profit.py +58,Donor information.,దాత సమాచారం.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +89,Please setup numbering series for Attendance via Setup &gt; Numbering Series,సెటప్&gt; నంబరింగ్ సిరీస్ ద్వారా హాజరు కోసం నంబర్ సిరీస్ను సెటప్ చేయండి
 apps/erpnext/erpnext/config/accounts.py +368,"e.g. Bank, Cash, Credit Card","ఉదా బ్యాంక్, నగదు, క్రెడిట్ కార్డ్"
 DocType: Job Applicant,Source Name,మూలం పేరు
 DocType: Vital Signs,"Normal resting blood pressure in an adult is approximately 120 mmHg systolic, and 80 mmHg diastolic, abbreviated ""120/80 mmHg""","వయోజనలో సాధారణ విశ్రాంతి రక్తపోటు సుమారు 120 mmHg సిస్టోలిక్, మరియు 80 mmHg డయాస్టొలిక్, సంక్షిప్తంగా &quot;120/80 mmHg&quot;"
@@ -3683,6 +3682,7 @@ DocType: Payment Entry,Payment Type,చెల్లింపు పద్ధత�
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +245,Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement,దయచేసి అంశం కోసం ఒక బ్యాచ్ ఎంచుకోండి {0}. ఈ అవసరాన్ని తీర్చగల ఒకే బ్యాచ్ దొరక్కపోతే
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +245,Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement,దయచేసి అంశం కోసం ఒక బ్యాచ్ ఎంచుకోండి {0}. ఈ అవసరాన్ని తీర్చగల ఒకే బ్యాచ్ దొరక్కపోతే
 DocType: Asset Maintenance Log,ACC-AML-.YYYY.-,ACC-AML-.YYYY.-
+apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1184,No gain or loss in the exchange rate,మారకపు రేటులో లాభం లేదా నష్టం లేదు
 DocType: Payroll Entry,Select Employees,Select ఉద్యోగులు
 DocType: Shopify Settings,Sales Invoice Series,సేల్స్ ఇన్వాయిస్ సిరీస్
 DocType: Opportunity,Potential Sales Deal,సంభావ్య సేల్స్ డీల్
@@ -4098,6 +4098,8 @@ DocType: Assessment Result Tool,Result HTML,ఫలితం HTML
 DocType: Selling Settings,How often should project and company be updated based on Sales Transactions.,సేల్స్ ట్రాన్సాక్షన్స్ ఆధారంగా ఎంత తరచుగా ప్రాజెక్ట్ మరియు కంపెనీ అప్డేట్ చేయాలి.
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +35,Expires On,గడువు ముగిసేది
 apps/erpnext/erpnext/utilities/activation.py +117,Add Students,స్టూడెంట్స్ జోడించండి
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","దయచేసి ఈ పత్రాన్ని రద్దు చేయడానికి ఉద్యోగి <a href=""#Form/Employee/{0}"">{0}</a> ను తొలగించండి"
 apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_exemption_declaration.js +18,Please select {0},దయచేసి ఎంచుకోండి {0}
 DocType: C-Form,C-Form No,సి ఫారం లేవు
 DocType: BOM,Exploded_items,Exploded_items
@@ -4401,7 +4403,7 @@ apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +49,Expense Claim for
 DocType: Sales Invoice Item,Discount (%) on Price List Rate with Margin,లాభాలతో ధర జాబితా రేటు తగ్గింపు (%)
 DocType: Healthcare Service Unit Type,Rate / UOM,రేట్ / UOM
 apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py +59,All Warehouses,అన్ని గిడ్డంగులు
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1299,No {0} found for Inter Company Transactions.,ఇంటర్ కంపెనీ లావాదేవీలకు ఎటువంటి {0} దొరకలేదు.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1306,No {0} found for Inter Company Transactions.,ఇంటర్ కంపెనీ లావాదేవీలకు ఎటువంటి {0} దొరకలేదు.
 DocType: Travel Itinerary,Rented Car,అద్దె కారు
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js +15,About your Company,మీ కంపెనీ గురించి
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +144,Credit To account must be a Balance Sheet account,ఖాతాకు క్రెడిట్ బాలన్స్ షీట్ ఖాతా ఉండాలి
@@ -4594,6 +4596,7 @@ DocType: Assessment Plan,Assessment Plan,అసెస్మెంట్ ప్�
 DocType: Travel Request,Fully Sponsored,పూర్తిగా ప్రాయోజితం
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +28,Reverse Journal Entry,రివర్స్ జర్నల్ ఎంట్రీ
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py +90,Customer {0} is created.,కస్టమర్ {0} సృష్టించబడింది.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,దయచేసి మానవ వనరులో HR ఉద్యోగ నామకరణ వ్యవస్థ సెటప్ చేయండి&gt; హెచ్ఆర్ సెట్టింగులు
 DocType: Stock Settings,Limit Percent,పరిమితి శాతం
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +82, Currently no stock available in any warehouse,ఏ గిడ్డంగిలో ప్రస్తుతం స్టాక్ లేదు
 ,Payment Period Based On Invoice Date,వాయిస్ తేదీ ఆధారంగా చెల్లింపు కాలం
@@ -4810,7 +4813,6 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +203,Number of Depreciations 
 DocType: Purchase Order,Order Confirmation Date,ఆర్డర్ నిర్ధారణ తేదీ
 DocType: Driver,HR-DRI-.YYYY.-,ఆర్-డ్రై-.YYYY.-
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,నిర్వహణ సందర్శించండి చేయండి
-apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","ప్రారంభ తేదీ మరియు ముగింపు తేదీ జాబ్ కార్డుతో అతివ్యాప్తి చెందుతుంది <a href=""#Form/Job Card/{0}"">{1}</a>"
 DocType: Employee Transfer,Employee Transfer Details,ఉద్యోగి బదిలీ వివరాలు
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +263,Please contact to the user who have Sales Master Manager {0} role,సేల్స్ మాస్టర్ మేనేజర్ {0} పాత్ర కలిగిన వినియోగదారుకు సంప్రదించండి
 DocType: Company,Default Cash Account,డిఫాల్ట్ నగదు ఖాతా
@@ -4897,7 +4899,7 @@ DocType: Project Update,Not Updated,నవీకరించబడలేదు
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +107,"There are inconsistencies between the rate, no of shares and the amount calculated","రేట్ల సంఖ్య, వాటాల సంఖ్య మరియు లెక్కించిన మొత్తం మధ్య అసమానతలు ఉన్నాయి"
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py +39,You are not present all day(s) between compensatory leave request days,మీరు పరిహార సెలవు రోజు అభ్యర్థుల మధ్య రోజు మొత్తం రోజులు లేవు
 apps/erpnext/erpnext/setup/doctype/company/company.js +109,Please re-type company name to confirm,తిరిగి రకం కంపెనీ పేరు నిర్ధారించడానికి దయచేసి
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +234,Total Outstanding Amt,మొత్తం అద్భుతమైన ఆంట్
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +29,Total Outstanding Amt,మొత్తం అద్భుతమైన ఆంట్
 DocType: Journal Entry,Printing Settings,ప్రింటింగ్ సెట్టింగ్స్
 DocType: Employee Advance,Advance Account,అడ్వాన్స్ అకౌంట్
 DocType: Job Offer,Job Offer Terms,ఉద్యోగ ఆఫర్ నిబంధనలు
@@ -4968,7 +4970,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js +1979,Enter value must be positive
 DocType: Asset,Finance Books,ఫైనాన్స్ బుక్స్
 DocType: Employee Tax Exemption Declaration Category,Employee Tax Exemption Declaration Category,ఉద్యోగుల పన్ను మినహాయింపు ప్రకటన వర్గం
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py +448,All Territories,అన్ని ప్రాంతాలు
-apps/erpnext/erpnext/hr/utils.py +215,Please set leave policy for employee {0} in Employee / Grade record,దయచేసి Employee / Grade రికార్డులో ఉద్యోగికి {0} సెలవు విధానంని సెట్ చేయండి
+apps/erpnext/erpnext/hr/utils.py +216,Please set leave policy for employee {0} in Employee / Grade record,దయచేసి Employee / Grade రికార్డులో ఉద్యోగికి {0} సెలవు విధానంని సెట్ చేయండి
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1400,Invalid Blanket Order for the selected Customer and Item,ఎంచుకున్న కస్టమర్ మరియు అంశం కోసం చెల్లని బ్లాంకెట్ ఆర్డర్
 apps/erpnext/erpnext/projects/doctype/task/task_tree.js +49,Add Multiple Tasks,బహుళ విధులను జోడించండి
 DocType: Purchase Invoice,Items,అంశాలు
@@ -4977,7 +4979,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,ఇయర్ పేరు
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,పని రోజుల కంటే ఎక్కువ సెలవులు ఈ నెల ఉన్నాయి.
 apps/erpnext/erpnext/controllers/buying_controller.py +760,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,అంశాల తర్వాత {0} {1} అంశంగా గుర్తించబడలేదు. మీరు వాటిని ఐటమ్ మాస్టర్ నుండి {1} అంశంగా ఎనేబుల్ చేయవచ్చు
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Ref,PDC / LC Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,ఉత్పత్తి కట్ట అంశం
 DocType: Sales Partner,Sales Partner Name,సేల్స్ భాగస్వామి పేరు
 apps/erpnext/erpnext/hooks.py +141,Request for Quotations,కొటేషన్స్ కోసం అభ్యర్థన
@@ -5043,7 +5045,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,డిస్కౌంట్ మొత్తాన్ని తర్వాత పన్ను సొమ్ము
 DocType: Patient,Inpatient Status,ఇన్పేషెంట్ స్థితి
 DocType: Daily Work Summary Settings,Daily Work Summary Settings,డైలీ వర్క్ సారాంశం సెట్టింగులు
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1294,Selected Price List should have buying and selling fields checked.,ఎంచుకున్న ధర జాబితా తనిఖీ చేసిన ఖాళీలను కొనడం మరియు అమ్మడం ఉండాలి.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1301,Selected Price List should have buying and selling fields checked.,ఎంచుకున్న ధర జాబితా తనిఖీ చేసిన ఖాళీలను కొనడం మరియు అమ్మడం ఉండాలి.
 apps/erpnext/erpnext/controllers/buying_controller.py +681,Please enter Reqd by Date,దయచేసి తేదీ ద్వారా రిక్డ్ నమోదు చేయండి
 DocType: Payment Entry,Internal Transfer,అంతర్గత బదిలీ
 DocType: Asset Maintenance,Maintenance Tasks,నిర్వహణ పనులు
@@ -5105,7 +5107,6 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +1017
 DocType: Company,Monthly Sales Target,మంత్లీ సేల్స్ టార్గెట్
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py +37,Can be approved by {0},ద్వారా ఆమోదం {0}
 DocType: Hotel Room,Hotel Room Type,హోటల్ గది రకం
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +181,Supplier &gt; Supplier Type,సరఫరాదారు&gt; సరఫరాదారు రకం
 DocType: Leave Allocation,Leave Period,కాలం వదిలివేయండి
 DocType: Item,Default Material Request Type,డిఫాల్ట్ మెటీరియల్ అభ్యర్థన రకం
 DocType: Supplier Scorecard,Evaluation Period,మూల్యాంకనం కాలం
@@ -5208,7 +5209,7 @@ DocType: Staffing Plan Detail,Vacancies,ఖాళీలు
 DocType: Hotel Room,Hotel Room,హోటల్ గది
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +57,Account {0} does not belongs to company {1},ఖాతా {0} చేస్తుంది కంపెనీ చెందినవి కాదు {1}
 DocType: Leave Type,Rounding,చుట్టుముట్టే
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +990,Serial Numbers in row {0} does not match with Delivery Note,వరుసగా {0} లో సీరియల్ సంఖ్యలు డెలివరీ గమనిక సరిపోలడం లేదు
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +997,Serial Numbers in row {0} does not match with Delivery Note,వరుసగా {0} లో సీరియల్ సంఖ్యలు డెలివరీ గమనిక సరిపోలడం లేదు
 DocType: Employee Benefit Application,Dispensed Amount (Pro-rated),డిస్పెన్సెడ్ మొత్తం (ప్రో-రేటెడ్)
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +36,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Group, Campaign, Sales Partner etc.","అప్పుడు ధర నిబంధనలు కస్టమర్, కస్టమర్ గ్రూప్, భూభాగం, సరఫరాదారు, సరఫరాదారు సమూహం, ప్రచారం, సేల్స్ భాగస్వామి మొదలైనవి ఆధారంగా ఫిల్టర్ చేయబడతాయి."
 DocType: Student,Guardian Details,గార్డియన్ వివరాలు
@@ -5494,7 +5495,7 @@ DocType: Journal Entry,Cash Entry,క్యాష్ ఎంట్రీ
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse_tree.js +17,Child nodes can be only created under 'Group' type nodes,చైల్డ్ నోడ్స్ మాత్రమే &#39;గ్రూప్&#39; రకం నోడ్స్ క్రింద రూపొందించినవారు చేయవచ్చు
 DocType: Attendance Request,Half Day Date,హాఫ్ డే తేదీ
 DocType: Academic Year,Academic Year Name,విద్యా సంవత్సరం పేరు
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1178,{0} not allowed to transact with {1}. Please change the Company.,{0} {1} తో లావాదేవీ చేయడానికి అనుమతించబడదు. దయచేసి కంపెనీని మార్చండి.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1185,{0} not allowed to transact with {1}. Please change the Company.,{0} {1} తో లావాదేవీ చేయడానికి అనుమతించబడదు. దయచేసి కంపెనీని మార్చండి.
 DocType: Sales Partner,Contact Desc,సంప్రదించండి desc
 DocType: Email Digest,Send regular summary reports via Email.,ఇమెయిల్ ద్వారా సాధారణ సారాంశం నివేదికలు పంపండి.
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +289,Please set default account in Expense Claim Type {0},ఖర్చుల దావా రకం లో డిఫాల్ట్ ఖాతా సెట్ దయచేసి {0}
@@ -5593,7 +5594,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,తెరవడం స్టాక్
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,కస్టమర్ అవసరం
 DocType: Lab Test,Result Date,ఫలితం తేదీ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +101,PDC/LC Date,PDC / LC తేదీ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,PDC / LC తేదీ
 DocType: Purchase Order,To Receive,అందుకోవడం
 DocType: Leave Period,Holiday List for Optional Leave,ఐచ్ఛిక సెలవు కోసం హాలిడే జాబితా
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5712,6 +5713,7 @@ DocType: Quality Inspection,Incoming,ఇన్కమింగ్
 apps/erpnext/erpnext/setup/doctype/company/company.js +90,Default tax templates for sales and purchase are created.,అమ్మకాలు మరియు కొనుగోలు కోసం డిఫాల్ట్ పన్ను టెంప్లేట్లు సృష్టించబడతాయి.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py +44,Assessment Result record {0} already exists.,అసెస్మెంట్ ఫలితం రికార్డు {0} ఇప్పటికే ఉంది.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","ఉదాహరణ: ABCD. #####. సిరీస్ సెట్ చేయబడి ఉంటే మరియు బ్యాచ్ నో లావాదేవీలలో పేర్కొనబడకపోతే, ఈ సిరీస్ ఆధారంగా ఆటోమేటిక్ బ్యాచ్ నంబర్ సృష్టించబడుతుంది. ఈ అంశానికి బ్యాచ్ నంబర్ను స్పష్టంగా చెప్పాలని మీరు అనుకుంటే, దీన్ని ఖాళీగా వదిలేయండి. గమనిక: ఈ సెట్టింగులు స్టాకింగ్ సెట్టింగులలో నామకరణ సీరీస్ ప్రిఫిక్స్ మీద ప్రాధాన్యతనిస్తాయి."
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +89,Please setup numbering series for Attendance via Setup &gt; Numbering Series,సెటప్&gt; నంబరింగ్ సిరీస్ ద్వారా హాజరు కోసం నంబర్ సిరీస్ను సెటప్ చేయండి
 DocType: BOM,Materials Required (Exploded),మెటీరియల్స్ (పేలుతున్న) అవసరం
 DocType: Contract,Party User,పార్టీ వాడుకరి
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',కంపెనీ ఖాళీ ఫిల్టర్ సెట్ చేయండి బృందంచే &#39;కంపెనీ&#39; ఉంది
@@ -5898,7 +5900,7 @@ DocType: POS Closing Voucher Invoices,POS Closing Voucher Invoices,POS మూస
 DocType: Tax Rule,Sales Tax Template,సేల్స్ టాక్స్ మూస
 DocType: Employee Benefit Application Detail,Pay Against Benefit Claim,బెనిఫిట్ దావాకు వ్యతిరేకంగా చెల్లించండి
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +21,Update Cost Center Number,ధర సెంటర్ సంఖ్యను నవీకరించండి
-apps/erpnext/erpnext/accounts/page/pos/pos.js +2521,Select items to save the invoice,ఇన్వాయిస్ సేవ్ చెయ్యడానికి ఐటమ్లను ఎంచుకోండి
+apps/erpnext/erpnext/accounts/page/pos/pos.js +2522,Select items to save the invoice,ఇన్వాయిస్ సేవ్ చెయ్యడానికి ఐటమ్లను ఎంచుకోండి
 DocType: Employee,Encashment Date,ఎన్క్యాష్మెంట్ తేదీ
 DocType: Training Event,Internet,ఇంటర్నెట్
 DocType: Special Test Template,Special Test Template,ప్రత్యేక టెస్ట్ మూస
@@ -5952,7 +5954,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,గంటకు
 DocType: Blanket Order,Purchasing,కొనుగోలు
 DocType: Announcement,Announcement,ప్రకటన
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +109,Customer LPO,కస్టమర్ LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +129,Customer LPO,కస్టమర్ LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","బ్యాచ్ ఆధారంగా స్టూడెంట్ గ్రూప్, స్టూడెంట్ బ్యాచ్ ప్రోగ్రామ్ ఎన్రోల్మెంట్ నుండి ప్రతి విద్యార్థి కోసం చెల్లుబాటు అవుతుంది."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,స్టాక్ లెడ్జర్ ఎంట్రీ ఈ గిడ్డంగి కోసం ఉనికిలో గిడ్డంగి తొలగించడం సాధ్యం కాదు.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,పంపిణీ
@@ -5987,7 +5989,6 @@ DocType: Subscription Plan,Billing Interval,బిల్లింగ్ వి�
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +36,Motion Picture & Video,మోషన్ పిక్చర్ &amp; వీడియో
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +5,Ordered,క్రమ
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +76,Actual start date and actual end date is mandatory,అసలు ప్రారంభ తేదీ మరియు వాస్తవ ముగింపు తేదీ తప్పనిసరి
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,కస్టమర్&gt; కస్టమర్ గ్రూప్&gt; భూభాగం
 DocType: Salary Detail,Component,కాంపోనెంట్
 apps/erpnext/erpnext/assets/doctype/asset_category/asset_category.py +16,Row {0}: {1} must be greater than 0,అడ్డు వరుస {0}: {1} తప్పనిసరిగా 0 కన్నా ఎక్కువ ఉండాలి
 DocType: Assessment Criteria,Assessment Criteria Group,అంచనా ప్రమాణం గ్రూప్
@@ -6142,7 +6143,7 @@ DocType: Item Attribute Value,Attribute Value,విలువ లక్షణం
 DocType: POS Closing Voucher Details,Expected Amount,ఊహించిన మొత్తం
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js +16,Create Multiple,బహుళ సృష్టించు
 ,Itemwise Recommended Reorder Level,Itemwise క్రమాన్ని స్థాయి సిఫార్సు
-apps/erpnext/erpnext/hr/utils.py +211,Employee {0} of grade {1} have no default leave policy,గ్రేడ్ {1} యొక్క ఉద్యోగి {0} డిఫాల్ట్ లీక్ విధానాన్ని కలిగి లేరు
+apps/erpnext/erpnext/hr/utils.py +212,Employee {0} of grade {1} have no default leave policy,గ్రేడ్ {1} యొక్క ఉద్యోగి {0} డిఫాల్ట్ లీక్ విధానాన్ని కలిగి లేరు
 DocType: Salary Detail,Salary Detail,జీతం వివరాలు
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1103,Please select {0} first,ముందుగా {0} దయచేసి ఎంచుకోండి
 apps/erpnext/erpnext/public/js/hub/marketplace.js +177,Added {0} users,{0} వినియోగదారులు జోడించబడ్డారు
@@ -6285,9 +6286,8 @@ DocType: Shipping Rule,Shipping Rule Type,షిప్పింగ్ రూల�
 apps/erpnext/erpnext/utilities/user_progress.py +239,Go to Rooms,రూములు వెళ్ళండి
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Payment Account, From Date and To Date is mandatory","కంపెనీ, చెల్లింపు ఖాతా, తేదీ మరియు తేదీ నుండి తప్పనిసరి"
 DocType: Company,Budget Detail,బడ్జెట్ వివరాలు
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,పంపే ముందు సందేశాన్ని నమోదు చేయండి
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +79,Please enter message before sending,పంపే ముందు సందేశాన్ని నమోదు చేయండి
 DocType: Purchase Invoice,DUPLICATE FOR SUPPLIER,సరఫరా కోసం DUPLICATE
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,సరఫరాదారు&gt; సరఫరాదారు సమూహం
 DocType: Asset,Custodian,కస్టోడియన్
 apps/erpnext/erpnext/config/accounts.py +356,Point-of-Sale Profile,పాయింట్ ఆఫ్ అమ్మకానికి ప్రొఫైల్
 apps/erpnext/erpnext/agriculture/doctype/soil_texture/soil_texture.py +25,{0} should be a value between 0 and 100,{0} 0 మరియు 100 మధ్య విలువ ఉండాలి
@@ -6297,7 +6297,7 @@ DocType: Cost Center,Cost Center Name,ఖర్చు సెంటర్ పే�
 DocType: Student,B+,B +
 DocType: HR Settings,Max working hours against Timesheet,మాక్స్ TIMESHEET వ్యతిరేకంగా పని గంటలు
 DocType: Maintenance Schedule Detail,Scheduled Date,షెడ్యూల్డ్ తేదీ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +232,Total Paid Amt,మొత్తం చెల్లించిన ఆంట్
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,Total Paid Amt,మొత్తం చెల్లించిన ఆంట్
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,160 అక్షరాల కంటే ఎక్కువ సందేశాలు బహుళ సందేశాలను విభజించబడింది ఉంటుంది
 DocType: Purchase Receipt Item,Received and Accepted,అందుకున్నారు మరియు Accepted
 ,GST Itemised Sales Register,జిఎస్టి వర్గీకరించబడ్డాయి సేల్స్ నమోదు
@@ -6749,6 +6749,7 @@ DocType: Purchase Invoice,Rounded Total (Company Currency),నున్నటి
 apps/erpnext/erpnext/accounts/doctype/account/account.py +103,Cannot covert to Group because Account Type is selected.,ఖాతా రకం ఎంపిక ఎందుకంటే గ్రూప్ ప్రచ్ఛన్న కాదు.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +270,{0} {1} has been modified. Please refresh.,{0} {1} మారిస్తే. రిఫ్రెష్ చెయ్యండి.
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,కింది రోజులలో లీవ్ అప్లికేషన్స్ తయారీ నుండి వినియోగదారులు ఆపు.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,అంశం కోడ్&gt; అంశం సమూహం&gt; బ్రాండ్
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +24,"If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0.","లాయల్టీ పాయింట్స్ కోసం అపరిమిత గడువు ఉంటే, గడువు వ్యవధి ఖాళీగా లేదా 0 గా ఉంచండి."
 DocType: Asset Maintenance Team,Maintenance Team Members,నిర్వహణ జట్టు సభ్యులు
 DocType: Loyalty Point Entry,Purchase Amount,కొనుగోలు మొత్తాన్ని
@@ -6820,7 +6821,7 @@ apps/erpnext/erpnext/hr/doctype/attendance_request/attendance_request.py +52,Att
 DocType: POS Profile,Account for Change Amount,మొత్తం చేంజ్ ఖాతా
 DocType: QuickBooks Migrator,Connecting to QuickBooks,క్విక్బుక్స్లో కనెక్ట్ చేస్తోంది
 DocType: Exchange Rate Revaluation,Total Gain/Loss,మొత్తం లాభం / నష్టం
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1171,Invalid Company for Inter Company Invoice.,ఇంటర్ కంపెనీ ఇన్వాయిస్ కోసం చెల్లని కంపెనీ.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1178,Invalid Company for Inter Company Invoice.,ఇంటర్ కంపెనీ ఇన్వాయిస్ కోసం చెల్లని కంపెనీ.
 DocType: Purchase Invoice,input service,ఇన్పుట్ సేవ
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +249,Row {0}: Party / Account does not match with {1} / {2} in {3} {4},రో {0}: పార్టీ / ఖాతాతో సరిపోలడం లేదు {1} / {2} లో {3} {4}
 DocType: Employee Promotion,Employee Promotion,ఉద్యోగి ప్రమోషన్
@@ -6893,7 +6894,6 @@ apps/erpnext/erpnext/education/doctype/student_admission/student_admission.py +2
 apps/erpnext/erpnext/config/accounts.py +295,"Seasonality for setting budgets, targets etc.","సెట్ బడ్జెట్లు, లక్ష్యాలను మొదలైనవి కోసం కాలికోద్యోగం"
 DocType: Supplier Scorecard Scoring Variable,Variable Name,వేరియబుల్ పేరు
 apps/erpnext/erpnext/stock/get_item_details.py +163,"Item {0} is a template, please select one of its variants","{0} అంశం ఒక టెంప్లేట్, దాని వైవిధ్యాలు ఒకటి ఎంచుకోండి దయచేసి"
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,దయచేసి మానవ వనరులో HR ఉద్యోగ నామకరణ వ్యవస్థ సెటప్ చేయండి&gt; హెచ్ఆర్ సెట్టింగులు
 DocType: Purchase Invoice Item,Deferred Expense,వాయిదా వేసిన ఖర్చు
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py +26,From Date {0} cannot be before employee's joining Date {1},తేదీ నుండి {0} ఉద్యోగి చేరిన తేదీకి ముందు ఉండకూడదు {1}
 DocType: Asset,Asset Category,ఆస్తి వర్గం
@@ -6945,13 +6945,14 @@ DocType: Item Attribute,Numeric Values,సంఖ్యా విలువలు
 apps/erpnext/erpnext/public/js/setup_wizard.js +56,Attach Logo,లోగో అటాచ్
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +51,Stock Levels,స్టాక్ స్థాయిలు
 DocType: Customer,Commission Rate,కమిషన్ రేటు
-apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py +240,Successfully created payment entries,చెల్లింపు నమోదులు విజయవంతంగా సృష్టించబడ్డాయి
+apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py +241,Successfully created payment entries,చెల్లింపు నమోదులు విజయవంతంగా సృష్టించబడ్డాయి
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +187,Created {0} scorecards for {1} between: ,{0} కోసం {0} స్కోర్కార్డ్లు సృష్టించబడ్డాయి:
 apps/erpnext/erpnext/stock/doctype/item/item.js +584,Make Variant,వేరియంట్ చేయండి
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +156,"Payment Type must be one of Receive, Pay and Internal Transfer","చెల్లింపు పద్ధతి, స్వీకరించండి ఒకటి ఉండాలి చెల్లించండి మరియు అంతర్గత బదిలీ"
 DocType: Travel Itinerary,Preferred Area for Lodging,లాడ్జింగ్ కోసం ఇష్టపడే ప్రాంతం
 apps/erpnext/erpnext/config/selling.py +184,Analytics,విశ్లేషణలు
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +25,Cart is Empty,కార్ట్ ఖాళీగా ఉంది
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,దయచేసి ఎడ్యుకేషన్&gt; ఎడ్యుకేషన్ సెట్టింగులలో ఇన్స్ట్రక్టర్ నేమింగ్ సిస్టం సెటప్ చేయండి
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +416,"Item {0} has no Serial No. Only serilialized items \
 						can have delivery based on Serial No",అంశం {0} వరుస సంఖ్య లేదు. సీరియల్ నంబర్ పై ఆధారపడిన డెలివరీను మాత్రమే కలిగి ఉంటాయి
 DocType: Vehicle,Model,మోడల్

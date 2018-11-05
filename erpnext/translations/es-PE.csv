@@ -119,7 +119,7 @@ DocType: Quotation,In Words will be visible once you save the Quotation.,En pala
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +284,Installation Note {0} has already been submitted,La nota de instalación {0} ya se ha presentado
 apps/erpnext/erpnext/config/selling.py +105,Manage Territory Tree.,Vista en árbol para la administración de los territorios
 apps/erpnext/erpnext/stock/utils.py +231,Serial number {0} entered more than once,Número de serie {0} entraron más de una vez
-apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,"Lista de receptores está vacía. Por favor, cree Lista de receptores"
+apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +72,Receiver List is empty. Please create Receiver List,"Lista de receptores está vacía. Por favor, cree Lista de receptores"
 DocType: Target Detail,Target Detail,Objetivo Detalle
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Plantillas de Cargos e Impuestos
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +145,Current Liabilities,Pasivo Corriente
@@ -229,7 +229,7 @@ apps/erpnext/erpnext/public/js/templates/contact_list.html +34,No contacts added
 apps/erpnext/erpnext/accounts/doctype/account/account.py +163,Root Type is mandatory,Tipo Root es obligatorio
 DocType: Patient Appointment,Scheduled,Programado
 DocType: Salary Component,Depends on Leave Without Pay,Depende de ausencia sin pago
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +232,Total Paid Amt,Total Pagado Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,Total Paid Amt,Total Pagado Amt
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +16,'Days Since Last Order' must be greater than or equal to zero,'Días desde el último pedido' debe ser mayor o igual a cero
 DocType: Material Request Item,For Warehouse,Por almacén
 ,Purchase Order Items To Be Received,Productos de la Orden de Compra a ser Recibidos
@@ -626,7 +626,7 @@ DocType: Request for Quotation Item,Project Name,Nombre del proyecto
 ,Serial No Warranty Expiry,Número de orden de caducidad Garantía
 DocType: Asset Repair,Manufacturing Manager,Gerente de Manufactura
 DocType: BOM,Item UOM,Unidad de Medida del Artículo
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +231,Total Invoiced Amt,Total Monto Facturado
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +26,Total Invoiced Amt,Total Monto Facturado
 DocType: Leave Application,Total Leave Days,Total Vacaciones
 apps/erpnext/erpnext/config/selling.py +169,Tax template for selling transactions.,Plantilla de Impuestos para las transacciones de venta.
 DocType: Appraisal Goal,Score Earned,Puntuación Obtenida
@@ -961,7 +961,7 @@ DocType: Bank Account,Contact HTML,HTML del Contacto
 DocType: Shipping Rule,Calculate Based On,Calcular basado en
 DocType: Work Order,Qty To Manufacture,Cantidad Para Fabricación
 DocType: BOM Item,Basic Rate (Company Currency),Precio Base (Moneda Local)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +234,Total Outstanding Amt,Monto Total Soprepasado
+apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +29,Total Outstanding Amt,Monto Total Soprepasado
 apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +47,Outstanding Amt,Monto Sobrepasado
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +231,Row {0}: Credit entry can not be linked with a {1},Fila {0}: Crédito no puede vincularse con {1}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +156,Credit Card,Tarjeta de Crédito
