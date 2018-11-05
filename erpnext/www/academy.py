@@ -81,7 +81,7 @@ def get_quiz_without_answers(quiz_name):
 		return None
 
 @frappe.whitelist()
-def evaluate_quiz(quiz_response, quiz_name):
+def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	"""LMS Function: Evaluates a simple multiple choice quiz.
 
 
@@ -89,20 +89,27 @@ def evaluate_quiz(quiz_response, quiz_name):
 	"""
 	import json
 	quiz_response = json.loads(quiz_response)
+	print(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
-	answers, score = quiz.evaluate(quiz_response, quiz_name)
+	answers, score, status = quiz.evaluate(quiz_response, quiz_name)
+	print("-----------------")
+	print(answers)
+
+	result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
+	result_data = []
+	for key in answers:
+		item = {}
+		item['question'] = key
+		item['quiz_result'] = result[key]
+		try:
+			item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
+		except:
+			item['selected_option'] = "Unattempted"
+		result_data.append(item)
+	# result_data = [{'question': key, 'selected_option': frappe.get_value('Options', quiz_response[key], 'option'), 'quiz_result': result[key]} for key in answers]
+
+	add_quiz_activity(enrollment, quiz_name, result_data, score, status)
 	return(score)
-	# quiz_name = kwargs.get('quiz')
-	# course_name = kwargs.get('course')
-	# enrollment = get_course_enrollment(course_name, frappe.session.user)
-	# try:
-	# 	quiz = frappe.get_doc("Quiz", quiz_name)
-	# 	answers, score = quiz.evaluate(quiz_response, enrollment, quiz_name)
-	# 	add_quiz_activity(enrollment, quiz_name, score, answers, quiz_response)
-	# 	return score
-	# except frappe.DoesNotExistError:
-	# 	frappe.throw("Quiz {0} does not exist".format(quiz_name))
-	# 	return None
 
 @frappe.whitelist()
 def get_completed_courses(email=frappe.session.user):
@@ -189,11 +196,17 @@ def add_activity(enrollment, content_type, content):
 
 def check_activity_exists(enrollment, content_type, content):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
-	if activity:
-		return True
-	else:
-		return False
+	return bool(activity)
 
-@frappe.whitelist()
-def add_quiz_activity(enrollment, quiz, score, answers):
-	pass
+def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
+	quiz_activity = frappe.get_doc({
+		"doctype": "Quiz Activity",
+		"enrollment": enrollment,
+		"quiz": quiz_name,
+		"result": result_data,
+		"score": score,
+		"status": status
+		})
+	quiz_activity.save()
+	print(quiz_activity)
+	frappe.db.commit()
