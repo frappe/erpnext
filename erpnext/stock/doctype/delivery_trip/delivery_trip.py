@@ -80,6 +80,9 @@ class DeliveryTrip(Document):
 			optimize (bool): True if route needs to be optimized, else False
 		"""
 
+		if not frappe.db.get_single_value("Google Maps Settings", "enabled"):
+			frappe.throw(_("Cannot process route, since Google Maps Settings is disabled."))
+
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
 
