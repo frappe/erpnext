@@ -402,7 +402,6 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 def get_cost_centers_with_children(cost_centers):
 	if not isinstance(cost_centers, list):
-		cost_centers = frappe.safe_encode(cost_centers)
 		cost_centers = [d.strip() for d in cost_centers.strip().split(',') if d]
 
 	all_cost_centers = []
