@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
+from __future__ import unicode_literals
 
 import re
 from past.builtins import cmp
@@ -342,7 +344,7 @@ def set_gl_entries_by_account(
 	accounts = frappe.db.sql_list("""select name from `tabAccount`
 		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
 	additional_conditions += " and account in ('{}')"\
-		.format("', '".join([frappe.safe_encode(frappe.db.escape(d)) for d in accounts]))
+		.format("', '".join([frappe.db.escape(d) for d in accounts]))
 
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 		where company=%(company)s
