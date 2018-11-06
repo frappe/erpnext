@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.regional.report.provident_fund_deductions.provident_fund_deductions import get_conditions
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -55,25 +56,6 @@ def get_columns(filters):
 	]
 
 	return columns
-
-def get_conditions(filters):
-	conditions = [""]
-
-	if filters.get("department"):
-		conditions.append("sal.department = '%s' " % (filters["department"]) )
-
-	if filters.get("branch"):
-		conditions.append("sal.branch = '%s' " % (filters["branch"]) )
-
-	if filters.get("company"):
-		conditions.append("sal.company = '%s' " % (filters["company"]) )
-
-	if filters.get("period"):
-		conditions.append("month(sal.start_date) = '%s' " % (filters["period"]))
-
-	return " and ".join(conditions)
-
-
 
 def get_data(filters):
 
