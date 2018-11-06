@@ -84,13 +84,15 @@ frappe.ui.form.on('Delivery Trip', {
 
 						frappe.confirm(
 							__(confirm_message),
-							() => resolve(),  // If "Yes" is selected
-							() => frappe.set_route("List", frm.doc.doctype)  // If "No" is selected
+							() => { return resolve(); },  // If "Yes" is selected
+							() => { frappe.set_route("List", frm.doc.doctype); }  // If "No" is selected
 						);
-					} else { resolve(); };
+					} else { return resolve(); }
+				}).fail((err) => {
+					return reject(err);
 				});
 			})
-		};
+		}
 	},
 
 	driver: function (frm) {
