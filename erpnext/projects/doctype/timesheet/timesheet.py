@@ -223,7 +223,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 			and tsd.parent LIKE %(txt)s {condition}
 			order by tsd.parent limit %(start)s, %(page_len)s"""
 			.format(condition=condition), {
-				"txt": "%%%s%%" % frappe.db.escape(txt),
+				'txt': '%' + txt + '%',
 				"start": start, "page_len": page_len, 'project': filters.get("project")
 			})
 

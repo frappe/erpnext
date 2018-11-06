@@ -22,10 +22,11 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_warehouse_account(self)
+		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
+			account = self.account or get_warehouse_account(self)
 
-		if account:
-			self.set_onload('account', account)
+			if account:
+				self.set_onload('account', account)
 		load_address_and_contact(self)
 
 

@@ -10,8 +10,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, getdate, get_link_to_form
-from frappe.utils.user import get_user_fullname
+from frappe.utils import get_datetime, get_link_to_form, cstr
 
 
 class DeliveryTrip(Document):
@@ -25,11 +24,9 @@ class DeliveryTrip(Document):
 		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
 
 		update_fields = {
-			"transporter": self.driver,
-			"transporter_name": self.driver_name,
-			"transport_mode": "Road",
+			"driver": self.driver,
+			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
-			"vehicle_type": "Regular",
 			"lr_no": self.name,
 			"lr_date": self.date
 		}
@@ -41,6 +38,7 @@ class DeliveryTrip(Document):
 				value = None if delete else value
 				setattr(note_doc, field, value)
 
+			note_doc.flags.ignore_validate_update_after_submit = True
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
@@ -169,59 +167,54 @@ def get_arrival_times(name):
 
 
 @frappe.whitelist()
-def notify_customers(docname, date, driver, vehicle, sender_email, delivery_notification):
-	sender_name = get_user_fullname(sender_email)
-	attachments = []
+def notify_customers(delivery_trip):
+	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 
-	parent_doc = frappe.get_doc('Delivery Trip', docname)
-	args = parent_doc.as_dict()
+	context = delivery_trip.as_dict()
+	context.update({
+		"departure_time": cstr(context.get("departure_time")),
+		"estimated_arrival": cstr(context.get("estimated_arrival"))
+	})
 
-	for delivery_stop in parent_doc.delivery_stops:
-		contact_info = frappe.db.get_value("Contact", delivery_stop.contact,
-			["first_name", "last_name", "email_id", "gender"], as_dict=1)
+	if delivery_trip.driver:
+		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))
 
-		args.update(delivery_stop.as_dict())
-		args.update(contact_info)
+	email_recipients = []
 
-		if delivery_stop.delivery_note:
-			default_print_format = frappe.get_meta('Delivery Note').default_print_format
-			attachments = frappe.attach_print('Delivery Note',
-				delivery_stop.delivery_note,
-				file_name="Delivery Note",
-				print_format=default_print_format or "Standard")
+	for stop in delivery_trip.delivery_stops:
+		contact_info = frappe.db.get_value("Contact", stop.contact,
+											["first_name", "last_name", "email_id", "gender"], as_dict=1)
 
-		if not delivery_stop.notified_by_email and contact_info.email_id:
-			driver_info = frappe.db.get_value("Driver", driver, ["full_name", "cell_number"], as_dict=1)
-			sender_designation = frappe.db.get_value("Employee", sender_email, ["designation"])
+		if contact_info and contact_info.email_id:
+			context.update(stop.as_dict())
+			context.update(contact_info)
 
-			estimated_arrival = cstr(delivery_stop.estimated_arrival)[:-3]
-			email_template = frappe.get_doc("Email Template", delivery_notification)
-			message = frappe.render_template(email_template.response, args)
+			dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
+			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
-			frappe.sendmail(
-				recipients=contact_info.email_id,
-				sender=sender_email,
-				message=message,
-				attachments=attachments,
-				subject=_(email_template.subject).format(getdate(date).strftime('%d.%m.%y'),
-					estimated_arrival))
+			frappe.sendmail(recipients=contact_info.email_id,
+							subject=dispatch_template.subject,
+							message=frappe.render_template(dispatch_template.response, context),
+							attachments=get_attachments(stop))
 
-			frappe.db.set_value("Delivery Stop", delivery_stop.name, "notified_by_email", 1)
-			frappe.db.set_value("Delivery Stop", delivery_stop.name,
-				"email_sent_to", contact_info.email_id)
-			frappe.msgprint(_("Email sent to {0}").format(contact_info.email_id))
+			stop.db_set("email_sent_to", contact_info.email_id)
+			email_recipients.append(contact_info.email_id)
 
-def round_timedelta(td, period):
-	"""Round timedelta"""
-	period_seconds = period.total_seconds()
-	half_period_seconds = period_seconds / 2
-	remainder = td.total_seconds() % period_seconds
-	if remainder >= half_period_seconds:
-		return datetime.timedelta(seconds=td.total_seconds() + (period_seconds - remainder))
+	if email_recipients:
+		frappe.msgprint(_("Email sent to {0}").format(", ".join(email_recipients)))
+		delivery_trip.db_set("email_notification_sent", True)
 	else:
-		return datetime.timedelta(seconds=td.total_seconds() - remainder)
+		frappe.msgprint(_("No contacts with email IDs found."))
 
-def format_address(address):
-	"""Customer Address format """
-	address = frappe.get_doc('Address', address)
-	return '{}, {}, {}, {}'.format(address.address_line1, address.city, address.pincode, address.country)
+
+def get_attachments(delivery_stop):
+	if not (frappe.db.get_single_value("Delivery Settings", "send_with_attachment") and delivery_stop.delivery_note):
+		return []
+
+	dispatch_attachment = frappe.db.get_single_value("Delivery Settings", "dispatch_attachment")
+	attachments = frappe.attach_print("Delivery Note",
+										delivery_stop.delivery_note,
+										file_name="Delivery Note",
+										print_format=dispatch_attachment)
+
+	return [attachments]

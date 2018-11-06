@@ -11,8 +11,8 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '11.x.x-develop'
-staging_version = '11.0.1'
+develop_version = '12.x.x-develop'
+staging_version = '11.0.3-beta.18'
 
 error_report_email = "support@erpnext.com"
 
@@ -25,6 +25,7 @@ web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
+	"Event": "public/js/event.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -250,7 +251,8 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
 	"monthly": [
-		"erpnext.accounts.doctype.sales_invoice.sales_invoice.booked_deferred_revenue",
+		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
+		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }

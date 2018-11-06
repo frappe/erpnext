@@ -64,13 +64,16 @@ def get_result(filters):
 				total_amount_credited += k.credit
 
 		rate = [i.tax_withholding_rate for i in tds_doc.rates
-			if i.fiscal_year == gle_map[d][0].fiscal_year][0]
+			if i.fiscal_year == gle_map[d][0].fiscal_year]
 
-		if getdate(filters.from_date) <= gle_map[d][0].posting_date \
-			and getdate(filters.to_date) >= gle_map[d][0].posting_date:
-			out.append([supplier.pan, supplier.name, tds_doc.name,
-				supplier.supplier_type, rate, total_amount_credited, tds_deducted,
-				gle_map[d][0].posting_date, "Purchase Invoice", d])
+		if rate and len(rate) > 0:
+			rate = rate[0]
+
+			if getdate(filters.from_date) <= gle_map[d][0].posting_date \
+				and getdate(filters.to_date) >= gle_map[d][0].posting_date:
+				out.append([supplier.pan, supplier.name, tds_doc.name,
+					supplier.supplier_type, rate, total_amount_credited, tds_deducted,
+					gle_map[d][0].posting_date, "Purchase Invoice", d])
 
 	return out
 

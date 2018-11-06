@@ -36,6 +36,10 @@ frappe.ready(function() {
 		more_items('timeline', false);
 	});
 
+	$(".file-size").each(function() {
+		$(this).text(frappe.form.formatters.FileSize($(this).text()));
+	});
+
 
 	var reload_items = function(item_status, item, $btn) {
 		$.ajax({

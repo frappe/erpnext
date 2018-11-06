@@ -12,6 +12,11 @@ class BalanceMismatchError(frappe.ValidationError): pass
 
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
+	def on_update(self):
+		if frappe.local.flags.ignore_on_update:
+			return
+		else:
+			super(Account, self).on_update()
 
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",

@@ -5,6 +5,7 @@ import frappe, erpnext
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import flt, now_datetime, cstr, random_string
 from frappe.utils.make_random import add_random_children, get_random
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.demo.domains import data
 from frappe import _
 
@@ -14,9 +15,10 @@ def setup(domain):
 	setup_fiscal_year()
 	setup_holiday_list()
 	setup_user()
-	#setup_employee()
+	setup_employee()
 	setup_user_roles()
 	setup_role_permissions()
+	setup_custom_field_for_domain()
 
 	employees = frappe.get_all('Employee',  fields=['name', 'date_of_joining'])
 
@@ -120,7 +122,7 @@ def setup_user():
 		user = frappe.new_doc("User")
 		user.update(u)
 		user.flags.no_welcome_mail = True
-		user.new_password = 'demo'
+		user.new_password = 'Demo1234567!!!'
 		user.insert()
 
 def setup_employee():
@@ -136,6 +138,8 @@ def setup_employee():
 		salary_component.save()
 
 	import_json('Employee')
+	holiday_list = frappe.db.get_value("Holiday List", {"holiday_list_name": str(now_datetime().year)}, 'name')
+	frappe.db.sql('''update tabEmployee set holiday_list={0}'''.format(holiday_list))
 
 def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 	ss = frappe.new_doc('Salary Structure')
@@ -166,12 +170,16 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 		"idx": 1
 	})
 	ss.insert()
+	ss.submit()
 
 	for e in employees:
 		sa  = frappe.new_doc("Salary Structure Assignment")
 		sa.employee = e.name
+		sa.salary_structure = ss.name
 		sa.from_date = "2015-01-01"
 		sa.base = random.random() * 10000
+		sa.insert()
+		sa.submit()
 
 	return ss
 
@@ -184,52 +192,63 @@ def setup_user_roles():
 		'Nursing User', 'Patient')
 
 	if not frappe.db.get_global('demo_hr_user'):
-		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')
+		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
 		user.add_roles('HR User', 'HR Manager', 'Accounts User')
 		frappe.db.set_global('demo_hr_user', user.name)
+		update_employee_department(user.name, 'Human Resources')
+		for d in frappe.get_all('User Permission', filters={"user": "CaitlinSnow@example.com"}):
+			frappe.delete_doc('User Permission', d.name)
 
 	if not frappe.db.get_global('demo_sales_user_1'):
-		user = frappe.get_doc('User', 'VakhitaRyzaev@example.com')
+		user = frappe.get_doc('User', 'VandalSavage@example.com')
 		user.add_roles('Sales User')
+		update_employee_department(user.name, 'Sales')
 		frappe.db.set_global('demo_sales_user_1', user.name)
 
 	if not frappe.db.get_global('demo_sales_user_2'):
-		user = frappe.get_doc('User', 'GabrielleLoftus@example.com')
+		user = frappe.get_doc('User', 'GraceChoi@example.com')
 		user.add_roles('Sales User', 'Sales Manager', 'Accounts User')
+		update_employee_department(user.name, 'Sales')
 		frappe.db.set_global('demo_sales_user_2', user.name)
 
 	if not frappe.db.get_global('demo_purchase_user'):
-		user = frappe.get_doc('User', 'MichalSobczak@example.com')
+		user = frappe.get_doc('User', 'MaxwellLord@example.com')
 		user.add_roles('Purchase User', 'Purchase Manager', 'Accounts User', 'Stock User')
+		update_employee_department(user.name, 'Purchase')
 		frappe.db.set_global('demo_purchase_user', user.name)
 
 	if not frappe.db.get_global('demo_manufacturing_user'):
-		user = frappe.get_doc('User', 'NuranVerkleij@example.com')
+		user = frappe.get_doc('User', 'NeptuniaAquaria@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
+		update_employee_department(user.name, 'Production')
 		frappe.db.set_global('demo_manufacturing_user', user.name)
 
 	if not frappe.db.get_global('demo_stock_user'):
-		user = frappe.get_doc('User', 'HatsueKashiwagi@example.com')
+		user = frappe.get_doc('User', 'HollyGranger@example.com')
 		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
+		update_employee_department(user.name, 'Production')
 		frappe.db.set_global('demo_stock_user', user.name)
 
 	if not frappe.db.get_global('demo_accounts_user'):
-		user = frappe.get_doc('User', 'LeonAbdulov@example.com')
+		user = frappe.get_doc('User', 'BarryAllen@example.com')
 		user.add_roles('Accounts User', 'Accounts Manager', 'Sales User', 'Purchase User')
+		update_employee_department(user.name, 'Accounts')
 		frappe.db.set_global('demo_accounts_user', user.name)
 
 	if not frappe.db.get_global('demo_projects_user'):
-		user = frappe.get_doc('User', 'panca@example.com')
+		user = frappe.get_doc('User', 'PeterParker@example.com')
 		user.add_roles('HR User', 'Projects User')
+		update_employee_department(user.name, 'Management')
 		frappe.db.set_global('demo_projects_user', user.name)
 
 	if not frappe.db.get_global('demo_education_user'):
-		user = frappe.get_doc('User', 'aromn@example.com')
+		user = frappe.get_doc('User', 'ArthurCurry@example.com')
 		user.add_roles('Academics User')
+		update_employee_department(user.name, 'Management')
 		frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
-	user = frappe.get_doc('User', 'WanMai@example.com')
+	user = frappe.get_doc('User', 'ClarkKent@example.com')
 	user.add_roles('Expense Approver')
 
 def setup_leave_allocation():
@@ -403,3 +422,19 @@ def import_json(doctype, submit=False, values=None):
 	frappe.db.commit()
 
 	frappe.flags.in_import = False
+
+def update_employee_department(user_id, department):
+	employee = frappe.db.get_value('Employee', {"user_id": user_id}, 'name')
+	department = frappe.db.get_value('Department', {'department_name': department}, 'name')
+	frappe.db.set_value('Employee', employee, 'department', department)
+
+def setup_custom_field_for_domain():
+	field = {
+		"Item": [
+			dict(fieldname='domain', label='Domain',
+				fieldtype='Select', hidden=1, default="Manufacturing",
+				options="Manufacturing\nService\nDistribution\nRetail"
+			)
+		]
+	}
+	create_custom_fields(field)

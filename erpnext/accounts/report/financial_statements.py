@@ -339,19 +339,20 @@ def set_gl_entries_by_account(
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
+	accounts = frappe.db.sql_list("""select name from `tabAccount`
+		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
+	additional_conditions += " and account in ({})"\
+		.format(", ".join([frappe.safe_encode(frappe.db.escape(d)) for d in accounts]))
+
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
-		and account in (select name from `tabAccount`
-			where lft >= %(lft)s and rgt <= %(rgt)s)
 		order by account, posting_date""".format(additional_conditions=additional_conditions),
 		{
 			"company": company,
 			"from_date": from_date,
 			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt,
 			"cost_center": filters.cost_center,
 			"project": filters.project
 		},
@@ -378,8 +379,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	if filters:
 		if filters.get("project"):
 			if not isinstance(filters.get("project"), list):
-				projects = str(filters.get("project")).strip()
-				filters.project = [d.strip() for d in projects.split(',') if d]
+				projects = frappe.safe_encode(filters.get("project"))
+				filters.project = [d.strip() for d in projects.strip().split(',') if d]
 			additional_conditions.append("project in %(project)s")
 
 		if filters.get("cost_center"):
@@ -389,17 +390,18 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 
 		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
-			additional_conditions.append("ifnull(finance_book, '') in ('%s', '')" %
+			additional_conditions.append("ifnull(finance_book, '') in (%s, '')" %
 				frappe.db.escape(company_finance_book))
 		elif filters.get("finance_book"):
-			additional_conditions.append("ifnull(finance_book, '') = '%s' " %
+			additional_conditions.append("ifnull(finance_book, '') = %s " %
 				frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
 def get_cost_centers_with_children(cost_centers):
 	if not isinstance(cost_centers, list):
-		cost_centers = [d.strip() for d in str(cost_centers).strip().split(',') if d]
+		cost_centers = frappe.safe_encode(cost_centers)
+		cost_centers = [d.strip() for d in cost_centers.strip().split(',') if d]
 
 	all_cost_centers = []
 	for d in cost_centers:

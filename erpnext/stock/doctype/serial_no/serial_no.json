@@ -1,5 +1,6 @@
 {
  "allow_copy": 0,
+ "allow_events_in_timeline": 0,
  "allow_guest_to_view": 0,
  "allow_import": 1,
  "allow_rename": 1,
@@ -397,7 +398,7 @@
    "precision": "",
    "print_hide": 0,
    "print_hide_if_no_value": 0,
-   "read_only": 1,
+   "read_only": 0,
    "remember_last_selected_value": 0,
    "report_hide": 0,
    "reqd": 0,
@@ -1613,7 +1614,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
- "modified": "2018-08-29 06:29:51.682813",
+ "modified": "2018-10-19 12:38:34.448513",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -1684,7 +1685,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 0,
+ "track_changes": 1,
  "track_seen": 0,
  "track_views": 0
 }
