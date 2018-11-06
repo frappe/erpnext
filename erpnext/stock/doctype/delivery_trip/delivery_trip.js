@@ -68,29 +68,28 @@ frappe.ui.form.on('Delivery Trip', {
 
 	validate: function (frm) {
 		if (frm.is_new() && frm.doc.delivery_stops) {
-			frappe.call({
-				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.validate_unique_delivery_notes",
-				args: {
-					delivery_stops: frm.doc.delivery_stops
-				},
-				callback: function (r) {
-					if (r) {
+			// frappe.confirm doesn't wait for callback to validate, so creating
+			// Promise to make sure execution is paused until user input
+			return new Promise((resolve, reject) => {
+				frappe.call({
+					method: "erpnext.stock.doctype.delivery_trip.delivery_trip.validate_unique_delivery_notes",
+					args: {
+						delivery_stops: frm.doc.delivery_stops
+					}
+				}).then((r) => {
+					if (r.message.length) {
 						let confirm_message = `Atleast one of the entered Delivery Notes already exist in
-												the following Delivery Trips: ${r.message.join(", ")}.
-												Do you still want to continue?`;
+											the following Delivery Trips: ${r.message.join(", ")}.
+											Do you still want to continue?`;
 
 						frappe.confirm(
 							__(confirm_message),
-							function () { return; }, // If "Yes" is selected
-							function () {
-								// If "No" is selected
-								frappe.db.delete_doc(frm.doc.doctype, frm.doc.name);
-								frappe.set_route("List", frm.doc.doctype)
-							}
+							() => resolve(),  // If "Yes" is selected
+							() => frappe.set_route("List", frm.doc.doctype)  // If "No" is selected
 						);
-					};
-				}
-			});
+					} else { resolve(); };
+				});
+			})
 		};
 	},
 
