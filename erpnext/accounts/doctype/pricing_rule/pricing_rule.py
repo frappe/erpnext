@@ -185,7 +185,8 @@ def get_pricing_rule_for_item(args):
 				"discount_percentage": 0.0
 			})
 		else:
-			item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
+			item_details.discount_percentage = (pricing_rule.get('discount_percentage', 0)
+				if pricing_rule else args.discount_percentage)
 	elif args.get('pricing_rule'):
 		item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 
