@@ -265,6 +265,9 @@ export default {
 		},
 
 		report_item() {
+			if (!hub.is_seller_registered()) {
+				frappe.throw(__('Please login as a Marketplace User to report this item.'));
+			}
 			this.report_item_dialog.show();
 		},
 
