@@ -57,7 +57,7 @@ class Analytics(object):
 		})
 
 	def get_data(self):
-		if self.filters["tree_type"] == 'Customer':
+		if self.filters["tree_type"] in ["Customer", "Suplier"]:
 			self.get_sales_transactions_based_on_customers_or_suppliers()
 			self.get_rows()
 
