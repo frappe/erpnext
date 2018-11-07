@@ -65,7 +65,7 @@ class Analytics(object):
 			self.get_sales_transactions_based_on_items()
 			self.get_rows()
 
-		elif self.filters["tree_type"] == 'Territory' or self.filters["tree_type"] == 'Customer Group':
+		elif self.filters["tree_type"] in ["Customer Group", "Supplier Group", "Territory"]:
 			self.get_sales_transactions_based_on_customer_or_territory_group()
 			self.get_rows_by_group()
 
