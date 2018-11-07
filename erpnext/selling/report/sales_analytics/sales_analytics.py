@@ -128,7 +128,8 @@ class Analytics(object):
 		if self.filters["tree_type"] == 'Customer Group':
 			entity_field = 'customer_group as entity'
 		elif self.filters["tree_type"] == 'Supplier Group':
-			entity_field = "supplier_group as entity"
+			entity_field = "supplier as entity"
+			self.get_supplier_parent_child_map()
 		else:
 			entity_field = "territory as entity"
 
@@ -203,6 +204,8 @@ class Analytics(object):
 		self.entity_periodic_data = frappe._dict()
 
 		for d in self.entries:
+			if self.filters["tree_type"] == "Supplier Group":
+				d.name = self.parent_child_map.get(d.name)
 			period = self.get_period(d.get(self.date_field))
 			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
 			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
@@ -268,6 +271,10 @@ class Analytics(object):
 			else:
 				self.depth_map.setdefault(d.name, 0)
 
+	def get_supplier_parent_child_map(self):
+		self.parent_child_map = frappe._dict(frappe.get_all(self.filters["tree_type"],
+			fields = ["supplier", "parent_supplier_group"]
+		))
 
 	def get_chart_data(self):
 		labels = [d.get("label") for d in self.columns[3:]]
