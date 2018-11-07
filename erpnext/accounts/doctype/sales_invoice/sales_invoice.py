@@ -451,7 +451,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
-				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="]]
 			},
 			"Sales Order Item": {
 				"ref_dn_field": "so_detail",
@@ -461,7 +461,7 @@ class SalesInvoice(SellingController):
 			},
 			"Delivery Note": {
 				"ref_dn_field": "delivery_note",
-				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="]]
 			},
 			"Delivery Note Item": {
 				"ref_dn_field": "dn_detail",
