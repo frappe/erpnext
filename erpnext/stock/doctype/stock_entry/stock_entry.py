@@ -73,7 +73,14 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
-
+		self.validate_serial_numbers()
+	def validate_serial_numbers(self):
+		"""
+			validate serial number stock
+		"""
+		
+		self.validate_serial_against_stock_entry()	
+		
 	def on_submit(self):
 
 		self.update_stock_ledger()
@@ -92,7 +99,8 @@ class StockEntry(StockController):
 
 		if self.job_card:
 			update_job_card_reference(self.job_card, 'stock_entry', self.name)
-
+			
+		self.validate_serial_against_stock_entry()
 	def on_cancel(self):
 
 		if self.purchase_order and self.purpose == "Subcontract":
@@ -1125,6 +1133,20 @@ class StockEntry(StockController):
 						frappe.throw(_("Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
 						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
 
+	def validate_serial_against_stock_entry(self):
+		##""" check if serial number is already used in other stock entry """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+			if (self.purpose=="Manufacture"):
+				for serial_no in item.serial_no.split("\n"):
+					stock_entry = frappe.db.get_value("Serial No", serial_no, "purchase_document_no")
+					if stock_entry and self.name != stock_entry:
+						frappe.throw(_("Serial Number: {0} is already referenced in Stock Entry: {1}".format(
+							serial_no, stock_entry
+						)))
+						
+						
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, string_types):
