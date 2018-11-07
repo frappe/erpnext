@@ -3,339 +3,279 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import getdate, flt
+from six import iteritems
 from erpnext.accounts.utils import get_fiscal_year
 
 def execute(filters=None):
-	columns = get_columns(filters)
-	data = get_data(filters)
-	chart = get_chart_data(columns)
+	return Analytics(filters).run()
 
-	return columns, data , None, chart
+class Analytics(object):
+	def __init__(self, filters=None):
+		self.filters = frappe._dict(filters or {})
+		self.date_field = 'transaction_date' \
+			if filters["doc_type"] in ['Sales Order', 'Purchase Order'] else 'posting_date'
+		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+		self.get_period_date_ranges()
+	
+	def run(self):
+		self.get_columns()
+		self.get_data()
+		self.get_chart_data()
+		return self.columns, self.data , None, self.chart
 
-def get_columns(filters):
-	columns =[
-		{
-			"label": _(filters["tree_type"]),
-			"options": filters["tree_type"],
-			"fieldname": "name",
-			"fieldtype": "Link",
-			"width": 140
-		},
-		{
-			"label": _(filters["tree_type"] + " Name"),
-			"fieldname": "code",
-			"fieldtype": "Data",
-			"width": 140
-		},
-		{
+	def get_columns(self):
+		self.columns =[{
+				"label": _(self.filters["tree_type"] + " ID"),
+				"options": self.filters["tree_type"],
+				"fieldname": "entity",
+				"fieldtype": "Link",
+				"width": 140
+			}]
+		if self.filters["tree_type"] == "Customer" or self.filters["tree_type"] == "Item":
+			self.columns.append({
+				"label": _(self.filters["tree_type"] + " Name"),
+				"fieldname": "entity_name",
+				"fieldtype": "Data",
+				"width": 140
+			})
+		for dummy, end_date in self.periodic_daterange:
+			period = self.get_period(end_date)
+			self.columns.append({
+				"label": _(period),
+				"fieldname": scrub(period),
+				"fieldtype": "Float",
+				"width": 120
+			})
+
+		self.columns.append({
 			"label": _("Total"),
 			"fieldname": "total",
 			"fieldtype": "Float",
 			"width": 120
-		}]
-
-	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"], year_end_date=filters["to_date"])
-
-	for dummy, end_date in ranges:
-
-		label = field_name = get_period(end_date, filters["range"])
-
-		columns.append({
-			"label": _(label),
-			"fieldname":field_name,
-			"fieldtype": "Float",
-			"width": 120
 		})
 
-	return columns
+	def get_data(self):
+		if self.filters["tree_type"] == 'Customer':
+			self.get_sales_transactions_based_on_customers_or_suppliers()
+			self.get_rows()
 
-def get_customer_by_group(filters):
-	condition = ""
+		elif self.filters["tree_type"] == 'Item':
+			self.get_sales_transactions_based_on_items()
+			self.get_rows()
 
-	if filters["tree_type"] == "Territory":
-		condition = 'territory'
+		elif self.filters["tree_type"] == 'Territory' or self.filters["tree_type"] == 'Customer Group':
+			self.get_sales_transactions_based_on_customer_or_territory_group()
+			self.get_rows_by_group()
 
-	if filters["tree_type"] == "Customer Group":
-		condition = 'customer_group'
+		elif self.filters["tree_type"] == 'Item Group':
+			self.get_sales_transactions_based_on_item_group()
+			self.get_rows_by_group()
 
-	return frappe.db.sql("""
-		select c.name, c.customer_name as type_name, c.{condition} as grp, g.lft, g.rgt
-		from `tabCustomer` c, `tab{tree_type}` g
-		where c.{condition} = g.name"""
-		.format(tree_type=filters["tree_type"], condition=condition), as_dict=1)
-
-def get_item_by_group():
-
-	return frappe.db.sql("""
-		select i.name, i.item_name as type_name, i.item_group as grp, i.stock_uom, g.lft , g.rgt
-		from `tabItem` i, `tabItem Group` g
-		where i.item_group = g.name """, as_dict=1)
-
-def get_customer():
-
-	return frappe.get_list("Customer", fields=["name", "customer_name as type_name"])
-
-def get_items(filters):
-
-	return frappe.get_list("Item",
-		fields=["name", "item_name as type_name"],
-		filters={"company":filters["company"]})
-
-def get_period(date, duration):
-
-	months ={"1": "Jan", "2": "Feb", "3": "Mar", "4": "Apr", "5": "May", "6": "Jun", "7": "Jul", "8": "Aug",
-		"9": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"}
-
-	if duration == 'Weekly':
-		period = "Week" + str(date.isocalendar()[1])
-	elif duration == 'Monthly':
-		period = months.get(str(date.month))
-	elif duration == 'Quarterly':
-		period = "Quarter" + str(((date.month-1)//3)+1)
-	else:
-		year = get_fiscal_year(date)
-		period = str(year[2])
-
-	return period
-
-def get_data_list(entry, filters):
-	data_list = {}
-
-	for d in entry:
-		date_field = filters["doc_type"] in ['Sales Order', 'Purchase Order'] and d.transaction_date or d.posting_date
-		period = get_period(date_field, filters["range"])
-
-		if data_list.get(d.name):
-			if data_list.get(d.name).get(period):
-				data_list[d.name][period] += flt(d.select_field, 2)
-			else:
-				data_list[d.name][period] = flt(d.select_field, 2)
+	def get_sales_transactions_based_on_customers_or_suppliers(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
 		else:
-			data_list.setdefault(d.name, {}).setdefault(period, flt(d.select_field, 2))
+			value_field = "total_qty as value_field"
 
-	return data_list
+		if self.filters["tree_type"] == 'Customer':
+			entity = "customer as entity"
+			entity_name = "customer_name as entity_name"
+		else:
+			entity = "supplier as entity"
+			entity_name = "supplier_name as entity_name"
 
-def get_customer_entry(filters):
-	date_field = filters["doc_type"] in ['Sales Order', 'Purchase Order'] and 'transaction_date' or 'posting_date'
+		self.entries = frappe.get_all(self.filters["doc_type"],
+			fields=[entity, entity_name, value_field, self.date_field],
+			filters = {
+				"docstatus": 1,
+				"company": self.filters["company"],
+				self.date_field: ('between', [self.filters["from_date"], self.filters["to_date"]])
+			}
+		)
 
-	if filters["value_quantity"] == 'Value':
-		select = "base_net_total as select_field"
-	else:
-		select = "total_qty as select_field"
+		self.entity_names = {}
+		for d in self.entries:
+			self.entity_names.setdefault(d.entity, d.entity_name)
 
-	entry = frappe.get_all(filters["doc_type"],
-		fields=["customer as name", select, date_field],
-		filters={
-			"docstatus": 1,
-			"company": filters["company"],
-			date_field: ('between', [filters["from_date"], filters["to_date"]])
-		}
-	)
+	def get_sales_transactions_based_on_items(self):
 
-	return entry
+		if self.filters["value_quantity"] == 'Value':
+			value_field = 'base_amount'
+		else:
+			value_field = 'qty'
 
-def get_item_entry(filters):
-	date_field = filters["doc_type"] in ['Sales Order', 'Purchase Order'] and 'transaction_date' or 'posting_date'
+		self.entries = frappe.db.sql("""
+			select i.item_code as entity, i.item_name as entity_name, i.{value_field} as value_field, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s
+		"""
+		.format(date_field=self.date_field, value_field = value_field, doctype=self.filters["doc_type"]),
+		(self.filters["company"], self.filters["from_date"], self.filters["to_date"]), as_dict=1)
 
-	if filters["value_quantity"] == 'Value':
-		select = 'base_amount'
-	else:
-		select = 'qty'
+		self.entity_names = {}
+		for d in self.entries:
+			self.entity_names.setdefault(d.entity, d.entity_name)
 
-	entry = frappe.db.sql("""
-		select i.item_code as name, i.{select} as select_field, s.{date_field}
-		from `tab{doctype} Item` i , `tab{doctype}` s
-		where s.name = i.parent and i.docstatus = 1 and s.company = %s
-		and s.{date_field} between %s and %s
-	"""
-	.format(date_field=date_field, select = select, doctype=filters["doc_type"]),
-	(filters["company"], filters["from_date"], filters["to_date"]), as_dict=1)
+	def get_sales_transactions_based_on_customer_or_territory_group(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
+		else:
+			value_field = "total_qty as value_field"
 
-	return entry
+		if self.filters["tree_type"] == 'Customer Group':
+			entity_field = 'customer_group as entity'
+		elif self.filters["tree_type"] == 'Supplier Group':
+			entity_field = "supplier_group as entity"
+		else:
+			entity_field = "territory as entity"
 
-def get_rows(filters, entry, type_list):
-	data=[]
+		self.entries = frappe.get_all(self.filters["doc_type"],
+			fields=[entity_field, value_field, self.date_field],
+			filters = {
+				"docstatus": 1,
+				"company": self.filters["company"],
+				self.date_field: ('between', [self.filters["from_date"], self.filters["to_date"]])
+			}
+		)
+		self.get_groups()
 
-	data_list = get_data_list(entry, filters)
+	def get_sales_transactions_based_on_item_group(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_amount"
+		else:
+			value_field = "qty"
 
-	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"], year_end_date=filters["to_date"])
+		self.entries = frappe.db.sql("""
+			select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s
+		""".format(date_field=self.date_field, value_field = value_field, doctype=self.filters["doc_type"]),
+		(self.filters["company"], self.filters["from_date"], self.filters["to_date"]), as_dict=1)
 
-	for d in type_list:
-		row = {}
-		total = 0
-		row["name"] = d.name
-		row["code"] = d.type_name
-		for dummy, end_date in ranges:
-			period = get_period(end_date, filters["range"])
+		self.get_groups()
 
-			if data_list.get(d.type_name) and data_list.get(d.type_name).get(period) :
-				row[period] = data_list.get(d.type_name).get(period)
-			else:
-				row[period] = 0.0
+	def get_rows(self):
+		self.data=[]
+		self.get_periodic_data()
 
-			total += row[period]
-
-		row["total"] = total
-		data.append(row)
-
-	return data
-
-def get_rows_by_group(filters, type_list, entry):
-	data = []
-
-	data_list = get_data_list(entry, filters)
-
-	groups, depth_map = get_groups(filters)
-
-	ranges = get_period_date_ranges(period=filters["range"], year_start_date = filters["from_date"], year_end_date=filters["to_date"])
-
-	for g in groups:
-		out = []
-		g_total = 0
-
-		group = {
-			"name": g.name,
-			"indent": depth_map.get(g.name),
-			"code": g.name
-		}
-
-		for d in type_list:
+		for entity, period_data in iteritems(self.entity_periodic_data):
+			row = {
+				"entity": entity,
+				"entity_name": self.entity_names.get(entity) 
+			}
 			total = 0
-			if d.lft >= g.lft and d.rgt <= g.rgt :
-				row = {
-					"name": d.name,
-					"code": d.type_name,
-					"indent": depth_map.get(g.name) + 1
-				}
+			for dummy, end_date in self.periodic_daterange:
+				period = self.get_period(end_date)
+				amount = flt(period_data.get(period, 0.0))
+				row[scrub(period)] = amount
+				total += amount
 
-				for dummy, end_date in ranges:
-					period = get_period(end_date, filters["range"])
-					if data_list.get(d.name) and data_list.get(d.name).get(period):
-						row[period] = data_list.get(d.name).get(period)
-					else:
-						row[period] = 0.0
-					total += row[period]
-					if group.get(period):
-						group[period] += row[period]
-					else:
-						group[period] = row[period]
-				row["total"] = total
-				g_total += total
-				if d.grp == g.name:
-					out.append(row)
+			row["total"] = total
+			self.data.append(row)
+	
+	def get_rows_by_group(self):
+		self.get_periodic_data()
+		out = []
 
-		group["total"] = g_total
-		data.append(group)
-		data += out
+		for d in reversed(self.group_entries):
+			row = {
+				"entity": d.name,
+				"indent": self.depth_map.get(d.name) 
+			}
+			total = 0
+			for dummy, end_date in self.periodic_daterange:
+				period = self.get_period(end_date)
+				amount = flt(self.entity_periodic_data.get(d.name, {}).get(period, 0.0))
+				row[scrub(period)] = amount
+				if d.parent:
+					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
+					self.entity_periodic_data[d.parent][period] += amount
+				total += amount
+			row["total"] = total
+			out = [row] + out
+		self.data = out
 
-	return data
+	def get_periodic_data(self):
+		self.entity_periodic_data = frappe._dict()
 
-def get_groups(filters):
+		for d in self.entries:
+			period = self.get_period(d.get(self.date_field))
+			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
+			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
 
-	if filters["tree_type"] == "Territory":
-		parent = 'parent_territory'
-	if filters["tree_type"] == "Customer Group":
-		parent = 'parent_customer_group'
-	if filters["tree_type"] == "Item Group":
-		parent = 'parent_item_group'
-	if filters["tree_type"] == "Supplier Group":
-		parent = 'parent_supplier_group'
-
-	depth_map = {}
-
-	entry = frappe.db.sql("""select name, lft, rgt , {parent} as parent
-		from `tab{tree}` order by lft"""
-		.format(tree=filters["tree_type"], parent=parent), as_dict=1)
-
-	for d in entry:
-		if d.parent:
-			depth_map.setdefault(d.name, depth_map.get(d.parent) + 1)
+	def get_period(self, posting_date):
+		if self.filters.range == 'Weekly':
+			period = "Week " + str(posting_date.isocalendar()[1])
+		elif self.filters.range == 'Monthly':
+			period = self.months[posting_date.month - 1]
+		elif self.filters.range == 'Quarterly':
+			period = "Quarter " + str(((posting_date.month-1)//3)+1)
 		else:
-			depth_map.setdefault(d.name, 0)
+			year = get_fiscal_year(posting_date, company=self.filters.company)
+			period = str(year[2])
 
-	return entry, depth_map
+		return period
 
-def get_chart_data(columns):
+	def get_period_date_ranges(self):
+		from dateutil.relativedelta import relativedelta
+		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
-	labels = [d.get("label") for d in columns[3:]]
-	chart = {
-		"data": {
-			'labels': labels,
-			'datasets':[
-				{ "values": ['0' for d in columns[3:]] }
-			]
-		}
-	}
+		increment = {
+			"Monthly": 1,
+			"Quarterly": 3,
+			"Half-Yearly": 6,
+			"Yearly": 12
+		}.get(self.filters.range)
 
-	chart["type"] = "line"
+		self.periodic_daterange = []
+		for dummy in range(1, 53, increment):
+			if self.filters.range == "Weekly":
+				period_end_date = from_date + relativedelta(days=6)
+			else:
+				period_end_date = from_date + relativedelta(months=increment, days=-1)
 
-	return chart
-
-def get_period_date_ranges(period, fiscal_year=None, year_start_date=None, year_end_date=None):
-	from dateutil.relativedelta import relativedelta
-
-	if not (year_start_date and year_end_date) :
-		year_start_date, year_end_date = frappe.db.get_value("Fiscal Year",
-			fiscal_year, ["year_start_date", "year_end_date"])
-
-	increment = {
-		"Monthly": 1,
-		"Quarterly": 3,
-		"Half-Yearly": 6,
-		"Yearly": 12
-	}.get(period)
-
-	period_date_ranges = []
-	if period == 'Weekly':
-		for dummy in range(1, 53):
-			period_end_date = getdate(year_start_date) + relativedelta(days=6)
-			period_date_ranges.append([year_start_date, period_end_date])
-			year_start_date = getdate(period_end_date) + relativedelta(days=1)
-	else:
-		for dummy in range(1, 13, increment):
-			period_end_date = getdate(year_start_date) + relativedelta(months=increment, days=-1)
-			if period_end_date > getdate(year_end_date):
-				period_end_date = year_end_date
-			period_date_ranges.append([year_start_date, period_end_date])
-			year_start_date = getdate(period_end_date) + relativedelta(days=1)
-			if period_end_date == year_end_date:
+			if period_end_date > to_date:
+				period_end_date = to_date
+			self.periodic_daterange.append([from_date, period_end_date])
+			
+			from_date = period_end_date + relativedelta(days=1)
+			if period_end_date == to_date:
 				break
 
-	return period_date_ranges
+	def get_groups(self):
+		if self.filters["tree_type"] == "Territory":
+			parent = 'parent_territory'
+		if self.filters["tree_type"] == "Customer Group":
+			parent = 'parent_customer_group'
+		if self.filters["tree_type"] == "Item Group":
+			parent = 'parent_item_group'
+		if self.filters["tree_type"] == "Supplier Group":
+			parent = 'parent_supplier_group'
 
-def get_data(filters):
-	if filters["tree_type"] == 'Customer':
-		entry = get_customer_entry(filters)
-		customers = get_customer()
+		self.depth_map = frappe._dict()
 
-		return get_rows(filters, entry, customers)
+		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
+			from `tab{tree}` order by lft"""
+			.format(tree=self.filters["tree_type"], parent=parent), as_dict=1)
 
-	elif filters["tree_type"] == 'Item':
-		entry = get_item_entry(filters)
-		items = get_items(filters)
-
-		return get_rows(filters, entry, items)
-
-	elif filters["tree_type"] == 'Territory' or filters["tree_type"] == 'Customer Group':
-		customer = get_customer_by_group(filters)
-		entry = get_customer_entry(filters)
-
-		return get_rows_by_group(filters, customer, entry)
-
-	elif filters["tree_type"] == 'Item Group':
-		items = get_item_by_group()
-		entry = get_item_entry(filters)
-
-		return get_rows_by_group(filters, items, entry)
+		for d in self.group_entries:
+			if d.parent:
+				self.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)
+			else:
+				self.depth_map.setdefault(d.name, 0)
 
 
-
-
-
-
-
-
-
-
+	def get_chart_data(self):
+		labels = [d.get("label") for d in self.columns[3:]]
+		self.chart = {
+			"data": {
+				'labels': labels,
+				'datasets':[
+				]
+			},
+			"type": "line"
+		}
