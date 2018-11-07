@@ -16,7 +16,7 @@ const routes = [
 ];
 
 var store = {
-	debug: false,
+	debug: true,
 	isLogin: false,
 	completedCourses: new Set(),
 	enrolledPrograms: new Set(),

@@ -12,7 +12,7 @@
                 </span>
             </div>
             <div v-if="$root.$data.isLogin" class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <AcademyCourseCardButton :course="course.name" :nextContent="nextContent" :nextContentType="nextContentType"/>
+                <AcademyCourseCardButton v-if="this.$root.$data.checkProgramEnrollment(this.$route.params.code)" :course="course.name" :nextContent="nextContent" :nextContentType="nextContentType"/>
             </div>
         </div>
     </div>
