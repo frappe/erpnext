@@ -110,6 +110,8 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 
 @frappe.whitelist()
 def get_completed_courses(email=frappe.session.user):
+	if get_student_id(email) == None:
+		return None
 	try:
 		student = frappe.get_doc("Student", get_student_id(email))
 		return student.get_completed_courses()
@@ -161,6 +163,8 @@ def get_student_id(email=None):
 
 @frappe.whitelist()
 def get_program_enrollments(email=frappe.session.user):
+	if get_student_id(email) == None:
+		return None
 	try:
 		student = frappe.get_doc("Student", get_student_id(email))
 		return student.get_program_enrollments()
@@ -169,6 +173,8 @@ def get_program_enrollments(email=frappe.session.user):
 
 @frappe.whitelist()
 def get_course_enrollments(email=frappe.session.user):
+	if get_student_id(email) == None:
+		return None
 	try:
 		student = frappe.get_doc("Student", get_student_id(email))
 		return student.get_course_enrollments()

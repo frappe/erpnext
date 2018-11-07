@@ -30,7 +30,6 @@ export default {
 		}
 	},
     beforeMount(){
-        console.log("Before Mount")
         if(this.$root.$data.isLogin) this.$root.$data.updateCompletedCourses()
     },
 	mounted() {
