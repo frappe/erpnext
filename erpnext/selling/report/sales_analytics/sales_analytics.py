@@ -33,7 +33,7 @@ class Analytics(object):
 				"fieldtype": "Link",
 				"width": 140
 			}]
-		if self.filters["tree_type"] == "Customer" or self.filters["tree_type"] == "Item":
+		if self.filters["tree_type"] in ["Customer", "Supplier", "Item"]:
 			self.columns.append({
 				"label": _(self.filters["tree_type"] + " Name"),
 				"fieldname": "entity_name",
