@@ -48,8 +48,10 @@ var store = {
 				email: frappe.session.user
 			}
 		}).then( r => {
-			for(var ii=0; ii < r.message.length; ii++){
-				this.enrolledPrograms.add(r.message[ii])
+			if(r.message){
+				for(var ii=0; ii < r.message.length; ii++){
+					this.enrolledPrograms.add(r.message[ii])
+				}
 			}
 		})
 		if (this.debug) console.log('Updated State', this.enrolledPrograms)
@@ -76,8 +78,10 @@ var store = {
 				email: frappe.session.user
 			}
 		}).then( r => {
-			for(var ii=0; ii < r.message.length; ii++){
-				this.completedCourses.add(r.message[ii])
+			if(r.message){
+				for(var ii=0; ii < r.message.length; ii++){
+					this.completedCourses.add(r.message[ii])
+				}
 			}
 		})
 		if (this.debug) console.log('Updated State', this.completedCourses)

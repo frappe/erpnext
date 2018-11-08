@@ -122,9 +122,12 @@ def get_completed_courses(email=frappe.session.user):
 def get_continue_data(program_name):
 	program = frappe.get_doc("Program", program_name)
 	courses = program.get_all_children()
-	continue_data = get_starting_content(courses[0].course)
-	continue_data['course'] = courses[0].course
-	return continue_data
+	try:
+		continue_data = get_starting_content(courses[0].course)
+		continue_data['course'] = courses[0].course
+		return continue_data
+	except:
+		return None
 
 def create_student(student_name=frappe.session.user):
 	student = frappe.get_doc({
@@ -132,7 +135,7 @@ def create_student(student_name=frappe.session.user):
 		"first_name": student_name,
 		"student_email_id": student_name,
 		})
-	student.save()
+	student.save(ignore_permissions=True)
 	frappe.db.commit()
 	return student_name
 
@@ -157,7 +160,8 @@ def get_student_id(email=None):
 	:param user: a user email address
 	"""
 	try:
-		return frappe.get_all('Student', filters={'student_email_id': email}, fields=['name'])[0].name
+		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
+		return student_id
 	except IndexError:
 		return None
 

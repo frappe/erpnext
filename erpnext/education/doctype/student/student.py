@@ -55,7 +55,7 @@ class Student(Document):
 
 	def get_program_enrollments(self):
 		"""Returns a list of course enrollments linked with the current student"""
-		program_enrollments = frappe.get_list("Program Enrollment", filters={"student": self.name}, fields=['program'])
+		program_enrollments = frappe.get_all("Program Enrollment", filters={"student": self.name}, fields=['program'])
 		if not program_enrollments:
 			return None
 		else:
@@ -79,7 +79,7 @@ class Student(Document):
 				"program": program_name,
 				"enrollment_date": frappe.utils.datetime.datetime.now()
 			})
-		enrollment.save()
+		enrollment.save(ignore_permissions=True)
 		enrollment.submit()
 		frappe.db.commit()
 		return enrollment
@@ -92,7 +92,7 @@ class Student(Document):
 				"program_enrollment": program_enrollment,
 				"enrollment_date": enrollment_date
 			})
-		enrollment.save()
+		enrollment.save(ignore_permissions=True)
 		frappe.db.commit()
 
 def get_timeline_data(doctype, name):

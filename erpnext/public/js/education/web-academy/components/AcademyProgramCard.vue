@@ -10,8 +10,7 @@
         </div>
         <div class='card-footer text-right'>
             <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a v-if="this.$root.$data.checkProgramEnrollment(program.name)" class='btn btn-secondary btn-sm' @click="$router.push('/Program/' + program.name)">Start Course</a>
-            <a v-else-if="this.$root.$data.isLogin" class='btn btn-secondary btn-sm' @click="enroll()">Enroll Now</a>
+            <a v-if="this.$root.$data.isLogin" class='btn btn-secondary btn-sm' @click="primaryAction()">{{ buttonName }}</a>
             <a v-else class='btn btn-secondary btn-sm' href="/login#signup">Sign Up</a>
         </div>
     </div>
@@ -37,6 +36,16 @@ export default {
     	})
     },
     methods: {
+        primaryAction(){
+            if(this.$root.$data.isLogin){
+                if(this.$root.$data.checkProgramEnrollment(program_code)){
+                    this.$router.push('/Program/' + program.name)
+                }
+                else {
+                    this.enroll()
+                }
+            }
+        }
         enroll() {
             frappe.call({
                 method: "erpnext.www.academy.enroll_in_program",
@@ -45,6 +54,20 @@ export default {
                     student_email_id: frappe.session.user
                 }
             })
+            this.$root.$data.enrolledPrograms.add(this.program_code)
+            this.$root.$data.updateEnrolledPrograms()
+        }
+    }
+    computed: {
+        buttonName() {
+            if(this.$root.$data.isLogin){
+                if(this.$root.$data.checkProgramEnrollment(program_code)){
+                    return "Start Course"
+                }
+                else {
+                    return "Enroll"
+                }
+            }
         }
     }
 };
