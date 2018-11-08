@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import flt
+from erpnext import get_company_currency
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -14,12 +15,14 @@ def execute(filters=None):
 	item_details = get_item_details()
 	data = []
 
+	company_currency = get_company_currency(filters["company"])
+
 	for d in entries:
 		if d.stock_qty > 0 or filters.get('show_return_entries', 0):
 			data.append([
-				d.name, d.customer, d.territory, item_details.get(d.item_code, {}).get("website_warehouse"), d.posting_date, d.item_code,
+				d.name, d.customer, d.territory, d.warehouse, d.posting_date, d.item_code,
 				item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
-				d.stock_qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
+				d.stock_qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt, company_currency
 			])
 
 	if data:
@@ -32,13 +35,105 @@ def get_columns(filters):
 	if not filters.get("doc_type"):
 		msgprint(_("Please select the document type first"), raise_exception=1)
 
-	return [filters["doc_type"] + ":Link/" + filters["doc_type"] + ":140",
-		_("Customer") + ":Link/Customer:140", _("Territory") + ":Link/Territory:100", _("Warehouse") + ":Link/Warehouse:100",
-		 _("Posting Date") + ":Date:100",
-		_("Item Code") + ":Link/Item:120", _("Item Group") + ":Link/Item Group:120",
-		_("Brand") + ":Link/Brand:120", _("Qty") + ":Float:100", _("Amount") + ":Currency:120",
-		_("Sales Person") + ":Link/Sales Person:140", _("Contribution %") + "::110",
-		_("Contribution Amount") + ":Currency:140"]
+	columns = [
+		{
+			"label": _(filters["doc_type"]),
+			"options": filters["doc_type"],
+			"fieldname": frappe.scrub(filters['doc_type']),
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Customer"),
+			"options": "Customer",
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Territory"),
+			"options": "Territory",
+			"fieldname": "territory",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Warehouse"),
+			"options": "Warehouse",
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 140
+		},
+		{
+			"label": _("Item Code"),
+			"options": "Item",
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Item Group"),
+			"options": "Item Group",
+			"fieldname": "item_group",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Brand"),
+			"options": "Brand",
+			"fieldname": "brand",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 140
+		},
+		{
+			"label": _("Amount"),
+			"options": "currency",
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 140
+		},
+		{
+			"label": _("Sales Person"),
+			"options": "Sales Person",
+			"fieldname": "sales_person",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Contribution %"),
+			"fieldname": "contribution",
+			"fieldtype": "Float",
+			"width": 140
+		},
+		{
+			"label": _("Contribution Amount"),
+			"options": "currency",
+			"fieldname": "contribution_amt",
+			"fieldtype": "Currency",
+			"width": 140
+		},
+		{
+			"label":_("Currency"),
+			"options": "Currency",
+			"fieldname":"currency",
+			"fieldtype":"Link",
+			"hidden" : 1
+		}
+	]
+
+	return columns
 
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
@@ -49,10 +144,10 @@ def get_entries(filters):
 	conditions, values = get_conditions(filters, date_field)
 
 	entries = frappe.db.sql("""
-		select
+		SELECT
 			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
-			st.sales_person, st.allocated_percentage,
-		CASE 
+			st.sales_person, st.allocated_percentage, dt_item.warehouse,
+		CASE
 			WHEN dt.status = "Closed" THEN dt_item.%s * dt_item.conversion_factor
 			ELSE dt_item.stock_qty
 		END as stock_qty,
@@ -64,9 +159,9 @@ def get_entries(filters):
 			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor) * st.allocated_percentage/100)
 			ELSE dt_item.base_net_amount * st.allocated_percentage/100
 		END as contribution_amt
-		from
+		FROM
 			`tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
-		where
+		WHERE
 			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
 			and dt.docstatus = 1 %s order by st.sales_person, dt.name desc
 		""" %(date_field, qty_field, qty_field, qty_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
@@ -116,7 +211,7 @@ def get_items(filters):
 
 def get_item_details():
 	item_details = {}
-	for d in frappe.db.sql("""select name, item_group, brand, website_warehouse from `tabItem`""", as_dict=1):
+	for d in frappe.db.sql("""SELECT `name`, `item_group`, `brand` FROM `tabItem`""", as_dict=1):
 		item_details.setdefault(d.name, d)
 
 	return item_details
