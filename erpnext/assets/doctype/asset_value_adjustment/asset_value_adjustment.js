@@ -3,7 +3,6 @@
 
 frappe.ui.form.on('Asset Value Adjustment', {
 	setup: function(frm) {
-		frm.trigger("set_current_asset_value");
 		frm.add_fetch('company', 'cost_center', 'cost_center');
 		frm.set_query('cost_center', function() {
 			return {
@@ -14,7 +13,9 @@ frappe.ui.form.on('Asset Value Adjustment', {
 			}
 		});
 	},
-
+	onload: function(frm) {
+	frm.trigger("set_current_asset_value");
+	},
 	asset: function(frm) {
 		frm.trigger("set_current_asset_value");
 	},
