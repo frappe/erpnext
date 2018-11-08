@@ -295,9 +295,9 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			received_qty += item.received_qty
 			total_qty += item.qty
-		try:
+		if total_qty:
 			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
-		except:
+		else:
 			self.db_set("per_received", 0, update_modified=False)
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
