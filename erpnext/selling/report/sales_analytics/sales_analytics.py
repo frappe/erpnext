@@ -232,7 +232,7 @@ class Analytics(object):
 			"Quarterly": 3,
 			"Half-Yearly": 6,
 			"Yearly": 12
-		}.get(self.filters.range)
+		}.get(self.filters.range, 1)
 
 		self.periodic_daterange = []
 		for dummy in range(1, 53, increment):
