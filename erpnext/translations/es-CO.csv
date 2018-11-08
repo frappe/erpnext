@@ -1,1 +1,1 @@
-apps/erpnext/erpnext/stock/doctype/item/item.py +515,Barcode {0} is not a valid {1} code,El código de barras {0} no es un código válido {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +516,Barcode {0} is not a valid {1} code,El código de barras {0} no es un código válido {1}

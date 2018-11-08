@@ -5,8 +5,8 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Assessment Group,Parent Assessment Group,Grupo de Evaluación Padre
 DocType: Student,Guardians,Guardianes
 DocType: Fee Schedule,Fee Schedule,Programa de Tarifas
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +673,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +945,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +736,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +1008,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
 DocType: Homepage,Company Tagline for website homepage,Lema de la empresa para la página de inicio del sitio web
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Student,Guardian Details,Detalles del Guardián

@@ -392,6 +392,34 @@ class TestLeaveApplication(unittest.TestCase):
 			i += 1
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
 
+	# test to not consider current leave in leave balance while submitting
+	def test_current_leave_on_submit(self):
+		employee = get_employee()
+		leave_type = 'Sick leave'
+		allocation = frappe.get_doc(dict(
+			doctype = 'Leave Allocation',
+			employee = employee.name,
+			leave_type = leave_type,
+			from_date = '2018-10-01',
+			to_date = '2018-10-10',
+			new_leaves_allocated = 1
+		))
+		allocation.insert(ignore_permissions=True)
+		allocation.submit()
+		leave_application = frappe.get_doc(dict(
+		doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type,
+			from_date = '2018-10-02',
+			to_date = '2018-10-02',
+			company = '_Test Company',
+			status = 'Approved',
+			leave_approver = 'test@example.com'
+		))
+		self.assertTrue(leave_application.insert())
+		leave_application.submit()
+		self.assertEqual(leave_application.docstatus, 1)
+
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")
 

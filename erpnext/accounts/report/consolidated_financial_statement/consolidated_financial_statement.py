@@ -100,7 +100,7 @@ def get_income_expense_data(companies, fiscal_year, filters):
 	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
 
 	return income, expense, net_profit_loss
-	
+
 def get_cash_flow_data(fiscal_year, companies, filters):
 	cash_flow_accounts = get_cash_flow_accounts()
 
@@ -122,7 +122,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			# add first net income in operations section
 			if net_profit_loss:
 				net_profit_loss.update({
-					"indent": 1, 
+					"indent": 1,
 					"parent_account": cash_flow_accounts[0]['section_header']
 				})
 				data.append(net_profit_loss)
@@ -271,7 +271,8 @@ def get_companies(filters):
 	return all_companies, companies
 
 def get_subsidiary_companies(company):
-	lft, rgt = frappe.db.get_value('Company', company,  ["lft", "rgt"])
+	lft, rgt = frappe.get_cached_value('Company',
+		company,  ["lft", "rgt"])
 
 	return frappe.db.sql_list("""select name from `tabCompany`
 		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(lft, rgt))
@@ -324,7 +325,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 	accounts_by_name, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
-	company_lft, company_rgt = frappe.get_cached_value('Company', 
+	company_lft, company_rgt = frappe.get_cached_value('Company',
 		filters.get('company'),  ["lft", "rgt"])
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
@@ -332,7 +333,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 	gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 		gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 		acc.account_name, acc.account_number
-		from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company in 
+		from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company in
 		(select name from `tabCompany` where lft >= %(company_lft)s and rgt <= %(company_rgt)s)
 		{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
 		order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
@@ -370,10 +371,10 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 
 	if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
-		additional_conditions.append("ifnull(finance_book, '') in ('%s', '')" %
+		additional_conditions.append("ifnull(finance_book, '') in (%s, '')" %
 			frappe.db.escape(company_finance_book))
 	elif filters.get("finance_book"):
-		additional_conditions.append("ifnull(finance_book, '') = '%s' " %
+		additional_conditions.append("ifnull(finance_book, '') = %s " %
 			frappe.db.escape(filters.get("finance_book")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""

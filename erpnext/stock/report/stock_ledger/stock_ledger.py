@@ -4,15 +4,18 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.stock.utils import update_included_uom_in_report
 
 def execute(filters=None):
+	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
-	item_details = get_item_details(items, sl_entries)
+	item_details = get_item_details(items, sl_entries, include_uom)
 	opening_row = get_opening_balance(filters, columns)
 
 	data = []
+	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
 
@@ -26,28 +29,36 @@ def execute(filters=None):
 			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
 			sle.batch_no, sle.serial_no, sle.project, sle.company])
 
+		if include_uom:
+			conversion_factors.append(item_detail.conversion_factor)
+
+	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():
 	columns = [
-		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
-		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
-		_("Warehouse") + ":Link/Warehouse:100", _("Stock UOM") + ":Link/UOM:100",
-		_("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
+		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
+		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency"},
+			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency"},
+			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
-		_("Voucher Type") + "::110",
-		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
-		_("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100",
-		_("Project") + ":Link/Project:100",
-		{"label": _("Company"), "fieldtype": "Link", "width": 110,
-			"options": "company", "fieldname": "company"}
+		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
+		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
+		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
+		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
 
 	return columns
@@ -56,7 +67,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = 'and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i) for i in items]))
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
@@ -88,7 +99,7 @@ def get_items(filters):
 			.format(" and ".join(conditions)), filters)
 	return items
 
-def get_item_details(items, sl_entries):
+def get_item_details(items, sl_entries, include_uom):
 	item_details = {}
 	if not items:
 		items = list(set([d.item_code for d in sl_entries]))
@@ -96,11 +107,18 @@ def get_item_details(items, sl_entries):
 	if not items:
 		return item_details
 
+	cf_field = cf_join = ""
+	if include_uom:
+		cf_field = ", ucd.`conversion_factor`"
+		cf_join = "LEFT JOIN `tabUOM Conversion Detail` ucd ON ucd.`parent`=item.`name` and ucd.`uom`=%(include_uom)s"
+
 	for item in frappe.db.sql("""
-		select name, item_name, description, item_group, brand, stock_uom
-		from `tabItem`
-		where name in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i,percent=False) + '"' for i in items])), as_dict=1):
+		SELECT item.`name`, item.`item_name`, item.`description`, item.`item_group`, item.`brand`, item.`stock_uom` {cf_field}
+		FROM `tabItem` item
+		{cf_join}
+		where item.`name` in ({names})
+		""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join([frappe.db.escape(i, percent=False) for i in items])),
+		{"include_uom": include_uom}, as_dict=1):
 			item_details.setdefault(item.name, item)
 
 	return item_details

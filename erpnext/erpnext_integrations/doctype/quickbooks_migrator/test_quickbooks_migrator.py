@@ -3,7 +3,8 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import frappe
 import unittest
 
-class TestSubscriber(unittest.TestCase):
+class TestQuickBooksMigrator(unittest.TestCase):
 	pass

@@ -85,9 +85,9 @@ class SerialNo(StockController):
 			self.purchase_date = purchase_sle.posting_date
 			self.purchase_time = purchase_sle.posting_time
 			self.purchase_rate = purchase_sle.incoming_rate
-			if purchase_sle.voucher_type == "Purchase Receipt":
+			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 				self.supplier, self.supplier_name = \
-					frappe.db.get_value("Purchase Receipt", purchase_sle.voucher_no,
+					frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
 						["supplier", "supplier_name"])
 
 			# If sales return entry
@@ -171,7 +171,7 @@ class SerialNo(StockController):
 			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text')"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
+				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
 
 				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s
@@ -304,8 +304,8 @@ def has_duplicate_serial_no(sn, sle):
 
 	status = False
 	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry'] and \
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry']:
+		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and \
+			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]:
 			status = True
 
 		if status and sle.voucher_type == 'Stock Entry' and \

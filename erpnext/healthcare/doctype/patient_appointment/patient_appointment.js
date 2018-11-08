@@ -142,6 +142,7 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.set_value('service_unit', btn_selected.attr('data-service-unit') || '');
 					frm.set_value('duration', btn_selected.attr('data-duration'));
 					d.hide();
+					frm.enable_save();
 					frm.save();
 					frm.enable_save();
 				}

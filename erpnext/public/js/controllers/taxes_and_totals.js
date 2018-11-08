@@ -73,15 +73,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(this.frm.doc.currency == company_currency) {
 				this.frm.set_value("conversion_rate", 1);
 			} else {
-				frappe.throw(repl('%(conversion_rate_label)s' +
-					__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s', {
-					"conversion_rate_label": conversion_rate_label,
-					"from_currency": this.frm.doc.currency,
-					"to_currency": company_currency
-				}));
+				const err_message = __('{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}', [
+					conversion_rate_label,
+					this.frm.doc.currency,
+					company_currency
+				]);
+				frappe.throw(err_message);
 			}
-
 		}
 	},
 
@@ -161,7 +159,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			if(cumulated_tax_fraction && !me.discount_amount_applied) {
 				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction));
-				item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
+				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 			}
@@ -521,7 +519,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						item.net_amount = flt(item.net_amount + discount_amount_loss,
 							precision("net_amount", item));
 					}
-					item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
+					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 				});
 
