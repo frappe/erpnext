@@ -147,7 +147,7 @@ def get_data(filters):
 	periodic_data = get_periodic_data(sle, filters)
 	ranges = get_period_date_ranges(filters)
 
-	for item, item_data in iteritems(item_details):
+	for dummy, item_data in iteritems(item_details):
 		row = {
 			"name": item_data.name,
 			"item_name": item_data.item_name,
