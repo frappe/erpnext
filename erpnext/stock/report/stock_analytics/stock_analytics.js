@@ -5,12 +5,26 @@
 frappe.query_reports["Stock Analytics"] = {
 	"filters": [
 		{
+			fieldname: "item_group",
+			label: __("Item Group"),
+			fieldtype: "Link",
+			options:"Item Group",
+			default: "",
+		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "Link",
+			options:"Item",
+			default: "",
+		},
+		{
 			fieldname: "value_quantity",
 			label: __("Value Or Qty"),
 			fieldtype: "Select",
 			options: [
 				{ "value": "Value", "label": __("Value") },
-				{ "value": "Quantity", "label": __("Quantity") },
+				{ "value": "Quantity", "label": __("Quantity") }
 			],
 			default: "Value",
 			reqd: 1
