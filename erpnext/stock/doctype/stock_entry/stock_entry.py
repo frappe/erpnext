@@ -72,8 +72,9 @@ class StockEntry(StockController):
 
 		self.set_incoming_rate()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(update_finished_item_rate=False)
 		self.validate_serial_numbers()
+		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		
 	def validate_serial_numbers(self):
 		"""
 			validate serial number stock
@@ -84,7 +85,7 @@ class StockEntry(StockController):
 	def on_submit(self):
 
 		self.update_stock_ledger()
-
+		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
 		self.update_work_order()
 		self.validate_purchase_order()
