@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 
-# Functions to get homepage details
+# Academy Utils
 @frappe.whitelist(allow_guest=True)
 def get_portal_details():
 	settings = frappe.get_doc("Education Settings")
@@ -9,14 +9,62 @@ def get_portal_details():
 	description = settings.description
 	return dict(title=title, description=description)
 
+def check_program_enrollment(program_name):
+	if frappe.session.user in ("Guest", "Administrator"):
+		return False
+	student = get_student_id(frappe.session.user)
+	enrollment = frappe.get_list("Program Enrollment", filters={'student':student, 'program': program_name})
+	if enrollment:
+		return True
+	else:
+		return False
+
 @frappe.whitelist(allow_guest=True)
 def get_featured_programs():
 	featured_program_names = frappe.get_all("Program", filters={"is_published": True, "is_featured": True})
-	featured_list = [program["name"] for program in featured_program_names]
-	if featured_list:
+	if featured_program_names:
+		featured_list = [get_program(program['name']) for program in featured_program_names]
 		return featured_list
 	else:
 		return None
+
+def get_program(program_name):
+	program = frappe.get_doc('Program', program_name)
+	is_enrolled = check_program_enrollment(program_name)
+	return {'program': program, 'is_enrolled': is_enrolled}
+
+
+def get_enrollment(course_name):
+	student = get_student_id(frappe.session.user)
+	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student, 'course':course_name})
+	try:
+		name = enrollment_name[0].name
+		enrollment = frappe.get_doc("Course Enrollment", name)
+		return enrollment
+	except:
+		return None
+
+@frappe.whitelist()
+def get_student_id(email=None):
+	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
+
+	:param user: a user email address
+	"""
+	try:
+		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
+		return student_id
+	except IndexError:
+		return None
+
+def create_student(student_name=frappe.session.user):
+	student = frappe.get_doc({
+		"doctype": "Student",
+		"first_name": student_name,
+		"student_email_id": student_name,
+		})
+	student.save(ignore_permissions=True)
+	frappe.db.commit()
+	return student_name
 
 # Functions to get program & course details
 @frappe.whitelist(allow_guest=True)
@@ -31,7 +79,31 @@ def get_program_details(program_name):
 def get_courses(program_name):
 	program = frappe.get_doc('Program', program_name)
 	courses = program.get_course_list()
-	return courses
+	course_data = [{'meta':get_continue_content(item.name), 'course':item} for item in courses]
+	return course_data
+
+@frappe.whitelist()
+def get_continue_content(course_name):
+	enrollment = get_enrollment(course_name)
+	course = frappe.get_doc("Course", enrollment.course)
+	last_activity = enrollment.get_last_activity()
+	
+	if last_activity == None:
+		next_content = course.get_first_content()
+		return dict(content=next_content.name, content_type=next_content.doctype, flag="Start")
+	
+	if last_activity.doctype == "Quiz Activity":
+		next_content = get_next_content(last_activity.quiz, "Quiz", course.name)
+	else:
+		next_content = get_next_content(last_activity.content, last_activity.content_type, course.name)
+	
+	if next_content == None:
+		next_content = course.get_first_content()
+		return dict(content=next_content.name, content_type=next_content.doctype, flag="Complete")
+	else:
+		next_content['flag'] = "Continue"
+		return next_content
+
 
 @frappe.whitelist()
 def get_starting_content(course_name):
@@ -39,7 +111,6 @@ def get_starting_content(course_name):
 	content = course.course_content[0].content
 	content_type = course.course_content[0].content_type
 	return dict(content=content, content_type=content_type)
-
 
 # Functions to get content details
 @frappe.whitelist()
@@ -109,11 +180,12 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	return(score)
 
 @frappe.whitelist()
-def get_completed_courses(email=frappe.session.user):
-	if get_student_id(email) == None:
+def get_completed_courses():
+	student = get_student_id(frappe.session.user)
+	if student == None:
 		return None
 	try:
-		student = frappe.get_doc("Student", get_student_id(email))
+		student = frappe.get_doc("Student", student)
 		return student.get_completed_courses()
 	except:
 		return None
@@ -128,16 +200,6 @@ def get_continue_data(program_name):
 		return continue_data
 	except:
 		return None
-
-def create_student(student_name=frappe.session.user):
-	student = frappe.get_doc({
-		"doctype": "Student",
-		"first_name": student_name,
-		"student_email_id": student_name,
-		})
-	student.save(ignore_permissions=True)
-	frappe.db.commit()
-	return student_name
 
 @frappe.whitelist()
 def enroll_all_courses_in_program(program_enrollment, student):
@@ -154,18 +216,6 @@ def enroll_in_program(program_name, student_email_id):
 	enroll_all_courses_in_program(program_enrollment, student)
 
 @frappe.whitelist()
-def get_student_id(email=None):
-	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
-
-	:param user: a user email address
-	"""
-	try:
-		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
-		return student_id
-	except IndexError:
-		return None
-
-@frappe.whitelist()
 def get_program_enrollments(email=frappe.session.user):
 	if get_student_id(email) == None:
 		return None
@@ -176,15 +226,18 @@ def get_program_enrollments(email=frappe.session.user):
 		return None
 
 @frappe.whitelist()
-def get_course_enrollments(email=frappe.session.user):
-	if get_student_id(email) == None:
+def get_course_enrollments():
+	student = get_student_id(frappe.session.user)
+	if student == None:
 		return None
 	try:
-		student = frappe.get_doc("Student", get_student_id(email))
+		student = frappe.get_doc("Student", student)
 		return student.get_course_enrollments()
 	except:
 		return None
 
+
+# Academty Activity 
 @frappe.whitelist()
 def add_activity(enrollment, content_type, content):
 	if(check_activity_exists(enrollment, content_type, content)):
