@@ -37,11 +37,11 @@ def review():
 			pass
 
 def create_review(name, measurable):
-	objectives = frappe.get_all("Quality Objective", filters={'parent': ''+ name +''}, fields=['objective', 'target', 'unit'])
+	objectives = frappe.get_all("Quality Objective", filters={'parent': name }, fields=['objective', 'target', 'unit'])
 	doc = frappe.get_doc({
 		"doctype": "Quality Review",
    		"goal": name,
-   		"date": frappe.utils.nowdate(),
+   		"date": frappe.as_unicode(frappe.utils.nowdate()),
 		"measurable": measurable,
 	})
 	if measurable == 'Yes':

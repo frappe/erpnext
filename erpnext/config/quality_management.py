@@ -4,15 +4,17 @@ from frappe import _
 def get_data():
     return [
         {
-            "label": "Goal and Procedure",
+            "label": _("Goal and Procedure"),
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Quality Goal"
+                    "name": "Quality Goal",
+                    "description":_("Quality Goal."),
                 },
                 {
                     "type": "doctype",
-                    "name": "Quality Procedure"
+                    "name": "Quality Procedure",
+                    "description":_("Quality Procedure."),
                 },
                 {
 					"type": "doctype",
@@ -25,39 +27,42 @@ def get_data():
             ]
         },
         {
-            "label": "Review and Action",
+            "label": _("Review and Action"),
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Quality Review"
+                    "name": "Quality Review",
+                    "description":_("Quality Review"),
                 },
                 {
                     "type": "doctype",
-                    "name": "Quality Action"
-
+                    "name": "Quality Action",
+                    "description":_("Quality Action"),
                 }
             ]
         },
         {
-            "label": "Meeting",
+            "label": _("Meeting"),
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Quality Meeting"
-
+                    "name": "Quality Meeting",
+                    "description":_("Quality Meeting"),
                 }
             ]
         },
         {
-            "label": "Feedback",
+            "label": _("Feedback"),
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Customer Feedback"
+                    "name": "Customer Feedback",
+                    "description":_("Customer Feedback"),
                 },
                 {
                     "type": "doctype",
-                    "name": "Customer Feedback Template"
+                    "name": "Customer Feedback Template",
+                    "description":_("Customer Feedback Template"),
                 }
             ]
         },

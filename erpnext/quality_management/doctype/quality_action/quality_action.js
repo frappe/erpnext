@@ -16,7 +16,6 @@ frappe.ui.form.on('Quality Action', {
 		if(frm.doc.review){
 			var problems = "";
 			frm.fields_dict.description.grid.remove_all();
-			frm.refresh();
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
@@ -34,6 +33,7 @@ frappe.ui.form.on('Quality Action', {
 						frm.add_child("description");
 						frm.fields_dict.description.get_value()[i].problem = problems[i];
 					}
+					frm.refresh();
 				}
 			});
 			frappe.call({
@@ -58,9 +58,6 @@ frappe.ui.form.on('Quality Action', {
 	feedback: function(frm) {
 		if(frm.doc.feedback){
 			frm.fields_dict.description.grid.remove_all();
-			frm.refresh();
-			frm.doc.description = [];
-			frm.refresh();
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
