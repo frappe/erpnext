@@ -1,6 +1,6 @@
-import AcademyHome from "./academy/pages/AcademyHome.vue";
-import AcademyProgramPage from "./academy/pages/AcademyProgramPage.vue";
-import AcademyCoursePage from "./academy/pages/AcademyCoursePage.vue";
+import AcademyHome from "./pages/AcademyHome.vue";
+import AcademyProgramPage from "./pages/AcademyProgramPage.vue";
+import AcademyCoursePage from "./pages/AcademyCoursePage.vue";
 
 const routes = [
 	{name: 'home', path: '', component: AcademyHome},

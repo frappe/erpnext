@@ -10,65 +10,61 @@
         </div>
         <div class='card-footer text-right'>
             <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a v-if="this.$root.$data.isLogin" class='btn btn-secondary btn-sm' @click="primaryAction()">{{ buttonName }}</a>
+            <a-button
+                    v-if="enrolled"
+                    type="primary"
+                    size="sm"
+                    :route="programPageRoute"
+                >
+                    {{ buttonName }}
+            </a-button>
+            <a v-else-if="isLogin" class='btn btn-secondary btn-sm' @click="enroll()">Enroll</a>
             <a v-else class='btn btn-secondary btn-sm' href="/login#signup">Sign Up</a>
         </div>
     </div>
 </div>
 </template>
 <script>
+import AButton from './Button.vue';
 export default {
-    props: ['program_code'],
+    props: ['program', 'enrolled'],
     name: "AcademyProgramCard",
     data() {
     	return {
-    		program: ''
+            isLogin: academy.store.isLogin
     	};
     },
-    mounted() {
-    	frappe.call({
-            method: "erpnext.www.academy.get_program_details",
-            args: {
-                program_name: this.program_code
-            }
-        }).then(r => {
-    		this.program = r.message
-    	})
+    created() {
     },
     methods: {
-        primaryAction(){
-            if(this.$root.$data.isLogin){
-                if(this.$root.$data.checkProgramEnrollment(this.program_code)){
-                    this.$router.push('/Program/' + program.name)
-                }
-                else {
-                    this.enroll()
-                }
-            }
-        },
         enroll() {
-            frappe.call({
-                method: "erpnext.www.academy.enroll_in_program",
-                args:{
-                    program_name: this.program_code,
-                    student_email_id: frappe.session.user
-                }
-            })
-            this.$root.$data.enrolledPrograms.add(this.program_code)
-            this.$root.$data.updateEnrolledPrograms()
+            academy.call('enroll_in_program', {
+                program_name: this.program.name,
+            }).then(
+                academy.store.enrolledPrograms.add(this.program.name),
+                academy.store.updateEnrolledPrograms(),
+                this.router.push('Program/' + this.program.name)
+            )
         }
     },
     computed: {
         buttonName() {
-            if(this.$root.$data.isLogin){
-                if(this.$root.$data.checkProgramEnrollment(this.program_code)){
+                if(this.enrolled){
                     return "Start Course"
                 }
                 else {
                     return "Enroll"
                 }
-            }
+        },
+        programPageRoute() {
+            return `Program/${this.program.name}`
+        },
+        isEnrolled() {
+            return academy.store.enrolledPrograms.has(this.program.name)
         }
+    },
+    components: {
+        AButton
     }
 };
 </script>
