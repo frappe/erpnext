@@ -12,7 +12,29 @@
                 </span>
             </div>
             <div v-if="$root.$data.isLogin" class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <AcademyCourseCardButton v-if="this.$root.$data.checkProgramEnrollment(this.$route.params.code)" :course="course.name" :nextContent="nextContent" :nextContentType="nextContentType"/>
+                <!-- <AcademyCourseCardButton
+                    v-if="this.$root.$data.checkProgramEnrollment(this.$route.params.code)"
+                    :course="course.name"
+                    :nextContent="nextContent"
+                    :nextContentType="nextContentType"
+                /> -->
+
+                <a-button
+                    v-if="showCompleted"
+                    type="success"
+                    size="sm"
+                    :route="firstContentRoute"
+                >
+                    Completed
+                </a-button>
+                <a-button
+                    v-if="showStart"
+                    type="primary"
+                    size="sm"
+                    :route="firstContentRoute"
+                >
+                    Start
+                </a-button>
             </div>
         </div>
     </div>
@@ -20,6 +42,7 @@
 </template>
 
 <script>
+import AButton from './Button';
 import AcademyCourseCardButton from './AcademyCourseCardButton.vue'
 
 export default {
@@ -32,7 +55,7 @@ export default {
         }
     },
     mounted() {
-        if(this.$root.$data.checkLogin()){
+        if(this.$root.$data.checkLogin()) {
             frappe.call({
                 method: "erpnext.www.academy.get_starting_content",
                 args: {
@@ -45,7 +68,19 @@ export default {
         }
     },
     components: {
-        AcademyCourseCardButton
+        AcademyCourseCardButton,
+        AButton
+    },
+    computed: {
+        showStart() {
+            return academy.loggedIn && !this.course.completed;
+        },
+        showCompleted() {
+            return academy.loggedIn && this.course.completed;
+        },
+        firstContentRoute() {
+            return `${course.name}/${course.content_type}/${data.content}`
+        }
     }
 };
 </script>

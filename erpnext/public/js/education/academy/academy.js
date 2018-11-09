@@ -1,21 +1,20 @@
 import Vue from 'vue/dist/vue.js';
 import VueRouter from 'vue-router/dist/vue-router.js'
 
-import AcademyRoot from "./web-academy/AcademyRoot.vue";
-import AcademyHome from "./web-academy/pages/AcademyHome.vue";
-import AcademyProgramPage from "./web-academy/pages/AcademyProgramPage.vue";
-import AcademyCoursePage from "./web-academy/pages/AcademyCoursePage.vue";
+import AcademyRoot from "./AcademyRoot.vue";
+import routes from './routes';
+import './call';
 
 Vue.use(VueRouter)
 
 
-const routes = [
-	{name: 'home', path: '', component: AcademyHome},
-	{name: 'program', path: '/Program/:code', component: AcademyProgramPage, props: true},
-	{name: 'content', path: '/Program/:code/:course/:type/:content', component: AcademyCoursePage, props: true},
-];
 
-var store = {
+
+frappe.provide('academy')
+
+frappe.utils.make_event_emitter(academy);
+
+academy.store = {
 	debug: true,
 	isLogin: false,
 	completedCourses: new Set(),
@@ -104,24 +103,34 @@ var store = {
 		this.updateEnrolledPrograms()
 		this.updateEnrolledCourses()
 		this.checkLogin()
-
 	},
 }
-
-const router = new VueRouter({
-	routes: routes,
-});
 
 frappe.ready(() => {
 	window.v = new Vue({
 		el: "#academy",
-		router: router,
-		data: store,
+		router: new VueRouter({ routes }),
 		template: "<academy-root/>",
 		components: { AcademyRoot },
 		created: function() {
 			if(store.checkLogin()){
 				store.updateState()
+			}
+		}
+	});
+	academy.store = new Vue({
+		data: store,
+		methods: {
+			checkLogin (){
+				if(frappe.session.user === "Guest"){
+					if (this.debug) console.log('No Session')
+					this.isLogin = false
+				}
+				else {
+					if (this.debug) console.log('Current User: ', frappe.session.user)
+					this.isLogin = true
+				}
+				return this.isLogin
 			}
 		}
 	});
