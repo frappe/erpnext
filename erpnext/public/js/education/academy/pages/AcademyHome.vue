@@ -1,10 +1,10 @@
 <template>
 <div>
-	<AcademyTopSection :title="title" :description="description">
+	<AcademyTopSection :title="portal.title" :description="portal.description">
         <AcademyTopSectionButton/>
     </AcademyTopSection>
 	<AcademyList :title="'Featured Programs'" :description="'Master ERPNext'">
-        <AcademyProgramCard v-for="program in featured_programs" :key="program.name" :program_code="program"/>
+        <AcademyProgramCard v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
     </AcademyList>
 </div>
 </template>
@@ -18,9 +18,9 @@ export default {
     name: "AcademyHome",
     data() {
     	return{
-    		title: '',
-    		description: '',
-            featured_programs: []
+    		portal: {},
+            featuredPrograms: [],
+            // enrolledPrograms: new Set()
     	}
     },
     components: {
@@ -28,15 +28,28 @@ export default {
         AcademyList,
         AcademyProgramCard,
         AcademyTopSectionButton
-	},
-	mounted() {
-    	frappe.call("erpnext.www.academy.get_portal_details").then(r => {
-    		this.title = r.message.title,
-    		this.description = r.message.description
-    	});
-        frappe.call("erpnext.www.academy.get_featured_programs").then(r => {
-            this.featured_programs = r.message
-        });
     },
+    beforeMount() {
+        // this.updateEnrolledPrograms().then(data => {
+        //     data.forEach(element => {
+        //         this.enrolledPrograms.add(element)
+        //     })
+        // });
+    },
+	mounted() {
+        this.getPortalDetails().then(data => this.portal = data);
+        this.getFeaturedPrograms().then(data => this.featuredPrograms = data);
+    },
+    methods: {
+        // updateEnrolledPrograms(){
+        //     return academy.call("get_program_enrollments")
+        // },
+        getPortalDetails() {
+            return academy.call("get_portal_details")
+        },
+        getFeaturedPrograms() {
+            return academy.call("get_featured_programs")
+        }
+    }
 };
 </script>
