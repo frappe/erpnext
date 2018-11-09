@@ -38,14 +38,14 @@ export default {
     methods: {
         primaryAction(){
             if(this.$root.$data.isLogin){
-                if(this.$root.$data.checkProgramEnrollment(program_code)){
+                if(this.$root.$data.checkProgramEnrollment(this.program_code)){
                     this.$router.push('/Program/' + program.name)
                 }
                 else {
                     this.enroll()
                 }
             }
-        }
+        },
         enroll() {
             frappe.call({
                 method: "erpnext.www.academy.enroll_in_program",
@@ -57,11 +57,11 @@ export default {
             this.$root.$data.enrolledPrograms.add(this.program_code)
             this.$root.$data.updateEnrolledPrograms()
         }
-    }
+    },
     computed: {
         buttonName() {
             if(this.$root.$data.isLogin){
-                if(this.$root.$data.checkProgramEnrollment(program_code)){
+                if(this.$root.$data.checkProgramEnrollment(this.program_code)){
                     return "Start Course"
                 }
                 else {
