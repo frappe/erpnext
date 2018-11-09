@@ -498,7 +498,6 @@ execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
-erpnext.patches.v10_0.remove_and_copy_fields_in_physician
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
@@ -573,3 +572,7 @@ execute:frappe.delete_doc("Page", "Sales Analytics")
 execute:frappe.delete_doc("Page", "Purchase Analytics")
 execute:frappe.delete_doc("Page", "Stock Analytics")
 execute:frappe.delete_doc("Page", "Production Analytics")
+erpnext.patches.v11_0.ewaybill_fields_gst_india
+erpnext.patches.v11_0.drop_column_max_days_allowed
+erpnext.patches.v11_0.change_healthcare_desktop_icons
+erpnext.patches.v10_0.update_user_image_in_employee

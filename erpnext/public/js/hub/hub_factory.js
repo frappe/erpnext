@@ -32,8 +32,9 @@ frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.
 };
 
 function is_marketplace_disabled() {
-	return frappe.model.with_doc('Marketplace Settings')
-		.then(doc => doc.disable_marketplace);
+	return frappe.call({
+		method: "erpnext.hub_node.doctype.marketplace_settings.marketplace_settings.is_marketplace_enabled"
+	}).then(r => r.message)
 }
 
 $(document).on('toolbar_setup', () => {

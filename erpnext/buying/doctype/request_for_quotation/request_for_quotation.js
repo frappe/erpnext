@@ -128,7 +128,7 @@ frappe.ui.form.on("Request for Quotation",{
 						doctype: "Supplier",
 						order_by: "name",
 						fields: ["name"],
-						filters: [["Supplier", "supplier_group_name", "=", args.supplier_group]]
+						filters: [["Supplier", "supplier_group", "=", args.supplier_group]]
 
 					},
 					callback: load_suppliers
