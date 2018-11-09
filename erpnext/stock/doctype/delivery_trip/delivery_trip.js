@@ -75,22 +75,22 @@ frappe.ui.form.on('Delivery Trip', {
 					method: "erpnext.stock.doctype.delivery_trip.delivery_trip.validate_unique_delivery_notes",
 					args: {
 						delivery_stops: frm.doc.delivery_stops
-					}
-				}).then((r) => {
-					if (r.message.length) {
-						let confirm_message = `Atleast one of the entered Delivery Notes already exist in
-											the following Delivery Trips: ${r.message.join(", ")}.
-											Do you still want to continue?`;
+					},
+					callback: (r) => {
+						if (r.message.length) {
+							let confirm_message = `Atleast one of the entered Delivery Notes already exist in
+												the following Delivery Trips: ${r.message.join(", ")}.
+												Do you still want to continue?`;
 
-						frappe.confirm(
-							__(confirm_message),
-							() => { return resolve(); },  // If "Yes" is selected
-							() => { frappe.set_route("List", frm.doc.doctype); }  // If "No" is selected
-						);
-					} else { return resolve(); }
-				}).fail((err) => {
-					return reject(err);
-				});
+							frappe.confirm(
+								__(confirm_message),
+								() => { resolve(); },  // If "Yes" is selected
+								() => { frappe.set_route("List", frm.doc.doctype); }  // If "No" is selected
+							);
+						} else { resolve(); }
+					},
+					error: (r) => reject(r.message)
+				})
 			})
 		}
 	},
