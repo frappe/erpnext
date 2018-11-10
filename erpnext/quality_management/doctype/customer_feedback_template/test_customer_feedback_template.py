@@ -23,7 +23,7 @@ def create_template():
 			}
 		]
 	})
-	template_exist = frappe.get_list("Customer Feedback Template", filters={"template": ""+ template.template +""}, fields=["name"])
+	template_exist = frappe.get_list("Customer Feedback Template", filters={"template": ""+ template.template +""}, fields=["name"], limit=1)
 	if len(template_exist) == 0:
 		template.insert()
 		return template
@@ -31,5 +31,5 @@ def create_template():
 		return template_exist[0]
 
 def get_template():
-	template = frappe.get_list("Customer Feedback Template", filters={"template": "_Test Customer Feedback Template"})
+	template = frappe.get_list("Customer Feedback Template", filters={"template": "_Test Customer Feedback Template"}, limit=1)
 	return template[0]

@@ -10,7 +10,6 @@ class TestQualityMeeting(unittest.TestCase):
 	def test_quality_meeting(self):
 		test_create_meeting = create_meeting()
 		test_get_meeting = get_meeting()
-		print(test_create_meeting, test_get_meeting)
 		self.assertEquals(test_create_meeting.name, test_get_meeting.name)
 
 def create_meeting():
@@ -20,7 +19,7 @@ def create_meeting():
 		"status": "Close",
 		"date": ""+ frappe.as_unicode(frappe.utils.nowdate()) +""
 	})
-	meeting_exist = frappe.get_list("Quality Meeting", filters={"date": ""+ meeting.date +""}, fields=["name"])
+	meeting_exist = frappe.get_list("Quality Meeting", filters={"date": ""+ meeting.date +""}, fields=["name"], limit=1)
 	if len(meeting_exist) == 0:
 		meeting.insert()
 		return meeting

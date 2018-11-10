@@ -5,6 +5,10 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import create_procedure
+from erpnext.quality_management.doctype.quality_goal.test_quality_goal import create_unit
+from erpnext.quality_management.doctype.quality_goal.test_quality_goal import create_goal
+from erpnext.quality_management.doctype.quality_review.test_quality_review import create_review
 
 class TestQualityAction(unittest.TestCase):
 
@@ -27,7 +31,7 @@ def create_action():
 		'date': ''+ frappe.utils.nowdate() +'',
 		'procedure': '_Test Quality Procedure'
 	})
-	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""})
+	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, limit=1)
 	if len(action_exist) == 0:
 		action.insert()
 		return action
@@ -35,69 +39,6 @@ def create_action():
 		return action_exist[0]
 
 def get_action():
-	review = frappe.get_list("Quality Review")
-	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""})
+	review = frappe.get_list("Quality Review", limit=1)
+	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, limit=1)
 	return action[0]
-
-def create_procedure():
-	procedure = frappe.get_doc({
-		"doctype": "Quality Procedure",
-		"procedure": "_Test Quality Procedure",
-		"procedure_step": [
-			{
-				"step": "_Test Quality Procedure Table",
-			}
-		]
-	})
-	procedure_exist = frappe.db.exists("Quality Procedure",""+ procedure.procedure +"")
-	if not procedure_exist:
-		procedure.insert()
-
-def create_unit():
-	unit = frappe.get_doc({
-		"doctype": "UOM",
-		"uom_name": "_Test UOM",
-	})
-	unit_exist = frappe.db.exists("UOM", ""+ unit.uom_name +"")
-	if not unit_exist:
-		unit.insert()
-
-def create_goal():
-	goal = frappe.get_doc({
-		"doctype": "Quality Goal",
-		"goal": "_Test Quality Goal",
-		"procedure": "_Test Quality Procedure",
-		"revision": "1",
-		"frequency": "None",
-		"measurable": "Yes",
-		"objective": [
-			{
-				"objective": "_Test Quality Objective 1",
-				"target": "100",
-				"unit": "_Test UOM"
-			}
-		]
-	})
-	goal_exist = frappe.db.exists("Quality Goal", ""+ goal.goal +"")
-	if not goal_exist:
-		goal.insert()
-
-def create_review():
-	review = frappe.get_doc({
-		"doctype": "Quality Review",
-		"scope": "Company",
-		"goal": "_Test Quality Goal",
-		"procedure": "_Test Quality Procedure",
-		"date": ""+ frappe.utils.nowdate() +"",
-		"values": [
-			{
-				"objective": "_Test Quality Objective 1",
-				"target": "100",
-				"achieved": "4",
-				"unit": "_Test UOM"
-			}
-		]
-	})
-	review_exist = frappe.get_list("Quality Review", filters={"goal": "_Test Quality Goal"})
-	if len(review_exist) == 0:
-		review.insert()

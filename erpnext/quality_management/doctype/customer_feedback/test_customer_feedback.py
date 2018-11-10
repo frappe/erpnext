@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-
+from erpnext.quality_management.doctype.customer_feedback_template.test_customer_feedback_template import create_template
 class TestCustomerFeedback(unittest.TestCase):
 	def test_customer_feedback(self):
-		create_feedback_template()
+		create_template()
 		test_create_feedback = create_feedback()
 		test_get_feedback = get_feedback()
 		self.assertEquals(test_create_feedback.name, test_get_feedback.name)
@@ -19,7 +19,7 @@ def create_feedback():
 		"template": "FDBK-TMPL-_Test Customer Feedback Template",
 		"date": ""+ frappe.utils.nowdate() +""
 	})
-	feedback_exist = frappe.get_list("Customer Feedback", filters={"date": ""+ feedback.date +""})
+	feedback_exist = frappe.get_list("Customer Feedback", filters={"date": ""+ feedback.date +""}, limit=1)
 	if len(feedback_exist) == 0:
 		feedback.insert()
 		return feedback
@@ -27,20 +27,20 @@ def create_feedback():
 		return feedback_exist[0]
 
 def get_feedback():
-	feedback = frappe.get_list("Customer Feedback")
+	feedback = frappe.get_list("Customer Feedback", limit=1)
 	return feedback[0]
 
-def create_feedback_template():
-	template = frappe.get_doc({
-		"doctype": "Customer Feedback Template",
-		"template": "_Test Customer Feedback Template",
-		"scope": "Company",
-		"feedback_parameter": [
-			{
-				"parameter": "_Test Customer Feedback Template Parameter",
-			}
-		]
-	})
-	template_exist = frappe.get_list("Customer Feedback Template", filters={"template": ""+ template.template +""}, fields=["name"])
-	if len(template_exist) == 0:
-		template.insert()
+#def create_feedback_template():
+#	template = frappe.get_doc({
+#		"doctype": "Customer Feedback Template",
+#		"template": "_Test Customer Feedback Template",
+#		"scope": "Company",
+#		"feedback_parameter": [
+#			{
+#				"parameter": "_Test Customer Feedback Template Parameter",
+#			}
+#		]
+#	})
+#	template_exist = frappe.get_list("Customer Feedback Template", filters={"template": ""+ template.template +""}, fields=["name"])
+#	if len(template_exist) == 0:
+#		template.insert()

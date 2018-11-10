@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import create_procedure
 
 class TestQualityGoal(unittest.TestCase):
 
@@ -41,20 +42,6 @@ def create_goal():
 def get_goal():
 	goal = frappe.db.exists("Quality Goal", "_Test Quality Goal")
 	return goal
-
-def create_procedure():
-	procedure = frappe.get_doc({
-		"doctype": "Quality Procedure",
-		"procedure": "_Test Quality Procedure",
-		"procedure_step": [
-			{
-				"step": "_Test Quality Procedure Table",
-			}
-		]
-	})
-	procedure_exist = frappe.db.exists("Quality Procedure",""+ procedure.procedure +"")
-	if not procedure_exist:
-		procedure.insert()
 
 def create_unit():
 	unit = frappe.get_doc({
