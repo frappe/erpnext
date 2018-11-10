@@ -27,7 +27,7 @@ class Timesheet(Document):
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
-		self.calculate_end_time()
+		self.calculate_std_hours()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -94,7 +94,7 @@ class Timesheet(Document):
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
 
-	def calculate_end_time(self):
+	def calculate_std_hours(self):
 		std_working_hours = frappe.get_value("Company", self.company, 'standard_working_hours')
 
 		for time in self.time_logs:
@@ -102,7 +102,8 @@ class Timesheet(Document):
 				if std_working_hours > 0:
 					time.hours = std_working_hours * date_diff(time.to_time, time.from_time)
 				else:
-					time.hours = time_diff_in_hours(time.to_time, time.from_time)
+					if not time.hours:
+						time.hours = time_diff_in_hours(time.to_time, time.from_time)
 
 	def before_cancel(self):
 		self.set_status()
