@@ -62,10 +62,10 @@ class WoocommerceSettings(Document):
 					custom.read_only = 1
 					custom.save()
 
-			if not frappe.get_value("Item Group",{"name": "WooCommerce Products"}):
+			if not frappe.get_value("Item Group",{"name": _("WooCommerce Products")}):
 				item_group = frappe.new_doc("Item Group")
-				item_group.item_group_name = "WooCommerce Products"
-				item_group.parent_item_group = "All Item Groups"
+				item_group.item_group_name = _("WooCommerce Products")
+				item_group.parent_item_group = _("All Item Groups")
 				item_group.save()
 
 
@@ -83,7 +83,7 @@ class WoocommerceSettings(Document):
 			for name in email_names:
 				frappe.delete_doc("Custom Field",name)
 
-			frappe.delete_doc("Item Group","WooCommerce Products")
+			frappe.delete_doc("Item Group", _("WooCommerce Products"))
 
 		frappe.db.commit()
 
