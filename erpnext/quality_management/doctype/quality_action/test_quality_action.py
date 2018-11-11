@@ -22,13 +22,14 @@ class TestQualityAction(unittest.TestCase):
 		self.assertEquals(test_create_action.name, test_get_action.name)
 
 def create_action():
-	review = frappe.get_list("Quality Review")
+	review = frappe.get_list("Quality Review", limit=1)
 	action = frappe.get_doc({
 		'doctype': 'Quality Action',
 		'action': 'Corrective',
 		'type': 'Quality Review',
 		'review': ''+ review[0].name +'',
 		'date': ''+ frappe.utils.nowdate() +'',
+		'goal': '_Test Quality Goal',
 		'procedure': '_Test Quality Procedure'
 	})
 	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, limit=1)
