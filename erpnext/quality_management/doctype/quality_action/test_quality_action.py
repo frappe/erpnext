@@ -20,6 +20,7 @@ class TestQualityAction(unittest.TestCase):
 		test_create_action = create_action()
 		test_get_action = get_action()
 		self.assertEquals(test_create_action.name, test_get_action.name)
+		self.assertEquals(test_create_action.goal, test_get_action.goal)
 
 def create_action():
 	review = frappe.get_list("Quality Review", limit=1)
@@ -32,7 +33,7 @@ def create_action():
 		'goal': '_Test Quality Goal',
 		'procedure': '_Test Quality Procedure'
 	})
-	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, limit=1)
+	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, fields=["name", "goal"], limit=1)
 	if len(action_exist) == 0:
 		action.insert()
 		return action
@@ -41,5 +42,5 @@ def create_action():
 
 def get_action():
 	review = frappe.get_list("Quality Review", limit=1)
-	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, limit=1)
+	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, fields=["name", "goal"], limit=1)
 	return action[0]
