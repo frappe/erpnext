@@ -14,7 +14,9 @@ class QualityProcedure(NestedSet):
 		for data in self.procedure_step:
 			if data.procedure == 'Procedure' and data.procedure_name:
 				data.step = data.procedure_name
-				self.check_parent(data.procedure_name)
+				doc = frappe.get_doc("Quality Procedure", data.procedure_name)
+				if(doc.parent_quality_procedure):
+					frappe.throw(_("'"+ data.procedure_name +"' already has a Parent Procedure '"+ doc.parent_quality_procedure +"'"))
 				self.is_group = 1
 
 	def on_update(self):
@@ -38,11 +40,6 @@ class QualityProcedure(NestedSet):
 			if flag_is_group == 0:
 				doc.is_group = 0
 				doc.save()
-
-	def check_parent(self, procedure_name):
-		doc = frappe.get_doc("Quality Procedure", procedure_name)
-		if(doc.parent_quality_procedure):
-			frappe.throw(_("'"+ procedure_name +"' already has a Parent Procedure '"+ doc.parent_quality_procedure +"'"))
 
 	def set_parent(self):
 		for data in self.procedure_step:
