@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Customer Feedback', {
 	onload: function(frm){
-		if(frm.doc.date == null){
+		if(!frm.doc.date){
 			frm.set_value("date", frappe.datetime.get_today());
 		}
 	},
