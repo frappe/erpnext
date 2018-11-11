@@ -7,31 +7,19 @@ frappe.ui.form.on('Quality Review', {
 			frm.set_value("date", frappe.datetime.get_today());
 		}
 		if(frm.doc.measurable == "Yes"){
-			frm.fields_dict.values.grid.docfields[1].hidden = 0;
-			frm.fields_dict.values.grid.docfields[2].hidden = 0;
-			frm.fields_dict.values.grid.docfields[3].hidden = 0;
-			frm.fields_dict.values.grid.docfields[4].hidden = 1;
+			show_target_achieved_unit(frm);
 			frm.refresh();
-			$("div[data-fieldname='achieved']").show();
-			$("div[data-fieldname='target']").show();
-			$("div[data-fieldname='unit']").show();
-			$("div[data-fieldname='yes_no']").hide();
+			show_target_achieved_unit_(frm);
 		}
 		else{
-			frm.fields_dict.values.grid.docfields[1].hidden = 1;
-			frm.fields_dict.values.grid.docfields[2].hidden = 1;
-			frm.fields_dict.values.grid.docfields[3].hidden = 1;
-			frm.fields_dict.values.grid.docfields[4].hidden = 0;
+			hide_target_achieved_unit(frm);
 			frm.refresh();
-			$("div[data-fieldname='achieved']").hide();
-			$("div[data-fieldname='target']").hide();
-			$("div[data-fieldname='unit']").hide();
-			$("div[data-fieldname='yes_no']").show();
+			hide_target_achieved_unit_(frm);
 		}
 	},
 	goal: function(frm) {
-		if (frm.doc.goal != null){
-			if (frm.doc.values != null){
+		if (frm.doc.goal){
+			if (frm.doc.values){
 				frm.fields_dict.values.grid.remove_all();
 				frm.refresh();
 			}
@@ -47,10 +35,7 @@ frappe.ui.form.on('Quality Review', {
 						frm.fields_dict.values.get_value()[i].objective = data.message.objective[i].objective;
 						if(frm.doc.measurable == "Yes"){
 							if(i < 1){
-								frm.fields_dict.values.grid.docfields[1].hidden = 0;
-								frm.fields_dict.values.grid.docfields[2].hidden = 0;
-								frm.fields_dict.values.grid.docfields[3].hidden = 0;
-								frm.fields_dict.values.grid.docfields[4].hidden = 1;
+								show_target_achieved_unit(frm);
 							}
 							frm.fields_dict.values.get_value()[i].target = data.message.objective[i].target;
 							frm.fields_dict.values.get_value()[i].achieved = 0;
@@ -58,26 +43,17 @@ frappe.ui.form.on('Quality Review', {
 						}
 						if(frm.doc.measurable == "No"){
 							if(i < 1){
-								frm.fields_dict.values.grid.docfields[1].hidden = 1;
-								frm.fields_dict.values.grid.docfields[2].hidden = 1;
-								frm.fields_dict.values.grid.docfields[3].hidden = 1;
-								frm.fields_dict.values.grid.docfields[4].hidden = 0;
+								hide_target_achieved_unit(frm);
 							}
 							frm.fields_dict.values.get_value()[i].yes_no = "No";
 						}
 					}
 					frm.refresh();
 					if(frm.doc.measurable == "Yes"){
-						$("div[data-fieldname='achieved']").show();
-						$("div[data-fieldname='target']").show();
-						$("div[data-fieldname='unit']").show();
-						$("div[data-fieldname='yes_no']").hide();
+						show_target_achieved_unit_(frm);
 					}
 					else{
-						$("div[data-fieldname='achieved']").hide();
-						$("div[data-fieldname='target']").hide();
-						$("div[data-fieldname='unit']").hide();
-						$("div[data-fieldname='yes_no']").show();
+						hide_target_achieved_unit_(frm);
 					}
 				}
 			});
@@ -92,3 +68,35 @@ frappe.ui.form.on('Quality Review', {
 		}
 	},
 });
+
+function show_target_achieved_unit(frm){
+	//	shows target, achieved and unit columns as the goal can be measured in numeric values
+	frm.fields_dict.values.grid.docfields[1].hidden = 0;
+	frm.fields_dict.values.grid.docfields[2].hidden = 0;
+	frm.fields_dict.values.grid.docfields[3].hidden = 0;
+	frm.fields_dict.values.grid.docfields[4].hidden = 1;
+}
+
+function show_target_achieved_unit_(frm){
+	//	 shows target, achieved and unit columns
+	$("div[data-fieldname='achieved']").show();
+	$("div[data-fieldname='target']").show();
+	$("div[data-fieldname='unit']").show();
+	$("div[data-fieldname='yes_no']").hide();
+}
+
+function hide_target_achieved_unit(frm){
+	//	hides target and unit columns as the goal cannot be measured in numeric values
+	frm.fields_dict.values.grid.docfields[1].hidden = 1;
+	frm.fields_dict.values.grid.docfields[2].hidden = 1;
+	frm.fields_dict.values.grid.docfields[3].hidden = 1;
+	frm.fields_dict.values.grid.docfields[4].hidden = 0;
+}
+
+function hide_target_achieved_unit_(frm){
+	//	 hides target, achieved and unit columns
+	$("div[data-fieldname='achieved']").hide();
+	$("div[data-fieldname='target']").hide();
+	$("div[data-fieldname='unit']").hide();
+	$("div[data-fieldname='yes_no']").show();
+}
