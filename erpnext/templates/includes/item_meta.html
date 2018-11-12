@@ -1,0 +1,31 @@
+<meta name="keywords" content="{{ meta.keywords }}"/>
+<meta name="description" content="{{ meta.description }}"/>
+<meta name="image" content="{{ meta.image }}">
+<meta name="subject" content="{{ doc.item_name }}">
+<meta name="copyright"content="Rohit Cutting Tools">
+<meta name="language" content="EN">
+<meta name="url" content="{{ meta.url }}">
+
+<!-- Open Graph general (Facebook, Pinterest & Google+) -->
+<meta property="og:title" content="{{ doc.item_name or doc.item_code }}"/>
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="product">
+<meta property="og:url" content="{{ meta.url }}"/>
+<meta property="og:image" content="{{ meta.image }}"/>
+<meta property="og:site_name" content="ERPNext" />
+<meta property="og:description" content="{{ meta.description }}"/>
+
+<!-- Schema.org for Google -->
+<meta itemprop="name" content="{{ title }}">
+<meta itemprop="description" content="{{ meta.description }}">
+<meta itemprop="image" content="{{ meta.image }}">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ meta.description }}">
+<meta name="twitter:image:src" content="{{ meta.image }}">
+
+<!-- Open Graph - Product (e-commerce) -->
+<meta name="product:price:currency" content="INR">
+<meta name="product:brand" content="ERPNext">

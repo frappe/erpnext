@@ -1,6 +1,67 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+class ProductPage {
+	constructor(container) {
+		this.$container = $(container);
+		this.is_template = Boolean(window.variant_info);
+		this.variant_info = window.variant_info;
+		this.item_code = this.$container.find('[itemscope] [itemprop="productID"]').text().trim();
+	}
+
+	make_item_details() {
+		this.fetch_item_details()
+			.then(data => {
+				if (!data) return;
+
+				if(data.cart_settings.enabled) {
+					// $(".item-cart, .item-price, .item-stock").toggleClass("hide", (!data.product_info.price || !data.product_info.in_stock));
+				}
+				if(data.cart_settings.show_price) {
+					$(".item-price").toggleClass("hide", false);
+				}
+				if(data.cart_settings.show_stock_availability) {
+					$(".item-stock").toggleClass("hide", false);
+				}
+				if(data.product_info.price) {
+					$(".item-price")
+						.html(data.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
+							(" + data.product_info.price.formatted_price + " / " + data.product_info.uom + ")</div>");
+
+					if(data.product_info.in_stock==0) {
+						$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
+					}
+					else if(data.product_info.in_stock==1) {
+						var qty_display = "{{ _("In stock") }}";
+						if (data.product_info.show_stock_qty) {
+							qty_display += " ("+data.product_info.stock_qty+")";
+						}
+						$(".item-stock").html("<div style='color: green'>\
+							<i class='fa fa-check'></i> "+qty_display+"</div>");
+					}
+
+					if(data.product_info.qty) {
+						qty = data.product_info.qty;
+						toggle_update_cart(data.product_info.qty);
+					} else {
+						toggle_update_cart(0);
+					}
+				}
+			})
+	}
+
+	fetch_item_details() {
+		return new Promise(resolve => frappe.call({
+			type: "POST",
+			method: "erpnext.shopping_cart.product_info.get_product_info_for_website",
+			args: {
+				item_code: this.item_code
+			},
+			callback: r => resolve(r.message)
+		}))
+	}
+}
+
 frappe.ready(function() {
 	window.item_code = $('[itemscope] [itemprop="productID"]').text().trim();
 	var qty = 0;

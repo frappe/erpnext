@@ -300,6 +300,7 @@ class Item(WebsiteGenerator):
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
+		self.set_website_meta(context)
 
 		return context
 
@@ -417,6 +418,17 @@ class Item(WebsiteGenerator):
 			for combination in itertools.product(*combination_source):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
+
+	def set_website_meta(self, context):
+		context.meta = frappe._dict({})
+		safe_description = frappe.utils.to_markdown(self.description)
+		keywords = ','.join([self.item_code, self.item_name, safe_description, self.item_group])
+		keywords = ', '.join(keywords.split(' '))
+		context.meta.keywords = keywords
+		context.meta.url = frappe.utils.get_url() + '/' + context.route
+		if context.website_image:
+			context.meta.image = frappe.utils.get_url() + context.website_image
+		context.meta.description = safe_description[:150]
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
