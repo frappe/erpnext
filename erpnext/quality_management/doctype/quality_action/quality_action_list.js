@@ -4,7 +4,7 @@ frappe.listview_settings['Quality Action'] = {
 		if(doc.status == "Planned") {
 			return [__("Planned"), "green", "status,=,Planned"];
 		}
-		else if(doc.status == "Under Review") {
+		else{
 			return [__("Under Review"), "red", "status,=,Under Review"];
 		}
 	}

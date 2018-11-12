@@ -11,7 +11,7 @@ frappe.ui.form.on('Quality Goal', {
 		}
 	},
 	revision: function(frm) {
-		if(frm.doc.revised_on == null){
+		if(!frm.doc.revised_on){
 			frm.set_value("revised_on", frappe.datetime.get_today());
 		}
 	},
