@@ -16,11 +16,8 @@ frappe.ui.form.on('Quality Review', {
 		}
 	},
 	goal: function(frm) {
+		frm.fields_dict.values.grid.remove_all();
 		if (frm.doc.goal){
-			if (frm.doc.values){
-				frm.fields_dict.values.grid.remove_all();
-				frm.refresh();
-			}
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
@@ -55,7 +52,6 @@ frappe.ui.form.on('Quality Review', {
 			frm.doc.scope = '';
 			frm.doc.action = '';
 			frm.doc.measurable = '';
-			frm.fields_dict.values.grid.remove_all();
 			frm.refresh();
 		}
 	},
