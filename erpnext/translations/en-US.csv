@@ -28,7 +28,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +130,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +297,Packing Slip(s) cancelled,Packing Slip(s) canceled
 DocType: Payment Entry,Cheque/Reference No,Check/Reference No
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +288,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +297,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
 apps/erpnext/erpnext/controllers/buying_controller.py +491,{0} {1} is cancelled or closed,{0} {1} is canceled or closed

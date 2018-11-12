@@ -1,6 +1,6 @@
 DocType: Accounting Period,Period Name,Perioda nosaukums
 DocType: Employee,Salary Mode,Alga Mode
-apps/erpnext/erpnext/public/js/hub/marketplace.js +109,Register,Reģistrēties
+apps/erpnext/erpnext/public/js/hub/marketplace.js +108,Register,Reģistrēties
 DocType: Patient,Divorced,Šķīries
 DocType: Support Settings,Post Route Key,Pasta maršruta atslēga
 DocType: Buying Settings,Allow Item to be added multiple times in a transaction,Atļaut punkts jāpievieno vairākas reizes darījumā
@@ -36,7 +36,6 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js +26,Show Employee,Rādīt
 DocType: Exchange Rate Revaluation Account,New Exchange Rate,Jauns valūtas kurss
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +38,Currency is required for Price List {0},Valūta ir nepieciešama Cenrāža {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* Tiks aprēķināts darījumā.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +181,Supplier &gt; Supplier Type,Piegādātājs&gt; Piegādātāja tips
 DocType: Delivery Trip,MAT-DT-.YYYY.-,MAT-DT-.YYYY.-
 DocType: Purchase Order,Customer Contact,Klientu Kontakti
 DocType: Patient Appointment,Check availability,Pārbaudīt pieejamību
@@ -72,7 +71,7 @@ DocType: Leave Type,Leave Type Name,Atstājiet veida nosaukums
 apps/erpnext/erpnext/templates/pages/projects.js +66,Show open,Rādīt open
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +163,Series Updated Successfully,Series Atjaunots Veiksmīgi
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +6,Checkout,izrakstīšanās
-apps/erpnext/erpnext/controllers/accounts_controller.py +772,{0} in row {1},{0} rindā {1}
+apps/erpnext/erpnext/controllers/accounts_controller.py +779,{0} in row {1},{0} rindā {1}
 DocType: Asset Finance Book,Depreciation Start Date,Nolietojuma sākuma datums
 DocType: Pricing Rule,Apply On,Piesakies On
 DocType: Item Price,Multiple Item prices.,Vairāki Izstrādājumu cenas.
@@ -120,7 +119,7 @@ DocType: Delivery Note,Issue Credit Note,Kredīta piezīme
 DocType: Lab Prescription,Lab Prescription,Lab prescription
 ,Delay Days,Kavēšanās dienas
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service Expense,Servisa izdevumu
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1012,Serial Number: {0} is already referenced in Sales Invoice: {1},Sērijas numurs: {0} jau ir atsauce pārdošanas rēķina: {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1009,Serial Number: {0} is already referenced in Sales Invoice: {1},Sērijas numurs: {0} jau ir atsauce pārdošanas rēķina: {1}
 DocType: Bank Statement Transaction Invoice Item,Invoice,Pavadzīme
 DocType: Purchase Invoice Item,Item Weight Details,Vienuma svara dati
 DocType: Asset Maintenance Log,Periodicity,Periodiskums
@@ -145,6 +144,7 @@ DocType: Daily Work Summary Group,Holiday List,Brīvdienu saraksts
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +115,Accountant,Grāmatvedis
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +61,Selling Price List,Pārdošanas cenrādis
 DocType: Patient,Tobacco Current Use,Tabakas patēriņš
+apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","Sākuma datums un beigu datums pārklājas ar darba karti <a href=""#Form/Job Card/{0}"">{1}</a>"
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +68,Selling Rate,Pārdošanas likme
 DocType: Cost Center,Stock User,Stock User
 DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
@@ -164,7 +164,7 @@ DocType: Student,O+,O +
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan_dashboard.py +8,Related,saistīts
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +46,Attendance date can not be less than employee's joining date,Apmeklējums datums nevar būt mazāks par darbinieka pievienojas datuma
 DocType: Grading Scale,Grading Scale Name,Šķirošana Scale Name
-apps/erpnext/erpnext/public/js/hub/marketplace.js +148,Add Users to Marketplace,Pievienot lietotājus Marketplace
+apps/erpnext/erpnext/public/js/hub/marketplace.js +147,Add Users to Marketplace,Pievienot lietotājus Marketplace
 apps/erpnext/erpnext/accounts/doctype/account/account.js +37,This is a root account and cannot be edited.,Tas ir root kontu un to nevar rediģēt.
 DocType: Sales Invoice,Company Address,Uzņēmuma adrese
 DocType: BOM,Operations,Operācijas
@@ -322,7 +322,7 @@ DocType: Customer,Primary Address,Galvenā adrese
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py +39,Diff Qty,Diff Qty
 DocType: Production Plan,Material Request Detail,Materiāla pieprasījums detalizēti
 DocType: Selling Settings,Default Quotation Validity Days,Nokotināšanas cesijas derīguma dienas
-apps/erpnext/erpnext/controllers/accounts_controller.py +870,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Lai iekļautu nodokli rindā {0} vienības likmes, nodokļi rindās {1} ir jāiekļauj arī"
+apps/erpnext/erpnext/controllers/accounts_controller.py +877,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Lai iekļautu nodokli rindā {0} vienības likmes, nodokļi rindās {1} ir jāiekļauj arī"
 DocType: SMS Center,SMS Center,SMS Center
 DocType: Payroll Entry,Validate Attendance,Apstiprināt apmeklējumu
 DocType: Sales Invoice,Change Amount,Mainīt Summa
@@ -441,7 +441,6 @@ DocType: Healthcare Practitioner,Practitioner Schedules,Praktiķu grafiki
 DocType: Cheque Print Template,Line spacing for amount in words,Rindstarpas par summu vārdiem
 DocType: Vehicle,Additional Details,papildu Details
 apps/erpnext/erpnext/templates/generators/bom.html +85,No description given,Apraksts nav dota
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Piegādātājs&gt; Piegādātāju grupa
 apps/erpnext/erpnext/config/buying.py +13,Request for purchase.,Pieprasīt iegādei.
 DocType: POS Closing Voucher Details,Collected Amount,Savākto summu
 DocType: Lab Test,Submitted Date,Iesniegtais datums
@@ -486,7 +485,7 @@ DocType: Item,Publish in Hub,Publicē Hub
 DocType: Student Admission,Student Admission,Studentu uzņemšana
 ,Terretory,Terretory
 apps/erpnext/erpnext/stock/doctype/item/item.py +827,Item {0} is cancelled,Postenis {0} ir atcelts
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +206,Depreciation Row {0}: Depreciation Start Date is entered as past date,Nolietojuma rinda {0}: nolietojuma sākuma datums tiek ierakstīts kā pagājis datums
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +215,Depreciation Row {0}: Depreciation Start Date is entered as past date,Nolietojuma rinda {0}: nolietojuma sākuma datums tiek ierakstīts kā pagājis datums
 DocType: Contract Template,Fulfilment Terms and Conditions,Izpildes noteikumi
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1130,Material Request,Materiāls Pieprasījums
 DocType: Bank Reconciliation,Update Clearance Date,Update Klīrenss Datums
@@ -543,6 +542,7 @@ apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js +3,Activity
 DocType: Accounts Settings,Settings for Accounts,Iestatījumi kontu
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +800,Supplier Invoice No exists in Purchase Invoice {0},Piegādātājs Invoice Nr pastāv pirkuma rēķina {0}
 apps/erpnext/erpnext/config/selling.py +118,Manage Sales Person Tree.,Pārvaldīt pārdošanas persona Tree.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +84,"Cannot process route, since Google Maps Settings is disabled.","Nevar apstrādāt maršrutu, jo Google Maps iestatījumi ir atspējoti."
 DocType: Job Applicant,Cover Letter,Pavadvēstule
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +37,Outstanding Cheques and Deposits to clear,"Izcilas Čeki un noguldījumi, lai nodzēstu"
 DocType: Item,Synced With Hub,Sinhronizēts ar Hub
@@ -602,7 +602,7 @@ DocType: Certification Application,Not Certified,Nav sertificēts
 DocType: Asset Value Adjustment,New Asset Value,Jauna aktīva vērtība
 DocType: Sales Invoice,Rate at which Customer Currency is converted to customer's base currency,"Ātrums, kādā Klients Valūtu pārvērsts klienta bāzes valūtā"
 DocType: Course Scheduling Tool,Course Scheduling Tool,Protams plānošanas rīks
-apps/erpnext/erpnext/controllers/accounts_controller.py +682,Row #{0}: Purchase Invoice cannot be made against an existing asset {1},Row # {0}: Pirkuma rēķins nevar būt pret esošā aktīva {1}
+apps/erpnext/erpnext/controllers/accounts_controller.py +689,Row #{0}: Purchase Invoice cannot be made against an existing asset {1},Row # {0}: Pirkuma rēķins nevar būt pret esošā aktīva {1}
 DocType: Crop Cycle,LInked Analysis,Ievilkta analīze
 DocType: POS Closing Voucher,POS Closing Voucher,POS slēgšanas kvīts
 DocType: Contract,Lapsed,Zaudēja
@@ -637,6 +637,7 @@ DocType: Asset Maintenance Log,Maintenance Type,Uzturēšānas veids
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +45,{0} - {1} is not enrolled in the Course {2},{0} - {1} nav uzņemts Course {2}
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +225,Student Name: ,Studenta vārds:
 DocType: POS Closing Voucher Details,Difference,Atšķirība
+DocType: Delivery Settings,Delay between Delivery Stops,Kavējums starp piegādes apstādinājumiem
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +59,Serial No {0} does not belong to Delivery Note {1},Sērijas Nr {0} nepieder komplektāciju {1}
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py +97,"There seems to be an issue with the server's GoCardless configuration. Don't worry, in case of failure, the amount will get refunded to your account.","Šķiet, ka ir problēma ar servera GoCardless konfigurāciju. Neuztraucieties, ja neizdodas, summa tiks atmaksāta jūsu kontā."
 apps/erpnext/erpnext/templates/pages/demo.html +47,ERPNext Demo,ERPNext Demo
@@ -697,7 +698,7 @@ DocType: Lab Test Template,No Result,nav rezultāts
 DocType: Purchase Invoice Item,Quantity and Rate,Daudzums un Rate
 DocType: Delivery Note,% Installed,% Uzstādīts
 apps/erpnext/erpnext/utilities/user_progress.py +230,Classrooms/ Laboratories etc where lectures can be scheduled.,Klases / Laboratories etc kur lekcijas var tikt plānots.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1311,Company currencies of both the companies should match for Inter Company Transactions.,Abu uzņēmumu kompāniju valūtām vajadzētu atbilst Inter uzņēmuma darījumiem.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1308,Company currencies of both the companies should match for Inter Company Transactions.,Abu uzņēmumu kompāniju valūtām vajadzētu atbilst Inter uzņēmuma darījumiem.
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +95,Please enter company name first,Ievadiet uzņēmuma nosaukumu pirmais
 DocType: Travel Itinerary,Non-Vegetarian,Ne-veģetārietis
 DocType: Purchase Invoice,Supplier Name,Piegādātājs Name
@@ -783,7 +784,7 @@ apps/erpnext/erpnext/utilities/user_progress.py +67,List a few of your customers
 DocType: Employee Tax Exemption Proof Submission,Rented From Date,Izīrēts no datuma
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +23,Enough Parts to Build,Pietiekami Parts Build
 DocType: POS Profile User,POS Profile User,POS lietotāja profils
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +185,Row {0}: Depreciation Start Date is required,Rinda {0}: ir jānosaka nolietojuma sākuma datums
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +194,Row {0}: Depreciation Start Date is required,Rinda {0}: ir jānosaka nolietojuma sākuma datums
 DocType: Purchase Invoice Item,Service Start Date,Pakalpojuma sākuma datums
 DocType: Subscription Invoice,Subscription Invoice,Abonēšanas rēķins
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +135,Direct Income,Direct Ienākumi
@@ -852,7 +853,6 @@ apps/erpnext/erpnext/setup/doctype/company/company.py +74,Account {0} does not b
 apps/erpnext/erpnext/setup/doctype/company/company.py +56,Abbreviation already used for another company,Abreviatūra jau tiek izmantots citam uzņēmumam
 DocType: Selling Settings,Default Customer Group,Default Klientu Group
 DocType: Employee,IFSC Code,IFSC kods
-apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +39,"Start date and end date is overlapping with the job card <a href=""#Form/Job Card/{0}"">{1}</a>","Sākuma datums un beigu datums pārklājas ar darba karti <a href=""#Form/Job Card/{0}"">{1}</a>"
 DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible in any transaction","Ja atslēgt ""noapaļots Kopā"" lauks nebūs redzama nevienā darījumā"
 DocType: BOM,Operating Cost,Darbības izmaksas
 DocType: Crop,Produced Items,Ražotie vienumi
@@ -904,7 +904,7 @@ apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +72,Territory i
 DocType: Supplier,Prevent RFQs,Novērst RFQ
 DocType: Hub User,Hub User,Hub Lietotājs
 apps/erpnext/erpnext/utilities/activation.py +83,Make Sales Order,Veikt klientu pasūtījumu
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +537,Salary Slip submitted for period from {0} to {1},Algu slīdēšana iesniegta periodam no {0} līdz {1}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +541,Salary Slip submitted for period from {0} to {1},Algu slīdēšana iesniegta periodam no {0} līdz {1}
 DocType: Project Task,Project Task,Projekta uzdevums
 DocType: Loyalty Point Entry Redemption,Redeemed Points,Pērti punkti
 ,Lead Id,Potenciālā klienta ID
@@ -1036,7 +1036,7 @@ DocType: Student Batch Name,Batch Name,partijas nosaukums
 DocType: Fee Validity,Max number of visit,Maksimālais apmeklējuma skaits
 ,Hotel Room Occupancy,Viesnīcas istabu aizņemšana
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,Kontrolsaraksts izveidots:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1216,Please set default Cash or Bank account in Mode of Payment {0},Lūdzu iestatītu standarta kases vai bankas kontu maksājuma veidu {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1213,Please set default Cash or Bank account in Mode of Payment {0},Lūdzu iestatītu standarta kases vai bankas kontu maksājuma veidu {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,uzņemt
 DocType: GST Settings,GST Settings,GST iestatījumi
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +81,Currency should be same as Price List Currency: {0},Valūtam jābūt tādam pašam kā Cenrādī Valūta: {0}
@@ -1090,7 +1090,7 @@ DocType: Company,Gain/Loss Account on Asset Disposal,Gain / zaudējumu aprēķin
 DocType: Vehicle Log,Service Details,Detalizēta informācija par pakalpojumu
 DocType: Lab Test Template,Grouped,Sagrupēti
 DocType: Selling Settings,Delivery Note Required,Nepieciešamais Piegāde Note
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +533,Submitting Salary Slips...,Iesniedzot algas likmes ...
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +537,Submitting Salary Slips...,Iesniedzot algas likmes ...
 DocType: Bank Guarantee,Bank Guarantee Number,Bankas garantijas skaits
 DocType: Bank Guarantee,Bank Guarantee Number,Bankas garantijas skaits
 DocType: Assessment Criteria,Assessment Criteria,vērtēšanas kritēriji
@@ -1116,13 +1116,13 @@ DocType: Sales Invoice,Redeem Loyalty Points,Izpirkt lojalitātes punktus
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +348,Payment Entry is already created,Maksājums ieraksts ir jau radīta
 DocType: Request for Quotation,Get Suppliers,Iegūt piegādātājus
 DocType: Purchase Receipt Item Supplied,Current Stock,Pašreizējā Stock
-apps/erpnext/erpnext/controllers/accounts_controller.py +665,Row #{0}: Asset {1} does not linked to Item {2},Row # {0}: Asset {1} nav saistīts ar posteni {2}
+apps/erpnext/erpnext/controllers/accounts_controller.py +672,Row #{0}: Asset {1} does not linked to Item {2},Row # {0}: Asset {1} nav saistīts ar posteni {2}
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +408,Preview Salary Slip,Preview Alga Slip
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +64,Account {0} has been entered multiple times,Konts {0} ir ievadīts vairākas reizes
 DocType: Account,Expenses Included In Valuation,Izdevumi iekļauts vērtēšanā
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +38,You can only renew if your membership expires within 30 days,"Jūs varat atjaunot tikai tad, ja jūsu dalības termiņš ir 30 dienu laikā"
 DocType: Shopping Cart Settings,Show Stock Availability,Rādīt pieejamību
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +510,Set {0} in asset category {1} or company {2},Iestatiet {0} īpašuma kategorijā {1} vai uzņēmumā {2}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +519,Set {0} in asset category {1} or company {2},Iestatiet {0} īpašuma kategorijā {1} vai uzņēmumā {2}
 DocType: Location,Longitude,Garums
 ,Absent Student Report,Nekonstatē Student pārskats
 DocType: Crop,Crop Spacing UOM,Crop starpība UOM
@@ -1195,7 +1195,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +50,Reserved for 
 DocType: Soil Texture,Sand,Smiltis
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +25,Energy,Enerģija
 DocType: Opportunity,Opportunity From,Iespēja no
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1000,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,Rinda {0}: {1} {2} vienumam ir vajadzīgi sērijas numuri. Jūs esat iesniedzis {3}.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +997,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,Rinda {0}: {1} {2} vienumam ir vajadzīgi sērijas numuri. Jūs esat iesniedzis {3}.
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +79,Please select a table,"Lūdzu, atlasiet tabulu"
 DocType: BOM,Website Specifications,Website specifikācijas
 DocType: Special Test Items,Particulars,Daži dati
@@ -1287,7 +1287,7 @@ apps/erpnext/erpnext/utilities/user_progress.py +146,Nos,Nos
 DocType: Item,Items with higher weightage will be shown higher,Preces ar augstāku weightage tiks parādīts augstāk
 apps/erpnext/erpnext/healthcare/doctype/inpatient_record/inpatient_record_dashboard.py +12,Lab Tests and Vital Signs,Lab testu un dzīvības pazīmes
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Banku samierināšanās Detail
-apps/erpnext/erpnext/controllers/accounts_controller.py +669,Row #{0}: Asset {1} must be submitted,Row # {0}: Asset {1} jāiesniedz
+apps/erpnext/erpnext/controllers/accounts_controller.py +676,Row #{0}: Asset {1} must be submitted,Row # {0}: Asset {1} jāiesniedz
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +40,No employee found,Darbinieks nav atrasts
 DocType: Item,If subcontracted to a vendor,Ja apakšlīgumu nodot pārdevējs
 apps/erpnext/erpnext/education/doctype/student_group/student_group.js +113,Student Group is already updated.,Studentu grupa jau ir atjaunināts.
@@ -1342,7 +1342,6 @@ DocType: Hotel Room Pricing Item,Hotel Room Pricing Item,Viesnīcas numuru cenas
 DocType: Loyalty Program Collection,Tier Name,Līmeņa nosaukums
 DocType: HR Settings,Enter retirement age in years,Ievadiet pensionēšanās vecumu gados
 DocType: Crop,Target Warehouse,Mērķa Noliktava
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +212,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Lūdzu, iestatiet Nosaukumu sēriju {0}, izmantojot iestatījumu&gt; Iestatījumi&gt; Nosaukumu sērija"
 DocType: Payroll Employee Detail,Payroll Employee Detail,Payroll Employee Detail
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +135,Please select a warehouse,"Lūdzu, izvēlieties noliktavu"
 DocType: Cheque Print Template,Starting location from left edge,Sākot atrašanās vietu no kreisās malas
@@ -1432,7 +1431,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Work Order,Plan material for sub-assemblies,Plāns materiāls mezgliem
 apps/erpnext/erpnext/config/selling.py +97,Sales Partners and Territory,Pārdošanas Partneri un teritorija
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +623,BOM {0} must be active,BOM {0} jābūt aktīvam
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +427,No Items available for transfer,Nav pieejams neviens elements pārsūtīšanai
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +430,No Items available for transfer,Nav pieejams neviens elements pārsūtīšanai
 DocType: Employee Boarding Activity,Activity Name,Aktivitātes nosaukums
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +860,Change Release Date,Mainīt izlaiduma datumu
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +250,Closing (Opening + Total),Slēgšana (atvēršana + kopā)
@@ -1661,6 +1660,7 @@ DocType: Quality Inspection Template,Quality Inspection Template Name,Kvalitāte
 DocType: Project,First Email,Pirmā e-pasta adrese
 DocType: Company,Exception Budget Approver Role,Izņēmums Budžeta apstiprinātāja loma
 DocType: Purchase Invoice,"Once set, this invoice will be on hold till the set date",Pēc iestatīšanas šis rēķins tiks aizturēts līdz noteiktajam datumam
+DocType: Cashier Closing,POS-CLO-,POS-CLO-
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,Rezervēts noliktavām Sales Order / gatavu preču noliktava
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Selling Amount,Pārdošanas apjoms
 DocType: Repayment Schedule,Interest Amount,procentu summa
@@ -1672,7 +1672,7 @@ DocType: Share Transfer,Issue,Izdevums
 apps/erpnext/erpnext/healthcare/doctype/patient_encounter/patient_encounter_dashboard.py +11,Records,Ieraksti
 DocType: Asset,Scrapped,iznīcināts
 DocType: Item,Item Defaults,Vienuma noklusējumi
-DocType: Purchase Invoice,Returns,atgriešana
+DocType: Cashier Closing,Returns,atgriešana
 DocType: Job Card,WIP Warehouse,WIP Noliktava
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +195,Serial No {0} is under maintenance contract upto {1},Sērijas Nr {0} ir zem uzturēšanas līgumu līdz pat {1}
 apps/erpnext/erpnext/config/hr.py +231,Recruitment,vervēšana
@@ -1686,7 +1686,6 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +911,Delivery 
 DocType: Student,A-,A-
 DocType: Share Transfer,Transfer Type,Pārsūtīšanas veids
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +124,Sales Expenses,Pārdošanas izmaksas
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Pasūtītājs&gt; Klientu grupa&gt; Teritorija
 DocType: Diagnosis,Diagnosis,Diagnoze
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +18,Standard Buying,Standarta iepirkums
 DocType: Attendance Request,Explanation,Paskaidrojums
@@ -1699,7 +1698,7 @@ DocType: Buying Settings,Material Transferred for Subcontract,Materiāls nodots 
 DocType: Email Digest,Purchase Orders Items Overdue,Pirkuma pasūtījumi priekšmetus kavējas
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1638,ZIP Code,Pasta indekss
 apps/erpnext/erpnext/controllers/selling_controller.py +262,Sales Order {0} is {1},Pārdošanas pasūtījums {0} ir {1}
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +256,Select interest income account in loan {0},Atlasiet procentu ienākumu kontu aizdevumā {0}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +260,Select interest income account in loan {0},Atlasiet procentu ienākumu kontu aizdevumā {0}
 DocType: Opportunity,Contact Info,Kontaktinformācija
 apps/erpnext/erpnext/config/stock.py +322,Making Stock Entries,Making Krājumu
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.py +15,Cannot promote Employee with status Left,Nevar reklamēt Darbinieku ar statusu pa kreisi
@@ -1711,7 +1710,7 @@ apps/erpnext/erpnext/hr/doctype/payroll_period/payroll_period.py +19,End Date ca
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +250,Invoice can't be made for zero billing hour,Rēķinu nevar veikt par nulles norēķinu stundu
 DocType: Company,Date of Commencement,Sākuma datums
 DocType: Sales Person,Select company name first.,Izvēlieties uzņēmuma nosaukums pirmo reizi.
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +204,Email sent to {0},E-pasts nosūtīts uz {0}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +359,Email sent to {0},E-pasts nosūtīts uz {0}
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,"Citāti, kas saņemti no piegādātājiem."
 apps/erpnext/erpnext/config/manufacturing.py +74,Replace BOM and update latest price in all BOMs,Aizstāt BOM un atjaunināt jaunāko cenu visās BOMs
 apps/erpnext/erpnext/controllers/selling_controller.py +28,To {0} | {1} {2},Uz {0} | {1}{2}
@@ -1733,7 +1732,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +147,Maximum discount for
 DocType: Asset Movement,From Employee,No darbinieka
 DocType: Driver,Cellphone Number,Mobilā tālruņa numurs
 DocType: Project,Monitor Progress,Pārraudzīt Progress
-apps/erpnext/erpnext/controllers/accounts_controller.py +529,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,"Brīdinājums: Sistēma nepārbaudīs pārāk augstu maksu, jo summu par posteni {0} ir {1} ir nulle"
+apps/erpnext/erpnext/controllers/accounts_controller.py +536,Warning: System will not check overbilling since amount for Item {0} in {1} is zero,"Brīdinājums: Sistēma nepārbaudīs pārāk augstu maksu, jo summu par posteni {0} ir {1} ir nulle"
 DocType: Journal Entry,Make Difference Entry,Padarīt atšķirība Entry
 DocType: Supplier Quotation,Auto Repeat Section,Auto atkārtotā sadaļa
 DocType: Upload Attendance,Attendance From Date,Apmeklējumu No Datums
@@ -1836,7 +1835,7 @@ apps/erpnext/erpnext/accounts/doctype/tax_withholding_category/tax_withholding_c
 apps/erpnext/erpnext/controllers/buying_controller.py +393,Row #{0}: Rejected Qty can not be entered in Purchase Return,Row # {0}: Noraidīts Daudz nevar jāieraksta Pirkuma Atgriezties
 apps/erpnext/erpnext/stock/doctype/item/item.js +197,Changing Customer Group for the selected Customer is not allowed.,Klienta grupas maiņa izvēlētajam klientam nav atļauta.
 ,Purchase Order Items To Be Billed,Pirkuma pasūtījuma posteņi ir Jāmaksā
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +71,Updating estimated arrival times.,Aptuveno ierašanās laiku atjaunināšana.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +75,Updating estimated arrival times.,Aptuveno ierašanās laiku atjaunināšana.
 DocType: Program Enrollment Tool,Enrollment Details,Reģistrēšanās informācija
 apps/erpnext/erpnext/stock/doctype/item/item.py +671,Cannot set multiple Item Defaults for a company.,Nevar iestatīt vairākus uzņēmuma vienumu noklusējuma iestatījumus.
 DocType: Purchase Invoice Item,Net Rate,Net Rate
@@ -1850,7 +1849,7 @@ DocType: Holiday,Holiday,Brīvdiena
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py +25,Leave Type is madatory,Atvaļinājuma veids ir disciplinārsods
 DocType: Support Settings,Close Issue After Days,Aizvērt Issue Pēc dienas
 ,Eway Bill,Eway Bill
-apps/erpnext/erpnext/public/js/hub/marketplace.js +139,You need to be a user with System Manager and Item Manager roles to add users to Marketplace.,"Lai pievienotu Marketplace lietotājiem, jums ir jābūt lietotājam ar sistēmas pārvaldnieka un vienumu pārvaldnieka lomu."
+apps/erpnext/erpnext/public/js/hub/marketplace.js +138,You need to be a user with System Manager and Item Manager roles to add users to Marketplace.,"Lai pievienotu Marketplace lietotājiem, jums ir jābūt lietotājam ar sistēmas pārvaldnieka un vienumu pārvaldnieka lomu."
 DocType: Leave Control Panel,Leave blank if considered for all branches,"Atstāt tukšu, ja to uzskata par visām filiālēm"
 DocType: Job Opening,Staffing Plan,Personāla plāns
 DocType: Bank Guarantee,Validity in Days,Derīguma dienās
@@ -1872,7 +1871,7 @@ DocType: Maintenance Team Member,Maintenance Role,Uzturēšanas loma
 apps/erpnext/erpnext/utilities/transaction_base.py +97,Duplicate row {0} with same {1},Dublikāts rinda {0} ar pašu {1}
 DocType: Marketplace Settings,Disable Marketplace,Atslēgt tirgu
 ,Trial Balance,Trial Balance
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +463,Fiscal Year {0} not found,Fiskālā gads {0} nav atrasts
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +467,Fiscal Year {0} not found,Fiskālā gads {0} nav atrasts
 apps/erpnext/erpnext/config/hr.py +394,Setting up Employees,Iestatīšana Darbinieki
 DocType: Hotel Room Reservation,Hotel Reservation User,Viesnīcu rezervācijas lietotājs
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +165,Please select prefix first,"Lūdzu, izvēlieties kodu pirmais"
@@ -1980,7 +1979,7 @@ apps/erpnext/erpnext/utilities/user_progress.py +138,Your Products or Services,J
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +15,Failed to login,Neizdevās pieslēgties
 apps/erpnext/erpnext/controllers/buying_controller.py +617,Asset {0} created,Aktīvs {0} izveidots
 DocType: Special Test Items,Special Test Items,Īpašie testa vienumi
-apps/erpnext/erpnext/public/js/hub/marketplace.js +102,You need to be a user with System Manager and Item Manager roles to register on Marketplace.,"Lai reģistrētos vietnē Marketplace, jums ir jābūt lietotājam ar sistēmas pārvaldnieka un vienumu pārvaldnieka lomu."
+apps/erpnext/erpnext/public/js/hub/marketplace.js +101,You need to be a user with System Manager and Item Manager roles to register on Marketplace.,"Lai reģistrētos vietnē Marketplace, jums ir jābūt lietotājam ar sistēmas pārvaldnieka un vienumu pārvaldnieka lomu."
 DocType: Bank Statement Transaction Payment Item,Mode of Payment,Maksājuma veidu
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py +25,As per your assigned Salary Structure you cannot apply for benefits,"Jūs nevarat pieteikties pabalstu saņemšanai, ņemot vērā jūsu piešķirto algu struktūru"
 apps/erpnext/erpnext/stock/doctype/item/item.py +218,Website Image should be a public file or website URL,Website Image vajadzētu būt publiski failu vai tīmekļa URL
@@ -1992,7 +1991,7 @@ DocType: Vehicle,Fuel UOM,degvielas UOM
 DocType: Warehouse,Warehouse Contact Info,Noliktava Kontaktinformācija
 DocType: Payment Entry,Write Off Difference Amount,Norakstīt starpības summa
 DocType: Volunteer,Volunteer Name,Brīvprātīgo vārds
-apps/erpnext/erpnext/controllers/accounts_controller.py +777,Rows with duplicate due dates in other rows were found: {0},Tika atrastas rindas ar dublējošiem termiņiem citās rindās: {0}
+apps/erpnext/erpnext/controllers/accounts_controller.py +784,Rows with duplicate due dates in other rows were found: {0},Tika atrastas rindas ar dublējošiem termiņiem citās rindās: {0}
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +535,"{0}: Employee email not found, hence email not sent","{0}: Darbinieku e-pasts nav atrasts, līdz ar to e-pasts nav nosūtīts"
 apps/erpnext/erpnext/hr/doctype/leave_encashment/leave_encashment.py +55,No Salary Structure assigned for Employee {0} on given date {1},Darba algas struktūra nav piešķirta darbiniekam {0} noteiktā datumā {1}
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +85,Shipping rule not applicable for country {0},Piegādes noteikumi nav piemērojami valstij {0}
@@ -2083,6 +2082,7 @@ DocType: Appraisal Template Goal,Appraisal Template Goal,Izvērtēšana Template
 DocType: Salary Component,Earning,Nopelnot
 DocType: Supplier Scorecard,Scoring Criteria,Vērtēšanas kritēriji
 DocType: Purchase Invoice,Party Account Currency,Party konta valūta
+DocType: Delivery Trip,Total Estimated Distance,Kopējais aprēķinātais attālums
 ,BOM Browser,BOM Browser
 apps/erpnext/erpnext/templates/emails/training_event.html +13,Please update your status for this training event,"Lūdzu, atjauniniet savu statusu šim mācību pasākumam"
 DocType: Item Barcode,EAN,EAN
@@ -2121,7 +2121,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +104,Appl
 DocType: Activity Cost,Projects,Projekti
 DocType: Payment Request,Transaction Currency,darījuma valūta
 apps/erpnext/erpnext/controllers/buying_controller.py +33,From {0} | {1} {2},No {0} | {1}{2}
-apps/erpnext/erpnext/public/js/hub/marketplace.js +164,Some emails are invalid,Daži e-pasta ziņojumi ir nederīgi
+apps/erpnext/erpnext/public/js/hub/marketplace.js +163,Some emails are invalid,Daži e-pasta ziņojumi ir nederīgi
 DocType: Work Order Operation,Operation Description,Darbība Apraksts
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +34,Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,"Nevar mainīt fiskālā gada sākuma datumu un fiskālā gada beigu datumu, kad saimnieciskais gads ir saglabāts."
 DocType: Quotation,Shopping Cart,Grozs
@@ -2145,7 +2145,7 @@ DocType: Student Admission,Eligibility and Details,Atbilstība un detaļas
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +92,Net Change in Fixed Asset,Neto izmaiņas pamatlīdzekļa
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py +38,Reqd Qty,Reqd Qty
 DocType: Leave Control Panel,Leave blank if considered for all designations,"Atstāt tukšu, ja to uzskata par visiem apzīmējumiem"
-apps/erpnext/erpnext/controllers/accounts_controller.py +876,Charge of type 'Actual' in row {0} cannot be included in Item Rate,"Lādiņš tips ""Faktiskais"" rindā {0} nevar iekļaut postenī Rate"
+apps/erpnext/erpnext/controllers/accounts_controller.py +883,Charge of type 'Actual' in row {0} cannot be included in Item Rate,"Lādiņš tips ""Faktiskais"" rindā {0} nevar iekļaut postenī Rate"
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +531,Max: {0},Max: {0}
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,From Datetime,No DATETIME
 DocType: Shopify Settings,For Company,Par Company
@@ -2159,7 +2159,7 @@ DocType: Material Request,Terms and Conditions Content,Noteikumi un nosacījumi 
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js +18,There were errors creating Course Schedule,"Izveidojot kursu grafiku, radās kļūdas"
 DocType: Department,The first Expense Approver in the list will be set as the default Expense Approver.,Pirmais izdevumu apstiprinātājs sarakstā tiks iestatīts kā noklusējuma izdevumu apstiprinātājs.
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +611,cannot be greater than 100,nevar būt lielāks par 100
-apps/erpnext/erpnext/public/js/hub/marketplace.js +97,You need to be a user other than Administrator with System Manager and Item Manager roles to register on Marketplace.,"Lai reģistrētos vietnē Marketplace, jums ir jābūt lietotājam, kas nav Administrators ar sistēmas pārvaldnieku un vienumu pārvaldnieka lomu."
+apps/erpnext/erpnext/public/js/hub/marketplace.js +96,You need to be a user other than Administrator with System Manager and Item Manager roles to register on Marketplace.,"Lai reģistrētos vietnē Marketplace, jums ir jābūt lietotājam, kas nav Administrators ar sistēmas pārvaldnieku un vienumu pārvaldnieka lomu."
 apps/erpnext/erpnext/stock/doctype/item/item.py +817,Item {0} is not a stock Item,Postenis {0} nav krājums punkts
 DocType: Packing Slip,MAT-PAC-.YYYY.-,MAT-PAC-.YYYY.-
 DocType: Maintenance Visit,Unscheduled,Neplānotā
@@ -2188,7 +2188,7 @@ DocType: Support Search Source,Response Options,Atbildes varianti
 DocType: HR Settings,Employee Settings,Darbinieku iestatījumi
 apps/erpnext/erpnext/templates/pages/integrations/gocardless_checkout.html +13,Loading Payment System,Maksājumu sistēmas ielāde
 ,Batch-Wise Balance History,Partijas-Wise Balance Vēsture
-apps/erpnext/erpnext/controllers/accounts_controller.py +1064,Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.,"Row # {0}: nevar iestatīt vērtējumu, ja summa {1} ir lielāka par rēķināto summu."
+apps/erpnext/erpnext/controllers/accounts_controller.py +1071,Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.,"Row # {0}: nevar iestatīt vērtējumu, ja summa {1} ir lielāka par rēķināto summu."
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +73,Print settings updated in respective print format,Drukas iestatījumi atjaunināti attiecīgajā drukas formātā
 DocType: Package Code,Package Code,Package Kods
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +108,Apprentice,Māceklis
@@ -2422,7 +2422,7 @@ DocType: Manufacturing Settings,Try planning operations for X days in advance.,M
 apps/erpnext/erpnext/hr/doctype/staffing_plan/staffing_plan.py +90,"{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. \
 				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}.","{0} vakanču un {1} budžeta {2}, kas jau ir plānots meitasuzņēmumiem {3}. \ Jūs varat plānot tikai līdz {4} vakanci un budžetu {5} atbilstoši personāla plānam {6} mātesuzņēmumam {3}."
 DocType: HR Settings,Stop Birthday Reminders,Stop Birthday atgādinājumi
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +203,Please set Default Payroll Payable Account in Company {0},Lūdzu noteikt Noklusējuma Algas Kreditoru kontu Uzņēmumu {0}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +207,Please set Default Payroll Payable Account in Company {0},Lūdzu noteikt Noklusējuma Algas Kreditoru kontu Uzņēmumu {0}
 DocType: Amazon MWS Settings,Get financial breakup of Taxes and charges data by Amazon ,Iegūstiet finansiālu sabrukumu par Nodokļiem un nodevām Amazon
 DocType: SMS Center,Receiver List,Uztvērējs Latviešu
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1108,Search Item,Meklēt punkts
@@ -2492,7 +2492,7 @@ apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py +46,"Job Openings for
 DocType: Vital Signs,Constipated,Aizcietējums
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +118,Against Supplier Invoice {0} dated {1},Pret Piegādātāju rēķinu {0} datēts {1}
 DocType: Customer,Default Price List,Default Cenrādis
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +483,Asset Movement record {0} created,Asset Kustība ierakstīt {0} izveidots
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +492,Asset Movement record {0} created,Asset Kustība ierakstīt {0} izveidots
 apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js +175,No items found.,Nav atrasts neviens vienums.
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +51,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,Jūs nevarat izdzēst saimnieciskais gads {0}. Fiskālā gads {0} ir noteikta kā noklusējuma Global iestatījumi
 DocType: Share Transfer,Equity/Liability Account,Pašu kapitāls / Atbildības konts
@@ -2632,6 +2632,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +46,Warehouse {0} can 
 DocType: Blanket Order,Order Type,Order Type
 ,Item-wise Sales Register,Postenis gudrs Sales Reģistrēties
 DocType: Asset,Gross Purchase Amount,Gross Pirkuma summa
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Vienības kods&gt; Vienības grupa&gt; Zīmols
 apps/erpnext/erpnext/utilities/user_progress.py +39,Opening Balances,Atvēršanas atlikumi
 DocType: Asset,Depreciation Method,nolietojums metode
 DocType: Purchase Taxes and Charges,Is this Tax included in Basic Rate?,Vai šis nodoklis iekļauts pamatlikmes?
@@ -2715,7 +2716,7 @@ DocType: Course,Course Abbreviation,Protams saīsinājums
 DocType: Budget,Action if Annual Budget Exceeded on PO,"Darbība, ja gada budžets pārsniegts PO"
 DocType: Student Leave Application,Student Leave Application,Studentu atvaļinājums
 DocType: Item,Will also apply for variants,Attieksies arī uz variantiem
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +288,"Asset cannot be cancelled, as it is already {0}","Asset nevar atcelt, jo tas jau ir {0}"
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +297,"Asset cannot be cancelled, as it is already {0}","Asset nevar atcelt, jo tas jau ir {0}"
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +31,Employee {0} on Half day on {1},Darbinieku {0} uz pusi dienas uz {1}
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +59,Total working hours should not be greater than max working hours {0},Kopējais darba laiks nedrīkst būt lielāks par max darba stundas {0}
 apps/erpnext/erpnext/templates/pages/task_info.html +90,On,Par
@@ -2739,6 +2740,7 @@ DocType: Delivery Settings,Delivery Settings,Piegādes iestatījumi
 apps/erpnext/erpnext/erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js +50,Fetch Data,Ielādēt datus
 apps/erpnext/erpnext/hr/doctype/leave_policy/leave_policy.py +16,Maximum leave allowed in the leave type {0} is {1},Atvaļinājuma maksimālais atvaļinājums veids {0} ir {1}
 DocType: SMS Center,Create Receiver List,Izveidot Uztvērēja sarakstu
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +98,Available-for-use Date should be after purchase date,Pieejams lietošanai Datums vajadzētu būt pēc pirkuma datuma
 DocType: Vehicle,Wheels,Riteņi
 DocType: Packing Slip,To Package No.,Iesaiņot No.
 DocType: Patient Relation,Family,Ģimene
@@ -2752,7 +2754,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +52,Telecommunicat
 apps/erpnext/erpnext/accounts/party.py +292,Billing currency must be equal to either default company's currency or party account currency,Norēķinu valūtai jābūt vienādai ar noklusējuma uzņēmuma valūtas vai partijas konta valūtu
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),"Norāda, ka pakete ir daļa no šīs piegādes (Tikai projekts)"
 DocType: Soil Texture,Loam,Loam
-apps/erpnext/erpnext/controllers/accounts_controller.py +770,Row {0}: Due Date cannot be before posting date,Rinda {0}: maksājuma datums nevar būt pirms izlikšanas datuma
+apps/erpnext/erpnext/controllers/accounts_controller.py +777,Row {0}: Due Date cannot be before posting date,Rinda {0}: maksājuma datums nevar būt pirms izlikšanas datuma
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +37,Make Payment Entry,Izveidot maksājuma Ierakstu
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +129,Quantity for Item {0} must be less than {1},Daudzums postenī {0} nedrīkst būt mazāks par {1}
 ,Sales Invoice Trends,PPR tendences
@@ -2825,7 +2827,7 @@ apps/erpnext/erpnext/hr/doctype/shift_request/shift_request.py +68,Employee {0} 
 DocType: Guardian,Guardian Interests,Guardian intereses
 apps/erpnext/erpnext/accounts/doctype/account/account.js +45,Update Account Name / Number,Atjauniniet konta nosaukumu / numuru
 DocType: Naming Series,Current Value,Pašreizējā vērtība
-apps/erpnext/erpnext/controllers/accounts_controller.py +321,Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year,Vairāki fiskālie gadi pastāv dienas {0}. Lūdzu noteikt uzņēmuma finanšu gads
+apps/erpnext/erpnext/controllers/accounts_controller.py +328,Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year,Vairāki fiskālie gadi pastāv dienas {0}. Lūdzu noteikt uzņēmuma finanšu gads
 DocType: Education Settings,Instructor Records to be created by,"Instruktoru ieraksti, ko izveido"
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +229,{0} created,{0} izveidots
 DocType: GST Account,GST Account,GST konts
@@ -2842,7 +2844,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +394,Amount
 DocType: Sales Person,Name and Employee ID,Darbinieka Vārds un ID
 apps/erpnext/erpnext/accounts/party.py +338,Due Date cannot be before Posting Date,Due Date nevar būt pirms nosūtīšanas datums
 DocType: Website Item Group,Website Item Group,Mājas lapa Prece Group
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +546,No salary slip found to submit for the above selected criteria OR salary slip already submitted,"Nav atalgojuma slīdes, kas iesniegts iepriekš norādītajiem kritērijiem VAI jau iesniegtās algu kvītis"
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +550,No salary slip found to submit for the above selected criteria OR salary slip already submitted,"Nav atalgojuma slīdes, kas iesniegts iepriekš norādītajiem kritērijiem VAI jau iesniegtās algu kvītis"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +160,Duties and Taxes,Nodevas un nodokļi
 DocType: Projects Settings,Projects Settings,Projektu iestatījumi
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +392,Please enter Reference date,Ievadiet Atsauces datums
@@ -2851,7 +2853,7 @@ DocType: Item Website Specification,Table for Item that will be shown in Web Sit
 DocType: Purchase Order Item Supplied,Supplied Qty,Piegādāto Daudz
 DocType: Clinical Procedure,HLC-CPR-.YYYY.-,HLC-CPR-.YYYY.-
 DocType: Purchase Order Item,Material Request Item,Materiāls Pieprasījums postenis
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +294,Please cancel Purchase Receipt {0} first,Vispirms atceļiet pirkuma kvīti {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +303,Please cancel Purchase Receipt {0} first,Vispirms atceļiet pirkuma kvīti {0}
 apps/erpnext/erpnext/config/selling.py +75,Tree of Item Groups.,Koks poz grupu.
 DocType: Production Plan,Total Produced Qty,Kopējā produkta daudzums
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +190,Cannot refer row number greater than or equal to current row number for this Charge type,Nevar atsaukties rindu skaits ir lielāks par vai vienāds ar pašreizējo rindu skaitu šim Charge veida
@@ -2962,6 +2964,7 @@ DocType: Purchase Order,Delivered,Pasludināts
 ,Vehicle Expenses,transportlīdzekļu Izdevumi
 DocType: Healthcare Settings,Create Lab Test(s) on Sales Invoice Submit,Izveidot lab testu (-s) par pārdošanas rēķinu iesniegšanu
 DocType: Serial No,Invoice Details,Informācija par rēķinu
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +70,Please enable Google Maps Settings to estimate and optimize routes,"Lūdzu, iespējojiet Google Maps iestatījumus, lai novērtētu un optimizētu maršrutus"
 DocType: Grant Application,Show on Website,Rādīt vietnē
 apps/erpnext/erpnext/education/doctype/student_admission/templates/student_admission.html +29,Start on,Sāciet
 DocType: Hub Tracked Item,Hub Category,Hub kategorijas
@@ -3002,7 +3005,7 @@ DocType: Patient,Patient Details,Pacienta detaļas
 DocType: Inpatient Record,B Positive,B Pozitīvs
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py +31,"Maximum benefit of employee {0} exceeds {1} by the sum {2} of previous claimed\
 			amount",Maksimālais darba ņēmēja pabalsts {0} pārsniedz {1} no summas {2} no iepriekšējās pieprasītās summas
-apps/erpnext/erpnext/controllers/accounts_controller.py +655,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Row # {0}: Daudz jābūt 1, jo prece ir pamatlīdzeklis. Lūdzu, izmantojiet atsevišķu rindu daudzkārtējai qty."
+apps/erpnext/erpnext/controllers/accounts_controller.py +662,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Row # {0}: Daudz jābūt 1, jo prece ir pamatlīdzeklis. Lūdzu, izmantojiet atsevišķu rindu daudzkārtējai qty."
 DocType: Leave Block List Allow,Leave Block List Allow,Atstājiet Block Latviešu Atļaut
 apps/erpnext/erpnext/setup/doctype/company/company.py +349,Abbr can not be blank or space,Abbr nevar būt tukšs vai telpa
 DocType: Patient Medical Record,Patient Medical Record,Pacienta medicīniskais ieraksts
@@ -3037,7 +3040,7 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Workstation,Wages per hour,Algas stundā
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Krājumu atlikumu partijā {0} kļūs negatīvs {1} postenī {2} pie Warehouse {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,"Šāds materiāls Pieprasījumi tika automātiski izvirzīts, balstoties uz posteni atjaunotne pasūtījuma līmenī"
-apps/erpnext/erpnext/controllers/accounts_controller.py +361,Account {0} is invalid. Account Currency must be {1},Konts {0} ir nederīgs. Konta valūta ir {1}
+apps/erpnext/erpnext/controllers/accounts_controller.py +368,Account {0} is invalid. Account Currency must be {1},Konts {0} ir nederīgs. Konta valūta ir {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py +31,From Date {0} cannot be after employee's relieving Date {1},No Datuma {0} nevar būt pēc darbinieku atlaišanas Datums {1}
 DocType: Supplier,Is Internal Supplier,Iekšējais piegādātājs
 DocType: Employee,Create User Permission,Izveidot lietotāja atļauju
@@ -3183,7 +3186,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +400,{0} ag
 DocType: Account,Fixed Asset,Pamatlīdzeklis
 DocType: Amazon MWS Settings,After Date,Pēc datuma
 apps/erpnext/erpnext/config/stock.py +327,Serialized Inventory,Serializēja inventarizācija
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1176,Invalid {0} for Inter Company Invoice.,Nederīgs {0} Inter uzņēmuma rēķins.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1173,Invalid {0} for Inter Company Invoice.,Nederīgs {0} Inter uzņēmuma rēķins.
 ,Department Analytics,Departamenta analīze
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py +74,Email not found in default contact,E-pasta adrese nav atrasta noklusējuma kontā
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js +23,Generate Secret,Izveidot slepenu
@@ -3196,7 +3199,7 @@ DocType: Sales Invoice,Total Billing Amount,Kopā Norēķinu summa
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.py +50,Program in the Fee Structure and Student Group {0} are different.,Maksas struktūras un studentu grupas {0} programmas atšķiras.
 DocType: Bank Statement Transaction Entry,Receivable Account,Debitoru konts
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.py +31,Valid From Date must be lesser than Valid Upto Date.,Derīga no datuma ir mazāka nekā derīga līdz datumam.
-apps/erpnext/erpnext/controllers/accounts_controller.py +673,Row #{0}: Asset {1} is already {2},Row # {0}: Asset {1} jau {2}
+apps/erpnext/erpnext/controllers/accounts_controller.py +680,Row #{0}: Asset {1} is already {2},Row # {0}: Asset {1} jau {2}
 DocType: Quotation Item,Stock Balance,Stock Balance
 apps/erpnext/erpnext/config/selling.py +327,Sales Order to Payment,Sales Order to Apmaksa
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +111,CEO,CEO
@@ -3238,6 +3241,7 @@ DocType: Stock Entry,Total Incoming Value,Kopā Ienākošais vērtība
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +434,Debit To is required,Debets ir nepieciešama
 DocType: Clinical Procedure,Inpatient Record,Stacionārais ieraksts
 apps/erpnext/erpnext/utilities/activation.py +109,"Timesheets help keep track of time, cost and billing for activites done by your team","Timesheets palīdz sekot līdzi laika, izmaksu un rēķinu par aktivitātēm, ko veic savu komandu"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +181,Supplier &gt; Supplier Type,Piegādātājs&gt; Piegādātāja tips
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +41,Purchase Price List,Pirkuma Cenrādis
 apps/erpnext/erpnext/accounts/report/tds_payable_monthly/tds_payable_monthly.py +164,Date of Transaction,Darījuma datums
 apps/erpnext/erpnext/config/buying.py +155,Templates of supplier scorecard variables.,Piegādes rezultātu tabulas mainīgie modeļi.
@@ -3281,7 +3285,7 @@ apps/erpnext/erpnext/config/integrations.py +13,GoCardless payment gateway setti
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +129,Exchange Gain/Loss,Exchange Gain / zaudējumi
 DocType: Opportunity,Lost Reason,Zaudēja Iemesls
 DocType: Amazon MWS Settings,Enable Amazon,Iespējot Amazon
-apps/erpnext/erpnext/controllers/accounts_controller.py +312,Row #{0}: Account {1} does not belong to company {2},Row # {0}: konts {1} nepieder uzņēmumam {2}
+apps/erpnext/erpnext/controllers/accounts_controller.py +319,Row #{0}: Account {1} does not belong to company {2},Row # {0}: konts {1} nepieder uzņēmumam {2}
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +30,Unable to find DocType {0},Nevar atrast DocType {0}
 apps/erpnext/erpnext/public/js/templates/address_list.html +22,New Address,Jaunā adrese
 DocType: Quality Inspection,Sample Size,Izlases lielums
@@ -3393,7 +3397,7 @@ DocType: Travel Request,Any other details,Jebkura cita informācija
 DocType: Water Analysis,Origin,Izcelsme
 apps/erpnext/erpnext/controllers/status_updater.py +207,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,Šis dokuments ir pāri robežai ar {0} {1} par posteni {4}. Jūs padarīt vēl {3} pret pats {2}?
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1216,Please set recurring after saving,Lūdzu noteikt atkārtojas pēc glābšanas
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +877,Select change amount account,Izvēlieties Mainīt summu konts
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +874,Select change amount account,Izvēlieties Mainīt summu konts
 DocType: Purchase Invoice,Price List Currency,Cenrādis Currency
 DocType: Naming Series,User must always select,Lietotājam ir vienmēr izvēlēties
 DocType: Stock Settings,Allow Negative Stock,Atļaut negatīvs Stock
@@ -3435,7 +3439,7 @@ DocType: BOM Item,Item operation,Vienuma darbība
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +327,Are you sure you want to cancel this appointment?,Vai tiešām vēlaties atcelt šo tikšanos?
 DocType: Hotel Room Pricing Package,Hotel Room Pricing Package,Viesnīcas numuru cenas pakete
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.js +42,Sales Pipeline,Sales Pipeline
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +163,Please set default account in Salary Component {0},Lūdzu iestatīt noklusēto kontu Algu komponentes {0}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +167,Please set default account in Salary Component {0},Lūdzu iestatīt noklusēto kontu Algu komponentes {0}
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html +7,Required On,Nepieciešamais On
 DocType: Rename Tool,File to Rename,Failu pārdēvēt
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +200,Please select BOM for Item in Row {0},"Lūdzu, izvēlieties BOM par posteni rindā {0}"
@@ -3456,7 +3460,7 @@ apps/erpnext/erpnext/hr/doctype/leave_encashment/leave_encashment.py +24,You can
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Cost of Purchased Items,Izmaksas iegādātās preces
 DocType: Employee Separation,Employee Separation Template,Darbinieku nošķiršanas veidne
 DocType: Selling Settings,Sales Order Required,Pasūtījumu Nepieciešamais
-apps/erpnext/erpnext/public/js/hub/marketplace.js +107,Become a Seller,Kļūstiet par Pārdevēju
+apps/erpnext/erpnext/public/js/hub/marketplace.js +106,Become a Seller,Kļūstiet par Pārdevēju
 DocType: Purchase Invoice,Credit To,Kredīts Lai
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +33,Active Leads / Customers,Aktīvās pievadi / Klienti
 DocType: Delivery Settings,Leave blank to use the standard Delivery Note format,"Atstājiet tukšu, lai izmantotu standarta piegādes piezīmes formātu"
@@ -3498,7 +3502,7 @@ apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +76,View Fee
 apps/erpnext/erpnext/setup/doctype/company/company.js +55,Make Tax Template,Veidojiet nodokļu veidlapu
 apps/erpnext/erpnext/public/js/conf.js +28,User Forum,lietotāju forums
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +328,Raw Materials cannot be blank.,Izejvielas nevar būt tukšs.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1032,Row #{0} (Payment Table): Amount must be negative,Rinda # {0} (Maksājumu tabula): summai jābūt negatīvai
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1029,Row #{0} (Payment Table): Amount must be negative,Rinda # {0} (Maksājumu tabula): summai jābūt negatīvai
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +570,"Could not update stock, invoice contains drop shipping item.","Nevarēja atjaunināt sastāvu, rēķins ir piliens kuģniecības objektu."
 DocType: Contract,Fulfilment Status,Izpildes statuss
 DocType: Lab Test Sample,Lab Test Sample,Laba testa paraugs
@@ -3638,7 +3642,7 @@ DocType: Purchase Receipt Item,Recd Quantity,Recd daudzums
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +170,Doc Date,Doc Datums
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +64,Fee Records Created - {0},Maksa Records Izveidoja - {0}
 DocType: Asset Category Account,Asset Category Account,Asset kategorija konts
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1027,Row #{0} (Payment Table): Amount must be positive,Row # {0} (Maksājumu tabula): summai jābūt pozitīvai
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1024,Row #{0} (Payment Table): Amount must be positive,Row # {0} (Maksājumu tabula): summai jābūt pozitīvai
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +137,Cannot produce more Item {0} than Sales Order quantity {1},Nevar ražot vairāk Vienību {0} nekā Pasūtījumu daudzums {1}
 apps/erpnext/erpnext/stock/doctype/item/item.js +440,Select Attribute Values,Atlasiet Atribūtu vērtības
 DocType: Purchase Invoice,Reason For Issuing document,Iemesls dokumentu izsniegšanai
@@ -3693,7 +3697,7 @@ DocType: Salary Structure,Total Earning,Kopā krāšana
 DocType: Purchase Receipt,Time at which materials were received,"Laiks, kurā materiāli tika saņemti"
 DocType: Products Settings,Products per Page,Produkti uz lapu
 DocType: Stock Ledger Entry,Outgoing Rate,Izejošais Rate
-apps/erpnext/erpnext/controllers/accounts_controller.py +362, or ,vai
+apps/erpnext/erpnext/controllers/accounts_controller.py +369, or ,vai
 DocType: Sales Order,Billing Status,Norēķinu statuss
 apps/erpnext/erpnext/public/js/conf.js +32,Report an Issue,Ziņojiet par problēmu
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +127,Utility Expenses,Utility Izdevumi
@@ -3721,7 +3725,6 @@ DocType: Complaint,Complaints,Sūdzības
 DocType: Employee Tax Exemption Declaration,Employee Tax Exemption Declaration,Darbinieku atbrīvojuma no nodokļiem deklarācija
 DocType: Payment Entry,Cheque/Reference Date,Čeks / Reference Date
 DocType: Purchase Invoice,Total Taxes and Charges,Kopā nodokļi un maksājumi
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +89,Available-for-use Date is entered as past date,Pieejamais lietojuma datums tiek ierakstīts kā pagājis datums
 DocType: Employee,Emergency Contact,Avārijas Contact
 DocType: Bank Reconciliation Detail,Payment Entry,maksājumu Entry
 ,sales-browser,pārdošanas pārlūkprogrammu
@@ -3768,6 +3771,7 @@ apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depr
 DocType: Sales Invoice,Is Return (Credit Note),Vai atdeve (kredītrēķins)
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.js +26,Start Job,Sākt darbu
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py +32,Serial no is required for the asset {0},Aktīvai ir nepieciešama sērijas Nr. {0}
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +212,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Lūdzu, iestatiet Nosaukumu sēriju {0}, izmantojot iestatījumu&gt; Iestatījumi&gt; Nosaukumu sērija"
 apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py +43,Disabled template must not be default template,Invalīdu veidni nedrīkst noklusējuma veidni
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py +290,For row {0}: Enter planned qty,Rindai {0}: ievadiet plānoto daudzumu
 DocType: Account,Income Account,Ienākumu konta
@@ -3781,6 +3785,7 @@ DocType: Sales Invoice,ACC-SINV-.YYYY.-,ACC-SINV-.YYYY.-
 DocType: Loyalty Program,Help Section,Palīdzības sadaļa
 apps/erpnext/erpnext/templates/generators/item_group.html +26,Prev,Iepriekšējā
 DocType: Appraisal Goal,Key Responsibility Area,Key Atbildība Platība
+DocType: Delivery Trip,Distance UOM,Attālums UOM
 apps/erpnext/erpnext/utilities/activation.py +127,"Student Batches help you track attendance, assessments and fees for students","Studentu Partijas palīdzēs jums izsekot apmeklējumu, slēdzienus un maksu studentiem"
 DocType: Payment Entry,Total Allocated Amount,Kopējā piešķirtā summa
 apps/erpnext/erpnext/setup/doctype/company/company.py +163,Set default inventory account for perpetual inventory,Iestatīt noklusējuma inventāra veido pastāvīgās uzskaites
@@ -3822,7 +3827,7 @@ apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js +114,Pr
 DocType: Item Supplier,Item Supplier,Postenis piegādātājs
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1317,Please enter Item Code to get batch no,"Ievadiet posteņu kodu, lai iegūtu partiju nē"
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +928,Please select a value for {0} quotation_to {1},"Lūdzu, izvēlieties vērtību {0} quotation_to {1}"
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +432,No Items selected for transfer,Pārvietošanai nav atlasīts neviens vienums
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +435,No Items selected for transfer,Pārvietošanai nav atlasīts neviens vienums
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,Visas adreses.
 DocType: Company,Stock Settings,Akciju iestatījumi
 apps/erpnext/erpnext/accounts/doctype/account/account.py +244,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","Apvienošana ir iespējama tikai tad, ja šādas īpašības ir vienādas abos ierakstos. Vai Group, Root Type, Uzņēmuma"
@@ -4108,7 +4113,7 @@ DocType: Student Log,Academic,akadēmisks
 DocType: Patient,Personal and Social History,Personiskā un sociālā vēsture
 apps/erpnext/erpnext/education/doctype/guardian/guardian.py +51,User {0} created,Lietotājs {0} izveidots
 DocType: Fee Schedule,Fee Breakup for each student,Maksas sadalījums katram studentam
-apps/erpnext/erpnext/controllers/accounts_controller.py +601,Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2}),Kopā avanss ({0}) pret rīkojuma {1} nevar būt lielāks par kopsummā ({2})
+apps/erpnext/erpnext/controllers/accounts_controller.py +608,Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2}),Kopā avanss ({0}) pret rīkojuma {1} nevar būt lielāks par kopsummā ({2})
 DocType: Sales Partner,Select Monthly Distribution to unevenly distribute targets across months.,Izvēlieties Mēneša Distribution nevienmērīgi izplatīt mērķus visā mēnešiem.
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure_template/clinical_procedure_template.js +88,Change Code,Mainīt kodu
 DocType: Purchase Invoice Item,Valuation Rate,Vērtēšanas Rate
@@ -4117,7 +4122,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +546,Price List Currency not sele
 DocType: Purchase Invoice,Availed ITC Cess,Izmantojis ITC Sess
 ,Student Monthly Attendance Sheet,Student Mēneša Apmeklējumu lapa
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +96,Shipping rule only applicable for Selling,Piegādes noteikums attiecas tikai uz Pārdošanu
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +210,Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date,Nolietojuma rinda {0}: Nākamais nolietojuma datums nevar būt pirms pirkuma datuma
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +219,Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date,Nolietojuma rinda {0}: Nākamais nolietojuma datums nevar būt pirms pirkuma datuma
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Projekta sākuma datums
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +36,Until,Līdz
 DocType: Rename Tool,Rename Log,Pārdēvēt Ieiet
@@ -4135,12 +4140,10 @@ DocType: Assessment Result Tool,Result HTML,rezultāts HTML
 DocType: Selling Settings,How often should project and company be updated based on Sales Transactions.,"Cik bieži ir jāuzlabo projekts un uzņēmums, pamatojoties uz pārdošanas darījumiem."
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +35,Expires On,Beigu termiņš
 apps/erpnext/erpnext/utilities/activation.py +117,Add Students,Pievienot Students
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Lūdzu, izdzēsiet Darbinieku <a href=""#Form/Employee/{0}"">{0}</a> \, lai atceltu šo dokumentu"
 apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_exemption_declaration.js +18,Please select {0},"Lūdzu, izvēlieties {0}"
 DocType: C-Form,C-Form No,C-Form Nr
 DocType: BOM,Exploded_items,Exploded_items
-apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +346,Distance,Attālums
+DocType: Delivery Stop,Distance,Attālums
 apps/erpnext/erpnext/utilities/user_progress.py +139,List your products or services that you buy or sell.,"Ierakstiet savus produktus vai pakalpojumus, kurus jūs pērkat vai pārdodat."
 DocType: Water Analysis,Storage Temperature,Uzglabāšanas temperatūra
 DocType: Sales Order,SAL-ORD-.YYYY.-,SAL-ORD-.YYYY.-
@@ -4167,7 +4170,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +398,Serial No {0} cre
 DocType: Homepage,Company Description for website homepage,Uzņēmuma apraksts mājas lapas sākumlapā
 DocType: Item Customer Detail,"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Par ērtības klientiem, šie kodi var izmantot drukas formātos, piemēram, rēķinos un pavadzīmēs"
 apps/erpnext/erpnext/accounts/report/purchase_order_items_to_be_billed/purchase_order_items_to_be_billed.py +18,Suplier Name,suplier Name
-apps/erpnext/erpnext/accounts/report/financial_statements.py +175,Could not retrieve information for {0}.,Nevarēja izgūt informāciju par {0}.
+apps/erpnext/erpnext/accounts/report/financial_statements.py +177,Could not retrieve information for {0}.,Nevarēja izgūt informāciju par {0}.
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +141,Opening Entry Journal,Atklāšanas ierakstu žurnāls
 DocType: Contract,Fulfilment Terms,Izpildes noteikumi
 DocType: Sales Invoice,Time Sheet List,Time Sheet saraksts
@@ -4350,7 +4353,7 @@ DocType: Serial No,Warranty / AMC Details,Garantijas / AMC Details
 apps/erpnext/erpnext/education/doctype/student_group/student_group.js +119,Select students manually for the Activity based Group,Izvēlieties studenti manuāli Grupas darbības balstītas
 apps/erpnext/erpnext/education/doctype/student_group/student_group.js +119,Select students manually for the Activity based Group,Izvēlieties studenti manuāli Grupas darbības balstītas
 DocType: Journal Entry,User Remark,Lietotājs Piezīme
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +85,Optimizing routes.,Maršrutu optimizācija.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +95,Optimizing routes.,Maršrutu optimizācija.
 DocType: Travel Itinerary,Non Diary,Ne dienasgrāmata
 apps/erpnext/erpnext/hr/doctype/retention_bonus/retention_bonus.py +14,Cannot create Retention Bonus for left Employees,Nevar izveidot atlikušo darbinieku saglabāšanas bonusu
 DocType: Lead,Market Segment,Tirgus segmentā
@@ -4381,7 +4384,7 @@ DocType: Amazon MWS Settings,Synch Products,Synch Produkti
 DocType: Loyalty Point Entry,Loyalty Program,Lojalitātes programma
 DocType: Student Guardian,Father,tēvs
 apps/erpnext/erpnext/crm/report/lead_conversion_time/lead_conversion_time.py +59,Support Tickets,Atbalsta biļetes
-apps/erpnext/erpnext/controllers/accounts_controller.py +687,'Update Stock' cannot be checked for fixed asset sale,&quot;Update Stock&quot; nevar pārbaudīta pamatlīdzekļu pārdošana
+apps/erpnext/erpnext/controllers/accounts_controller.py +694,'Update Stock' cannot be checked for fixed asset sale,&quot;Update Stock&quot; nevar pārbaudīta pamatlīdzekļu pārdošana
 DocType: Bank Reconciliation,Bank Reconciliation,Banku samierināšanās
 DocType: Attendance,On Leave,Atvaļinājumā
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,Saņemt atjauninājumus
@@ -4426,7 +4429,7 @@ DocType: Location,Check if it is a hydroponic unit,"Pārbaudiet, vai tā ir hidr
 apps/erpnext/erpnext/config/stock.py +112,Serial No and Batch,Sērijas Nr un partijas
 DocType: Warranty Claim,From Company,No Company
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py +40,Sum of Scores of Assessment Criteria needs to be {0}.,Summa rādītājus vērtēšanas kritēriju jābūt {0}.
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +198,Please set Number of Depreciations Booked,Lūdzu noteikts skaits nolietojuma Rezervēts
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +207,Please set Number of Depreciations Booked,Lūdzu noteikts skaits nolietojuma Rezervēts
 DocType: Supplier Scorecard Period,Calculations,Aprēķini
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +86,Value or Qty,Vērtība vai Daudz
 DocType: Payment Terms Template,Payment Terms,Maksājuma nosacījumi
@@ -4446,7 +4449,7 @@ DocType: Sales Invoice Item,Discount (%) on Price List Rate with Margin,Atlaide 
 DocType: Sales Invoice Item,Discount (%) on Price List Rate with Margin,Atlaide (%) par Cenrādis likmi ar Margin
 DocType: Healthcare Service Unit Type,Rate / UOM,Rate / UOM
 apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py +59,All Warehouses,Visas Noliktavas
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1306,No {0} found for Inter Company Transactions.,Netika atrasta neviena {0} starpuzņēmuma Darījumu gadījumā.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1303,No {0} found for Inter Company Transactions.,Netika atrasta neviena {0} starpuzņēmuma Darījumu gadījumā.
 DocType: Travel Itinerary,Rented Car,Izīrēts auto
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js +15,About your Company,Par jūsu uzņēmumu
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +144,Credit To account must be a Balance Sheet account,Kredīts kontā jābūt bilance konts
@@ -4548,6 +4551,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +45,"Even if 
 DocType: Plant Analysis Criteria,Plant Analysis Criteria,Augu analīzes kritēriji
 DocType: Cheque Print Template,Cheque Height,Čeku augstums
 DocType: Supplier,Supplier Details,Piegādātājs Details
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +89,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Lūdzu, uzstādiet apmeklētāju numerācijas sēriju, izmantojot iestatīšanas&gt; numerācijas sēriju"
 DocType: Setup Progress,Setup Progress,Iestatīšanas progress
 DocType: Expense Claim,Approval Status,Apstiprinājums statuss
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +35,From value must be less than to value in row {0},No vērtība nedrīkst būt mazāka par to vērtību rindā {0}
@@ -4641,7 +4645,6 @@ DocType: Assessment Plan,Assessment Plan,novērtējums Plan
 DocType: Travel Request,Fully Sponsored,Pilnībā sponsorēts
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +28,Reverse Journal Entry,Reversās žurnāla ieraksts
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py +90,Customer {0} is created.,Klients {0} ir izveidots.
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Lūdzu, izveidojiet darbinieku nosaukumu sistēmu cilvēkresursu vadībā&gt; Personāla iestatījumi"
 DocType: Stock Settings,Limit Percent,Limit Percent
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +82, Currently no stock available in any warehouse,Pašlaik nav nevienas noliktavas noliktavā
 ,Payment Period Based On Invoice Date,"Samaksa periodā, pamatojoties uz rēķina datuma"
@@ -4700,7 +4703,7 @@ DocType: Appointment Type,Default Duration,Noklusējuma ilgums
 DocType: BOM Explosion Item,Source Warehouse,Source Noliktava
 DocType: Installation Note,Installation Date,Uzstādīšana Datums
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js +30,Share Ledger,Akciju pārvaldnieks
-apps/erpnext/erpnext/controllers/accounts_controller.py +661,Row #{0}: Asset {1} does not belong to company {2},Row # {0}: Asset {1} nepieder uzņēmumam {2}
+apps/erpnext/erpnext/controllers/accounts_controller.py +668,Row #{0}: Asset {1} does not belong to company {2},Row # {0}: Asset {1} nepieder uzņēmumam {2}
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js +114,Sales Invoice {0} created,Tirdzniecības rēķins {0} izveidots
 DocType: Employee,Confirmation Date,Apstiprinājums Datums
 DocType: Inpatient Occupancy,Check Out,Izbraukšana
@@ -4720,6 +4723,7 @@ DocType: Lead,Lead Owner,Lead Īpašnieks
 DocType: Production Plan,Sales Orders Detail,Pārdošanas pasūtījumu detalizēts apraksts
 DocType: Bin,Requested Quantity,Pieprasītā daudzums
 DocType: Fees,EDU-FEE-.YYYY.-,EDU-FEE-.YYYY.-
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Lūdzu, uzstādiet Instruktoru nosaukumu sistēmu izglītībā&gt; Izglītības iestatījumi"
 DocType: Patient,Marital Status,Ģimenes statuss
 DocType: Stock Settings,Auto Material Request,Auto Materiāls Pieprasījums
 DocType: Woocommerce Settings,API consumer secret,API patērētāju noslēpums
@@ -4772,7 +4776,7 @@ DocType: Purchase Invoice,Terms,Noteikumi
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js +10,Select Days,Izvēlieties dienas
 DocType: Academic Term,Term Name,Termina nosaukums
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +365,Credit ({0}),Kredīts ({0})
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +499,Creating Salary Slips...,Algu likmju radīšana ...
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +503,Creating Salary Slips...,Algu likmju radīšana ...
 apps/erpnext/erpnext/hr/doctype/department/department.js +14,You cannot edit root node.,Jūs nevarat rediģēt saknes mezglu.
 DocType: Buying Settings,Purchase Order Required,Pasūtījuma Obligātas
 apps/erpnext/erpnext/public/js/projects/timer.js +5,Timer,Taimeris
@@ -4810,7 +4814,7 @@ DocType: Lab Test Template,Standard Selling Rate,Standard pārdošanas kurss
 DocType: Account,Rate at which this tax is applied,"Ātrums, kādā tiek piemērots šis nodoklis"
 DocType: Cash Flow Mapper,Section Name,Sadaļas nosaukums
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +92,Reorder Qty,Pārkārtot Daudz
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +283,Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1},Nolietojuma rinda {0}: paredzamā vērtība pēc lietderīgās lietošanas laika ir lielāka vai vienāda ar {1}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +292,Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1},Nolietojuma rinda {0}: paredzamā vērtība pēc lietderīgās lietošanas laika ir lielāka vai vienāda ar {1}
 apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py +55,Current Job Openings,Pašreizējās vakanču
 DocType: Company,Stock Adjustment Account,Stock konta korekcijas
 apps/erpnext/erpnext/public/js/payment/pos_payment.html +17,Write Off,Uzrakstiet Off
@@ -4857,7 +4861,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +611,Please
 DocType: Program Enrollment,School House,School House
 DocType: Serial No,Out of AMC,Out of AMC
 DocType: Opportunity,Opportunity Amount,Iespējas summa
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +203,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,Skaits nolietojuma kartīti nedrīkst būt lielāks par kopskaita nolietojuma
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +212,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,Skaits nolietojuma kartīti nedrīkst būt lielāks par kopskaita nolietojuma
 DocType: Purchase Order,Order Confirmation Date,Pasūtījuma apstiprinājuma datums
 DocType: Driver,HR-DRI-.YYYY.-,HR-DRI-.YYYY.-
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,Izveidot tehniskās apkopes vizīti
@@ -4898,7 +4902,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.js +39,Timesheet,Laika uzskaites
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html +243,Batch: ,Partija:
 DocType: Volunteer,Afternoon,Pēcpusdiena
 DocType: Loyalty Program,Loyalty Program Help,Lojalitātes programmas palīdzība
-apps/erpnext/erpnext/controllers/accounts_controller.py +305,{0} '{1}' is disabled,{0} '{1}' ir neaktīvs
+apps/erpnext/erpnext/controllers/accounts_controller.py +312,{0} '{1}' is disabled,{0} '{1}' ir neaktīvs
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +13,Set as Open,Uzstādīt kā Atvērt
 DocType: Cheque Print Template,Scanned Cheque,Skanētie Čeku
 DocType: Notification Control,Send automatic emails to Contacts on Submitting transactions.,Nosūtīt automātisko e-pastus kontaktiem Iesniedzot darījumiem.
@@ -4911,7 +4915,7 @@ DocType: Purchase Order,Customer Contact Email,Klientu Kontakti Email
 DocType: Warranty Claim,Item and Warranty Details,Elements un Garantija Details
 DocType: Chapter,Chapter Members,Nodaļas locekļi
 DocType: Sales Team,Contribution (%),Ieguldījums (%)
-apps/erpnext/erpnext/controllers/accounts_controller.py +133,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"Piezīme: Maksājumu ievades netiks izveidota, jo ""naudas vai bankas konts"" netika norādīta"
+apps/erpnext/erpnext/controllers/accounts_controller.py +140,Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"Piezīme: Maksājumu ievades netiks izveidota, jo ""naudas vai bankas konts"" netika norādīta"
 apps/erpnext/erpnext/projects/doctype/project/project.py +79,Project {0} already exists,Projekts {0} jau eksistē
 DocType: Clinical Procedure,Nursing User,Aprūpes lietotājs
 DocType: Employee Benefit Application,Payroll Period,Algas periods
@@ -4919,6 +4923,8 @@ DocType: Plant Analysis,Plant Analysis Criterias,Augu analīzes kritēriji
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +239,Serial No {0} does not belong to Batch {1},Sērijas numurs {0} nepieder partijai {1}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +220,Responsibilities,Pienākumi
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +125,Validity period of this quotation has ended.,Šīs kotācijas derīguma termiņš ir beidzies.
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +53,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Lūdzu, izdzēsiet Darbinieku <a href=""#Form/Employee/{0}"">{0}</a> \, lai atceltu šo dokumentu"
 DocType: Expense Claim Account,Expense Claim Account,Izdevumu Prasība konts
 DocType: Account,Capital Work in Progress,Kapitālais darbs notiek
 DocType: Accounts Settings,Allow Stale Exchange Rates,Atļaut mainīt valūtas kursus
@@ -5000,7 +5006,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +9,Airline,Aviokom
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +878,Issue Material,Jautājums Materiāls
 apps/erpnext/erpnext/config/integrations.py +32,Connect Shopify with ERPNext,Savienojiet Shopify ar ERPNext
 DocType: Material Request Item,For Warehouse,Noliktavai
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +45,Delivery Notes {0} updated,Piegādes piezīmes {0} ir atjauninātas
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +71,Delivery Notes {0} updated,Piegādes piezīmes {0} ir atjauninātas
 DocType: Employee,Offer Date,Piedāvājuma Datums
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py +35,Quotations,Citāti
 apps/erpnext/erpnext/accounts/page/pos/pos.js +742,You are in offline mode. You will not be able to reload until you have network.,"Jūs esat bezsaistes režīmā. Jūs nevarēsiet, lai pārlādētu, kamēr jums ir tīkls."
@@ -5050,7 +5056,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +747,Default Unit of Measure for
 DocType: Shipping Rule,Calculate Based On,"Aprēķināt, pamatojoties uz"
 DocType: Contract,Unfulfilled,Nepiepildīts
 DocType: Delivery Note Item,From Warehouse,No Noliktavas
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +64,No employees for the mentioned criteria,Nav minētu kritēriju darbinieku
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +68,No employees for the mentioned criteria,Nav minētu kritēriju darbinieku
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1030,No Items with Bill of Materials to Manufacture,Nav Preces ar Bill materiālu ražošana
 DocType: Shopify Settings,Default Customer,Noklusējuma klients
 DocType: Sales Stage,Stage Name,Skatuves vārds
@@ -5093,7 +5099,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,Nodokļu summa pēc Atlaide Summa
 DocType: Patient,Inpatient Status,Stacionārs statuss
 DocType: Daily Work Summary Settings,Daily Work Summary Settings,Ikdienas darba kopsavilkums Settings
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1301,Selected Price List should have buying and selling fields checked.,Izvēlētajā cenrāžā jāpārbauda pirkšanas un pārdošanas lauki.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1298,Selected Price List should have buying and selling fields checked.,Izvēlētajā cenrāžā jāpārbauda pirkšanas un pārdošanas lauki.
 apps/erpnext/erpnext/controllers/buying_controller.py +681,Please enter Reqd by Date,"Lūdzu, ievadiet Reqd pēc datuma"
 DocType: Payment Entry,Internal Transfer,iekšējā Transfer
 DocType: Asset Maintenance,Maintenance Tasks,Apkopes uzdevumi
@@ -5130,7 +5136,7 @@ apps/erpnext/erpnext/templates/generators/item.html +96,Add to Cart,Pievienot gr
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +197,Group By,Group By
 DocType: Guardian,Interests,intereses
 apps/erpnext/erpnext/config/accounts.py +336,Enable / disable currencies.,Ieslēgt / izslēgt valūtas.
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +549,Could not submit some Salary Slips,Nevarēja iesniegt kādu atalgojuma slīdni
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +553,Could not submit some Salary Slips,Nevarēja iesniegt kādu atalgojuma slīdni
 DocType: Exchange Rate Revaluation,Get Entries,Iegūt ierakstus
 DocType: Production Plan,Get Material Request,Iegūt Material pieprasījums
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +118,Postal Expenses,Pasta izdevumi
@@ -5217,7 +5223,7 @@ apps/erpnext/erpnext/stock/doctype/batch/batch.js +128,New Batch ID (Optional),J
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +231,Expense account is mandatory for item {0},Izdevumu konts ir obligāta posteni {0}
 DocType: BOM,Website Description,Mājas lapa Apraksts
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +101,Net Change in Equity,Neto pašu kapitāla izmaiņas
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +291,Please cancel Purchase Invoice {0} first,Lūdzu atcelt pirkuma rēķina {0} pirmais
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +300,Please cancel Purchase Invoice {0} first,Lūdzu atcelt pirkuma rēķina {0} pirmais
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit_type/healthcare_service_unit_type.py +25,Not permitted. Please disable the Service Unit Type,"Nav atļauts. Lūdzu, atspējojiet servisa vienības veidu"
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +43,"Email Address must be unique, already exists for {0}","E-pasta adrese ir unikāls, jau pastāv {0}"
 DocType: Serial No,AMC Expiry Date,AMC Derīguma termiņš
@@ -5257,7 +5263,7 @@ DocType: Staffing Plan Detail,Vacancies,Vakances
 DocType: Hotel Room,Hotel Room,Viesnicas istaba
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +57,Account {0} does not belongs to company {1},Konts {0} nav pieder uzņēmumam {1}
 DocType: Leave Type,Rounding,Noapaļošana
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +997,Serial Numbers in row {0} does not match with Delivery Note,Sērijas numurus kārtas {0} nesakrīt ar piegādes piezīme
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +994,Serial Numbers in row {0} does not match with Delivery Note,Sērijas numurus kārtas {0} nesakrīt ar piegādes piezīme
 DocType: Employee Benefit Application,Dispensed Amount (Pro-rated),Apmaksātā summa (Pro-rated)
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +36,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Group, Campaign, Sales Partner etc.","Tad cenu noteikumi tiek filtrēti, pamatojoties uz Klientu, Klientu grupu, Teritoriju, Piegādātāju, Piegādātāju grupu, Kampaņu, Pārdošanas partneri utt."
 DocType: Student,Guardian Details,Guardian Details
@@ -5312,7 +5318,7 @@ DocType: Complaint,Complaint,Sūdzība
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +534,Warehouse required for stock Item {0},Noliktava nepieciešama krājumu postenī {0}
 DocType: Leave Allocation,Unused leaves,Neizmantotās lapas
 apps/erpnext/erpnext/hr/doctype/loan/loan.js +83,Make Repayment Entry,Veikt atmaksu ierakstu
-apps/erpnext/erpnext/patches/v11_0/update_department_lft_rgt.py +8,All Departments,Visi departamenti
+apps/erpnext/erpnext/patches/v11_0/update_department_lft_rgt.py +10,All Departments,Visi departamenti
 DocType: Healthcare Service Unit,Vacant,Brīvs
 DocType: Patient,Alcohol Past Use,Alkohola iepriekšējā lietošana
 DocType: Fertilizer Content,Fertilizer Content,Mēslošanas līdzekļa saturs
@@ -5323,7 +5329,7 @@ DocType: Share Transfer,Transfer,Nodošana
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +262,Work Order {0} must be cancelled before cancelling this Sales Order,Pirms šī Pārdošanas pasūtījuma anulēšanas ir jāanulē darba kārtība {0}
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +995,Fetch exploded BOM (including sub-assemblies),Atnest eksplodēja BOM (ieskaitot mezglus)
 DocType: Authorization Rule,Applicable To (Employee),Piemērojamais Lai (Darbinieku)
-apps/erpnext/erpnext/controllers/accounts_controller.py +170,Due Date is mandatory,Due Date ir obligāts
+apps/erpnext/erpnext/controllers/accounts_controller.py +177,Due Date is mandatory,Due Date ir obligāts
 apps/erpnext/erpnext/controllers/item_variant.py +82,Increment for Attribute {0} cannot be 0,Pieaugums par atribūtu {0} nevar būt 0
 DocType: Employee Benefit Claim,Benefit Type and Amount,Pabalsta veids un summa
 apps/erpnext/erpnext/hotels/report/hotel_room_occupancy/hotel_room_occupancy.py +19,Rooms Booked,Rezervētas istabas
@@ -5471,7 +5477,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.py +196,Sales Account,Pārdo�
 DocType: Purchase Invoice Item,Total Weight,Kopējais svars
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +101,Commission on Sales,Komisijas apjoms
 DocType: Job Offer Term,Value / Description,Vērtība / Apraksts
-apps/erpnext/erpnext/controllers/accounts_controller.py +690,"Row #{0}: Asset {1} cannot be submitted, it is already {2}","Row # {0}: Asset {1} nevar iesniegt, tas jau {2}"
+apps/erpnext/erpnext/controllers/accounts_controller.py +697,"Row #{0}: Asset {1} cannot be submitted, it is already {2}","Row # {0}: Asset {1} nevar iesniegt, tas jau {2}"
 DocType: Tax Rule,Billing Country,Norēķinu Country
 DocType: Purchase Order Item,Expected Delivery Date,Gaidīts Piegāde Datums
 DocType: Restaurant Order Entry,Restaurant Order Entry,Restorāna pasūtījuma ieraksts
@@ -5510,12 +5516,13 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Maintenance Visit,Breakdown,Avārija
 DocType: Travel Itinerary,Vegetarian,Veģetārietis
 DocType: Patient Encounter,Encounter Date,Saskarsmes datums
-apps/erpnext/erpnext/controllers/accounts_controller.py +891,Account: {0} with currency: {1} can not be selected,Konts: {0} ar valūtu: {1} nevar atlasīt
+apps/erpnext/erpnext/controllers/accounts_controller.py +898,Account: {0} with currency: {1} can not be selected,Konts: {0} ar valūtu: {1} nevar atlasīt
 DocType: Bank Statement Transaction Settings Item,Bank Data,Bankas dati
 DocType: Purchase Receipt Item,Sample Quantity,Parauga daudzums
 DocType: Bank Guarantee,Name of Beneficiary,Saņēmēja nosaukums
 DocType: Manufacturing Settings,"Update BOM cost automatically via Scheduler, based on latest valuation rate / price list rate / last purchase rate of raw materials.","Automātiski atjaunināt BOM izmaksas, izmantojot plānotāju, pamatojoties uz jaunāko novērtēšanas likmi / cenrāžu likmi / izejvielu pēdējo pirkumu likmi."
 DocType: Supplier,SUP-.YYYY.-,SUP-.YYYY.-
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Group,Piegādātājs&gt; Piegādātāju grupa
 DocType: Bank Reconciliation Detail,Cheque Date,Čeku Datums
 apps/erpnext/erpnext/accounts/doctype/account/account.py +57,Account {0}: Parent account {1} does not belong to company: {2},Konts {0}: Mātes vērā {1} nepieder uzņēmumam: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js +126,Successfully deleted all transactions related to this company!,Veiksmīgi svītrots visas ar šo uzņēmumu darījumus!
@@ -5543,7 +5550,7 @@ DocType: Journal Entry,Cash Entry,Naudas Entry
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse_tree.js +17,Child nodes can be only created under 'Group' type nodes,Bērnu mezgli var izveidot tikai ar &quot;grupa&quot; tipa mezgliem
 DocType: Attendance Request,Half Day Date,Half Day Date
 DocType: Academic Year,Academic Year Name,Akadēmiskais gads Name
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1185,{0} not allowed to transact with {1}. Please change the Company.,"{0} nav atļauts veikt darījumus ar {1}. Lūdzu, mainiet uzņēmumu."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1182,{0} not allowed to transact with {1}. Please change the Company.,"{0} nav atļauts veikt darījumus ar {1}. Lūdzu, mainiet uzņēmumu."
 DocType: Sales Partner,Contact Desc,Contact Desc
 DocType: Email Digest,Send regular summary reports via Email.,Regulāri jānosūta kopsavilkuma ziņojumu pa e-pastu.
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +289,Please set default account in Expense Claim Type {0},Lūdzu iestatīt noklusēto kontu Izdevumu prasījuma veida {0}
@@ -5576,7 +5583,7 @@ DocType: Restaurant Order Entry,Restaurant Table,Restorāna galds
 DocType: Hotel Room,Hotel Manager,Viesnīcas vadītājs
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +64,Set Tax Rule for shopping cart,Uzstādīt Nodokļu noteikums par iepirkumu grozs
 DocType: Purchase Invoice,Taxes and Charges Added,Nodokļi un maksājumi Pievienoja
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +214,Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date,Nolietojuma rinda {0}: Nākamais nolietojuma datums nevar būt pirms pieejamā datuma
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +223,Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date,Nolietojuma rinda {0}: Nākamais nolietojuma datums nevar būt pirms pieejamā datuma
 ,Sales Funnel,Pārdošanas piltuve
 apps/erpnext/erpnext/setup/doctype/company/company.py +53,Abbreviation is mandatory,Saīsinājums ir obligāta
 DocType: Project,Task Progress,uzdevums Progress
@@ -5590,7 +5597,7 @@ DocType: Stock Settings,Role Allowed to edit frozen stock,Loma Atļauts rediģē
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +131,All Customer Groups,Visas klientu grupas
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +155,Accumulated Monthly,uzkrātais Mēneša
 DocType: Attendance Request,On Duty,Darbā
-apps/erpnext/erpnext/controllers/accounts_controller.py +848,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} ir obligāta. Varbūt Valūtas ieraksts nav izveidots {1} uz {2}.
+apps/erpnext/erpnext/controllers/accounts_controller.py +855,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} ir obligāta. Varbūt Valūtas ieraksts nav izveidots {1} uz {2}.
 apps/erpnext/erpnext/hr/doctype/staffing_plan/staffing_plan.py +51,Staffing Plan {0} already exist for designation {1},Personāla plāns {0} jau ir paredzēts apzīmējumam {1}
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +46,Tax Template is mandatory.,Nodokļu veidne ir obligāta.
 apps/erpnext/erpnext/accounts/doctype/account/account.py +51,Account {0}: Parent account {1} does not exist,Konts {0}: Mātes vērā {1} neeksistē
@@ -5670,11 +5677,10 @@ apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard S
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +240,Atleast one warehouse is mandatory,Vismaz viena noliktava ir obligāta
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit_type/healthcare_service_unit_type.py +14,"Configure Item Fields like UOM, Item Group, Description and No of Hours.","Konfigurēt vienuma laukus, piemēram, UOM, vienumu grupa, apraksts un stundu skaits."
 DocType: Certification Application,Certification Status,Sertifikācijas statuss
-apps/erpnext/erpnext/public/js/hub/marketplace.js +45,Marketplace,Tirgus laukums
+apps/erpnext/erpnext/public/js/hub/marketplace.js +44,Marketplace,Tirgus laukums
 DocType: Travel Itinerary,Travel Advance Required,Nepieciešama iepriekšēja ceļošana
 DocType: Subscriber,Subscriber Name,Abonenta nosaukums
 DocType: Serial No,Out of Warranty,No Garantijas
-DocType: Cashier Closing,Cashier-closing-,Kasešu slēgšana-
 DocType: Bank Statement Transaction Settings Item,Mapped Data Type,Mape datu tips
 DocType: BOM Update Tool,Replace,Aizstāt
 apps/erpnext/erpnext/templates/includes/product_list.js +42,No products found.,Nav produktu atrasts.
@@ -5762,7 +5768,6 @@ DocType: Quality Inspection,Incoming,Ienākošs
 apps/erpnext/erpnext/setup/doctype/company/company.js +90,Default tax templates for sales and purchase are created.,Tiek veidoti noklusējuma nodokļu veidnes pārdošanai un pirkšanai.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py +44,Assessment Result record {0} already exists.,Novērtējuma rezultātu reģistrs {0} jau eksistē.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Piemērs: ABCD. #####. Ja sērija ir iestatīta un Partijas Nr nav minēts darījumos, automātiskais partijas numurs tiks izveidots, pamatojoties uz šo sēriju. Ja jūs vienmēr vēlaties skaidri norādīt šī vienuma partijas Nr, atstājiet šo tukšu. Piezīme. Šis iestatījums būs prioritāte salīdzinājumā ar nosaukumu sērijas prefiksu krājumu iestatījumos."
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +89,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Lūdzu, uzstādiet apmeklētāju numerācijas sēriju, izmantojot iestatīšanas&gt; numerācijas sēriju"
 DocType: BOM,Materials Required (Exploded),Nepieciešamie materiāli (eksplodēja)
 DocType: Contract,Party User,Partijas lietotājs
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Lūdzu noteikt Company filtrēt tukšu, ja Group By ir &quot;Uzņēmuma&quot;"
@@ -5965,7 +5970,7 @@ apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +18,O
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +18,Opp Count,Opp skaits
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +218,Both Trial Period Start Date and Trial Period End Date must be set,"Ir jānosaka gan izmēģinājuma perioda sākuma datums, gan izmēģinājuma perioda beigu datums"
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py +52,Average Rate,Vidējā likme
-apps/erpnext/erpnext/controllers/accounts_controller.py +792,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Maksājuma grafikam kopējam maksājuma summai jābūt vienādai ar Grand / Rounded Total
+apps/erpnext/erpnext/controllers/accounts_controller.py +799,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Maksājuma grafikam kopējam maksājuma summai jābūt vienādai ar Grand / Rounded Total
 DocType: Subscription Plan Detail,Plan,Plānu
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +34,Bank Statement balance as per General Ledger,Bankas paziņojums bilance kā vienu virsgrāmatas
 DocType: Job Applicant,Applicant Name,Pieteikuma iesniedzēja nosaukums
@@ -6034,7 +6039,7 @@ DocType: Item Price,Item Price,Vienība Cena
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +48,Soap & Detergent,Ziepes un mazgāšanas
 DocType: BOM,Show Items,Rādīt preces
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.py +30,From Time cannot be greater than To Time.,No laiks nedrīkst būt lielāks par uz laiku.
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +111,Do you want to notify all the customers by email?,Vai vēlaties paziņot visiem klientiem pa e-pastu?
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +123,Do you want to notify all the customers by email?,Vai vēlaties paziņot visiem klientiem pa e-pastu?
 DocType: Subscription Plan,Billing Interval,Norēķinu intervāls
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +36,Motion Picture & Video,Motion Picture & Video
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +5,Ordered,Pasūtīts
@@ -6043,9 +6048,9 @@ DocType: Salary Detail,Component,komponents
 apps/erpnext/erpnext/assets/doctype/asset_category/asset_category.py +16,Row {0}: {1} must be greater than 0,Rindai {0}: {1} jābūt lielākam par 0
 DocType: Assessment Criteria,Assessment Criteria Group,Vērtēšanas kritēriji Group
 DocType: Healthcare Settings,Patient Name By,Pacienta nosaukums līdz
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +220,Accrual Journal Entry for salaries from {0} to {1},Uzkrāšanas žurnāls Ieraksts algas no {0} līdz {1}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +224,Accrual Journal Entry for salaries from {0} to {1},Uzkrāšanas žurnāls Ieraksts algas no {0} līdz {1}
 DocType: Sales Invoice Item,Enable Deferred Revenue,Iespējot atliktos ieņēmumus
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +193,Opening Accumulated Depreciation must be less than equal to {0},Atklāšanas Uzkrātais nolietojums jābūt mazākam nekā vienādam ar {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +202,Opening Accumulated Depreciation must be less than equal to {0},Atklāšanas Uzkrātais nolietojums jābūt mazākam nekā vienādam ar {0}
 DocType: Warehouse,Warehouse Name,Noliktavas nosaukums
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py +20,Actual start date must be less than actual end date,Faktiskajam sākuma datumam jābūt mazākam par faktisko beigu datumu
 DocType: Naming Series,Select Transaction,Izvēlieties Transaction
@@ -6197,7 +6202,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js +16,Create Mul
 apps/erpnext/erpnext/hr/utils.py +212,Employee {0} of grade {1} have no default leave policy,Darbiniekam {0} pakāpē {1} nav paredzētas atvaļinājuma politikas
 DocType: Salary Detail,Salary Detail,alga Detail
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +1103,Please select {0} first,"Lūdzu, izvēlieties {0} pirmais"
-apps/erpnext/erpnext/public/js/hub/marketplace.js +177,Added {0} users,Pievienoti {0} lietotāji
+apps/erpnext/erpnext/public/js/hub/marketplace.js +176,Added {0} users,Pievienoti {0} lietotāji
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +21,"In the case of multi-tier program, Customers will be auto assigned to the concerned tier as per their spent","Daudzpakāpju programmas gadījumā Klienti tiks automātiski piešķirti attiecīgajam līmenim, salīdzinot ar viņu iztērēto"
 DocType: Appointment Type,Physician,Ārsts
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1072,Batch {0} of Item {1} has expired.,Sērija {0} no posteņa {1} ir beidzies.
@@ -6342,7 +6347,7 @@ DocType: Purchase Invoice,DUPLICATE FOR SUPPLIER,Dublikāts piegādātājs
 DocType: Asset,Custodian,Turētājbanka
 apps/erpnext/erpnext/config/accounts.py +356,Point-of-Sale Profile,Point-of-Sale Profils
 apps/erpnext/erpnext/agriculture/doctype/soil_texture/soil_texture.py +25,{0} should be a value between 0 and 100,{0} jābūt vērtībai no 0 līdz 100
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +319,Payment of {0} from {1} to {2},{0} maksājums no {1} līdz {2}
+apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +323,Payment of {0} from {1} to {2},{0} maksājums no {1} līdz {2}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +166,Unsecured Loans,Nenodrošināti aizdevumi
 DocType: Cost Center,Cost Center Name,Cost Center Name
 DocType: Student,B+,B +
@@ -6374,6 +6379,7 @@ DocType: Item,Has Serial No,Ir Sērijas nr
 DocType: Employee,Date of Issue,Izdošanas datums
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +252,"As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}","Kā vienu Pirkšana iestatījumu, ja pirkuma čeka Nepieciešams == &quot;JĀ&quot;, tad, lai izveidotu pirkuma rēķinu, lietotājam ir nepieciešams, lai izveidotu pirkuma kvīts vispirms posteni {0}"
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +172,Row #{0}: Set Supplier for item {1},Row # {0}: Set Piegādātājs posteni {1}
+DocType: Global Defaults,Default Distance Unit,Noklusējuma attāluma vienība
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +115,Row {0}: Hours value must be greater than zero.,Rinda {0}: Stundas vērtībai ir jābūt lielākai par nulli.
 apps/erpnext/erpnext/stock/doctype/item/item.py +211,Website Image {0} attached to Item {1} cannot be found,Website Image {0} pievienots posteni {1} nevar atrast
 DocType: Issue,Content Type,Content Type
@@ -6429,7 +6435,7 @@ apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +437,Debit To account must be a Balance Sheet account,Debets kontā jābūt bilance konts
 DocType: Asset,Naming Series,Nosaucot Series
 DocType: Vital Signs,Coated,Pārklāts
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +181,Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount,Rinda {0}: paredzamā vērtība pēc derīguma termiņa beigām ir mazāka nekā bruto pirkuma summa
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +190,Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount,Rinda {0}: paredzamā vērtība pēc derīguma termiņa beigām ir mazāka nekā bruto pirkuma summa
 DocType: GoCardless Settings,GoCardless Settings,GoCardless iestatījumi
 DocType: Leave Block List,Leave Block List Name,Atstājiet Block Saraksta nosaukums
 DocType: Certified Consultant,Certification Validity,Sertifikācijas derīgums
@@ -6498,6 +6504,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +237,"{0} {
 DocType: Bank Statement Settings Item,Bank Header,Bankas virsraksts
 apps/erpnext/erpnext/healthcare/doctype/sample_collection/sample_collection.js +7,View Lab Tests,Skatīt laboratorijas testus
 DocType: Hub Users,Hub Users,Centrmezglu lietotāji
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Pasūtītājs&gt; Klientu grupa&gt; Teritorija
 DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,Uzturēšana Datums
 DocType: Purchase Invoice Item,Rejected Serial No,Noraidīts Sērijas Nr
@@ -6512,7 +6519,7 @@ apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +62,Ag
 DocType: SG Creation Tool Course,Max Strength,Max Stiprums
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +28,Installing presets,Iepriekš iestatīto instalēšana
 DocType: Fee Schedule,EDU-FSH-.YYYY.-,EDU-FSH-.YYYY.-
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +99,No Delivery Note selected for Customer {},Klientam nav izvēlēta piegādes piezīme {}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +111,No Delivery Note selected for Customer {},Klientam nav izvēlēta piegādes piezīme {}
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py +17,Employee {0} has no maximum benefit amount,Darbiniekam {0} nav maksimālās labuma summas
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1128,Select Items based on Delivery Date,"Atlasiet vienumus, pamatojoties uz piegādes datumu"
 DocType: Grant Application,Has any past Grant Record,Vai ir kāds pagātnes Granta ieraksts
@@ -6540,7 +6547,7 @@ DocType: Selling Settings,Settings for Selling Module,Iestatījumi Pārdošana m
 DocType: Hotel Room Reservation,Hotel Room Reservation,Viesnīcas numuru rezervēšana
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +357,Customer Service,Klientu apkalpošana
 DocType: BOM,Thumbnail,Thumbnail
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +207,No contacts with email IDs found.,Netika atrasts neviens kontakts ar e-pasta ID.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +362,No contacts with email IDs found.,Netika atrasts neviens kontakts ar e-pasta ID.
 DocType: Item Customer Detail,Item Customer Detail,Postenis Klientu Detail
 DocType: Notification Control,Prompt for Email on Submission of,Jautāt e-pastu uz iesniegšanai
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py +36,Maximum benefit amount of employee {0} exceeds {1},Darbinieka maksimālais pabalsta apmērs {0} pārsniedz {1}
@@ -6801,7 +6808,6 @@ DocType: Purchase Invoice,Rounded Total (Company Currency),Noapaļota Kopā (Com
 apps/erpnext/erpnext/accounts/doctype/account/account.py +103,Cannot covert to Group because Account Type is selected.,"Nevar slēptu to grupai, jo ir izvēlēta Account Type."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +270,{0} {1} has been modified. Please refresh.,{0}{1} ir mainīta. Lūdzu atsvaidzināt.
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,Pietura lietotājiem veikt Leave Pieteikumi uz nākamajās dienās.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Vienības kods&gt; Vienības grupa&gt; Zīmols
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +24,"If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0.","Ja neierobežots derīguma termiņš ir Lojalitātes punktiem, derīguma termiņš ir tukšs vai 0."
 DocType: Asset Maintenance Team,Maintenance Team Members,Tehniskās apkopes komandas biedri
 DocType: Loyalty Point Entry,Purchase Amount,pirkuma summa
@@ -6809,7 +6815,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +251,"Cannot deliver S
 											to fullfill Sales Order {2}","Nevar piegādāt sērijas Nr {0} vienumu {1}, jo tas ir rezervēts, lai pilnībā aizpildītu pārdošanas pasūtījumu {2}"
 DocType: Quotation,SAL-QTN-.YYYY.-,SAL-QTN-.YYYY.-
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +261,Supplier Quotation {0} created,Piegādātājs Piedāvājums {0} izveidots
-apps/erpnext/erpnext/accounts/report/financial_statements.py +104,End Year cannot be before Start Year,Beigu gads nevar būt pirms Start gads
+apps/erpnext/erpnext/accounts/report/financial_statements.py +106,End Year cannot be before Start Year,Beigu gads nevar būt pirms Start gads
 DocType: Employee Benefit Application,Employee Benefits,Darbinieku pabalsti
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +266,Packed quantity must equal quantity for Item {0} in row {1},Pildīta daudzums ir jābūt vienādai daudzums postenim {0} rindā {1}
 DocType: Work Order,Manufactured Qty,Ražoti Daudz
@@ -6825,6 +6831,7 @@ apps/erpnext/erpnext/accounts/party.py +30,{0}: {1} does not exists,{0}: {1} nee
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js +78,Select Batch Numbers,Izvēlieties Partijas Numbers
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +231,To GSTIN,Uz GSTIN
 apps/erpnext/erpnext/config/accounts.py +12,Bills raised to Customers.,Rēķinus izvirzīti klientiem.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Lūdzu, izveidojiet darbinieku nosaukumu sistēmu cilvēkresursu vadībā&gt; Personāla iestatījumi"
 DocType: Healthcare Settings,Invoice Appointments Automatically,Rēķina iecelšana automātiski
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,Projekts Id
 DocType: Salary Component,Variable Based On Taxable Salary,"Mainīgs, pamatojoties uz aplikšanu ar nodokli"
@@ -6873,7 +6880,7 @@ apps/erpnext/erpnext/hr/doctype/attendance_request/attendance_request.py +52,Att
 DocType: POS Profile,Account for Change Amount,Konts Mainīt summa
 DocType: QuickBooks Migrator,Connecting to QuickBooks,Savienošana ar QuickBooks
 DocType: Exchange Rate Revaluation,Total Gain/Loss,Kopējā peļņa / zaudējumi
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1178,Invalid Company for Inter Company Invoice.,Nederīgs uzņēmums Inter uzņēmuma rēķinam.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1175,Invalid Company for Inter Company Invoice.,Nederīgs uzņēmums Inter uzņēmuma rēķinam.
 DocType: Purchase Invoice,input service,ievades pakalpojums
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +249,Row {0}: Party / Account does not match with {1} / {2} in {3} {4},Row {0}: Party / Account nesakrīt ar {1} / {2} jo {3} {4}
 DocType: Employee Promotion,Employee Promotion,Darbinieku veicināšana
@@ -7004,7 +7011,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +156,"Payme
 DocType: Travel Itinerary,Preferred Area for Lodging,Ierašanās priekšrocība
 apps/erpnext/erpnext/config/selling.py +184,Analytics,Analytics
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +25,Cart is Empty,Grozs ir tukšs
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,"Lūdzu, uzstādiet Instruktoru nosaukumu sistēmu izglītībā&gt; Izglītības iestatījumi"
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +416,"Item {0} has no Serial No. Only serilialized items \
 						can have delivery based on Serial No","Vienumam {0} nav sērijas numura. Tikai serilialized preces \ var būt piegāde, pamatojoties uz sērijas Nr"
 DocType: Vehicle,Model,modelis
@@ -7034,7 +7040,7 @@ apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.py +35,To date can not
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js +118,Nothing to change,Nekas mainīt
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +104,Please select a csv file,"Lūdzu, izvēlieties csv failu"
 DocType: Holiday List,Total Holidays,Kopējās svētku dienas
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +109,Missing email template for dispatch. Please set one in Delivery Settings.,"Trūkst e-pasta veidnes nosūtīšanai. Lūdzu, iestatiet to piegādes iestatījumos."
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +121,Missing email template for dispatch. Please set one in Delivery Settings.,"Trūkst e-pasta veidnes nosūtīšanai. Lūdzu, iestatiet to piegādes iestatījumos."
 DocType: Student Leave Application,Mark as Present,Atzīmēt kā Present
 DocType: Supplier Scorecard,Indicator Color,Indikatora krāsa
 DocType: Purchase Order,To Receive and Bill,Lai saņemtu un Bill
@@ -7043,7 +7049,7 @@ apps/erpnext/erpnext/templates/pages/home.html +14,Featured Products,piedāvāti
 apps/erpnext/erpnext/assets/doctype/asset/asset.js +384,Select Serial No,Izvēlieties kārtas numuru
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +124,Designer,Dizainers
 apps/erpnext/erpnext/config/selling.py +163,Terms and Conditions Template,Noteikumi un nosacījumi Template
-DocType: Serial No,Delivery Details,Piegādes detaļas
+DocType: Delivery Trip,Delivery Details,Piegādes detaļas
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +618,Cost Center is required in row {0} in Taxes table for type {1},Izmaksas Center ir nepieciešama rindā {0} nodokļos tabula veidam {1}
 DocType: Program,Program Code,programmas kods
 DocType: Terms and Conditions,Terms and Conditions Help,Noteikumi Palīdzība
@@ -7067,7 +7073,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +984,Get
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Lead Time Days,Izpildes laiks dienas
 DocType: Cash Flow Mapping,Is Income Tax Expense,Ir ienākumu nodokļa izdevumi
 apps/erpnext/erpnext/patches/v11_0/add_default_dispatch_notification_template.py +19,Your order is out for delivery!,Jūsu pasūtījums ir paredzēts piegādei!
-apps/erpnext/erpnext/controllers/accounts_controller.py +677,Row #{0}: Posting Date must be same as purchase date {1} of asset {2},Row # {0}: norīkošana datums jābūt tāds pats kā iegādes datums {1} no aktīva {2}
+apps/erpnext/erpnext/controllers/accounts_controller.py +684,Row #{0}: Posting Date must be same as purchase date {1} of asset {2},Row # {0}: norīkošana datums jābūt tāds pats kā iegādes datums {1} no aktīva {2}
 DocType: Program Enrollment,Check this if the Student is residing at the Institute's Hostel.,"Atzīmējiet šo, ja students dzīvo pie institūta Hostel."
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +125,Please enter Sales Orders in the above table,Ievadiet klientu pasūtījumu tabulā iepriekš
 ,Stock Summary,Stock kopsavilkums
