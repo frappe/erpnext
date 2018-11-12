@@ -292,11 +292,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 					if(add_row_index == -1) {
 						child = frappe.model.add_child(this.frm.doc, cur_grid.doctype, "items", add_row_index);
-						show_description(child.idx, r.message.item_code, child.item_code);
 					} else {
 						child = cur_grid.get_grid_row(add_row_index-1).doc;
-						show_description(child.idx, r.message.item_code, child.item_code);
 					}
+					show_description(child.idx, r.message.item_code, child.item_code);
 
 					frappe.model.set_value(child.doctype, child.name, {
 						"item_code": r.message.item_code,
