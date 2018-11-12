@@ -8,8 +8,8 @@ frappe.ui.form.on('Customer Feedback', {
 		}
 	},
 	template: function(frm){	//	Used to fetch the parameters of the selected feedback template
+		frm.fields_dict.feedback.grid.remove_all();
 		if(frm.doc.template){
-			frm.fields_dict.feedback.grid.remove_all();
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
@@ -24,10 +24,6 @@ frappe.ui.form.on('Customer Feedback', {
 					frm.refresh();
 				}
 			});
-		}
-		else{
-			frm.fields_dict.feedback.grid.remove_all();
-			frm.refresh();
 		}
 	}
 });
