@@ -6,12 +6,11 @@ frappe.ui.form.on('Quality Review', {
 		frm.set_value("date", frappe.datetime.get_today());
 		if(frm.doc.measurable == "Yes"){
 			show_target_achieved_unit(frm);
-			frm.refresh();
 		}
 		else{
 			hide_target_achieved_unit(frm);
-			frm.refresh();
 		}
+		frm.refresh();
 	},
 	goal: function(frm) {
 		frm.fields_dict.values.grid.remove_all();
