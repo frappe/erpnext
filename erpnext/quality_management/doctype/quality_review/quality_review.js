@@ -9,12 +9,10 @@ frappe.ui.form.on('Quality Review', {
 		if(frm.doc.measurable == "Yes"){
 			show_target_achieved_unit(frm);
 			frm.refresh();
-			show_target_achieved_unit_();
 		}
 		else{
 			hide_target_achieved_unit(frm);
 			frm.refresh();
-			hide_target_achieved_unit_();
 		}
 	},
 	goal: function(frm) {
@@ -49,12 +47,6 @@ frappe.ui.form.on('Quality Review', {
 						}
 					}
 					frm.refresh();
-					if(frm.doc.measurable == "Yes"){
-						show_target_achieved_unit_();
-					}
-					else{
-						hide_target_achieved_unit_();
-					}
 				}
 			});
 		}
@@ -77,26 +69,10 @@ function show_target_achieved_unit(frm){
 	frm.fields_dict.values.grid.docfields[4].hidden = 1;
 }
 
-function show_target_achieved_unit_(){
-	//	 shows target, achieved and unit columns
-	$("div[data-fieldname='achieved']").show();
-	$("div[data-fieldname='target']").show();
-	$("div[data-fieldname='unit']").show();
-	$("div[data-fieldname='yes_no']").hide();
-}
-
 function hide_target_achieved_unit(frm){
 	//	hides target and unit columns as the goal cannot be measured in numeric values
 	frm.fields_dict.values.grid.docfields[1].hidden = 1;
 	frm.fields_dict.values.grid.docfields[2].hidden = 1;
 	frm.fields_dict.values.grid.docfields[3].hidden = 1;
 	frm.fields_dict.values.grid.docfields[4].hidden = 0;
-}
-
-function hide_target_achieved_unit_(){
-	//	 hides target, achieved and unit columns
-	$("div[data-fieldname='achieved']").hide();
-	$("div[data-fieldname='target']").hide();
-	$("div[data-fieldname='unit']").hide();
-	$("div[data-fieldname='yes_no']").show();
 }
