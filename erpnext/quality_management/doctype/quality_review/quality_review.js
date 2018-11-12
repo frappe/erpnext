@@ -4,6 +4,7 @@
 frappe.ui.form.on('Quality Review', {
 	onload: function(frm){
 		frm.set_value("date", frappe.datetime.get_today());
+		$(".grid-add-row").hide();
 		if(frm.doc.measurable == "Yes"){
 			show_target_achieved_unit(frm);
 		}

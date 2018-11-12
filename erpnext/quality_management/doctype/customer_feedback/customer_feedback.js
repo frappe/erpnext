@@ -4,6 +4,7 @@
 frappe.ui.form.on('Customer Feedback', {
 	onload: function(frm){
 		frm.set_value("date", frappe.datetime.get_today());
+		$(".grid-add-row").hide();
 		frm.refresh();
 	},
 	template: function(frm){	//	Used to fetch the parameters of the selected feedback template
