@@ -521,6 +521,7 @@ def get_items_for_material_requests(doc, company=None):
 			frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get('idx')))
 
 		if data.get('include_exploded_items') and bom_no and include_subcontracted_items:
+			# fetch exploded items from BOM
 			for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
 					ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
 					bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
