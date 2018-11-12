@@ -448,7 +448,9 @@ class WorkOrder(Document):
 					if item_dict.get(d.item_code):
 						d.required_qty = item_dict.get(d.item_code).get("qty")
 			else:
-				for item in sorted(item_dict.values(), key=lambda d: d['idx']):
+				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
+				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
+				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
 					self.append('required_items', {
 						'operation': item.operation,
 						'item_code': item.item_code,
