@@ -371,6 +371,25 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No material request created"))
 
+def get_exploded_items(bom_wise_item_details, company, bom_no, include_non_stock_items):
+	for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
+			ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
+			bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
+			item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
+		from
+			`tabBOM Explosion Item` bei
+			JOIN `tabBOM` bom ON bom.name = bei.parent
+			JOIN `tabItem` item ON item.name = bei.item_code
+			LEFT JOIN `tabItem Default` item_default
+				ON item_default.parent = item.name and item_default.company=%s
+		where
+			bei.docstatus < 2
+			and bom.name=%s and item.is_stock_item in (1, {0})
+		group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
+		(company, bom_no), as_dict=1):
+			bom_wise_item_details.setdefault(d.get('item_code'), d)
+	return bom_wise_item_details
+
 def get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, parent_qty):
 	items = frappe.db.sql("""
 		SELECT
@@ -522,22 +541,7 @@ def get_items_for_material_requests(doc, company=None):
 
 		if data.get('include_exploded_items') and bom_no and include_subcontracted_items:
 			# fetch exploded items from BOM
-			for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
-					ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
-					bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
-					item.default_material_request_type, item.min_order_qty, item_default.default_warehouse
-				from
-					`tabBOM Explosion Item` bei
-					JOIN `tabBOM` bom ON bom.name = bei.parent
-					JOIN `tabItem` item ON item.name = bei.item_code
-					LEFT JOIN `tabItem Default` item_default
-						ON item_default.parent = item.name and item_default.company=%s
-				where
-					bei.docstatus < 2
-					and bom.name=%s and item.is_stock_item in (1, {0})
-				group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
-				(company, bom_no), as_dict=1):
-					bom_wise_item_details.setdefault(d.get('item_code'), d)
+			bom_wise_item_details = get_exploded_items(bom_wise_item_details, company, bom_no, include_non_stock_items)
 		else:
 			bom_wise_item_details = get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, 1)
 		for item, item_details in bom_wise_item_details.items():
