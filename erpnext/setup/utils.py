@@ -98,7 +98,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://frankfurter.erpnext.org/{0}".format(transaction_date)
+			api_url = "https://frankfurter.app/{0}".format(transaction_date)
 			response = requests.get(api_url, params={
 				"base": from_currency,
 				"symbols": to_currency
