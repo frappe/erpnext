@@ -74,7 +74,7 @@ def is_perpetual_inventory_enabled(company):
 		frappe.local.enable_perpetual_inventory = {}
 
 	if not company in frappe.local.enable_perpetual_inventory:
-		frappe.local.enable_perpetual_inventory[company] = frappe.get_cached_value('Company', 
+		frappe.local.enable_perpetual_inventory[company] = frappe.get_cached_value('Company',
 			company,  "enable_perpetual_inventory") or 0
 
 	return frappe.local.enable_perpetual_inventory[company]
@@ -87,7 +87,7 @@ def get_default_finance_book(company=None):
 		frappe.local.default_finance_book = {}
 
 	if not company in frappe.local.default_finance_book:
-		frappe.local.default_finance_book[company] = frappe.get_cached_value('Company', 
+		frappe.local.default_finance_book[company] = frappe.get_cached_value('Company',
 			company,  "default_finance_book")
 
 	return frappe.local.default_finance_book[company]
@@ -108,7 +108,7 @@ def get_region(company=None):
 	You can also set global company flag in `frappe.flags.company`
 	'''
 	if company or frappe.flags.company:
-		return frappe.get_cached_value('Company', 
+		return frappe.get_cached_value('Company',
 			company or frappe.flags.company,  'country')
 	elif frappe.flags.country:
 		return frappe.flags.country

@@ -13,6 +13,7 @@ class TestTaxes(unittest.TestCase):
             'company_name': uuid4(),
             'abbr': ''.join(s[0] for s in uuid4().split('-')),
             'default_currency': 'USD',
+            'country': 'United States',
         }).insert()
         self.account = frappe.get_doc({
             'doctype': 'Account',
