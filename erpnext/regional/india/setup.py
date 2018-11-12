@@ -11,14 +11,17 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	if not patch:
+		update_address_template()
+		make_fixtures()
+
+# TODO: for all countries
+def setup_company_independent_fixtures():
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-	if not patch:
-		update_address_template()
-		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
