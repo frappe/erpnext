@@ -57,6 +57,21 @@ class ReceivablePayableReport(object):
 
 		credit_or_debit_note = "Credit Note" if args.get("party_type") == "Customer" else "Debit Note"
 
+		if self.filters.based_on_payment_terms:
+			columns.append({
+				"label": "Payment Term",
+				"fieldname": "payment_term",
+				"fieldtype": "Data",
+				"width": 120
+			})
+			columns.append({
+				"label": "Payment Term Amount",
+				"fieldname": "payment_term_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			})
+
 		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
 				"label": label,
@@ -187,7 +202,7 @@ class ReceivablePayableReport(object):
 							else:
 								outstanding_amount = d[1] - payment_amount
 								row = self.prepare_row(party_naming_by, args, gle, outstanding_amount, 
-									credit_note_amount, d[0], payment_amount )
+									credit_note_amount, d[0], payment_amount , d[1], d[2])
 								payment_amount = 0
 								data.append(row)
 				else:
@@ -199,7 +214,7 @@ class ReceivablePayableReport(object):
 		return data
 
 	def prepare_row(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount, 
-		due_date=None, paid_amt=None):
+		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None):
 		row = [gle.posting_date, gle.party]
 
 		# customer / supplier name
@@ -223,7 +238,10 @@ class ReceivablePayableReport(object):
 		# invoiced and paid amounts
 		invoiced_amount = gle.get(self.dr_or_cr) if (gle.get(self.dr_or_cr) > 0) else 0
 
-		if not self.filters.based_on_payment_terms:
+		if self.filters.based_on_payment_terms:
+			row+=[payment_term, payment_term_amount]
+
+		if paid_amt == None:
 			paid_amt = invoiced_amount - outstanding_amount - credit_note_amount
 		row += [invoiced_amount, paid_amt, credit_note_amount, outstanding_amount]
 
@@ -467,15 +485,15 @@ class ReceivablePayableReport(object):
 
 	def get_payment_term_detail(self, voucher_nos):
 		payment_term_map = frappe._dict()
-		for d in frappe.db.sql(""" select si.name, si.payment_terms_template, ps.due_date, ps.payment_amount
+		for d in frappe.db.sql(""" select si.name, si.payment_terms_template, ps.due_date, ps.payment_amount, ps.description
 		from `tabSales Invoice` si, `tabPayment Schedule` ps
 		where si.name = ps.parent and 
 		si.docstatus = 1 and si.company = '%s' and
 		si.name in (%s) order by ps.due_date"""
 		% (self.filters.company, ','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict = 1):
 			if d.payment_terms_template:
-				payment_term_map.setdefault(d.name,[])
-				payment_term_map[d.name].append((d.due_date,d.payment_amount))
+				payment_term_map.setdefault(d.name, [])
+				payment_term_map[d.name].append((d.due_date, d.payment_amount, d.description))
 
 		return payment_term_map
 
