@@ -8,7 +8,7 @@ export default {
     data() {
         return {
             buttonName: '',
-            isLoggedIn: this.$root.$data.checkLogin(),
+            isLoggedIn: academy.store.checkLogin(),
             nextContent: '',
             nextContentType: '',
             nextCourse: '',
@@ -20,7 +20,7 @@ export default {
                 frappe.call({
                     method: "erpnext.www.academy.get_continue_data",
                     args: {
-                        program_name: this.$route.params.code
+                        program_name: this.$route.params.program_name
                     }
                 }).then( r => {
                     this.nextContent = r.message.content,
@@ -30,7 +30,7 @@ export default {
         }
 
         if(this.isLoggedIn){
-            if(this.$root.$data.checkProgramEnrollment(this.$route.params.code)){
+            if(academy.store.checkProgramEnrollment(this.$route.params.program_name)){
             	if(this.$route.name == 'home'){
                     this.buttonName = 'Explore Courses'
             	}
@@ -51,18 +51,18 @@ export default {
             if(this.$route.name == 'home'){
                 return
             }
-            else if(this.$route.name == 'program' && this.$root.$data.checkProgramEnrollment(this.$route.params.code)){
-                this.$router.push({ name: 'content', params: { code: this.$route.params.code, course: this.nextCourse, type: this.nextContentType, content: this.nextContent}})
+            else if(this.$route.name == 'program' && academy.store.checkProgramEnrollment(this.$route.params.program_name)){
+                this.$router.push({ name: 'content', params: { program_name: this.$route.params.program_name, course: this.nextCourse, type: this.nextContentType, content: this.nextContent}})
             }
             else {
                 frappe.call({
                 method: "erpnext.www.academy.enroll_in_program",
                 args:{
-                    program_name: this.$route.params.code,
+                    program_name: this.$route.params.program_name,
                     student_email_id: frappe.session.user
                 }
                 })
-                this.$root.$data.updateEnrolledPrograms()
+                academy.store.updateEnrolledPrograms()
             }
         },
     }

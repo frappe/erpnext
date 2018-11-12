@@ -1,12 +1,11 @@
 <template>
 <div>
 	<AcademyTopSection v-bind:title="program.program_name" v-bind:description="program.description">
-        <!-- <AcademyTopSectionButton/> -->
-		<a-button @click="startCourse">Start Course</a-button>
-		<a-button @click="continueCourse">Continue Course</a-button>
+		<!-- <a-button @click="startCourse">Start Course</a-button>
+		<a-button @click="continueCourse">Continue Course</a-button> -->
     </AcademyTopSection>
 	<AcademyList :title="'Courses'" :description="''">
-        <AcademyCourseCard v-for="course in course_list" :course="course" :key="course.name"/>
+        <AcademyCourseCard v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.meta.flag"/>
     </AcademyList>
 </div>
 </template>
@@ -15,7 +14,6 @@ import Button from '../components/Button.vue';
 import AcademyTopSection from "../components/AcademyTopSection.vue"
 import AcademyList from "../components/AcademyList.vue"
 import AcademyCourseCard from "../components/AcademyCourseCard.vue"
-import AcademyTopSectionButton from "../components/AcademyTopSectionButton.vue";
 
 
 export default {
@@ -25,26 +23,25 @@ export default {
         AButton: Button,
 		AcademyTopSection,
 		AcademyList,
-		AcademyCourseCard,
-        AcademyTopSectionButton
+		AcademyCourseCard
 	},
 	data() {
 		return {
 			program: {},
-			course_list: []
+			course_data: []
 		}
 	},
     beforeMount() {
-        if(this.$root.$data.isLogin) this.$root.$data.updateCompletedCourses()
+        if(academy.store.isLogin) academy.store.updateCompletedCourses()
     },
 	mounted() {
 		this.getProgramDetails().then(data => this.program = data);
-		this.getCourses().then(data => this.course_list = data);
+		this.getCourses().then(data => this.course_data = data);
 		
-		academy.on(`course-completed`, (course_name) => {
-			const course = this.course_list.findIndex(c => c.name === course_name);
-			this.course_list[course].completed = true;
-		});
+		// academy.on(`course-completed`, (course_name) => {
+		// 	const course = this.course_data.findIndex(c => c.name === course_name);
+		// 	this.course_data[course].completed = true;
+		// });
 	},
 	methods: {
 		startCourse() {
