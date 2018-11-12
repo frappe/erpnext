@@ -33,6 +33,14 @@ def get_program(program_name):
 	is_enrolled = check_program_enrollment(program_name)
 	return {'program': program, 'is_enrolled': is_enrolled}
 
+@frappe.whitelist(allow_guest=True)
+def get_program_details(program_name):
+	try:
+		program = frappe.get_doc('Program', program_name)
+		return program
+	except:
+		return None
+
 
 def get_enrollment(course_name):
 	student = get_student_id(frappe.session.user)
@@ -68,14 +76,6 @@ def create_student(student_name=frappe.session.user):
 
 # Functions to get program & course details
 @frappe.whitelist(allow_guest=True)
-def get_program_details(program_name):
-	try:
-		program = frappe.get_doc('Program', program_name)
-		return program
-	except:
-		return None
-
-@frappe.whitelist(allow_guest=True)
 def get_courses(program_name):
 	program = frappe.get_doc('Program', program_name)
 	courses = program.get_course_list()
@@ -84,6 +84,8 @@ def get_courses(program_name):
 
 @frappe.whitelist()
 def get_continue_content(course_name):
+	if(frappe.session.user == "Guest"):
+		return None
 	enrollment = get_enrollment(course_name)
 	course = frappe.get_doc("Course", enrollment.course)
 	last_activity = enrollment.get_last_activity()
@@ -203,15 +205,16 @@ def get_continue_data(program_name):
 
 @frappe.whitelist()
 def enroll_all_courses_in_program(program_enrollment, student):
-	course_list = [course.name for course in get_courses(program_enrollment.program)]
+	program = frappe.get_doc("Program", program_enrollment.program)
+	course_list = [course.course for course in program.get_all_children()]
 	for course_name in course_list:
 		student.enroll_in_course(course_name=course_name, program_enrollment=program_enrollment.name)
 
 @frappe.whitelist()
-def enroll_in_program(program_name, student_email_id):
-	if(not get_student_id(student_email_id)):
-		create_student(student_email_id)
-	student = frappe.get_doc("Student", get_student_id(student_email_id))
+def enroll_in_program(program_name):
+	if(not get_student_id(frappe.session.user)):
+		create_student(frappe.session.user)
+	student = frappe.get_doc("Student", get_student_id(frappe.session.user))
 	program_enrollment = student.enroll_in_program(program_name)
 	enroll_all_courses_in_program(program_enrollment, student)
 

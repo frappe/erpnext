@@ -12,7 +12,7 @@ import ContentVideo from "../components/ContentVideo.vue"
 import ContentNavigation from "../components/ContentNavigation.vue"
 
 export default {
-	props:['code', 'course', 'type', 'content'],
+	props:['program_name', 'course', 'type', 'content'],
 	name: "AcademyCoursePage",
 	data() {
 		return{

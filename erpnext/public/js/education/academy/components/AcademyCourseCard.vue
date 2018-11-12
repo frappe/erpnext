@@ -11,29 +11,13 @@
                     </ul>
                 </span>
             </div>
-            <div v-if="$root.$data.isLogin" class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <!-- <AcademyCourseCardButton
-                    v-if="this.$root.$data.checkProgramEnrollment(this.$route.params.code)"
-                    :course="course.name"
-                    :nextContent="nextContent"
-                    :nextContentType="nextContentType"
-                /> -->
-
+            <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
                 <a-button
-                    v-if="showCompleted"
-                    type="success"
-                    size="sm"
+                    :type="buttonType"
+                    size="sm btn-block"
                     :route="firstContentRoute"
                 >
-                    Completed
-                </a-button>
-                <a-button
-                    v-if="showStart"
-                    type="primary"
-                    size="sm"
-                    :route="firstContentRoute"
-                >
-                    Start
+                    {{ courseMeta.flag }}
                 </a-button>
             </div>
         </div>
@@ -42,44 +26,36 @@
 </template>
 
 <script>
-import AButton from './Button';
+import AButton from './Button.vue';
 import AcademyCourseCardButton from './AcademyCourseCardButton.vue'
 
 export default {
-    props: ['course'],
+    props: ['course', 'courseMeta', 'program_name'],
     name: "AcademyCourseCard",
-    data() {
-        return {
-            nextContent: '',
-            nextContentType: ''
-        }
-    },
-    mounted() {
-        if(this.$root.$data.checkLogin()) {
-            frappe.call({
-                method: "erpnext.www.academy.get_starting_content",
-                args: {
-                    course_name: this.course.name
-                }
-            }).then(r => {
-                this.nextContent = r.message.content,
-                this.nextContentType = r.message.content_type
-            });
-        }
-    },
     components: {
         AcademyCourseCardButton,
         AButton
     },
     computed: {
         showStart() {
-            return academy.loggedIn && !this.course.completed;
+            return academy.loggedIn && !this.courseMeta.flag == "Completed";
         },
         showCompleted() {
-            return academy.loggedIn && this.course.completed;
+            return academy.loggedIn && this.courseMeta.flag == "Completed";
         },
         firstContentRoute() {
-            return `${course.name}/${course.content_type}/${data.content}`
+            return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+        },
+        buttonType() {
+            if (this.courseMeta.flag == "Start" ){
+                return "primary"
+            }
+            else if (this.courseMeta.flag == "Complete" ) {
+                return "success"
+            }
+            else {
+                return "info"
+            }
         }
     }
 };
