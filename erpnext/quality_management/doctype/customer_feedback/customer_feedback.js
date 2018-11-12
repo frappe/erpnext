@@ -3,9 +3,7 @@
 
 frappe.ui.form.on('Customer Feedback', {
 	onload: function(frm){
-		if(!frm.doc.date){
-			frm.set_value("date", frappe.datetime.get_today());
-		}
+		frm.set_value("date", frappe.datetime.get_today());
 	},
 	template: function(frm){	//	Used to fetch the parameters of the selected feedback template
 		frm.fields_dict.feedback.grid.remove_all();
