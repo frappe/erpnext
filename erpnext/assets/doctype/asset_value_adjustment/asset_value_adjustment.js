@@ -14,7 +14,9 @@ frappe.ui.form.on('Asset Value Adjustment', {
 		});
 	},
 	onload: function(frm) {
-	frm.trigger("set_current_asset_value");
+		if(frm.is_new() && frm.doc.asset) {
+			frm.trigger("set_current_asset_value");
+		}
 	},
 	asset: function(frm) {
 		frm.trigger("set_current_asset_value");
