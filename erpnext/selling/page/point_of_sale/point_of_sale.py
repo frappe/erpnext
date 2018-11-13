@@ -28,7 +28,6 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	serial_no = data.get("serial_no") if data.get("serial_no") else ""
 	batch_no = data.get("batch_no") if data.get("batch_no") else ""
 	barcode = data.get("barcode") if data.get("barcode") else ""
-	frappe.errprint([item_code, serial_no, batch_no, barcode])
 
 	item_code, condition = get_conditions(item_code, serial_no, batch_no, barcode)
 
