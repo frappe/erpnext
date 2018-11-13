@@ -13,7 +13,7 @@ import ContentNavigation from "../components/ContentNavigation.vue"
 
 export default {
 	props:['program_name', 'course', 'type', 'content'],
-	name: "AcademyCoursePage",
+	name: "CoursePage",
 	data() {
 		return{
 			nextContent: '',
