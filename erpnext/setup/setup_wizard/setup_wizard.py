@@ -13,6 +13,7 @@ from frappe import _, _dict
 from frappe.utils import cstr, getdate
 from argparse import Namespace
 from frappe.desk.page.setup_wizard.setup_wizard import update_global_settings, run_post_setup_complete, make_records
+from journeys.journeys.config import get_journeys_config
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -125,7 +126,7 @@ def login_as_first_user(args):
 @frappe.whitelist()
 def install_fixtures(config=None):
 	if not config:
-		config = frappe.local.conf.setup or {}
+		config = get_journeys_config().get('setup_config') or {}
 
 	update_global_settings(_dict(config))
 
@@ -133,9 +134,8 @@ def install_fixtures(config=None):
 
 @frappe.whitelist()
 def make_setup_docs(args, config=None):
-	# TODO: get from not site conf
 	if not config:
-		config = frappe.local.conf.setup or {}
+		config = get_journeys_config().get('setup_config') or {}
 
 	args = json.loads(args)
 
