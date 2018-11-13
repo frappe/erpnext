@@ -84,8 +84,8 @@ def get_courses(program_name):
 
 @frappe.whitelist()
 def get_continue_content(course_name):
-	if(frappe.session.user == "Guest"):
-		return None
+	if frappe.session.user == "Guest":
+		return dict(content=None, content_type=None, flag=None)
 	enrollment = get_enrollment(course_name)
 	course = frappe.get_doc("Course", enrollment.course)
 	last_activity = enrollment.get_last_activity()
@@ -126,6 +126,8 @@ def get_content(content_name, content_type):
 
 @frappe.whitelist()
 def get_next_content(content, content_type, course):
+	if frappe.session.user == "Guest":
+		return None
 	course_doc = frappe.get_doc("Course", course)
 	content_list = [{'content_type':item.content_type, 'content':item.content} for item in course_doc.get_all_children()]
 	current_index = content_list.index({'content': content, 'content_type': content_type})
