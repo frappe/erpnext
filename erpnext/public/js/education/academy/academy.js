@@ -101,7 +101,7 @@ frappe.ready(() => {
 	});
 
 	academy.view = new Vue({
-		el: "#academy-app",
+		el: "#lms-app",
 		router: new VueRouter({ routes }),
 		template: "<academy-root/>",
 		components: { AcademyRoot },
