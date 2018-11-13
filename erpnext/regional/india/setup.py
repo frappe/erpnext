@@ -11,9 +11,10 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	setup_company_independent_fixtures()
 	if not patch:
 		update_address_template()
-		make_fixtures()
+		make_fixtures(company)
 
 # TODO: for all countries
 def setup_company_independent_fixtures():
