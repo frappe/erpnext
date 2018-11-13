@@ -37,6 +37,7 @@ class TransactionBase(StatusUpdater):
 			self._add_calendar_event(opts)
 
 	def delete_events(self):
+		from frappe.desk.doctype.event.event import delete_events
 		delete_events(self.doctype, self.name)
 
 	def _add_calendar_event(self, opts):
@@ -133,22 +134,6 @@ class TransactionBase(StatusUpdater):
 			ret = None
 
 		return ret
-
-def delete_events(ref_type, ref_name, delete_event=False):
-	participations = frappe.get_all("Event Participants", filters={"reference_doctype": ref_type, "reference_docname": ref_name,
-		"parenttype": "Event"}, fields=["parent", "name"])
-
-	if participations:
-		for participation in participations:
-			if delete_event:
-				frappe.delete_doc("Event", participation.parent, for_reload=True)
-			else:
-				total_participants = frappe.get_all("Event Participants", filters={"parenttype": "Event", "parent": participation.parent})
-
-				if len(total_participants) <= 1:
-					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
-
-				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, string_types):

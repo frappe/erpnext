@@ -10,7 +10,7 @@ from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
 	set_user_permission_if_allowed, has_permission
 from frappe.model.document import Document
-from erpnext.utilities.transaction_base import delete_events
+from frappe.desk.doctype.event.event import delete_events
 from frappe.utils.nestedset import NestedSet
 
 class EmployeeUserDisabledError(frappe.ValidationError):
