@@ -720,6 +720,13 @@ class TestStockEntry(unittest.TestCase):
 		for d in stock_entry.get('items'):
 			self.assertEqual(item_quantity.get(d.item_code), d.qty)
 
+	def test_customer_provided_parts_se(self):
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		se = make_stock_entry(item_code='CUST-0987', purporse = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
+		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
+		self.assertEqual(se.get("items")[0].amount, 0)
+
+
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
 	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
