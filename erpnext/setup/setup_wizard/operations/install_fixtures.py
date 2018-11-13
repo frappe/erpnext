@@ -244,9 +244,9 @@ def install(country=None):
 
 	set_more_defaults()
 
-	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
-	if os.path.exists(path.encode("utf-8")):
-		frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
+	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
+	# if os.path.exists(path.encode("utf-8")):
+	# 	frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
 
 
 def set_more_defaults():
