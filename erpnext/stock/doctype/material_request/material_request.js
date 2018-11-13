@@ -40,6 +40,7 @@ frappe.ui.form.on('Material Request', {
 
 	refresh: function(frm) {
 		frm.events.make_custom_buttons(frm);
+		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 	},
 
 	make_custom_buttons: function(frm) {
@@ -58,6 +59,11 @@ frappe.ui.form.on('Material Request', {
 
 				if (frm.doc.material_request_type === "Material Issue") {
 					frm.add_custom_button(__("Issue Material"),
+						() => frm.events.make_stock_entry(frm), __("Make"));
+				}
+
+				if (frm.doc.material_request_type === "Customer Provided") {
+					frm.add_custom_button(__("Material Receipt"),
 						() => frm.events.make_stock_entry(frm), __("Make"));
 				}
 
@@ -258,6 +264,9 @@ frappe.ui.form.on('Material Request', {
 				}
 			}
 		});
+	},
+	material_request_type: function(frm) {
+		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 	},
 
 });
