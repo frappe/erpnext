@@ -25,5 +25,3 @@ def execute():
 				status = "In Transit"
 
 		frappe.db.set_value("Delivery Trip", trip.name, "status", status, update_modified=False)
-
-	frappe.db.commit()
