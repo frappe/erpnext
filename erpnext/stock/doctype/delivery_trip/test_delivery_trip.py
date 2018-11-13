@@ -9,7 +9,7 @@ import erpnext
 import frappe
 from erpnext.stock.doctype.delivery_trip.delivery_trip import get_contact_and_address, notify_customers
 from erpnext.tests.utils import create_test_contact_and_address
-from frappe.utils import add_days, now_datetime
+from frappe.utils import add_days, flt, now_datetime, nowdate
 
 
 class TestDeliveryTrip(unittest.TestCase):
@@ -72,6 +72,33 @@ class TestDeliveryTrip(unittest.TestCase):
 		self.assertEqual(len(route_list[0]), 2)  # [home_address, locked_stop]
 		self.assertEqual(len(route_list[1]), 3)  # [locked_stop, second_stop, home_address]
 
+	def test_delivery_trip_status_draft(self):
+		self.assertEqual(self.delivery_trip.status, "Draft")
+
+	def test_delivery_trip_status_scheduled(self):
+		self.delivery_trip.submit()
+		self.assertEqual(self.delivery_trip.status, "Scheduled")
+
+	def test_delivery_trip_status_cancelled(self):
+		self.delivery_trip.submit()
+		self.delivery_trip.cancel()
+		self.assertEqual(self.delivery_trip.status, "Cancelled")
+
+	def test_delivery_trip_status_in_transit(self):
+		self.delivery_trip.submit()
+		self.delivery_trip.delivery_stops[0].visited = 1
+		self.delivery_trip.save()
+		self.assertEqual(self.delivery_trip.status, "In Transit")
+
+	def test_delivery_trip_status_completed(self):
+		self.delivery_trip.submit()
+
+		for stop in self.delivery_trip.delivery_stops:
+			stop.visited = 1
+
+		self.delivery_trip.save()
+		self.assertEqual(self.delivery_trip.status, "Completed")
+
 
 def create_driver():
 	if not frappe.db.exists("Driver", "Newton Scmander"):
@@ -108,11 +135,11 @@ def create_vehicle():
 			"make": "Maruti",
 			"model": "PCM",
 			"last_odometer": 5000,
-			"acquisition_date": frappe.utils.nowdate(),
+			"acquisition_date": nowdate(),
 			"location": "Mumbai",
 			"chassis_no": "1234ABCD",
 			"uom": "Litre",
-			"vehicle_value": frappe.utils.flt(500000)
+			"vehicle_value": flt(500000)
 		})
 		vehicle.insert()
 
