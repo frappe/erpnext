@@ -70,7 +70,7 @@ class calculate_taxes_and_totals(object):
 						if item.rate_with_margin > 0 else item.rate
 
 				item.net_rate = item.rate
-				item.discount_amount = item.price_list_rate - item.rate
+				item.discount_amount = item.rate_with_margin - item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
 
