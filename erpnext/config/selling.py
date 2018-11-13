@@ -185,10 +185,10 @@ def get_data():
 			"icon": "fa fa-table",
 			"items": [
 				{
-					"type": "page",
-					"name": "sales-analytics",
-					"label": _("Sales Analytics"),
-					"icon": "fa fa-bar-chart",
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Analytics",
+					"doctype": "Sales Order"
 				},
 				{
 					"type": "page",

@@ -594,6 +594,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		erpnext.utils.add_item(this.frm);
 	},
 
+	scan_barcode: function() {
+		let transaction_controller= new erpnext.TransactionController({frm:this.frm});
+		transaction_controller.scan_barcode();
+	},
+
 	on_submit: function() {
 		this.clean_up();
 	},

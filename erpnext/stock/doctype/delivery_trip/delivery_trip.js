@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Delivery Trip', {
 	setup: function (frm) {
+		frm.set_indicator_formatter('customer', (stop) => (stop.visited) ? "green" : "orange");
+
 		frm.set_query("driver", function () {
 			return {
 				filters: {
