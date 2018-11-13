@@ -210,9 +210,10 @@ class ProductionPlan(Document):
 
 	def set_status(self):
 		self.status = {
-			'0': 'Draft',
-			'1': 'Submitted'
-		}[cstr(self.docstatus or 0)]
+			0: 'Draft',
+			1: 'Submitted',
+			2: 'Cancelled'
+		}.get(self.docstatus)
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
