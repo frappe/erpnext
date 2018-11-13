@@ -174,7 +174,7 @@ class ReceivablePayableReport(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		self.company_currency = frappe.get_cached_value('Company',  self.filters.get("company"),  "default_currency")
+		self.company_currency = frappe.get_cached_value('Company',  self.filters.get("company"), "default_currency")
 
 		return_entries = self.get_return_entries(args.get("party_type"))
 
@@ -192,29 +192,37 @@ class ReceivablePayableReport(object):
 
 		for gle in gl_entries_data:
 			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers):
-				if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
-					outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
-						gle,self.filters.report_date, self.dr_or_cr, return_entries, currency_precision)
-					if abs(outstanding_amount) > 0.1/10**currency_precision:
+				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
+					gle,self.filters.report_date, self.dr_or_cr, return_entries, currency_precision)
+				if abs(outstanding_amount) > 0.1/10**currency_precision:
+					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
+						pdc_amount = flt(self.pdc_details.get((gle.voucher_no, gle.party), {}).get("pdc_amount"))
 						for d in self.payment_term_map.get(gle.voucher_no):
-							if payment_amount >= d[1]:
-								payment_amount -= d[1]
+							if payment_amount + credit_note_amount >= d[1]:
+								temp = payment_amount
+								payment_amount = payment_amount - d[1] + credit_note_amount
+								credit_note_amount = credit_note_amount - d[1] + temp - payment_amount
 							else:
-								outstanding_amount = d[1] - payment_amount
-								row = self.prepare_row(party_naming_by, args, gle, outstanding_amount, 
-									credit_note_amount, d[0], payment_amount , d[1], d[2])
+								outstanding_amount = d[1] - payment_amount - credit_note_amount
+								if pdc_amount > outstanding_amount:
+									pdc = outstanding_amount
+									pdc_amount -= outstanding_amount
+								else:
+									pdc = pdc_amount
+									pdc_amount = 0
+
+								row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
+									credit_note_amount, d[0], payment_amount , d[1], d[2], pdc)
 								payment_amount = 0
+								credit_note_amount = 0
 								data.append(row)
-				else:
-					outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
-						gle,self.filters.report_date, self.dr_or_cr, return_entries, currency_precision)
-					if abs(outstanding_amount) > 0.1/10**currency_precision:
+					else:
 						row = self.prepare_row(party_naming_by, args, gle, outstanding_amount, credit_note_amount)
 						data.append(row)
 		return data
 
 	def prepare_row(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount, 
-		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None):
+		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None, pdc_amount=None):
 		row = [gle.posting_date, gle.party]
 
 		# customer / supplier name
@@ -274,9 +282,14 @@ class ReceivablePayableReport(object):
 
 		pdc = self.pdc_details.get((gle.voucher_no, gle.party), {})
 
-		remaining_balance = outstanding_amount - flt(pdc.get("pdc_amount"))
-		row += [pdc.get("pdc_date"), pdc.get("pdc_ref"),
-			flt(pdc.get("pdc_amount")), remaining_balance]
+		if pdc_amount == None:
+			pdc_amount = flt(pdc.get("pdc_amount"))
+
+		pdc_date = pdc.get("pdc_date") if pdc_amount else ''
+		pdc_ref = pdc.get("pdc_ref") if pdc_amount else ''
+
+		remaining_balance = outstanding_amount - pdc_amount
+		row += [pdc_date, pdc_ref, pdc_amount, remaining_balance]
 
 <<<<<<< HEAD
 					# customer territory / supplier group
@@ -555,7 +568,7 @@ def get_pdc_details(party_type, report_date):
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus < 2 and pent.posting_date > %s
+			pent.docstatus < 2 and pent.posting_date > %s 
 			and pent.party_type = %s
 			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
