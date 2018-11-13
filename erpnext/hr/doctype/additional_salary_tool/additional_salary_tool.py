@@ -22,14 +22,15 @@ class AdditionalSalaryTool(Document):
 
 
 	def create_additional_salary(self, table_fieldname):
-		from_date = today()
 		for d in self.get(table_fieldname):
 			if not d.additional_salary_id:
 				addl_salary = frappe.new_doc("Additional Salary")
 				addl_salary.company = self.company
 				addl_salary.employee = self.employee
 				addl_salary.salary_component = d.salary_component
-				addl_salary.from_date = from_date
+				addl_salary.payroll_date = d.payroll_date or today()
+				addl_salary.to_date = d.to_date
+				addl_salary.is_recurring = d.is_recurring
 				addl_salary.amount = d.amount
 				addl_salary.bank = d.bank
 				addl_salary.insert()
@@ -42,7 +43,7 @@ class AdditionalSalaryTool(Document):
 
 		current_list = [d.additional_salary_id for d in self.earnings if d.additional_salary_id] \
 			+ [d.additional_salary_id for d in self.deductions if d.additional_salary_id]
-		
+
 		delete_list, expired_list = [], []
 		for d in addl_salary_records:
 			if d.name not in current_list:
@@ -53,11 +54,18 @@ class AdditionalSalaryTool(Document):
 
 		for addl_salary in expired_list:
 			frappe.db.set_value("Additional Salary", addl_salary, "to_date", end_date)
-		
+
 		for d in delete_list:
 			addl_salary = frappe.get_doc("Additional Salary", d)
 			addl_salary.cancel()
 
+		for d in self.earnings:
+			if d.additional_salary_id:
+				addl_salary = frappe.get_doc("Additional Salary", d.additional_salary_id)
+				addl_salary.is_recurring = d.is_recurring
+				if d.is_recurring and d.to_date:
+					addl_salary.to_date = d.to_date
+				addl_salary.save()
 
 @frappe.whitelist()
 def get_additional_salary_records(employee):
@@ -65,16 +73,11 @@ def get_additional_salary_records(employee):
 	end_date = get_last_day(today())
 
 	additional_components = frappe.db.sql("""
-		select name, salary_component, amount, type, bank, from_date
+		select name, salary_component, amount, type, bank, payroll_date, is_recurring, to_date
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
-			and (
-				(%(from_date)s between from_date and to_date)
-				or (ifnull(to_date, '') = '' and from_date <= %(to_date)s)
-				or (%(to_date)s between from_date and to_date)
-				or (from_date between %(from_date)s and %(to_date)s)
-			)
+			and payroll_date between %(from_date)s and %(to_date)s
 	""", {
 		'employee': employee,
 		'from_date': start_date,
@@ -82,6 +85,3 @@ def get_additional_salary_records(employee):
 	}, as_dict=1)
 
 	return additional_components
-			
-
-			

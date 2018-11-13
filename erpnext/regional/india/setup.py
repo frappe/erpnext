@@ -59,18 +59,27 @@ def create_hsn_codes(data, code_field):
 			pass
 
 def add_custom_roles_for_reports():
-	for report_name in ('GST Sales Register', 'GST Purchase Register',
-		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill'):
+	accounting_reports = ['GST Sales Register', 'GST Purchase Register',
+		'GST Itemised Sales Register', 'GST Itemised Purchase Register',
+		'HSN-wise-summary of outward supplies', 'Eway Bill', 'GSTR-1', 'GSTR-2']
 
-		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
-			frappe.get_doc(dict(
-				doctype='Custom Role',
-				report=report_name,
-				roles= [
-					dict(role='Accounts User'),
-					dict(role='Accounts Manager')
-				]
-			)).insert()
+	for report_name in accounting_reports:
+		add_report_permissions(report_name, ["Accounts User", "Accounts Manager", "Auditor"])
+
+	hr_reports = ['Employee Insurance Policy Deductions', 'Employee Salary Payment Details',
+		'Defined Contribution Pension Scheme Deductions', 'Income Tax Deductions',
+		'Professional Tax Deductions', 'Provident Fund Deductions']
+
+	for report_name in hr_reports:
+		add_report_permissions(report_name, ["HR User", "HR Manager"])
+
+def add_report_permissions(report_name, roles):
+	if not frappe.db.get_value('Custom Role', dict(report=report_name)):
+		frappe.get_doc(dict(
+			doctype='Custom Role',
+			report=report_name,
+			roles= map(lambda r: dict(role=r), roles)
+		)).insert()
 
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):

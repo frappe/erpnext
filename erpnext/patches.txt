@@ -571,7 +571,7 @@ execute:frappe.delete_doc("Page", "Sales Analytics")
 execute:frappe.delete_doc("Page", "Purchase Analytics")
 execute:frappe.delete_doc("Page", "Stock Analytics")
 execute:frappe.delete_doc("Page", "Production Analytics")
-erpnext.patches.v11_0.ewaybill_fields_gst_india
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-08
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v11_0.move_employee_health_insurance_to_employee_insurance

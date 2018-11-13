@@ -7,8 +7,8 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{\"add_total_row\": 0}",
- "letter_head": "Gadgets International",
- "modified": "2018-10-23 10:45:40.047978",
+ "letter_head": "",
+ "modified": "2018-10-24 10:45:40.047978",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Employee Insurance Policy Deductions",
@@ -17,15 +17,5 @@
  "ref_doctype": "Salary Slip",
  "report_name": "Employee Insurance Policy Deductions",
  "report_type": "Script Report",
- "roles": [
-  {
-   "role": "HR User"
-  },
-  {
-   "role": "HR Manager"
-  },
-  {
-   "role": "Employee"
-  }
- ]
+ "roles": []
 }

@@ -41,7 +41,7 @@ class DeductSalaryforPreviousLeaves(Document):
 				order by from_date desc
 				limit 1
 			""", (self.employee, d.from_date))
- 
+
 			dt = getdate(d.from_date)
 			days_in_month = cint(calendar.monthrange(cint(dt.year) ,cint(dt.month))[1])
 			month_start_date = get_first_day(dt)
@@ -58,9 +58,9 @@ class DeductSalaryforPreviousLeaves(Document):
 			for f in salary_slip.deductions:
 				if f.prorated_based_on_attendance or (d.is_lwp and f.depends_on_lwp):
 					amount -= flt(f.default_amount)
-			
+
 			prorated_amount = rounded(amount * d.total_days / days_in_month)
-			
+
 			self.total_deduction_amount += prorated_amount
 
 	def create_additional_salary(self):
@@ -68,8 +68,7 @@ class DeductSalaryforPreviousLeaves(Document):
 		addl_salary.company = self.company
 		addl_salary.employee = self.employee
 		addl_salary.salary_component = self.salary_component
-		addl_salary.from_date = self.payroll_date
-		addl_salary.to_date = self.payroll_date
+		addl_salary.payroll_date = self.payroll_date
 		addl_salary.amount = self.total_deduction_amount
 		addl_salary.submit()
 
@@ -90,7 +89,7 @@ class DeductSalaryforPreviousLeaves(Document):
 		if self.additional_salary:
 			addl_salary = frappe.get_doc("Additional Salary", self.additional_salary)
 			addl_salary.cancel()
-	
+
 	def cancel_leave_applications(self):
 		for d in self.leave_periods:
 			leave_applications = frappe.db.sql_list("""

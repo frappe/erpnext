@@ -25,7 +25,7 @@ class TestAdditionalSalary(unittest.TestCase):
 
 		salary_slip = make_salary_slip(salary_structure.name, employee=employee,
 			from_date=get_first_day(nowdate()), to_date=get_last_day(nowdate()))
-		
+
 		addl_comp = [d for d in salary_slip.earnings if d.salary_component=="Additional Allowance"]
 		self.assertTrue(addl_comp)
 		self.assertEqual(addl_comp[0].amount, 100)
@@ -40,7 +40,7 @@ def create_additional_salary(**args):
 	addl_sal.amount = args.amount or 100
 	addl_sal.company = args.company or "_Test Company"
 	addl_sal.overwrite_salary_structure_amount = 1
-	addl_sal.from_date = args.from_date or get_first_day(nowdate())
+	addl_sal.payroll_date = args.from_date or get_first_day(nowdate())
 	addl_sal.to_date = args.to_date or get_last_day(nowdate())
 	addl_sal.submit()
 

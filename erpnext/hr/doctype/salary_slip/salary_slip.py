@@ -420,7 +420,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-		
+
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		self.total_deduction = 0
@@ -434,7 +434,7 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
-		
+
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannnot be negative"), NegativeSalaryError)
 
@@ -492,8 +492,8 @@ class SalarySlip(TransactionBase):
 		frappe.db.sql("""
 			update `tabAdditional Salary` set salary_slip=%s
 			where employee=%s and docstatus=1
-			and ((from_date between %s and %s) or (to_date between %s and %s) or (%s between from_date and to_date))
-		""", (salary_slip, self.employee, self.start_date, self.end_date, self.start_date, self.end_date, self.start_date))
+				and payroll_date between %s and %s
+		""", (salary_slip, self.employee, self.start_date, self.end_date))
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
