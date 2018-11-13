@@ -1,10 +1,10 @@
 <template>
-	<div id="academy-root">
+	<div id="lms-root">
 	<router-view :key="$route.fullPath"></router-view>
 	</div>
 </template>
 <script>
 export default {
-    name: "AcademyRoot",
+    name: "lmsRoot",
 };
 </script>
