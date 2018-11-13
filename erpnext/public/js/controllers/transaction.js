@@ -262,6 +262,62 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+		this.frm.fields_dict["scan_barcode"] && this.frm.fields_dict["scan_barcode"].set_value("");
+		this.frm.fields_dict["scan_barcode"] && this.frm.fields_dict["scan_barcode"].set_new_description("");
+	},
+
+	scan_barcode: function() {
+		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
+
+		let show_description = function(idx, item_code, exist=null) {
+			if(exist) {
+				scan_barcode_field.set_new_description(__('Row : ') + idx + ' ' +
+					item_code + __(' Qty increased by 1'));
+			} else {
+				scan_barcode_field.set_new_description(__('New row : ') + idx + ' ' +
+					item_code + __('  Created'));
+			}
+		}
+
+		if(this.frm.doc.scan_barcode) {
+			frappe.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_serial_or_batch_or_barcode_number",
+				args: { search_value: this.frm.doc.scan_barcode }
+			}).then(r => {
+
+				if(r && r.message && r.message.item_code) {
+					let child = "";
+					let add_row_index = -1;
+					let cur_grid= this.frm.fields_dict["items"].grid;
+
+					this.frm.doc.items.map(d => {
+						if(d.item_code==r.message.item_code){
+							add_row_index = d.idx;
+							return;
+						} else if(!d.item_code && add_row_index==-1) {
+							add_row_index = d.idx;
+						}
+					});
+
+					if(add_row_index == -1) {
+						child = frappe.model.add_child(this.frm.doc, cur_grid.doctype, "items", add_row_index);
+					} else {
+						child = cur_grid.get_grid_row(add_row_index-1).doc;
+					}
+					show_description(child.idx, r.message.item_code, child.item_code);
+
+					frappe.model.set_value(child.doctype, child.name, {
+						"item_code": r.message.item_code,
+						"qty": (child.qty || 0) + 1
+					});
+				}
+				else{
+					scan_barcode_field.set_new_description(this.frm.doc.scan_barcode +__(' does not exist!'));
+				}
+			});
+			scan_barcode_field.set_value("");
+		}
+		return false;
 	},
 
 	apply_default_taxes: function() {
