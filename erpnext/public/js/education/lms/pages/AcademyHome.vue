@@ -42,13 +42,13 @@ export default {
     },
     methods: {
         // updateEnrolledPrograms(){
-        //     return academy.call("get_program_enrollments")
+        //     return lms.call("get_program_enrollments")
         // },
         getPortalDetails() {
-            return academy.call("get_portal_details")
+            return lms.call("get_portal_details")
         },
         getFeaturedPrograms() {
-            return academy.call("get_featured_programs")
+            return lms.call("get_featured_programs")
         }
     }
 };

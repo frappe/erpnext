@@ -15,14 +15,14 @@ var store = {
 }
 
 frappe.ready(() => {
-	frappe.provide('academy')
-	// frappe.utils.make_event_emitter(academy);
+	frappe.provide('lms')
+	// frappe.utils.make_event_emitter(lms);
 
-	academy.store = new Vue({
+	lms.store = new Vue({
 		data: store,
 		methods: {
 			addCompletedCourses (courseName){
-				if (academy.debug) console.log('addCompletedCourses triggered with', courseName)
+				if (lms.debug) console.log('addCompletedCourses triggered with', courseName)
 				this.completedCourses.add(courseName)
 			},
 
@@ -40,32 +40,32 @@ frappe.ready(() => {
 			},
 
 			updateEnrolledPrograms (){
-				if (academy.debug) console.log('Updating enrolledPrograms')
-				academy.call("get_program_enrollments").then(data => {
+				if (lms.debug) console.log('Updating enrolledPrograms')
+				lms.call("get_program_enrollments").then(data => {
 					data.forEach(element => {
 						this.enrolledPrograms.add(element)
 					})
 				});
-				if (academy.debug) console.log('Updated State', this.enrolledPrograms)
+				if (lms.debug) console.log('Updated State', this.enrolledPrograms)
 			},
 
 			updateEnrolledCourses (){
-				if (academy.debug) console.log('Updating enrolledCourses')
+				if (lms.debug) console.log('Updating enrolledCourses')
 				frappe.call({
-					method: "erpnext.www.academy.get_course_enrollments",
+					method: "erpnext.www.lms.get_course_enrollments",
 					args:{
 						email: frappe.session.user
 					}
 				}).then( r => {
 					this.enrolledCourses = r.message
 				})
-				if (academy.debug) console.log('Updated State', this.enrolledCourses)
+				if (lms.debug) console.log('Updated State', this.enrolledCourses)
 			},
 
 			updateCompletedCourses (){
-				if (academy.debug) console.log('Updating States')
+				if (lms.debug) console.log('Updating States')
 				frappe.call({
-					method: "erpnext.www.academy.get_completed_courses",
+					method: "erpnext.www.lms.get_completed_courses",
 					args:{
 						email: frappe.session.user
 					}
@@ -76,16 +76,16 @@ frappe.ready(() => {
 						}
 					}
 				})
-				if (academy.debug) console.log('Updated State', this.completedCourses)
+				if (lms.debug) console.log('Updated State', this.completedCourses)
 			},
 
 			checkLogin (){
 				if(frappe.session.user === "Guest"){
-					if (academy.debug) console.log('No Session')
+					if (lms.debug) console.log('No Session')
 					this.isLogin = false
 				}
 				else {
-					if (academy.debug) console.log('Current User: ', frappe.session.user)
+					if (lms.debug) console.log('Current User: ', frappe.session.user)
 					this.isLogin = true
 				}
 				return this.isLogin
@@ -100,17 +100,17 @@ frappe.ready(() => {
 		}
 	});
 
-	academy.view = new Vue({
+	lms.view = new Vue({
 		el: "#lms-app",
 		router: new VueRouter({ routes }),
 		template: "<academy-root/>",
 		components: { AcademyRoot },
 		created: function() {
-			if(academy.store.checkLogin()){
-				academy.store.updateState()
+			if(lms.store.checkLogin()){
+				lms.store.updateState()
 			}
 		}
 	});
 
-	academy.debug = true
+	lms.debug = true
 })

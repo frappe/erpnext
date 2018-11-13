@@ -16,7 +16,7 @@ export default {
 				frappe.call({
 					method: "erpnext.www.lms.add_activity",
 					args: {
-						enrollment: academy.store.enrolledCourses[this.$route.params.course],
+						enrollment: lms.store.enrolledCourses[this.$route.params.course],
 						content_type: this.$route.params.type,
 						content: this.$route.params.content
 					}
@@ -29,7 +29,7 @@ export default {
 				frappe.call({
 					method: "erpnext.www.lms.add_activity",
 					args: {
-						enrollment: academy.store.enrolledCourses[this.$route.params.course],
+						enrollment: lms.store.enrolledCourses[this.$route.params.course],
 						content_type: this.$route.params.type,
 						content: this.$route.params.content
 					}
@@ -38,15 +38,15 @@ export default {
 			frappe.call({
 					method: "erpnext.www.lms.mark_course_complete",
 					args: {
-						enrollment: academy.store.enrolledCourses[this.$route.params.course]
+						enrollment: lms.store.enrolledCourses[this.$route.params.course]
 					}
 				})
-			// academy.store.addCompletedCourses(this.$route.params.course)
-			academy.store.updateCompletedCourses()
+			// lms.store.addCompletedCourses(this.$route.params.course)
+			lms.store.updateCompletedCourses()
 			this.$router.push({ name: 'program', params: { program_name: this.$route.params.program_name}})
 
 			//
-			academy.trigger('course-completed', course_name);
+			lms.trigger('course-completed', course_name);
 		}
 	}
 };

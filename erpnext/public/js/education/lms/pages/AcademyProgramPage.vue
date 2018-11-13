@@ -32,13 +32,13 @@ export default {
 		}
 	},
     beforeMount() {
-        if(academy.store.isLogin) academy.store.updateCompletedCourses()
+        if(lms.store.isLogin) lms.store.updateCompletedCourses()
     },
 	mounted() {
 		this.getProgramDetails().then(data => this.program = data);
 		this.getCourses().then(data => this.course_data = data);
 		
-		// academy.on(`course-completed`, (course_name) => {
+		// lms.on(`course-completed`, (course_name) => {
 		// 	const course = this.course_data.findIndex(c => c.name === course_name);
 		// 	this.course_data[course].completed = true;
 		// });
@@ -51,17 +51,17 @@ export default {
 				)
 		},
 		getContentForNextCourse() {
-			return academy.call('get_continue_data', {
+			return lms.call('get_continue_data', {
 				program_name: this.program_name
 			});
 		},
 		getProgramDetails() {
-			return academy.call('get_program_details', {
+			return lms.call('get_program_details', {
 				program_name: this.program_name
 			});
 		},
 		getCourses() {
-			return academy.call('get_courses', {
+			return lms.call('get_courses', {
 				program_name: this.program_name
 			})
 		}

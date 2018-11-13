@@ -13,7 +13,7 @@ export default {
     },
     computed: {
         getButtonName: function() {
-            if(academy.store.checkCourseCompletion(this.course)){
+            if(lms.store.checkCourseCompletion(this.course)){
                 return 'Completed'
             }
             else{
@@ -21,7 +21,7 @@ export default {
             }
         },
         getClassName: function() {
-            if(academy.store.checkCourseCompletion(this.course)){
+            if(lms.store.checkCourseCompletion(this.course)){
                 return 'btn-success'
             }
         }
