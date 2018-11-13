@@ -53,8 +53,11 @@ export default {
             else if (this.courseMeta.flag == "Complete" ) {
                 return "success"
             }
-            else {
+            else if (this.courseMeta.flag == "Continue" ) {
                 return "info"
+            }
+            else {
+                return " hidden"
             }
         }
     }
