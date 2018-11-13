@@ -736,6 +736,7 @@ def make_sales_order(**args):
 	if args.transaction_date:
 		so.transaction_date = args.transaction_date
 
+	so.set_warehouse = "" # no need to test set_warehouse permission since it only affects the client
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
