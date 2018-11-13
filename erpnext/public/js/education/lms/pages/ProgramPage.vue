@@ -1,19 +1,19 @@
 <template>
 <div>
-	<AcademyTopSection v-bind:title="program.program_name" v-bind:description="program.description">
+	<TopSection v-bind:title="program.program_name" v-bind:description="program.description">
 		<!-- <a-button @click="startCourse">Start Course</a-button>
 		<a-button @click="continueCourse">Continue Course</a-button> -->
-    </AcademyTopSection>
-	<AcademyList :title="'Courses'" :description="''">
-        <AcademyCourseCard v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.meta.flag"/>
-    </AcademyList>
+    </TopSection>
+	<CardList :title="'Courses'" :description="''">
+        <CourseCard v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.meta.flag"/>
+    </CardList>
 </div>
 </template>
 <script>
 import Button from '../components/Button.vue';
-import AcademyTopSection from "../components/AcademyTopSection.vue"
-import AcademyList from "../components/AcademyList.vue"
-import AcademyCourseCard from "../components/AcademyCourseCard.vue"
+import TopSection from "../components/TopSection.vue"
+import CardList from "../components/CardList.vue"
+import CourseCard from "../components/CourseCard.vue"
 
 
 export default {
@@ -21,9 +21,9 @@ export default {
     name: "ProgramPage",
     components: {
         AButton: Button,
-		AcademyTopSection,
-		AcademyList,
-		AcademyCourseCard
+		TopSection,
+		CardList,
+		CourseCard
 	},
 	data() {
 		return {

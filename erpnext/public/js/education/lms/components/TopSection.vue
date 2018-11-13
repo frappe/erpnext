@@ -19,6 +19,6 @@
 
 export default {
 	props: ['title', 'description'],
-    name: "AcademyTopSection",
+    name: "TopSection",
 };
 </script>

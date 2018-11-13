@@ -4,7 +4,7 @@
 <script>
 export default {
     props: ['course', 'nextContent', 'nextContentType'],
-    name: "AcademyCourseCardButton",
+    name: "CourseCardButton",
     data() {
         return {
             buttonName: 'Start',

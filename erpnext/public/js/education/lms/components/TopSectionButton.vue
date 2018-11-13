@@ -4,7 +4,7 @@
 </template>
 <script>
 export default {
-    name: "AcademyTopSectionButton",
+    name: "TopSectionButton",
     data() {
         return {
             buttonName: '',
