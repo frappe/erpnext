@@ -1,7 +1,7 @@
 frappe.ready(() => {
-    frappe.provide('academy');
+    frappe.provide('lms');
 
-    academy.call = (method, args) => {
+    lms.call = (method, args) => {
         const method_path = 'erpnext.www.lms.' + method;
         return new Promise((resolve, reject) => {
             return frappe.call({

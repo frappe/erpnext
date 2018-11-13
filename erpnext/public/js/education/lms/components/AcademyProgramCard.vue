@@ -31,18 +31,18 @@ export default {
     name: "AcademyProgramCard",
     data() {
     	return {
-            isLogin: academy.store.isLogin
+            isLogin: lms.store.isLogin
     	};
     },
     created() {
     },
     methods: {
         enroll() {
-            academy.call('enroll_in_program', {
+            lms.call('enroll_in_program', {
                 program_name: this.program.name,
             }).then(
-                academy.store.enrolledPrograms.add(this.program.name),
-                academy.store.updateEnrolledPrograms(),
+                lms.store.enrolledPrograms.add(this.program.name),
+                lms.store.updateEnrolledPrograms(),
                 this.router.push('Program/' + this.program.name)
             )
         }
@@ -60,7 +60,7 @@ export default {
             return `Program/${this.program.name}`
         },
         isEnrolled() {
-            return academy.store.enrolledPrograms.has(this.program.name)
+            return lms.store.enrolledPrograms.has(this.program.name)
         }
     },
     components: {
