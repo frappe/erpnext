@@ -165,7 +165,7 @@ default_roles = [
 ]
 
 role_home_page = {
-	"LMS User": "academy"
+	"LMS User": "lms"
 }
 
 has_website_permission = {
