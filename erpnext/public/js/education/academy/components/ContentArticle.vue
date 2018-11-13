@@ -28,7 +28,7 @@ export default {
     },
     mounted() {
     	frappe.call({
-    		method: "erpnext.www.academy.get_content",
+    		method: "erpnext.www.lms.get_content",
     		args: {
     			content_name: this.content,
     			content_type: this.type

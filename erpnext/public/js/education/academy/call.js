@@ -2,7 +2,7 @@ frappe.ready(() => {
     frappe.provide('academy');
 
     academy.call = (method, args) => {
-        const method_path = 'erpnext.www.academy.' + method;
+        const method_path = 'erpnext.www.lms.' + method;
         return new Promise((resolve, reject) => {
             return frappe.call({
                 method: method_path,
