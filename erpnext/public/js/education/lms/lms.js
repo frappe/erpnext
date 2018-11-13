@@ -1,7 +1,7 @@
 import Vue from 'vue/dist/vue.js';
 import VueRouter from 'vue-router/dist/vue-router.js'
 
-import AcademyRoot from "./AcademyRoot.vue";
+import lmsRoot from "./lmsRoot.vue";
 import routes from './routes';
 import './call';
 
@@ -103,8 +103,8 @@ frappe.ready(() => {
 	lms.view = new Vue({
 		el: "#lms-app",
 		router: new VueRouter({ routes }),
-		template: "<academy-root/>",
-		components: { AcademyRoot },
+		template: "<lms-root/>",
+		components: { lmsRoot },
 		created: function() {
 			if(lms.store.checkLogin()){
 				lms.store.updateState()

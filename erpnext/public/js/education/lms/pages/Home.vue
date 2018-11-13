@@ -15,7 +15,7 @@ import AcademyProgramCard from "../components/AcademyProgramCard.vue"
 import AcademyTopSectionButton from "../components/AcademyTopSectionButton.vue"
 
 export default {
-    name: "AcademyHome",
+    name: "Home",
     data() {
     	return{
     		portal: {},

@@ -18,7 +18,7 @@ import AcademyCourseCard from "../components/AcademyCourseCard.vue"
 
 export default {
 	props: ['program_name'],
-    name: "AcademyProgramPage",
+    name: "ProgramPage",
     components: {
         AButton: Button,
 		AcademyTopSection,
