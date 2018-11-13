@@ -12,6 +12,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
 			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 		}
+		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 
 		item.rate = flt(item.rate_with_margin , precision("rate", item));
 
