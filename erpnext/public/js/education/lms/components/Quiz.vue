@@ -42,7 +42,7 @@
 import QuizSingleChoice from "./Quiz/QuizSingleChoice.vue"
 export default {
 	props: ['content', 'type'],
-	name: 'ContentQuiz',
+	name: 'Quiz',
 	data() {
     	return {
     		quizData: '',

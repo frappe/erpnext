@@ -9,7 +9,7 @@
 <script>
 export default {
 	props: ['nextContent', 'nextContentType'],
-	name: 'ContentNavigation',
+	name: 'Navigation',
 	methods: {
 		goNext() {
 			if(this.$route.params.type != "Quiz"){

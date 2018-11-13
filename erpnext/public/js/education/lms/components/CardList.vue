@@ -13,6 +13,6 @@
 <script>
 export default {
     props:['title', 'description'],
-    name: "AcademyList",
+    name: "CardList",
 };
 </script>

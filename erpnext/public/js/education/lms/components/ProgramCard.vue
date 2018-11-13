@@ -28,7 +28,7 @@
 import AButton from './Button.vue';
 export default {
     props: ['program', 'enrolled'],
-    name: "AcademyProgramCard",
+    name: "ProgramCard",
     data() {
     	return {
             isLogin: lms.store.isLogin
