@@ -35,7 +35,7 @@ export default {
 	},
 	mounted() {
 	  	frappe.call({
-	  		method: "erpnext.www.academy.get_next_content",
+	  		method: "erpnext.www.lms.get_next_content",
 	  		args:{
 	  			content: this.content,
 	  			content_type: this.type,

@@ -18,7 +18,7 @@ export default {
     mounted() {
         if(this.isLoggedIn && this.$route.name == 'program'){
                 frappe.call({
-                    method: "erpnext.www.academy.get_continue_data",
+                    method: "erpnext.www.lms.get_continue_data",
                     args: {
                         program_name: this.$route.params.program_name
                     }
@@ -56,7 +56,7 @@ export default {
             }
             else {
                 frappe.call({
-                method: "erpnext.www.academy.enroll_in_program",
+                method: "erpnext.www.lms.enroll_in_program",
                 args:{
                     program_name: this.$route.params.program_name,
                     student_email_id: frappe.session.user

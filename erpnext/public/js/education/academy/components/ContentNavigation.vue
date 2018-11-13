@@ -14,7 +14,7 @@ export default {
 		goNext() {
 			if(this.$route.params.type != "Quiz"){
 				frappe.call({
-					method: "erpnext.www.academy.add_activity",
+					method: "erpnext.www.lms.add_activity",
 					args: {
 						enrollment: academy.store.enrolledCourses[this.$route.params.course],
 						content_type: this.$route.params.type,
@@ -27,7 +27,7 @@ export default {
 		finish() {
 			if(this.$route.params.type != "Quiz"){
 				frappe.call({
-					method: "erpnext.www.academy.add_activity",
+					method: "erpnext.www.lms.add_activity",
 					args: {
 						enrollment: academy.store.enrolledCourses[this.$route.params.course],
 						content_type: this.$route.params.type,
@@ -36,7 +36,7 @@ export default {
 				})
 			}
 			frappe.call({
-					method: "erpnext.www.academy.mark_course_complete",
+					method: "erpnext.www.lms.mark_course_complete",
 					args: {
 						enrollment: academy.store.enrolledCourses[this.$route.params.course]
 					}
