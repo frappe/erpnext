@@ -53,7 +53,7 @@ export default {
     },
     mounted() {
     	frappe.call({
-    		method: "erpnext.www.academy.get_quiz_without_answers",
+    		method: "erpnext.www.lms.get_quiz_without_answers",
     		args: {
     			quiz_name: this.content,
     		}
@@ -70,7 +70,7 @@ export default {
 		},
 		submitQuiz() {
 			frappe.call({
-				method: "erpnext.www.academy.evaluate_quiz",
+				method: "erpnext.www.lms.evaluate_quiz",
 				args: {
                     enrollment: academy.store.enrolledCourses[this.$route.params.course],
 					quiz_response: this.quizResponse,
