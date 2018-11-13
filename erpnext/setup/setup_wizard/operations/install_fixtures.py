@@ -388,8 +388,10 @@ def install_post_company_fixtures(args=None):
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
 
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+	current_fiscal_year = frappe.get_all("Fiscal Year")[0]
+
 	global_defaults.update({
-		'current_fiscal_year': get_fy_details(args.get('fy_start_date'), args.get('fy_end_date')),
+		'current_fiscal_year': current_fiscal_year.name,
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
