@@ -65,8 +65,8 @@ class ReceivablePayableReport(object):
 				"width": 120
 			})
 			columns.append({
-				"label": "Payment Term Amount",
-				"fieldname": "payment_term_amount",
+				"label": "Invoice Grand Total",
+				"fieldname": "invoice_grand_total",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
@@ -128,14 +128,14 @@ class ReceivablePayableReport(object):
 			"fieldname": "pdc/lc_amount",
 			"label": _("PDC/LC Amount"),
 			"fieldtype": "Currency",
-			"options": "Currency",
+			"options": "currency",
 			"width": 130
 		},
 		{
 			"fieldname": "remaining_balance",
 			"label": _("Remaining Balance"),
 			"fieldtype": "Currency",
-			"options": "Currency",
+			"options": "currency",
 			"width": 130
 		}]
 
@@ -166,7 +166,7 @@ class ReceivablePayableReport(object):
 
 	def get_data(self, party_naming_by, args):
 		from erpnext.accounts.utils import get_currency_precision
-		currency_precision = get_currency_precision() or 2
+		self.currency_precision = get_currency_precision() or 2
 		self.dr_or_cr = "debit" if args.get("party_type") == "Customer" else "credit"
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
@@ -193,8 +193,8 @@ class ReceivablePayableReport(object):
 		for gle in gl_entries_data:
 			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
-					gle,self.filters.report_date, self.dr_or_cr, return_entries, currency_precision)
-				if abs(outstanding_amount) > 0.1/10**currency_precision:
+					gle,self.filters.report_date, self.dr_or_cr, return_entries)
+				if abs(outstanding_amount) > 0.1/10**self.currency_precision:
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
 						pdc_amount = flt(self.pdc_details.get((gle.voucher_no, gle.party), {}).get("pdc_amount"))
 						for d in self.payment_term_map.get(gle.voucher_no):
@@ -210,7 +210,8 @@ class ReceivablePayableReport(object):
 								else:
 									pdc = pdc_amount
 									pdc_amount = 0
-
+								if self.filters.get(gle.party_type):
+									d[1] = d[1] * d[3]
 								row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
 									credit_note_amount, d[0], payment_amount , d[1], d[2], pdc)
 								payment_amount = 0
@@ -247,7 +248,9 @@ class ReceivablePayableReport(object):
 		invoiced_amount = gle.get(self.dr_or_cr) if (gle.get(self.dr_or_cr) > 0) else 0
 
 		if self.filters.based_on_payment_terms:
-			row+=[payment_term, payment_term_amount]
+			row+=[payment_term, invoiced_amount]
+			if payment_term_amount:
+				invoiced_amount = payment_term_amount
 
 		if paid_amt == None:
 			paid_amt = invoiced_amount - outstanding_amount - credit_note_amount
@@ -344,23 +347,23 @@ class ReceivablePayableReport(object):
 		doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
 		return [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1})]
 
-	def get_outstanding_amount(self, gle, report_date, dr_or_cr, return_entries, currency_precision):
+	def get_outstanding_amount(self, gle, report_date, dr_or_cr, return_entries):
 		payment_amount, credit_note_amount = 0.0, 0.0
 		reverse_dr_or_cr = "credit" if dr_or_cr=="debit" else "debit"
 
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
-				amount = flt(e.get(reverse_dr_or_cr), currency_precision) - flt(e.get(dr_or_cr), currency_precision)
+				amount = flt(e.get(reverse_dr_or_cr), self.currency_precision) - flt(e.get(dr_or_cr), self.currency_precision)
 				if e.voucher_no not in return_entries:
 					payment_amount += amount
 				else:
 					credit_note_amount += amount
 
-		outstanding_amount = (flt((flt(gle.get(dr_or_cr), currency_precision)
-			- flt(gle.get(reverse_dr_or_cr), currency_precision)
-			- payment_amount - credit_note_amount), currency_precision))
+		outstanding_amount = (flt((flt(gle.get(dr_or_cr), self.currency_precision)
+			- flt(gle.get(reverse_dr_or_cr), self.currency_precision)
+			- payment_amount - credit_note_amount), self.currency_precision))
 
-		credit_note_amount = flt(credit_note_amount, currency_precision)
+		credit_note_amount = flt(credit_note_amount, self.currency_precision)
 
 		return outstanding_amount, credit_note_amount, payment_amount
 
@@ -498,16 +501,22 @@ class ReceivablePayableReport(object):
 
 	def get_payment_term_detail(self, voucher_nos):
 		payment_term_map = frappe._dict()
-		for d in frappe.db.sql(""" select si.name, si.payment_terms_template, ps.due_date, ps.payment_amount, ps.description
-		from `tabSales Invoice` si, `tabPayment Schedule` ps
-		where si.name = ps.parent and 
-		si.docstatus = 1 and si.company = '%s' and
-		si.name in (%s) order by ps.due_date"""
+		for d in frappe.db.sql(""" select si.name, si.payment_terms_template,
+			party_account_currency, currency, si.conversion_rate,
+			ps.due_date, ps.payment_amount, ps.description
+			from `tabSales Invoice` si, `tabPayment Schedule` ps
+			where si.name = ps.parent and 
+			si.docstatus = 1 and si.company = '%s' and
+			si.name in (%s) order by ps.due_date"""
 		% (self.filters.company, ','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict = 1):
 			if d.payment_terms_template:
-				payment_term_map.setdefault(d.name, [])
-				payment_term_map[d.name].append((d.due_date, d.payment_amount, d.description))
+				if self.filters.get("customer") and d.currency == d.party_account_currency:
+					payment_term_amount = d.payment_amount
+				else:
+					payment_term_amount = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
 
+				payment_term_map.setdefault(d.name, [])
+				payment_term_map[d.name].append((d.due_date, payment_term_amount, d.description))
 		return payment_term_map
 
 	def get_chart_data(self, columns, data):
