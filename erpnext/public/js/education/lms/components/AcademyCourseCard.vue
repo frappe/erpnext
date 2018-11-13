@@ -38,10 +38,10 @@ export default {
     },
     computed: {
         showStart() {
-            return academy.loggedIn && !this.courseMeta.flag == "Completed";
+            return lms.loggedIn && !this.courseMeta.flag == "Completed";
         },
         showCompleted() {
-            return academy.loggedIn && this.courseMeta.flag == "Completed";
+            return lms.loggedIn && this.courseMeta.flag == "Completed";
         },
         firstContentRoute() {
             return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
