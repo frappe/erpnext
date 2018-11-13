@@ -1,15 +1,15 @@
 <template>
 	<div>
 		<component v-bind:is="currentComponent" :content="content" :type="type">
-			<ContentNavigation :nextContent="nextContent" :nextContentType="nextContentType"/>
+			<Navigation :nextContent="nextContent" :nextContentType="nextContentType"/>
 		</component>
 	</div>
 </template>
 <script>
-import ContentArticle from "../components/ContentArticle.vue"
-import ContentQuiz from "../components/ContentQuiz.vue"
-import ContentVideo from "../components/ContentVideo.vue"
-import ContentNavigation from "../components/ContentNavigation.vue"
+import Article from "../components/Article.vue"
+import Quiz from "../components/Quiz.vue"
+import Video from "../components/Video.vue"
+import Navigation from "../components/Navigation.vue"
 
 export default {
 	props:['program_name', 'course', 'type', 'content'],
@@ -23,13 +23,13 @@ export default {
 	computed: {
 	  currentComponent: function() {
 	  	if(this.type === "Article") {
-	  		return 'ContentArticle'
+	  		return 'Article'
 	  	}
 	  	else if(this.type === "Quiz") {
-	  		return 'ContentQuiz'
+	  		return 'Quiz'
 	  	}
 	  	else if(this.type === "Video") {
-	  		return 'ContentVideo'
+	  		return 'Video'
 	  	}
 	  },
 	},
@@ -47,10 +47,10 @@ export default {
 	  	});
 	},
 	components: {
-		ContentArticle,
-		ContentVideo,
-		ContentQuiz,
-		ContentNavigation
+		Article,
+		Video,
+		Quiz,
+		Navigation
 	}
 };
 </script>

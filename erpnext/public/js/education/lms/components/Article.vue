@@ -1,8 +1,8 @@
 <template>
 <div>
-    <ContentTitle :title="contentData.title" :author="contentData.author" :publishDate="contentData.publish_date">
+    <Title :title="contentData.title" :author="contentData.author" :publishDate="contentData.publish_date">
         <slot></slot>
-    </ContentTitle>
+    </Title>
     <section class="article-content-section">
         <div class='container'>
             <div class="content" v-html="contentData.content"></div>
@@ -17,10 +17,10 @@
 </div>
 </template>
 <script>
-import ContentTitle from './ContentTitle.vue'
+import Title from './Title.vue'
 export default {
 	props: ['content', 'type'],
-	name: 'ContentArticle',
+	name: 'Article',
 	data() {
     	return {
     		contentData: ''
@@ -38,7 +38,7 @@ export default {
     	});
     },
     components: {
-        ContentTitle
+        Title
     }
 };
 </script>

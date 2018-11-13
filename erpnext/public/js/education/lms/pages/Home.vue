@@ -1,18 +1,18 @@
 <template>
 <div>
-	<AcademyTopSection :title="portal.title" :description="portal.description">
-        <AcademyTopSectionButton/>
-    </AcademyTopSection>
-	<AcademyList :title="'Featured Programs'" :description="'Master ERPNext'">
-        <AcademyProgramCard v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
-    </AcademyList>
+	<TopSection :title="portal.title" :description="portal.description">
+        <TopSectionButton/>
+    </TopSection>
+	<CardList :title="'Featured Programs'" :description="'Master ERPNext'">
+        <ProgramCard v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
+    </CardList>
 </div>
 </template>
 <script>
-import AcademyTopSection from "../components/AcademyTopSection.vue"
-import AcademyList from "../components/AcademyList.vue"
-import AcademyProgramCard from "../components/AcademyProgramCard.vue"
-import AcademyTopSectionButton from "../components/AcademyTopSectionButton.vue"
+import TopSection from "../components/TopSection.vue"
+import CardList from "../components/CardList.vue"
+import ProgramCard from "../components/ProgramCard.vue"
+import TopSectionButton from "../components/TopSectionButton.vue"
 
 export default {
     name: "Home",
@@ -24,10 +24,10 @@ export default {
     	}
     },
     components: {
-		AcademyTopSection,
-        AcademyList,
-        AcademyProgramCard,
-        AcademyTopSectionButton
+		TopSection,
+        CardList,
+        ProgramCard,
+        TopSectionButton
     },
     beforeMount() {
         // this.updateEnrolledPrograms().then(data => {

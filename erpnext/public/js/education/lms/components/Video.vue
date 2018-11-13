@@ -39,7 +39,7 @@
 <script>
 export default {
 	props: ['content', 'type'],
-	name: 'ContentVideo',
+	name: 'Video',
 	data() {
     	return {
     		contentData: ''
