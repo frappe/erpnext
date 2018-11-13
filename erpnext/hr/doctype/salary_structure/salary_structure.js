@@ -58,8 +58,8 @@ frappe.ui.form.on('Salary Structure', {
 				doc.company = frm.doc.company;
 				frappe.set_route('Form', 'Salary Structure Assignment', doc.name);
 			});
-			frm.add_custom_button(__("Add Employees"),function () {
-			frm.trigger('add_employees')
+			frm.add_custom_button(__("Assign to Employees"),function () {
+			frm.trigger('assign_to_employees')
 		})
 		}
 		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
@@ -68,9 +68,9 @@ frappe.ui.form.on('Salary Structure', {
 		});
 	},
 
-	add_employees:function (frm) {
+	assign_to_employees:function (frm) {
 		var d = new frappe.ui.Dialog({
-			title: __("Add Employees"),
+			title: __("Assign to Employees"),
 			fields: [
 				{fieldname: "sec_break", fieldtype: "Section Break", label: __("Filter Employees By (Optional)")},
 				{fieldname: "grade", fieldtype: "Link", options: "Employee Grade", label: __("Employee Grade")},
