@@ -1,8 +1,8 @@
 <template>
 <div>
-    <Title :title="contentData.title" :author="contentData.author" :publishDate="contentData.publish_date">
+    <ContentTitle :title="contentData.title" :author="contentData.author" :publishDate="contentData.publish_date">
         <slot></slot>
-    </Title>
+    </ContentTitle>
     <section class="article-content-section">
         <div class='container'>
             <div class="content" v-html="contentData.content"></div>
@@ -17,7 +17,7 @@
 </div>
 </template>
 <script>
-import Title from './Title.vue'
+import ContentTitle from './ContentTitle.vue'
 export default {
 	props: ['content', 'type'],
 	name: 'Article',
@@ -27,18 +27,15 @@ export default {
     	}
     },
     mounted() {
-    	frappe.call({
-    		method: "erpnext.www.lms.get_content",
-    		args: {
-    			content_name: this.content,
-    			content_type: this.type
-    		}
-    	}).then(r => {
-    			this.contentData = r.message
-    	});
+    	this.getContent().then(data => this.contentData = data);
+    },
+    methods: {
+        getContent() {
+            return frappe.db.get_doc(this.type, this.content)
+        }
     },
     components: {
-        Title
+        ContentTitle
     }
 };
 </script>

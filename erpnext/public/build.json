@@ -55,7 +55,7 @@
         "stock/dashboard/item_dashboard_list.html",
         "stock/dashboard/item_dashboard.js"
     ],
-    "js/academy.min.js": [
+    "js/lms.min.js": [
         "public/js/education/lms/lms.js"
     ]
 }
