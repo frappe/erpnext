@@ -20,7 +20,7 @@
 <script>
 export default {
     props: ['title', 'publishDate', 'author'],
-    name: 'Title',
+    name: 'ContentTitle',
     data() {
         return {
 
