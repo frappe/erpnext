@@ -1,16 +1,13 @@
 <template>
 <div>
 	<TopSection v-bind:title="program.program_name" v-bind:description="program.description">
-		<!-- <a-button @click="startCourse">Start Course</a-button>
-		<a-button @click="continueCourse">Continue Course</a-button> -->
     </TopSection>
 	<CardList :title="'Courses'" :description="''">
-        <CourseCard v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.meta.flag"/>
+        <CourseCard slot="card-list-slot" v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.course.name + course.meta.flag"/>
     </CardList>
 </div>
 </template>
 <script>
-import Button from '../components/Button.vue';
 import TopSection from "../components/TopSection.vue"
 import CardList from "../components/CardList.vue"
 import CourseCard from "../components/CourseCard.vue"
@@ -20,7 +17,6 @@ export default {
 	props: ['program_name'],
     name: "ProgramPage",
     components: {
-        AButton: Button,
 		TopSection,
 		CardList,
 		CourseCard

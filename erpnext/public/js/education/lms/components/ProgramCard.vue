@@ -57,7 +57,7 @@ export default {
                 }
         },
         programPageRoute() {
-            return `Program/${this.program.name}`
+            return { name: 'program', params: { program_name: this.program.name }}
         },
         isEnrolled() {
             return lms.store.enrolledPrograms.has(this.program.name)

@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<component v-bind:is="currentComponent" :content="content" :type="type">
-			<Navigation :nextContent="nextContent" :nextContentType="nextContentType"/>
+			<ContentNavigation :nextContent="nextContent" :nextContentType="nextContentType"/>
 		</component>
 	</div>
 </template>
@@ -9,7 +9,7 @@
 import Article from "../components/Article.vue"
 import Quiz from "../components/Quiz.vue"
 import Video from "../components/Video.vue"
-import Navigation from "../components/Navigation.vue"
+import ContentNavigation from "../components/ContentNavigation.vue"
 
 export default {
 	props:['program_name', 'course', 'type', 'content'],
@@ -50,7 +50,7 @@ export default {
 		Article,
 		Video,
 		Quiz,
-		Navigation
+		ContentNavigation
 	}
 };
 </script>

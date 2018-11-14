@@ -46,15 +46,12 @@ export default {
     	}
     },
     mounted() {
-    	frappe.call({
-    		method: "erpnext.www.lms.get_content",
-    		args: {
-    			content_name: this.content,
-    			content_type: this.type
-    		}
-    	}).then(r => {
-    			this.contentData = r.message
-    	});
+    	this.getContent().then(data => this.contentData = data);
     },
+    methods: {
+        getContent() {
+            return frappe.db.get_doc(this.type, this.content)
+        }
+    }
 };
 </script>
