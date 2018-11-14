@@ -4,11 +4,13 @@
         <TopSectionButton/>
     </TopSection>
 	<CardList :title="'Featured Programs'" :description="'Master ERPNext'">
-        <ProgramCard v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
+        <ProgramCard slot="card-list-slot" v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
+        <AButton slot="list-bottom" :type="'primary'" :size="'lg'" :route="'List/Program'">View All</AButton>
     </CardList>
 </div>
 </template>
 <script>
+import Button from '../components/Button.vue';
 import TopSection from "../components/TopSection.vue"
 import CardList from "../components/CardList.vue"
 import ProgramCard from "../components/ProgramCard.vue"
@@ -19,11 +21,12 @@ export default {
     data() {
     	return{
     		portal: {},
-            featuredPrograms: [],
+            featuredPrograms: {},
             // enrolledPrograms: new Set()
     	}
     },
     components: {
+        AButton: Button,
 		TopSection,
         CardList,
         ProgramCard,
