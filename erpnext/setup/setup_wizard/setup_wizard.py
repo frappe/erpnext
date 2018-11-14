@@ -124,18 +124,16 @@ def login_as_first_user(args):
 		frappe.local.login_manager.login_as(args.get("email"))
 
 @frappe.whitelist()
-def install_fixtures(config=None):
-	if not config:
-		config = get_journeys_config().get('setup_config') or {}
+def install_fixtures():
+	config = get_journeys_config().get('setup_config') or {}
 
 	update_global_settings(_dict(config))
 
 	fixtures.install(_dict(config).country)
 
 @frappe.whitelist()
-def make_setup_docs(args, config=None):
-	if not config:
-		config = get_journeys_config().get('setup_config') or {}
+def make_setup_docs(args):
+	config = get_journeys_config().get('setup_config') or {}
 
 	args = json.loads(args)
 
@@ -146,6 +144,10 @@ def make_setup_docs(args, config=None):
 
 	run_post_setup_complete(args)
 
+@frappe.whitelist()
+def setup(args, config=None):
+	install_fixtures()
+	make_setup_docs(args)
 
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
