@@ -104,7 +104,7 @@ frappe.ui.form.on('Patient Appointment', {
 		});
 	},
 	check_availability: function(frm) {
-		check_and_set_availability(frm)
+		check_and_set_availability(frm);
 	},
 	onload:function(frm){
 		if(frm.is_new()) {
@@ -121,9 +121,8 @@ var check_and_set_availability = function(frm) {
 	var selected_slot = null;
 	var service_unit = null;
 	var duration = null;
-	var { patient } = frm.doc;
 
-	show_availability()
+	show_availability();
 
 	function show_empty_state(practitioner, appointment_date) {
 		frappe.msgprint({
@@ -133,7 +132,7 @@ var check_and_set_availability = function(frm) {
 		});
 	}
 
-	function show_availability(data) {
+	function show_availability() {
 		let selected_practitioner = '';
 		var d = new frappe.ui.Dialog({
 			title: __("Available slots"),
@@ -179,10 +178,10 @@ var check_and_set_availability = function(frm) {
 						filters: {
 							"department": department
 						}
-					}
-				}
+					};
+				};
 			}
-		}
+		};
 
 		// disable dialog action initially
 		d.get_primary_btn().attr('disabled', true);
@@ -193,19 +192,19 @@ var check_and_set_availability = function(frm) {
 
 		d.fields_dict["appointment_date"].df.onchange = () => {
 			show_slots(d, fd);
-		}
+		};
 		d.fields_dict["practitioner"].df.onchange = () => {
 			if(d.get_value('practitioner') && d.get_value('practitioner') != selected_practitioner){
 				selected_practitioner = d.get_value('practitioner');
 				show_slots(d, fd);
 			}
-		}
+		};
 		d.show();
 	}
 
 	function show_slots(d, fd) {
 		if (d.get_value('appointment_date') && d.get_value('practitioner')){
-			fd.available_slots.html("")
+			fd.available_slots.html("");
 			frappe.call({
 				method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_availability_data',
 				args: {
@@ -228,7 +227,7 @@ var check_and_set_availability = function(frm) {
 								let slot_start_time = moment(slot.from_time, 'HH:mm:ss');
 								let slot_to_time = moment(slot.to_time, 'HH:mm:ss');
 								let interval = (slot_to_time - slot_start_time)/60000 | 0;
-								//iterate in all booked appointments, update the start time and duration
+								// iterate in all booked appointments, update the start time and duration
 								slot_details[i].appointments.forEach(function(booked) {
 									let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
 									let end_time = booked_moment.clone().add(booked.duration, 'minutes');
@@ -268,8 +267,8 @@ var check_and_set_availability = function(frm) {
 							$wrapper.find('button').removeClass('btn-primary');
 							$btn.addClass('btn-primary');
 							selected_slot = $btn.attr('data-name');
-							service_unit = $btn.attr('data-service-unit')
-							duration = $btn.attr('data-duration')
+							service_unit = $btn.attr('data-service-unit');
+							duration = $btn.attr('data-duration');
 							// enable dialog action
 							d.get_primary_btn().attr('disabled', null);
 						});
@@ -283,10 +282,10 @@ var check_and_set_availability = function(frm) {
 				freeze_message: __("Fetching records......")
 			});
 		}else{
-			fd.available_slots.html("Appointment date and Healthcare Practitioner are Mandatory".bold())
+			fd.available_slots.html("Appointment date and Healthcare Practitioner are Mandatory".bold());
 		}
 	}
-}
+};
 
 var get_procedure_prescribed = function(frm){
 	if(frm.doc.patient){
