@@ -28,42 +28,44 @@ frappe.treeview_settings["Location"] = {
 		}
 	],
 	onrender: function (node) {
+		frappe.model.get_value('Agriculture Settings', { 'name': 'Agriculture Settings' }, 'area_uom',
+			function (d) {
 
-		if (!node.is_root) {
-			frappe.db.get_value("Location", node.data.value, "area")
-				.then((r) => {
-					// Place the location area on the right side, tree accounts style.
-					$('<span class="balance-area pull-right text-muted small">'
-						+ (`${((flt(r.message.area)).toLocaleString('en') + ' Sq m')}`)
-						+ '</span>').insertBefore(node.$ul);
-				});
-		}
+				if (!node.is_root) {
+					frappe.db.get_value("Location", node.data.value, "area")
+						.then((r) => {
+							// Place the location area on the right side, tree accounts style.
+							$('<span class="balance-area pull-right text-muted small">'
+								+ (__('{0} {1}'), [__((flt(r.message.area).toLocaleString('en')).toString()) + " " + __(d.area_uom.toString())])
+								+ '</span>').insertBefore(node.$ul);
+						});
+				}
 
-		// Applies when filter is applied in tree view
-		if (!node.parent_label) {
-			frappe.db.get_value("Location", node.data.value, "area")
-				.then((r) => {
-					if (r.message) {
-						$('<span class="balance-area pull-right text-muted small">'
-							+ (`${((flt(r.message.area)).toLocaleString('en') + ' Sq m')}`)
-							+ '</span>').insertBefore(node.$ul);
-					}
-				});
-		}
+				// Applies when filter is applied in tree view
+				if (!node.parent_label) {
+					frappe.db.get_value("Location", node.data.value, "area")
+						.then((r) => {
+							if (r.message) {
+								$('<span class="balance-area pull-right text-muted small">'
+									+ (__('{0} {1}'), [__((flt(r.message.area).toLocaleString('en')).toString()) + " " + __(d.area_uom.toString())])
+									+ '</span>').insertBefore(node.$ul);
+							}
+						});
+				}
 
-		if (node.data.value == 'All Locations') {
-			// Get the total of all locations in square meters
-			frappe.call({
-				method: "erpnext.assets.doctype.location.location.get_total_location",
-				callback: function (r) {
-					// console.log(r.message);
-					$('<span class="balance-area pull-right text-muted small">'
-						+ (`${((flt(r.message)).toLocaleString('en') + ' Sq m')}`)
-						+ '</span>').insertBefore(node.$ul);
+				if (node.data.value == 'All Locations') {
+					// Get the total of all locations in default location area unit
+					frappe.call({
+						method: "erpnext.assets.doctype.location.location.get_total_location",
+						callback: function (r) {
+							// console.log(r.message);
+							$('<span class="balance-area pull-right text-muted small">'
+								+ (__('{0} {1} {2}'), [__((flt(r.message).toLocaleString('en')).toString()) + " " + __(d.area_uom.toString()) + " " + __('In') + " " + __('Total')])
+								+ '</span>').insertBefore(node.$ul);
+						}
+					});
 				}
 			});
-		}
-
 	},
 	onload: function (treeview) {
 		treeview.make_tree();
