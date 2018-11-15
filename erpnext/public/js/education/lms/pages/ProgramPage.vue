@@ -28,7 +28,7 @@ export default {
 		}
 	},
     beforeMount() {
-        if(lms.store.isLogin) lms.store.updateCompletedCourses()
+        // if(lms.store.isLogin) lms.store.updateCompletedCourses()
     },
 	mounted() {
 		this.getProgramDetails().then(data => this.program = data);
