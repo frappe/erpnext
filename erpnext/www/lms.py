@@ -97,6 +97,7 @@ def get_continue_content(course_name):
 	if frappe.session.user == "Guest":
 		return dict(content=None, content_type=None, flag=None)
 	enrollment = get_enrollment(course_name)
+	print(enrollment)
 	course = frappe.get_doc("Course", enrollment.course)
 	last_activity = enrollment.get_last_activity()
 	
@@ -229,6 +230,7 @@ def enroll_in_program(program_name):
 	student = frappe.get_doc("Student", get_student_id(frappe.session.user))
 	program_enrollment = student.enroll_in_program(program_name)
 	enroll_all_courses_in_program(program_enrollment, student)
+	return program_name
 
 @frappe.whitelist()
 def get_program_enrollments(email=frappe.session.user):

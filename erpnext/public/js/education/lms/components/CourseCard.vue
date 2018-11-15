@@ -27,13 +27,11 @@
 
 <script>
 import AButton from './Button.vue';
-import CourseCardButton from './CourseCardButton.vue'
 
 export default {
     props: ['course', 'courseMeta', 'program_name'],
     name: "CourseCard",
     components: {
-        CourseCardButton,
         AButton
     },
     computed: {
