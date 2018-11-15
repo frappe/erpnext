@@ -331,31 +331,36 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		filters.get('company'),  ["lft", "rgt"])
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
-
-	gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
-		gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
-		acc.account_name, acc.account_number
-		from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company in 
-		(select name from `tabCompany` where lft >= %(company_lft)s and rgt <= %(company_rgt)s)
-		{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
-		order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
-		{
-			"from_date": from_date,
-			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt,
+	companies = frappe.db.sql_list(""" select name from `tabCompany`
+		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""", {
 			"company_lft": company_lft,
 			"company_rgt": company_rgt,
-		},
-		as_dict=True)
+		})
 
-	if filters and filters.get('presentation_currency'):
-		convert_to_presentation_currency(gl_entries, get_currency(filters))
+	for company in companies:
+		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
+			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
+			acc.account_name, acc.account_number
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
+			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
+			{
+				"from_date": from_date,
+				"to_date": to_date,
+				"lft": root_lft,
+				"rgt": root_rgt,
+				"company": company
+			},
+			as_dict=True)
 
-	for entry in gl_entries:
-		key = entry.account_number or entry.account_name
-		validate_entries(key, entry, accounts_by_name)
-		gl_entries_by_account.setdefault(key, []).append(entry)
+		if filters and filters.get('presentation_currency'):
+			filters['company'] = company
+			convert_to_presentation_currency(gl_entries, get_currency(filters))
+
+		for entry in gl_entries:
+			key = entry.account_number or entry.account_name
+			validate_entries(key, entry, accounts_by_name)
+			gl_entries_by_account.setdefault(key, []).append(entry)
 
 	return gl_entries_by_account
 
