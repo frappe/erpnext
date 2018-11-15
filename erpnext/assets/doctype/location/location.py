@@ -230,14 +230,3 @@ def get_total_location():
 	total_location = frappe.db.get_value("Location", {"is_group": 0}, "sum(round(area, 3))")
 
 	return total_location
-
-@frappe.whitelist()
-def get_uom_default():
-	pass
-	# frappe.db.sql("""select doctype, field, value from tabSingles""")
-	# frappe.db.sql('''SELECT FROM `tabSingles` WHERE parent=%(serieFa)s''', {'name':serieDte, 'serieFa':serie_fac_original})
-
-
-	# prueba_uo = frappe.db.sql('''select value FROM `tabSingles` where doctype like %(name)s and field=%(owner)s''', 
-	# 						  {'name':'Agriculture Settings', 'owner':'area_uom'}
-	# return prueba_uo
