@@ -18,6 +18,7 @@
     ],
     "js/erpnext.min.js": [
         "public/js/conf.js",
+        "public/js/shortcut_popover.js",
         "public/js/utils.js",
         "public/js/queries.js",
         "public/js/sms_manager.js",
