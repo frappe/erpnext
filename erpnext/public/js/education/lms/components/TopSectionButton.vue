@@ -30,7 +30,7 @@ export default {
         }
 
         if(this.isLoggedIn){
-            if(lms.store.checkProgramEnrollment(this.$route.params.program_name)){
+            if(lms.store.enrolledPrograms.has(this.$route.params.program_name)){
             	if(this.$route.name == 'home'){
                     this.buttonName = 'Explore Courses'
             	}
@@ -51,7 +51,7 @@ export default {
             if(this.$route.name == 'home'){
                 return
             }
-            else if(this.$route.name == 'program' && lms.store.checkProgramEnrollment(this.$route.params.program_name)){
+            else if(this.$route.name == 'program' && lms.store.enrolledPrograms.has(this.$route.params.program_name)){
                 this.$router.push({ name: 'content', params: { program_name: this.$route.params.program_name, course: this.nextCourse, type: this.nextContentType, content: this.nextContent}})
             }
             else {
