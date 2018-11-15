@@ -14,7 +14,7 @@ def execute():
 		"Purchase Order", "Purchase Invoice", "Purchase Receipt", "Quotation", "Supplier Quotation"]
 
 	for doctype in doctypes:
-		total_qty =	frappe.db.sql('''
+		total_qty = frappe.db.sql('''
 			SELECT
 				parent, SUM(qty) as qty
 			FROM
@@ -22,14 +22,25 @@ def execute():
 			GROUP BY parent
 		''' % (doctype), as_dict = True)
 
-		when_then = []
-		for d in total_qty:
-			when_then.append("""
-				when dt.name = {0} then {1}
-			""".format(frappe.db.escape(d.get("parent")), d.get("qty")))
+		# Query to update total_qty might become too big, Update in batches
+		# batch_size is chosen arbitrarily, Don't try too hard to reason about it
+		batch_size = 100000
+		for i in range(0, len(total_qty), batch_size):
+			batch_transactions = total_qty[i:i + batch_size]
 
-		if when_then:
-			frappe.db.sql('''
-				UPDATE
-					`tab%s` dt SET dt.total_qty = CASE %s ELSE 0.0 END
-			''' % (doctype, " ".join(when_then)))
+			# UPDATE with CASE for some reason cannot use PRIMARY INDEX,
+			# causing all rows to be examined, leading to a very slow update
+
+			# UPDATE with WHERE clause uses PRIMARY INDEX, but will lead to too many queries
+
+			# INSERT with ON DUPLICATE KEY UPDATE uses PRIMARY INDEX
+			# and can perform multiple updates per query
+			# This is probably never used anywhere else as of now, but should be
+			values = []
+			for d in batch_transactions:
+				values.append("('{}', {})".format(d.parent, d.qty))
+			conditions = ",".join(values)
+			frappe.db.sql("""
+				INSERT INTO `tab{}` (name, total_qty) VALUES {}
+				ON DUPLICATE KEY UPDATE name = VALUES(name), total_qty = VALUES(total_qty)
+			""".format(doctype, conditions))
