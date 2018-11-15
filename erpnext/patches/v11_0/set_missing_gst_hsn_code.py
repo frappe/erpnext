@@ -36,8 +36,8 @@ def execute():
 			where dt_item.name in ({rows_name})
 		""".format(dt=dt, rows_name=", ".join(['%s']*len(transaction_rows_name))), tuple(transaction_rows_name))
 
-		for t in transactions:
-			print(t.name)
-			trans_doc = frappe.get_doc(dt, t.name)
+		parent = set([d.name for d in transactions])
+		for t in list(parent):
+			trans_doc = frappe.get_doc(dt, t)
 			hsnwise_tax = get_itemised_tax_breakup_html(trans_doc)
-			frappe.db.set_value(dt, t.name, "other_charges_calculation", hsnwise_tax, update_modified=False)
+			frappe.db.set_value(dt, t, "other_charges_calculation", hsnwise_tax, update_modified=False)
