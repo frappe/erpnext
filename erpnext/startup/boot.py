@@ -15,6 +15,8 @@ def boot_session(bootinfo):
 	if frappe.session['user']!='Guest':
 		update_page_info(bootinfo)
 
+		load_shortcut_setting(bootinfo)
+
 		load_country_and_currency(bootinfo)
 		bootinfo.sysdefaults.territory = frappe.db.get_single_value('Selling Settings',
 			'territory')
@@ -76,3 +78,11 @@ def update_page_info(bootinfo):
 			"route": "Tree/Sales Person"
 		}
 	})
+
+def load_shortcut_setting(bootinfo):
+	shortcut_setting = frappe.get_all('Shortcut Settings', {
+		'user': ['in', (frappe.session.user, '')]
+	}, limit=1, order_by='user desc') # user setting should get priority
+	if not shortcut_setting: return
+
+	bootinfo.shortcut_setting = frappe.get_doc('Shortcut Settings', shortcut_setting[0].name)

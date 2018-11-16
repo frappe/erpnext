@@ -4,40 +4,74 @@
 frappe.provide('erpnext');
 
 $(document).on('toolbar_setup', () => {
+	create_shortcut_popover();
+	frappe.realtime.on('update_shortcut_setting', (shortcut_setting) => {
+		frappe.boot.shortcut_setting = shortcut_setting;
+	})
+});
+
+function create_shortcut_popover() {
 	const home_button = $('.navbar-home');
 
 	home_button.popover({
+		html: true,
 		animation: true,
-		placement: 'bottom',
+		container: 'body',
 		trigger: 'manual',
-		delay: { "show": 500, "hide": 100 },
+		placement: 'bottom',
 		content: () => {
-			const content = $('<div class="app-icon-container">');
-			const icons_to_show = ['Desktop', 'Marketplace', 'Social', 'Explore'];
-			icons_to_show.forEach(icon => {
-				let _module = frappe.modules[icon];
-				if (_module) {
-					content.append(frappe.ui.app_icon.get_html(_module, true));
-				}
+			const shortcut_setting = frappe.boot.shortcut_setting;
+
+			if (!shortcut_setting || !shortcut_setting.enabled) return
+
+			const shortcut_popover = $(`<div class="shortcut-popover">`);
+
+			shortcut_setting.shortcut_items.map(item => {
+				shortcut_popover.append(`<a href="#${item.link || ''}" class="shortcut-item">
+				${item.label}
+				</a>`);
 			});
 
+			// push configuration option
+			shortcut_popover.append(get_customize_shortcut_link());
 
-			return content.prop('outerHTML');
+			return shortcut_popover;
 		},
-		html: true,
-		container: 'body'
-	}).on("mouseenter",  () => {
+	})
+	.on("mouseenter", () => {
 		setTimeout(() => {
 			home_button.popover("show");
+			$(".popover").on("mouseleave click", () => {
+				home_button.popover('hide');
+			});
 		}, 500);
-		$(".popover").on("mouseleave",  () => {
-			home_button.popover('hide');
-		});
-	}).on("mouseleave",  () => {
+	})
+	.on("mouseleave", () => {
 		setTimeout(() => {
 			if (!$(".popover:hover").length) {
 				home_button.popover("hide");
 			}
 		}, 100);
 	});
-});
+}
+
+function get_customize_shortcut_link() {
+	const customize_shortcut_link = $(`<a class="shortcut-item">${__('Customize')}</a>`);
+	customize_shortcut_link.click(() => {
+		go_to_user_shortcut_setting_page();
+	});
+	return customize_shortcut_link;
+}
+
+function go_to_user_shortcut_setting_page() {
+	let shortcut_setting = {...frappe.boot.shortcut_setting};
+	if (shortcut_setting && shortcut_setting.user === frappe.session.user) {
+		frappe.set_route('Form', shortcut_setting.doctype, shortcut_setting.name)
+	} else {
+		frappe.model.with_doctype('Shortcut Settings', () => {
+			shortcut_setting = frappe.model.copy_doc(shortcut_setting);
+			shortcut_setting.user = frappe.session.user;
+			frappe.set_route('Form', shortcut_setting.doctype, shortcut_setting.name)
+		})
+	}
+}

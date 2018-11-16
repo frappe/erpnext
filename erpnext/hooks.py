@@ -308,3 +308,7 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
 	}
 }
+
+has_permission = {
+	"Shortcut Settings": "erpnext.setup.doctype.shortcut_settings.shortcut_settings.has_permission",
+}

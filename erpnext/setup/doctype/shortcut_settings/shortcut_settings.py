@@ -7,4 +7,10 @@ import frappe
 from frappe.model.document import Document
 
 class ShortcutSettings(Document):
-	pass
+	def on_update(self):
+		frappe.publish_realtime('update_shortcut_setting', self, user=self.user, after_commit=True)
+	def after_insert(self):
+		frappe.publish_realtime('update_shortcut_setting', self, user=self.user, after_commit=True)
+
+def has_permission(doc, user):
+	return doc.user == user
