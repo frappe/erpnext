@@ -12,7 +12,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '12.x.x-develop'
-staging_version = '11.0.3-beta.20'
+staging_version = '11.0.3-beta.24'
 
 error_report_email = "support@erpnext.com"
 
@@ -133,6 +133,13 @@ website_route_rules = [
 	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
+	{"from_route": "/material-requests", "to_route": "Material Request"},
+	{"from_route": "/material-requests/<path:name>", "to_route": "material_request_info",
+		"defaults": {
+			"doctype": "Material Request",
+			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
+		}
+	},
 ]
 
 standard_portal_menu_items = [
@@ -155,6 +162,7 @@ standard_portal_menu_items = [
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
 	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application"},
+	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
 ]
 
 default_roles = [
@@ -168,6 +176,7 @@ has_website_permission = {
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Material Request": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
