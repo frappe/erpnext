@@ -13,11 +13,23 @@ def execute(filters=None):
 def get_columns():
 	return [
 		{
-			"label": _("Item Name"),
-			"fieldname": "item_name",
+			"label": _("Item Code"),
+			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 120
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Data",
+			"width": 100
 		},
 		{
 			"label": _("Warehouse"),
@@ -70,8 +82,8 @@ def get_item_price_qty_data(filters):
 	if filters.get("item_code"):
 		conditions += "where a.item_code=%(item_code)s"
 
-	item_results = frappe.db.sql("""select a.item_code as item_name, a.name as price_list_name,
-		b.warehouse as warehouse, b.actual_qty as actual_qty
+	item_results = frappe.db.sql("""select a.item_code, a.item_name, a.name as price_list_name,
+		a.brand as brand, b.warehouse as warehouse, b.actual_qty as actual_qty
 		from `tabItem Price` a left join `tabBin` b
 		ON a.item_code = b.item_code
 		{conditions}"""
@@ -86,7 +98,9 @@ def get_item_price_qty_data(filters):
 	if item_results:
 		for item_dict in item_results:
 			data = {
+				'item_code': item_dict.item_code,
 				'item_name': item_dict.item_name,
+				'brand': item_dict.brand,
 				'warehouse': item_dict.warehouse,
 				'stock_available': item_dict.actual_qty or 0,
 				'buying_price_list': "",

@@ -7,7 +7,8 @@ import unittest
 from frappe.utils import random_string
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
 
-test_ignore = ["Account", "Cost Center", "Payment Terms Template"]
+test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component"]
+test_dependencies = ["Fiscal Year"]
 test_records = frappe.get_test_records('Company')
 
 class TestCompany(unittest.TestCase):

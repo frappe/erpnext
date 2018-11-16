@@ -5,7 +5,7 @@ data = {
 		'Crop Cycle',
 		'Fertilizer',
 		'Item',
-		'Land Unit',
+		'Location',
 		'Disease',
 		'Plant Analysis',
 		'Soil Analysis',

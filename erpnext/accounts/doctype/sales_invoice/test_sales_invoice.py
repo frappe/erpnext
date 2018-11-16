@@ -16,7 +16,7 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-
+from six import iteritems
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -277,7 +277,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for k, v in expected_values[i].items():
+			for k, v in iteritems(expected_values[i]):
 				self.assertEqual(d.get(k), v)
 
 		# check net total
@@ -523,7 +523,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for key, val in expected_values[i].items():
+			for key, val in iteritems(expected_values[i]):
 				self.assertEqual(d.get(key), val)
 
 		# check net total
@@ -691,6 +691,7 @@ class TestSalesInvoice(unittest.TestCase):
 		item = make_item("_Test POS Item")
 		pos = copy.deepcopy(test_records[1])
 		pos['items'][0]['item_code'] = item.name
+		pos['items'][0]['warehouse'] = "_Test Warehouse - _TC"
 		pos["is_pos"] = 1
 		pos["offline_pos_name"] = timestamp
 		pos["update_stock"] = 1
@@ -1323,14 +1324,14 @@ class TestSalesInvoice(unittest.TestCase):
 		return si
 
 	def test_company_monthly_sales(self):
-		existing_current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		existing_current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 
 		si = create_sales_invoice()
-		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
 
 		si.cancel()
-		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
 	def test_rounding_adjustment(self):
@@ -1414,6 +1415,92 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, si.insert)
 
+	def test_credit_note(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+
+		outstanding_amount = get_outstanding_amount(si.doctype,
+			si.name, "Debtors - _TC", si.customer, "Customer")
+
+		self.assertEqual(si.outstanding_amount, outstanding_amount)
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = si.currency
+		pe.paid_to_account_currency = si.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = si.grand_total * -1
+		pe.insert()
+		pe.submit()
+
+		si_doc = frappe.get_doc('Sales Invoice', si.name)
+		self.assertEqual(si_doc.outstanding_amount, 0)
+
+	def test_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
+		self.assertEqual(si.cost_center, cost_center)
+
+		expected_values = {
+			"Debtors - _TC": {
+				"cost_center": cost_center
+			},
+			"Sales - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center - _TC"
+		si =  create_sales_invoice(debit_to="Debtors - _TC")
+
+		expected_values = {
+			"Debtors - _TC": {
+				"cost_center": None
+			},
+			"Sales - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+		
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1454,5 +1541,60 @@ def create_sales_invoice(**args):
 
 	return si
 
+def create_sales_invoice_against_cost_center(**args):
+	si = frappe.new_doc("Sales Invoice")
+	args = frappe._dict(args)
+	if args.posting_date:
+		si.set_posting_time = 1
+	si.posting_date = args.posting_date or nowdate()
+
+	si.company = args.company or "_Test Company"
+	si.cost_center = args.cost_center or "_Test Cost Center - _TC"
+	si.customer = args.customer or "_Test Customer"
+	si.debit_to = args.debit_to or "Debtors - _TC"
+	si.update_stock = args.update_stock
+	si.is_pos = args.is_pos
+	si.is_return = args.is_return
+	si.return_against = args.return_against
+	si.currency=args.currency or "INR"
+	si.conversion_rate = args.conversion_rate or 1
+
+	si.append("items", {
+		"item_code": args.item or args.item_code or "_Test Item",
+		"gst_hsn_code": "999800",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 1,
+		"rate": args.rate or 100,
+		"income_account": "Sales - _TC",
+		"expense_account": "Cost of Goods Sold - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
+		"serial_no": args.serial_no
+	})
+
+	if not args.do_not_save:
+		si.insert()
+		if not args.do_not_submit:
+			si.submit()
+		else:
+			si.payment_schedule = []
+	else:
+		si.payment_schedule = []
+
+	return si
+
+
 test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')
+
+def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):
+	bal = flt(frappe.db.sql("""
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+		from `tabGL Entry`
+		where against_voucher_type=%s and against_voucher=%s
+		and account = %s and party = %s and party_type = %s""",
+		(against_voucher_type, against_voucher, account, party, party_type))[0][0] or 0.0)
+
+	if against_voucher_type == 'Purchase Invoice':
+		bal = bal * -1
+
+	return bal

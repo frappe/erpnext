@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import fmt_money, formatdate, format_time, now_datetime, \
-	get_url_to_form, get_url_to_list, flt
+	get_url_to_form, get_url_to_list, flt, getdate
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
 import frappe.desk.notifications
-from erpnext.accounts.utils import get_balance_on, get_count_on
+from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -22,7 +22,7 @@ class EmailDigest(Document):
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
+		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
 	def get_users(self):
 		"""get list of users"""
@@ -45,25 +45,27 @@ class EmailDigest(Document):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n"))
+		recipients = list(filter(lambda r: r in valid_users,
+			self.recipient_list.split("\n")))
 
 		original_user = frappe.session.user
 
 		if recipients:
 			for user_id in recipients:
 				frappe.set_user(user_id)
-				msg_for_this_receipient = self.get_msg_html()
-				if msg_for_this_receipient:
+				frappe.set_user_lang(user_id)
+				msg_for_this_recipient = self.get_msg_html()
+				if msg_for_this_recipient:
 					frappe.sendmail(
 						recipients=user_id,
-						subject=_("{frequency} Digest").format(frequency=self.frequency),
-						message=msg_for_this_receipient,
+						subject=_("{0} Digest").format(self.frequency),
+						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
 
 		frappe.set_user(original_user)
+		frappe.set_user_lang(original_user)
 
 	def get_msg_html(self):
 		"""Build email digest content"""
@@ -94,7 +96,13 @@ class EmailDigest(Document):
 		quote = get_random_quote()
 		context.quote = {"text": quote[0], "author": quote[1]}
 
-		if not (context.events or context.todo_list or context.notifications or context.cards):
+		if self.get("purchase_orders_items_overdue"):
+			context.purchase_order_list, context.purchase_orders_items_overdue_list = self.get_purchase_orders_items_overdue_list()
+			if not context.purchase_order_list:
+				frappe.throw(_("No items to be received are overdue"))
+
+		if not (context.events or context.todo_list or context.notifications or context.cards
+				or context.purchase_orders_items_overdue_list):
 			return None
 
 		frappe.flags.ignore_account_permission = False
@@ -133,7 +141,7 @@ class EmailDigest(Document):
 		notifications = frappe.desk.notifications.get_notifications()
 
 		notifications = sorted(notifications.get("open_count_doctype", {}).items(),
-			lambda a, b: 1 if a[1] < b[1] else -1)
+			key=lambda a: a[1])
 
 		notifications = [{"key": n[0], "value": n[1],
 			"link": get_url_to_list(n[0])} for n in notifications if n[1]]
@@ -228,9 +236,10 @@ class EmailDigest(Document):
 
 		cache = frappe.cache()
 		context.cards = []
-		for key in ("income", "expenses_booked", "income_year_to_date","expense_year_to_date",
-			 "new_quotations","pending_quotations","sales_order","purchase_order","pending_sales_orders","pending_purchase_orders",
-			"invoiced_amount", "payables", "bank_balance", "credit_balance"):
+		for key in ("income", "expenses_booked", "income_year_to_date", "expense_year_to_date",
+					"bank_balance", "credit_balance", "invoiced_amount", "payables",
+					"sales_orders_to_bill", "purchase_orders_to_bill", "sales_order", "purchase_order",
+					"sales_orders_to_deliver", "purchase_orders_to_receive", "new_quotations", "pending_quotations"):
 			if self.get(key):
 				cache_key = "email_digest:card:{0}:{1}:{2}:{3}".format(self.company, self.frequency, key, self.from_date)
 				card = cache.get(cache_key)
@@ -277,7 +286,7 @@ class EmailDigest(Document):
 
 	def get_income(self):
 		"""Get income for given period"""
-		income, past_income, count = self.get_period_amounts(self.get_root_type_accounts("income"),'income')
+		income, past_income, count = self.get_period_amounts(self.get_roots("income"),'income')
 
 		return {
 			"label": self.meta.get_label("income"),
@@ -324,12 +333,12 @@ class EmailDigest(Document):
 		return self.get_type_balance('invoiced_amount', 'Receivable')
 
 	def get_expenses_booked(self):
-		expense, past_expense, count = self.get_period_amounts(self.get_root_type_accounts("expense"), 'expenses_booked')
+		expenses, past_expenses, count = self.get_period_amounts(self.get_roots("expense"), 'expenses_booked')
 
 		return {
 			"label": self.meta.get_label("expenses_booked"),
-			"value": expense,
-			"last_value": past_expense,
+			"value": expenses,
+			"last_value": past_expenses,
 			"count": count
 		}
 
@@ -338,16 +347,67 @@ class EmailDigest(Document):
 		balance = past_balance = 0.0
 		count = 0
 		for account in accounts:
-			balance += (get_balance_on(account, date = self.future_to_date)
-				- get_balance_on(account, date = self.future_from_date - timedelta(days=1)))
-
-			count += (get_count_on(account,fieldname, date = self.future_to_date )
-				- get_count_on(account,fieldname, date = self.future_from_date - timedelta(days=1)))
-
-			past_balance += (get_balance_on(account, date = self.past_to_date)
-				- get_balance_on(account, date = self.past_from_date - timedelta(days=1)))
+			balance += get_incomes_expenses_for_period(account, self.future_from_date, self.future_to_date)
+			past_balance += get_incomes_expenses_for_period(account, self.past_from_date, self.past_to_date)
+			count += get_count_for_period(account, fieldname, self.future_from_date, self.future_to_date)
 
 		return balance, past_balance, count
+
+	def get_sales_orders_to_bill(self):
+		"""Get value not billed"""
+
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
+                    count(*) from `tabSales Order`
+					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed"
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+
+		return {
+			"label": self.meta.get_label("sales_orders_to_bill"),
+			"value": value,
+			"count": count
+		}
+
+	def get_sales_orders_to_deliver(self):
+		"""Get value not delivered"""
+
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0), 
+					count(*) from `tabSales Order`
+					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered"
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+
+		return {
+			"label": self.meta.get_label("sales_orders_to_deliver"),
+			"value": value,
+			"count": count
+		}
+
+	def get_purchase_orders_to_receive(self):
+		"""Get value not received"""
+
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total))-(sum(grand_total*per_received/100)),0),
+                    count(*) from `tabPurchase Order`
+					where (transaction_date <= %(to_date)s) and per_received < 100
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+
+		return {
+			"label": self.meta.get_label("purchase_orders_to_receive"),
+			"value": value,
+			"count": count
+		}
+
+	def get_purchase_orders_to_bill(self):
+		"""Get purchase not billed"""
+
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
+                    count(*) from `tabPurchase Order`
+					where (transaction_date <= %(to_date)s) and per_billed < 100
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+
+		return {
+			"label": self.meta.get_label("purchase_orders_to_bill"),
+			"value": value,
+			"count": count
+		}
 
 	def get_type_balance(self, fieldname, account_type, root_type=None):
 
@@ -380,6 +440,10 @@ class EmailDigest(Document):
 				'count': count
 			}
 
+	def get_roots(self, root_type):
+		return [d.name for d in frappe.db.get_all("Account",
+			filters={"root_type": root_type.title(), "company": self.company,
+				"is_group": 1, "parent_account": ["in", ("", None)]})]
 
 	def get_root_type_accounts(self, root_type):
 		if not root_type in self._accounts:
@@ -417,8 +481,9 @@ class EmailDigest(Document):
 		value, count, billed_value, delivered_value = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*),
 			ifnull(sum(grand_total*per_billed/100),0), ifnull(sum(grand_total*{0}/100),0)  from `tab{1}`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Closed','Cancelled', 'Completed') """.format(getfield, doc_type),
-			{"to_date": self.future_to_date})[0]
+			and status not in ('Closed','Cancelled', 'Completed')
+			and company = %(company)s """.format(getfield, doc_type),
+			{"to_date": self.future_to_date, "company": self.company})[0]
 
 		return {
 			"label": self.meta.get_label(fieldname),
@@ -432,17 +497,19 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.future_to_date})[0]
+			and company = %(company)s
+			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.future_to_date, "company": self.company})[0]
 
 		last_value = frappe.db.sql("""select ifnull(sum(grand_total),0) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
-			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date})[0][0]
+			and company = %(company)s
+			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date, "company": self.company})[0][0]
 
 		return {
 			"label": self.meta.get_label(fieldname),
-            		"value": value,
+            "value": value,
 			"last_value": last_value,
-            		"count": count
+            "count": count
 		}
 
 	def get_summary_of_doc(self, doc_type, fieldname):
@@ -454,16 +521,17 @@ class EmailDigest(Document):
 
 		return {
 			"label": self.meta.get_label(fieldname),
-            		"value": value,
-            		"last_value": last_value,
+            "value": value,
+            "last_value": last_value,
 			"count": count
 		}
 
 	def get_total_on(self, doc_type, from_date, to_date):
 
 		return frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tab{0}`
-			where (transaction_date between %(from_date)s and %(to_date)s) and status not in ('Cancelled')""".format(doc_type),
-			{"from_date": from_date, "to_date": to_date})[0]
+			where (transaction_date between %(from_date)s and %(to_date)s) and company=%(company)s
+			and status not in ('Cancelled')""".format(doc_type),
+			{"from_date": from_date, "to_date": to_date, "company": self.company})[0]
 
 	def get_from_to_date(self):
 		today = now_datetime().date()
@@ -524,6 +592,30 @@ class EmailDigest(Document):
 		else:
 			return fmt_money(value, currency=self.currency)
 
+	def get_purchase_orders_items_overdue_list(self):
+		fields_po = "distinct `tabPurchase Order Item`.parent as po"
+		fields_poi = "`tabPurchase Order Item`.parent, `tabPurchase Order Item`.schedule_date, item_code," \
+		             "received_qty, qty - received_qty as missing_qty, rate, amount"
+
+		sql_po = """select {fields} from `tabPurchase Order Item` 
+			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
+			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
+			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
+			`tabPurchase Order Item`.schedule_date DESC""".format(fields=fields_po)
+
+		sql_poi = """select {fields} from `tabPurchase Order Item` 
+			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
+			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
+			and received_qty < qty order by `tabPurchase Order Item`.idx""".format(fields=fields_poi)
+		purchase_order_list = frappe.db.sql(sql_po, as_dict=True)
+		purchase_order_items_overdue_list = frappe.db.sql(sql_poi, as_dict=True)
+
+		for t in purchase_order_items_overdue_list:
+			t.link = get_url_to_form("Purchase Order", t.parent)
+			t.rate = fmt_money(t.rate, 2, t.currency)
+			t.amount = fmt_money(t.amount, 2, t.currency)
+		return purchase_order_list, purchase_order_items_overdue_list
+
 def send():
 	now_date = now_datetime().date()
 
@@ -536,3 +628,39 @@ def send():
 @frappe.whitelist()
 def get_digest_msg(name):
 	return frappe.get_doc("Email Digest", name).get_msg_html()
+
+def get_incomes_expenses_for_period(account, from_date, to_date):
+		"""Get amounts for current and past periods"""
+		
+		val = 0.0
+		balance_on_to_date = get_balance_on(account, date = to_date)
+		balance_before_from_date = get_balance_on(account, date = from_date - timedelta(days=1))
+	
+		fy_start_date = get_fiscal_year(to_date)[1]
+
+		if from_date == fy_start_date:
+			val = balance_on_to_date
+		elif from_date > fy_start_date:
+			val = balance_on_to_date - balance_before_from_date
+		else:
+			last_year_closing_balance = get_balance_on(account, date=fy_start_date - timedelta(days=1))
+			print(fy_start_date - timedelta(days=1), last_year_closing_balance)
+			val = balance_on_to_date + (last_year_closing_balance - balance_before_from_date)
+
+		return val
+
+def get_count_for_period(account, fieldname, from_date, to_date):
+	count = 0.0
+	count_on_to_date = get_count_on(account, fieldname, to_date)
+	count_before_from_date = get_count_on(account, fieldname, from_date - timedelta(days=1))
+
+	fy_start_date = get_fiscal_year(to_date)[1]
+	if from_date == fy_start_date:
+		count = count_on_to_date
+	elif from_date > fy_start_date:
+		count = count_on_to_date - count_before_from_date
+	else:
+		last_year_closing_count = get_count_on(account, fieldname, fy_start_date - timedelta(days=1))
+		count = count_on_to_date + (last_year_closing_count - count_before_from_date)
+
+	return count

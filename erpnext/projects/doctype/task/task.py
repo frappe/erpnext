@@ -133,20 +133,21 @@ class Task(NestedSet):
 					task.flags.ignore_recursion_check = True
 					task.save()
 
-	def has_webform_permission(doc):
-		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
+	def has_webform_permission(self):
+		project_user = frappe.db.get_value("Project User", {"parent": self.project, "user":frappe.session.user} , "user")
 		if project_user:
 			return True
 
 	def populate_depends_on(self):
 		if self.parent_task:
 			parent = frappe.get_doc('Task', self.parent_task)
-			parent.append("depends_on", {
-				"doctype": "Task Depends On",
-				"task": self.name,
-				"subject": self.subject
-			})
-			parent.save()
+			if not self.name in [row.task for row in parent.depends_on]:
+				parent.append("depends_on", {
+					"doctype": "Task Depends On",
+					"task": self.name,
+					"subject": self.subject
+				})
+				parent.save()
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
@@ -162,12 +163,16 @@ def check_if_child_exists(name):
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	return frappe.db.sql(""" select name from `tabProject`
-			where %(key)s like "%(txt)s"
+			where %(key)s like %(txt)s
 				%(mcond)s
 			order by name
-			limit %(start)s, %(page_len)s """ % {'key': searchfield,
-			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})
+			limit %(start)s, %(page_len)s""" % {
+				'key': searchfield,
+				'txt': frappe.db.escape('%' + txt + '%'),
+				'mcond':get_match_cond(doctype),
+				'start': start,
+				'page_len': page_len
+			})
 
 
 @frappe.whitelist()
@@ -186,27 +191,25 @@ def set_tasks_as_overdue():
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
-	conditions = ''
+
+	filters = [['docstatus', '<', '2']]
 
 	if task:
-		# via filters
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(task))
+		filters.append(['parent_task', '=', task])
 	elif parent and not is_root:
 		# via expand child
-		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(parent))
+		filters.append(['parent_task', '=', parent])
 	else:
-		conditions += ' and ifnull(parent_task, "")=""'
+		filters.append(['ifnull(`parent_task`, "")', '=', ''])
 
 	if project:
-		conditions += ' and project = "{0}"'.format(frappe.db.escape(project))
+		filters.append(['project', '=', project])
 
-	tasks = frappe.db.sql("""select name as value,
-		subject as title,
-		is_group as expandable
-		from `tabTask`
-		where docstatus < 2
-		{conditions}
-		order by name""".format(conditions=conditions), as_dict=1)
+	tasks = frappe.get_list(doctype, fields=[
+		'name as value',
+		'subject as title',
+		'is_group as expandable'
+	], filters=filters, order_by='name')
 
 	# return tasks
 	return tasks

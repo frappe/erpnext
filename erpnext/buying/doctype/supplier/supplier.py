@@ -10,6 +10,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact, delete
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
+
 class Supplier(TransactionBase):
 	def get_feed(self):
 		return self.supplier_name
@@ -18,6 +19,13 @@ class Supplier(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+
+	def before_save(self):
+		if not self.on_hold:
+			self.hold_type = ''
+			self.release_date = ''
+		elif self.on_hold and not self.hold_type:
+			self.hold_type = 'All'
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
@@ -35,7 +43,7 @@ class Supplier(TransactionBase):
 			self.naming_series = ''
 
 	def validate(self):
-		#validation for Naming Series mandatory field...
+		# validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)

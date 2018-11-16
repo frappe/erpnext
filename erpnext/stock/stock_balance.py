@@ -148,11 +148,9 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 			mismatch = True
 
 	if mismatch:
-		bin.projected_qty = (flt(bin.actual_qty) + flt(bin.ordered_qty) +
-			flt(bin.indented_qty) + flt(bin.planned_qty) - flt(bin.reserved_qty)
-			- flt(bin.reserved_qty_for_production)) - flt(bin.reserved_qty_for_sub_contract)
-
-		bin.save()
+		bin.set_projected_qty()
+		bin.db_update()
+		bin.clear_cache()
 
 def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None,
 	 	fiscal_year=None):

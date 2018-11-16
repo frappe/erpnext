@@ -33,32 +33,32 @@ def execute(filters=None):
 
 	return columns, data, None, chart
 
-def get_net_profit_loss(income, expense, period_list, company, currency=None):
+def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
 	total = 0
 	net_profit_loss = {
 		"account_name": "'" + _("Profit for the year") + "'",
 		"account": "'" + _("Profit for the year") + "'",
 		"warn_if_negative": True,
-		"currency": currency or frappe.db.get_value("Company", company, "default_currency")
+		"currency": currency or frappe.get_cached_value('Company',  company,  "default_currency")
 	}
 
 	has_value = False
 
 	for period in period_list:
-		total_income = flt(income[-2][period.key], 3) if income else 0
-		total_expense = flt(expense[-2][period.key], 3) if expense else 0
+		key = period if consolidated else period.key
+		total_income = flt(income[-2][key], 3) if income else 0
+		total_expense = flt(expense[-2][key], 3) if expense else 0
 
-		net_profit_loss[period.key] = total_income - total_expense
+		net_profit_loss[key] = total_income - total_expense
 
-		if net_profit_loss[period.key]:
+		if net_profit_loss[key]:
 			has_value=True
 
-		total += flt(net_profit_loss[period.key])
+		total += flt(net_profit_loss[key])
 		net_profit_loss["total"] = total
 
 	if has_value:
 		return net_profit_loss
-
 
 def get_chart_data(filters, columns, income, expense, net_profit_loss):
 	labels = [d.get("label") for d in columns[2:]]

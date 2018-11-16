@@ -65,8 +65,8 @@ erpnext/hr/doctype/training_event/tests/test_training_event.js
 erpnext/hr/doctype/training_result_employee/test_training_result.js
 erpnext/hr/doctype/training_feedback/test_training_feedback.js
 erpnext/hr/doctype/loan_type/test_loan_type.js
-erpnext/hr/doctype/employee_loan_application/test_employee_loan_application.js
-erpnext/hr/doctype/employee_loan/test_employee_loan.js
+erpnext/hr/doctype/loan_application/test_loan_application.js
+erpnext/hr/doctype/loan/test_loan.js
 erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/tests/test_request_for_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js

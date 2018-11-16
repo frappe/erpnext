@@ -10,7 +10,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 	float_preceision = frappe.db.get_default("float_preceision")
 
-	condition =get_condition(filters)
+	condition = get_condition(filters)
 
 	avg_daily_outgoing = 0
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days)+1
@@ -18,7 +18,7 @@ def execute(filters=None):
 		frappe.throw(_("'From Date' must be after 'To Date'"))
 
 	columns = get_columns()
-	items = get_item_info()
+	items = get_item_info(filters)
 	consumed_item_map = get_consumed_items(condition)
 	delivered_item_map = get_delivered_items(condition)
 
@@ -28,23 +28,31 @@ def execute(filters=None):
 		avg_daily_outgoing = flt(total_outgoing / diff, float_preceision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
-		data.append([item.name, item.item_name, item.description, item.safety_stock, item.lead_time_days,
-			consumed_item_map.get(item.name, 0), delivered_item_map.get(item.name,0), total_outgoing,
-			avg_daily_outgoing, reorder_level])
+		data.append([item.name, item.item_name, item.item_group, item.brand, item.description,
+			item.safety_stock, item.lead_time_days, consumed_item_map.get(item.name, 0),
+			delivered_item_map.get(item.name,0), total_outgoing, avg_daily_outgoing, reorder_level])
 
 	return columns , data
 
 def get_columns():
 	return[
-			_("Item") + ":Link/Item:120", _("Item Name") + ":Data:120", _("Description") + "::160",
+			_("Item") + ":Link/Item:120", _("Item Name") + ":Data:120", _("Item Group") + ":Link/Item Group:100",
+			_("Brand") + ":Link/Brand:100", _("Description") + "::160",
 			_("Safety Stock") + ":Float:160", _("Lead Time Days") + ":Float:120", _("Consumed") + ":Float:120",
 			_("Delivered") + ":Float:120", _("Total Outgoing") + ":Float:120", _("Avg Daily Outgoing") + ":Float:160",
 			_("Reorder Level") + ":Float:120"
 	]
 
-def get_item_info():
-	return frappe.db.sql("""select name, item_name, description, safety_stock,
-		lead_time_days from tabItem""", as_dict=1)
+def get_item_info(filters):
+	from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+	conditions = [get_item_group_condition(filters.get("item_group"))]
+	if filters.get("brand"):
+		conditions.append("item.brand=%(brand)s")
+
+	return frappe.db.sql("""select name, item_name, description, brand, item_group,
+		safety_stock, lead_time_days from `tabItem` item where {}"""
+		.format(" and ".join(conditions)), filters, as_dict=1)
+
 
 def get_consumed_items(condition):
 	cn_items = frappe.db.sql("""select se_item.item_code,

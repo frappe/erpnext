@@ -11,8 +11,9 @@ from frappe.utils.html_utils import clean_html
 
 class StockSettings(Document):
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom", "allow_negative_stock", "default_warehouse"]:
-			frappe.db.set_default(key, self.get(key, ""))
+		for key in ["item_naming_by", "item_group", "stock_uom",
+			"allow_negative_stock", "default_warehouse", "set_qty_in_transactions_based_on_serial_no_input"]:
+				frappe.db.set_default(key, self.get(key, ""))
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code",
@@ -25,8 +26,9 @@ class StockSettings(Document):
 			frappe.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)
 
 		# show/hide barcode field
-		frappe.make_property_setter({'fieldname': 'barcodes', 'property': 'hidden',
-			'value': 0 if self.show_barcode_field else 1})
+		for name in ["barcode", "barcodes", "scan_barcode"]:
+			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
+				'value': 0 if self.show_barcode_field else 1})
 
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()

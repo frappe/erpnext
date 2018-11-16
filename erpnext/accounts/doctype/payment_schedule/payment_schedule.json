@@ -15,6 +15,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -47,10 +48,12 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 2, 
+   "fetch_from": "", 
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -63,7 +66,7 @@
    "label": "Description", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "payment_term.description", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -79,6 +82,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -111,10 +115,12 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 2, 
+   "fetch_from": "", 
    "fieldname": "invoice_portion", 
    "fieldtype": "Percent", 
    "hidden": 0, 
@@ -127,7 +133,7 @@
    "label": "Invoice Portion", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "payment_term.invoice_portion", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
@@ -143,6 +149,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -175,6 +182,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -216,7 +224,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-03-08 11:26:18.266987", 
+ "modified": "2018-09-06 17:35:44.580209", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Schedule", 
@@ -230,5 +238,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

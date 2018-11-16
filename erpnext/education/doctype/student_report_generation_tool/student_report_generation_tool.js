@@ -24,7 +24,7 @@ frappe.ui.form.on('Student Report Generation Tool', {
 		frm.page.clear_indicator();
 		frm.page.set_primary_action(__('Print Report Card'), () => {
 			let url = "/api/method/erpnext.education.doctype.student_report_generation_tool.student_report_generation_tool.preview_report_card";
-			open_url_post(url, frm.doc, true);
+			open_url_post(url, {"doc": frm.doc}, true);
 		});
 	},
 

@@ -61,7 +61,7 @@ class OpeningInvoiceCreationTool(Document):
 
 	def make_invoices(self):
 		names = []
-		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
+		mandatory_error_msg = _("Row {0}: {1} is required to create the Opening {2} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
@@ -73,7 +73,7 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.temporary_opening_account:
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
-			
+
 			# Allow to create invoice even if no party present in customer or supplier.
 			if not frappe.db.exists(row.party_type, row.party):
 				if self.create_missing_party:
@@ -90,11 +90,7 @@ class OpeningInvoiceCreationTool(Document):
 
 			for d in ("Party", "Outstanding Amount", "Temporary Opening Account"):
 				if not row.get(scrub(d)):
-					frappe.throw(mandatory_error_msg.format(
-						idx=row.idx,
-						field=_(d),
-						invoice_type=self.invoice_type
-					))
+					frappe.throw(mandatory_error_msg.format(row.idx, _(d), self.invoice_type))
 
 			args = self.get_invoice_dict(row=row)
 			if not args:
@@ -120,20 +116,20 @@ class OpeningInvoiceCreationTool(Document):
 		if party_type == "Customer":
 			party_doc.customer_name = party
 		else:
-			supplier_type = frappe.db.get_single_value("Buying Settings", "supplier_type")
-			if not supplier_type:
-				frappe.throw(_("Please Set Supplier Type in Buying Settings."))
+			supplier_group = frappe.db.get_single_value("Buying Settings", "supplier_group")
+			if not supplier_group:
+				frappe.throw(_("Please Set Supplier Group in Buying Settings."))
 
 			party_doc.supplier_name = party
-			party_doc.supplier_type = supplier_type
+			party_doc.supplier_group = supplier_group
 
 		party_doc.flags.ignore_mandatory = True
-		party_doc.save(ignore_permissions=True)		
+		party_doc.save(ignore_permissions=True)
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
-			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			cost_center = frappe.get_cached_value('Company',  self.company,  "cost_center")
 			if not cost_center:
 				frappe.throw(
 					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
@@ -161,7 +157,8 @@ class OpeningInvoiceCreationTool(Document):
 			income_expense_account_field = "expense_account"
 
 		item = get_item_dict()
-		return frappe._dict({
+
+		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
 			"set_posting_time": 1,
@@ -170,8 +167,13 @@ class OpeningInvoiceCreationTool(Document):
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"currency": frappe.db.get_value("Company", self.company, "default_currency")
+			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency")
 		})
+
+		if self.invoice_type == "Sales":
+			args["is_pos"] = 0
+
+		return args
 
 @frappe.whitelist()
 def get_temporary_opening_account(company=None):

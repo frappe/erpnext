@@ -8,8 +8,8 @@ import unittest
 from frappe.utils import flt, nowdate
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, InvalidPaymentEntry
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice, create_sales_invoice_against_cost_center
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice, make_purchase_invoice_against_cost_center
 from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim
 
 test_dependencies = ["Item"]
@@ -39,6 +39,69 @@ class TestPaymentEntry(unittest.TestCase):
 
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
+
+	def test_payment_entry_for_blocked_supplier_invoice(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = nowdate()
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_past_date(self):
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
+
+				pi = make_purchase_invoice()
+
+				get_payment_entry('Purchase Invoice', pi.name, bank_account="_Test Bank - _TC")
+
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
 
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
@@ -88,7 +151,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 	def test_payment_entry_against_ec(self):
 
-		payable = frappe.db.get_value('Company', "_Test Company", 'default_payable_account')
+		payable = frappe.get_cached_value('Company',  "_Test Company",  'default_payable_account')
 		ec = make_expense_claim(payable, 300, 300, "_Test Company", "Travel Expenses - _TC")
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
@@ -259,7 +322,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		for i, gle in enumerate(gl_entries):
+		for gle in gl_entries:
 			self.assertEqual(expected_gle[gle.account][0], gle.account)
 			self.assertEqual(expected_gle[gle.account][1], gle.debit)
 			self.assertEqual(expected_gle[gle.account][2], gle.credit)
@@ -331,3 +394,176 @@ class TestPaymentEntry(unittest.TestCase):
 
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
+
+	def test_payment_entry_against_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.cost_center, si.cost_center)
+
+		pe.reference_no = "112211-1"
+		pe.reference_date = nowdate()
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = si.grand_total
+		pe.insert()
+		pe.submit()
+
+		expected_values = {
+			"_Test Bank - _TC": {
+				"cost_center": cost_center
+			},
+			"Debtors - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_payment_entry_against_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+		si =  create_sales_invoice(debit_to="Debtors - _TC")
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+
+		pe.reference_no = "112211-2"
+		pe.reference_date = nowdate()
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = si.grand_total
+		pe.insert()
+		pe.submit()
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(gle.cost_center, None)
+
+	def test_payment_entry_against_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		pi =  make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.cost_center, pi.cost_center)
+
+		pe.reference_no = "112222-1"
+		pe.reference_date = nowdate()
+		pe.paid_from = "_Test Bank - _TC"
+		pe.paid_amount = pi.grand_total
+		pe.insert()
+		pe.submit()
+
+		expected_values = {
+			"_Test Bank - _TC": {
+				"cost_center": cost_center
+			},
+			"Creditors - _TC": {
+				"cost_center": cost_center
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_payment_entry_against_purchase_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+
+		pe.reference_no = "112222-2"
+		pe.reference_date = nowdate()
+		pe.paid_from = "_Test Bank - _TC"
+		pe.paid_amount = pi.grand_total
+		pe.insert()
+		pe.submit()
+
+		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""", pe.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(gle.cost_center, None)
+
+	def test_payment_entry_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.utils import get_balance_on
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
+
+		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=si.cost_center)
+		party_balance = get_balance_on(party_type="Customer", party=si.customer, cost_center=si.cost_center)
+		party_account_balance = get_balance_on(si.debit_to, cost_center=si.cost_center)
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "112211-1"
+		pe.reference_date = nowdate()
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = si.grand_total
+		pe.insert()
+		pe.submit()
+
+		expected_account_balance = account_balance + si.grand_total
+		expected_party_balance = party_balance - si.grand_total
+		expected_party_account_balance = party_account_balance - si.grand_total
+
+		account_balance = get_balance_on(account=pe.paid_to, cost_center=pe.cost_center)
+		party_balance = get_balance_on(party_type="Customer", party=pe.party, cost_center=pe.cost_center)
+		party_account_balance = get_balance_on(account=pe.paid_from, cost_center=pe.cost_center)
+
+		self.assertEqual(pe.cost_center, si.cost_center)
+		self.assertEqual(expected_account_balance, account_balance)
+		self.assertEqual(expected_party_balance, party_balance)
+		self.assertEqual(expected_party_account_balance, party_account_balance)
+
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()

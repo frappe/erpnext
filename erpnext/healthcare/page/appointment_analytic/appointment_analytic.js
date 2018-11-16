@@ -14,7 +14,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			title: __("Appointment Analytics"),
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Patient Appointment", "Physician", "Medical Department", "Appointment Type", "Patient"],
+			doctypes: ["Patient Appointment", "Healthcare Practitioner", "Medical Department", "Appointment Type", "Patient"],
 			tree_grid: { show: true }
 		});
 
@@ -22,16 +22,16 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			"Medical Department": {
 				label: __("Department"),
 				show: true,
-				item_key: "physician",
+				item_key: "practitioner",
 				parent_field: "department",
 				formatter: function(item) {
 					return item.name;
 				}
 			},
-			"Physician": {
-				label: __("Physician"),
+			"Healthcare Practitioner": {
+				label: __("Healthcare Practitioner"),
 				show: true,
-				item_key: "physician",
+				item_key: "practitioner",
 				formatter: function(item) {
 					return item.name;
 				}
@@ -52,7 +52,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: __("Tree Type"), fieldname: "tree_type",
-			options:["Physician", "Medical Department"], filter: function(val, item, opts, me) {
+			options:["Healthcare Practitioner", "Medical Department"], filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);}},
 		{fieldtype:"Select", label: __("Status"), fieldname: "status",
 			options:[
@@ -64,10 +64,10 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				{label: __("Cancelled"), value: "Cancelled"}]},
 		{fieldtype:"Select", label: __("Type"), link:"Appointment Type", fieldname: "type",
 			default_value: __("Select Type...")},
-		{fieldtype:"Select", label: __("Physician"), link:"Physician", fieldname: "physician",
-			default_value: __("Select Physician..."), filter: function(val, item, opts) {
+		{fieldtype:"Select", label: __("Healthcare Practitioner"), link:"Healthcare Practitioner", fieldname: "practitioner",
+			default_value: __("Select Healthcare Practitioner..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.name == val || item._show;
-			}, link_formatter: {filter_input: "physician"}},
+			}, link_formatter: {filter_input: "practitioner"}},
 		{fieldtype:"Select", label: __("Department"), link:"Medical Department", fieldname: "department",
 			default_value: __("Select Department..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.department == val || item._show;
@@ -81,7 +81,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	],
 	setup_filters: function() {
 		this._super();
-		this.trigger_refresh_on_change(["tree_type", "physician", "department", "status", "type"]);
+		this.trigger_refresh_on_change(["tree_type", "practitioner", "department", "status", "type"]);
 
 		//	this.show_zero_check()
 	},
@@ -96,10 +96,10 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		}
 		if(!this.data || me.item_type != me.tree_type) {
 			var items = null;
-			if(me.tree_type=='Physician') {
-				items = frappe.report_dump.data["Physician"];
+			if(me.tree_type=='Healthcare Practitioner') {
+				items = frappe.report_dump.data["Healthcare Practitioner"];
 			} if(me.tree_type=='Medical Department') {
-				items = this.prepare_tree("Physician", "Medical Department");
+				items = this.prepare_tree("Healthcare Practitioner", "Medical Department");
 			}
 			me.item_type = me.tree_type;
 			me.parent_map = {};

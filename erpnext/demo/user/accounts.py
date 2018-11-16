@@ -28,7 +28,7 @@ def work():
 				si.posting_date = frappe.flags.current_date
 				for d in si.get("items"):
 					if not d.income_account:
-						d.income_account = "Sales - {}".format(frappe.db.get_value('Company', si.company, 'abbr'))
+						d.income_account = "Sales - {}".format(frappe.get_cached_value('Company',  si.company,  'abbr'))
 				si.insert()
 				si.submit()
 				frappe.db.commit()
@@ -56,7 +56,7 @@ def work():
 	if random.random() < 0.5:
 		make_payment_entries("Purchase Invoice", "Accounts Payable")
 
-	if random.random() < 0.1:
+	if random.random() < 0.4:
 		#make payment request against sales invoice
 		sales_invoice_name = get_random("Sales Invoice", filters={"docstatus": 1})
 		if sales_invoice_name:
@@ -106,7 +106,7 @@ def make_pos_invoice():
 		si.posting_date = frappe.flags.current_date
 		for d in si.get("items"):
 			if not d.income_account:
-				d.income_account = "Sales - {}".format(frappe.db.get_value('Company', si.company, 'abbr'))
+				d.income_account = "Sales - {}".format(frappe.get_cached_value('Company',  si.company,  'abbr'))
 		si.set_missing_values()
 		make_payment_entries_for_pos_invoice(si)
 		si.insert()

@@ -9,7 +9,7 @@ from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate
-
+from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
@@ -17,7 +17,7 @@ from erpnext.stock.get_item_details import get_item_details
 from six import iteritems
 
 test_ignore = ["BOM"]
-test_dependencies = ["Warehouse"]
+test_dependencies = ["Warehouse", "Item Group"]
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
@@ -34,10 +34,10 @@ def make_item(item_code, properties=None):
 	if properties:
 		item.update(properties)
 
-
-	if item.is_stock_item and not item.default_warehouse:
-		item.default_warehouse = "_Test Warehouse - _TC"
-
+	if item.is_stock_item:
+		for item_default in [doc for doc in item.get("item_defaults") if not doc.default_warehouse]:
+			item_default.default_warehouse = "_Test Warehouse - _TC"
+			item_default.company = "_Test Company"
 	item.insert()
 
 	return item
@@ -66,7 +66,7 @@ class TestItem(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center 2 - _TC",
+			"cost_center": "_Test Cost Center - _TC",
 			"qty": 1.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
@@ -144,14 +144,14 @@ class TestItem(unittest.TestCase):
 			})
 			item_attribute.save()
 
+		template = frappe.get_doc('Item', '_Test Variant Item')
+		template.item_group = "_Test Item Group D"
+		template.save()
+
 		variant = create_variant("_Test Variant Item", {"Test Size": "Extra Large"})
 		variant.item_code = "_Test Variant Item-XL"
 		variant.item_name = "_Test Variant Item-XL"
 		variant.save()
-
-		template = frappe.get_doc('Item', '_Test Variant Item')
-		template.item_group = "_Test Item Group D"
-		template.save()
 
 		variant = frappe.get_doc('Item', '_Test Variant Item-XL')
 		for fieldname in allow_fields:
@@ -199,7 +199,12 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC",
+			"item_defaults": [
+				{
+					"default_warehouse": "_Test Warehouse - _TC",
+					"company": "_Test Company"
+				}
+			],
 			"has_variants": 1
 		})
 
@@ -235,6 +240,24 @@ class TestItem(unittest.TestCase):
 
 		self.assertTrue(frappe.db.get_value("Bin",
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
+
+	def test_uom_conversion_factor(self):
+		if frappe.db.exists('Item', 'Test Item UOM'):
+			frappe.delete_doc('Item', 'Test Item UOM')
+
+		item_doc = make_item("Test Item UOM", {
+			"stock_uom": "Gram",
+			"uoms": [dict(uom='Carat'), dict(uom='Kg')]
+		})
+
+		for d in item_doc.uoms:
+			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
+			d.conversion_factor = value
+
+		self.assertEqual(item_doc.uoms[0].uom, "Carat")
+		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
+		self.assertEqual(item_doc.uoms[1].uom, "Kg")
+		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
@@ -296,7 +319,7 @@ def make_item_variant():
 
 test_records = frappe.get_test_records('Item')
 
-def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None):
+def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None, is_customer_provided_item=None, customer=None, is_purchase_item=None):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
@@ -305,5 +328,12 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None)
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item or 1
 		item.valuation_rate = valuation_rate or 0.0
-		item.default_warehouse = warehouse or '_Test Warehouse - _TC'
+		item.is_purchase_item = is_purchase_item
+		item.is_customer_provided_item = is_customer_provided_item
+		item.customer = customer or ''
+		item.append("item_defaults", {
+			"default_warehouse": warehouse or '_Test Warehouse - _TC',
+			"company": "_Test Company"
+		})
 		item.save()
+

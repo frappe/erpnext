@@ -11,10 +11,21 @@ from frappe.utils import now_datetime, nowdate, add_days, add_months
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.hr.doctype.salary_structure.test_salary_structure \
+	import make_salary_structure, create_salary_structure_assignment
+
 
 class TestTimesheet(unittest.TestCase):
+	def setUp(self):
+		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
+			frappe.db.sql("delete from `tab%s`" % dt)
+
+		if not frappe.db.exists("Salary Component", "Timesheet Component"):
+			frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
+
+
 	def test_timesheet_billing_amount(self):
-		make_salary_structure("_T-Employee-00001")
+		make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -24,7 +35,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 100)
 
 	def test_timesheet_billing_amount_not_billable(self):
-		make_salary_structure("_T-Employee-00001")
+		make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -34,14 +45,15 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
-		salary_structure = make_salary_structure("_T-Employee-00001")
+		salary_structure = make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate = True, billable=1)
 		salary_slip = make_salary_slip(timesheet.name)
 		salary_slip.submit()
 
 		self.assertEqual(salary_slip.total_working_hours, 2)
 		self.assertEqual(salary_slip.hour_rate, 50)
-		self.assertEqual(salary_slip.net_pay, 150)
+		self.assertEqual(salary_slip.earnings[0].salary_component, "Timesheet Component")
+		self.assertEqual(salary_slip.earnings[0].amount, 100)
 		self.assertEqual(salary_slip.timesheets[0].time_sheet, timesheet.name)
 		self.assertEqual(salary_slip.timesheets[0].working_hours, 2)
 
@@ -116,50 +128,74 @@ class TestTimesheet(unittest.TestCase):
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
 
+	def test_timesheet_std_working_hours(self):
+		company = frappe.get_doc('Company', "_Test Company")
+		company.standard_working_hours = 8
+		company.save()
 
-def make_salary_structure(employee):
-	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
-	if name:
-		salary_structure = frappe.get_doc('Salary Structure', name)
-	else:
-		salary_structure = frappe.new_doc("Salary Structure")
-		salary_structure.name = "Timesheet Salary Structure Test"
-		salary_structure.salary_slip_based_on_timesheet = 1
-		salary_structure.from_date = add_days(nowdate(), -30)
-		salary_structure.salary_component = "Basic"
-		salary_structure.hour_rate = 50.0
-		salary_structure.company = "_Test Company"
-		salary_structure.payment_account = get_random("Account")
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = "_T-Employee-00001"
+		timesheet.company = '_Test Company'
+		timesheet.append(
+			'time_logs',
+			{
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(days= 4)
+			}
+		)
+		timesheet.save()
 
-		salary_structure.set('employees', [])
-		salary_structure.set('earnings', [])
-		salary_structure.set('deductions', [])
+		ts = frappe.get_doc('Timesheet', timesheet.name)
+		self.assertEqual(ts.total_hours, 32)
+		ts.submit()
+		ts.cancel()
 
-		es = salary_structure.append('employees', {
-			"employee": employee,
-			"base": 1200,
-			"from_date": add_months(nowdate(),-1)
-		})
+		company = frappe.get_doc('Company', "_Test Company")
+		company.standard_working_hours = 0
+		company.save()
 
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = "_T-Employee-00001"
+		timesheet.company = '_Test Company'
+		timesheet.append(
+			'time_logs',
+			{
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(days= 4)
+			}
+		)
+		timesheet.save()
 
-		es = salary_structure.append('earnings', {
-			"salary_component": "_Test Allowance",
-			"amount": 100
-		})
+		ts = frappe.get_doc('Timesheet', timesheet.name)
+		self.assertEqual(ts.total_hours, 96)
+		ts.submit()
+		ts.cancel()
 
-		ds = salary_structure.append('deductions', {
-			"salary_component": "_Test Professional Tax",
-			"amount": 50
-		})
+def make_salary_structure_for_timesheet(employee):
+	salary_structure_name = "Timesheet Salary Structure Test"
+	frequency = "Monthly"
 
-		salary_structure.save(ignore_permissions=True)
+	salary_structure = make_salary_structure(salary_structure_name, frequency, dont_submit=True)
+	salary_structure.salary_component = "Timesheet Component"
+	salary_structure.salary_slip_based_on_timesheet = 1
+	salary_structure.hour_rate = 50.0
+	salary_structure.save()
+	salary_structure.submit()
+
+	if not frappe.db.get_value("Salary Structure Assignment",
+		{'employee':employee, 'docstatus': 1}):
+			create_salary_structure_assignment(employee, salary_structure.name)
 
 	return salary_structure
+
 
 def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test Activity Type", project=None, task=None, company=None):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
+	timesheet.company = company or '_Test Company'
 	timesheet_detail = timesheet.append('time_logs', {})
 	timesheet_detail.billable = billable
 	timesheet_detail.activity_type = activity_type
@@ -168,7 +204,6 @@ def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test 
 	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours= timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
-	timesheet_detail.company = company or '_Test Company'
 
 	for data in timesheet.get('time_logs'):
 		if simulate:

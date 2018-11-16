@@ -77,8 +77,8 @@ class StockLedgerEntry(Document):
 				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
 					frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
 
-			elif item_det.has_batch_no ==0 and self.batch_no:
-					frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
+			elif item_det.has_batch_no ==0 and self.batch_no and self.is_cancelled == "No":
+				frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
 
 		if item_det.has_variants:
 			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
@@ -124,10 +124,12 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 def on_doctype_update():
-	if not frappe.db.sql("""show index from `tabStock Ledger Entry`
-		where Key_name="posting_sort_index" """):
+	if not frappe.db.has_index('tabStock Ledger Entry', 'posting_sort_index'):
 		frappe.db.commit()
-		frappe.db.sql("""alter table `tabStock Ledger Entry`
-			add index posting_sort_index(posting_date, posting_time, name)""")
+		frappe.db.add_index("Stock Ledger Entry",
+			fields=["posting_date", "posting_time", "name"],
+			index_name="posting_sort_index")
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
+	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
+	

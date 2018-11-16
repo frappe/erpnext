@@ -13,12 +13,6 @@ from six import string_types
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
-	def load_notification_message(self):
-		dt = self.doctype.lower().replace(" ", "_")
-		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.set("__notification_message",
-				frappe.db.get_value("Notification Control", None, dt + "_message"))
-
 	def validate_posting_time(self):
 		# set Edit Posting Date and Time to 1 while data import
 		if frappe.flags.in_import and self.posting_date:
@@ -43,11 +37,18 @@ class TransactionBase(StatusUpdater):
 			self._add_calendar_event(opts)
 
 	def delete_events(self):
-		events = frappe.db.sql_list("""select name from `tabEvent`
-			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
-		if events:
-			frappe.db.sql("delete from `tabEvent` where name in ({0})"
-				.format(", ".join(['%s']*len(events))), tuple(events))
+		participations = frappe.get_all("Event Participants", filters={"reference_doctype": self.doctype, "reference_docname": self.name,
+			"parenttype": "Event"}, fields=["name", "parent"])
+
+		if participations:
+			for participation in participations:
+				total_participants = frappe.get_all("Event Participants", filters={"parenttype": "Event", "parent": participation.parent})
+
+				if len(total_participants) <= 1:
+					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
+
+				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
+
 
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
@@ -60,10 +61,14 @@ class TransactionBase(StatusUpdater):
 				"description": opts.description,
 				"starts_on":  self.contact_date,
 				"ends_on": opts.ends_on,
-				"event_type": "Private",
-				"ref_type": self.doctype,
-				"ref_name": self.name
+				"event_type": "Private"
 			})
+
+			event.append('event_participants', {
+				"reference_doctype": self.doctype,
+				"reference_docname": self.name
+				}
+			)
 
 			event.insert(ignore_permissions=True)
 
@@ -150,7 +155,7 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
 	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom,
-		"must_be_whole_number") or None, distinct_uoms)
+		"must_be_whole_number", cache=True) or None, distinct_uoms)
 
 	if not integer_uoms:
 		return

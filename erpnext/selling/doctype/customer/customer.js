@@ -5,7 +5,6 @@ frappe.ui.form.on("Customer", {
 	setup: function(frm) {
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
-
 		frm.set_query('customer_group', {'is_group': 0});
 		frm.set_query('default_price_list', { 'selling': 1});
 		frm.set_query('account', 'accounts', function(doc, cdt, cdn) {
@@ -19,11 +18,14 @@ frappe.ui.form.on("Customer", {
 			if(doc.party_account_currency) {
 				$.extend(filters, {"account_currency": doc.party_account_currency});
 			}
-
 			return {
 				filters: filters
 			}
 		});
+
+		if (frm.doc.__islocal == 1) {
+			frm.set_value("represents_company", "");
+		}
 
 		frm.set_query('customer_primary_contact', function(doc) {
 			return {
@@ -58,10 +60,26 @@ frappe.ui.form.on("Customer", {
 			frm.set_value("primary_address", "");
 		}
 	},
+
+	is_internal_customer: function(frm) {
+		if (frm.doc.is_internal_customer == 1) {
+			frm.toggle_reqd("represents_company", true);
+		}
+		else {
+			frm.toggle_reqd("represents_company", false);
+		}
+	},
+
 	customer_primary_contact: function(frm){
 		if(!frm.doc.customer_primary_contact){
 			frm.set_value("mobile_no", "");
 			frm.set_value("email_id", "");
+		}
+	},
+
+	loyalty_program: function(frm) {
+		if(frm.doc.loyalty_program) {
+			frm.set_value('loyalty_program_tier', null);
 		}
 	},
 
@@ -73,7 +91,6 @@ frappe.ui.form.on("Customer", {
 		}
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
-
 		frm.toggle_display(['address_html','contact_html','primary_address_and_contact_detail'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
@@ -89,8 +106,17 @@ frappe.ui.form.on("Customer", {
 				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
 			});
 
+			frm.add_custom_button(__('Pricing Rule'), function () {
+				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+			}, __("Make"));
+
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
+
+			//
+			if (frm.doc.__onload.dashboard_info.loyalty_point) {
+				frm.dashboard.add_indicator(__('Loyalty Point: {0}', [frm.doc.__onload.dashboard_info.loyalty_point]), 'blue');
+			}
 
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);

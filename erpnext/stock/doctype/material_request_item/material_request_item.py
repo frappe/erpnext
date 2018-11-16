@@ -6,10 +6,12 @@
 from __future__ import unicode_literals
 import frappe
 
+from erpnext.controllers.print_settings import print_settings_for_item_table
 from frappe.model.document import Document
 
 class MaterialRequestItem(Document):
-	pass
+	def __setup__(self):
+		print_settings_for_item_table(self)
 
 def on_doctype_update():
 	frappe.db.add_index("Material Request Item", ["item_code", "warehouse"])

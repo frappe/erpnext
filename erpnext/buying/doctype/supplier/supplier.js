@@ -4,6 +4,9 @@
 frappe.ui.form.on("Supplier", {
 	setup: function (frm) {
 		frm.set_query('default_price_list', { 'buying': 1 });
+		if (frm.doc.__islocal == 1) {
+			frm.set_value("represents_company", "");
+		}
 		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
@@ -36,13 +39,31 @@ frappe.ui.form.on("Supplier", {
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.set_route('query-report', 'General Ledger',
 					{ party_type: 'Supplier', party: frm.doc.name });
-			});
+			}, __("View"));
+
 			frm.add_custom_button(__('Accounts Payable'), function () {
 				frappe.set_route('query-report', 'Accounts Payable', { supplier: frm.doc.name });
-			});
+			}, __("View"));
+
+			frm.add_custom_button(__('Bank Account'), function () {
+				erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);
+			}, __("Make"));
+
+			frm.add_custom_button(__('Pricing Rule'), function () {
+				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
+			}, __("Make"));
 
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
 	},
+
+	is_internal_supplier: function(frm) {
+		if (frm.doc.is_internal_supplier == 1) {
+			frm.toggle_reqd("represents_company", true);
+		}
+		else {
+			frm.toggle_reqd("represents_company", false);
+		}
+	}
 });

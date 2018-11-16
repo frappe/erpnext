@@ -16,12 +16,16 @@ def execute(filters=None):
 	emp_map = get_employee_details()
 
 	holiday_list = [emp_map[d]["holiday_list"] for d in emp_map if emp_map[d]["holiday_list"]]
-	default_holiday_list = frappe.db.get_value("Company", filters.get("company"), "default_holiday_list")
+	default_holiday_list = frappe.get_cached_value('Company',  filters.get("company"),  "default_holiday_list")
 	holiday_list.append(default_holiday_list)
 	holiday_list = list(set(holiday_list))
 	holiday_map = get_holiday(holiday_list, filters["month"])
 
 	data = []
+	leave_types = frappe.db.sql("""select name from `tabLeave Type`""", as_list=True)
+	leave_list = [d[0] for d in leave_types]
+	columns.extend(leave_list)
+
 	for emp in sorted(att_map):
 		emp_det = emp_map.get(emp)
 		if not emp_det:
@@ -49,10 +53,35 @@ def execute(filters=None):
 			elif status == "Half Day":
 				total_p += 0.5
 				total_a += 0.5
+				total_l += 0.5
 
 		row += [total_p, total_l, total_a]
-		data.append(row)
 
+		if not filters.get("employee"):
+			filters.update({"employee": emp})
+			conditions += " and employee = %(employee)s"
+		elif not filters.get("employee") == emp:
+			filters.update({"employee": emp})
+
+		leave_details = frappe.db.sql("""select leave_type, status, count(*) as count from `tabAttendance`\
+			where leave_type is not NULL %s group by leave_type, status""" % conditions, filters, as_dict=1)
+
+		leaves = {}
+		for d in leave_details:
+			if d.status == "Half Day":
+				d.count = d.count * 0.5
+			if d.leave_type in leaves:
+				leaves[d.leave_type] += d.count
+			else:
+				leaves[d.leave_type] = d.count
+
+		for d in leave_list:
+			if d in leaves:
+				row.append(leaves[d])
+			else:
+				row.append("0.0")
+
+		data.append(row)
 	return columns, data
 
 def get_columns(filters):

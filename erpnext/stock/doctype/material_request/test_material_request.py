@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import frappe, unittest, erpnext
 from frappe.utils import flt, today
 from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
@@ -600,6 +601,36 @@ class TestMaterialRequest(unittest.TestCase):
 		po.submit()
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(mr.per_ordered, 100)
+
+	def test_customer_provided_parts_mr(self):
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		mr = make_material_request(item_code='CUST-0987', material_request_type='Customer Provided')
+		se = make_stock_entry(mr.name)
+		se.insert()
+		se.submit()
+		self.assertEqual(se.get("items")[0].amount, 0)
+		self.assertEqual(se.get("items")[0].material_request, mr.name)
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+		self.assertEqual(mr.per_ordered, 100)
+
+def make_material_request(**args):
+	args = frappe._dict(args)
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = args.material_request_type or "Purchase"
+	mr.company = args.company or "_Test Company"
+	mr.customer = args.customer or '_Test Customer'
+	mr.append("items", {
+		"item_code": args.item_code or "_Test Item",
+		"qty": args.qty or 10,
+		"schedule_date": args.schedule_date or today(),
+		"warehouse": args.warehouse or "_Test Warehouse - _TC"
+	})
+	mr.insert()
+	if not args.do_not_submit:
+		mr.submit()
+	return mr
 
 test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')

@@ -123,6 +123,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.sync_sales_invoice()
 		});
 
+		this.page.add_menu_item(__("Cashier Closing"), function () {
+			frappe.set_route('List', 'Cashier Closing');
+		});		
+
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
@@ -131,7 +135,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	email_prompt: function() {
 		var me = this;
 		var fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
-			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
+			{fieldtype: "Section Break", collapsible: 1, label: "CC & Email Template"},
 			{fieldtype: "Section Break"},
 			{label:__("Subject"), fieldtype:"Data", reqd: 1,
 				fieldname:"subject",length:524288},
@@ -288,6 +292,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (callback) {
 					callback();
 				}
+			},
+			error: () => {
+				setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
 			}
 		})
 	},
@@ -405,10 +412,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_search: function () {
 		var me = this;
-		this.serach_item = frappe.ui.form.make_control({
+		this.search_item = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
-				"label": "Item",
+				"label": __("Item"),
 				"fieldname": "pos_item",
 				"placeholder": __("Search Item")
 			},
@@ -416,13 +423,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			only_input: true,
 		});
 
-		this.serach_item.make_input();
+		this.search_item.make_input();
 
-		this.serach_item.$input.on("keypress", function (event) {
+		this.search_item.$input.on("keypress", function (event) {
 
 			clearTimeout(me.last_search_timeout);
 			me.last_search_timeout = setTimeout(() => {
-				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+				if((me.search_item.$input.val() != "") || (event.which == 13)) {
 					me.items = me.get_items();
 					me.make_item_list();
 				}
@@ -679,7 +686,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
 			this.set_customer_value_in_party_field();
-			this.serach_item.$input.focus();
+			this.search_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();
 		}
@@ -1051,6 +1058,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
 						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
+						item_uom: obj.stock_uom,
 						color: frappe.get_palette(obj.item_name),
 						abbr: frappe.get_abbr(obj.item_name)
 					})).tooltip().appendTo($wrap);
@@ -1073,8 +1081,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		if (this.items.length == 1
-			&& this.serach_item.$input.val()) {
-			this.serach_item.$input.val("");
+			&& this.search_item.$input.val()) {
+			this.search_item.$input.val("");
 			this.add_to_cart();
 		}
 	},
@@ -1096,7 +1104,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.items_list = this.apply_category();
 
-		key = this.serach_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
+		key = this.search_item.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g, '\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
@@ -1104,15 +1112,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.serach_item.$input.val())) {
+					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
-						return me.item_batch_no[item.item_code] = me.serach_item.$input.val()
+						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
-						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.serach_item.$input.val())) {
+						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search_item.$input.val())) {
 						search_status = false;
-						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
+						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (in_list(me.barcode_data[item.item_code], me.serach_item.$input.val())) {
+					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
@@ -1186,7 +1194,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					message: __('Discount amount cannot be greater than 100%')
 				});
 				me.update_discount(item_code, discount);
-			}else{	
+			}else{
 				me.update_discount(item_code, discount);
 				me.update_value();
 			}
@@ -1399,6 +1407,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.item_code = this.items[0].item_code;
 		this.child.item_name = this.items[0].item_name;
 		this.child.stock_uom = this.items[0].stock_uom;
+		this.child.uom = this.items[0].sales_uom || this.items[0].stock_uom;
+		this.child.conversion_factor = this.items[0].conversion_factor || 1;
 		this.child.brand = this.items[0].brand;
 		this.child.description = this.items[0].description || this.items[0].item_name;
 		this.child.discount_percentage = 0.0;
@@ -1408,8 +1418,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.income_account = this.pos_profile_data['income_account'] || this.items[0].income_account;
 		this.child.warehouse = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][1] : (this.pos_profile_data['warehouse'] || this.items[0].default_warehouse));
-		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
-		this.child.rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
 		this.child.actual_qty = me.get_actual_qty(this.items[0]);
 		this.child.amount = flt(this.child.qty) * flt(this.child.rate);
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
@@ -1565,15 +1575,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				style="margin-right: 5px;">${__('Print')}</a>
 			<a class="btn btn-default new_doc">${__('New')}</a>`);
 
-		$('.print_doc').click(function () {
-			var html = frappe.render(me.print_template_data, me.frm.doc)
-			me.print_document(html)
+		this.msgprint.msg_area.find('.print_doc').on('click', function() {
+			var html = frappe.render(me.print_template_data, me.frm.doc);
+			me.print_document(html);
 		})
 
-		$('.new_doc').click(function () {
-			me.msgprint.hide()
-			me.make_new_cart()
+		this.msgprint.msg_area.find('.new_doc').on('click', function() {
+			me.msgprint.hide();
+			me.make_new_cart();
 		})
+
 	},
 
 	print_document: function (html) {

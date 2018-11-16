@@ -7,7 +7,9 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 class JobOffer(Document):
-	pass
+	def onload(self):
+		employee = frappe.db.get_value("Employee", {"job_applicant": self.job_applicant}, "name") or ""
+		self.set_onload("employee", employee)
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):

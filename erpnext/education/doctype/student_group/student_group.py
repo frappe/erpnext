@@ -33,7 +33,7 @@ class StudentGroup(Document):
 		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.course)
 		students = [d.student for d in program_enrollment] if program_enrollment else []
 		for d in self.students:
-			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
+			if not frappe.db.get_value("Student", d.student, "enabled") and d.active and not self.disabled:
 				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
 
 			if (self.group_based_on == "Batch") and cint(frappe.defaults.get_defaults().validate_batch)\

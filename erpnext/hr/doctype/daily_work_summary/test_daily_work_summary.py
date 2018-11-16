@@ -15,8 +15,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test()
 		for d in self.users:
 			# check that email is sent to users
-			self.assertTrue(d.email in [d.recipient for d in self.emails
-				if self.groups.subject in d.message])
+			if d.message:
+				self.assertTrue(d.email in [d.recipient for d in self.emails
+					if self.groups.subject in d.message])
 
 	def test_email_trigger_failed(self):
 		hour = '00:00'
@@ -33,8 +34,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 	def test_incoming(self):
 		# get test mail with message-id as in-reply-to
 		self.setup_and_prepare_test()
-
 		with open(os.path.join(os.path.dirname(__file__), "test_data", "test-reply.raw"), "r") as f:
+			if not self.emails: return
 			test_mails = [f.read().replace('{{ sender }}',
 			self.users[-1].email).replace('{{ message_id }}',
 			self.emails[-1].message_id)]

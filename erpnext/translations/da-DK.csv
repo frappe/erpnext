@@ -1,26 +1,26 @@
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +123,'Opening','Åbning'
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +153,'Opening','Åbning'
 DocType: Lead,Lead,Bly
 apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
 DocType: Timesheet,% Amount Billed,% Beløb Billed
 DocType: Purchase Order,% Billed,% Billed
 ,Lead Id,Bly Id
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +209,'Total','Total'
+apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.py +87,{0} {1} created,{0} {1} creado
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +215,'Total','Total'
 DocType: Selling Settings,Selling Settings,Salg af indstillinger
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71,Selling Amount,Selling Beløb
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Selling Amount,Selling Beløb
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,"Bly skal indstilles, hvis Opportunity er lavet af Lead"
-DocType: Item,Default Selling Cost Center,Standard Selling Cost center
+DocType: Item Default,Default Selling Cost Center,Standard Selling Cost center
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-Above
 DocType: Pricing Rule,Selling,Selling
-apps/erpnext/erpnext/accounts/page/pos/pos.js +76, to ,Ultima Actualización : Fecha inválida
 DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
-apps/erpnext/erpnext/controllers/stock_controller.py +236,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
+apps/erpnext/erpnext/controllers/stock_controller.py +240,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
 apps/erpnext/erpnext/config/selling.py +169,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
-apps/erpnext/erpnext/controllers/accounts_controller.py +313, or ,o
+apps/erpnext/erpnext/controllers/accounts_controller.py +369, or ,o
 DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order
 DocType: SMS Center,All Lead (Open),Alle Bly (Open)
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,Hent opdateringer
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},"'Opdater lager' kan ikke markeres, varerne ikke leveres via {0}"
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +46,'Update Stock' can not be checked because items are not delivered via {0},"'Opdater lager' kan ikke markeres, varerne ikke leveres via {0}"
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,Standard Selling
 ,Lead Details,Bly Detaljer
 DocType: Selling Settings,Settings for Selling Module,Indstillinger for Selling modul

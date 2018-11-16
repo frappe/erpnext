@@ -8,18 +8,10 @@ import frappe.defaults
 from frappe.model.document import Document
 
 class Bin(Document):
-	def validate(self):
+	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
-			self.stock_uom = frappe.db.get_value('Item', self.item_code, 'stock_uom')
-
-		self.validate_mandatory()
+			self.stock_uom = frappe.get_cached_value('Item', self.item_code, 'stock_uom')
 		self.set_projected_qty()
-
-	def validate_mandatory(self):
-		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
-		for f in qf:
-			if (not getattr(self, f, None)) or (not self.get(f)):
-				self.set(f, 0.0)
 
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		'''Called from erpnext.stock.utils.update_bin'''

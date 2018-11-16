@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc('stock', 'doctype', 'item')
 	frappe.reload_doc('stock', 'doctype', 'quality_inspection_template')
+	frappe.reload_doc('stock', 'doctype', 'item')
 
 	for data in frappe.get_all('Item Quality Inspection Parameter',
 		fields = ["distinct parent"], filters = {'parenttype': 'Item'}):

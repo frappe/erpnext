@@ -110,7 +110,6 @@ class TestShoppingCart(unittest.TestCase):
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
-
 		self.assertEqual(quotation.taxes_and_charges, tax_rule_master)
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 

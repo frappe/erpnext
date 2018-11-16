@@ -119,7 +119,7 @@ def get_attribute_values(item):
 	return frappe.flags.attribute_values, frappe.flags.numeric_values
 
 def find_variant(template, args, variant_item_code=None):
-	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
+	conditions = ["""(iv_attribute.attribute={0} and iv_attribute.attribute_value={1})"""\
 		.format(frappe.db.escape(key), frappe.db.escape(cstr(value))) for key, value in args.items()]
 
 	conditions = " or ".join(conditions)
@@ -178,10 +178,23 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
-		item=item, args=args, now=frappe.flags.in_test);
+	if isinstance(args, string_types):
+		variants = json.loads(args)
+	total_variants = 1
+	for key in variants:
+		total_variants *= len(variants[key])
+	if total_variants >= 600:
+		frappe.msgprint("Please do not create more than 500 items at a time", raise_exception=1)
+		return
+	if total_variants < 10:
+		return create_multiple_variants(item, args)
+	else:
+		frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
+			item=item, args=args, now=frappe.flags.in_test);
+		return 'queued'
 
 def create_multiple_variants(item, args):
+	count = 0
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -191,6 +204,9 @@ def create_multiple_variants(item, args):
 		if not get_variant(item, args=attribute_values):
 			variant = create_variant(item, attribute_values)
 			variant.save()
+			count +=1
+
+	return count
 
 def generate_keyed_value_combinations(args):
 	"""
@@ -273,17 +289,18 @@ def copy_attributes_to_variant(item, variant):
 					variant.set(field.fieldname, item.get(field.fieldname))
 
 	variant.variant_of = item.name
-	variant.has_variants = 0
-	if not variant.description:
-		variant.description = ""
+	if 'description' in allow_fields:
+		variant.has_variants = 0
+		if not variant.description:
+			variant.description = ""
 
-	if item.variant_based_on=='Item Attribute':
-		if variant.attributes:
-			attributes_description = ""
-			for d in variant.attributes:
-				attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
+		if item.variant_based_on=='Item Attribute':
+			if variant.attributes:
+				attributes_description = ""
+				for d in variant.attributes:
+					attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 
-			if attributes_description not in variant.description:
+				if attributes_description not in variant.description:
 					variant.description += attributes_description
 
 def make_variant_item_code(template_item_code, template_item_name, variant):

@@ -7,7 +7,7 @@ from frappe import msgprint, _
 from frappe.utils import cint, now
 from erpnext.accounts.doctype.sales_invoice.pos import get_child_nodes
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
-
+from six import iteritems
 from frappe.model.document import Document
 
 class POSProfile(Document):
@@ -39,7 +39,7 @@ class POSProfile(Document):
 			self.expense_account], "Cost Center": [self.cost_center],
 			"Warehouse": [self.warehouse]}
 
-		for link_dt, dn_list in accounts.items():
+		for link_dt, dn_list in iteritems(accounts):
 			for link_dn in dn_list:
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
 						"company": self.company, "name": link_dn}):
@@ -102,12 +102,12 @@ class POSProfile(Document):
 
 def get_item_groups(pos_profile):
 	item_groups = []
-	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+	pos_profile = frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get('item_groups'):
-			item_groups.extend(["'%s'" % frappe.db.escape(d.name) for d in get_child_nodes('Item Group', data.item_group)])
+			item_groups.extend(["%s" % frappe.db.escape(d.name) for d in get_child_nodes('Item Group', data.item_group)])
 
 	return list(set(item_groups))
 

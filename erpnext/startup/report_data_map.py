@@ -208,15 +208,15 @@ data_map = {
 	},
 	"Supplier": {
 		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name",
-			"supplier_type as parent_supplier_type"],
+			"supplier_group as parent_supplier_group"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
-			"parent_supplier_type": ["Supplier Type", "name"],
+			"parent_supplier_group": ["Supplier Group", "name"],
 		}
 	},
-	"Supplier Type": {
-		"columns": ["name"],
+	"Supplier Group": {
+		"columns": ["name", "parent_supplier_group"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},
@@ -298,14 +298,14 @@ data_map = {
 		}
 	},
 	"Patient Appointment": {
-		"columns": ["name", "appointment_type", "patient", "physician", "appointment_date", "department", "status", "company"],
+		"columns": ["name", "appointment_type", "patient", "practitioner", "appointment_date", "department", "status", "company"],
 		"order_by": "name",
 		"links": {
-			"physician": ["Physician", "name"],
+			"practitioner": ["Healthcare Practitioner", "name"],
 			"appointment_type": ["Appointment Type", "name"]
 		}
 	},
-	"Physician": {
+	"Healthcare Practitioner": {
 		"columns": ["name", "department"],
 		"order_by": "name",
 		"links": {

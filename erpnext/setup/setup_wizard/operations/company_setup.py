@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
-from frappe.utils.file_manager import save_file
 from .default_website import website_maker
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
@@ -107,14 +106,19 @@ def create_logo(args):
 		attach_logo = args.get("attach_logo").split(",")
 		if len(attach_logo)==3:
 			filename, filetype, content = attach_logo
-			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
-				decode=True).file_url
+			_file = frappe.get_doc({
+				"doctype": "File",
+				"file_name": filename,
+				"attached_to_doctype": "Website Settings",
+				"attached_to_name": "Website Settings",
+				"decode": True})
+			_file.save()
+			fileurl = _file.file_url
 			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
-				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")	))
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")))
 
 def create_website(args):
-	if args.get('setup_website'):
-		website_maker(args)
+	website_maker(args)
 
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year

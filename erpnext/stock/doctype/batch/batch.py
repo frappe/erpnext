@@ -86,8 +86,13 @@ class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
-			if frappe.db.get_value('Item', self.item, 'create_new_batch'):
-				if batch_uses_naming_series():
+			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item, 
+				['create_new_batch', 'batch_number_series'])
+
+			if create_new_batch:
+				if batch_number_series:
+					self.batch_id = make_autoname(batch_number_series)
+				elif batch_uses_naming_series():
 					self.batch_id = self.get_name_from_naming_series()
 				else:
 					self.batch_id = get_name_from_hash()
@@ -246,8 +251,8 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 
 def get_batches(item_code, warehouse, qty=1, throw=False):
 	batches = frappe.db.sql(
-		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` '
-		'on `tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no '
+		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` ignore index (item_code, warehouse) '
+		'on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )'
 		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
 		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
 		'group by batch_id '

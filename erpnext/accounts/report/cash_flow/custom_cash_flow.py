@@ -10,7 +10,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 
 
 def get_mapper_for(mappers, position):
-	mapper_list = filter(lambda x: x['position'] == position, mappers)
+	mapper_list = list(filter(lambda x: x['position'] == position, mappers))
 	return mapper_list[0] if mapper_list else []
 
 
@@ -25,15 +25,14 @@ def get_mappers_from_db():
 
 
 def get_accounts_in_mappers(mapping_names):
-	return frappe.db.sql(
-		'select cfma.name, cfm.label, cfm.is_working_capital, cfm.is_income_tax_liability, '
-		'cfm.is_income_tax_expense, cfm.is_finance_cost, cfm.is_finance_cost_adjustment '
-		'from `tabCash Flow Mapping Accounts` cfma '
-		'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
-		'where cfma.parent in %s '
-		'order by cfm.is_working_capital',
-		(mapping_names,)
-	)
+	return frappe.db.sql('''
+		select cfma.name, cfm.label, cfm.is_working_capital, cfm.is_income_tax_liability,
+		cfm.is_income_tax_expense, cfm.is_finance_cost, cfm.is_finance_cost_adjustment
+		from `tabCash Flow Mapping Accounts` cfma
+		join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name
+		where cfma.parent in (%s)
+		order by cfm.is_working_capital
+	''', (', '.join(['"%s"' % d for d in mapping_names])))
 
 
 def setup_mappers(mappers):
@@ -334,6 +333,7 @@ def compute_data(filters, company_currency, profit_data, period_list, light_mapp
 
 
 def execute(filters=None):
+	if not filters.periodicity: filters.periodicity = "Monthly"
 	period_list = get_period_list(
 		filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity,
 		filters.accumulated_values, filters.company
@@ -345,20 +345,20 @@ def execute(filters=None):
 
 	# compute net profit / loss
 	income = get_data(
-		filters.company, "Income", "Credit", period_list,
+		filters.company, "Income", "Credit", period_list, filters=filters,
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
 		ignore_accumulated_values_for_fy=True
 	)
 
 	expense = get_data(
-		filters.company, "Expense", "Debit", period_list,
+		filters.company, "Expense", "Debit", period_list, filters=filters,
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
 		ignore_accumulated_values_for_fy=True
 	)
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	data = compute_data(filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts)
 
@@ -376,6 +376,7 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
+		accounts = ', '.join(['"%s"' % d for d in account_names])
 
 		if opening_balances:
 			date_info = dict(date=start_date)
@@ -397,19 +398,19 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 				from `tabGL Entry`
 				where company=%s and posting_date >= %s and posting_date <= %s 
 					and voucher_type != 'Period Closing Voucher'
-					and account in ( SELECT name FROM tabAccount WHERE name IN %s
-					OR parent_account IN %s)
-			""", (company, start, end, account_names, account_names))
+					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
+					OR parent_account IN (%s))
+			""", (company, start, end, accounts, accounts))
 		else:
 			gl_sum = frappe.db.sql_list("""
 				select sum(credit) - sum(debit)
 				from `tabGL Entry`
 				where company=%s and posting_date >= %s and posting_date <= %s 
 					and voucher_type != 'Period Closing Voucher'
-					and account in ( SELECT name FROM tabAccount WHERE name IN %s
-					OR parent_account IN %s)
+					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
+					OR parent_account IN (%s))
 			""", (company, start_date if accumulated_values else period['from_date'],
-				period['to_date'], account_names, account_names))
+				period['to_date'], accounts, accounts))
 
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]

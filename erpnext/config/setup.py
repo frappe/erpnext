@@ -64,7 +64,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Users and Permissions"),
-					"youtube_id": "fnBoRhBrwR4"
+					"youtube_id": "8Slw1hsTmUI"
 				},
 				{
 					"type": "help",
@@ -81,12 +81,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Authorization Rule",
 					"description": _("Create rules to restrict transactions based on values.")
-				},
-				{
-					"type": "doctype",
-					"name": "Notification Control",
-					"label": _("Email Notifications"),
-					"description": _("Automatically compose message on submission of transactions.")
 				}
 			]
 		},

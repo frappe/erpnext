@@ -294,6 +294,16 @@ def get_data():
 			"hidden": 1
         },
         {
+			"module_name": "Healthcare Practitioner",
+			"color": "#2ecc71",
+			"icon": "fa fa-user-md",
+			"doctype": "Healthcare Practitioner",
+			"type": "link",
+			"link": "List/Healthcare Practitioner",
+			"label": _("Healthcare Practitioner"),
+			"hidden": 1
+        },
+        {
 			"module_name": "Patient Appointment",
 			"color": "#934F92",
 			"icon": "fa fa-calendar-plus-o",
@@ -304,13 +314,13 @@ def get_data():
 			"hidden": 1
         },
         {
-			"module_name": "Consultation",
+			"module_name": "Patient Encounter",
 			"color": "#2ecc71",
 			"icon": "fa fa-stethoscope",
-			"doctype": "Consultation",
+			"doctype": "Patient Encounter",
 			"type": "link",
-			"link": "List/Consultation",
-			"label": _("Consultation"),
+			"link": "List/Patient Encounter",
+			"label": _("Patient Encounter"),
 			"hidden": 1
         },
         {
@@ -321,6 +331,36 @@ def get_data():
 			"type": "list",
 			"link": "List/Lab Test",
 			"label": _("Lab Test"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Vital Signs",
+			"color": "#2ecc71",
+			"icon": "fa fa-thermometer-empty",
+			"doctype": "Vital Signs",
+			"type": "list",
+			"link": "List/Vital Signs",
+			"label": _("Vital Signs"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Clinical Procedure",
+			"color": "#FF888B",
+			"icon": "fa fa-medkit",
+			"doctype": "Clinical Procedure",
+			"type": "list",
+			"link": "List/Clinical Procedure",
+			"label": _("Clinical Procedure"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Inpatient Record",
+			"color": "#7578f6",
+			"icon": "fa fa-list-alt",
+			"doctype": "Inpatient Record",
+			"type": "list",
+			"link": "List/Inpatient Record",
+			"label": _("Inpatient Record"),
 			"hidden": 1
         },
 		{
@@ -346,7 +386,7 @@ def get_data():
 			"color": "#EA81E8",
 			"icon": "🍔",
 			"_doctype": "Restaurant",
-			"type": "list",
+			"type": "module",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
 			"hidden": 1
@@ -398,13 +438,13 @@ def get_data():
 			"hidden": 1
 		},
 		{
-			"module_name": "Land Unit",
-			"_doctype": "Land Unit",
-			"label": _("Land Unit"),
+			"module_name": "Location",
+			"_doctype": "Location",
+			"label": _("Location"),
 			"color": "#8BC34A",
 			"icon": "fa fa-map",
 			"type": "list",
-			"link": "List/Land Unit",
+			"link": "List/Location",
 			"hidden": 1
 		},
 		{

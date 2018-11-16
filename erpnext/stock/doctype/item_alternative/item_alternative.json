@@ -41,7 +41,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -73,7 +73,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -104,7 +104,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -134,7 +134,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -143,6 +143,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -155,7 +156,7 @@
    "label": "Item Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "item_code.item_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -166,7 +167,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }, 
   {
@@ -175,6 +176,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_from": "alternative_item_code.item_name",
    "fieldname": "alternative_item_name", 
    "fieldtype": "Read Only", 
    "hidden": 0, 
@@ -187,7 +189,7 @@
    "label": "Alternative Item Name", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "alternative_item_code.item_name", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -198,7 +200,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "translatable": 0, 
+   "translatable": 0,
    "unique": 0
   }
  ], 
@@ -212,7 +214,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-03-07 16:08:08.097107", 
+ "modified": "2018-05-16 22:43:35.377291",
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Alternative", 
@@ -221,7 +223,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -241,7 +242,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -261,7 +261,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

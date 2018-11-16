@@ -16,16 +16,16 @@
 				<tr>
 					<td>{{ item }}</td>
 					<td class='text-right'>
-						{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item), None, company_currency) }}
+						{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item), None, currency) }}
 					</td>
 					{% for tax_account in tax_accounts %}
 						{% set tax_details = taxes.get(tax_account) %}
 						{% if tax_details %}
 							<td class='text-right'>
 								{% if tax_details.tax_rate or not tax_details.tax_amount %}
-									({{ tax_details.tax_rate }}%) 
+									({{ tax_details.tax_rate }}%)
 								{% endif %}
-								{{ frappe.utils.fmt_money(tax_details.tax_amount, None, company_currency) }}
+								{{ frappe.utils.fmt_money(tax_details.tax_amount / conversion_rate, None, currency) }}
 							</td>
 						{% else %}
 							<td></td>

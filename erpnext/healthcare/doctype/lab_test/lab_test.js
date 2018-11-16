@@ -10,27 +10,22 @@ cur_frm.cscript.custom_refresh = function(doc) {
 frappe.ui.form.on('Lab Test', {
 	setup: function(frm) {
 		frm.get_field('normal_test_items').grid.editable_fields = [
-			{fieldname: 'test_name', columns: 3},
-			{fieldname: 'test_event', columns: 2},
+			{fieldname: 'lab_test_name', columns: 3},
+			{fieldname: 'lab_test_event', columns: 2},
 			{fieldname: 'result_value', columns: 2},
-			{fieldname: 'test_uom', columns: 1},
+			{fieldname: 'lab_test_uom', columns: 1},
 			{fieldname: 'normal_range', columns: 2}
 		];
 		frm.get_field('special_test_items').grid.editable_fields = [
-			{fieldname: 'test_particulars', columns: 3},
+			{fieldname: 'lab_test_particulars', columns: 3},
 			{fieldname: 'result_value', columns: 7}
 		];
 	},
 	refresh :  function(frm){
 		refresh_field('normal_test_items');
 		refresh_field('special_test_items');
-		if(!frm.doc.__islocal && !frm.doc.invoice && frappe.user.has_role("Accounts User")){
-			frm.add_custom_button(__('Make Invoice'), function() {
-				make_invoice(frm);
-			});
-		}
 		if(frm.doc.__islocal){
-			frm.add_custom_button(__('Get from Consultation'), function () {
+			frm.add_custom_button(__('Get from Patient Encounter'), function () {
 				get_lab_test_prescribed(frm);
 			});
 		}
@@ -60,7 +55,7 @@ frappe.ui.form.on('Lab Test', {
 
 	},
 	onload: function (frm) {
-		frm.add_fetch("physician", "department", "department");
+		frm.add_fetch("practitioner", "department", "department");
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",
@@ -160,29 +155,26 @@ var show_lab_tests = function(frm, result){
 	$.each(result, function(x, y){
 		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
 		<div class="col-xs-2"> %(lab_test)s </div>\
-		<div class="col-xs-2"> %(consultation)s </div>\
-		<div class="col-xs-3"> %(physician)s </div>\
+		<div class="col-xs-2"> %(encounter)s </div>\
+		<div class="col-xs-3"> %(practitioner)s </div>\
 		<div class="col-xs-3"> %(date)s </div>\
 		<div class="col-xs-1">\
 		<a data-name="%(name)s" data-lab-test="%(lab_test)s"\
-		data-consultation="%(consultation)s" data-physician="%(physician)s"\
-		data-invoice="%(invoice)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
-		</button></a></div></div>', {name:y[0], lab_test: y[1], consultation:y[2], invoice:y[3], physician:y[4], date:y[5]})).appendTo(html_field);
+		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
+		data-invoiced="%(invoiced)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
+		</button></a></div></div>', {name:y[0], lab_test: y[1], encounter:y[2], invoiced:y[3], practitioner:y[4], date:y[5]})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.template = $(this).attr("data-lab-test");
 			frm.doc.prescription = $(this).attr("data-name");
-			frm.doc.physician = $(this).attr("data-physician");
+			frm.doc.practitioner = $(this).attr("data-practitioner");
 			frm.set_df_property("template", "read_only", 1);
 			frm.set_df_property("patient", "read_only", 1);
-			frm.set_df_property("physician", "read_only", 1);
-			if($(this).attr("data-invoice") != 'null'){
-				frm.doc.invoice = $(this).attr("data-invoice");
-				refresh_field("invoice");
-			}else {
-				frm.doc.invoice = "";
-				refresh_field("invoice");
+			frm.set_df_property("practitioner", "read_only", 1);
+			frm.doc.invoiced = 0;
+			if($(this).attr("data-invoiced") == 1){
+				frm.doc.invoiced = 1;
 			}
-
+			refresh_field("invoiced");
 			refresh_field("template");
 			d.hide();
 			return false;
@@ -193,24 +185,6 @@ var show_lab_tests = function(frm, result){
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
-};
-
-var make_invoice = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method: "erpnext.healthcare.doctype.lab_test.lab_test.create_invoice",
-		args: {company:doc.company, patient:doc.patient, lab_tests: [doc.name], prescriptions:[]},
-		callback: function(r){
-			if(!r.exc){
-				if(r.message){
-					/*	frappe.show_alert(__('Sales Invoice {0} created',
-					['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));	*/
-					frappe.set_route("Form", "Sales Invoice", r.message);
-				}
-				cur_frm.reload_doc();
-			}
-		}
-	});
 };
 
 cur_frm.cscript.custom_before_submit =  function(doc) {

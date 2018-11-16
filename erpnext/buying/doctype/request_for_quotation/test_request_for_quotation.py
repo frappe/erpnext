@@ -56,7 +56,7 @@ class TestRequestforQuotation(unittest.TestCase):
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = "_Test Supplier '1"
-		supplier.supplier_type = "_Test Supplier Type"
+		supplier.supplier_group = "_Test Supplier Group"
 		supplier.insert()
 
 		rfq = make_request_for_quotation(supplier_wt_appos)

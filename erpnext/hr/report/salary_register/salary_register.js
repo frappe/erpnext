@@ -29,6 +29,13 @@ frappe.query_reports["Salary Register"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
+		},
+		{
+			"fieldname":"docstatus",
+			"label":__("Document Status"),
+			"fieldtype":"Select",
+			"options":["Draft", "Submitted", "Cancelled"],
+			"default":"Submitted"
 		}
 	]
 }

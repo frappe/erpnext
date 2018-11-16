@@ -1,0 +1,29 @@
+
+{% if data %}
+<h5 style="margin-top: 20px;"> {{ __("Allocated Leaves") }} </h5>
+<table class="table table-bordered small">
+	<thead>
+		<tr>
+			<th style="width: 20%">{{ __("Leave Type") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Total Allocated Leaves") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Used Leaves") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Pending Leaves") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Available Leaves") }}</th>
+		</tr>
+
+	</thead>
+	<tbody>
+		{% for(const [key, value] of Object.entries(data)) { %}
+			<tr>
+				<td> {%= key %} </td>
+				<td class="text-right"> {%= value["total_leaves"] %} </td>
+				<td class="text-right"> {%= value["leaves_taken"] %} </td>
+				<td class="text-right"> {%= value["pending_leaves"] %} </td>
+				<td class="text-right"> {%= value["remaining_leaves"] %} </td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+{% } else { %}
+<p style="margin-top: 30px;"> No Leaves have been allocated. </p>
+{% } %}

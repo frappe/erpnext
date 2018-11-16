@@ -11,6 +11,8 @@ def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.periodicity, company=filters.company)
 
+	currency = filters.presentation_currency or frappe.get_cached_value('Company',  filters.company,  "default_currency")
+
 	asset = get_data(filters.company, "Asset", "Debit", period_list,
 		only_current_fiscal_year=False, filters=filters,
 		accumulated_values=filters.accumulated_values)
@@ -24,7 +26,7 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
-		period_list, filters.company)
+		period_list, filters.company, currency)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
 
@@ -37,7 +39,7 @@ def execute(filters=None):
 			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"warn_if_negative": True,
-			"currency": frappe.db.get_value("Company", filters.company, "default_currency")
+			"currency": currency
 		}
 		for period in period_list:
 			unclosed[period.key] = opening_balance
@@ -58,12 +60,12 @@ def execute(filters=None):
 
 	return columns, data, message, chart
 
-def get_provisional_profit_loss(asset, liability, equity, period_list, company):
+def get_provisional_profit_loss(asset, liability, equity, period_list, company, currency=None, consolidated=False):
 	provisional_profit_loss = {}
 	total_row = {}
 	if asset and (liability or equity):
 		total = total_row_total=0
-		currency = frappe.db.get_value("Company", company, "default_currency")
+		currency = currency or frappe.get_cached_value('Company',  company,  "default_currency")
 		total_row = {
 			"account_name": "'" + _("Total (Credit)") + "'",
 			"account": "'" + _("Total (Credit)") + "'",
@@ -73,22 +75,23 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 		has_value = False
 
 		for period in period_list:
+			key = period if consolidated else period.key
 			effective_liability = 0.0
 			if liability:
-				effective_liability += flt(liability[-2].get(period.key))
+				effective_liability += flt(liability[-2].get(key))
 			if equity:
-				effective_liability += flt(equity[-2].get(period.key))
+				effective_liability += flt(equity[-2].get(key))
 
-			provisional_profit_loss[period.key] = flt(asset[-2].get(period.key)) - effective_liability
-			total_row[period.key] = effective_liability + provisional_profit_loss[period.key]
+			provisional_profit_loss[key] = flt(asset[-2].get(key)) - effective_liability
+			total_row[key] = effective_liability + provisional_profit_loss[key]
 
-			if provisional_profit_loss[period.key]:
+			if provisional_profit_loss[key]:
 				has_value = True
 
-			total += flt(provisional_profit_loss[period.key])
+			total += flt(provisional_profit_loss[key])
 			provisional_profit_loss["total"] = total
 
-			total_row_total += flt(total_row[period.key])
+			total_row_total += flt(total_row[key])
 			total_row["total"] = total_row_total
 
 		if has_value:

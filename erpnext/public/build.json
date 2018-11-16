@@ -3,9 +3,18 @@
         "public/less/erpnext.less",
         "public/less/hub.less"
     ],
+    "css/marketplace.css": [
+        "public/less/hub.less"
+    ],
     "js/erpnext-web.min.js": [
         "public/js/website_utils.js",
         "public/js/shopping_cart.js"
+    ],
+	"css/erpnext-web.css": [
+		"public/less/website.less"
+	],
+    "js/marketplace.min.js": [
+        "public/js/hub/marketplace.js"
     ],
     "js/erpnext.min.js": [
         "public/js/conf.js",
@@ -30,12 +39,13 @@
         "public/js/payment/pos_payment.html",
         "public/js/payment/payment_details.html",
         "public/js/templates/item_selector.html",
+		"public/js/templates/employees_to_mark_attendance.html",
         "public/js/utils/item_selector.js",
         "public/js/help_links.js",
         "public/js/agriculture/ternary_plot.js",
         "public/js/templates/item_quick_entry.html",
         "public/js/utils/item_quick_entry.js",
-	"public/js/utils/customer_quick_entry.js",
+		"public/js/utils/customer_quick_entry.js",
         "public/js/education/student_button.html",
         "public/js/education/assessment_result_tool.html",
         "public/js/hub/hub_factory.js"

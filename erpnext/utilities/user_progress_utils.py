@@ -63,7 +63,7 @@ def create_suppliers(args_data):
 				doc = frappe.get_doc({
 					"doctype":"Supplier",
 					"supplier_name": supplier,
-					"supplier_type": _("Local"),
+					"supplier_group": _("Local"),
 					"company": defaults.get("company")
 				}).insert()
 
@@ -110,7 +110,10 @@ def create_items(args_data):
 					"is_stock_item": 1,
 					"item_group": _("Products"),
 					"stock_uom": _(args.get("item_uom_" + str(i))),
-					"default_warehouse": default_warehouse
+					"item_defaults": [{
+						"default_warehouse": default_warehouse,
+						"company": defaults.get("company_name")
+					}]
 				}).insert()
 
 			except frappe.NameError:
@@ -231,6 +234,6 @@ def create_users(args_data):
 
 @frappe.whitelist()
 def update_default_domain_actions_and_get_state():
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	update_domain_actions(domain)
 	return get_domain_actions_state(domain)

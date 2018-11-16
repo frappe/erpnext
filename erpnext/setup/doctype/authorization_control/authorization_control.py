@@ -40,7 +40,7 @@ class AuthorizationControl(TransactionBase):
 		chk = 1
 		add_cond1,add_cond2	= '',''
 		if based_on == 'Itemwise Discount':
-			add_cond1 += " and master_name = '"+cstr(item).replace("'", "\\'")+"'"
+			add_cond1 += " and master_name = " + frappe.db.escape(cstr(item))
 			itemwise_exists = frappe.db.sql("""select value from `tabAuthorization Rule`
 				where transaction = %s and value <= %s
 				and based_on = %s and company = %s and docstatus != 2 %s %s""" %

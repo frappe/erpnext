@@ -79,7 +79,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 			let d = moment(row.from_time);
 			if(row.expected_hours) {
 				d.add(row.expected_hours, "hours");
-				row.to_time = d.format(moment.defaultDatetimeFormat);
+				row.to_time = d.format(frappe.defaultDatetimeFormat);
 			}
 			frm.refresh_field("time_logs");
 			frm.save();

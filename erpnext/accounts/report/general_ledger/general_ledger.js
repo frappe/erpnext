@@ -12,6 +12,12 @@ frappe.query_reports["General Ledger"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
@@ -33,7 +39,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
-				var company = frappe.query_report_filters_by_name.company.get_value();
+				var company = frappe.query_report.get_filter_value('company');
 				return {
 					"doctype": "Account",
 					"filters": {
@@ -46,12 +52,70 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"voucher_no",
 			"label": __("Voucher No"),
 			"fieldtype": "Data",
+			on_change: function() {
+				frappe.query_report.set_filter_value('group_by', "");
+			}
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "MultiSelect",
+			get_data: function() {
+				var cost_centers = frappe.query_report.get_filter_value("cost_center") || "";
+
+				const values = cost_centers.split(/\s*,\s*/).filter(d => d);
+				const txt = cost_centers.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: "Cost Center",
+						txt: txt,
+						filters: {
+							"company": frappe.query_report.get_filter_value("company"),
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
+			}
 		},
 		{
 			"fieldname":"project",
 			"label": __("Project"),
-			"fieldtype": "Link",
-			"options": "Project"
+			"fieldtype": "MultiSelect",
+			get_data: function() {
+				var projects = frappe.query_report.get_filter_value("project") || "";
+
+				const values = projects.split(/\s*,\s*/).filter(d => d);
+				const txt = projects.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: "Project",
+						txt: txt,
+						filters: {
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
+			}
 		},
 		{
 			"fieldtype": "Break",
@@ -63,37 +127,62 @@ frappe.query_reports["General Ledger"] = {
 			"options": "Party Type",
 			"default": "",
 			on_change: function() {
-				frappe.query_report_filters_by_name.party.set_value("");
+				frappe.query_report.set_filter_value('party', "");
 			}
 		},
 		{
 			"fieldname":"party",
 			"label": __("Party"),
-			"fieldtype": "Dynamic Link",
-			"get_options": function() {
-				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
-				var party = frappe.query_report_filters_by_name.party.get_value();
-				if(party && !party_type) {
-					frappe.throw(__("Please select Party Type first"));
-				}
-				return party_type;
+			"fieldtype": "MultiSelect",
+			get_data: function() {
+				if (!frappe.query_report.filters) return;
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				var parties = frappe.query_report.get_filter_value('party');
+				if(!party_type) return;
+
+				const values = parties.split(/\s*,\s*/).filter(d => d);
+				const txt = parties.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: frappe.query_report.get_filter_value('party_type'),
+						txt: txt,
+						filters: {
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
 			},
 			on_change: function() {
-				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
-				var party = frappe.query_report_filters_by_name.party.get_value();
-				if(!party_type || !party) {
-					frappe.query_report_filters_by_name.party_name.set_value("");
-					return;
-				}
-				var fieldname = erpnext.utils.get_party_name(party_type) || "name";
-				frappe.db.get_value(party_type, party, fieldname, function(value) {
-					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
-				});
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				var parties = frappe.query_report.get_filter_value('party');
+				const values = parties.split(/\s*,\s*/).filter(d => d);
 
-				if (party_type === "Customer" || party_type === "Supplier") {
-					frappe.db.get_value(party_type, party, "tax_id", function(value) {
-						frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+				if(!party_type || !parties || values.length>1) {
+					frappe.query_report.set_filter_value('party_name', "");
+					frappe.query_report.set_filter_value('tax_id', "");
+					return;
+				} else {
+					var party = values[0];
+					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
+					frappe.db.get_value(party_type, party, fieldname, function(value) {
+						frappe.query_report.set_filter_value('party_name', value[fieldname]);
 					});
+
+					if (party_type === "Customer" || party_type === "Supplier") {
+						frappe.db.get_value(party_type, party, "tax_id", function(value) {
+							frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+						});
+					}
 				}
 			}
 		},
@@ -104,21 +193,18 @@ frappe.query_reports["General Ledger"] = {
 			"hidden": 1
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group by"),
+			"fieldtype": "Select",
+			"options": ["", __("Group by Voucher"), __("Group by Voucher (Consolidated)"),
+				__("Group by Account"), __("Group by Party")],
+			"default": __("Group by Voucher (Consolidated)")
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
-		},
-		{
-			"fieldname":"group_by_voucher",
-			"label": __("Group by Voucher"),
-			"fieldtype": "Check",
-			"default": 1
-		},
-		{
-			"fieldname":"group_by_account",
-			"label": __("Group by Account"),
-			"fieldtype": "Check",
 		},
 		{
 			"fieldname": "presentation_currency",

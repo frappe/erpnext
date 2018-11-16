@@ -87,25 +87,27 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
-	edit_task: function (frm, doctype, name) {
+});
+
+frappe.ui.form.on("Project Task", {
+	edit_task: function(frm, doctype, name) {
 		var doc = frappe.get_doc(doctype, name);
-		if (doc.task_id) {
+		if(doc.task_id) {
 			frappe.set_route("Form", "Task", doc.task_id);
 		} else {
 			frappe.msgprint(__("Save the document first."));
 		}
 	},
-	edit_timesheet: function (frm, cdt, cdn) {
+
+	edit_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.route_options = {
-			"project": frm.doc.project_name,
-			"task": child.task_id
-		};
+		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
 		frappe.set_route("List", "Timesheet");
 	},
-	make_timesheet: function (frm, cdt, cdn) {
+
+	make_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.model.with_doctype('Timesheet', function () {
+		frappe.model.with_doctype('Timesheet', function() {
 			var doc = frappe.model.get_new_doc('Timesheet');
 			var row = frappe.model.add_child(doc, 'time_logs');
 			row.project = frm.doc.project_name;
@@ -114,32 +116,32 @@ frappe.ui.form.on("Project", {
 		})
 	},
 
-	status: function (frm, doctype, name) {
+	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
-
 });
 
-
 frappe.ui.form.on("Project", "validate", function (frm) {
-	frappe.call({
-		method: "erpnext.projects.doctype.project.project.times_check",
-		args: {
-			"from1": frm.doc.from,
-			"to": frm.doc.to,
-			"first_email": frm.doc.first_email,
-			"second_email": frm.doc.second_email,
-			"daily_time_to_send": frm.doc.daily_time_to_send,
-			"weekly_time_to_send": frm.doc.weekly_time_to_send
+	if (frm.doc.collect_progress == 1) {
+		frappe.call({
+			method: "erpnext.projects.doctype.project.project.times_check",
+			args: {
+				"from1": frm.doc.from,
+				"to": frm.doc.to,
+				"first_email": frm.doc.first_email,
+				"second_email": frm.doc.second_email,
+				"daily_time_to_send": frm.doc.daily_time_to_send,
+				"weekly_time_to_send": frm.doc.weekly_time_to_send
 
-		},
-		callback: function (r) {
-			frm.set_value("from", r.message.from1);
-			frm.set_value("to", r.message.to);
-			frm.set_value("first_email", r.message.first_email);
-			frm.set_value("second_email", r.message.second_email);
-			frm.set_value("daily_time_to_send", r.message.daily_time_to_send);
-			frm.set_value("weekly_time_to_send", r.message.weekly_time_to_send);
-		}
-	});
+			},
+			callback: function (r) {
+				frm.set_value("from", r.message.from1);
+				frm.set_value("to", r.message.to);
+				frm.set_value("first_email", r.message.first_email);
+				frm.set_value("second_email", r.message.second_email);
+				frm.set_value("daily_time_to_send", r.message.daily_time_to_send);
+				frm.set_value("weekly_time_to_send", r.message.weekly_time_to_send);
+			}
+		});
+	}
 });

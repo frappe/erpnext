@@ -8,14 +8,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming   import make_autoname
 from frappe.exceptions import ValidationError
+from frappe.utils import nowdate
 
 class ShareDontExists(ValidationError): pass
 
 class ShareTransfer(Document):
-	def before_save(self):
+	def before_submit(self):
 		if self.transfer_type == 'Issue':
-			company_doc = self.get_shareholder_doc(self.company)
-			company_doc.append('share_balance', {
+			shareholder = self.get_shareholder_doc(self.company)
+			shareholder.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
 				'to_no': self.to_no,
@@ -25,7 +26,7 @@ class ShareTransfer(Document):
 				'is_company': 1,
 				'current_state': 'Issued'
 			})
-			company_doc.save()
+			shareholder.save()
 
 			doc = frappe.get_doc('Shareholder', self.to_shareholder)
 			doc.append('share_balance', {
@@ -60,13 +61,13 @@ class ShareTransfer(Document):
 		self.folio_no_validation()
 		if self.transfer_type == 'Issue':
 			if not self.get_shareholder_doc(self.company):
-				company_doc = frappe.get_doc({
+				shareholder = frappe.get_doc({
 					'doctype': 'Shareholder',
 					'title': self.company,
 					'company': self.company,
 					'is_company': 1
 				})
-				company_doc.insert()
+				shareholder.insert()
 			# validate share doesnt exist in company
 			ret_val = self.share_exists(self.get_shareholder_doc(self.company).name)
 			if ret_val != False:
@@ -275,3 +276,27 @@ class ShareTransfer(Document):
 			return frappe.get_doc('Shareholder', doc[0]['name'])
 		else: #It will necessarily by 0 indicating it doesn't exist
 			return False
+
+@frappe.whitelist()
+def make_jv_entry( company, account, amount, payment_account,\
+	credit_applicant_type, credit_applicant, debit_applicant_type, debit_applicant):
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = 'Journal Entry'
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	account_amt_list = []
+
+	account_amt_list.append({
+		"account": account,
+		"debit_in_account_currency": amount,
+		"party_type": debit_applicant_type,
+		"party": debit_applicant,
+		})
+	account_amt_list.append({
+		"account": payment_account,
+		"credit_in_account_currency": amount,
+		"party_type": credit_applicant_type,
+		"party": credit_applicant,
+		})
+	journal_entry.set("accounts", account_amt_list)
+	return journal_entry.as_dict()

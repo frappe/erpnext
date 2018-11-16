@@ -7,7 +7,7 @@ from erpnext.setup.doctype.setup_progress.setup_progress import get_action_compl
 
 def get_slide_settings():
 	defaults = frappe.defaults.get_defaults()
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	company = defaults.get("company") or ''
 	currency = defaults.get("currency") or ''
 

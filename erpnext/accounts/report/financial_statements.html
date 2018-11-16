@@ -1,5 +1,7 @@
 {%
-	if (report.columns.length > 8) {
+	var report_columns = report.get_columns_for_print();
+
+	if (report_columns.length > 8) {
 		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
 	}
 %}
@@ -30,9 +32,9 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: {%= 100 - (report.columns.length - 2) * 13 %}%"></th>
-			{% for(var i=2, l=report.columns.length; i<l; i++) { %}
-				<th class="text-right">{%= report.columns[i].label %}</th>
+			<th style="width: {%= 100 - (report_columns.length - 2) * 13 %}%"></th>
+			{% for(var i=2, l=report_columns.length; i<l; i++) { %}
+				<th class="text-right">{%= report_columns[i].label %}</th>
 			{% } %}
 		</tr>
 	</thead>
@@ -47,9 +49,9 @@
 				<td>
 					<span style="padding-left: {%= cint(data[j].indent) * 2 %}em">{%= row.account_name %}</span>
 				</td>
-				{% for(var i=2, l=report.columns.length; i<l; i++) { %}
+				{% for(var i=2, l=report_columns.length; i<l; i++) { %}
 					<td class="text-right">
-						{% var fieldname = report.columns[i].field || report.columns[i].fieldname; %}
+						{% var fieldname = report_columns[i].fieldname; %}
 						{% if (!is_null(row[fieldname])) { %}
 							{%= format_currency(row[fieldname], filters.presentation_currency) %}
 						{% } %}

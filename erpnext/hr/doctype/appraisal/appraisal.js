@@ -24,6 +24,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.kra_template = function(doc, dt, dn) {
+	doc.goals = [];
 	erpnext.utils.map_current_doc({
 		method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
 		source_name: cur_frm.doc.kra_template,

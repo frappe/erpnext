@@ -11,14 +11,21 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
 			"options": "Customer",
 			on_change: () => {
-				var customer = frappe.query_report_filters_by_name.customer.get_value();
-				frappe.db.get_value('Customer', customer, "tax_id", function(value) {
-					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+				var customer = frappe.query_report.get_filter_value('customer');
+				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name"], function(value) {
+					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+					frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
 				});
 			}
 		},
@@ -97,6 +104,12 @@ frappe.query_reports["Accounts Receivable"] = {
 		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"customer_name",
+			"label": __("Customer Name"),
 			"fieldtype": "Data",
 			"hidden": 1
 		}

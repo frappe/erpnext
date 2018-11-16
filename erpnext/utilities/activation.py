@@ -54,7 +54,7 @@ def get_help_messages():
 	if get_level() > 6:
 		return []
 
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	messages = []
 
 	message_settings = [

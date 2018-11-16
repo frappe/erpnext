@@ -18,7 +18,8 @@
 					<a class="product-link" href="{{ item.route|abs_url }}">
 						<div class="col-sm-4 col-xs-4 product-image-wrapper">
 							<div class="product-image-img">
-								{{ product_image_square(item.thumbnail or item.image) }}
+								<!-- thumbnail not updated, and used as background image in item card -->
+								{{ product_image_square(item.image) }}
 							<div class="product-text" itemprop="name">{{ item.item_name }}</div>
 							</div>
 						</div>

@@ -10,13 +10,12 @@ def setup_healthcare():
 		return
 	create_medical_departments()
 	create_antibiotics()
-	create_test_uom()
+	create_lab_test_uom()
 	create_duration()
 	create_dosage()
 	create_healthcare_item_groups()
-	create_lab_test_items()
-	create_lab_test_template()
 	create_sensitivity()
+	add_healthcare_service_unit_tree_root()
 
 def create_medical_departments():
 	departments = [
@@ -74,30 +73,30 @@ def create_antibiotics():
 		except frappe.DuplicateEntryError:
 			pass
 
-def create_test_uom():
+def create_lab_test_uom():
 	records = [
-		{"doctype": "Lab Test UOM", "name": "umol/L", "test_uom": "umol/L", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "mg/L", "test_uom": "mg/L", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "mg / dl", "test_uom": "mg / dl", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "pg / ml", "test_uom": "pg / ml", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "U/ml", "test_uom": "U/ml", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "/HPF", "test_uom": "/HPF", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "Million Cells / cumm", "test_uom": "Million Cells / cumm", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "Lakhs Cells / cumm", "test_uom": "Lakhs Cells / cumm", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "U / L", "test_uom": "U / L", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "g / L", "test_uom": "g / L", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "IU / ml", "test_uom": "IU / ml", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "gm %", "test_uom": "gm %", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "Microgram", "test_uom": "Microgram", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "Micron", "test_uom": "Micron", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "Cells / cumm", "test_uom": "Cells / cumm", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "%", "test_uom": "%", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "mm / dl", "test_uom": "mm / dl", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "mm / hr", "test_uom": "mm / hr", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "ulU / ml", "test_uom": "ulU / ml", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "ng / ml", "test_uom": "ng / ml", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "ng / dl", "test_uom": "ng / dl", "uom_description": None },
-		{"doctype": "Lab Test UOM", "name": "ug / dl", "test_uom": "ug / dl", "uom_description": None }
+		{"doctype": "Lab Test UOM", "name": "umol/L", "lab_test_uom": "umol/L", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "mg/L", "lab_test_uom": "mg/L", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "mg / dl", "lab_test_uom": "mg / dl", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "pg / ml", "lab_test_uom": "pg / ml", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "U/ml", "lab_test_uom": "U/ml", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "/HPF", "lab_test_uom": "/HPF", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "Million Cells / cumm", "lab_test_uom": "Million Cells / cumm", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "Lakhs Cells / cumm", "lab_test_uom": "Lakhs Cells / cumm", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "U / L", "lab_test_uom": "U / L", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "g / L", "lab_test_uom": "g / L", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "IU / ml", "lab_test_uom": "IU / ml", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "gm %", "lab_test_uom": "gm %", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "Microgram", "lab_test_uom": "Microgram", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "Micron", "lab_test_uom": "Micron", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "Cells / cumm", "lab_test_uom": "Cells / cumm", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "%", "lab_test_uom": "%", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "mm / dl", "lab_test_uom": "mm / dl", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "mm / hr", "lab_test_uom": "mm / hr", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "ulU / ml", "lab_test_uom": "ulU / ml", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "ng / ml", "lab_test_uom": "ng / ml", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "ng / dl", "lab_test_uom": "ng / dl", "uom_description": None },
+		{"doctype": "Lab Test UOM", "name": "ug / dl", "lab_test_uom": "ug / dl", "uom_description": None }
 	]
 
 	insert_record(records)
@@ -183,73 +182,6 @@ def create_healthcare_item_groups():
 	]
 	insert_record(records)
 
-def create_lab_test_items():
-	records = [
-		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": _("Laboratory"),
-			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
-	]
-	insert_record(records)
-
-def create_lab_test_template():
-	records = [
-		{"doctype": "Lab Test Template", "name": "MCH","test_name": "MCH","test_code": "MCH",
-		"test_group": _("Laboratory"),"department": _("Haematology"),"item": "MCH",
-		"test_template_type": "Single","is_billable": 1,"test_rate": 0.0,"test_uom": "Microgram",
-		"test_normal_range": "27 - 32 Microgram",
-		"sensitivity": 0,"test_description": "Mean Corpuscular Hemoglobin"},
-		{"doctype": "Lab Test Template", "name": "LDL","test_name": "LDL (Serum)","test_code": "LDL",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "LDL","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "70 - 160 mg/dlLow-density Lipoprotein (LDL)",
-		"sensitivity": 0,"test_description": "Low-density Lipoprotein (LDL)"},
-		{"doctype": "Lab Test Template", "name": "GTT","test_name": "GTT","test_code": "GTT",
-		"test_group": _("Laboratory"),"department": _("Haematology"),
-		"item": "GTT","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "Less than 85 mg/dl",
-		"sensitivity": 0,"test_description": "Glucose Tolerance Test"},
-		{"doctype": "Lab Test Template", "name": "HDL","test_name": "HDL (Serum)","test_code": "HDL",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "HDL","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "35 - 65 mg/dl",
-		"sensitivity": 0,"test_description": "High-density Lipoprotein (HDL)"},
-		{"doctype": "Lab Test Template", "name": "BILT","test_name": "Bilirubin Total","test_code": "BILT",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "BILT","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.2 - 1.2 mg / dl",
-		"sensitivity": 0,"test_description": "Bilirubin Total"},
-		{"doctype": "Lab Test Template", "name": "BILD","test_name": "Bilirubin Direct","test_code": "BILD",
-		"test_group": _("Laboratory"),"department": _("Biochemistry"),
-		"item": "BILD","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.4 mg / dl",
-		"sensitivity": 0,"test_description": "Bilirubin Direct"},
-
-		{"doctype": "Lab Test Template", "name": "BP","test_name": "Bile Pigment","test_code": "BP",
-		"test_group": _("Laboratory"),"department": _("Pathology"),
-		"item": "BP","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
-		"sensitivity": 0,"test_description": "Bile Pigment"},
-		{"doctype": "Lab Test Template", "name": "BS","test_name": "Bile Salt","test_code": "BS",
-		"test_group": _("Laboratory"),"department": _("Pathology"),
-		"item": "BS","test_template_type": "Single",
-		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
-		"sensitivity": 0,"test_description": "Bile Salt"}
-	]
-	insert_record(records)
-
 def create_sensitivity():
 	records = [
 		{"doctype": "Sensitivity", "sensitivity": _("Low Sensitivity")},
@@ -260,3 +192,13 @@ def create_sensitivity():
 		{"doctype": "Sensitivity", "sensitivity": _("Intermediate")}
 	]
 	insert_record(records)
+
+def add_healthcare_service_unit_tree_root():
+	record = [
+	 {
+	  "doctype": "Healthcare Service Unit",
+	  "healthcare_service_unit_name": "All Healthcare Service Units",
+	  "is_group": 1
+	 }
+	]
+	insert_record(record)

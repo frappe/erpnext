@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-07-25 22:49:10.762704", 
+ "modified": "2018-07-20 13:08:43.797886", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "issues", 
@@ -82,6 +82,29 @@
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "default": "Medium", 
+   "fieldname": "priority", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "label": "Priority", 
+   "max_length": 0, 
+   "max_value": 0, 
+   "options": "Low\nMedium\nHigh", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "default": "1", 
+   "fieldname": "via_customer_portal", 
+   "fieldtype": "Check", 
+   "hidden": 1, 
+   "label": "Via Customer Portal", 
+   "max_length": 0, 
+   "max_value": 0, 
+   "read_only": 1, 
    "reqd": 0
   }
  ]

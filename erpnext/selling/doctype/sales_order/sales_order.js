@@ -18,7 +18,21 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 	},
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Deliver and Bill') {
+			frm.add_custom_button(__('Update Items'), () => {
+				erpnext.utils.update_child_items({
+					frm: frm,
+					child_docname: "items",
+					child_doctype: "Sales Order Detail",
+				})
+			});
+		}
+	},
 	onload: function(frm) {
+		if (!frm.doc.transaction_date){
+			frm.set_value('transaction_date', frappe.datetime.get_today())
+		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
@@ -28,6 +42,15 @@ frappe.ui.form.on("Sales Order", {
 				query: "erpnext.controllers.queries.get_project_name",
 				filters: {
 					'customer': doc.customer
+				}
+			}
+		});
+
+		frm.set_query("blanket_order", "items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"docstatus": 1
 				}
 			}
 		});
@@ -59,7 +82,7 @@ frappe.ui.form.on("Sales Order Item", {
 	},
 	delivery_date: function(frm, cdt, cdn) {
 		if(!frm.doc.delivery_date) {
-			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
+			erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "delivery_date");
 		}
 	}
 });
@@ -127,6 +150,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					&& flt(doc.per_delivered, 6) < 100) {
 					this.frm.add_custom_button(__('Material Request'),
 						function() { me.make_material_request() }, __("Make"));
+					this.frm.add_custom_button(__('Request for Raw Materials'),
+						function() { me.make_raw_material_request() }, __("Make"));
 				}
 
 				// make purchase order
@@ -158,7 +183,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_project() }, __("Make"));
 				}
 
-				if(!doc.subscription) {
+				if(!doc.auto_repeat) {
 					this.frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(doc.doctype, doc.name)
 					}, __("Make"))
@@ -290,6 +315,86 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
+	make_raw_material_request: function() {
+		var me = this;
+		this.frm.call({
+			doc: this.frm.doc,
+			method: 'get_work_order_items',
+			args: {
+				for_raw_material_request: 1
+			},
+			callback: function(r) {
+				if(!r.message) {
+					frappe.msgprint({
+						message: __('No Items with Bill of Materials.'),
+						indicator: 'orange'
+					});
+					return;
+				}
+				else {
+					me.make_raw_material_request_dialog(r);
+				}
+			}
+		});
+	},
+
+	make_raw_material_request_dialog: function(r) {
+		var fields = [
+			{fieldtype:'Check', fieldname:'include_exploded_items',
+				label: __('Include Exploded Items')},
+			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
+				label: __('Ignore Existing Ordered Qty')},
+			{
+				fieldtype:'Table', fieldname: 'items',
+				description: __('Select BOM, Qty and For Warehouse'),
+				fields: [
+					{fieldtype:'Read Only', fieldname:'item_code',
+						label: __('Item Code'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
+						label: __('BOM'), in_list_view:1, get_query: function(doc) {
+							return {filters: {item: doc.item_code}};
+						}
+					},
+					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
+						label: __('Qty'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
+						label: __('For Warehouse')}
+				],
+				data: r.message,
+				get_data: function() {
+					return r.message
+				}
+			}
+		]
+		var d = new frappe.ui.Dialog({
+			title: __("Select from Items having BOM"),
+			fields: fields,
+			primary_action: function() {
+				var data = d.get_values();
+				me.frm.call({
+					method: 'erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request',
+					args: {
+						items: data,
+						company: me.frm.doc.company,
+						sales_order: me.frm.docname,
+						project: me.frm.project
+					},
+					freeze: true,
+					callback: function(r) {
+						if(r.message) {
+							frappe.msgprint(__('Material Request {0} submitted.',
+							['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+						}
+						d.hide();
+						me.frm.reload_doc();
+					}
+				});
+			},
+			primary_action_label: __('Make')
+		});
+		d.show();
+	},
+
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 
@@ -393,19 +498,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			title: __("For Supplier"),
 			fields: [
 				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
+				 "description": __("Leave the field empty to make purchase orders for all suppliers"),
 					"get_query": function () {
 						return {
 							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
 							filters: {'parent': me.frm.doc.name}
 						}
-					}, "reqd": 1 },
+					}},
+
 				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
 
 		dialog.fields_dict.make_purchase_order.$input.click(function() {
 			var args = dialog.get_values();
-			if(!args) return;
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
@@ -417,8 +523,17 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				freeze: true,
 				callback: function(r) {
 					if(!r.exc) {
-						var doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", r.message.doctype, r.message.name);
+						// var args = dialog.get_values();
+						if (args.supplier){
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+						else{
+							frappe.route_options = {
+								"sales_order": me.frm.doc.name
+							}
+							frappe.set_route("List", "Purchase Order");
+						}
 					}
 				}
 			})
@@ -442,11 +557,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				frappe.ui.form.is_saving = false;
 			}
 		});
-	},
-	on_submit: function(doc, cdt, cdn) {
-		if(cint(frappe.boot.notification_settings.sales_order)) {
-			this.frm.email_doc(frappe.boot.notification_settings.sales_order_message);
-		}
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));

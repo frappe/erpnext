@@ -26,6 +26,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			};
 		});
 
+		if (this.frm.doc.__islocal
+			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
+			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
+		}
+
 		/* eslint-disable */
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {
@@ -63,12 +68,19 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if(me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
-			} else {
+			}
+			else if (me.frm.doc.material_request_type == "Customer Provided") {
+				return{
+					query: "erpnext.controllers.queries.item_query",
+					filters:{ 'customer': me.frm.doc.customer }
+				}
+			}
+			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters: {'is_purchase_item': 1}
@@ -93,7 +105,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
+		erpnext.utils.get_party_details(this.frm, null, null, function(){
+			me.apply_price_list();
+		});
 	},
 
 	supplier_address: function() {
@@ -108,8 +122,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		let item_rate = item.price_list_rate;
+		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
+			item_rate = item.blanket_order_rate;
+		}
+		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;		
+		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
 
 		this.calculate_taxes_and_totals();
 	},
@@ -223,6 +241,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	tc_name: function() {
 		this.get_terms();
 	},
+
 	link_to_mrs: function() {
 		var my_items = [];
 		for (var i in cur_frm.doc.items) {
@@ -236,48 +255,73 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				items: my_items
 			},
 			callback: function(r) {
-				if(r.exc) return;
-
-				var i = 0;
-				var item_length = cur_frm.doc.items.length;
-				while (i < item_length) {
-					var qty = cur_frm.doc.items[i].qty;
-					(r.message[0] || []).forEach(function(d) {
-						if (d.qty > 0 && qty > 0 && cur_frm.doc.items[i].item_code == d.item_code && !cur_frm.doc.items[i].material_request_item)
-						{
-							cur_frm.doc.items[i].material_request = d.mr_name;
-							cur_frm.doc.items[i].material_request_item = d.mr_item;
-							var my_qty = Math.min(qty, d.qty);
-							qty = qty - my_qty;
-							d.qty = d.qty  - my_qty;
-							cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
-							cur_frm.doc.items[i].qty = my_qty;
-							
-							frappe.msgprint(__("Assigning {0} to {1} (row {2})", 
-								[d.mr_name, d.item_code, cur_frm.doc.items[i].idx]));
-							
-							if (qty > 0) {
-								frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
-								var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
-								item_length++;
-
-								for (var key in cur_frm.doc.items[i]) {
-									newrow[key] = cur_frm.doc.items[i][key];
-								}
-
-								newrow.idx = item_length;
-								newrow["stock_qty"] = newrow.conversion_factor*qty;
-								newrow["qty"] = qty;
-								newrow["material_request"] = "";
-								newrow["material_request_item"] = "";
-							}
-						}
-					});
-					i++;
+				if(!r.message) {
+					frappe.throw(__("No pending Material Requests found to link for the given items."))
 				}
-				refresh_field("items");
+				else {
+					var i = 0;
+					var item_length = cur_frm.doc.items.length;
+					while (i < item_length) {
+						var qty = cur_frm.doc.items[i].qty;
+						(r.message[0] || []).forEach(function(d) {
+							if (d.qty > 0 && qty > 0 && cur_frm.doc.items[i].item_code == d.item_code && !cur_frm.doc.items[i].material_request_item)
+							{
+								cur_frm.doc.items[i].material_request = d.mr_name;
+								cur_frm.doc.items[i].material_request_item = d.mr_item;
+								var my_qty = Math.min(qty, d.qty);
+								qty = qty - my_qty;
+								d.qty = d.qty  - my_qty;
+								cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
+								cur_frm.doc.items[i].qty = my_qty;
+	
+								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
+								if (qty > 0)
+								{
+									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+									var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
+									item_length++;
+	
+									for (var key in cur_frm.doc.items[i])
+									{
+										newrow[key] = cur_frm.doc.items[i][key];
+									}
+	
+									newrow.idx = item_length;
+									newrow["stock_qty"] = newrow.conversion_factor*qty;
+									newrow["qty"] = qty;
+	
+									newrow["material_request"] = "";
+									newrow["material_request_item"] = "";
+	
+								}
+							}
+						});
+						i++;
+					}
+					refresh_field("items");
+					//cur_frm.save();
+				}
 			}
 		});
+	},
+
+	update_auto_repeat_reference: function(doc) {
+		if (doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{ 
+					docname: doc.auto_repeat,
+					reference:doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
 	}
 });
 

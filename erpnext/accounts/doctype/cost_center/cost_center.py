@@ -4,15 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint, cstr
 from frappe.utils.nestedset import NestedSet
+from erpnext.accounts.utils import validate_field_number
+
 
 class CostCenter(NestedSet):
 	nsm_parent_field = 'parent_cost_center'
 
 	def autoname(self):
-		self.name = self.cost_center_name.strip() + ' - ' + \
-			frappe.db.get_value("Company", self.company, "abbr")
-			
+		from erpnext.accounts.utils import get_autoname_with_number
+		self.name = get_autoname_with_number(self.cost_center_number, self.cost_center_name, None, self.company)
 
 	def validate(self):
 		self.validate_mandatory()
@@ -55,6 +57,8 @@ class CostCenter(NestedSet):
 
 		# Validate properties before merging
 		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")
+		if not merge:
+			new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
 		return new_cost_center
 
@@ -62,8 +66,30 @@ class CostCenter(NestedSet):
 		super(CostCenter, self).after_rename(olddn, newdn, merge)
 
 		if not merge:
-			frappe.db.set_value("Cost Center", newdn, "cost_center_name",
-				" - ".join(newdn.split(" - ")[:-1]))
+			new_cost_center = frappe.db.get_value("Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1)
+
+			# exclude company abbr
+			new_parts = newdn.split(" - ")[:-1]
+			# update cost center number and remove from parts
+			if new_parts[0][0].isdigit():
+				if len(new_parts) == 1:
+					new_parts = newdn.split(" ")
+				if new_cost_center.cost_center_number != new_parts[0]:
+					validate_field_number("Cost Center", self.name, new_parts[0], self.company, "cost_center_number")
+					self.cost_center_number = new_parts[0]
+					self.db_set("cost_center_number", new_parts[0])
+				new_parts = new_parts[1:]
+
+			# update cost center name
+			cost_center_name = " - ".join(new_parts)
+			if new_cost_center.cost_center_name != cost_center_name:
+				self.cost_center_name = cost_center_name
+				self.db_set("cost_center_name", cost_center_name)
 
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])
+
+def get_name_with_number(new_account, account_number):
+	if account_number and not new_account[0].isdigit():
+		new_account = account_number + " - " + new_account
+	return new_account

@@ -8,16 +8,16 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Hub Settings"
+					"name": "Marketplace Settings"
 				},
 			]
 		},
 		{
-			"label": _("Hub"),
+			"label": _("Marketplace"),
 			"items": [
 				{
 					"type": "page",
-					"name": "hub"
+					"name": "marketplace/home"
 				},
 			]
 		},

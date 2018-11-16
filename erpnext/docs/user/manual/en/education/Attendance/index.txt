@@ -1,3 +1,0 @@
-student-attendance
-student-attendance-tool
-student-leave-application

@@ -15,8 +15,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Consultation",
-					"label": _("Consultation"),
+					"name": "Patient Encounter",
+					"label": _("Patient Encounter"),
 				},
 				{
 					"type": "doctype",
@@ -33,6 +33,16 @@ def get_data():
 					"type": "page",
 					"name": "appointment-analytic",
 					"label": _("Appointment Analytics"),
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure",
+					"label": _("Clinical Procedure"),
+				},
+				{
+					"type": "doctype",
+					"name": "Inpatient Record",
+					"label": _("Inpatient Record"),
 				}
 			]
 		},
@@ -69,13 +79,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Physician",
-					"label": _("Physician"),
+					"name": "Healthcare Practitioner",
+					"label": _("Healthcare Practitioner"),
 				},
 				{
 					"type": "doctype",
-					"name": "Physician Schedule",
-					"label": _("Physician Schedule"),
+					"name": "Practitioner Schedule",
+					"label": _("Practitioner Schedule"),
 				},
 				{
 					"type": "doctype",
@@ -89,8 +99,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Patient Service Unit",
-					"label": _("Patient Service Unit")
+					"name": "Healthcare Service Unit",
+					"label": _("Healthcare Service Unit")
 				}
 			]
 		},
@@ -157,6 +167,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Lab Test Template",
 					"label": _("Lab Test Template")
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure Template",
+					"label": _("Clinical Procedure Template"),
+				},
+				{
+					"type": "doctype",
+					"name": "Healthcare Service Unit Type",
+					"label": _("Healthcare Service Unit Type")
 				}
 			]
 		}

@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
@@ -13,11 +13,12 @@ class EmployeeAdvanceOverPayment(frappe.ValidationError):
 
 class EmployeeAdvance(Document):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def validate(self):
 		self.set_status()
+		self.validate_employee_advance_account()
 
 	def on_cancel(self):
 		self.set_status()
@@ -35,11 +36,18 @@ class EmployeeAdvance(Document):
 		elif self.docstatus == 2:
 			self.status = "Cancelled"
 
+	def validate_employee_advance_account(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		if (self.advance_account and
+			company_currency != frappe.db.get_value('Account', self.advance_account, 'account_currency')):
+			frappe.throw(_("Advance account currency should be same as company currency {0}")
+				.format(company_currency))
+
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
 			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
 			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance' 
+			where against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
@@ -59,9 +67,10 @@ class EmployeeAdvance(Document):
 			select sum(ifnull(allocated_amount, 0))
 			from `tabExpense Claim Advance`
 			where employee_advance = %s and docstatus=1 and allocated_amount > 0
-		""", self.name)[0][0]
+		""", self.name)[0][0] or 0
 
-		frappe.db.set_value("Employee Advance", self.name, "claimed_ amount", claimed_amount)
+		if claimed_amount:
+			frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
 
 @frappe.whitelist()
 def get_due_advance_amount(employee, posting_date):

@@ -9,7 +9,7 @@ from frappe.utils import flt,cstr
 from erpnext.accounts.report.financial_statements import get_period_list
 
 def execute(filters=None):
-	columns, data = [], []
+	columns, data, chart = [], [], []
 	if filters.get('fiscal_year'):
 		company = erpnext.get_default_company()
 		period_list = get_period_list(filters.get('fiscal_year'), filters.get('fiscal_year'),"Monthly", company)

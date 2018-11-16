@@ -8,7 +8,7 @@ def get_data():
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
-			'Subscription': 'reference_document',
+			'Auto Repeat': 'reference_document',
 		},
 		'internal_links': {
 			'Quotation': ['items', 'prevdoc_docname']
@@ -32,7 +32,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Quotation', 'Subscription']
+				'items': ['Quotation', 'Auto Repeat']
 			},
 			{
 				'label': _('Payment'),

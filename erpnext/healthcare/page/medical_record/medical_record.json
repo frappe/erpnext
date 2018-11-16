@@ -1,23 +1,25 @@
 {
- "content": null,
- "creation": "2016-06-09 11:33:14.025787",
- "docstatus": 0,
- "doctype": "Page",
- "icon": "icon-play",
- "idx": 0,
- "modified": "2017-03-06 11:20:40.174661",
- "modified_by": "Administrator",
- "module": "Healthcare",
- "name": "medical_record",
- "owner": "Administrator",
- "page_name": "medical_record",
+ "content": null, 
+ "creation": "2016-06-09 11:33:14.025787", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "icon-play", 
+ "idx": 0, 
+ "modified": "2018-08-06 11:40:39.705660", 
+ "modified_by": "Administrator", 
+ "module": "Healthcare", 
+ "name": "medical_record", 
+ "owner": "Administrator", 
+ "page_name": "medical_record", 
+ "restrict_to_domain": "Healthcare", 
  "roles": [
   {
    "role": "Physician"
   }
- ],
- "script": null,
- "standard": "Yes",
- "style": null,
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
  "title": "Medical Record"
 }

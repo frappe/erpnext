@@ -13,7 +13,10 @@ from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
+from erpnext.accounts.party import get_party_account_currency
 from six import string_types
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -33,12 +36,6 @@ class PurchaseOrder(BuyingController):
 			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request'
 		}]
-
-	def onload(self):
-		super(PurchaseOrder, self).onload()
-
-		self.set_onload('disable_fetch_last_purchase_rate',
-			cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
@@ -68,7 +65,7 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["project", "="], ["item_code", "="], 
+				"compare_fields": [["project", "="], ["item_code", "="],
 					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
 			}
@@ -90,6 +87,8 @@ class PurchaseOrder(BuyingController):
 		if warn_po:
 			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
 			frappe.msgprint(_("{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.").format(self.supplier, standing), title=_("Caution"), indicator='orange')
+
+		self.party_account_currency = get_party_account_currency("Supplier", self.supplier, self.company)
 
 	def validate_minimum_order_qty(self):
 		items = list(set([d.item_code for d in self.get("items")]))
@@ -123,7 +122,6 @@ class PurchaseOrder(BuyingController):
 
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
-		if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
 		conversion_rate = flt(self.get('conversion_rate')) or 1.0
 		for d in self.get("items"):
@@ -139,7 +137,7 @@ class PurchaseOrder(BuyingController):
 					d.last_purchase_rate = d.rate
 				else:
 
-					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					item_last_purchase_rate = frappe.get_cached_value("Item", d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
 						d.base_price_list_rate = d.base_rate = d.price_list_rate \
 							= d.rate = d.last_purchase_rate = item_last_purchase_rate
@@ -173,7 +171,7 @@ class PurchaseOrder(BuyingController):
 		for d in self.get("items"):
 			if (not po_item_rows or d.name in po_item_rows) \
 				and [d.item_code, d.warehouse] not in item_wh_list \
-				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
+				and frappe.get_cached_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
 					item_wh_list.append([d.item_code, d.warehouse])
 		for item_code, warehouse in item_wh_list:
@@ -184,7 +182,7 @@ class PurchaseOrder(BuyingController):
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
 			self.name)
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
+		date_diff = frappe.db.sql("select '%s' - '%s' " % (mod_db[0][0], cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
@@ -210,11 +208,16 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		self.validate_budget()
+
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
+
+		self.update_blanket_order()
+
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -237,6 +240,9 @@ class PurchaseOrder(BuyingController):
 		# Must be called after updating ordered qty in Material Request
 		self.update_requested_qty()
 		self.update_ordered_qty()
+
+		self.update_blanket_order()
+
 
 	def on_update(self):
 		pass
@@ -284,9 +290,18 @@ class PurchaseOrder(BuyingController):
 				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
+	def update_receiving_percentage(self):
+		total_qty, received_qty = 0.0, 0.0
+		for item in self.items:
+			received_qty += item.received_qty
+			total_qty += item.qty
+		if total_qty:
+			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
+		else:
+			self.db_set("per_received", 0, update_modified=False)
+
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
-	if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
 	conversion_rate = flt(conversion_rate) or 1.0
 
@@ -295,7 +310,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 		last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
 		return last_purchase_rate
 	else:
-		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
+		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
 			return item_last_purchase_rate
 
@@ -314,6 +329,7 @@ def close_or_unclose_purchase_orders(names, status):
 			else:
 				if po.status == "Closed":
 					po.update_status("Draft")
+			po.update_blanket_order()
 
 	frappe.local.message_log = []
 
@@ -372,10 +388,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "buying_cost_center"], as_dict=1)
+		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
 		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
-			or item.buying_cost_center \
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+			or item.get("buying_cost_center") \
+			or item_group.get("buying_cost_center")
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -445,6 +462,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
+							'main_item_code': rm_item_data["item_code"],
 							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
 						}
 					}

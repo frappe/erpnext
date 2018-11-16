@@ -21,12 +21,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
-		} else {
-			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
 		}
 	},
 
 	refresh: function(doc) {
+		const me = this;
 		this._super();
 
 		hide_fields(this.frm.doc);
@@ -37,26 +36,53 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			this.show_stock_ledger();
 		}
 
-		if(!doc.is_return && doc.docstatus==1) {
-			if(doc.outstanding_amount != 0) {
-				this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		if(!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0){
+			if(doc.on_hold) {
+				this.frm.add_custom_button(
+					__('Change Release Date'),
+					function() {me.change_release_date()},
+					__('Hold Invoice')
+				);
+				this.frm.add_custom_button(
+					__('Unblock Invoice'),
+					function() {me.unblock_invoice()},
+					__('Make')
+				);
+			} else if (!doc.on_hold) {
+				this.frm.add_custom_button(
+					__('Block Invoice'),
+					function() {me.block_invoice()},
+					__('Make')
+				);
 			}
+		}
 
+		if(doc.docstatus == 1 && doc.outstanding_amount != 0
+			&& !(doc.is_return && doc.return_against)) {
+			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+
+		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __("Make"));
 			}
 
-			if(!doc.subscription) {
+			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))
 			}
 		}
 
+		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
+			cur_frm.add_custom_button(__('Payment Request'), function() {
+				me.make_payment_request()
+			}, __("Make"));
+		}
+
 		if(doc.docstatus===0) {
-			var me = this;
 			this.frm.add_custom_button(__('Purchase Order'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
@@ -92,8 +118,118 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get items from"));
 		}
-
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+
+		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function() {
+				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
+				var internal = supplier.is_internal_supplier;
+				var disabled = supplier.disabled;
+				if (internal == 1 && disabled == 0) {
+					me.frm.add_custom_button("Inter Company Invoice", function() {
+						me.make_inter_company_invoice(me.frm);
+					}, __("Make"));
+				}
+			});
+		}
+	},
+
+	unblock_invoice: function() {
+		const me = this;
+		frappe.call({
+			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice',
+			'args': {'name': me.frm.doc.name},
+			'callback': (r) => me.frm.reload_doc()
+		});
+	},
+
+	block_invoice: function() {
+		this.make_comment_dialog_and_block_invoice();
+	},
+
+	change_release_date: function() {
+		this.make_dialog_and_set_release_date();
+	},
+
+	can_change_release_date: function(date) {
+		const diff = frappe.datetime.get_diff(date, frappe.datetime.nowdate());
+		if (diff < 0) {
+			frappe.throw('New release date should be in the future');
+			return false;
+		} else {
+			return true;
+		}
+	},
+
+	make_comment_dialog_and_block_invoice: function(){
+		const me = this;
+
+		const title = __('Add Comment');
+		const fields = [
+			{
+				fieldname: 'hold_comment',
+				read_only: 0,
+				fieldtype:'Small Text',
+				label: __('Reason For Putting On Hold'),
+				default: ""
+			},
+		];
+
+		this.dialog = new frappe.ui.Dialog({
+			title: title,
+			fields: fields
+		});
+
+		this.dialog.set_primary_action(__('Save'), function() {
+			const dialog_data = me.dialog.get_values();
+			frappe.call({
+				'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
+				'args': {'name': me.frm.doc.name, 'hold_comment': dialog_data.hold_comment},
+				'callback': (r) => me.frm.reload_doc()
+			});
+			me.dialog.hide();
+		});
+
+		this.dialog.show();
+	},
+
+	make_dialog_and_set_release_date: function() {
+		const me = this;
+
+		const title = __('Set New Release Date');
+		const fields = [
+			{
+				fieldname: 'release_date',
+				read_only: 0,
+				fieldtype:'Date',
+				label: __('Release Date'),
+				default: me.frm.doc.release_date
+			},
+		];
+
+		this.dialog = new frappe.ui.Dialog({
+			title: title,
+			fields: fields
+		});
+
+		this.dialog.set_primary_action(__('Save'), function() {
+			me.dialog_data = me.dialog.get_values();
+			if(me.can_change_release_date(me.dialog_data.release_date)) {
+				me.dialog_data.name = me.frm.doc.name;
+				me.set_release_date(me.dialog_data);
+				me.dialog.hide();
+			}
+		});
+
+		this.dialog.show();
+	},
+
+	set_release_date: function(data) {
+		return frappe.call({
+			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date',
+			'args': data,
+			'callback': (r) => this.frm.reload_doc()
+		});
 	},
 
 	supplier: function() {
@@ -110,6 +246,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
+
+				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
+				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
 			})
 	},
 
@@ -131,6 +270,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+	},
+
+	make_inter_company_invoice: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
+			frm: frm
+		});
 	},
 
 	is_paid: function() {
@@ -185,9 +331,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_fixed_asset_account",
+				method: "erpnext.assets.doctype.asset_category.asset_category.get_asset_category_account",
 				args: {
 					"asset": row.asset,
+					"fieldname": "fixed_asset_account",
 					"account": row.expense_account
 				},
 				callback: function(r, rt) {
@@ -350,28 +497,26 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Purchase Invoice': 'Debit Note',
 			'Payment Entry': 'Payment'
 		}
+
+		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
 	},
 
 	onload: function(frm) {
-		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
-			frm.set_query(field, "items", function() {
-				return {
-					filters: [
-						["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-						["Warehouse", "is_group", "=", 0]
-					]
-				}
-			})
-		})
+		if(frm.doc.__onload && !frm.doc.__onload.supplier_tds) {
+			me.frm.set_df_property("apply_tds", "read_only", 1);
+		}
 
-		frm.set_query("supplier_warehouse", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
-		})
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 	},
 
 	is_subcontracted: function(frm) {

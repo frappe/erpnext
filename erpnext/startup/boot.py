@@ -25,19 +25,20 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('Selling Settings',
 			'default_valid_till'))
 
-		bootinfo.notification_settings = frappe.get_doc("Notification Control",
-			"Notification Control")
-
 		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
+		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
 
 		if not bootinfo.customer_count:
-			bootinfo.setup_complete = frappe.db.sql("""select name from
-				tabCompany limit 1""") and 'Yes' or 'No'
+			bootinfo.setup_complete = frappe.db.sql("""SELECT `name`
+				FROM `tabCompany`
+				LIMIT 1""") and 'Yes' or 'No'
 
 		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_terms,
 			default_letter_head, default_bank_account, enable_perpetual_inventory from `tabCompany`""",
 			as_dict=1, update={"doctype":":Company"})
+
+		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
+		bootinfo.party_account_types = frappe._dict(party_account_types)
 
 def load_country_and_currency(bootinfo):
 	country = frappe.db.get_default("country")
