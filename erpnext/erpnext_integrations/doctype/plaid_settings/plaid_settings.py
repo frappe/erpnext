@@ -110,7 +110,7 @@ def add_account_subtype(account_subtype):
 @frappe.whitelist()
 def sync_transactions(bank, bank_account=None):
 
-	last_sync_date = frappe.db.get_value("Plaid Settings", None, "last_sync_date")
+	last_sync_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
 	if last_sync_date:
 		start_date = formatdate(last_sync_date, "YYYY-MM-dd")
 	else:
@@ -124,7 +124,7 @@ def sync_transactions(bank, bank_account=None):
 			for transaction in transactions:
 				result.append(new_bank_transaction(transaction))
 
-		frappe.db.set_value("Plaid Settings", None, "last_sync_date", getdate(end_date))
+		frappe.db.set_value("Bank Account", bank_account, "last_integration_date", getdate(end_date))
 
 		return result
 	except Exception:

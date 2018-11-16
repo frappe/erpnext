@@ -1,8 +1,7 @@
 {
 	"css/erpnext.css": [
 		"public/less/erpnext.less",
-		"public/less/hub.less",
-		"public/less/bankreconciliation.less"
+		"public/less/hub.less"
 	],
 	"css/marketplace.css": [
 		"public/less/hub.less"
@@ -16,9 +15,6 @@
 	],
 	"js/marketplace.min.js": [
 		"public/js/hub/marketplace.js"
-	],
-	"js/bankreconciliation.min.js": [
-		"public/js/reconciliation/reconciliation_home.js"
 	],
 	"js/erpnext.min.js": [
 		"public/js/conf.js",
@@ -52,8 +48,7 @@
 		"public/js/utils/customer_quick_entry.js",
 		"public/js/education/student_button.html",
 		"public/js/education/assessment_result_tool.html",
-		"public/js/hub/hub_factory.js",
-		"public/js/reconciliation/reconciliation_factory.js"
+		"public/js/hub/hub_factory.js"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
