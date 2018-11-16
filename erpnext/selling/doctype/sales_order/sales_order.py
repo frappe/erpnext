@@ -905,7 +905,7 @@ def update_status(status, name):
 	so.update_status(status)
 
 def get_default_bom_item(item_code):
-	bom = frappe.get_all('BOM', dict(item=item_code, is_active=True),
+	bom = frappe.get_all('BOM', dict(item=item_code, is_active=True, docstatus=1),
 			order_by='is_default desc')
 	bom = bom[0].name if bom else None
 
