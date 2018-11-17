@@ -37,14 +37,6 @@ def execute(filters=None):
 
 			row = [d.voucher_type, d.voucher_no, d.party_type, d.party,party_name,customer_group, d.posting_date,   				d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
 
-			if d.against_voucher:
-				row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
-			else:
-				row += ["", "", "", "", ""]
-			if invoice.due_date:
-				row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
-			
-			data.append(row)
 		elif d.party_type == "Supplier":
 				datas = frappe.db.sql("""
 						select supplier_name,supplier_group  from `tabSupplier` 
@@ -60,14 +52,14 @@ def execute(filters=None):
 
 				row = [d.voucher_type, d.voucher_no, d.party_type, d.party,party_name,supplier_group, d.posting_date,   				d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
 
-				if d.against_voucher:
-					row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
-				else:
-					row += ["", "", "", "", ""]
-				if invoice.due_date:
-					row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
-				
-				data.append(row)
+		if d.against_voucher:
+			row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
+		else:
+			row += ["", "", "", "", ""]
+		if invoice.due_date:
+			row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
+
+		data.append(row)
 
 	return columns, data
 
