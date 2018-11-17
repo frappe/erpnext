@@ -57,4 +57,29 @@ def get_data():
 				},
 			]
 		},
+				{
+			"label": _("Service Level Agreement"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Support Team",
+					"description": _("Support Team."),
+				},
+				{
+					"type": "doctype",
+					"name": "Issue Criticality",
+					"description": _("Issue Criticality."),
+				},
+				{
+					"type": "doctype",
+					"name": "Support Contract",
+					"description": _("Support Contract."),
+				},
+				{
+					"type": "doctype",
+					"name": "Support Contract Template",
+					"description": _("Support Contract Template."),
+				}
+			]
+		},
 	]
