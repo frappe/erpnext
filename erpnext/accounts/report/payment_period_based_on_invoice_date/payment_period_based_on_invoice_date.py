@@ -49,7 +49,6 @@ def execute(filters=None):
 					party_name = supplier_result[0]
 					supplier_group = supplier_result[1]
 
-
 				row = [d.voucher_type, d.voucher_no, d.party_type, d.party,party_name,supplier_group, d.posting_date,   				d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
 
 		if d.against_voucher:
