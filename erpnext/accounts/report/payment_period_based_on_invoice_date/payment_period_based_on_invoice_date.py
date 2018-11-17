@@ -23,21 +23,55 @@ def execute(filters=None):
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
+		if d.party_type == "Customer":
+			datas = frappe.db.sql("""
+					select customer_name,customer_group  from `tabCustomer` 
+					where name = %s """,(d.party))
+			for customer_data in datas:
 
-		row = [d.voucher_type, d.voucher_no, d.party_type, d.party,d.party_name, d.posting_date, d.against_voucher, 
-			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+				result_data = customer_data
+				customer_result = result_data	
+						
+				party_name = customer_result[0]
+				customer_group = customer_result[1]
 
-		if d.against_voucher:
-			row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
-		else:
-			row += ["", "", "", "", ""]
-		if invoice.due_date:
-			row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
-		
-		data.append(row)
+			row = [d.voucher_type, d.voucher_no, d.party_type, d.party,party_name,customer_group, d.posting_date,   				d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+
+			if d.against_voucher:
+				row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
+			else:
+				row += ["", "", "", "", ""]
+			if invoice.due_date:
+				row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
+			
+			data.append(row)
+		elif d.party_type == "Supplier":
+				datas = frappe.db.sql("""
+						select supplier_name,supplier_group  from `tabSupplier` 
+						where name = %s """,(d.party))
+				for supplier_data in datas:
+					
+					result_data = supplier_data
+					supplier_result = result_data	
+							
+					party_name = supplier_result[0]
+					supplier_group = supplier_result[1]
+
+
+				row = [d.voucher_type, d.voucher_no, d.party_type, d.party,party_name,supplier_group, d.posting_date,   				d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+
+				if d.against_voucher:
+					row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
+				else:
+					row += ["", "", "", "", ""]
+				if invoice.due_date:
+					row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
+				
+				data.append(row)
 
 	return columns, data
 
+		
 def validate_filters(filters):
 	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
 		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
@@ -50,7 +84,8 @@ def get_columns(filters):
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
 		_("Party Type") + "::100", 
 		_("Party") + ":Dynamic Link/Party Type:140",
-		_("Party Name") + ":: 100",
+		_("Party Name") + "::150",
+		_("Party Group") + "::150",
 		_("Posting Date") + ":Date:100",
 		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Invoice Posting Date") + ":Date:130", 
