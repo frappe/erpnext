@@ -86,12 +86,12 @@ for(var i=0, l=data.length; i<l; i++) {
 
 				{% if(filters.against_in_print) { %}
 				<td>
-					{%= data[i].against.split(", ").join("<br />") %}
+					{%= (data[i].against || "").split(", ").join("<br />") %}
 				</td>
 				{% } %}
 
 				<td>
-					{%= data[i].remarks.split("\n").join("<br />") %}
+					{%= (data[i].remarks || "").split("\n").join("<br />") %}
 					{% if(data[i].against_voucher) { %}
 						{% if(data[i].remarks) { %}<br />{% } %}
 						{%= __("Against") %}
