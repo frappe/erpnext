@@ -954,7 +954,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	return paid_amount[0][0] if paid_amount else 0
 
 @frappe.whitelist()
-def get_party_and_account_balance(company, date, paid_from, paid_to=None, ptype=None, pty=None, cost_center=None):
+def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, ptype=None, pty=None, cost_center=None):
 	return frappe._dict({
 		"party_balance": get_balance_on(party_type=ptype, party=pty, cost_center=cost_center),
 		"paid_from_account_balance": get_balance_on(paid_from, date, cost_center=cost_center),

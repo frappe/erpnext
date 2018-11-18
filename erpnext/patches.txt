@@ -568,11 +568,17 @@ erpnext.patches.v11_0.remove_land_unit_icon
 erpnext.patches.v11_0.add_default_dispatch_notification_template
 erpnext.patches.v11_0.add_market_segments
 erpnext.patches.v11_0.add_sales_stages
-erpnext.patches.v11_0.ewaybill_fields_gst_india
+execute:frappe.delete_doc("Page", "Sales Analytics")
+execute:frappe.delete_doc("Page", "Purchase Analytics")
+execute:frappe.delete_doc("Page", "Stock Analytics")
+execute:frappe.delete_doc("Page", "Production Analytics")
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.migrate_reference_and_clearance_to_journal_entry_accounts_table
 erpnext.patches.v11_0.item_uom_conversion_table
 erpnext.patches.saif.def_warehouse_to_set_warehouse
-
+erpnext.patches.v11_0.update_delivery_trip_status
+erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
+erpnext.patches.v11_0.set_missing_gst_hsn_code

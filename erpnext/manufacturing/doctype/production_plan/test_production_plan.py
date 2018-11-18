@@ -10,6 +10,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -160,7 +161,9 @@ def create_production_plan(**args):
 			'planned_start_date': args.planned_start_date or now_datetime()
 		}]
 	})
-	pln.get_items_for_material_requests()
+	mr_items = get_items_for_material_requests(pln.as_dict())
+	for d in mr_items:
+		pln.append('mr_items', d)
 	
 	if not args.do_not_save:
 		pln.insert()
