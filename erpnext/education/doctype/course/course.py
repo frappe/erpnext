@@ -18,13 +18,18 @@ class Course(Document):
 				total_weightage += criteria.weightage or 0
 			if total_weightage != 100:
 				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))
+	
+	def get_contents_based_on_type(self): 
+		contents= self.get_contents()
+		quiz_list = [item for item in contents if item.doctype=="Quiz"]
+		content_list = [item for item in contents if item.doctype!="Quiz"]
+		return content_list, quiz_list
 
 	def get_contents(self):
 		try:
 			course_content_list = self.get_all_children()
 			content_data = [frappe.get_doc(course_content.content_type, course_content.content) for course_content in course_content_list]
 		except Exception as e:
-			print(e)
 			return None
 		return content_data
 

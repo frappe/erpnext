@@ -44,7 +44,7 @@ class Student(Document):
 		if self.student_applicant:
 			frappe.db.set_value("Student Applicant", self.student_applicant, "application_status", "Admitted")
 
-	def get_course_enrollments(self):
+	def get_all_course_enrollments(self):
 		"""Returns a list of course enrollments linked with the current student"""
 		course_enrollments = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['course', 'name'])
 		if not course_enrollments:
