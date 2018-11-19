@@ -51,7 +51,6 @@ def get_continue_content(course_name):
 	if frappe.session.user == "Guest":
 		return dict(content=None, content_type=None, flag=None)
 	enrollment = utils.get_course_enrollment(course_name)
-	print(enrollment)
 	course = frappe.get_doc("Course", enrollment.course)
 	last_activity = enrollment.get_last_activity()
 	
@@ -250,7 +249,6 @@ def get_quiz_progress(quiz_list, quiz_activity):
 			last_attempted = quiz
 		elif attempts and quiz.grading_basis == 'Last Highest Score':
 			sorted_by_score = sorted(attempts, key = lambda i: int(i.score), reverse=True)
-			print([q.score for q in sorted_by_score])
 			scores.append(sorted_by_score[0])
 			last_attempted = quiz
 		elif not attempts:
