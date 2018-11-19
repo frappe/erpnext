@@ -19,8 +19,6 @@ default_sales_partner_type = ["Channel Partner", "Distributor", "Dealer", "Agent
 	"Retailer", "Implementation Partner", "Reseller"]
 
 def install(country=None):
-	root_territory = get_root_of("Territory")
-
 	records = [
 		# domains
 		{ 'doctype': 'Domain', 'domain': 'Distribution'},
@@ -104,8 +102,8 @@ def install(country=None):
 
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{'doctype': 'Territory', 'territory_name': _('All Territories'), 'is_group': 1, 'name': _('All Territories'), 'parent_territory': ''},
-		{'doctype': 'Territory', 'territory_name': country.replace("'", ""), 'is_group': 0, 'parent_territory': root_territory},
-		{'doctype': 'Territory', 'territory_name': _("Rest Of The World"), 'is_group': 0, 'parent_territory': root_territory},
+		{'doctype': 'Territory', 'territory_name': country.replace("'", ""), 'is_group': 0, 'parent_territory': _('All Territories')},
+		{'doctype': 'Territory', 'territory_name': _("Rest Of The World"), 'is_group': 0, 'parent_territory': _('All Territories')},
 
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': _('All Customer Groups'), 'is_group': 1, 	'name': _('All Customer Groups'), 'parent_customer_group': ''},
@@ -417,7 +415,6 @@ def install_post_company_fixtures(args=None):
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 	stock_settings.save()
 
-
 	if args.bank_account:
 		company_name = args.company_name
 		bank_account_group =  frappe.db.get_value("Account",
@@ -480,7 +477,8 @@ def install_post_company_fixtures(args=None):
 		# {}
 	]
 
-	make_records(records, True)
+	# TODO:
+	# make_records(records, True)
 
 
 def get_fy_details(fy_start_date, fy_end_date):
