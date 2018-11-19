@@ -944,7 +944,8 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		'schedule_date': schedule_date,
 		'warehouse': item.get('warehouse'),
 		'sales_order': sales_order,
-		'project': project
+		'project': project,
+		'uom': item_doc.stock_uom
 		})
 	material_request.insert()
 	material_request.flags.ignore_permissions = 1
