@@ -23,9 +23,22 @@ def execute(filters=None):
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
+		if d.party_type == "Customer":
+			for i in frappe.db.sql("""
+				select customer_name,customer_group  from `tabCustomer` 
+				where name = %s """,(d.party), as_dict=1):
+			
+				row = [d.voucher_type, d.voucher_no, d.party_type, d.party,i.customer_name,i.customer_group, d.posting_date,
+				       d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+	
+		elif d.party_type == "Supplier":
+			for i in frappe.db.sql("""
+					select supplier_name,supplier_group  from `tabSupplier` 
+					where name = %s """,(d.party), as_dict=1):
 
-		row = [d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher, 
-			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+				row = [d.voucher_type, d.voucher_no, d.party_type, d.party,i.supplier_name,i.supplier_group, d.posting_date,
+				       d.against_voucher,invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+
 
 		if d.against_voucher:
 			row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
@@ -50,6 +63,8 @@ def get_columns(filters):
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
 		_("Party Type") + "::100", 
 		_("Party") + ":Dynamic Link/Party Type:140",
+		_("Party Name") + "::150",
+		_("Party Group") + "::150",
 		_("Posting Date") + ":Date:100",
 		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Invoice Posting Date") + ":Date:130", 
