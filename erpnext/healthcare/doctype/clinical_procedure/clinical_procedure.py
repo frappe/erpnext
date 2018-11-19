@@ -43,7 +43,7 @@ class ClinicalProcedure(Document):
 		self.reload()
 
 	def complete(self):
-		if self.consume_stock:
+		if self.consume_stock and self.items:
 			create_stock_entry(self)
 		frappe.db.set_value("Clinical Procedure", self.name, "status", 'Completed')
 
