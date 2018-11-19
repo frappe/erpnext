@@ -33,7 +33,10 @@ function create_shortcut_popover() {
 
 			const shortcut_popover = $(`<div>`);
 
-			shortcut_setting.shortcut_items.map(item => {
+			// only show max 5 items
+			const items_to_show = shortcut_setting.shortcut_items.slice(0, 5);
+
+			items_to_show.map(item => {
 				shortcut_popover.append(`
 					<a href="#${item.link || ''}" class="shortcut-item">
 						${item.label}
