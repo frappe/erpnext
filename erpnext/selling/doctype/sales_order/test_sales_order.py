@@ -275,7 +275,6 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
 
-		existing_reserved_qty = get_reserved_qty()
 		trans_item = json.dumps([{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 

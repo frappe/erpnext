@@ -6,7 +6,6 @@ import frappe, erpnext
 import json
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
-from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
