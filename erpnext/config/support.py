@@ -62,13 +62,18 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Support Team",
+					"name": "Employee Group",
 					"description": _("Support Team."),
 				},
 				{
 					"type": "doctype",
 					"name": "Issue Criticality",
 					"description": _("Issue Criticality."),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Level",
+					"description": _("Service Level."),
 				},
 				{
 					"type": "doctype",
