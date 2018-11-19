@@ -1,7 +1,8 @@
 {
     "css/erpnext.css": [
         "public/less/erpnext.less",
-        "public/less/hub.less"
+        "public/less/hub.less",
+        "public/less/shortcut_popup.less"
     ],
     "css/marketplace.css": [
         "public/less/hub.less"

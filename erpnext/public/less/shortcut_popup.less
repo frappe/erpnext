@@ -1,0 +1,25 @@
+@import "variables.less";
+@import "common.less";
+
+.shortcut-popover {
+	padding: 0px;
+	overflow: hidden;
+	.popover-content {
+		padding: 0;
+		font-size: @text-medium;
+	}
+	a.shortcut-item {
+		.ellipsis;
+		display: block;
+		padding: 15px 20px;
+	}
+	a:hover {
+		background: @btn-bg;
+		text-decoration: none;
+	}
+	.divider {
+		height: 1px;
+		overflow: hidden;
+		background-color: #d8dfe5;
+	}
+}

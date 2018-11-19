@@ -7,7 +7,11 @@ $(document).on('toolbar_setup', () => {
 	create_shortcut_popover();
 	frappe.realtime.on('update_shortcut_setting', (shortcut_setting) => {
 		frappe.boot.shortcut_setting = shortcut_setting;
-	})
+	});
+	frappe.search.utils.make_function_searchable(
+		go_to_user_shortcut_setting_page,
+		__('Shortcut Setting')
+	)
 });
 
 function create_shortcut_popover() {
@@ -19,20 +23,26 @@ function create_shortcut_popover() {
 		container: 'body',
 		trigger: 'manual',
 		placement: 'bottom',
+		template: `<div class="shortcut-popover popover">
+			<div class="popover-content"></div>
+		</div>`,
 		content: () => {
 			const shortcut_setting = frappe.boot.shortcut_setting;
 
 			if (!shortcut_setting || !shortcut_setting.enabled) return
 
-			const shortcut_popover = $(`<div class="shortcut-popover">`);
+			const shortcut_popover = $(`<div>`);
 
 			shortcut_setting.shortcut_items.map(item => {
-				shortcut_popover.append(`<a href="#${item.link || ''}" class="shortcut-item">
-				${item.label}
-				</a>`);
+				shortcut_popover.append(`
+					<a href="#${item.link || ''}" class="shortcut-item">
+						${item.label}
+					</a>
+				`);
 			});
 
 			// push configuration option
+			shortcut_popover.append('<div class="divider">')
 			shortcut_popover.append(get_customize_shortcut_link());
 
 			return shortcut_popover;
