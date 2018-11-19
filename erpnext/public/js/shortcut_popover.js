@@ -16,7 +16,7 @@ $(document).on('toolbar_setup', () => {
 
 function create_shortcut_popover() {
 	const home_button = $('.navbar-home');
-
+	let mouseover_timeout;
 	home_button.popover({
 		html: true,
 		animation: true,
@@ -52,7 +52,7 @@ function create_shortcut_popover() {
 		},
 	})
 	.on("mouseenter", () => {
-		setTimeout(() => {
+		mouseover_timeout = setTimeout(() => {
 			home_button.popover("show");
 			$(".popover").on("mouseleave click", () => {
 				home_button.popover('hide');
@@ -60,6 +60,7 @@ function create_shortcut_popover() {
 		}, 500);
 	})
 	.on("mouseleave", () => {
+		clearTimeout(mouseover_timeout);
 		setTimeout(() => {
 			if (!$(".popover:hover").length) {
 				home_button.popover("hide");

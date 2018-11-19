@@ -4,7 +4,7 @@
  "allow_guest_to_view": 0,
  "allow_import": 0,
  "allow_rename": 0,
- "autoname": "format:{user}-SHORTCUT-SETTING",
+ "autoname": "format:{user}-Shortcut-Setting",
  "beta": 0,
  "creation": "2018-11-15 10:26:04.685822",
  "custom": 0,
@@ -125,11 +125,11 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
- "modified": "2018-11-19 10:32:55.673660",
+ "modified": "2018-11-19 11:26:47.857890",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Shortcut Settings",
- "name_case": "",
+ "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
