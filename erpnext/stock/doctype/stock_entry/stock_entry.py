@@ -72,6 +72,13 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.validate_serial_numbers()
+	def validate_serial_numbers(self):
+		"""
+			validate serial number stock
+		"""
+		
+		self.validate_serial_against_stock_entry()
 
 	def on_submit(self):
 
@@ -87,7 +94,7 @@ class StockEntry(StockController):
 		self.validate_reserved_serial_no_consumption()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
-
+		self.validate_serial_against_stock_entry()
 	def on_cancel(self):
 
 		if self.purchase_order and self.purpose == "Subcontract":
@@ -286,6 +293,18 @@ class StockEntry(StockController):
 				self.check_duplicate_entry_for_work_order()
 		elif self.purpose != "Material Transfer":
 			self.work_order = None
+	def validate_serial_against_stock_entry(self):
+		##""" check if serial number is already used in other stock entry """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+			if (self.purpose=="Manufacture"):
+				for serial_no in item.serial_no.split("\n"):
+					stock_entry = frappe.db.get_value("Serial No", serial_no, "purchase_document_no")
+					if stock_entry and self.name != stock_entry:
+						frappe.throw(_("Serial Number: {0} is already referenced in Stock Entry: {1}".format(
+							serial_no, stock_entry
+						)))
 
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
