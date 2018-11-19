@@ -77,10 +77,16 @@ frappe.ui.form.on('Delivery Trip', {
 						delivery_stops: frm.doc.delivery_stops
 					},
 					callback: (r) => {
-						if (r.message.length) {
-							let confirm_message = `Atleast one of the entered Delivery Notes already exist in
-												the following Delivery Trips: ${r.message.join(", ")}.
-												Do you still want to continue?`;
+						if (!$.isEmptyObject(r.message)) {
+							// create an unordered list of existing note <-> trip mappings
+							let existing_trips = "<ul>";
+							for (let trip in r.message) {
+								existing_trips += `<li><strong>${r.message[trip]}</strong> assigned to <strong>${trip}</strong></li>`
+							}
+							existing_trips += "</ul>"
+
+							let confirm_message = `The following deliveries already exist in recent
+								trip(s): ${existing_trips} Do you still want to continue?`;
 
 							frappe.confirm(
 								__(confirm_message),
