@@ -9,7 +9,7 @@ Vue.use(VueRouter)
 
 var store = {
 	isLogin: false,
-	enrolledPrograms: new Set(),
+	enrolledPrograms: [],
 	enrolledCourses: {}
 }
 
@@ -23,11 +23,7 @@ frappe.ready(() => {
 			updateEnrolledPrograms() {
 				if(this.isLogin) {
 					lms.call("get_program_enrollments").then(data => {
-						if(data){
-							data.forEach(element => {
-								this.enrolledPrograms.add(element)
-							})
-						}
+						if(data) this.enrolledPrograms = data
 					});
 					if (lms.debug) console.log('Updated Enrolled Programs', this.enrolledPrograms)
 				}

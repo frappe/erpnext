@@ -63,7 +63,7 @@ export default {
             return this.programRoute
         },
         isEnrolled() {
-            return lms.store.enrolledPrograms.has(this.program.name)
+            return lms.store.enrolledPrograms.includes(this.program.name)
         }
     },
     components: {
