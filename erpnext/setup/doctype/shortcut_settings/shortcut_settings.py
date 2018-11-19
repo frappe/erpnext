@@ -14,3 +14,7 @@ class ShortcutSettings(Document):
 
 def has_permission(doc, user):
 	return doc.user == user
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	return "(`tabShortcut Settings`.`user`='{user}')".format(user=user)

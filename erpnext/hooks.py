@@ -312,3 +312,7 @@ regional_overrides = {
 has_permission = {
 	"Shortcut Settings": "erpnext.setup.doctype.shortcut_settings.shortcut_settings.has_permission",
 }
+
+permission_query_conditions = {
+	"Shortcut Settings": "erpnext.setup.doctype.shortcut_settings.shortcut_settings.get_permission_query_conditions",
+}
