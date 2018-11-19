@@ -34,7 +34,7 @@ frappe.ready(() => {
 			},
 
 			updateEnrolledCourses() {
-				lms.call("get_course_enrollments").then(data => {
+				lms.call("get_all_course_enrollments").then(data => {
 					if(data) this.enrolledCourses = data
 				})
 				if (lms.debug) console.log('Updated Enrolled Courses', this.enrolledCourses)

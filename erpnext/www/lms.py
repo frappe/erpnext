@@ -1,29 +1,23 @@
 from __future__ import unicode_literals
+import erpnext.education.utils as utils
 import frappe
 
 # Academy Utils
 @frappe.whitelist(allow_guest=True)
 def get_portal_details():
+	"""
+	Returns portal details from Education Settings Doctype. This contains the Title and Description for LMS amoung other things.
+	"""
 	settings = frappe.get_doc("Education Settings")
 	title = settings.portal_title
 	description = settings.description
 	return dict(title=title, description=description)
 
-def check_program_enrollment(program_name):
-	if frappe.session.user in ("Guest", "Administrator"):
-		return False
-	student = get_student_id(frappe.session.user)
-	enrollment = frappe.get_list("Program Enrollment", filters={'student':student, 'program': program_name})
-	if enrollment:
-		return True
-	else:
-		return False
-
 @frappe.whitelist(allow_guest=True)
 def get_featured_programs():
 	featured_program_names = frappe.get_all("Program", filters={"is_published": True, "is_featured": True})
 	if featured_program_names:
-		featured_list = [get_program(program['name']) for program in featured_program_names]
+		featured_list = [utils.get_program(program['name']) for program in featured_program_names]
 		return featured_list
 	else:
 		return None
@@ -32,15 +26,10 @@ def get_featured_programs():
 def get_all_programs():
 	program_names = frappe.get_all("Program", filters={"is_published": True})
 	if program_names:
-		featured_list = [get_program(program['name']) for program in program_names]
+		featured_list = [utils.get_program(program['name']) for program in program_names]
 		return featured_list
 	else:
 		return None
-
-def get_program(program_name):
-	program = frappe.get_doc('Program', program_name)
-	is_enrolled = check_program_enrollment(program_name)
-	return {'program': program, 'is_enrolled': is_enrolled}
 
 @frappe.whitelist(allow_guest=True)
 def get_program_details(program_name):
@@ -50,40 +39,6 @@ def get_program_details(program_name):
 	except:
 		return None
 
-
-def get_enrollment(course_name):
-	student = get_student_id(frappe.session.user)
-	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student, 'course':course_name})
-	try:
-		name = enrollment_name[0].name
-		enrollment = frappe.get_doc("Course Enrollment", name)
-		return enrollment
-	except:
-		return None
-
-@frappe.whitelist()
-def get_student_id(email=None):
-	"""Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
-
-	:param user: a user email address
-	"""
-	try:
-		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
-		return student_id
-	except IndexError:
-		return None
-
-def create_student():
-	student_name=frappe.session.user
-	student = frappe.get_doc({
-		"doctype": "Student",
-		"first_name": student_name,
-		"student_email_id": student_name,
-		})
-	student.save(ignore_permissions=True)
-	frappe.db.commit()
-	return student_name
-
 # Functions to get program & course details
 @frappe.whitelist(allow_guest=True)
 def get_courses(program_name):
@@ -92,11 +47,10 @@ def get_courses(program_name):
 	course_data = [{'meta':get_continue_content(item.name), 'course':item} for item in courses]
 	return course_data
 
-@frappe.whitelist()
 def get_continue_content(course_name):
 	if frappe.session.user == "Guest":
 		return dict(content=None, content_type=None, flag=None)
-	enrollment = get_enrollment(course_name)
+	enrollment = utils.get_course_enrollment(course_name)
 	print(enrollment)
 	course = frappe.get_doc("Course", enrollment.course)
 	last_activity = enrollment.get_last_activity()
@@ -117,8 +71,6 @@ def get_continue_content(course_name):
 		next_content['flag'] = "Continue"
 		return next_content
 
-
-@frappe.whitelist()
 def get_starting_content(course_name):
 	course = frappe.get_doc('Course', course_name)
 	content = course.course_content[0].content
@@ -173,6 +125,7 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
 	"""
+	
 	import json
 	quiz_response = json.loads(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
@@ -194,16 +147,18 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	add_quiz_activity(enrollment, quiz_name, result_data, score, status)
 	return(score)
 
-@frappe.whitelist()
-def get_completed_courses():
-	student = get_student_id(frappe.session.user)
-	if student == None:
-		return None
-	try:
-		student = frappe.get_doc("Student", student)
-		return student.get_completed_courses()
-	except:
-		return None
+def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
+	quiz_activity = frappe.get_doc({
+		"doctype": "Quiz Activity",
+		"enrollment": enrollment,
+		"quiz": quiz_name,
+		"activity_date": frappe.utils.datetime.datetime.now(),
+		"result": result_data,
+		"score": score,
+		"status": status
+		})
+	quiz_activity.save()
+	frappe.db.commit()
 
 @frappe.whitelist()
 def get_continue_data(program_name):
@@ -217,47 +172,39 @@ def get_continue_data(program_name):
 		return None
 
 @frappe.whitelist()
-def enroll_all_courses_in_program(program_enrollment, student):
-	program = frappe.get_doc("Program", program_enrollment.program)
-	course_list = [course.course for course in program.get_all_children()]
-	for course_name in course_list:
-		student.enroll_in_course(course_name=course_name, program_enrollment=program_enrollment.name)
-
-@frappe.whitelist()
 def enroll_in_program(program_name):
-	if(not get_student_id(frappe.session.user)):
-		create_student(frappe.session.user)
-	student = frappe.get_doc("Student", get_student_id(frappe.session.user))
+	if(not utils.get_current_student()):
+		utils.create_student(frappe.session.user)
+	student = frappe.get_doc("Student", utils.get_current_student())
 	program_enrollment = student.enroll_in_program(program_name)
-	enroll_all_courses_in_program(program_enrollment, student)
+	utils.enroll_all_courses_in_program(program_enrollment, student)
 	return program_name
 
 @frappe.whitelist()
-def get_program_enrollments(email=frappe.session.user):
-	if get_student_id(email) == None:
+def get_program_enrollments():
+	if utils.get_current_student() == None:
 		return None
 	try:
-		student = frappe.get_doc("Student", get_student_id(email))
+		student = frappe.get_doc("Student", utils.get_current_student())
 		return student.get_program_enrollments()
 	except:
 		return None
 
 @frappe.whitelist()
-def get_course_enrollments():
-	student = get_student_id(frappe.session.user)
+def get_all_course_enrollments():
+	student = utils.get_current_student()
 	if student == None:
 		return None
 	try:
 		student = frappe.get_doc("Student", student)
-		return student.get_course_enrollments()
+		return student.get_all_course_enrollments()
 	except:
 		return None
-
 
 # Academty Activity 
 @frappe.whitelist()
 def add_activity(enrollment, content_type, content):
-	if(check_activity_exists(enrollment, content_type, content)):
+	if(utils.check_activity_exists(enrollment, content_type, content)):
 		pass
 	else:
 		activity = frappe.get_doc({
@@ -270,25 +217,54 @@ def add_activity(enrollment, content_type, content):
 		activity.save()
 		frappe.db.commit()
 
-def check_activity_exists(enrollment, content_type, content):
-	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
-	return bool(activity)
+def get_course_progress(course_enrollment):
+	course = frappe.get_doc('Course', course_enrollment.course)
 
-def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
-	quiz_activity = frappe.get_doc({
-		"doctype": "Quiz Activity",
-		"enrollment": enrollment,
-		"quiz": quiz_name,
-		"result": result_data,
-		"score": score,
-		"status": status
-		})
-	quiz_activity.save()
-	frappe.db.commit()
+	content_activity, quiz_activity = course_enrollment.get_linked_activity()
+	content_list, quiz_list = course.get_contents_based_on_type()
+	
+	quiz_scores, is_quiz_complete, last_quiz_attempted = get_quiz_progress(quiz_list, quiz_activity)
+	is_content_complete, last_content_viewed = get_content_progress(content_list, content_activity)
 
-@frappe.whitelist()
-def mark_course_complete(enrollment):
-	course_enrollment = frappe.get_doc("Course Enrollment", enrollment)
-	course_enrollment.completed = True
-	course_enrollment.save()
-	frappe.db.commit()
+	quiz_data = {
+		'gradable_quiz_attempts': quiz_scores,
+		'complete': is_quiz_complete,
+		'last': last_quiz_attempted
+	}
+
+	content_data = {
+		'complete': is_content_complete,
+		'last': last_content_viewed
+	}
+	
+	return quiz_data, content_data
+
+def get_quiz_progress(quiz_list, quiz_activity):
+	scores = []
+	is_complete = True
+	last_attempted = None
+	for quiz in quiz_list:
+		attempts = [attempt for attempt in quiz_activity if attempt.quiz==quiz.name]
+		if attempts and quiz.grading_basis == 'Last Attempt':
+			scores.append(attempts[0])
+			last_attempted = quiz
+		elif attempts and quiz.grading_basis == 'Last Highest Score':
+			sorted_by_score = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+			print([q.score for q in sorted_by_score])
+			scores.append(sorted_by_score[0])
+			last_attempted = quiz
+		elif not attempts:
+			is_complete = False
+	return scores, is_complete, last_attempted
+
+def get_content_progress(content_list, content_activity):
+	is_complete = True
+	last_viewed = None
+	activity_list = [[activity.content, activity.content_type] for activity in content_activity]
+	for item in content_list:
+		current_content = [item.name, item.doctype]
+		if current_content in activity_list:
+			last_viewed = item
+		else:
+			is_complete = False
+	return is_complete, last_viewed

@@ -54,3 +54,67 @@ def validate_duplicate_student(students):
 			unique_students.append(stud.student)
 
 		return None
+
+def get_current_student():
+	"""
+	Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
+	Takes email from from frappe.session.user
+	"""
+	email = frappe.session.user
+	if email in ('Administrator', 'Guest'):
+		return None
+	try:
+		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
+		return student_id
+	except IndexError:
+		return None
+
+def get_program_enrollment(program_name):
+	"""
+	Function to get program enrollments for a particular student for a program
+	"""
+	student = get_current_student()
+	if not student:
+		return None
+	else:
+		enrollment = frappe.get_list("Program Enrollment", filters={'student':student, 'program': program_name})
+		if enrollment:
+			return enrollment[0].name
+		else:
+			return None
+
+def get_program(program_name):
+	program = frappe.get_doc('Program', program_name)
+	is_enrolled = bool(get_program_enrollment(program_name))
+	return {'program': program, 'is_enrolled': is_enrolled}
+
+def get_course_enrollment(course_name):
+	student = utils.get_current_student()
+	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student, 'course':course_name})
+	try:
+		name = enrollment_name[0].name
+		enrollment = frappe.get_doc("Course Enrollment", name)
+		return enrollment
+	except:
+		return None
+
+def create_student():
+	student_name=frappe.session.user
+	student = frappe.get_doc({
+		"doctype": "Student",
+		"first_name": student_name,
+		"student_email_id": student_name,
+		})
+	student.save(ignore_permissions=True)
+	frappe.db.commit()
+	return student_name
+
+def enroll_all_courses_in_program(program_enrollment, student):
+	program = frappe.get_doc("Program", program_enrollment.program)
+	course_list = [course.course for course in program.get_all_children()]
+	for course_name in course_list:
+		student.enroll_in_course(course_name=course_name, program_enrollment=program_enrollment.name)
+
+def check_activity_exists(enrollment, content_type, content):
+	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
+	return bool(activity)
