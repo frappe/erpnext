@@ -40,17 +40,17 @@ export default {
 		// });
 	},
 	methods: {
-		startCourse() {
-			this.getContentForNextCourse()
-				.then((data) => 
-					this.$router.push(`/Program/${this.program_name}/${data.course}/${data.content_type}/${data.content}`)
-				)
-		},
-		getContentForNextCourse() {
-			return lms.call('get_continue_data', {
-				program_name: this.program_name
-			});
-		},
+		// startCourse() {
+		// 	this.getContentForNextCourse()
+		// 		.then((data) => 
+		// 			this.$router.push(`/Program/${this.program_name}/${data.course}/${data.content_type}/${data.content}`)
+		// 		)
+		// },
+		// getContentForNextCourse() {
+		// 	return lms.call('get_continue_data', {
+		// 		program_name: this.program_name
+		// 	});
+		// },
 		getProgramDetails() {
 			return lms.call('get_program_details', {
 				program_name: this.program_name
