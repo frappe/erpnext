@@ -34,17 +34,22 @@ export default {
 	  },
 	},
 	mounted() {
-	  	frappe.call({
-	  		method: "erpnext.www.lms.get_next_content",
-	  		args:{
-	  			content: this.content,
-	  			content_type: this.type,
-	  			course: this.course
-	  		}
-	  	}).then(r => {
+	  	this.getNextContent().then(data => {
 	  		this.nextContent = r.message.content,
 	  		this.nextContentType = r.message.content_type
 	  	});
+	},
+	methods: {
+		getNextContent(){
+			return lms.call({
+				method: "get_next_content",
+				args:{
+					content: this.content,
+					content_type: this.type,
+					course: this.course
+			  	}
+			});
+		}
 	},
 	components: {
 		Article,

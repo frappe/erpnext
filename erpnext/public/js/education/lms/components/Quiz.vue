@@ -52,32 +52,35 @@ export default {
     	}
     },
     mounted() {
-    	frappe.call({
-    		method: "erpnext.www.lms.get_quiz_without_answers",
-    		args: {
-    			quiz_name: this.content,
-    		}
-    	}).then(r => {
-    			this.quizData = r.message
+    	this.getQuizWithoutAnswers().then(data => {
+    			this.quizData = data
     	});
     },
     components: {
     	QuizSingleChoice,
     },
     methods: {
+        getQuizWithoutAnswers() {
+            return lms.call({
+                method: "get_quiz_without_answers",
+                args: {
+                    quiz_name: this.content,
+                }
+    	    })
+        },
 		updateResponse(res) {
 			this.quizResponse[res.question] = (res.option)
 		},
 		submitQuiz() {
-			frappe.call({
-				method: "erpnext.www.lms.evaluate_quiz",
+			lms.call({
+				method: "evaluate_quiz",
 				args: {
                     enrollment: lms.store.enrolledCourses[this.$route.params.course],
 					quiz_response: this.quizResponse,
                     quiz_name: this.content
 				}
-            }).then(r => {
-                this.score = r.message,
+            }).then(data => {
+                this.score = data,
                 this.submitted = true,
                 this.quizResponse = null
 			});

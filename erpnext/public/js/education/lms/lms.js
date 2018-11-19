@@ -66,7 +66,7 @@ frappe.ready(() => {
 		template: "<lms-root/>",
 		components: { lmsRoot },
 		mounted() {
-				lms.store.updateState()
+			if(lms.store.isLogin) lms.store.updateState()
 		}
 	});
 
