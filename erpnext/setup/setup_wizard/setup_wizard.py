@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import json
+from time import time
 from frappe import _
 
 from .operations import install_fixtures as fixtures, taxes_setup, company_setup, sample_data
@@ -93,7 +94,7 @@ def setup_complete(args=None):
 	fin(args)
 
 def stage_fixtures(args):
-	fixtures.install(_dict(frappe.local.conf.setup).country)
+	fixtures.install(args.get('country'))
 
 def setup_company(args):
 	fixtures.install_company(args)
@@ -140,7 +141,7 @@ def make_setup_docs(args):
 	args.update(config)
 
 	fixtures.install_company(_dict(args))
-	fixtures.install_post_company_fixtures(_dict(args))
+	fixtures.install_defaults(_dict(args))
 
 	run_post_setup_complete(args)
 
@@ -148,11 +149,3 @@ def make_setup_docs(args):
 def setup(args, config=None):
 	install_fixtures()
 	make_setup_docs(args)
-
-def get_fy_details(fy_start_date, fy_end_date):
-	start_year = getdate(fy_start_date).year
-	if start_year == getdate(fy_end_date).year:
-		fy = cstr(start_year)
-	else:
-		fy = cstr(start_year) + '-' + cstr(start_year + 1)
-	return fy

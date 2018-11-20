@@ -373,11 +373,15 @@ def install_post_company_fixtures(args=None):
 		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments'), 'company': args.company_name},
 		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments'), 'company': args.company_name},
 		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': args.company_name},
+	]
 
+	make_records(records)
+
+def install_defaults(args=None):
+	records = [
 		# Price Lists
 		{ "doctype": "Price List", "price_list_name": _("Standard Buying"), "enabled": 1, "buying": 1, "selling": 0, "currency": args.currency },
 		{ "doctype": "Price List", "price_list_name": _("Standard Selling"), "enabled": 1, "buying": 0, "selling": 1, "currency": args.currency },
-
 	]
 
 	make_records(records)
@@ -478,7 +482,7 @@ def install_post_company_fixtures(args=None):
 	]
 
 	# TODO:
-	# make_records(records, True)
+	make_records(records, True)
 
 
 def get_fy_details(fy_start_date, fy_end_date):
