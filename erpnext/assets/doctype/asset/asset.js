@@ -240,7 +240,6 @@ frappe.ui.form.on('Asset', {
 				"asset": frm.doc.name,
 				"item_code": frm.doc.item_code,
 				"company": frm.doc.company,
-				"serial_no": frm.doc.serial_no
 			},
 			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
 			callback: function(r) {
@@ -381,42 +380,6 @@ erpnext.asset.transfer_asset = function(frm) {
 				"reqd": 1
 			},
 			{
-				"label": __("Select Serial No"),
-				"fieldname": "serial_nos",
-				"fieldtype": "Link",
-				"options": "Serial No",
-				"get_query": function () {
-					return {
-						filters: {
-							'asset': frm.doc.name
-						}
-					}
-				},
-				"onchange": function() {
-					let val = this.get_value();
-					if (val) {
-						let serial_nos = dialog.get_value("serial_no") || val;
-						if (serial_nos) {
-							serial_nos = serial_nos.split('\n');
-							serial_nos.push(val);
-
-							const unique_sn = serial_nos.filter(function(elem, index, self) {
-							    return index === self.indexOf(elem);
-							});
-
-							dialog.set_value("serial_no", unique_sn.join('\n'));
-							dialog.set_value("serial_nos", "");
-						}
-					}
-				}
-			},
-			{
-				"label": __("Serial No"),
-				"fieldname": "serial_no",
-				"read_only": 1,
-				"fieldtype": "Small Text"
-			},
-			{
 				"label": __("Date"),
 				"fieldname": "transfer_date",
 				"fieldtype": "Datetime",
@@ -439,7 +402,6 @@ erpnext.asset.transfer_asset = function(frm) {
 					"transaction_date": args.transfer_date,
 					"source_location": frm.doc.location,
 					"target_location": args.target_location,
-					"serial_no": args.serial_no,
 					"company": frm.doc.company
 				}
 			},

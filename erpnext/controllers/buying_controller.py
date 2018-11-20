@@ -547,43 +547,18 @@ class BuyingController(StockController):
 			return
 
 		asset_items = self.get_asset_items()
+
 		if asset_items:
-			self.make_serial_nos_for_asset(asset_items)
+			for d in self.items:
+				if d.is_fixed_asset:
+					if d.qty > 1:
+						frappe.throw(_("Quantity cannot be greater than 1. Please add more rows for each item"))
+					if not d.asset:
+						asset = self.make_asset(d)
+						d.db_set('asset', asset)
 
-	def make_serial_nos_for_asset(self, asset_items):
-		items_data = get_asset_item_details(asset_items)
-
-		for d in self.items:
-			if d.is_fixed_asset:
-				item_data = items_data.get(d.item_code)
-				if not d.asset:
-					asset = self.make_asset(d)
-					d.db_set('asset', asset)
-
-				if item_data.get('has_serial_no'):
-					# If item has serial no
-					if item_data.get('serial_no_series') and not d.serial_no:
-						serial_nos = get_auto_serial_nos(item_data.get('serial_no_series'), d.qty)
-					elif d.serial_no:
-						serial_nos = d.serial_no
-					elif not d.serial_no:
-						frappe.throw(_("Serial no is mandatory for the item {0}").format(d.item_code))
-
-					auto_make_serial_nos({
-						'serial_no': serial_nos,
-						'item_code': d.item_code,
-						'via_stock_ledger': False,
-						'company': self.company,
-						'actual_qty': d.qty,
-						'purchase_document_type': self.doctype,
-						'purchase_document_no': self.name,
-						'asset': d.asset,
-						'location': d.asset_location
-					})
-					d.db_set('serial_no', serial_nos)
-
-				if d.asset:
-					self.make_asset_movement(d)
+					if d.asset:
+						self.make_asset_movement(d)
 
 	def make_asset(self, row):
 		if not row.asset_location:
@@ -623,7 +598,6 @@ class BuyingController(StockController):
 			'asset': row.asset,
 			'target_location': row.asset_location,
 			'purpose': 'Receipt',
-			'serial_no': row.serial_no,
 			'quantity': len(get_serial_nos(row.serial_no)),
 			'company': self.company,
 			'transaction_date': self.posting_date,

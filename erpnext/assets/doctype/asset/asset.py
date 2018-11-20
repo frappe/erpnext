@@ -435,7 +435,7 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 	return pi
 
 @frappe.whitelist()
-def make_sales_invoice(asset, item_code, company, serial_no=None):
+def make_sales_invoice(asset, item_code, company):
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
 	si.currency = frappe.get_cached_value('Company',  company,  "default_currency")
@@ -445,7 +445,6 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 		"is_fixed_asset": 1,
 		"asset": asset,
 		"income_account": disposal_account,
-		"serial_no": serial_no,
 		"cost_center": depreciation_cost_center,
 		"qty": 1
 	})
@@ -479,8 +478,6 @@ def transfer_asset(args):
 	import json
 	args = json.loads(args)
 
-	if args.get('serial_no'):
-		args['quantity'] = len(args.get('serial_no').split('\n'))
 
 	movement_entry = frappe.new_doc("Asset Movement")
 	movement_entry.update(args)
@@ -501,7 +498,7 @@ def get_item_details(item_code, asset_category):
 			'depreciation_method': d.depreciation_method,
 			'total_number_of_depreciations': d.total_number_of_depreciations,
 			'frequency_of_depreciation': d.frequency_of_depreciation,
-			'start_date': nowdate()
+			'depreciation_start_date': nowdate()
 		})
 
 	return books
