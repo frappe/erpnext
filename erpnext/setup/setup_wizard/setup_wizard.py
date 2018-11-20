@@ -142,6 +142,7 @@ def make_setup_docs(args):
 
 	fixtures.install_company(_dict(args))
 	fixtures.install_defaults(_dict(args))
+	# setup_taxes(args)
 
 	run_post_setup_complete(args)
 
