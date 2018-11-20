@@ -16,13 +16,13 @@ export default {
         }
     },
     mounted() {
-        if(this.isLoggedIn && this.$route.name == 'program'){
-                this.getContinueData().then( data => {
-                    this.nextContent = data.content,
-                    this.nextContentType = data.content_type,
-                    this.nextCourse = data.course
-                })
-        }
+        // if(this.isLoggedIn && this.$route.name == 'program'){
+        //         this.getContinueData().then( data => {
+        //             this.nextContent = data.content,
+        //             this.nextContentType = data.content_type,
+        //             this.nextCourse = data.course
+        //         })
+        // }
         this.computeButtons()
     },
     methods: {
@@ -32,9 +32,9 @@ export default {
                     if(this.$route.name == 'home'){
                         this.buttonName = 'Explore Courses'
                     }
-                    else if(this.$route.name == 'program'){
-                        this.buttonName = 'Start Course'
-                    }
+                    // else if(this.$route.name == 'program'){
+                    //     this.buttonName = 'Start Course'
+                    // }
                 }
                 else {
                     this.buttonName = 'Enroll Now'
@@ -44,14 +44,14 @@ export default {
                 this.buttonName = 'Sign Up'
             }
         },
-        getContinueData() {
-            lms.call({
-                    method: "get_continue_data",
-                    args: {
-                        program_name: this.$route.params.program_name
-                    }
-                })
-        },
+        // getContinueData() {
+        //     lms.call({
+        //             method: "get_continue_data",
+        //             args: {
+        //                 program_name: this.$route.params.program_name
+        //             }
+        //         })
+        // },
         primaryAction() {
             if(this.$route.name == 'home'){
                 return
