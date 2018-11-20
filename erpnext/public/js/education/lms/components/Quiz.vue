@@ -61,25 +61,23 @@ export default {
     },
     methods: {
         getQuizWithoutAnswers() {
-            return lms.call({
-                method: "get_quiz_without_answers",
-                args: {
+            return lms.call("get_quiz_without_answers",
+                {
                     quiz_name: this.content,
                 }
-    	    })
+    	    )
         },
 		updateResponse(res) {
 			this.quizResponse[res.question] = (res.option)
 		},
 		submitQuiz() {
-			lms.call({
-				method: "evaluate_quiz",
-				args: {
+			lms.call("evaluate_quiz",
+				{
                     enrollment: lms.store.enrolledCourses[this.$route.params.course],
 					quiz_response: this.quizResponse,
                     quiz_name: this.content
 				}
-            }).then(data => {
+            ).then(data => {
                 this.score = data,
                 this.submitted = true,
                 this.quizResponse = null

@@ -60,13 +60,12 @@ export default {
                 this.$router.push({ name: 'content', params: { program_name: this.$route.params.program_name, course: this.nextCourse, type: this.nextContentType, content: this.nextContent}})
             }
             else {
-                lms.call({
-                method: "enroll_in_program",
-                args:{
-                    program_name: this.$route.params.program_name,
-                    student_email_id: frappe.session.user
-                }
-                })
+                lms.call("enroll_in_program",
+                    {
+                        program_name: this.$route.params.program_name,
+                        student_email_id: frappe.session.user
+                    }
+                )
                 lms.store.updateEnrolledPrograms()
             }
         },
