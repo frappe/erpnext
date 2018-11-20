@@ -55,6 +55,7 @@ def validate_duplicate_student(students):
 
 		return None
 
+# LMS Utils
 def get_current_student():
 	"""
 	Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
@@ -89,7 +90,7 @@ def get_program(program_name):
 	return {'program': program, 'is_enrolled': is_enrolled}
 
 def get_course_enrollment(course_name):
-	student = utils.get_current_student()
+	student = get_current_student()
 	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student, 'course':course_name})
 	try:
 		name = enrollment_name[0].name
