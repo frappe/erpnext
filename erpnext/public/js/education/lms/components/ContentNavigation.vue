@@ -13,14 +13,13 @@ export default {
 	methods: {
 		addActivity() {
 			if(this.$route.params.type != "Quiz"){
-				lms.call({
-					method: "add_activity",
-					args: {
+				lms.call("add_activity",
+					{
 						enrollment: lms.store.enrolledCourses[this.$route.params.course],
 						content_type: this.$route.params.type,
 						content: this.$route.params.content
 					}
-				})
+				)
 			}
 		},
 		goNext() {
