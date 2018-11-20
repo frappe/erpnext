@@ -1,4 +1,4 @@
-frappe
-unidecode
-pygithub
-googlemaps
+frappe==2.1.4
+googlemaps==3.0.2
+PyGithub==1.9.1
+Unidecode==1.0.23
