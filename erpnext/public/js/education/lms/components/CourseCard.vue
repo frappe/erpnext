@@ -36,16 +36,16 @@ export default {
     },
     computed: {
         showStart() {
-            return lms.loggedIn && !this.courseMeta.flag == "Completed";
+            return lms.loggedIn && !this.courseMeta.flag == "Complete";
         },
         showCompleted() {
-            return lms.loggedIn && this.courseMeta.flag == "Completed";
+            return lms.loggedIn && this.courseMeta.flag == "Complete";
         },
         firstContentRoute() {
             return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
         },
         buttonType() {
-            if (this.courseMeta.flag == "Start" ){
+            if (this.courseMeta.flag == "Start Course" ){
                 return "primary"
             }
             else if (this.courseMeta.flag == "Complete" ) {

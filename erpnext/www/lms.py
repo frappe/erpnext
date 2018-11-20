@@ -64,37 +64,8 @@ def get_program_details(program_name):
 def get_courses(program_name):
 	program = frappe.get_doc('Program', program_name)
 	courses = program.get_course_list()
-	course_data = [{'meta':get_continue_content(item.name), 'course':item} for item in courses]
+	course_data = [{'meta':get_course_meta(utils.get_course_enrollment(item.name)), 'course':item} for item in courses]
 	return course_data
-
-def get_continue_content(course_name):
-	if frappe.session.user == "Guest":
-		return dict(content=None, content_type=None, flag=None)
-	enrollment = utils.get_course_enrollment(course_name)
-	course = frappe.get_doc("Course", enrollment.course)
-	last_activity = enrollment.get_last_activity()
-	
-	if last_activity == None:
-		next_content = course.get_first_content()
-		return dict(content=next_content.name, content_type=next_content.doctype, flag="Start")
-	
-	if last_activity.doctype == "Quiz Activity":
-		next_content = get_next_content(last_activity.quiz, "Quiz", course.name)
-	else:
-		next_content = get_next_content(last_activity.content, last_activity.content_type, course.name)
-	
-	if next_content == None:
-		next_content = course.get_first_content()
-		return dict(content=next_content.name, content_type=next_content.doctype, flag="Complete")
-	else:
-		next_content['flag'] = "Continue"
-		return next_content
-
-def get_starting_content(course_name):
-	course = frappe.get_doc('Course', course_name)
-	content = course.course_content[0].content
-	content_type = course.course_content[0].content_type
-	return dict(content=content, content_type=content_type)
 
 @frappe.whitelist()
 def get_next_content(content, content_type, course):
@@ -171,17 +142,6 @@ def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
 	frappe.db.commit()
 
 @frappe.whitelist()
-def get_continue_data(program_name):
-	program = frappe.get_doc("Program", program_name)
-	courses = program.get_all_children()
-	try:
-		continue_data = get_starting_content(courses[0].course)
-		continue_data['course'] = courses[0].course
-		return continue_data
-	except:
-		return None
-
-@frappe.whitelist()
 def enroll_in_program(program_name):
 	if(not utils.get_current_student()):
 		utils.create_student(frappe.session.user)
@@ -192,13 +152,14 @@ def enroll_in_program(program_name):
 
 # Academty Activity 
 @frappe.whitelist()
-def add_activity(enrollment, content_type, content):
-	if(utils.check_activity_exists(enrollment, content_type, content)):
+def add_activity(course, content_type, content):
+	enrollment = utils.get_course_enrollment(course)
+	if(utils.check_activity_exists(enrollment.name, content_type, content)):
 		pass
 	else:
 		activity = frappe.get_doc({
 			"doctype": "Course Activity",
-			"enrollment": enrollment,
+			"enrollment": enrollment.name,
 			"content_type": content_type,
 			"content": content,
 			"activity_date": frappe.utils.datetime.datetime.now()
@@ -215,8 +176,8 @@ def get_course_progress(course_enrollment):
 			status = check_content_completion(content.name, content.doctype, course_enrollment.name)
 			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
 		elif content.doctype == 'Quiz':
-			status, score = check_quiz_completion(content, course_enrollment.name)
-			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score})
+			status, score, result = check_quiz_completion(content, course_enrollment.name)
+			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
 	return progress
 
 def check_content_completion(content_name, content_type, enrollment_name):
@@ -228,18 +189,29 @@ def check_content_completion(content_name, content_type, enrollment_name):
 
 def check_quiz_completion(quiz, enrollment_name):
 	attempts = frappe.get_list("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
-	if attempts and quiz.grading_basis == 'Last Attempt':
-		score = attempts[0]['score']
-		status = attempts[0]['status']
-		return status, score
-	
-	elif attempts and quiz.grading_basis == 'Last Highest Score':
-		sorted_by_score = sorted(attempts, key = lambda i: int(i.score), reverse=True)
-		score = sorted_by_score[0]['score']
-		status = sorted_by_score[0]['status']
-		return status, score
-	
-	return False, None
+	status = bool(len(attempts) == quiz.max_attempts)
+	score = None
+	result = None
+	if attempts and quiz.grading_basis == 'Last Highest Score':
+		attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+	score = attempts[0]['score']
+	result = attempts[0]['status']
+	if result == 'Pass':
+		status = True
+	return status, score, result
 
-def get_course_meta():
-	pass
+
+def get_course_meta(course_enrollment):
+	# course_enrollment = frappe.get_doc("Course Enrollment", course_enrollment_name)
+	progress = get_course_progress(course_enrollment)
+	print(progress)
+	count = sum([act['is_complete'] for act in progress])
+	print('Count', count)
+	if count == 0:
+		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+	elif count == len(progress):
+		return {'flag':'Complete', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+	elif count < len(progress):
+		next_item = next(item for item in progress if item['is_complete']==False)
+		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
+	

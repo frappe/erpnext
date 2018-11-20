@@ -13,9 +13,10 @@ export default {
 	methods: {
 		addActivity() {
 			if(this.$route.params.type != "Quiz"){
+				console.log("Adding Activity")
 				lms.call("add_activity",
 					{
-						enrollment: lms.store.enrolledCourses[this.$route.params.course],
+						course: this.$route.params.course,
 						content_type: this.$route.params.type,
 						content: this.$route.params.content
 					}
