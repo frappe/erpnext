@@ -72,7 +72,8 @@ frappe.ui.form.on('Asset', {
 						"voucher_no": frm.doc.name,
 						"from_date": frm.doc.available_for_use_date,
 						"to_date": frm.doc.available_for_use_date,
-						"company": frm.doc.company
+						"company": frm.doc.company,
+						"group_by": ''
 					};
 					frappe.set_route("query-report", "General Ledger");
 				});
