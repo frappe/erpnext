@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class ResponseandResolution(Document):
+class ServiceLevelTable(Document):
 	pass
