@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
@@ -21,24 +21,92 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if party_naming_by == "Naming Series":
 			columns += [ args.get("party_type") + " Name::140"]
 
-		credit_debit_label = _("Credit Note Amt") if args.get('party_type') == 'Customer' else _("Debit Note Amt")
+		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
+		
+		columns += [{
+			"label": _("Total Invoiced Amt"),
+			"fieldname": "total_invoiced_amt",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 100
+		},
+		{
+			"label": _("Total Paid Amt"),
+			"fieldname": "total_paid_amt",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 100
+		}]
+
 		columns += [
-			_("Total Invoiced Amt") + ":Currency/currency:140",
-			_("Total Paid Amt") + ":Currency/currency:140",
-			credit_debit_label + ":Currency/currency:140",
-			_("Total Outstanding Amt") + ":Currency/currency:160",
-			"0-" + str(self.filters.range1) + ":Currency/currency:100",
-			str(self.filters.range1) + "-" + str(self.filters.range2) + ":Currency/currency:100",
-			str(self.filters.range2) + "-" + str(self.filters.range3) + ":Currency/currency:100",
-			str(self.filters.range3) + _("-Above") + ":Currency/currency:100"]
+			{
+				"label": _(credit_debit_label),
+				"fieldname": scrub(credit_debit_label),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 140
+			},
+			{
+				"label": _("Total Outstanding Amt"),
+				"fieldname": "total_outstanding_amt",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			},
+			{
+				"label": _("0-" + str(self.filters.range1)),
+				"fieldname": scrub("0-" + str(self.filters.range1)),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			},
+			{
+				"label": _(str(self.filters.range1) + "-" + str(self.filters.range2)),
+				"fieldname": scrub(str(self.filters.range1) + "-" + str(self.filters.range2)),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			},
+			{
+				"label": _(str(self.filters.range2) + "-" + str(self.filters.range3)),
+				"fieldname": scrub(str(self.filters.range2) + "-" + str(self.filters.range3)),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			},
+			{
+				"label": _(str(self.filters.range3) + _("-Above")),
+				"fieldname": scrub(str(self.filters.range3) + _("-Above")),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			}
+		]
 
 		if args.get("party_type") == "Customer":
-			columns += [
-				_("Territory") + ":Link/Territory:80", 
-				_("Customer Group") + ":Link/Customer Group:120"
-			]
+			columns += [{
+				"label": _("Territory"),
+				"fieldname": "territory",
+				"fieldtype": "Link",
+				"options": "Territory",
+				"width": 80
+			},
+			{
+				"label": _("Customer Group"),
+				"fieldname": "customer_group",
+				"fieldtype": "Link",
+				"options": "Customer Group",
+				"width": 80
+			}]
+
 		if args.get("party_type") == "Supplier":
-			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
+			columns += [{
+				"label": _("Supplier Group"),
+				"fieldname": "supplier_group",
+				"fieldtype": "Link",
+				"options": "Supplier Group",
+				"width": 80
+			}]
 			
 		columns.append({
 			"fieldname": "currency",

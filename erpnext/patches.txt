@@ -572,10 +572,11 @@ execute:frappe.delete_doc("Page", "Sales Analytics")
 execute:frappe.delete_doc("Page", "Purchase Analytics")
 execute:frappe.delete_doc("Page", "Stock Analytics")
 execute:frappe.delete_doc("Page", "Production Analytics")
-erpnext.patches.v11_0.ewaybill_fields_gst_india
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
+erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.make_default_shortcut_setting

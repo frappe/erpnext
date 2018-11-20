@@ -108,7 +108,8 @@ class BOM(WebsiteGenerator):
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
-				"stock_qty": item.stock_qty
+				"stock_qty": item.stock_qty,
+				"allow_transfer_for_manufacture": item.allow_transfer_for_manufacture
 			})
 			for r in ret:
 				if not item.get(r):
@@ -127,6 +128,8 @@ class BOM(WebsiteGenerator):
 		self.validate_rm_item(item)
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args['transfer_for_manufacture'] = (cstr(args.get('allow_transfer_for_manufacture', '')) or
+			item and item[0].allow_transfer_for_manufacture or 0)
 		args.update(item[0])
 
 		rate = self.get_rm_rate(args)
@@ -142,7 +145,7 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate,
-			 'allow_transfer_for_manufacture': item and args['allow_transfer_for_manufacture'] or 0
+			 'allow_transfer_for_manufacture': cint(args['transfer_for_manufacture']) or 0
 		}
 
 		return ret_item
