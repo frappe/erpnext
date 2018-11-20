@@ -3,8 +3,8 @@ frappe.ui.form.on("Communication", {
 		// setup custom Make button only if Communication is Email
 		if(frm.doc.communication_medium == "Email" && frm.doc.sent_or_received == "Received") {
 			frm.events.setup_custom_buttons(frm);
-			console.log(frm.doc.subject);
 		}
+		console.log(frm.doc.subject);
 	},
 
 	setup_custom_buttons: (frm) => {
