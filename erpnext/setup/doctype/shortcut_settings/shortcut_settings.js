@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Shortcut Settings', {
-	refresh: function(frm) {
+	refresh: function() {
 
 	}
 });
