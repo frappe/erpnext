@@ -35,20 +35,20 @@ export default {
 	},
 	mounted() {
 	  	this.getNextContent().then(data => {
-	  		this.nextContent = r.message.content,
-	  		this.nextContentType = r.message.content_type
+	  		this.nextContent = data.content,
+	  		this.nextContentType = data.content_type
 	  	});
 	},
 	methods: {
 		getNextContent(){
-			return lms.call({
-				method: "get_next_content",
-				args:{
+			window.t = this
+			return lms.call("get_next_content",
+				{
 					content: this.content,
 					content_type: this.type,
 					course: this.course
 			  	}
-			});
+			);
 		}
 	},
 	components: {
