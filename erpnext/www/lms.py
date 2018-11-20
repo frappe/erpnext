@@ -2,7 +2,27 @@ from __future__ import unicode_literals
 import erpnext.education.utils as utils
 import frappe
 
-# Academy Utils
+# LMS Utils to Update State for Vue Store
+@frappe.whitelist()
+def get_program_enrollments():
+	try:
+		student = frappe.get_doc("Student", utils.get_current_student())
+		return student.get_program_enrollments()
+	except:
+		return None
+
+@frappe.whitelist()
+def get_all_course_enrollments():
+	student = utils.get_current_student()
+	if student == None:
+		return None
+	try:
+		student = frappe.get_doc("Student", student)
+		return student.get_all_course_enrollments()
+	except:
+		return None
+
+# Vue Client Functions
 @frappe.whitelist(allow_guest=True)
 def get_portal_details():
 	"""
@@ -76,16 +96,6 @@ def get_starting_content(course_name):
 	content_type = course.course_content[0].content_type
 	return dict(content=content, content_type=content_type)
 
-# Functions to get content details
-@frappe.whitelist()
-def get_content(content_name, content_type):
-	try:
-		content = frappe.get_doc(content_type, content_name)
-		return content
-	except:
-		frappe.throw("{0} with name {1} does not exist".format(content_type, content_name))
-		return None
-
 @frappe.whitelist()
 def get_next_content(content, content_type, course):
 	if frappe.session.user == "Guest":
@@ -94,6 +104,7 @@ def get_next_content(content, content_type, course):
 	content_list = [{'content_type':item.content_type, 'content':item.content} for item in course_doc.get_all_children()]
 	current_index = content_list.index({'content': content, 'content_type': content_type})
 	try:
+		# print(content_list[current_index + 1])
 		return content_list[current_index + 1]
 	except IndexError:
 		return None
@@ -179,27 +190,6 @@ def enroll_in_program(program_name):
 	utils.enroll_all_courses_in_program(program_enrollment, student)
 	return program_name
 
-@frappe.whitelist()
-def get_program_enrollments():
-	if utils.get_current_student() == None:
-		return None
-	try:
-		student = frappe.get_doc("Student", utils.get_current_student())
-		return student.get_program_enrollments()
-	except:
-		return None
-
-@frappe.whitelist()
-def get_all_course_enrollments():
-	student = utils.get_current_student()
-	if student == None:
-		return None
-	try:
-		student = frappe.get_doc("Student", student)
-		return student.get_all_course_enrollments()
-	except:
-		return None
-
 # Academty Activity 
 @frappe.whitelist()
 def add_activity(enrollment, content_type, content):
@@ -218,51 +208,38 @@ def add_activity(enrollment, content_type, content):
 
 def get_course_progress(course_enrollment):
 	course = frappe.get_doc('Course', course_enrollment.course)
+	contents = course.get_contents()
+	progress = []
+	for index, content in enumerate(contents):
+		if content.doctype in ('Article', 'Video'):
+			status = check_content_completion(content.name, content.doctype, course_enrollment.name)
+			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
+		elif content.doctype == 'Quiz':
+			status, score = check_quiz_completion(content, course_enrollment.name)
+			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score})
+	return progress
 
-	content_activity, quiz_activity = course_enrollment.get_linked_activity()
-	content_list, quiz_list = course.get_contents_based_on_type()
+def check_content_completion(content_name, content_type, enrollment_name):
+	activity = frappe.get_list("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
+	if activity:
+		return True
+	else:
+		return False
+
+def check_quiz_completion(quiz, enrollment_name):
+	attempts = frappe.get_list("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
+	if attempts and quiz.grading_basis == 'Last Attempt':
+		score = attempts[0]['score']
+		status = attempts[0]['status']
+		return status, score
 	
-	quiz_scores, is_quiz_complete, last_quiz_attempted = get_quiz_progress(quiz_list, quiz_activity)
-	is_content_complete, last_content_viewed = get_content_progress(content_list, content_activity)
-
-	quiz_data = {
-		'gradable_quiz_attempts': quiz_scores,
-		'complete': is_quiz_complete,
-		'last': last_quiz_attempted
-	}
-
-	content_data = {
-		'complete': is_content_complete,
-		'last': last_content_viewed
-	}
+	elif attempts and quiz.grading_basis == 'Last Highest Score':
+		sorted_by_score = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+		score = sorted_by_score[0]['score']
+		status = sorted_by_score[0]['status']
+		return status, score
 	
-	return quiz_data, content_data
+	return False, None
 
-def get_quiz_progress(quiz_list, quiz_activity):
-	scores = []
-	is_complete = True
-	last_attempted = None
-	for quiz in quiz_list:
-		attempts = [attempt for attempt in quiz_activity if attempt.quiz==quiz.name]
-		if attempts and quiz.grading_basis == 'Last Attempt':
-			scores.append(attempts[0])
-			last_attempted = quiz
-		elif attempts and quiz.grading_basis == 'Last Highest Score':
-			sorted_by_score = sorted(attempts, key = lambda i: int(i.score), reverse=True)
-			scores.append(sorted_by_score[0])
-			last_attempted = quiz
-		elif not attempts:
-			is_complete = False
-	return scores, is_complete, last_attempted
-
-def get_content_progress(content_list, content_activity):
-	is_complete = True
-	last_viewed = None
-	activity_list = [[activity.content, activity.content_type] for activity in content_activity]
-	for item in content_list:
-		current_content = [item.name, item.doctype]
-		if current_content in activity_list:
-			last_viewed = item
-		else:
-			is_complete = False
-	return is_complete, last_viewed
+def get_course_meta():
+	pass
