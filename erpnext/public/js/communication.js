@@ -3,6 +3,7 @@ frappe.ui.form.on("Communication", {
 		// setup custom Make button only if Communication is Email
 		if(frm.doc.communication_medium == "Email" && frm.doc.sent_or_received == "Received") {
 			frm.events.setup_custom_buttons(frm);
+			console.log(frm.doc.subject);
 		}
 	},
 
@@ -47,6 +48,21 @@ frappe.ui.form.on("Communication", {
 	},
 
 	make_issue_from_communication: (frm) => {
+		return frappe.call({
+			method: "frappe.email.inbox.make_issue_from_communication",
+			args: {
+				communication: frm.doc.name
+			},
+			freeze: true,
+			callback: (r) => {
+				if(r.message) {
+					frm.reload_doc()
+				}
+			}
+		})
+	},
+
+	auto_make_issue_from_communication: (frm) => {
 		return frappe.call({
 			method: "frappe.email.inbox.make_issue_from_communication",
 			args: {
