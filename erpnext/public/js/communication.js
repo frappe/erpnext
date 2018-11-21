@@ -31,21 +31,6 @@ frappe.ui.form.on("Communication", {
 		}
 	},
 
-	console: (frm) => {
-		return frappe.call({
-			method: "frappe.email.inbox.console",
-			args: {
-				communication: frm.doc.name
-			},
-			freeze: true,
-			callback: (r) => {
-				if(r.message) {
-					frm.reload_doc()
-				}
-			}
-		})
-	},
-
 	make_lead_from_communication: (frm) => {
 		return frappe.call({
 			method: "frappe.email.inbox.make_lead_from_communication",
