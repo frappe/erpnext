@@ -4,18 +4,6 @@ frappe.ui.form.on("Communication", {
 		if(frm.doc.communication_medium == "Email" && frm.doc.sent_or_received == "Received") {
 			frm.events.setup_custom_buttons(frm);
 		}
-		return frappe.call({
-			method: "frappe.email.inbox.console",
-			args: {
-				communication: frm.doc.name
-			},
-			freeze: true,
-			callback: (r) => {
-				if(r.message) {
-					frm.reload_doc()
-				}
-			}
-		})
 	},
 
 	setup_custom_buttons: (frm) => {
