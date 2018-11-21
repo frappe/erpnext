@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 from frappe import _
+import frappe
 
 def get_data():
-	return [
+	config = [
 		{
 			"label": _("Billing"),
 			"items": [
@@ -25,48 +26,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
-				},
-				{
-					"type": "page",
-					"name": "pos",
-					"label": _("POS"),
-					"description": _("Point of Sale")
-				},
-				{
-					"type": "doctype",
-					"name": "Cashier Closing",
-					"description": _("Cashier Closing")
-				},
-				{
-					"type": "doctype",
-					"name": "Auto Repeat",
-					"label": _("Auto Repeat"),
-					"description": _("To make recurring documents")
-				},
-				{
-					"type": "doctype",
-					"name": "Loyalty Program",
-					"label": _("Loyalty Program"),
-					"description": _("To make Customer based incentive schemes.")
-				},
-				{
-					"type": "doctype",
-					"name": "Loyalty Point Entry",
-					"label": _("Loyalty Point Entry"),
-					"description": _("To view logs of Loyalty Points assigned to a Customer.")
-				},
-				{
-					"type": "report",
-					"name": "Accounts Receivable",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Accounts Payable",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
+				}
 			]
 
 		},
@@ -121,6 +81,18 @@ def get_data():
 		{
 			"label": _("Accounting Statements"),
 			"items": [
+				{
+					"type": "report",
+					"name": "Accounts Receivable",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounts Payable",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
 				{
 					"type": "report",
 					"name": "Trial Balance",
@@ -225,49 +197,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Goods and Services Tax (GST India)"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "GST Settings",
-				},
-				{
-					"type": "doctype",
-					"name": "GST HSN Code",
-				},
-				{
-					"type": "report",
-					"name": "GSTR-1",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GSTR-2",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Sales Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Purchase Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Itemised Sales Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Itemised Purchase Register",
-					"is_query_report": True
-				},
-			]
-		},
-		{
 			"label": _("Budget and Cost Center"),
 			"items": [
 				{
@@ -347,29 +276,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "POS Settings",
-					"description": _("Setup mode of POS (Online / Offline)")
-				},
-				{
-					"type": "doctype",
-					"name": "POS Profile",
-					"label": _("Point-of-Sale Profile"),
-					"description": _("Setup default values for POS Invoices")
-				},
-				{
-					"type": "doctype",
-					"name":"Terms and Conditions",
+					"name": "Terms and Conditions",
 					"label": _("Terms and Conditions Template"),
 					"description": _("Template of terms or contract.")
 				},
 				{
 					"type": "doctype",
-					"name":"Mode of Payment",
+					"name": "Mode of Payment",
 					"description": _("e.g. Bank, Cash, Credit Card")
 				},
 				{
 					"type": "doctype",
-					"name":"C-Form",
+					"name": "Auto Repeat",
+					"label": _("Auto Repeat"),
+					"description": _("To make recurring documents")
+				},
+				{
+					"type": "doctype",
+					"name": "C-Form",
 					"description": _("C-Form records"),
 					"country": "India"
 				}
@@ -529,28 +453,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Subscription Management"),
-			"icon": "fa fa-microchip ",
-			"items": [
-				{
-					"type": "doctype",
-					"name":"Subscriber",
-				},
-				{
-					"type": "doctype",
-					"name":"Subscription Plan",
-				},
-				{
-					"type": "doctype",
-					"name":"Subscription"
-				},
-				{
-					"type": "doctype",
-					"name": "Subscription Settings"
-				}
-			]
-		},
-		{
 			"label": _("Help"),
 			"icon": "fa fa-facetime-video",
 			"items": [
@@ -572,3 +474,121 @@ def get_data():
 			]
 		}
 	]
+	gst = {
+		"label": _("Goods and Services Tax (GST India)"),
+		"items": [
+			{
+				"type": "doctype",
+				"name": "GST Settings",
+			},
+			{
+				"type": "doctype",
+				"name": "GST HSN Code",
+			},
+			{
+				"type": "report",
+				"name": "GSTR-1",
+				"is_query_report": True
+			},
+			{
+				"type": "report",
+				"name": "GSTR-2",
+				"is_query_report": True
+			},
+			{
+				"type": "report",
+				"name": "GST Sales Register",
+				"is_query_report": True
+			},
+			{
+				"type": "report",
+				"name": "GST Purchase Register",
+				"is_query_report": True
+			},
+			{
+				"type": "report",
+				"name": "GST Itemised Sales Register",
+				"is_query_report": True
+			},
+			{
+				"type": "report",
+				"name": "GST Itemised Purchase Register",
+				"is_query_report": True
+			},
+		]
+	}
+	retail = {
+		"label": _("Retail Operations"),
+		"items": [
+			{
+				"type": "page",
+				"name": "pos",
+				"label": _("POS"),
+				"description": _("Point of Sale")
+			},
+			{
+				"type": "doctype",
+				"name": "Cashier Closing",
+				"description": _("Cashier Closing")
+			},
+			{
+				"type": "doctype",
+				"name": "POS Settings",
+				"description": _("Setup mode of POS (Online / Offline)")
+			},
+			{
+				"type": "doctype",
+				"name": "POS Profile",
+				"label": _("Point-of-Sale Profile"),
+				"description": _("Setup default values for POS Invoices")
+			},
+			{
+				"type": "doctype",
+				"name": "Loyalty Program",
+				"label": _("Loyalty Program"),
+				"description": _("To make Customer based incentive schemes.")
+			},
+			{
+				"type": "doctype",
+				"name": "Loyalty Point Entry",
+				"label": _("Loyalty Point Entry"),
+				"description": _("To view logs of Loyalty Points assigned to a Customer.")
+			}
+		]
+	}
+	subscriptions = {
+		"label": _("Subscription Management"),
+		"icon": "fa fa-microchip ",
+		"items": [
+			{
+				"type": "doctype",
+				"name": "Subscriber",
+			},
+			{
+				"type": "doctype",
+				"name": "Subscription Plan",
+			},
+			{
+				"type": "doctype",
+				"name": "Subscription"
+			},
+			{
+				"type": "doctype",
+				"name": "Subscription Settings"
+			}
+		]
+	},
+	countries = frappe.get_all("Company", fields="country")
+	countries = [country["country"] for country in countries]
+	if "India" in countries:
+		config.insert(7, gst)
+	domains = frappe.get_active_domains()
+	if "Retail" in domains:
+		config.insert(2, retail)
+	else:
+		config.insert(7, retail)
+	if "Services" in domains:
+		config.insert(2, subscriptions)
+	else:
+		config.insert(7, subscriptions)
+	return config
