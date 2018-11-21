@@ -514,7 +514,7 @@ def get_data():
 				"type": "report",
 				"name": "GST Itemised Purchase Register",
 				"is_query_report": True
-			},
+			}
 		]
 	}
 	retail = {
@@ -577,7 +577,7 @@ def get_data():
 				"name": "Subscription Settings"
 			}
 		]
-	},
+	}
 	countries = frappe.get_all("Company", fields="country")
 	countries = [country["country"] for country in countries]
 	if "India" in countries:
