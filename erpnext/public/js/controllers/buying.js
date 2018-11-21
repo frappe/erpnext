@@ -235,6 +235,20 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.get_terms();
 	},
 
+	make_landed_cost_voucher: function() {
+		return frappe.call({
+			method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_landed_cost_voucher",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
 	link_to_mrs: function() {
 		var my_items = [];
 		for (var i in cur_frm.doc.items) {
@@ -294,20 +308,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					refresh_field("items");
 					//cur_frm.save();
 				}
-			}
-		});
-	},
-
-	make_landed_cost_voucher: function() {
-		return frappe.call({
-			method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_landed_cost_voucher",
-			args: {
-				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
 	},

@@ -455,8 +455,10 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
 		if self.update_stock and self.auto_accounting_for_stock:
 			warehouse_account = get_warehouse_account_map()
+		
 		billing_party_type, billing_party = self.get_billing_party()
 
 		voucher_wise_stock_value = {}
