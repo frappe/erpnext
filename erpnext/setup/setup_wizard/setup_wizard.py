@@ -14,6 +14,7 @@ from frappe import _, _dict
 from frappe.utils import cstr, getdate
 from argparse import Namespace
 from frappe.desk.page.setup_wizard.setup_wizard import update_global_settings, run_post_setup_complete, make_records
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
 from journeys.journeys.config import get_journeys_config
 
 def get_setup_stages(args=None):
@@ -150,3 +151,13 @@ def make_setup_docs(args):
 def setup(args, config=None):
 	install_fixtures()
 	make_setup_docs(args)
+
+
+@frappe.whitelist()
+def get_country_and_charts():
+	config = get_journeys_config().get('setup_config') or {}
+	country = config.get('country')
+	return {
+		'country': country,
+		'charts': get_charts_for_country(country)
+	}
