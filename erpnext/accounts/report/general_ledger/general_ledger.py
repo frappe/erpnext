@@ -17,8 +17,6 @@ def execute(filters=None):
 		return [], []
 
 	account_details = {}
-	if not filters.get("group_by"):
-		filters['group_by'] = _('Group by Voucher (Consolidated)')
 
 	if filters and filters.get('print_in_account_currency') and \
 		not filters.get('account'):
@@ -55,9 +53,8 @@ def validate_filters(filters, account_details):
 		and account_details[filters.account].is_group == 0):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
-	if (filters.get("voucher_no")
-		and filters.get("group_by") in [_('Group by Voucher'), _('Group by Voucher (Consolidated)')]):
-		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
+	if filters.get("voucher_no") and filters.get("group_by") == _('Group by Voucher (Consolidated)'):
+		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher (Consolidated)"))
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -120,8 +117,8 @@ def get_result(filters, account_details):
 
 def get_gl_entries(filters):
 	currency_map = get_currency(filters)
-	select_fields = """, debit, credit, debit_in_account_currency,
-		credit_in_account_currency """
+	select_fields = """, debit, credit, debit_in_account_currency, credit_in_account_currency,
+		reference_no, reference_date, against_voucher"""
 
 	group_by_statement = ''
 	order_by_statement = "order by posting_date, account"
@@ -130,18 +127,20 @@ def get_gl_entries(filters):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
-		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
+		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, against_voucher_type, party_type, party"
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
-			sum(credit_in_account_currency) as  credit_in_account_currency"""
+			sum(credit_in_account_currency) as credit_in_account_currency,
+			GROUP_CONCAT(DISTINCT reference_no SEPARATOR ', ') as reference_no,
+			min(reference_date) as reference_date,
+			GROUP_CONCAT(against_voucher SEPARATOR ', ') as against_voucher"""
 
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			posting_date, account, party_type, party,
-			voucher_type, voucher_no, cost_center, project,
-			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening, reference_no, reference_date {select_fields}
+			voucher_type, voucher_no, cost_center, project, account_currency,
+			remarks, against, is_opening, against_voucher_type {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions} {group_by_statement}
 		{order_by_statement}
@@ -221,7 +220,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# Opening for filtered account
 	data.append(totals.opening)
 
-	if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
+	if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
@@ -306,7 +305,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		elif gle.posting_date <= to_date:
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
 			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
+			if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			else:
 				entries.append(gle)
