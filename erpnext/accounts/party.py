@@ -21,20 +21,19 @@ from six import iteritems
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None,
-		company=None, posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None,
-		ignore_permissions=False, fetch_payment_terms_template=True):
+def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None, letter_of_credit=None,
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
 	if not party:
 		return {}
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
-	return _get_party_details(party, account, party_type, letter_of_credit, company, posting_date,
-		bill_date, price_list,currency, doctype, ignore_permissions, fetch_payment_terms_template)
+	return _get_party_details(party, account, party_type, letter_of_credit,
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address, shipping_address)
 
-def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None,
-		company=None, posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None,
-		ignore_permissions=False, fetch_payment_terms_template=True):
+def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, company=None, posting_date=None,
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
+	fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
 	out = frappe._dict(set_due_date(party, party_type, company, posting_date, bill_date, doctype))
 	party = out[scrub(party_type)]
@@ -53,7 +52,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	out["currency"] = currency
 
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
-	set_address_details(out, party, party_type, doctype, company)
+	set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
@@ -74,19 +73,17 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 
 	return out
 
-def set_address_details(out, party, party_type, doctype=None, company=None):
+def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):  
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else scrub(party_type) + "_address"
-	out[billing_address_field] = get_default_address(party_type, party.name)
+	out[billing_address_field] = party_address or get_default_address(party_type, party.name)
 	if doctype:
 		out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
-
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
-
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = get_party_shipping_address(party_type, party.name)
+		out.shipping_address_name = shipping_address or get_party_shipping_address(party_type, party.name)
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
@@ -100,7 +97,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 	elif doctype and doctype == "Purchase Invoice":
 		out.update(get_company_address(company))
 		if out.company_address:
-			out["shipping_address"] = out["company_address"]
+			out["shipping_address"] = shipping_address or out["company_address"]
+			out.shipping_address_display = get_address_display(out["shipping_address"])
 			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
 		get_regional_address_details(out, doctype, company)
 

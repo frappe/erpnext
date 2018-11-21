@@ -14,10 +14,10 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	filters.update({"from_date": filters.get("date_range")[0], "to_date": filters.get("date_range")[1]})
+	filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0], "to_date": filters.get("date_range") and filters.get("date_range")[1]})
 	columns = get_columns(additional_table_columns)
 
-	company_currency = erpnext.get_company_currency(filters.company)
+	company_currency = erpnext.get_company_currency(filters.get('company'))
 
 	item_list = get_items(filters, additional_query_columns)
 	if item_list:
@@ -55,7 +55,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		]
 
 		row += [(d.base_net_rate * d.qty)/d.stock_qty, d.base_net_amount] \
-			if d.stock_uom != d.uom else [d.base_net_rate, d.base_net_amount]
+			if d.stock_uom != d.uom and d.stock_qty != 0 else [d.base_net_rate, d.base_net_amount]
 
 		total_tax = 0
 		for tax in tax_columns:
@@ -108,6 +108,23 @@ def get_conditions(filters):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
 			where parent=`tabSales Invoice`.name
 				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+	
+	if filters.get("warehouse"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
+
+	
+	if filters.get("brand"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
 
 	return conditions
 

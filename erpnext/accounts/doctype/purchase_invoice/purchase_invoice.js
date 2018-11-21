@@ -77,8 +77,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
-			cur_frm.add_custom_button(__('Payment Request'),
-				this.make_payment_request, __("Make"));
+			cur_frm.add_custom_button(__('Payment Request'), function() {
+				me.make_payment_request()
+			}, __("Make"));
 		}
 
 		if(doc.docstatus===0) {
@@ -523,25 +524,9 @@ frappe.ui.form.on("Purchase Invoice", {
 			me.frm.set_df_property("apply_tds", "read_only", 1);
 		}
 
-		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
-			frm.set_query(field, "items", function() {
-				return {
-					filters: [
-						["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-						["Warehouse", "is_group", "=", 0]
-					]
-				}
-			})
-		})
-
-		frm.set_query("supplier_warehouse", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
-		})
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 	},
 
 	is_subcontracted: function(frm) {

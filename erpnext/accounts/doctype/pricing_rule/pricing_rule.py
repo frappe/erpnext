@@ -201,8 +201,8 @@ def get_pricing_rule_for_item(args):
 				"discount_percentage": 0.0
 			})
 		else:
-			item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
-
+			item_details.discount_percentage = (pricing_rule.get('discount_percentage', 0)
+				if pricing_rule else args.discount_percentage)
 	elif args.get('pricing_rule'):
 		item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 
@@ -384,3 +384,13 @@ def set_transaction_type(args):
 		args.transaction_type = "selling"
 	else:
 		args.transaction_type = "buying"
+
+@frappe.whitelist()
+def make_pricing_rule(doctype, docname):
+	doc = frappe.new_doc("Pricing Rule")
+	doc.applicable_for = doctype
+	doc.set(frappe.scrub(doctype), docname)
+	doc.selling = 1 if doctype == "Customer" else 0
+	doc.buying = 1 if doctype == "Supplier" else 0
+
+	return doc

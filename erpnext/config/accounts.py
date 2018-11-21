@@ -242,6 +242,16 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "GSTR-1",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "GSTR-2",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "GST Sales Register",
 					"is_query_report": True
 				},

@@ -297,12 +297,12 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.base_received_amount + total_deductions - 
+					self.unallocated_amount = (self.base_received_amount + total_deductions -
 						self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
@@ -775,7 +775,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
-
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
@@ -869,7 +868,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type)) or doc.get("party")
-
+	pe.contact_person = doc.get("contact_person")
+	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account
@@ -925,7 +925,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	return paid_amount[0][0] if paid_amount else 0
 
 @frappe.whitelist()
-def get_party_and_account_balance(company, date, paid_from, paid_to=None, ptype=None, pty=None, cost_center=None):
+def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, ptype=None, pty=None, cost_center=None):
 	return frappe._dict({
 		"party_balance": get_balance_on(party_type=ptype, party=pty, cost_center=cost_center),
 		"paid_from_account_balance": get_balance_on(paid_from, date, cost_center=cost_center),

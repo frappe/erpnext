@@ -85,7 +85,7 @@ def add_print_formats():
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
+		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
@@ -164,6 +164,43 @@ def make_custom_fields(update=True):
 			fieldtype='Check', insert_after='disabled', print_hide=1)
 	]
 
+	ewaybill_fields = [
+		{
+			'fieldname': 'distance',
+			'label': 'Distance (in km)',
+			'fieldtype': 'Float',
+			'insert_after': 'vehicle_no',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'gst_transporter_id',
+			'label': 'GST Transporter ID',
+			'fieldtype': 'Data',
+			'insert_after': 'transporter_name',
+			'fetch_from': 'transporter.gst_transporter_id',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'mode_of_transport',
+			'label': 'Mode of Transport',
+			'fieldtype': 'Select',
+			'options': '\nRoad\nAir\nRail\nShip',
+			'default': 'Road',
+			'insert_after': 'lr_date',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'gst_vehicle_type',
+			'label': 'GST Vehicle Type',
+			'fieldtype': 'Select',
+			'options': '\nRegular\nOver Dimensional Cargo (ODC)',
+			'default': 'Regular',
+			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
+			'insert_after': 'mode_of_transport',
+			'print_hide': 1
+		}
+	]
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
@@ -175,7 +212,7 @@ def make_custom_fields(update=True):
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
 		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
-		'Delivery Note': sales_invoice_gst_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
@@ -240,6 +277,15 @@ def make_custom_fields(update=True):
 				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1),
 			dict(fieldname='total_eligible_hra_exemption', label='Total Eligible HRA Exemption',
 				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1)
+		],
+		'Supplier': [
+			{
+				'fieldname': 'gst_transporter_id',
+				'label': 'GST Transporter ID',
+				'fieldtype': 'Data',
+				'insert_after': 'supplier_type',
+				'depends_on': 'eval:doc.is_transporter'
+			}
 		]
 	}
 

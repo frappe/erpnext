@@ -1,6 +1,6 @@
 <template>
 	<div class="hub-page-container">
-		<component :is="current_page"></component>
+		<component :is="current_page.component" :key="current_page.key"></component>
 	</div>
 </template>
 
@@ -100,10 +100,16 @@ export default {
 			}
 
 			if (!route) {
-				return NotFound;
+				return {
+					key: 'not-found',
+					component: NotFound
+				};
 			}
 
-			return route_map[route];
+			return {
+				key: curr_route,
+				component: route_map[route]
+			}
 		}
 	}
 }
