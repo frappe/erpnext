@@ -86,7 +86,7 @@ for(var i=0, l=data.length; i<l; i++) {
 
 				{% if(filters.against_in_print) { %}
 				<td>
-					{%= (data[i].against || "").split(", ").join("<br />") %}
+					{%= (data[i].against || "").split(", ").join("<br />").split(",").join("<br />") %}
 				</td>
 				{% } %}
 
