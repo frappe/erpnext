@@ -7,7 +7,11 @@
                 <span class="course-list text-muted" id="getting-started">
                     Course Content
                     <ul class="mb-0 mt-1">
-                            <li v-for="content in course.course_content" :key="content.name">{{ content.content }}</li>
+                        <li v-for="content in course.course_content" :key="content.name">
+                            <router-link tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, course: course.name, type:content.content_type, content: content.content} }">
+                                <span style="padding-right: 0.4em"><i :class="iconClass(content.content_type)"></i></span>{{ content.content }}
+                            </router-link>
+                        </li>
                     </ul>
                 </span>
             </div>
@@ -58,14 +62,27 @@ export default {
                 return " hidden"
             }
         }
+    },
+    methods: {
+        iconClass(content_type) {
+            if(content_type == 'Video') return 'fa fa-play'
+            if(content_type == 'Article') return 'fa fa-file-text-o'
+            if(content_type == 'Quiz') return 'fa fa-question-circle-o'
+        }
     }
 };
 </script>
 
 <style scoped>
     @media only screen and (max-width: 576px) {
-    .course-buttons {
-        margin-top: 1em;
+        .course-buttons {
+            margin-top: 1em;
+        }
     }
-}
+    li {
+        list-style-type: none;
+    }
+    .fa {
+        font-size: 0.8em;
+    }
 </style>

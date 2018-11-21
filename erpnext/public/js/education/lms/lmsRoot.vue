@@ -5,6 +5,9 @@
 </template>
 <script>
 export default {
-    name: "lmsRoot",
+	name: "lmsRoot",
+	mounted() {
+		$(document).scrollTop(0)
+	}
 };
 </script>
