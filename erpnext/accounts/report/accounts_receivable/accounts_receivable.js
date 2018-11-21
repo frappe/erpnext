@@ -23,9 +23,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Customer",
 			on_change: () => {
 				var customer = frappe.query_report.get_filter_value('customer');
-				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name"], function(value) {
+				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name", "credit_limit", "payment_terms"], function(value) {
 					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
 					frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
+					frappe.query_report.set_filter_value('credit_limit', value["credit_limit"]);
+					frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
 				});
 			}
 		},
@@ -111,6 +113,18 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"customer_name",
 			"label": __("Customer Name"),
 			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"payment_terms",
+			"label": __("Payment Tems"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"credit_limit",
+			"label": __("Credit Limit"),
+			"fieldtype": "Currency",
 			"hidden": 1
 		}
 	],
