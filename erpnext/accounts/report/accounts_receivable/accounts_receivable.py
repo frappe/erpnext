@@ -140,6 +140,9 @@ class ReceivablePayableReport(object):
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
 
+		if args.get("party_type") == "Customer":
+			columns.append(_("Sales Person") + "::120")
+
 		columns.append(_("Remarks") + "::200")
 
 		return columns
@@ -241,6 +244,9 @@ class ReceivablePayableReport(object):
 						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_group(gle.party)]
+
+					if args.get("party_type") == "Customer":
+						row.append(voucher_details.get(gle.voucher_no, {}).get("sales_person"))
 
 					row.append(gle.remarks)
 					data.append(row)
@@ -550,8 +556,12 @@ def get_voucher_details(party_type, voucher_nos, dn_details):
 	voucher_details = frappe._dict()
 
 	if party_type == "Customer":
-		for si in frappe.db.sql("""select name, due_date, po_no
-			from `tabSales Invoice` where docstatus=1 and name in (%s)
+		for si in frappe.db.sql("""
+			select inv.name, inv.due_date, inv.po_no, GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person
+			from `tabSales Invoice` inv
+			left join `tabSales Team` steam on steam.parent = inv.name and steam.parenttype = 'Sales Invoice'
+			where inv.docstatus=1 and inv.name in (%s)
+			group by inv.name
 			""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
 				si['delivery_note'] = dn_details.get(si.name)
 				voucher_details.setdefault(si.name, si)
