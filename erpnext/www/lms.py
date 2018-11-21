@@ -204,9 +204,7 @@ def check_quiz_completion(quiz, enrollment_name):
 def get_course_meta(course_enrollment):
 	# course_enrollment = frappe.get_doc("Course Enrollment", course_enrollment_name)
 	progress = get_course_progress(course_enrollment)
-	print(progress)
 	count = sum([act['is_complete'] for act in progress])
-	print('Count', count)
 	if count == 0:
 		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count == len(progress):
