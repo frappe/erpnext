@@ -134,14 +134,19 @@ def install_fixtures():
 	fixtures.install(_dict(config).country)
 
 @frappe.whitelist()
-def make_setup_docs(args):
+def install_company(args):
 	config = get_journeys_config().get('setup_config') or {}
-
 	args = json.loads(args)
-
 	args.update(config)
 
 	fixtures.install_company(_dict(args))
+
+@frappe.whitelist()
+def setup_globals(args):
+	config = get_journeys_config().get('setup_config') or {}
+	args = json.loads(args)
+	args.update(config)
+
 	fixtures.install_defaults(_dict(args))
 	# setup_taxes(args)
 
@@ -150,7 +155,8 @@ def make_setup_docs(args):
 @frappe.whitelist()
 def setup(args, config=None):
 	install_fixtures()
-	make_setup_docs(args)
+	install_company(args)
+	setup_globals(args)
 
 
 @frappe.whitelist()
