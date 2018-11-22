@@ -33,8 +33,16 @@
 import AButton from './Button.vue';
 
 export default {
-    props: ['course', 'courseMeta', 'program_name'],
+    props: ['course', 'program_name'],
     name: "CourseCard",
+    data() {
+        return {
+            courseMeta: {}
+        }
+    },
+    mounted() {
+        this.getCourseMeta().then(data => this.courseMeta = data)
+    },
     components: {
         AButton
     },
@@ -68,7 +76,12 @@ export default {
             if(content_type == 'Video') return 'fa fa-play'
             if(content_type == 'Article') return 'fa fa-file-text-o'
             if(content_type == 'Quiz') return 'fa fa-question-circle-o'
-        }
+        },
+        getCourseMeta() {
+			return lms.call('get_course_meta', {
+					course_name: this.course.name
+				})
+		}
     }
 };
 </script>
