@@ -14,9 +14,7 @@ def check_email():
 		print(email_account.name, email_account)
 		for comm in frappe.get_all("Communication", "name", filters=[
 			{"email_account":email_account.name},
-			{"email_account":email_account.name},
-			{"creation": ("<", datetime.now() - timedelta(seconds = (email_account.unreplied_for_mins or 30) * 60))},
-			{"creation": (">", datetime.now() - timedelta(seconds = (email_account.unreplied_for_mins or 30) * 60 * 3))}
+			{"email_account":email_account.name}
 		]):
 			comm = frappe.get_doc("Communication", comm.name)
 			print("-------------------------")
