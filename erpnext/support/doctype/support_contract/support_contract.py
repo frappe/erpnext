@@ -8,3 +8,6 @@ from frappe.model.document import Document
 
 class SupportContract(Document):
 	pass
+
+def check_email():
+	print("=======================check_email scheduled=======================")
