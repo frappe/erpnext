@@ -21,5 +21,5 @@ def check_email():
 			print("-------------------------")
 			print("Subject : " + comm.subject)
 			print("Content : " + comm.content)
-			print("Content : " + comm.creation)
+			print("Time : " + str(comm.creation))
 			print("-------------------------")
