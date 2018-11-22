@@ -81,7 +81,7 @@ frappe.ui.form.on('Delivery Trip', {
 							// create an unordered list of existing note <-> trip mappings
 							let existing_trips = "<ul>";
 							for (let trip in r.message) {
-								existing_trips += `<li><strong>${r.message[trip]}</strong> assigned to <strong>${trip}</strong></li>`
+								existing_trips += `<li><strong>${trip}</strong> exists in <strong>${r.message[trip]}</strong></li>`
 							}
 							existing_trips += "</ul>"
 
