@@ -12,5 +12,5 @@ class SupportContract(Document):
 def check_email():
 	print("=======================check_email scheduled=======================")
 	for email_account in frappe.get_all("Email Account", "name", filters={"enable_incoming": 1, "notify_if_unreplied": 1}):
-		print(email_account.name)
-		#email_account = frappe.get_doc("Email Account", email_account.name)
+		email_account = frappe.get_doc("Email Account", email_account.name)
+		print(email_account)
