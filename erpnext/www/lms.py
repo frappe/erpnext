@@ -64,8 +64,7 @@ def get_program_details(program_name):
 def get_courses(program_name):
 	program = frappe.get_doc('Program', program_name)
 	courses = program.get_course_list()
-	course_data = [{'meta':get_course_meta(utils.get_course_enrollment(item.name)), 'course':item} for item in courses]
-	return course_data
+	return courses
 
 @frappe.whitelist()
 def get_next_content(content, content_type, course):
@@ -171,7 +170,7 @@ def get_course_progress(course_enrollment):
 	course = frappe.get_doc('Course', course_enrollment.course)
 	contents = course.get_contents()
 	progress = []
-	for index, content in enumerate(contents):
+	for content in contents:
 		if content.doctype in ('Article', 'Video'):
 			status = check_content_completion(content.name, content.doctype, course_enrollment.name)
 			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
@@ -192,16 +191,18 @@ def check_quiz_completion(quiz, enrollment_name):
 	status = bool(len(attempts) == quiz.max_attempts)
 	score = None
 	result = None
-	if attempts and quiz.grading_basis == 'Last Highest Score':
-		attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
-	score = attempts[0]['score']
-	result = attempts[0]['status']
-	if result == 'Pass':
-		status = True
+	if attempts:
+		if quiz.grading_basis == 'Last Highest Score':
+			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+		score = attempts[0]['score']
+		result = attempts[0]['status']
+		if result == 'Pass':
+			status = True
 	return status, score, result
-
-
-def get_course_meta(course_enrollment):
+	
+@frappe.whitelist()
+def get_course_meta(course_name):
+	course_enrollment = utils.get_course_enrollment(course_name)
 	# course_enrollment = frappe.get_doc("Course Enrollment", course_enrollment_name)
 	progress = get_course_progress(course_enrollment)
 	count = sum([act['is_complete'] for act in progress])

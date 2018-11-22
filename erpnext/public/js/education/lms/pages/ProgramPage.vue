@@ -3,7 +3,7 @@
 	<TopSection v-bind:title="program.program_name" v-bind:description="program.description">
     </TopSection>
 	<CardList :title="'Courses'" :description="''">
-        <CourseCard slot="card-list-slot" v-for="course in course_data" :course="course.course" :program_name="program_name" :courseMeta="course.meta" :key="course.course.name + course.meta.flag"/>
+        <CourseCard slot="card-list-slot" v-for="course in courseData" :course="course" :program_name="program_name" :key="course.name"/>
     </CardList>
 </div>
 </template>
@@ -24,7 +24,7 @@ export default {
 	data() {
 		return {
 			program: {},
-			course_data: []
+			courseData: [],
 		}
 	},
     beforeMount() {
@@ -32,11 +32,10 @@ export default {
     },
 	mounted() {
 		this.getProgramDetails().then(data => this.program = data);
-		this.getCourses().then(data => this.course_data = data);
-		
+		this.getCourses().then(data => this.courseData = data);
 		// lms.on(`course-completed`, (course_name) => {
-		// 	const course = this.course_data.findIndex(c => c.name === course_name);
-		// 	this.course_data[course].completed = true;
+		// 	const course = this.courseData.findIndex(c => c.name === course_name);
+		// 	this.courseData[course].completed = true;
 		// });
 	},
 	methods: {
