@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 class SupportContract(Document):
 	
 	def validate(self):
+		print(self.start_date >= self.end_date)
 		if self.start_date >= self.end_date:
 			frappe.throw(_("Start Date of contract can't be less greater than End Date"))
 
