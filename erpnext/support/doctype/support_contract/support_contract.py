@@ -10,8 +10,7 @@ class SupportContract(Document):
 	pass
 
 def check_email():
-	print("=======================check_email scheduled=======================")
-	for email_account in frappe.get_all("Email Account"):
+	for email_account in frappe.get_all("Email Account", filters={"enable_incoming": 1}):
 		print(email_account.name, email_account)
 		for comm in frappe.get_all("Communication", "name", filters=[{"email_account":email_account.name}]):
 			comm = frappe.get_doc("Communication", comm.name)
