@@ -15,4 +15,4 @@ def check_email():
 		print(email_account.name, email_account)
 		for comm in frappe.get_all("Communication", "name", filters=[{"email_account":email_account.name}]):
 			comm = frappe.get_doc("Communication", comm.name)
-			print(comm.name)
+			print(comm.subject)
