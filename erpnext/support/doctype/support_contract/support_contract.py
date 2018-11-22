@@ -12,7 +12,7 @@ class SupportContract(Document):
 def check_email():
 	for email_account in frappe.get_all("Email Account", filters={"enable_incoming": 1}):
 		print(email_account.name, email_account)
-		print(datetime.now() - timedelta(seconds = (30 * 60)))
+		print(datetime.now(), datetime.now() - timedelta(seconds = (30 * 60)))
 		for comm in frappe.get_all("Communication", "name", filters=[
 			{"email_account":email_account.name},
 			{"creation": (">", datetime.now() - timedelta(seconds = (30 * 60)))}
@@ -21,4 +21,5 @@ def check_email():
 			print("-------------------------")
 			print("Subject : " + comm.subject)
 			print("Content : " + comm.content)
+			print("Content : " + comm.creation)
 			print("-------------------------")
