@@ -464,25 +464,25 @@ def get_dashboard_info(party_type, party):
 
 	companies = frappe.db.sql("""
 		select distinct company from `tab{0}`
-		where docstatus =1 and {1} = %s
-		""".format(doctype, party_type.lower()), (party), as_dict=1)
+		where docstatus =1 and {1} = %s"""
+		.format(doctype, party_type.lower()), (party), as_dict=1)
 
 	company_wise_info = []
 
 	company_wise_grand_total = frappe._dict(frappe.db.sql("""
-			select company, sum(grand_total)
-			from `tab{0}`
-			where {1}=%s and docstatus=1 and posting_date between %s and %s
-			group by company
-		""".format(doctype, party_type.lower()),
+		select company, sum(grand_total)
+		from `tab{0}`
+		where {1}=%s and docstatus=1 and posting_date between %s and %s
+		group by company"""
+		.format(doctype, party_type.lower()),
 		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date)))
 
 	company_wise_base_grand_total = frappe._dict(frappe.db.sql("""
-			select company, sum(base_grand_total)
-			from `tab{0}`
-			where {1}=%s and docstatus=1 and posting_date between %s and %s
-			group by company
-		""".format(doctype, party_type.lower()),
+		select company, sum(base_grand_total)
+		from `tab{0}`
+		where {1}=%s and docstatus=1 and posting_date between %s and %s
+		group by company"""
+		.format(doctype, party_type.lower()),
 		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date)))
 
 	company_wise_total_unpaid = frappe._dict(frappe.db.sql("""

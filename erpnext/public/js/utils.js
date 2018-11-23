@@ -104,16 +104,21 @@ $.extend(erpnext.utils, {
 	set_party_dashboard_indicators: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var company_wise_info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Company'), '', 4);
-			frm.dashboard.add_indicator(__('Annual Billing'), '', 4);
-			frm.dashboard.add_indicator(__('Total Unpaid'), '', 4);
-			company_wise_info.forEach(function(info){
-				frm.dashboard.add_indicator(__('{0}',[info.company]), '', 4);
-				frm.dashboard.add_indicator(__('{0}',
-					[format_currency(info.billing_this_year, info.currency)]), '', 4);
-				frm.dashboard.add_indicator(__('{0}',
-					[format_currency(info.total_unpaid, info.currency)]), '', 4);
-			});
+			if(company_wise_info[0]) {
+				frm.dashboard.stats_area.removeClass('hidden');
+				frm.dashboard.stats_area_row.append(
+					'<div class="col-xs-4"><h6>Company</h6></div>'+
+					'</div><div class="col-xs-4"><h6>Annual Billing</h6></div>' +
+					'<div class="col-xs-4"><h6>Total Unpaid</h6></div>'
+				);
+				company_wise_info.forEach(function(info) {
+					frm.dashboard.stats_area_row.append(
+						'<div class="col-xs-4 small" style="margin-bottom:10px">'+info.company+'</div>' +
+						'</div><div class="col-xs-4 small" style="margin-bottom:10px"><span class="indicator blue">'+format_currency(info.billing_this_year, info.currency)+'</span></div>' +
+						'<div class="col-xs-4 small" style="margin-bottom:10px"><span class="indicator orange">'+format_currency(info.billing_this_year, info.currency)+'</span></div>'
+					);
+				});
+			}
 		}
 	},
 
