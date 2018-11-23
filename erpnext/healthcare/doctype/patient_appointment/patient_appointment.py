@@ -40,7 +40,6 @@ class PatientAppointment(Document):
 		""", (self.appointment_date, self.name, self.practitioner, self.patient,
 		self.appointment_time, end_time.time(), self.appointment_time, end_time.time(), self.appointment_time))
 
-		print (overlaps)
 		if overlaps:
 			frappe.throw(_("""Appointment overlaps with {0}.<br> {1} has appointment scheduled
 			with {2} at {3} having {4} minute(s) duration.""").format(overlaps[0][0], overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4]))
