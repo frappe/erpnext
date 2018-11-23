@@ -45,7 +45,7 @@ export default {
                 program_name: this.program.name,
             }).then(data => {
                 console.log(data)
-                lms.store.enrolledPrograms.add(data),
+                lms.store.updateEnrolledPrograms()
                 this.$router.push(this.programRoute)
             })
         }
