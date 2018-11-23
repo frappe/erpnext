@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _, utils
+import re
 from datetime import datetime, timedelta
 class SupportContract(Document):
 	
@@ -21,13 +22,11 @@ def check_email():
 			comm = frappe.get_doc("Communication", comm.name)
 			support_contract = frappe.get_list("Support Contract", filters={"email_id": comm.sender, "contract_status": "Active"}, fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
 			if support_contract:
-				print(support_contract)
-				print(support_contract[0].issue_criticality)
 				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-				print("Keywords-----------------------")
 				for keyword in issue_criticality.keyword:
-					print(keyword.keyword)
-				print("Keywords-----------------------")
+					if re.search(r''+ keyword.keyword +'', comm.subject) or re.search(r''+ keyword.keyword +'', comm.content):
+						print("Keyword matched : " + str(keyword.keyword))
+
 				#print("-------------------------")
 				#print("Subject : " + comm.subject)
 				#print("Content : " + comm.content)
