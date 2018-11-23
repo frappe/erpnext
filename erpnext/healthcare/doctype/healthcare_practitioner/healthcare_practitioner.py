@@ -9,6 +9,7 @@ from frappe import throw, _
 from frappe.utils import cstr
 from erpnext.accounts.party import validate_party_accounts
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.desk.reportview import build_match_conditions, get_filters_cond
 
 class HealthcarePractitioner(Document):
 	def onload(self):
@@ -65,3 +66,23 @@ class HealthcarePractitioner(Document):
 def validate_service_item(item, msg):
 	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
 		frappe.throw(_(msg))
+
+def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
+	fields = ["name", "first_name", "mobile_phone"]
+	match_conditions = build_match_conditions("Healthcare Practitioner")
+	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
+
+	if filters:
+		filter_conditions = get_filters_cond(doctype, filters, [])
+		match_conditions += "{}".format(filter_conditions)
+
+	return frappe.db.sql("""select %s from `tabHealthcare Practitioner` where docstatus < 2
+		and (%s like %s or first_name like %s)
+		and active = 1
+		{match_conditions}
+		order by
+		case when name like %s then 0 else 1 end,
+		case when first_name like %s then 0 else 1 end,
+		name, first_name limit %s, %s""".format(match_conditions=match_conditions) %
+		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
+		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
