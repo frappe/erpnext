@@ -103,12 +103,17 @@ $.extend(erpnext, {
 $.extend(erpnext.utils, {
 	set_party_dashboard_indicators: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
-			var info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, info.currency)]), 'blue');
-			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, info.currency)]),
-				info.total_unpaid ? 'orange' : 'green');
+			var company_wise_info = frm.doc.__onload.dashboard_info;
+			frm.dashboard.add_indicator(__('Company'));
+			frm.dashboard.add_indicator(__('Annual Billing'));
+			frm.dashboard.add_indicator(__('Total Unpaid'));
+			company_wise_info.forEach(function(info){
+				frm.dashboard.add_indicator(__('{0}',[info.company]));
+				frm.dashboard.add_indicator(__('{0}',
+					[format_currency(info.billing_this_year, info.currency)]));
+				frm.dashboard.add_indicator(__('{0}',
+					[format_currency(info.total_unpaid, info.currency)]));
+			});
 		}
 	},
 
