@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _, utils
 import re
-from frappe.frappe.email.inbox.make_issue_from_communication
+from frappe.email.inbox.make_issue_from_communication
 from datetime import datetime, timedelta
 class SupportContract(Document):
 	
