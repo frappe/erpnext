@@ -27,6 +27,10 @@ def check_email():
 				#print(service_level.support_and_resolution)
 				for level in service_level.support_and_resolution:
 					print(level.day)
+					if level.day == "Workday":
+						print("--Workday--")
+					else:
+						print("--Holiday--")
 				#issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
 				#for keyword in issue_criticality.keyword:
 				#	if re.search(r''+ keyword.keyword +'', comm.subject) or re.search(r''+ keyword.keyword +'', comm.content):
