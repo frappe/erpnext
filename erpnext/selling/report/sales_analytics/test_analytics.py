@@ -9,9 +9,6 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 
 class TestAnalytics(unittest.TestCase):
 
-	def tearDown(self):
-		frappe.db.sql(""" DELETE FROM `tabSales Order` """)
-
 	def test_by_entity(self):
 		create_sales_order()
 
@@ -20,7 +17,7 @@ class TestAnalytics(unittest.TestCase):
 			'range': 'Monthly',
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer',
-			'company': '_Test Company',
+			'company': '_Test Company 2',
 			'from_date': '2017-04-01',
 			'value_quantity': 'Value'
 		}
@@ -83,14 +80,13 @@ class TestAnalytics(unittest.TestCase):
 		self.assertEqual(expected_data, report[1])
 
 	def test_by_group(self):
-		create_sales_order()
-
+	
 		filters = {
 			'doc_type': 'Sales Order',
 			'range': 'Monthly',
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer Group',
-			'company': '_Test Company',
+			'company': '_Test Company 2',
 			'from_date': '2017-04-01',
 			'value_quantity': 'Value'
 		}
@@ -170,14 +166,13 @@ class TestAnalytics(unittest.TestCase):
 		self.assertEqual(expected_data, report[1])
 	
 	def test_by_quantity(self):
-		create_sales_order()
 
 		filters = {
 			'doc_type': 'Sales Order',
 			'range': 'Monthly',
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer',
-			'company': '_Test Company',
+			'company': '_Test Company 2',
 			'from_date': '2017-04-01',
 			'value_quantity': 'Quantity'
 		}
@@ -242,9 +237,39 @@ class TestAnalytics(unittest.TestCase):
 def create_sales_order():
 	frappe.set_user("Administrator")
 
-	make_sales_order(qty=10, customer = "_Test Customer 1", transaction_date='2018-02-10')
-	make_sales_order(qty=10, customer = "_Test Customer 1", transaction_date='2018-02-15')
-	make_sales_order(qty=15, customer = "_Test Customer 2", transaction_date='2017-09-23')
-	make_sales_order(qty=10, customer = "_Test Customer 2", transaction_date='2017-10-10')
-	make_sales_order(qty=20, customer = "_Test Customer 3", transaction_date='2017-06-15')
-	make_sales_order(qty=10, customer = "_Test Customer 3", transaction_date='2017-07-10')
+	make_sales_order(company="_Test Company 2", qty=10,
+		customer = "_Test Customer 1",
+		transaction_date = '2018-02-10',
+		warehouse = 'Finished Goods - _TC2',
+		currency = 'EUR')
+
+	make_sales_order(company="_Test Company 2",
+		qty=10, customer = "_Test Customer 1",
+		transaction_date = '2018-02-15',
+		warehouse = 'Finished Goods - _TC2',
+		currency = 'EUR')
+
+	make_sales_order(company = "_Test Company 2",
+		qty=10, customer = "_Test Customer 2",
+		transaction_date = '2017-10-10',
+		warehouse='Finished Goods - _TC2',
+		currency = 'EUR')
+
+	make_sales_order(company="_Test Company 2",
+		qty=15, customer = "_Test Customer 2",
+		transaction_date='2017-09-23',
+		warehouse='Finished Goods - _TC2',
+		currency = 'EUR')
+		
+	make_sales_order(company="_Test Company 2",
+		qty=20, customer = "_Test Customer 3",
+		transaction_date='2017-06-15',
+		warehouse='Finished Goods - _TC2',
+		currency = 'EUR')
+		
+	make_sales_order(company="_Test Company 2",
+		qty=10, customer = "_Test Customer 3",
+		transaction_date='2017-07-10',
+		warehouse='Finished Goods - _TC2',
+		currency = 'EUR')
+		
