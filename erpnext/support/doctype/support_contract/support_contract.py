@@ -23,8 +23,7 @@ def check_email():
 			if support_contract:
 				print(support_contract)
 				print(support_contract[0].issue_criticality)
-				#issue_criticality = frappe.get_doc("Issue Criticality", support_contract.issue_criticality)
-				#print(issue_criticality)
+				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
 				#print("Keywords-----------------------")
 				#for keyword in issue_criticality.keyword:
 				#	print(keyword)
