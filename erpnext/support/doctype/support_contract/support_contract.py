@@ -19,7 +19,6 @@ def check_email():
 	for email_account in frappe.get_all("Email Account", filters=[{"enable_incoming": 1}]):
 		for comm in frappe.get_all("Communication", "name", filters=[{"email_account":email_account.name}]):
 			comm = frappe.get_doc("Communication", comm.name)
-			print(comm.sender)
 			support_contract = frappe.get_list("Support Contract", filters={"email_id": comm.sender, "contract_status": "Active"}, limit=1)
 			if support_contract:
 				print(support_contract)
