@@ -24,7 +24,9 @@ def check_email():
 			support_contract = frappe.get_list("Support Contract", filters=[{"email_id": comm.sender}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
 			if support_contract:
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-				print(service_level.support_and_resolution)
+				#print(service_level.support_and_resolution)
+				for level in service_level.support_and_resolution:
+					print(level)
 				#issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
 				#for keyword in issue_criticality.keyword:
 				#	if re.search(r''+ keyword.keyword +'', comm.subject) or re.search(r''+ keyword.keyword +'', comm.content):
