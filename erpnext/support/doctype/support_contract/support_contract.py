@@ -26,7 +26,7 @@ def check_email():
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				#print(service_level.support_and_resolution)
 				for level in service_level.support_and_resolution:
-					print(level)
+					print(level.day)
 				#issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
 				#for keyword in issue_criticality.keyword:
 				#	if re.search(r''+ keyword.keyword +'', comm.subject) or re.search(r''+ keyword.keyword +'', comm.content):
