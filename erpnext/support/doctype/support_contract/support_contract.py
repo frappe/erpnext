@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _, utils
 import re
+from frappe.frappe.email.inbox.make_issue_from_communication
 from datetime import datetime, timedelta
 class SupportContract(Document):
 	
@@ -25,10 +26,5 @@ def check_email():
 				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
 				for keyword in issue_criticality.keyword:
 					if re.search(r''+ keyword.keyword +'', comm.subject) or re.search(r''+ keyword.keyword +'', comm.content):
-						print("Keyword matched : " + str(keyword.keyword))
-
-				#print("-------------------------")
-				#print("Subject : " + comm.subject)
-				#print("Content : " + comm.content)
-				#print("Time : " + str(comm.creation))
-				#print("-------------------------")
+						issue = make_issue_from_communication(comm.name)
+						print(issue)
