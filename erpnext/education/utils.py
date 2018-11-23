@@ -100,11 +100,12 @@ def get_course_enrollment(course_name):
 		return None
 
 def create_student():
-	student_name=frappe.session.user
+	user = frappe.get_doc("User", frappe.session.user)
 	student = frappe.get_doc({
 		"doctype": "Student",
-		"first_name": student_name,
-		"student_email_id": student_name,
+		"first_name": user.first_name,
+		"last_name": user.last_name,
+		"student_email_id": user.email,
 		})
 	student.save(ignore_permissions=True)
 	frappe.db.commit()
