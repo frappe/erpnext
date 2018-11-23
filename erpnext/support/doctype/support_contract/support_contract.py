@@ -24,10 +24,10 @@ def check_email():
 				print(support_contract)
 				print(support_contract[0].issue_criticality)
 				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-				#print("Keywords-----------------------")
-				#for keyword in issue_criticality.keyword:
-				#	print(keyword)
-				#print("Keywords-----------------------")
+				print("Keywords-----------------------")
+				for keyword in issue_criticality.keyword:
+					print(keyword)
+				print("Keywords-----------------------")
 				#print("-------------------------")
 				#print("Subject : " + comm.subject)
 				#print("Content : " + comm.content)
