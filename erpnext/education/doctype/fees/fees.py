@@ -126,3 +126,9 @@ def get_list_context(context=None):
 		"get_list": get_fee_list,
 		"row_template": "templates/includes/fee/fee_row.html"
 	}
+
+@frappe.whitelist()
+def set_paid_amount(name):
+	doc = frappe.get_doc("Fees", name)
+	paid_amount = doc.grand_total - doc.outstanding_amount
+	frappe.db.set_value("Fees", name, "paid_amount", paid_amount)
