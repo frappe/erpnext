@@ -23,17 +23,19 @@ frappe.ready(() => {
 			updateEnrolledPrograms() {
 				if(this.isLogin) {
 					lms.call("get_program_enrollments").then(data => {
-						if(data) this.enrolledPrograms = data
+						this.enrolledPrograms = data
 					});
 					if (lms.debug) console.log('Updated Enrolled Programs', this.enrolledPrograms)
 				}
 			},
 
 			updateEnrolledCourses() {
-				lms.call("get_all_course_enrollments").then(data => {
-					if(data) this.enrolledCourses = data
-				})
-				if (lms.debug) console.log('Updated Enrolled Courses', this.enrolledCourses)
+				if(this.isLogin) {
+					lms.call("get_all_course_enrollments").then(data => {
+						this.enrolledCourses = data
+					})
+					if (lms.debug) console.log('Updated Enrolled Courses', this.enrolledCourses)
+				}
 			},
 
 			checkLogin() {
