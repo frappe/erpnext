@@ -424,7 +424,11 @@ def install_defaults(args=None):
 				"account_type": "Bank",
 			})
 			try:
-				return bank_account.insert()
+				doc = bank_account.insert()
+
+				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+
+				return doc
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
 			except frappe.DuplicateEntryError:
