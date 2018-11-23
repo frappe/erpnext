@@ -148,7 +148,7 @@ def setup_globals(args):
 	args.update(config)
 
 	fixtures.install_defaults(_dict(args))
-	# setup_taxes(args)
+	setup_taxes(args)
 
 	run_post_setup_complete(args)
 
