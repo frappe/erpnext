@@ -232,9 +232,6 @@ doc_events = {
 }
 
 scheduler_events = {
-	"all": [
-		"erpnext.support.doctype.support_contract.support_contract.check_email"
-	],
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",

@@ -81,6 +81,13 @@ class Issue(Document):
 
 		self.db_set("description", "")
 
+	def set_sla(self):
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
+		response_and_resolution = frappe.get_doc("Service Level", support_contract.service_level)
+		print(response_and_resolution.support_and_resolution)
+		#self.issue_criticality = support_contract[0].issue_criticality	
+		pass
+
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
