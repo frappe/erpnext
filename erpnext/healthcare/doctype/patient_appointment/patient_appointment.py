@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, add_days
+from frappe.utils import getdate, add_days, get_time
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
@@ -23,6 +23,27 @@ class PatientAppointment(Document):
 		if today == appointment_date:
 			frappe.db.set_value("Patient Appointment", self.name, "status", "Open")
 			self.reload()
+
+	def validate(self):
+		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
+		overlaps = frappe.db.sql("""
+		select
+			name, practitioner, patient, appointment_time, duration
+		from
+			`tabPatient Appointment`
+		where
+			appointment_date=%s and name!=%s and status NOT IN ("Closed", "Cancelled")
+			and (practitioner=%s or patient=%s) and
+			((appointment_time<%s and appointment_time + INTERVAL duration MINUTE>%s) or
+			(appointment_time>%s and appointment_time<%s) or
+			(appointment_time=%s))
+		""", (self.appointment_date, self.name, self.practitioner, self.patient,
+		self.appointment_time, end_time.time(), self.appointment_time, end_time.time(), self.appointment_time))
+
+		print (overlaps)
+		if overlaps:
+			frappe.throw(_("""Appointment overlaps with {0}.<br> {1} has appointment scheduled
+			with {2} at {3} having {4} minute(s) duration.""").format(overlaps[0][0], overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4]))
 
 	def after_insert(self):
 		if self.procedure_prescription:
