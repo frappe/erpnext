@@ -126,7 +126,7 @@ frappe.ui.form.on("Item", {
 	image: function() {
 		refresh_field("image_view");
 	},
-	
+
 	is_customer_provided_item: function(frm) {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},

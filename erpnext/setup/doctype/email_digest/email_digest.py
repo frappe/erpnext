@@ -370,7 +370,7 @@ class EmailDigest(Document):
 	def get_sales_orders_to_deliver(self):
 		"""Get value not delivered"""
 
-		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0), 
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
 					count(*) from `tabSales Order`
 					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered"
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
@@ -597,13 +597,13 @@ class EmailDigest(Document):
 		fields_poi = "`tabPurchase Order Item`.parent, `tabPurchase Order Item`.schedule_date, item_code," \
 		             "received_qty, qty - received_qty as missing_qty, rate, amount"
 
-		sql_po = """select {fields} from `tabPurchase Order Item` 
+		sql_po = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
 			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
 			`tabPurchase Order Item`.schedule_date DESC""".format(fields=fields_po)
 
-		sql_poi = """select {fields} from `tabPurchase Order Item` 
+		sql_poi = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
 			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.idx""".format(fields=fields_poi)

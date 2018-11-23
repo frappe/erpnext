@@ -119,7 +119,7 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
-	
+
 	def validate_qty(self):
 		data = frappe.get_all("Delivery Note Item", filters={"parent" : self.name}, fields=["qty"])
 		for quant in data:
@@ -183,7 +183,7 @@ class DeliveryNote(SellingController):
 					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
-			#Customer Provided parts will have zero valuation rate		
+			#Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
