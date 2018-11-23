@@ -101,8 +101,6 @@ def get_quiz_without_answers(quiz_name):
 @frappe.whitelist()
 def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	"""LMS Function: Evaluates a simple multiple choice quiz.
-
-
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
 	"""
 	
@@ -143,7 +141,7 @@ def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
 @frappe.whitelist()
 def enroll_in_program(program_name):
 	if(not utils.get_current_student()):
-		utils.create_student(frappe.session.user)
+		utils.create_student()
 	student = frappe.get_doc("Student", utils.get_current_student())
 	program_enrollment = student.enroll_in_program(program_name)
 	utils.enroll_all_courses_in_program(program_enrollment, student)
