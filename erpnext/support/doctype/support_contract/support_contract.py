@@ -21,9 +21,9 @@ def check_email():
 			comm = frappe.get_doc("Communication", comm.name)
 			support_contract = frappe.get_list("Support Contract", filters=[{"email_id": comm.sender}], limit=1)
 			print(support_contract[0].issue_criticality)
-			issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-			for keyword in issue_criticality.keyword:
-				print(keyword)
+			#issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
+			#for keyword in issue_criticality.keyword:
+			#	print(keyword)
 			print("-------------------------")
 			print("Subject : " + comm.subject)
 			print("Content : " + comm.content)
