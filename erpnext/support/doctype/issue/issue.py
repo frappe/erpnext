@@ -83,10 +83,15 @@ class Issue(Document):
 
 	def set_sla(self):
 		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
-		response_and_resolution = frappe.get_doc("Service Level", support_contract.service_level)
-		print(response_and_resolution.support_and_resolution)
-		#self.issue_criticality = support_contract[0].issue_criticality	
-		pass
+		self.service_level = support_contract[0].name
+		self.issue_criticality = support_contract[0].issue_criticality
+		self.employee_group = support_contract[0].employee_group
+		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
+		if service_level.day == "Workday":
+			pass
+		else:
+			pass
+		#self.issue_criticality = support_contract[0].issue_criticality
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
