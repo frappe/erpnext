@@ -20,8 +20,9 @@ def check_email():
 		for comm in frappe.get_all("Communication", "name", filters=[{"email_account":email_account.name}]):
 			comm = frappe.get_doc("Communication", comm.name)
 			print(comm.sender)
-			#support_contract = frappe.get_list("Support Contract", filters={"email_id": comm.sender, "contract_status": "Active"}, limit=1)
-			#print(support_contract)
+			support_contract = frappe.get_list("Support Contract", filters={"email_id": comm.sender, "contract_status": "Active"}, limit=1)
+			if support_contract:
+				print(support_contract)
 			#issue_criticality = frappe.get_doc("Issue Criticality", support_contract.issue_criticality)
 			#print(issue_criticality)
 			#print("Keywords-----------------------")
