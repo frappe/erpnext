@@ -21,11 +21,11 @@ def check_email():
 			comm = frappe.get_doc("Communication", comm.name)
 			support_contract = frappe.get_list("Support Contract", filters={"email_id": comm.sender, "contract_status": "Active"}, limit=1)
 			print(support_contract)
-			issue_criticality = frappe.get_doc("Issue Criticality", support_contract.issue_criticality)
-			print(issue_criticality)
+			#issue_criticality = frappe.get_doc("Issue Criticality", support_contract.issue_criticality)
+			#print(issue_criticality)
 			print("Keywords-----------------------")
-			for keyword in issue_criticality.keyword:
-				print(keyword)
+			#for keyword in issue_criticality.keyword:
+			#	print(keyword)
 			print("Keywords-----------------------")
 			#print("-------------------------")
 			#print("Subject : " + comm.subject)
