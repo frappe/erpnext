@@ -48,6 +48,8 @@ frappe.ui.form.on("Fees", {
 	},
 
 	refresh: function(frm) {
+		frm.set_value("paid_amount" ,frm.doc.grand_total - frm.doc.outstanding_amount);
+
 		if(frm.doc.docstatus == 0 && frm.doc.set_posting_time) {
 			frm.set_df_property('posting_date', 'read_only', 0);
 			frm.set_df_property('posting_time', 'read_only', 0);
