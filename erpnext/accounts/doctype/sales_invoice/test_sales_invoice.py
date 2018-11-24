@@ -1416,10 +1416,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.utils import get_balance_on_voucher
 		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
-		outstanding_amount = get_outstanding_amount(si.doctype,
-			si.name, "Debtors - _TC", si.customer, "Customer")
+		outstanding_amount = get_balance_on_voucher(si.doctype, si.name, "Customer", si.customer, "Debtors - _TC")
 
 		self.assertEqual(si.outstanding_amount, outstanding_amount)
 
@@ -1584,16 +1584,3 @@ def create_sales_invoice_against_cost_center(**args):
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')
-
-def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):
-	bal = flt(frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and party = %s and party_type = %s""",
-		(against_voucher_type, against_voucher, account, party, party_type))[0][0] or 0.0)
-
-	if against_voucher_type == 'Purchase Invoice':
-		bal = bal * -1
-
-	return bal
