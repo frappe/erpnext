@@ -8,9 +8,10 @@
                     Course Content
                     <ul class="mb-0 mt-1">
                         <li v-for="content in course.course_content" :key="content.name">
-                            <router-link tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, course: course.name, type:content.content_type, content: content.content} }">
+                            <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, course: course.name, type:content.content_type, content: content.content} }">
                                 <span style="padding-right: 0.4em"><i :class="iconClass(content.content_type)"></i></span>{{ content.content }}
                             </router-link>
+                            <div v-else><span style="padding-right: 0.4em"><i :class="iconClass(content.content_type)"></i></span>{{ content.content }}</div>
                         </li>
                     </ul>
                 </span>
@@ -37,22 +38,17 @@ export default {
     name: "CourseCard",
     data() {
         return {
+            isLogin: lms.store.isLogin,
             courseMeta: {}
         }
     },
     mounted() {
-        this.getCourseMeta().then(data => this.courseMeta = data)
+        if(this.isLogin) this.getCourseMeta().then(data => this.courseMeta = data)
     },
     components: {
         AButton
     },
     computed: {
-        showStart() {
-            return lms.loggedIn && !this.courseMeta.flag == "Complete";
-        },
-        showCompleted() {
-            return lms.loggedIn && this.courseMeta.flag == "Complete";
-        },
         firstContentRoute() {
             return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
         },
