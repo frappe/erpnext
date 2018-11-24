@@ -112,11 +112,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "Completed Work Orders",
 					"doctype": "Work Order"
-				},{ 
-					"type": "page",
-					"name": "production-analytics",
-					"label": _("Production Analytics"),  
-					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Production Analytics",
+					"doctype": "Work Order"
 				},
 				{
 					"type": "report",

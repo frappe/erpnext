@@ -122,10 +122,10 @@ def get_data():
 			"icon": "fa fa-table",
 			"items": [
 				{
-					"type": "page",
-					"name": "purchase-analytics",
-					"label": _("Purchase Analytics"),
-					"icon": "fa fa-bar-chart",
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Analytics",
+					"doctype": "Purchase Order"
 				},
 				{
 					"type": "report",
