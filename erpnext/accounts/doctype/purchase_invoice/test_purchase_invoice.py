@@ -766,12 +766,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_debit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
+		from erpnext.accounts.utils import get_balance_on_voucher
 
 		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
-		outstanding_amount = get_outstanding_amount(pi.doctype,
-			pi.name, "Creditors - _TC", pi.supplier, "Supplier")
+		outstanding_amount = get_balance_on_voucher(pi.doctype, pi.name, "Supplier", pi.supplier, "Creditors - _TC")
 
 		self.assertEqual(pi.outstanding_amount, outstanding_amount)
 
