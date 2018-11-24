@@ -1,5 +1,6 @@
 {
  "allow_copy": 0,
+ "allow_events_in_timeline": 0,
  "allow_guest_to_view": 0,
  "allow_import": 1,
  "allow_rename": 1,
@@ -3047,6 +3048,7 @@
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 1,
+   "collapsible_depends_on": "taxes",
    "columns": 0,
    "fieldname": "item_tax_section_break",
    "fieldtype": "Section Break",
@@ -4113,7 +4115,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 1,
- "modified": "2018-09-20 11:14:21.031369",
+ "modified": "2018-11-23 01:48:29.347662",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
