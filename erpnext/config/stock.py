@@ -42,6 +42,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Stock Balance Multi-UOM",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Stock Projected Qty",
 					"doctype": "Item",
 				},
