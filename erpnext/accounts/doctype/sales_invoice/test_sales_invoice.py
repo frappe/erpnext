@@ -844,7 +844,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -1138,7 +1137,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
