@@ -67,7 +67,7 @@ export default {
         },
         isLogin() {
             return lms.store.checkLogin()
-        }
+        },
     },
     methods: {
         iconClass(content_type) {
@@ -77,9 +77,10 @@ export default {
         },
         getCourseMeta() {
 			return lms.call('get_course_meta', {
-					course_name: this.course.name
+                    course_name: this.course.name,
+                    program_name: this.program_name
 				})
-		}
+        },
     }
 };
 </script>
@@ -92,6 +93,7 @@ export default {
     }
     li {
         list-style-type: none;
+        padding: 0;
     }
     .fa {
         font-size: 0.8em;

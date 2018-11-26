@@ -199,9 +199,10 @@ def check_quiz_completion(quiz, enrollment_name):
 	return status, score, result
 	
 @frappe.whitelist()
-def get_course_meta(course_name):
+def get_course_meta(course_name, program_name):
 	course_enrollment = utils.get_course_enrollment(course_name)
-	# course_enrollment = frappe.get_doc("Course Enrollment", course_enrollment_name)
+	if not course_enrollment:
+		utils.enroll_in_course(course_name, program_name)
 	progress = get_course_progress(course_enrollment)
 	count = sum([act['is_complete'] for act in progress])
 	if count == 0:
@@ -215,7 +216,11 @@ def get_course_meta(course_name):
 @frappe.whitelist()
 def get_program_meta(program_name):
 	program = frappe.get_doc("Program", program_name)
-	program_meta = {}
-	for course in program.get_all_children():
-		program_meta[course.course] = get_course_meta(course.course)
-	return program_meta
+	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
+	if not program_enrollment:
+		return None
+	else:
+		program_meta = {}
+		for course in program.get_all_children():
+			program_meta[course.course] = get_course_meta(course.course, program_name)
+		return program_meta
