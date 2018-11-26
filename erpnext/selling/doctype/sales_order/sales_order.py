@@ -341,9 +341,11 @@ class SalesOrder(SellingController):
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-
-		self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
-			update_modified=False)
+		
+		if tot_qty != 0:
+			self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
+				update_modified=False)
+		
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
