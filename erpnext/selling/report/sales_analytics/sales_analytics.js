@@ -67,23 +67,16 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		}
 	],
-	"formatter": function(value, row, column, data) {
-		if(!value){
-			value = 0
-		}
-		return value;
-	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					row_values = data.slice(5).map(function (column) {
+					row_values = data.slice(4).map(function (column) {
 						return column.content;
 					})
-
-					entry  = {
+					entry = {
 						'name':row_name,
 						'values':row_values
 					}
