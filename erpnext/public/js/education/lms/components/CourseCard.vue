@@ -38,12 +38,11 @@ export default {
     name: "CourseCard",
     data() {
         return {
-            isLogin: lms.store.isLogin,
             courseMeta: {}
         }
     },
     mounted() {
-        if(this.isLogin) this.getCourseMeta().then(data => this.courseMeta = data)
+        this.getCourseMeta().then(data => this.courseMeta = data)
     },
     components: {
         AButton
@@ -65,6 +64,9 @@ export default {
             else {
                 return " hidden"
             }
+        },
+        isLogin() {
+            return lms.store.checkLogin()
         }
     },
     methods: {
