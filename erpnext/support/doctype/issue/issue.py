@@ -96,8 +96,10 @@ class Issue(Document):
 		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 		for service in service_level.support_and_resolution:
 			if service.day == "Workday" and service.weekday == day_name:
-				self.hours_to_respond = service.response_time
+				self.time_to_respond = service.response_time
+				self.response_time_period = service.response_time_period
 				self.hours_to_resolve = service.resolution_time
+				self.resolution_time_period = service.resolution_time_period
 			else:
 				print("Holiday List" + str(now))
 
