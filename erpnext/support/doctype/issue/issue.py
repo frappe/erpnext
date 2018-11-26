@@ -88,7 +88,7 @@ class Issue(Document):
 		now = datetime.datetime.now()
 		day = now.day
 		day_name = now.strftime("%A")
-		support_contract = frappe.get_list("Support Contract", filters=["customer": self.customer, "contract_status": "Active"], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
 		print("---------------------------------")
 		print(support_contract[0])
 		print("---------------------------------")
