@@ -101,10 +101,11 @@ class Issue(Document):
 				self.time_to_resolve = service.resolution_time
 				self.resolution_time_period = service.resolution_time_period
 			else:
-				holiday_list = frappe.get_doc("Holiday List", service.holiday)
-				for holiday in holiday_list.holidays:
+				print(service.holiday)
+				holiday_list = frappe.get_doc("Holiday List", ""+ service.holiday +"")
+				#for holiday in holiday_list.holidays:
 				#	if holiday.holiday_date == utils.today():
-					print("-----------YES")
+				#	print("-----------YES")
 #
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
