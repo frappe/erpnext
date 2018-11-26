@@ -88,7 +88,8 @@ class Issue(Document):
 		day = now.day
 		day_name = now.strftime("%A")
 		month=now.strftime("%B")
-		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group", "support_and_resolution"], limit=1)
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
+		support_contract_child = support_contract.get_children()
 		self.support_contract = support_contract[0].name
 		self.service_level = support_contract[0].service_level
 		self.issue_criticality = support_contract[0].issue_criticality
