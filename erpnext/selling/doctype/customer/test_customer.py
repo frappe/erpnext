@@ -12,6 +12,7 @@ from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
+from erpnext import get_default_company
 
 test_ignore = ["Price List"]
 test_dependencies = ['Payment Term', 'Payment Terms Template']
@@ -217,5 +218,15 @@ def get_customer_dict(customer_name):
 		 "customer_name": customer_name,
 		 "customer_type": "Individual",
 		 "doctype": "Customer",
-		 "territory": "_Test Territory"
+		 "territory": "_Test Territory",
+		 "tax_id": 00000
 	}
+
+def test_customer_account(self):
+	company_abbr = frappe.db.get_value("Company", get_default_company(), "abbr")
+	test_account = '_Test Customer 1 - {}'.format(company_abbr)
+	if frappe.db.get_single_value('Accounts Settings', 'create_customer_account_after_insert'):
+		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
+		frappe.db.sql("delete from `tabAccount` where name=%s",test_account)
+		frappe.get_doc(get_customer_dict('_Test Customer 1')).insert(ignore_permissions=True)
+		self.assertTrue(frappe.db.exists("Account", "_Test Customer 1 - {}".format(company_abbr)))

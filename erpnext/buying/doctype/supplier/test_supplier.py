@@ -7,6 +7,7 @@ import frappe, unittest
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled
 from frappe.test_runner import make_test_records
+from erpnext import get_default_company
 
 test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Supplier')
@@ -90,3 +91,20 @@ class TestSupplier(unittest.TestCase):
         supplier.country = 'Greece'
         supplier.save()
         self.assertEqual(supplier.country, "Greece")
+
+        def get_suplier_dict(customer_name):
+        	return {
+        		 "supplier_group": "_Test Supplier Group",
+        		 "supplier_name": customer_name,
+        		 "doctype": "Suplier",
+        		 "tax_id": 00000
+        	}
+
+        def test_customer_account(self):
+        	company_abbr = frappe.db.get_value("Company", get_default_company(), "abbr")
+        	test_account = '_Test Supplier 1 - {}'.format(company_abbr)
+        	if frappe.db.get_single_value('Accounts Settings', 'create_supplier_account_after_insert'):
+        		frappe.db.sql("delete from `tabSupplier` where supplier_name='_Test Supplier 1'")
+        		frappe.db.sql("delete from `tabAccount` where name=%s",test_account)
+        		frappe.get_doc(get_supplier_dict('_Test Supplier 1')).insert(ignore_permissions=True)
+        		self.assertTrue(frappe.db.exists("Account", "_Test Supplier 1 - {}".format(company_abbr)))
