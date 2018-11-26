@@ -1407,6 +1407,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.item_code = this.items[0].item_code;
 		this.child.item_name = this.items[0].item_name;
 		this.child.stock_uom = this.items[0].stock_uom;
+		this.child.uom = this.items[0].sales_uom || this.items[0].stock_uom;
+		this.child.conversion_factor = this.items[0].conversion_factor || 1;
 		this.child.brand = this.items[0].brand;
 		this.child.description = this.items[0].description || this.items[0].item_name;
 		this.child.discount_percentage = 0.0;
@@ -1416,8 +1418,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.income_account = this.pos_profile_data['income_account'] || this.items[0].income_account;
 		this.child.warehouse = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][1] : (this.pos_profile_data['warehouse'] || this.items[0].default_warehouse));
-		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
-		this.child.rate = flt(this.price_list_data[this.child.item_code], 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
+		this.child.rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
 		this.child.actual_qty = me.get_actual_qty(this.items[0]);
 		this.child.amount = flt(this.child.qty) * flt(this.child.rate);
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
@@ -1573,15 +1575,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				style="margin-right: 5px;">${__('Print')}</a>
 			<a class="btn btn-default new_doc">${__('New')}</a>`);
 
-		$('.print_doc').click(function () {
-			var html = frappe.render(me.print_template_data, me.frm.doc)
-			me.print_document(html)
+		this.msgprint.msg_area.find('.print_doc').on('click', function() {
+			var html = frappe.render(me.print_template_data, me.frm.doc);
+			me.print_document(html);
 		})
 
-		$('.new_doc').click(function () {
-			me.msgprint.hide()
-			me.make_new_cart()
+		this.msgprint.msg_area.find('.new_doc').on('click', function() {
+			me.msgprint.hide();
+			me.make_new_cart();
 		})
+
 	},
 
 	print_document: function (html) {
