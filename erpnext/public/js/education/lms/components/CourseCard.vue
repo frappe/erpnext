@@ -67,7 +67,7 @@ export default {
         },
         isLogin() {
             return lms.store.checkLogin()
-        },
+        }
     },
     methods: {
         iconClass(content_type) {

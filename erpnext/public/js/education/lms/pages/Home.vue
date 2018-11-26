@@ -32,21 +32,11 @@ export default {
         ProgramCard,
         TopSectionButton
     },
-    beforeMount() {
-        // this.updateEnrolledPrograms().then(data => {
-        //     data.forEach(element => {
-        //         this.enrolledPrograms.add(element)
-        //     })
-        // });
-    },
 	mounted() {
         this.getPortalDetails().then(data => this.portal = data);
         this.getFeaturedPrograms().then(data => this.featuredPrograms = data);
     },
     methods: {
-        // updateEnrolledPrograms(){
-        //     return lms.call("get_program_enrollments")
-        // },
         getPortalDetails() {
             return lms.call("get_portal_details")
         },

@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<TopSection :title="portal.title" :description="portal.description">
-        	<AButton :type="'primary'" :size="'lg'" :route="{ name: 'signup'}">Sign Up</AButton>
+        	<AButton v-if="isLogin" :type="'primary'" :size="'lg'" :route="{ name: 'signup'}">Sign Up</AButton>
     	</TopSection>
 		<CardList :title="'All Programs'" :description="''">
 			<ProgramCard slot="card-list-slot" v-for="item in masterData" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
@@ -37,15 +37,17 @@ export default {
         this.getMaster().then(data => this.masterData = data);
     },
     methods: {
-        // updateEnrolledPrograms(){
-        //     return lms.call("get_program_enrollments")
-        // },
         getPortalDetails() {
             return lms.call("get_portal_details")
         },
         getMaster() {
             return lms.call("get_all_programs")
         }
-    }
+	},
+	computed: {
+		isLogin() {
+			return !lms.store.checkLogin()
+		}
+	}
 };
 </script>
