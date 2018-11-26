@@ -107,6 +107,8 @@ class Issue(Document):
 					print("Elif")
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
+						print(holiday.holiday_date)
+						print(utils.today())
 						if holiday.holiday_date == utils.today():
 							self.time_to_respond = service.response_time
 							self.response_time_period = service.response_time_period
