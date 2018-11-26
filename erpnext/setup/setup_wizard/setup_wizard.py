@@ -9,13 +9,7 @@ from time import time
 from frappe import _
 
 from .operations import install_fixtures as fixtures, taxes_setup, company_setup, sample_data
-
-from frappe import _, _dict
 from frappe.utils import cstr, getdate
-from argparse import Namespace
-from frappe.desk.page.setup_wizard.setup_wizard import update_global_settings, run_post_setup_complete, make_records
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
-from journeys.journeys.config import get_journeys_config
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -124,46 +118,3 @@ def make_sample_data(domains):
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.login_as(args.get("email"))
-
-@frappe.whitelist()
-def install_fixtures():
-	config = get_journeys_config().get('setup_config') or {}
-
-	update_global_settings(_dict(config))
-
-	fixtures.install(_dict(config).country)
-
-@frappe.whitelist()
-def install_company(args):
-	config = get_journeys_config().get('setup_config') or {}
-	args = json.loads(args)
-	args.update(config)
-
-	fixtures.install_company(_dict(args))
-
-@frappe.whitelist()
-def setup_globals(args):
-	config = get_journeys_config().get('setup_config') or {}
-	args = json.loads(args)
-	args.update(config)
-
-	fixtures.install_defaults(_dict(args))
-	setup_taxes(args)
-
-	run_post_setup_complete(args)
-
-@frappe.whitelist()
-def setup(args, config=None):
-	install_fixtures()
-	install_company(args)
-	setup_globals(args)
-
-
-@frappe.whitelist()
-def get_country_and_charts():
-	config = get_journeys_config().get('setup_config') or {}
-	country = config.get('country')
-	return {
-		'country': country,
-		'charts': get_charts_for_country(country)
-	}
