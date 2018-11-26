@@ -94,8 +94,6 @@ class Issue(Document):
 		self.issue_criticality = support_contract[0].issue_criticality
 		self.employee_group = support_contract[0].employee_group
 		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-		print(utils.today())
-		print(utils.now())
 		for service in service_level.support_and_resolution:
 			if service.day == "Workday" and service.weekday == day_name:
 				self.time_to_respond = service.response_time
@@ -103,11 +101,10 @@ class Issue(Document):
 				self.time_to_resolve = service.resolution_time
 				self.resolution_time_period = service.resolution_time_period
 			else:
-				print(service.holiday)
-				#holiday_list = frappe.get_doc("Holiday List", service.holiday)
-				#for holiday in holiday_list.holidays:
+				holiday_list = frappe.get_doc("Holiday List", service.holiday)
+				for holiday in holiday_list.holidays:
 				#	if holiday.holiday_date == utils.today():
-				#		print("-----------YES")
+					print("-----------YES")
 #
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
