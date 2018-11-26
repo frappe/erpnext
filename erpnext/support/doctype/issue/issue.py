@@ -105,7 +105,12 @@ class Issue(Document):
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
 						if holiday.holiday_date == utils.today():
-							print("-----------YES")
+							self.time_to_respond = service.response_time
+							self.response_time_period = service.response_time_period
+							self.time_to_resolve = service.resolution_time
+							self.resolution_time_period = service.resolution_time_period
+				else:
+					frappe.throw(_("Support for the day doesn't exist."))
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
