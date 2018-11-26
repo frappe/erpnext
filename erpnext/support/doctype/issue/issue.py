@@ -106,7 +106,7 @@ class Issue(Document):
 					for holiday in holiday_list.holidays:
 						print(str(holiday.holiday_date)+ " --- " +str(utils.today()))
 						print(holiday.holiday_date == utils.today())
-						if holiday.holiday_date == utils.today():
+						if str(holiday.holiday_date) == str(utils.today()):
 							self.time_to_respond = service.response_time
 							self.response_time_period = service.response_time_period
 							self.time_to_resolve = service.resolution_time
