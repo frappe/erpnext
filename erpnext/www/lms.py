@@ -212,3 +212,10 @@ def get_course_meta(course_name):
 		next_item = next(item for item in progress if item['is_complete']==False)
 		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
 	
+@frappe.whitelist()
+def get_program_meta(program_name):
+	program = frappe.get_doc("Program", program_name)
+	program_meta = {}
+	for course in program.get_all_children():
+		program_meta[course.course] = get_course_meta(course.course)
+	return program_meta
