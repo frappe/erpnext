@@ -22,9 +22,7 @@ frappe.ui.form.on('Support Contract', {
 					frm.fields_dict.support_and_resolution.get_value()[i].from = data.message.support_and_resolution[i].from;
 					frm.fields_dict.support_and_resolution.get_value()[i].to = data.message.support_and_resolution[i].to;
 					frm.fields_dict.support_and_resolution.get_value()[i].response_time = data.message.support_and_resolution[i].response_time;
-					frm.fields_dict.support_and_resolution.get_value()[i].response_time_period = data.message.support_and_resolution[i].response_time_period;
 					frm.fields_dict.support_and_resolution.get_value()[i].resolution_time = data.message.support_and_resolution[i].resolution_time;
-					frm.fields_dict.support_and_resolution.get_value()[i].resolution_time_period = data.message.support_and_resolution[i].resolution_time_period;
 				}
 				frm.refresh();
 			}

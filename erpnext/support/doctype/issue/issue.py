@@ -107,6 +107,10 @@ class Issue(Document):
 			for keyword in issue_criticality.keyword:
 				if re.search(r''+ keyword.keyword +'', self.description):
 					self.priority = support_contract[0].priority
+		self.sla_timer()
+		
+	def sla_timer(self):
+		pass
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
