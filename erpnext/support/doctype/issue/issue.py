@@ -102,7 +102,7 @@ class Issue(Document):
 				self.resolution_time_period = service.resolution_time_period
 			else:
 				print(service.holiday)
-				holiday_list = frappe.get_doc("Holiday List", ""+ service.holiday +"")
+				holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 				#for holiday in holiday_list.holidays:
 				#	if holiday.holiday_date == utils.today():
 				#	print("-----------YES")
