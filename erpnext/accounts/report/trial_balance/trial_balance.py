@@ -232,6 +232,13 @@ def get_columns():
 			"width": 300
 		},
 		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
+		},
+		{
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Currency",
@@ -272,13 +279,6 @@ def get_columns():
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120
-		},
-		{
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1
 		}
 	]
 
