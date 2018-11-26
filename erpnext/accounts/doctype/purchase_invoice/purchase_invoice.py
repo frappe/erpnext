@@ -947,6 +947,10 @@ def make_sales_order(customer, source_name, target_doc=None):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
+		# workaround for get_item_details not setting the base_rate hence not calculating the correct gross profit
+		for item in target.items:
+			item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), target.precision("amount", item))
+
 	def update_item(source, target, source_parent):
 		target.discount_percentage = 0
 
