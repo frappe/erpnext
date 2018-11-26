@@ -109,7 +109,12 @@ def create_student():
 		})
 	student.save(ignore_permissions=True)
 	frappe.db.commit()
-	return student_name
+	return student
+
+def enroll_in_course(course_name, program_name):
+	student_id = get_current_student()
+	student = frappe.get_doc("Student", student_id)
+	student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
 
 def enroll_all_courses_in_program(program_enrollment, student):
 	program = frappe.get_doc("Program", program_enrollment.program)
