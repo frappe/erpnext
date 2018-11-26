@@ -105,6 +105,7 @@ class Issue(Document):
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
 						if holiday.holiday_date == utils.today():
+							print("In if holiday")
 							self.time_to_respond = service.response_time
 							self.response_time_period = service.response_time_period
 							self.time_to_resolve = service.resolution_time
