@@ -12,7 +12,12 @@ const routes = [
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
-			if(!lms.store.isLogin) next({name: 'home'})
+			if(!lms.store.isLogin){
+				next({name: 'home'})
+			}
+			else {
+				next()
+			}
 		}
 	},
 	{
