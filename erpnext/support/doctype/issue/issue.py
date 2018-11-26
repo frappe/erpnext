@@ -101,7 +101,7 @@ class Issue(Document):
 					self.response_time_period = service.response_time_period
 					self.time_to_resolve = service.resolution_time
 					self.resolution_time_period = service.resolution_time_period
-				else:
+				elif service.day == "Holiday" and service.holiday:
 					print("---------------------------------")
 					print(service.day)
 					print(service.holiday)
