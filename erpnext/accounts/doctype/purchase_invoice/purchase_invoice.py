@@ -949,7 +949,7 @@ def make_sales_order(customer, source_name, target_doc=None):
 
 		# workaround for get_item_details not setting the base_rate hence not calculating the correct gross profit
 		for item in target.items:
-			item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), target.precision("amount", item))
+			item.gross_profit = 0.0
 
 	def update_item(source, target, source_parent):
 		target.discount_percentage = 0
