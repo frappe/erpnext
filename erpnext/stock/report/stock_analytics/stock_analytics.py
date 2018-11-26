@@ -167,13 +167,11 @@ def get_data(filters):
 	return data
 
 def get_chart_data(columns):
-	labels = [d.get("label") for d in columns[4:]]
+	labels = [d.get("label") for d in columns[5:]]
 	chart = {
 		"data": {
 			'labels': labels,
-			'datasets':[
-				{ "values": ['0' for d in columns[4:]] }
-			]
+			'datasets':[]
 		}
 	}
 	chart["type"] = "line"
