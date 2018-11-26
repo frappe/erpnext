@@ -97,11 +97,13 @@ class Issue(Document):
 			service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 			for service in service_level.support_and_resolution:
 				if service.day == "Workday" and service.weekday == day_name:
+					print("If")
 					self.time_to_respond = service.response_time
 					self.response_time_period = service.response_time_period
 					self.time_to_resolve = service.resolution_time
 					self.resolution_time_period = service.resolution_time_period
 				elif service.day == "Holiday" and service.holiday:
+					print("Elif")
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
 						if holiday.holiday_date == utils.today():
@@ -110,6 +112,7 @@ class Issue(Document):
 							self.time_to_resolve = service.resolution_time
 							self.resolution_time_period = service.resolution_time_period
 				else:
+					print("Else")
 					frappe.throw(_("Support for the day doesn't exist."))
 
 	def split_issue(self, subject, communication_id):
