@@ -98,6 +98,7 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
+		self.validate_qty()
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.set_status()
@@ -121,9 +122,8 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 	
 	def validate_qty(self):
-		data = frappe.get_all("Delivery Note Item", filters={"parent" : self.name}, fields=["qty"])
-		for quant in data:
-			if quant.qty == 0:
+		for item in self.items:
+			if not item.qty:
 				frappe.throw("Item quantity can not be zero")
 
 	def validate_with_previous_doc(self):
