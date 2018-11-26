@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 from frappe.utils.user import is_website_user
+import datetime
 
 sender_field = "raised_by"
 
@@ -23,6 +24,7 @@ class Issue(Document):
 			self.raised_by = frappe.session.user
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
+		self.set_sla()
 
 		if self.status == "Closed":
 			from frappe.desk.form.assign_to import clear
@@ -82,15 +84,20 @@ class Issue(Document):
 		self.db_set("description", "")
 
 	def set_sla(self):
+		now = datetime.datetime.now()
+		day = now.day
+		day_name = now.strftime("%A")
+		month=now.strftime("%B")
 		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
 		self.service_level = support_contract[0].name
 		self.issue_criticality = support_contract[0].issue_criticality
 		self.employee_group = support_contract[0].employee_group
 		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-		if service_level.day == "Workday":
-			pass
-		else:
-			pass
+		for service in service_level.support_and_resolution:
+			if service.day == "Workday" and service.weekday == day:
+				print("------------------------------Workday" + str(day))
+			else:
+				print("Holiday List" + str(now))
 		#self.issue_criticality = support_contract[0].issue_criticality
 
 	def split_issue(self, subject, communication_id):
