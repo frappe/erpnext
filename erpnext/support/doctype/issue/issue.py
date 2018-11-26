@@ -88,14 +88,16 @@ class Issue(Document):
 		day = now.day
 		day_name = now.strftime("%A")
 		month=now.strftime("%B")
-		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group"], limit=1)
-		self.service_level = support_contract[0].name
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer}, {"contract_status": "Active"}], fields=["contract_template", "service_level", "issue_criticality", "employee_group", "support_and_resolution"], limit=1)
+		self.support_contract = support_contract[0].name
+		self.service_level = support_contract[0].service_level
 		self.issue_criticality = support_contract[0].issue_criticality
 		self.employee_group = support_contract[0].employee_group
-		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-		for service in service_level.support_and_resolution:
+		#service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
+		for service in support_contract[0].support_and_resolution:
 			if service.day == "Workday" and service.weekday == day_name:
-				print("------------------------------Workday" + str(day))
+				self.hours_to_respond = service.
+				self.hours_to_resolve = 
 			else:
 				print("Holiday List" + str(now))
 		#self.issue_criticality = support_contract[0].issue_criticality
