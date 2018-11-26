@@ -92,15 +92,15 @@ class TestSupplier(unittest.TestCase):
         supplier.save()
         self.assertEqual(supplier.country, "Greece")
 
-        def get_suplier_dict(customer_name):
+        def get_suplier_dict(supplier_name):
         	return {
         		 "supplier_group": "_Test Supplier Group",
-        		 "supplier_name": customer_name,
+        		 "supplier_name": supplier_name,
         		 "doctype": "Suplier",
         		 "tax_id": 00000
         	}
 
-        def test_customer_account(self):
+        def test_supplier_account(self):
         	company_abbr = frappe.db.get_value("Company", get_default_company(), "abbr")
         	test_account = '_Test Supplier 1 - {}'.format(company_abbr)
         	if frappe.db.get_single_value('Accounts Settings', 'create_supplier_account_after_insert'):
