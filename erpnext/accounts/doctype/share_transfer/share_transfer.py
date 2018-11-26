@@ -189,7 +189,6 @@ class ShareTransfer(Document):
 					if (shareholder == 'from_shareholder') else self.to_folio_no;
 				doc.save()
 			else:
-				print(doc.name, doc.folio_no, self.from_folio_no, shareholder, self.to_folio_no)
 				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
 					frappe.throw(_('The folio numbers are not matching'))
 

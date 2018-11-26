@@ -80,7 +80,6 @@ class TestShareTransfer(unittest.TestCase):
 		]
 		for d in share_transfers:
 			st = frappe.get_doc(d)
-			print(st.as_dict())
 			st.submit()
 
 	def test_invalid_share_transfer(self):
