@@ -20,12 +20,11 @@
             </div>
             <div class='course-buttons text-center col-xs-5 col-sm-4 col-md-3'>
                 <a-button
-                    v-if="programData.name == 'ECP2018'"
-                    :type="'success'"
+                    :type="buttonType"
                     size="sm btn-block"
-                    :route="{name: 'home'}"
+                    :route="programRoute"
                 >
-                    Download Certificate
+                    {{ buttonName }}
                 </a-button>
             </div>
         </div>
@@ -52,6 +51,30 @@ export default {
                     program_name: this.program
 				})
         },
+    },
+    computed: {
+        programRoute() {
+            return {name: 'program', params: {program_name: this.program}}
+        },
+        buttonType() {
+            if (this.programData.percentage == 100 ){
+                return "success"
+            }
+            else if (this.programData.percentage == "0" ) {
+                return "secondary"
+            }
+            else {
+                return "info"
+            }
+        },
+        buttonName() {
+            if (this.programData.percentage == 100 ){
+                return "Program Complete"
+            }
+            else {
+                return `${this.programData.percentage}% Completed`
+            }
+        }
     },
     components: {
         AButton
