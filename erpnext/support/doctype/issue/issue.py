@@ -94,7 +94,7 @@ class Issue(Document):
 		self.employee_group = support_contract[0].employee_group
 		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 		for service in service_level.support_and_resolution:
-			if service.day == "Workday" and service.weekday == day:
+			if service.day == "Workday" and service.weekday == day_name:
 				print("------------------------------Workday" + str(day))
 			else:
 				print("Holiday List" + str(now))
