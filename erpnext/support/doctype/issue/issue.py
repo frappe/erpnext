@@ -92,14 +92,14 @@ class Issue(Document):
 		print("---------------------------------------------------------------")
 		support_contract_child = support_contract[0].get_all_children()
 		print(support_contract[0])
-		print(support_contract_child)
 		print("---------------------------------------------------------------")
 		self.support_contract = support_contract[0].name
 		self.service_level = support_contract[0].service_level
 		self.issue_criticality = support_contract[0].issue_criticality
 		self.employee_group = support_contract[0].employee_group
 		#service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-		#for service in support_contract_child.support_and_resolution:
+		for service in support_contract_child:
+			print(service)
 		#	if service.day == "Workday" and service.weekday == day_name:
 		#		self.hours_to_respond = service.response_time
 		#		self.hours_to_resolve = service.resolution_time
