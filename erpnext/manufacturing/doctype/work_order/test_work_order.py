@@ -292,6 +292,7 @@ class TestWorkOrder(unittest.TestCase):
 			make_bom(item=fg_item, rate=1000, raw_materials = ['_Test FG Item', '_Test FG Non Stock Item'])
 
 		wo = make_wo_order_test_record(production_item = fg_item)
+
 		se = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
 		se.insert()
 		se.submit()
