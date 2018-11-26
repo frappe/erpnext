@@ -1,5 +1,6 @@
 import Vue from 'vue/dist/vue.js';
 import VueRouter from 'vue-router/dist/vue-router.js'
+import moment from 'moment/min/moment.min.js'
 
 import lmsRoot from "./lmsRoot.vue";
 import routes from './routes';
@@ -16,6 +17,8 @@ var store = {
 frappe.ready(() => {
 	frappe.provide('lms')
 	// frappe.utils.make_event_emitter(lms);
+
+	lms.moment = moment
 
 	lms.store = new Vue({
 		data: store,

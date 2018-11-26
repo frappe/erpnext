@@ -215,6 +215,7 @@ def get_course_meta(course_name, program_name):
 	
 @frappe.whitelist()
 def get_program_progress(program_name):
+	import math
 	program = frappe.get_doc("Program", program_name)
 	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
 	program_meta = {}
@@ -231,4 +232,10 @@ def get_program_progress(program_name):
 		program_meta['progress'] = progress
 		program_meta['name'] = program_name
 		program_meta['program'] = program.program_name
+		program_meta['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
 		return program_meta
+
+@frappe.whitelist()
+def get_joining_date():
+	student = frappe.get_doc("Student", utils.get_current_student())
+	return student.joining_date
