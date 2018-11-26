@@ -94,7 +94,7 @@ class Issue(Document):
 		self.issue_criticality = support_contract[0].issue_criticality
 		self.employee_group = support_contract[0].employee_group
 		service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-		for service in service_level:
+		for service in service_level.support_and_resolution:
 			if service.day == "Workday" and service.weekday == day_name:
 				self.hours_to_respond = service.response_time
 				self.hours_to_resolve = service.resolution_time
