@@ -98,7 +98,7 @@ class Issue(Document):
 			if service.day == "Workday" and service.weekday == day_name:
 				self.time_to_respond = service.response_time
 				self.response_time_period = service.response_time_period
-				self.hours_to_resolve = service.resolution_time
+				self.time_to_resolve = service.resolution_time
 				self.resolution_time_period = service.resolution_time_period
 			else:
 				print("Holiday List" + str(now))
