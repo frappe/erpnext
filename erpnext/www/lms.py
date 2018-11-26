@@ -214,13 +214,21 @@ def get_course_meta(course_name, program_name):
 		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
 	
 @frappe.whitelist()
-def get_program_meta(program_name):
+def get_program_progress(program_name):
 	program = frappe.get_doc("Program", program_name)
 	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
+	program_meta = {}
 	if not program_enrollment:
 		return None
 	else:
-		program_meta = {}
+		progress = []
 		for course in program.get_all_children():
-			program_meta[course.course] = get_course_meta(course.course, program_name)
+			meta = get_course_meta(course.course, program_name)
+			is_complete = False
+			if meta['flag'] == "Complete":
+				is_complete = True
+			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
+		program_meta['progress'] = progress
+		program_meta['name'] = program_name
+		program_meta['program'] = program.program_name
 		return program_meta
