@@ -106,6 +106,10 @@ class Issue(Document):
 					for holiday in holiday_list.holidays:
 						if holiday.holiday_date == utils.today():
 							print("In if holiday")
+							print(service.response_time)
+							print(service.response_time_period)
+							print(service.resolution_time)
+							print(service.resolution_time_period)
 							self.time_to_respond = service.response_time
 							self.response_time_period = service.response_time_period
 							self.time_to_resolve = service.resolution_time
