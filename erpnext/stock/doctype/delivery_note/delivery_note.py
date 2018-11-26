@@ -98,7 +98,6 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
-		self.validate_qty()
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.set_status()
@@ -120,11 +119,6 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
-	
-	def validate_qty(self):
-		for item in self.items:
-			if not item.qty:
-				frappe.throw("Item quantity can not be zero")
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc({
@@ -208,7 +202,6 @@ class DeliveryNote(SellingController):
 
 	def on_submit(self):
 		self.validate_packed_qty()
-		self.validate_qty()
 
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
