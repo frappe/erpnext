@@ -2,6 +2,7 @@ import Home from "./pages/Home.vue";
 import ProgramPage from "./pages/ProgramPage.vue";
 import ContentPage from "./pages/ContentPage.vue";
 import ListPage from "./pages/ListPage.vue";
+import ProfilePage from "./pages/ProfilePage.vue";
 
 const routes = [
 	{name: 'home', path: '', component: Home},
@@ -12,7 +13,7 @@ const routes = [
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
-			if(!lms.store.isLogin){
+			if(!lms.store.checkLogin()){
 				next({name: 'home'})
 			}
 			else {
@@ -35,6 +36,12 @@ const routes = [
 		component: ListPage,
 		props: true
 	},
+	{
+		name: 'profile',
+		path: '/Profile',
+		component: ProfilePage,
+		props: true
+	}
 ];
 
 export default routes;
