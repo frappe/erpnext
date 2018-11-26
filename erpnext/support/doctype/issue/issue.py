@@ -106,7 +106,7 @@ class Issue(Document):
 				#for holiday in holiday_list.holidays:
 				#	if holiday.holiday_date == utils.today():
 				#	print("-----------YES")
-#
+
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
