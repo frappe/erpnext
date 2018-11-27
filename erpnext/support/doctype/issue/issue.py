@@ -111,7 +111,9 @@ class Issue(Document):
 		self.sla_timer()
 		
 	def sla_timer(self):
-		print(utils.now(), utils.today())
+		print("----------------------------------------")
+		print(utils.now())
+		print(utils.today())
 		#time = datetime.now().time().strftime('%H:%M:%S')
 		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
 
