@@ -108,14 +108,14 @@ class Issue(Document):
 				for keyword in issue_criticality.keyword:
 					if re.search(r''+ keyword.keyword +'', self.description):
 						self.priority = support_contract[0].priority
+		time = datetime.now().time().strftime('%H:%M:%S')
+		print(time_diff_in_hours((datetime.now() + timedelta(hours=service.response_time)).strftime('%H:%M:%S') , time))
 		self.sla_timer()
 		
 	def sla_timer(self):
-		time = datetime.now().time().strftime('%H:%M:%S')
-		print(time)
-		print(self.response_time)
-		end_time = time + timedelta(hours=self.response_time)
-		print(time_diff_in_hours(end_time, time))
+		pass
+		#time = datetime.now().time().strftime('%H:%M:%S')
+		#print(time_diff_in_hours((datetime.now() + timedelta(hours=self.response_time)).strftime('%H:%M:%S') , time))
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
