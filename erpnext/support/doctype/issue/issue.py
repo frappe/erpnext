@@ -114,6 +114,7 @@ class Issue(Document):
 									for keyword in issue_criticality.keyword:
 										if re.search(r''+ keyword.keyword +'', self.description):
 											self.priority = support_contract[0].priority
+				self.isset_sla = 1
 			else:
 				pass
 		
