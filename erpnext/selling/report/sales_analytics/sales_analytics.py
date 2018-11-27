@@ -166,7 +166,7 @@ class Analytics(object):
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
 				"entity": entity,
-				"entity_name": self.entity_names.get(entity) 
+				"entity_name": self.entity_names.get(entity)
 			}
 			total = 0
 			for dummy, end_date in self.periodic_daterange:
@@ -177,7 +177,7 @@ class Analytics(object):
 
 			row["total"] = total
 			self.data.append(row)
-	
+
 	def get_rows_by_group(self):
 		self.get_periodic_data()
 		out = []
@@ -185,7 +185,7 @@ class Analytics(object):
 		for d in reversed(self.group_entries):
 			row = {
 				"entity": d.name,
-				"indent": self.depth_map.get(d.name) 
+				"indent": self.depth_map.get(d.name)
 			}
 			total = 0
 			for dummy, end_date in self.periodic_daterange:
@@ -275,7 +275,8 @@ class Analytics(object):
 		self.parent_child_map = frappe._dict(frappe.db.sql(""" select name, supplier_group from `tabSupplier`"""))
 
 	def get_chart_data(self):
-		labels = [d.get("label") for d in self.columns[2:]]
+		length = len(self.columns)
+		labels = [d.get("label") for d in self.columns[2:length-1]]
 		self.chart = {
 			"data": {
 				'labels': labels,
