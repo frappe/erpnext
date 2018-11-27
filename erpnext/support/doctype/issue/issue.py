@@ -90,7 +90,7 @@ class Issue(Document):
 			self.support_contract = support_contract[0].name
 			service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 			for service in service_level.support_and_resolution:
-				if service.day == "Workday" and service.weekday == datetime.datetime.now().strftime("%A"):
+				if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
 					self.response_time = service.response_time
 					#self.response_time_period = service.response_time_period
 					self.resolution_time = service.resolution_time
@@ -98,7 +98,7 @@ class Issue(Document):
 				elif service.day == "Holiday" and service.holiday:
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
-						if holiday.holiday_date == datetime.datetime.now().date():
+						if holiday.holiday_date == datetime.now().date():
 							self.response_time = service.response_time
 							#self.response_time_period = service.response_time_period
 							self.resolution_time = service.resolution_time
@@ -111,7 +111,7 @@ class Issue(Document):
 		self.sla_timer()
 		
 	def sla_timer(self):
-		time = datetime.datetime.now().time().strftime('%H:%M:%S')
+		time = datetime.now().time().strftime('%H:%M:%S')
 		print(time)
 		print(self.response_time)
 		end_time = time + timedelta(hours=self.response_time)
