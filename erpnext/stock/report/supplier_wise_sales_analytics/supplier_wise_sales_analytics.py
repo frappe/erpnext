@@ -85,6 +85,14 @@ def get_suppliers_details(filters):
 			is_stock_item=1 and name=pri.item_code)""", as_dict=1):
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
+	for d in frappe.db.sql("""select pr.supplier, pri.item_code from
+		`tabPurchase Invoice` pr, `tabPurchase Invoice Item` pri
+		where pr.name=pri.parent and pr.docstatus=1 and
+		ifnull(pr.update_stock, 0) = 1 and pri.item_code=(select name from `tabItem`
+			where is_stock_item=1 and name=pri.item_code)""", as_dict=1):
+			if d.item_code not in item_supplier_map:
+				item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
+
 	if supplier:
 		for item_code, suppliers in iteritems(item_supplier_map):
 			if supplier not in suppliers:
