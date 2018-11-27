@@ -57,6 +57,8 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
 	def validate(self):
+
+		self.validate_qty_is_not_zero()
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -358,6 +360,11 @@ class AccountsController(TransactionBase):
 											self.company_currency)
 
 		return gl_dict
+
+	def validate_qty_is_not_zero(self):
+		for item in self.items:
+			if not item.qty:
+				frappe.throw("Item quantity can not be zero")
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
