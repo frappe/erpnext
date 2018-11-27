@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
+from __future__ import unicode_literals
 
 import re
 from past.builtins import cmp
@@ -379,8 +381,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	if filters:
 		if filters.get("project"):
 			if not isinstance(filters.get("project"), list):
-				projects = str(filters.get("project")).strip()
-				filters.project = [d.strip() for d in projects.split(',') if d]
+				projects = frappe.safe_encode(filters.get("project"))
+				filters.project = [d.strip() for d in projects.strip().split(',') if d]
 			additional_conditions.append("project in %(project)s")
 
 		if filters.get("cost_center"):
@@ -400,7 +402,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 def get_cost_centers_with_children(cost_centers):
 	if not isinstance(cost_centers, list):
-		cost_centers = [d.strip() for d in str(cost_centers).strip().split(',') if d]
+		cost_centers = [d.strip() for d in cost_centers.strip().split(',') if d]
 
 	all_cost_centers = []
 	for d in cost_centers:

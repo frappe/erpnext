@@ -128,6 +128,50 @@ class TestTimesheet(unittest.TestCase):
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
 
+	def test_timesheet_std_working_hours(self):
+		company = frappe.get_doc('Company', "_Test Company")
+		company.standard_working_hours = 8
+		company.save()
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = "_T-Employee-00001"
+		timesheet.company = '_Test Company'
+		timesheet.append(
+			'time_logs',
+			{
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(days= 4)
+			}
+		)
+		timesheet.save()
+
+		ts = frappe.get_doc('Timesheet', timesheet.name)
+		self.assertEqual(ts.total_hours, 32)
+		ts.submit()
+		ts.cancel()
+
+		company = frappe.get_doc('Company', "_Test Company")
+		company.standard_working_hours = 0
+		company.save()
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = "_T-Employee-00001"
+		timesheet.company = '_Test Company'
+		timesheet.append(
+			'time_logs',
+			{
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(days= 4)
+			}
+		)
+		timesheet.save()
+
+		ts = frappe.get_doc('Timesheet', timesheet.name)
+		self.assertEqual(ts.total_hours, 96)
+		ts.submit()
+		ts.cancel()
 
 def make_salary_structure_for_timesheet(employee):
 	salary_structure_name = "Timesheet Salary Structure Test"

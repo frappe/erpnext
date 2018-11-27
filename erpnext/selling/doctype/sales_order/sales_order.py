@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
+from six import string_types
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
@@ -17,6 +18,7 @@ from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -346,7 +348,15 @@ class SalesOrder(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.per_billed < 100 and self.per_delivered < 100:
+		if self.status == 'Closed':
+			self.indicator_color = "green"
+			self.indicator_title = _("Closed")
+
+		elif self.per_delivered < 100 and getdate(self.delivery_date) < getdate(nowdate()):
+			self.indicator_color = "red"
+			self.indicator_title = _("Overdue")
+
+		elif self.per_billed < 100 and self.per_delivered < 100:
 			self.indicator_color = "orange"
 			self.indicator_title = _("Not Paid and Not Delivered")
 
@@ -358,7 +368,7 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def get_work_order_items(self):
+	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
 
@@ -367,8 +377,13 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
+					if not for_raw_material_request:
+						total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
 							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+						pending_qty = stock_qty - total_work_order_qty
+					else:
+						pending_qty = stock_qty
+
 					if pending_qty:
 						items.append(dict(
 							name= i.name,
@@ -376,6 +391,7 @@ class SalesOrder(SellingController):
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
+							required_qty = pending_qty if for_raw_material_request else 0,
 							sales_order_item = i.name
 						))
 		return items
@@ -838,7 +854,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 				or supplier_name like %(txt)s)
 			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
 			and name not in (select supplier from `tabPurchase Order` po inner join `tabPurchase Order Item` poi
-			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)			
+			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
@@ -894,3 +910,44 @@ def get_default_bom_item(item_code):
 	bom = bom[0].name if bom else None
 
 	return bom
+
+@frappe.whitelist()
+def make_raw_material_request(items, company, sales_order, project=None):
+	if not frappe.has_permission("Sales Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	if isinstance(items, string_types):
+		items = frappe._dict(json.loads(items))
+
+	for item in items.get('items'):
+		item["include_exploded_items"] = items.get('include_exploded_items')
+		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
+
+	raw_materials = get_items_for_material_requests(items, company)
+	if not raw_materials:
+		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
+
+	material_request = frappe.new_doc('Material Request')
+	material_request.update(dict(
+		doctype = 'Material Request',
+		transaction_date = nowdate(),
+		company = company,
+		requested_by = frappe.session.user,
+		material_request_type = 'Purchase'
+	))
+	for item in raw_materials:
+		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
+		schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+		material_request.append('items', {
+		'item_code': item.get('item_code'),
+		'qty': item.get('quantity'),
+		'schedule_date': schedule_date,
+		'warehouse': item.get('warehouse'),
+		'sales_order': sales_order,
+		'project': project
+		})
+	material_request.insert()
+	material_request.flags.ignore_permissions = 1
+	material_request.run_method("set_missing_values")
+	material_request.submit()
+	return material_request
