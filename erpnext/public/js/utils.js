@@ -106,24 +106,27 @@ $.extend(erpnext.utils, {
 			var company_wise_info = frm.doc.__onload.dashboard_info;
 			if(company_wise_info.length > 1) {
 				frm.dashboard.stats_area.removeClass('hidden');
-				frm.dashboard.stats_area_row.append(
-					'<div class="col-xs-4"><h6>Company</h6></div>'+
-					'</div><div class="col-xs-4"><h6>Annual Billing</h6></div>' +
-					'<div class="col-xs-4"><h6>Total Unpaid</h6></div>'
-				);
+				frm.dashboard.stats_area_row.addClass('flex');
+				frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 				company_wise_info.forEach(function(info) {
 					frm.dashboard.stats_area_row.append(
-						'<div class="col-xs-4 small" style="margin-bottom:10px">'+info.company+'</div>' +
-						'</div><div class="col-xs-4 small" style="margin-bottom:10px">'+format_currency(info.billing_this_year, info.currency)+'</div>' +
-						'<div class="col-xs-4 small" style="margin-bottom:10px">'+format_currency(info.billing_this_year, info.currency)+'</div>'
+						'<div class="flex-column col-xs-6">'+
+							'<div style="margin-bottom:20px"><h6>'+info.company+'</h6></div>'+
+							'<div class="badge-link small" style="margin-bottom:10px">Annual Billing: '
+							+format_currency(info.billing_this_year, info.currency)+'</div>'+
+							'<div class="badge-link small" style="margin-bottom:20px">Total Unpaid: '
+							+format_currency(info.total_unpaid, info.currency)+'</div>'+
+						'</div>'
 					);
 				});
 			}
 			else {
 				frm.dashboard.stats_area.removeClass('hidden');
 				frm.dashboard.stats_area_row.append(
-					'</div><div class="col-xs-6 small" style="margin-bottom:10px">Annual Billing: '+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</div>' +
-					'<div class="col-xs-6 small" style="margin-bottom:10px">Total Unpaid: '+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</div>'
+					'</div><div class="col-xs-6 small" style="margin-bottom:10px">Annual Billing: <b>'
+					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>' +
+					'<div class="col-xs-6 small" style="margin-bottom:10px">Total Unpaid: <b>'
+					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>'
 				);
 			}
 		}
