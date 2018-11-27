@@ -111,7 +111,7 @@ class Issue(Document):
 		self.sla_timer()
 		
 	def sla_timer(self):
-		time = datetime.datetime.now().time.strftime('%H:%M:%S')
+		time = datetime.datetime.now().time().strftime('%H:%M:%S')
 		print(time)
 		print(self.time_to_respond)
 
