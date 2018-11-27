@@ -188,17 +188,26 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-		qty_dict.bal_qty_p = qty_dict.bal_qty / d.purchase_uom_conversion_factor
-		qty_dict.bal_qty_s = qty_dict.bal_qty / d.sales_uom_conversion_factor
+	if d.purchase_uom_conversion_factor is None:
+		   qty_dict.bal_qty_p = 0
+		elif d.purchase_uom_conversion_factor != 0:
+			qty_dict.bal_qty_p = qty_dict.bal_qty / d.purchase_uom_conversion_factor
+		else: qty_dict.bal_qty_p = 0
+
+	if d.sales_uom_conversion_factor is None:
+		   qty_dict.bal_qty_s = 0
+		elif d.sales_uom_conversion_factor != 0:
+		   qty_dict.bal_qty_s = qty_dict.bal_qty / d.sales_uom_conversion_factor
+		else: qty_dict.bal_qty_s = 0
 		
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
-	
+
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
-		
+
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in qty_dict.items():
@@ -206,7 +215,7 @@ def filter_items_with_no_transactions(iwb_map):
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
-		
+
 		if no_transactions:
 			iwb_map.pop((company, item, warehouse))
 
