@@ -85,8 +85,17 @@ class Asset(AccountsController):
 		elif not self.finance_books:
 			frappe.throw(_("Enter depreciation details"))
 
-		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(nowdate()):
-			frappe.throw(_("Available-for-use Date is entered as past date"))
+		if self.is_existing_asset:
+			return
+
+		date =  nowdate()
+		docname = self.purchase_receipt or self.purchase_invoice
+		if docname:
+			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
+			date = frappe.db.get_value(doctype, docname, 'posting_date')
+
+		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(date):
+			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def make_depreciation_schedule(self):
 		if self.depreciation_method != 'Manual':
@@ -511,3 +520,34 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 			.format(account_name.replace('_', ' ').title(), asset_category, company))
 
 	return account
+
+@frappe.whitelist()
+def make_journal_entry(asset_name):
+	asset = frappe.get_doc("Asset", asset_name)
+	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
+		get_depreciation_accounts(asset)
+
+	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
+		["depreciation_cost_center", "series_for_depreciation_entry"])
+	depreciation_cost_center = asset.cost_center or depreciation_cost_center
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = "Depreciation Entry"
+	je.naming_series = depreciation_series
+	je.company = asset.company
+	je.remark = "Depreciation Entry against asset {0}".format(asset_name)
+
+	je.append("accounts", {
+		"account": depreciation_expense_account,
+		"reference_type": "Asset",
+		"reference_name": asset.name,
+		"cost_center": depreciation_cost_center
+	})
+
+	je.append("accounts", {
+		"account": accumulated_depreciation_account,
+		"reference_type": "Asset",
+		"reference_name": asset.name
+	})
+
+	return je

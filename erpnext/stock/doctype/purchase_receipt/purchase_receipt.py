@@ -185,7 +185,8 @@ class PurchaseReceipt(BuyingController):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
-						"voucher_detail_no": d.name}, "stock_value_difference")
+						"voucher_detail_no": d.name, "warehouse": d.warehouse}, "stock_value_difference")
+
 					if not stock_value_diff:
 						continue
 					gl_entries.append(self.get_gl_dict({

@@ -82,7 +82,7 @@ def get_place_of_supply(out, doctype):
 
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
-		if address.gst_state and address.gst_state_number:
+		if address and address.gst_state and address.gst_state_number:
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 def get_regional_address_details(out, doctype, company):

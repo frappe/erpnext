@@ -108,7 +108,8 @@ class BOM(WebsiteGenerator):
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
-				"stock_qty": item.stock_qty
+				"stock_qty": item.stock_qty,
+				"allow_transfer_for_manufacture": item.allow_transfer_for_manufacture
 			})
 			for r in ret:
 				if not item.get(r):
@@ -127,6 +128,8 @@ class BOM(WebsiteGenerator):
 		self.validate_rm_item(item)
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args['transfer_for_manufacture'] = (cstr(args.get('allow_transfer_for_manufacture', '')) or
+			item and item[0].allow_transfer_for_manufacture or 0)
 		args.update(item[0])
 
 		rate = self.get_rm_rate(args)
@@ -142,7 +145,7 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate,
-			 'allow_transfer_for_manufacture': item and args['allow_transfer_for_manufacture'] or 0
+			 'allow_transfer_for_manufacture': cint(args['transfer_for_manufacture']) or 0
 		}
 
 		return ret_item
@@ -334,14 +337,15 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-		duplicate_items = list(get_duplicates(check_list))
-		if duplicate_items:
-			li = []
-			for i in duplicate_items:
-				li.append("{0} on row {1}".format(i.item_code, i.idx))
-			duplicate_list = '<br>' + '<br>'.join(li)
+		if not self.allow_same_item_multiple_times:
+			duplicate_items = list(get_duplicates(check_list))
+			if duplicate_items:
+				li = []
+				for i in duplicate_items:
+					li.append("{0} on row {1}".format(i.item_code, i.idx))
+				duplicate_list = '<br>' + '<br>'.join(li)
 
-			frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
+				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
@@ -367,7 +371,8 @@ class BOM(WebsiteGenerator):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.on_update()
+			bom_obj.check_recursion()
+			bom_obj.update_exploded_items()
 
 		return bom_list
 

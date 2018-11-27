@@ -153,6 +153,16 @@ def get_conditions(filters):
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
+	if filters.get("brand"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+	
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
 	return conditions
 
 def get_invoices(filters, additional_query_columns):
