@@ -153,6 +153,10 @@ class BuyingController(StockController):
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
+			item.valuation_rate = 0.0
+			if self.doctype == "Purchase Receipt":
+				item.receipt_valuation_rate = 0.0
+
 			if item.item_code and item.qty and item.item_code in stock_items:
 				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
@@ -174,22 +178,15 @@ class BuyingController(StockController):
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
 
-				valuation_item_tax_amount = self.get_valuation_item_tax_amount(item)
-				item.valuation_rate = ((item.base_net_amount + valuation_item_tax_amount + rm_supp_cost
-					 + landed_cost_voucher_amount) / qty_in_stock_uom)
-			else:
-				item.valuation_rate = 0.0
-
-	def get_valuation_item_tax_amount(self, item):
-		valuation_item_tax_amount = item.item_tax_amount
-		# If item has been invoiced, use the tax amount from invoices
-		# If the invoice is incomplete, then use both invoiced_item_tax_amount and item_tax_amount
-		# proportional to the qty invoiced vs qty not yet invoiced
-		if self.doctype == "Purchase Receipt":
-			if item.invoiced_item_tax_portion:
-				valuation_item_tax_amount = item.invoiced_item_tax_amount
-				valuation_item_tax_amount += (1 - item.invoiced_item_tax_portion) * item.item_tax_amount
-		return valuation_item_tax_amount
+				if self.doctype == "Purchase Receipt":
+					item.receipt_valuation_rate = (item.base_net_amount + item.item_tax_amount + rm_supp_cost) / qty_in_stock_uom
+					unbilled_qty = max(0, item.qty - item.billed_qty)
+					unbilled_valuation_amount = item.receipt_valuation_rate * unbilled_qty
+					item.valuation_rate = ((item.billed_valuation_amount + unbilled_valuation_amount
+						+ landed_cost_voucher_amount) / item.qty)
+				else:
+					item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
+						 + landed_cost_voucher_amount) / qty_in_stock_uom)
 
 	def validate_for_subcontracting(self):
 		if not self.is_subcontracted and self.sub_contracted_items:
