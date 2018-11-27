@@ -109,8 +109,8 @@ class Issue(Document):
 					if re.search(r''+ keyword.keyword +'', self.description):
 						self.priority = support_contract[0].priority
 		time = datetime.now().time().strftime('%H:%M:%S')
-		print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time)).strftime('%H:%M:%S') , time))
-		self.sla_timer()
+		print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
+		#self.sla_timer()
 		
 	def sla_timer(self):
 		pass
