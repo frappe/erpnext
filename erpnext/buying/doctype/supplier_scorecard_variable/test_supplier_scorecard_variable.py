@@ -13,9 +13,9 @@ class TestSupplierScorecardVariable(unittest.TestCase):
 	def test_variable_exist(self):
 		for d in test_existing_variables:
 			my_doc = frappe.get_doc("Supplier Scorecard Variable", d.get("name"))
-			self.assertEquals(my_doc.param_name, d.get('param_name'))
-			self.assertEquals(my_doc.variable_label, d.get('variable_label'))
-			self.assertEquals(my_doc.path, d.get('path'))
+			self.assertEqual(my_doc.param_name, d.get('param_name'))
+			self.assertEqual(my_doc.variable_label, d.get('variable_label'))
+			self.assertEqual(my_doc.path, d.get('path'))
 
 	def test_path_exists(self):
 		for d in test_good_variables:

@@ -12,6 +12,21 @@ import erpnext
 
 class Membership(Document):
 	def validate(self):
+		if not self.member or not frappe.db.exists("Member", self.member):
+			member_name = frappe.get_value('Member', dict(email=frappe.session.user))
+
+			if not member_name:
+				user = frappe.get_doc('User', frappe.session.user)
+				member = frappe.get_doc(dict(
+					doctype='Member',
+					email=frappe.session.user,
+					membership_type=self.membership_type,
+					member_name=user.get_fullname()
+				)).insert(ignore_permissions=True)
+				member_name = member.name
+
+			if self.get("__islocal"):
+				self.member = member_name
 
 		# get last membership (if active)
 		last_membership = erpnext.get_last_membership()

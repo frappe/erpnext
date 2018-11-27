@@ -13,6 +13,21 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"reqd": 1
 			},
 			{
+				"fieldname":"cost_center",
+				"label": __("Cost Center"),
+				"fieldtype": "Link",
+				"options": "Cost Center",
+				"get_query": function() {
+					var company = frappe.query_report.get_filter_value('company');
+					return {
+						"doctype": "Cost Center",
+						"filters": {
+							"company": company,
+						}
+					}
+				}
+			},
+			{
 				"fieldname": "fiscal_year",
 				"label": __("Fiscal Year"),
 				"fieldtype": "Link",
@@ -26,9 +41,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 					}
 					frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
 						var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-						frappe.query_report_filters_by_name.from_date.set_input(fy.year_start_date);
-						frappe.query_report_filters_by_name.to_date.set_input(fy.year_end_date);
-						query_report.trigger_refresh();
+						frappe.query_report.set_filter_value({
+							from_date: fy.year_start_date,
+							to_date: fy.year_end_date
+						});
 					});
 				}
 			},

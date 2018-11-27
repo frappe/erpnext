@@ -21,7 +21,7 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			fieldname: "item",
 			fieldtype: "Link",
 			get_query: () => {
-				let quote = frappe.query_report_filters_by_name.supplier_quotation.get_value();
+				let quote = frappe.query_report.get_filter_value('supplier_quotation');
 				if (quote != "") {
 					return {
 						query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
@@ -94,7 +94,7 @@ frappe.query_reports["Quoted Item Comparison"] = {
 					},
 					freeze: true,
 					callback: (r) => {
-						frappe.msgprint("Successfully Set Supplier");
+						frappe.msgprint(__("Successfully Set Supplier"));
 						dialog.hide();
 					}
 				});

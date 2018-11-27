@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from six import iteritems
 
 def get_context(context):
 	context.no_cache = 1
@@ -28,7 +29,7 @@ def get_context(context):
 
 def update_gstin(context):
 	dirty = False
-	for key, value in frappe.form_dict.items():
+	for key, value in iteritems(frappe.form_dict):
 		if key != 'party':
 			address_name = frappe.get_value('Address', key)
 			if address_name:

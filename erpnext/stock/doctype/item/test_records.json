@@ -1,13 +1,9 @@
 [
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Item 1",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
@@ -17,6 +13,14 @@
   "apply_warehouse_wise_reorder_level": 1,
   "gst_hsn_code": "999800",
   "valuation_rate": 100,
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
   "reorder_levels": [
    {
     "material_request_type": "Purchase",
@@ -40,14 +44,10 @@
   "website_warehouse": "_Test Warehouse - _TC"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Item 2",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
@@ -56,17 +56,22 @@
   "item_name": "_Test Item 2",
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse - _TC"
+  "website_warehouse": "_Test Warehouse - _TC",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Item Home Desktop 100 3",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
@@ -74,6 +79,15 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
   "valuation_rate": 100,
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
   "taxes": [
    {
     "doctype": "Item Tax",
@@ -85,53 +99,69 @@
   "stock_uom": "_Test UOM 1"
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Item Home Desktop 200 4",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_sub_contracted_item": 0,
   "item_code": "_Test Item Home Desktop 200",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 200",
-  "stock_uom": "_Test UOM 1"
+  "stock_uom": "_Test UOM 1",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
   "description": "_Test Product Bundle Item 5",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 0,
   "is_sub_contracted_item": 0,
   "item_code": "_Test Product Bundle Item",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Product Bundle Item",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test FG Item 6",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 1,
   "item_code": "_Test FG Item",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
   "description": "_Test Non Stock Item 7",
@@ -144,10 +174,18 @@
   "item_code": "_Test Non Stock Item",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Non Stock Item",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Serialized Item 8",
   "doctype": "Item",
   "has_batch_no": 0,
@@ -158,10 +196,18 @@
   "item_code": "_Test Serialized Item",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Serialized Item",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Serialized Item 9",
   "doctype": "Item",
   "has_batch_no": 0,
@@ -173,51 +219,66 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Serialized Item With Series",
   "serial_no_series": "ABCD.#####",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Item Home Desktop Manufactured 10",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
   "item_code": "_Test Item Home Desktop Manufactured",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop Manufactured",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test FG Item 2 11",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 1,
   "item_code": "_Test FG Item 2",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item 2",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  },
  {
-  "default_warehouse": "_Test Warehouse - _TC",
   "description": "_Test Variant Item 12",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 1,
@@ -225,7 +286,16 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Variant Item",
   "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
   "has_variants": 1,
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
   "attributes": [
 	  {
 	  	"attribute": "Test Size"
@@ -242,14 +312,10 @@
   ]
  },
  {
-  "default_warehouse": "_Test Warehouse Group-C1 - _TC",
   "description": "_Test Item 1",
   "doctype": "Item",
-  "expense_account": "_Test Account Cost for Goods Sold - _TC",
-  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": 0,
   "has_serial_no": 0,
-  "income_account": "Sales - _TC",
   "inspection_required": 0,
   "is_stock_item": 1,
   "is_sub_contracted_item": 0,
@@ -257,6 +323,15 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item Warehouse Group Wise Reorder",
   "apply_warehouse_wise_reorder_level": 1,
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse Group-C1 - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
   "reorder_levels": [
    {
 	"warehouse_group": "_Test Warehouse Group - _TC",
@@ -270,5 +345,4 @@
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse Group-C1 - _TC"
  }
-
 ]

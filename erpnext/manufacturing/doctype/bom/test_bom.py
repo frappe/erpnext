@@ -6,19 +6,24 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from frappe.utils import cstr
+from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 
 test_records = frappe.get_test_records('BOM')
 
 class TestBOM(unittest.TestCase):
+	def setUp(self):
+		if not frappe.get_value('Item', '_Test Item'):
+			make_test_records('Item')
+
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		items_dict = get_bom_items_as_dict(bom=get_default_bom(),
 			company="_Test Company", qty=1, fetch_exploded=0)
 		self.assertTrue(test_records[2]["items"][0]["item_code"] in items_dict)
 		self.assertTrue(test_records[2]["items"][1]["item_code"] in items_dict)
-		self.assertEquals(len(items_dict.values()), 2)
+		self.assertEqual(len(items_dict.values()), 2)
 
 	def test_get_items_exploded(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
@@ -28,11 +33,11 @@ class TestBOM(unittest.TestCase):
 		self.assertFalse(test_records[2]["items"][1]["item_code"] in items_dict)
 		self.assertTrue(test_records[0]["items"][0]["item_code"] in items_dict)
 		self.assertTrue(test_records[0]["items"][1]["item_code"] in items_dict)
-		self.assertEquals(len(items_dict.values()), 3)
+		self.assertEqual(len(items_dict.values()), 3)
 
 	def test_get_items_list(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
-		self.assertEquals(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
+		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
 
 	def test_default_bom(self):
 		def _get_default_bom_in_item():

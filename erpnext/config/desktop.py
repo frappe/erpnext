@@ -56,7 +56,6 @@ def get_data():
 		{
 			"module_name": "Lead",
 			"icon": "octicon octicon-broadcast",
-			"type": "module",
 			"_doctype": "Lead",
 			"type": "link",
 			"link": "List/Lead"
@@ -81,7 +80,6 @@ def get_data():
 		{
 			"module_name": "Stock",
 			"color": "#f39c12",
-			"icon": "fa fa-truck",
 			"icon": "octicon octicon-package",
 			"type": "module",
 			"hidden": 1
@@ -96,7 +94,6 @@ def get_data():
 		{
 			"module_name": "Selling",
 			"color": "#1abc9c",
-			"icon": "fa fa-tag",
 			"icon": "octicon octicon-tag",
 			"type": "module",
 			"hidden": 1
@@ -104,7 +101,6 @@ def get_data():
 		{
 			"module_name": "Buying",
 			"color": "#c0392b",
-			"icon": "fa fa-shopping-cart",
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
 			"hidden": 1
@@ -112,7 +108,6 @@ def get_data():
 		{
 			"module_name": "HR",
 			"color": "#2ecc71",
-			"icon": "fa fa-group",
 			"icon": "octicon octicon-organization",
 			"label": _("Human Resources"),
 			"type": "module",
@@ -121,7 +116,6 @@ def get_data():
 		{
 			"module_name": "Manufacturing",
 			"color": "#7f8c8d",
-			"icon": "fa fa-cogs",
 			"icon": "octicon octicon-tools",
 			"type": "module",
 			"hidden": 1
@@ -145,7 +139,6 @@ def get_data():
 		{
 			"module_name": "Projects",
 			"color": "#8e44ad",
-			"icon": "fa fa-puzzle-piece",
 			"icon": "octicon octicon-rocket",
 			"type": "module",
 			"hidden": 1
@@ -153,7 +146,6 @@ def get_data():
 		{
 			"module_name": "Support",
 			"color": "#2c3e50",
-			"icon": "fa fa-phone",
 			"icon": "octicon octicon-issue-opened",
 			"type": "module",
 			"hidden": 1
@@ -286,10 +278,98 @@ def get_data():
 		{
 			"module_name": "Healthcare",
 			"color": "#FF888B",
-			"icon": "octicon octicon-plus",
+			"icon": "fa fa-heartbeat",
 			"type": "module",
 			"label": _("Healthcare"),
 			"hidden": 1
+		},
+        {
+			"module_name": "Patient",
+			"color": "#6BE273",
+			"icon": "fa fa-user",
+			"doctype": "Patient",
+			"type": "link",
+			"link": "List/Patient",
+			"label": _("Patient"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Healthcare Practitioner",
+			"color": "#2ecc71",
+			"icon": "fa fa-user-md",
+			"doctype": "Healthcare Practitioner",
+			"type": "link",
+			"link": "List/Healthcare Practitioner",
+			"label": _("Healthcare Practitioner"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Patient Appointment",
+			"color": "#934F92",
+			"icon": "fa fa-calendar-plus-o",
+			"doctype": "Patient Appointment",
+			"type": "link",
+			"link": "List/Patient Appointment",
+			"label": _("Patient Appointment"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Patient Encounter",
+			"color": "#2ecc71",
+			"icon": "fa fa-stethoscope",
+			"doctype": "Patient Encounter",
+			"type": "link",
+			"link": "List/Patient Encounter",
+			"label": _("Patient Encounter"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Lab Test",
+			"color": "#7578f6",
+			"icon": "octicon octicon-beaker",
+			"doctype": "Lab Test",
+			"type": "list",
+			"link": "List/Lab Test",
+			"label": _("Lab Test"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Vital Signs",
+			"color": "#2ecc71",
+			"icon": "fa fa-thermometer-empty",
+			"doctype": "Vital Signs",
+			"type": "list",
+			"link": "List/Vital Signs",
+			"label": _("Vital Signs"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Clinical Procedure",
+			"color": "#FF888B",
+			"icon": "fa fa-medkit",
+			"doctype": "Clinical Procedure",
+			"type": "list",
+			"link": "List/Clinical Procedure",
+			"label": _("Clinical Procedure"),
+			"hidden": 1
+        },
+        {
+			"module_name": "Inpatient Record",
+			"color": "#7578f6",
+			"icon": "fa fa-list-alt",
+			"doctype": "Inpatient Record",
+			"type": "list",
+			"link": "List/Inpatient Record",
+			"label": _("Inpatient Record"),
+			"hidden": 1
+        },
+		{
+			"module_name": "Hub",
+			"color": "#009248",
+			"icon": "/assets/erpnext/images/hub_logo.svg",
+			"type": "page",
+			"link": "Hub/Item",
+			"label": _("Hub")
 		},
 		{
 			"module_name": "Data Import",
@@ -306,9 +386,17 @@ def get_data():
 			"color": "#EA81E8",
 			"icon": "🍔",
 			"_doctype": "Restaurant",
-			"type": "list",
+			"type": "module",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Hotels",
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"label": _("Hotels"),
 			"hidden": 1
 		},
 		{
@@ -350,13 +438,13 @@ def get_data():
 			"hidden": 1
 		},
 		{
-			"module_name": "Land Unit",
-			"_doctype": "Land Unit",
-			"label": _("Land Unit"),
+			"module_name": "Location",
+			"_doctype": "Location",
+			"label": _("Location"),
 			"color": "#8BC34A",
 			"icon": "fa fa-map",
 			"type": "list",
-			"link": "List/Land Unit",
+			"link": "List/Location",
 			"hidden": 1
 		},
 		{

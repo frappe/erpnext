@@ -5,16 +5,40 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import nowdate, add_days
+from frappe.utils import nowdate, get_last_day, add_days
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 class TestAssetMaintenance(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
-		create_asset()
+		create_asset_data()
 		create_maintenance_team()
 
 	def test_create_asset_maintenance(self):
+		pr = make_purchase_receipt(item_code="Photocopier",
+			qty=1, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset_doc = frappe.get_doc('Asset', asset_name)
+		month_end_date = get_last_day(nowdate())
+
+		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+
+		asset_doc.available_for_use_date = purchase_date
+		asset_doc.purchase_date = purchase_date
+
+		asset_doc.calculate_depreciation = 1
+		asset_doc.append("finance_books", {
+			"expected_value_after_useful_life": 200,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": month_end_date
+		})
+
+		asset_doc.save()
+
 		if not frappe.db.exists("Asset Maintenance", "Photocopier"):
 			asset_maintenance =	frappe.get_doc({
 					"doctype": "Asset Maintenance",
@@ -40,9 +64,15 @@ class TestAssetMaintenance(unittest.TestCase):
 		next_due_date = calculate_next_due_date(asset_maintenance_log.completion_date, "Monthly")
 		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
 
-def create_asset():
+def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Equipment"):
 		create_asset_category()
+
+	if not frappe.db.exists("Location", "Test Location"):
+		frappe.get_doc({
+			'doctype': 'Location',
+			'location_name': 'Test Location'
+		}).insert()
 
 	if not frappe.db.exists("Item", "Photocopier"):
 		frappe.get_doc({
@@ -54,21 +84,6 @@ def create_asset():
 			"is_fixed_asset": 1,
 			"is_stock_item": 0,
 			"asset_category": "Equipment"
-		}).insert()
-
-	if not frappe.db.exists("Asset", "Photocopier"):
-		frappe.get_doc({
-			"doctype": "Asset",
-			"asset_name": "Photocopier",
-			"item_code": "Photocopier",
-			"asset_category": "Equipment",
-			"gross_purchase_amount": 100000,
-			"expected_value_after_useful_life": 10000,
-			"warehouse": "_Test Warehouse - _TC",
-			"company": "_Test Company",
-			"purchase_date": nowdate(),
-			"maintenance_required": 1,
-			"asset_owner": "Company"
 		}).insert()
 
 def create_maintenance_team():

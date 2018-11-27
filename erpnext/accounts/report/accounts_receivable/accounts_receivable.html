@@ -34,7 +34,7 @@
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}
-	{%= dateutil.str_to_user(filters.report_date) %}
+	{%= frappe.datetime.str_to_user(filters.report_date) %}
 </h5>
 <hr>
 {% if(filters.show_pdc_in_print) { %}
@@ -138,7 +138,7 @@
 			<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
-					<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+					<td>{%= frappe.datetime.str_to_user(data[i]["posting_date"]) %}</td>
 					<td>
 						{% if(!filters.show_pdc_in_print) { %}
 							{%= data[i]["voucher_type"] %}
@@ -220,7 +220,7 @@
 									<br> {%= data[i][__("Customer Name")] %}
 								{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
 									<br> {%= data[i][__("Supplier Name")] %}
-								{% } %} 
+								{% } %}
 							{% } %}
 							<br>{%= __("Remarks") %}:
 							{%= data[i][__("Remarks")] %}
@@ -230,7 +230,7 @@
 					{% } %}
 					<td style="text-align: right">{%= format_currency(data[i][("total_invoiced_amt")], data[i]["currency"]) %}</td>
 					<td style="text-align: right">{%= format_currency(data[i][("total_paid_amt")], data[i]["currency"]) %}</td>
-					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("Credit Note Amt")], data[i]["currency"]) : format_currency(data[i][__("Debit Note Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("credit_note_amt")], data[i]["currency"]) : format_currency(data[i][__("debit_note_amt")], data[i]["currency"]) %}</td>
 					<td style="text-align: right">{%= format_currency(data[i][("total_outstanding_amt")], data[i]["currency"]) %}</td>
 				{% } %}
 			{% } %}
@@ -238,4 +238,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">{{ __("Printed On ") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

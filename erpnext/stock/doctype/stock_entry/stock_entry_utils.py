@@ -4,12 +4,15 @@
 import frappe, erpnext
 from frappe.utils import cint, flt
 
+from six import string_types
+
 @frappe.whitelist()
 def make_stock_entry(**args):
 	'''Helper function to make a Stock Entry
 
 	:item_code: Item to be moved
 	:qty: Qty to be moved
+	:company: Company Name (optional)
 	:from_warehouse: Optional
 	:to_warehouse: Optional
 	:rate: Optional
@@ -17,6 +20,7 @@ def make_stock_entry(**args):
 	:batch_no: Optional
 	:posting_date: Optional
 	:posting_time: Optional
+	:purpose: Optional
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	'''
@@ -49,7 +53,7 @@ def make_stock_entry(**args):
 	if args.item_code:
 		args.item = args.item_code
 
-	if isinstance(args.qty, basestring):
+	if isinstance(args.qty, string_types):
 		if '.' in args.qty:
 			args.qty = flt(args.qty)
 		else:

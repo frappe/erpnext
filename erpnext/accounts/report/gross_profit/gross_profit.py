@@ -11,7 +11,7 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = frappe._dict()
-	filters.currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	filters.currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	gross_profit_data = GrossProfitGenerator(filters)
 
@@ -24,8 +24,6 @@ def execute(filters=None):
 		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
 			"buying_rate", "base_amount", "buying_amount", "gross_profit", "gross_profit_percent"],
 		"warehouse": ["warehouse", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
-			"gross_profit", "gross_profit_percent"],
-		"territory": ["territory", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
 			"gross_profit", "gross_profit_percent"],
 		"brand": ["brand", "qty", "base_rate", "buying_rate", "base_amount", "buying_amount",
 			"gross_profit", "gross_profit_percent"],
@@ -151,7 +149,7 @@ class GrossProfitGenerator(object):
 
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
-		for key in self.grouped.keys():
+		for key in list(self.grouped):
 			if self.filters.get("group_by") != "Invoice":
 				for i, row in enumerate(self.grouped[key]):
 					if i==0:
@@ -238,7 +236,7 @@ class GrossProfitGenerator(object):
 							previous_stock_value = len(my_sle) > i+1 and \
 								flt(my_sle[i+1].stock_value) or 0.0
 							if previous_stock_value:
-								return previous_stock_value - flt(sle.stock_value)
+								return (previous_stock_value - flt(sle.stock_value)) * flt(row.qty) / abs(flt(sle.qty))
 							else:
 								return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 			else:

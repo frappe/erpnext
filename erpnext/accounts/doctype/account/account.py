@@ -12,6 +12,11 @@ class BalanceMismatchError(frappe.ValidationError): pass
 
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
+	def on_update(self):
+		if frappe.local.flags.ignore_on_update:
+			return
+		else:
+			super(Account, self).on_update()
 
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
@@ -20,14 +25,16 @@ class Account(NestedSet):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		self.name = get_account_autoname(self.account_number, self.account_name, self.company)
+		from erpnext.accounts.utils import get_autoname_with_number
+		self.name = get_autoname_with_number(self.account_number, self.account_name, None, self.company)
 
 	def validate(self):
+		from erpnext.accounts.utils import validate_field_number
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_root_details()
-		validate_account_number(self.name, self.account_number, self.company)
+		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -117,7 +124,7 @@ class Account(NestedSet):
 
 	def validate_account_currency(self):
 		if not self.account_currency:
-			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			self.account_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
@@ -177,17 +184,20 @@ def get_account_currency(account):
 	if not account:
 		return
 	def generator():
-		account_currency, company = frappe.db.get_value("Account", account, ["account_currency", "company"])
+		account_currency, company = frappe.get_cached_value("Account", account, ["account_currency", "company"])
 		if not account_currency:
-			account_currency = frappe.db.get_value("Company", company, "default_currency")
+			account_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 		return account_currency
 
 	return frappe.local_cache("account_currency", account, generator)
 
+def on_doctype_update():
+	frappe.db.add_index("Account", ["lft", "rgt"])
+
 def get_account_autoname(account_number, account_name, company):
 	# first validate if company exists
-	company = frappe.db.get_value("Company", company, ["abbr", "name"], as_dict=True)
+	company = frappe.get_cached_value('Company',  company,  ["abbr", "name"], as_dict=True)
 	if not company:
 		frappe.throw(_('Company {0} does not exist').format(company))
 

@@ -1,3 +1,0 @@
-crops_and_land
-diseases_and_fertlizers
-analytics

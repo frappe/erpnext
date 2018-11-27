@@ -11,28 +11,23 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Stock Entry': 'Return',
 			'Purchase Invoice': 'Invoice'
 		}
+
+		frm.set_query("asset", "items", function() {
+			return {
+				filters: {
+					"purchase_receipt": frm.doc.name
+				}
+			}
+		})
 	},
 	onload: function(frm) {
-		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
-			frm.set_query(field, "items", function() {
-				return {
-					filters: [
-						["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-						["Warehouse", "is_group", "=", 0]
-					]
-				}
-			})
-		})
-
-		frm.set_query("supplier_warehouse", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
 		});
+	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	refresh: function(frm) {
@@ -62,9 +57,22 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
-			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
-				this.show_general_ledger();
-			}
+			//removed for temporary
+			this.show_general_ledger();
+
+			this.frm.add_custom_button(__('Asset'), function() {
+				frappe.route_options = {
+					purchase_receipt: me.frm.doc.name,
+				};
+				frappe.set_route("List", "Asset");
+			}, __("View"));
+
+			this.frm.add_custom_button(__('Asset Movement'), function() {
+				frappe.route_options = {
+					reference_name: me.frm.doc.name,
+				};
+				frappe.set_route("List", "Asset Movement");
+			}, __("View"));
 		}
 
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
@@ -100,7 +108,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __("Make"));
 
-				if(!this.frm.doc.subscription) {
+				if(!this.frm.doc.auto_repeat) {
 					cur_frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
 					}, __("Make"))
@@ -211,11 +219,6 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 			['BOM', 'docstatus', '=', '1']
 		]
 	}
-}
-
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.purchase_receipt))
-		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
 
 frappe.provide("erpnext.buying");

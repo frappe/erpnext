@@ -9,38 +9,26 @@ from frappe import _
 
 class AssessmentPlan(Document):
 	def validate(self):
-		self.set_missing_field()
 		self.validate_overlap()
 		self.validate_max_score()
 		self.validate_assessment_criteria()
 
-	def set_missing_field(self):
-		if self.student_group:
-			academic_term, academic_year, program, course = frappe.get_value("Student Group", self.student_group,
-				["academic_term", "academic_year", "program", "course"])
-			self.academic_term = academic_term
-			self.academic_year = academic_year
-			if program:
-				self.program = program
-			if course and not self.course:	#pylint: disable=E0203
-				self.course = course
-
 	def validate_overlap(self):
 		"""Validates overlap for Student Group, Instructor, Room"""
-		
+
 		from erpnext.education.utils import validate_overlap_for
 
 		#Validate overlapping course schedules.
 		if self.student_group:
 			validate_overlap_for(self, "Course Schedule", "student_group")
-		
+
 		validate_overlap_for(self, "Course Schedule", "instructor")
 		validate_overlap_for(self, "Course Schedule", "room")
 
 		#validate overlapping assessment schedules.
 		if self.student_group:
 			validate_overlap_for(self, "Assessment Plan", "student_group")
-		
+
 		validate_overlap_for(self, "Assessment Plan", "room")
 		validate_overlap_for(self, "Assessment Plan", "supervisor", self.supervisor)
 

@@ -23,6 +23,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 				return erpnext.queries.warehouse(frm.doc);
 			});
 		}
+
+		if (!frm.doc.expense_account) {
+			frm.trigger("set_expense_account");
+		}
 	},
 
 	refresh: function(frm) {
@@ -38,14 +42,22 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	get_items: function(frm) {
-		frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
+		frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1,
+			"get_query": function() {
+				return {
+					"filters": {
+						"company": frm.doc.company,
+					}
+				}
+			}},
 			function(data) {
 				frappe.call({
 					method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
 					args: {
 						warehouse: data.warehouse,
 						posting_date: frm.doc.posting_date,
-						posting_time: frm.doc.posting_time
+						posting_time: frm.doc.posting_time,
+						company:frm.doc.company
 					},
 					callback: function(r) {
 						var items = [];
@@ -114,6 +126,25 @@ frappe.ui.form.on("Stock Reconciliation", {
 	toggle_display_account_head: function(frm) {
 		frm.toggle_display(['expense_account', 'cost_center'],
 			erpnext.is_perpetual_inventory_enabled(frm.doc.company));
+	},
+	purpose: function(frm) {
+		frm.trigger("set_expense_account");
+	},
+	set_expense_account: function(frm) {
+		if (frm.doc.company && erpnext.is_perpetual_inventory_enabled(frm.doc.company)) {
+			return frm.call({
+				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_difference_account",
+				args: {
+					"purpose": frm.doc.purpose,
+					"company": frm.doc.company
+				},
+				callback: function(r) {
+					if (!r.exc) {
+						frm.set_value("expense_account", r.message);
+					}
+				}
+			});
+		}
 	}
 });
 
@@ -137,37 +168,12 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
-	onload: function() {
-		this.set_default_expense_account();
-	},
-
-	set_default_expense_account: function() {
-		var me = this;
-		if(this.frm.doc.company) {
-			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company) && !this.frm.doc.expense_account) {
-				return this.frm.call({
-					method: "erpnext.accounts.utils.get_company_default",
-					args: {
-						"fieldname": "stock_adjustment_account",
-						"company": this.frm.doc.company
-					},
-					callback: function(r) {
-						if (!r.exc) {
-							me.frm.set_value("expense_account", r.message);
-						}
-					}
-				});
-			}
-		}
-	},
-
 	setup: function() {
 		var me = this;
 
 		this.setup_posting_date_time_check();
 
 		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.add_fetch("company", "cost_center", "cost_center");
 		}
 		this.frm.fields_dict["expense_account"].get_query = function() {

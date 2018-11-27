@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt
 from frappe import _
 
@@ -25,10 +25,17 @@ def get_data(filters):
 		filters_data.append(["against_voucher", "=", filters.get("asset")])
 
 	if filters.get("asset_category"):
+
 		assets = frappe.db.sql_list("""select name from tabAsset
 			where asset_category = %s and docstatus=1""", filters.get("asset_category"))
 
 		filters_data.append(["against_voucher", "in", assets])
+
+	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+	if (not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book)):
+		filters_data.append(["finance_book", "in", ['', filters.get('finance_book')]])
+	elif filters.get("finance_book"):
+		filters_data.append(["finance_book", "=", filters.get('finance_book')])
 
 	gl_entries = frappe.get_all('GL Entry',
 		filters= filters_data,
@@ -40,7 +47,7 @@ def get_data(filters):
 
 	assets = [d.against_voucher for d in gl_entries]
 	assets_details = get_assets_details(assets)
-	
+
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
 		if not asset_data.get("accumulated_depreciation_amount"):

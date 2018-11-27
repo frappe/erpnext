@@ -12,6 +12,7 @@ def execute():
 			plan_doc = frappe.get_doc("Data Migration Plan", plan.name)
 			for m in plan_doc.get("mappings"):
 				frappe.delete_doc("Data Migration Mapping", m.mapping, force=True)
+			docs = frappe.get_all("Data Migration Run", filters={"data_migration_plan": plan.name})
+			for doc in docs:
+				frappe.delete_doc("Data Migration Run", doc.name)
 			frappe.delete_doc("Data Migration Plan", plan.name)
-
-	frappe.delete_doc("Module Def", "Hub Node", ignore_missing=True)

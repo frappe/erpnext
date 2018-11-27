@@ -2,8 +2,8 @@
 	{
 		"doctype": "Crop Cycle",
 		"title": "Basil from seed 2017",
-		"linked_land_unit": [{
-			"land_unit": "Basil Farm"
+		"linked_location": [{
+			"location": "Basil Farm"
 		}],
 		"crop": "Basil from seed",
 		"start_date": "2017-11-11",

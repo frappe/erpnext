@@ -11,7 +11,8 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '10.x.x-develop'
+develop_version = '12.x.x-develop'
+staging_version = '11.0.3-beta.24'
 
 error_report_email = "support@erpnext.com"
 
@@ -20,11 +21,14 @@ docs_app = "foundation"
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
 web_include_js = "assets/js/erpnext-web.min.js"
-web_include_css = "assets/erpnext/css/website.css"
+web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
+	"Event": "public/js/event.js"
 }
+
+welcome_email = "erpnext.setup.utils.welcome_email"
 
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
@@ -51,7 +55,7 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
-calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
+calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
 
 
@@ -129,11 +133,10 @@ website_route_rules = [
 	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
-	{"from_route": "/grant-application", "to_route": "Grant Application"},
-	{"from_route": "/chapters", "to_route": "Chapter"},
 ]
 
 standard_portal_menu_items = [
+	{"title": _("Personal Details"), "route": "/personal-details", "reference_doctype": "Patient", "role": "Patient"},
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
 	{"title": _("Supplier Quotation"), "route": "/supplier-quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
@@ -146,13 +149,12 @@ standard_portal_menu_items = [
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
-	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Consultation", "role":"Patient"},
+	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Patient Encounter", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
-	{"title": _("Grant Application"), "route": "/grant-application", "reference_doctype": "Grant Application", "role": "Non Profit Portal User"},
-	{"title": _("Chapter"), "route": "/chapters", "reference_doctype": "Chapter"}
+	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application"},
 ]
 
 default_roles = [
@@ -170,8 +172,9 @@ has_website_permission = {
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Lab Test": "erpnext.healthcare.web_form.lab_test.lab_test.has_website_permission",
-	"Consultation": "erpnext.healthcare.web_form.prescription.prescription.has_website_permission",
-	"Patient Appointment": "erpnext.healthcare.web_form.patient_appointments.patient_appointments.has_website_permission"
+	"Patient Encounter": "erpnext.healthcare.web_form.prescription.prescription.has_website_permission",
+	"Patient Appointment": "erpnext.healthcare.web_form.patient_appointments.patient_appointments.has_website_permission",
+	"Patient": "erpnext.healthcare.web_form.personal_details.personal_details.has_website_permission"
 }
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"
@@ -200,21 +203,30 @@ doc_events = {
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
+	"Sales Invoice": {
+		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
+		"on_trash": "erpnext.regional.check_deletion_permission"
+	},
 	"Payment Entry": {
-		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
+	},
+	"Contact":{
+		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
 	}
 }
 
 scheduler_events = {
 	"hourly": [
-		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
+		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
+		"erpnext.accounts.doctype.subscription.subscription.process_all",
+		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -226,12 +238,22 @@ scheduler_events = {
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
-		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
+		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
-		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
-		"erpnext.assets.doctype.asset.asset.update_maintenance_status"
+		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
+		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
+		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
+		"erpnext.projects.doctype.project.project.update_project_sales_billing"
+	],
+	"daily_long": [
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
+	],
+	"monthly": [
+		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
+		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
+		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }
 
@@ -259,10 +281,16 @@ get_site_info = 'erpnext.utilities.get_site_info'
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
 regional_overrides = {
+	'France': {
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
+	},
 	'India': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
-		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data'
+		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
+		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
+		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
+		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'

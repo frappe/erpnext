@@ -2,20 +2,22 @@ frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
 	"filters": get_filters(),
-	"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
-		if (columnDef.df.fieldname=="account") {
-			value = dataContext.account_name;
+	"formatter": function(value, row, column, data, default_formatter) {
+		if (column.fieldname=="account") {
+			value = data.account_name;
 
-			columnDef.df.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")";
-			columnDef.df.is_tree = true;
+			column.link_onclick =
+				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+			column.is_tree = true;
 		}
 
-		value = default_formatter(row, cell, value, columnDef, dataContext);
+		value = default_formatter(value, row, column, data);
 
-		if (!dataContext.parent_account) {
+		if (!data.parent_account) {
+			value = $(`<span>${value}</span>`);
+
 			var $value = $(value).css("font-weight", "bold");
-			if (dataContext.warn_if_negative && dataContext[columnDef.df.fieldname] < 0) {
+			if (data.warn_if_negative && data[column.fieldname] < 0) {
 				$value.addClass("text-danger");
 			}
 
@@ -30,7 +32,7 @@ erpnext.financial_statements = {
 
 		frappe.route_options = {
 			"account": data.account,
-			"company": frappe.query_report_filters_by_name.company.get_value(),
+			"company": frappe.query_report.get_filter_value('company'),
 			"from_date": data.from_date || data.year_start_date,
 			"to_date": data.to_date || data.year_end_date,
 			"project": (project && project.length > 0) ? project[0].$input.val() : ""
@@ -71,6 +73,43 @@ function get_filters(){
 			"reqd": 1
 		},
 		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "MultiSelect",
+			get_data: function() {
+				var cost_centers = frappe.query_report.get_filter_value("cost_center") || "";
+
+				const values = cost_centers.split(/\s*,\s*/).filter(d => d);
+				const txt = cost_centers.match(/[^,\s*]*$/)[0] || '';
+				let data = [];
+
+				frappe.call({
+					type: "GET",
+					method:'frappe.desk.search.search_link',
+					async: false,
+					no_spinner: true,
+					args: {
+						doctype: "Cost Center",
+						txt: txt,
+						filters: {
+							"company": frappe.query_report.get_filter_value("company"),
+							"name": ["not in", values]
+						}
+					},
+					callback: function(r) {
+						data = r.results;
+					}
+				});
+				return data;
+			}
+		},
+		{
 			"fieldname":"from_fiscal_year",
 			"label": __("Start Year"),
 			"fieldtype": "Link",
@@ -96,8 +135,18 @@ function get_filters(){
 				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
-			"default": "Monthly",
+			"default": "Yearly",
 			"reqd": 1
+		},
+		// Note:
+		// If you are modifying this array such that the presentation_currency object
+		// is no longer the last object, please make adjustments in cash_flow.js
+		// accordingly.
+		{
+			"fieldname": "presentation_currency",
+			"label": __("Currency"),
+			"fieldtype": "Select",
+			"options": erpnext.get_presentation_currency_list()
 		}
 	]
 }

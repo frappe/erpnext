@@ -99,7 +99,7 @@ def upload():
 	from frappe.modules import scrub
 
 	rows = read_csv_content_from_uploaded_file()
-	rows = filter(lambda x: x and any(x), rows)
+	rows = list(filter(lambda x: x and any(x), rows))
 	if not rows:
 		msg = [_("Please select a csv file")]
 		return {"messages": msg, "error": msg}

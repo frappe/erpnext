@@ -78,7 +78,7 @@
  "icon": "fa fa-magic", 
  "idx": 1, 
  "in_create": 0, 
- "in_dialog": 0, 
+
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 

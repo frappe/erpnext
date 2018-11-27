@@ -9,46 +9,25 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee",
-					"description": _("Employee records."),
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Attendance Tool",
-					"label": _("Employee Attendance Tool"),
-					"description":_("Mark Attendance for multiple employees"),
 					"hide_count": True
 				},
 				{
 					"type": "doctype",
 					"name": "Attendance",
-					"description": _("Attendance record."),
+				},
+				{
+					"type": "doctype",
+					"name": "Attendance Request",
 				},
 				{
 					"type": "doctype",
 					"name": "Upload Attendance",
-					"description":_("Upload attendance from a .csv file"),
 					"hide_count": True
-				},
-			]
-		},
-		{
-			"label": _("Recruitment"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Job Opening",
-					"description": _("Opening for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
-					"description": _("Applicant for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Offer Letter",
-					"description": _("Offer candidate a Job."),
-				},
+				}
 			]
 		},
 		{
@@ -57,36 +36,39 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Leave Application",
-					"description": _("Applications for leave."),
-				},
-				{
-					"type": "doctype",
-					"name":"Leave Type",
-					"description": _("Type of leaves like casual, sick etc."),
-				},
-				{
-					"type": "doctype",
-					"name": "Holiday List",
-					"description": _("Holiday master.")
 				},
 				{
 					"type": "doctype",
 					"name": "Leave Allocation",
-					"description": _("Allocate leaves for a period.")
 				},
 				{
 					"type": "doctype",
-					"name": "Leave Control Panel",
-					"label": _("Leave Allocation Tool"),
-					"description":_("Allocate leaves for the year."),
-					"hide_count": True
+					"name": "Compensatory Leave Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Encashment",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Period",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Policy",
+				},
+				{
+					"type": "doctype",
+					"name":"Leave Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Holiday List",
 				},
 				{
 					"type": "doctype",
 					"name": "Leave Block List",
-					"description": _("Block leave applications by department.")
 				},
-
 			]
 		},
 		{
@@ -94,47 +76,89 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Salary Structure Assignment",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Slip",
-					"description": _("Monthly salary statement."),
 				},
 				{
 					"type": "doctype",
-					"name": "Payroll Entry",
-					"label": _("Payroll Entry"),
-					"description":_("Generate Salary Slips"),
-					"hide_count": True
+					"name": "Payroll Entry"
 				},
 				{
 					"type": "doctype",
-					"name": "Salary Structure",
-					"description": _("Salary template master.")
+					"name": "Employee Benefit Application",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Benefit Claim",
+				},
+				{
+					"type": "doctype",
+					"name": "Additional Salary",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Declaration",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Proof Submission",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Incentive",
+				},
+				{
+					"type": "doctype",
+					"name": "Retention Bonus",
+				},
+			]
+		},
+		{
+			"label": _("Payroll Setup"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Payroll Period",
 				},
 				{
 					"type": "doctype",
 					"name": "Salary Component",
-					"label": _("Salary Components"),
-					"description": _("Earnings, Deductions and other Salary components")
 				},
-
+				{
+					"type": "doctype",
+					"name": "Salary Structure",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Category",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Sub Category"
+				}
 			]
 		},
 		{
-			"label": _("Expense Claims"),
+			"label": _("Travel and Expense Claim"),
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Employee Advance",
-					"description": _("Manage advance amount given to the Employee"),
 				},
 				{
 					"type": "doctype",
 					"name": "Expense Claim",
-					"description": _("Claims for company expense."),
 				},
 				{
 					"type": "doctype",
 					"name": "Expense Claim Type",
-					"description": _("Types of Expense Claim.")
+				},
+				{
+					"type": "doctype",
+					"name": "Travel Request",
 				},
 			]
 		},
@@ -144,12 +168,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Appraisal",
-					"description": _("Performance appraisal."),
 				},
 				{
 					"type": "doctype",
 					"name": "Appraisal Template",
-					"description": _("Template for performance appraisals.")
 				},
 				{
 					"type": "page",
@@ -159,22 +181,66 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Loan Management"),
+			"label": _("Loan Management"),
 			"icon": "icon-list",
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Loan Type",
-					"description": _("Define various loan types")
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan Application",
-					"description": _("Employee Loan Application")
+					"name": "Loan Application",
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Loan"
+					"name": "Loan"
+				},
+			]
+		},
+		{
+			"label": _("Employee Lifecycle"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Transfer",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Promotion",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation Template",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding Template"
+				}
+			]
+		},
+		{
+			"label": _("Recruitment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+				},
+				{
+					"type": "doctype",
+					"name": "Job Opening",
+				},
+				{
+					"type": "doctype",
+					"name": "Job Offer",
 				},
 			]
 		},
@@ -199,7 +265,23 @@ def get_data():
 				},
 			]
 		},
-
+		{
+			"label": _("Shift Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Shift Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Assignment",
+				}
+			]
+		},
 		{
 			"label": _("Fleet Management"),
 			"items": [
@@ -220,32 +302,39 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "HR Settings",
-					"description": _("Settings for HR Module")
 				},
 				{
 					"type": "doctype",
 					"name": "Employment Type",
-					"description": _("Types of employment (permanent, contract, intern etc.).")
 				},
 				{
 					"type": "doctype",
 					"name": "Branch",
-					"description": _("Organization branch master.")
 				},
 				{
 					"type": "doctype",
 					"name": "Department",
-					"description": _("Organization unit (department) master.")
 				},
 				{
 					"type": "doctype",
 					"name": "Designation",
-					"description": _("Employee designation (e.g. CEO, Director etc.).")
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Settings"
+					"name": "Employee Grade",
 				},
+				{
+					"type": "doctype",
+					"name": "Daily Work Summary Group"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Health Insurance"
+				},
+				{
+					"type": "doctype",
+					"name": "Staffing Plan",
+				}
 			]
 		},
 		{
@@ -314,11 +403,17 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
-				},
+				}
+			]
+		},
+		{
+			"label": _("Analytics"),
+			"items": [
 				{
-					"type": "help",
-					"label": _("Processing Payroll"),
-					"youtube_id": "apgE-f25Rm0"
+					"type": "report",
+					"is_query_report": True,
+					"name": "Department Analytics",
+					"doctype": "Employee"
 				},
 			]
 		}
