@@ -193,6 +193,22 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
+	def check_valuation_rate_with_previous_doc(self):
+		has_different_rate = False
+		for item in self.items:
+			receipt_valuation_rate = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "receipt_valuation_rate")
+			val_rate_db_precision = 6 if cint(self.precision("valuation_rate", item)) <= 6 else 9
+
+			# if valuation rates are different
+			if abs(item.valuation_rate - receipt_valuation_rate) >= 1.0 / (10 ** val_rate_db_precision):
+				has_different_rate = True
+				if not cint(self.revalue_purchase_receipt):
+					frappe.throw(_("Row {0}: Item Valuation Rate does not match the Valuation Rate in Purchase Receipt. "
+						"Check 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+		if not has_different_rate:
+			self.revalue_purchase_receipt = 0
+
 	def validate_return_against(self):
 		if cint(self.is_return) and self.return_against:
 			against_doc = frappe.get_doc("Purchase Invoice", self.return_against)
@@ -330,6 +346,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+		self.check_valuation_rate_with_previous_doc()
 		self.update_status_updater_args()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -357,21 +374,18 @@ class PurchaseInvoice(BuyingController):
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_receipts_valuation(self):
-		purchase_receipts = set()
-		for item in self.get("items"):
-			if item.purchase_receipt:
-				purchase_receipts.add(item.purchase_receipt)
+		purchase_receipts = set([item.purchase_receipt for item in self.items if item.purchase_receipt])
 
 		for pr_name in purchase_receipts:
 			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
 
-			# set invoiced item tax amount in pr item
-			pr_doc.set_invoiced_item_tax_amount()
+			# set billed item tax amount and billed net amount in pr item
+			pr_doc.set_billed_valuation_amount()
 
-			# set valuation amount in pr item
+			# set valuation rate in pr item
 			pr_doc.update_valuation_rate("items")
 
-			# db_update will update and save invoiced item tax amount in PR
+			# db_update will update and save valuation_rate in PR
 			for item in pr_doc.get("items"):
 				item.db_update()
 
