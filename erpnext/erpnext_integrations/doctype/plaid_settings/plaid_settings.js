@@ -7,6 +7,6 @@ frappe.ui.form.on('Plaid Settings', {
 	},
 
 	connect_btn: function(frm) {
-		frappe.set_route('bankreconciliation/synchronization');
+		frappe.set_route('bank-reconciliation');
 	}
 });

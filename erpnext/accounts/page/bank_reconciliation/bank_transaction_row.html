@@ -1,0 +1,32 @@
+<div class="list-row transaction-item">
+	<div>
+		<div class="clickable-section" data-name={{ name }}>
+			<div class="col-sm-2 ellipsis hidden-xs">
+				{%= frappe.datetime.str_to_user(date) %}
+			</div>
+			<div class="col-xs-8 col-sm-4 ellipsis list-subject">
+				{{ description }}
+			</div>
+			<div class="col-sm-2 ellipsis hidden-xs">
+				{%= format_currency(debit, currency) %}
+			</div>
+			<div class="col-sm-2 ellipsis hidden-xs">
+				{%= format_currency(credit, currency) %}
+			</div>
+			<div class="col-sm-1 ellipsis hidden-xs">
+				{{ currency }}
+			</div>
+		</div>
+		<div class="col-xs-3 col-sm-1">
+			<div class="btn-group">
+				<a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu reports-dropdown" style="max-height: 300px; overflow-y: auto; right: 0px; left: auto;">
+					<li><a class="new-payment" data-name={{ name }}>{{ __("New Payment") }}</a></li>
+					<li><a class="new-invoice" data-name={{ name }}>{{ __("New Invoice") }}</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>

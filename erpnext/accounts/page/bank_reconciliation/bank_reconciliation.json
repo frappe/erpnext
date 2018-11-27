@@ -1,0 +1,29 @@
+{
+ "content": null, 
+ "creation": "2018-11-24 12:03:14.646669", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-11-24 12:03:14.646669", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "bank-reconciliation", 
+ "owner": "Administrator", 
+ "page_name": "bank-reconciliation", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Bank Reconciliation"
+}

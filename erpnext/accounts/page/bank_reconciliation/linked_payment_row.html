@@ -1,0 +1,19 @@
+<div class="grid-row">
+	<div class="row">
+		<div class="col-xs-12">
+			<label class="control-label">{{ name }}</label>
+		</div>
+		<div class="col-xs-5 ellipsis hidden-xs">
+			<h4>{{ __("Date:") }}</h4><h6> {{ posting_date }}</h6>
+			<h4>{{ __("Reference Date:") }}</h4><h6>{{ reference_date }}</h6>
+		</div>
+		<div class="col-xs-7 ellipsis list-subject">
+			<h4>{{ __("Amount:") }}</h4><h6>{{ format_currency(paid_amount, paid_to_account_currency) }}</h6>
+			<h4>{{ __("Party:") }}</h4><h6>{{ party }}</h6>
+			<h4>{{ __("Reference:") }}</h4><h6>{{ reference_no }}</h6>
+		</div>
+		<div class="text-right margin-bottom">
+			<button class="btn btn-primary btn-xs reconciliation-btn" data-name={{ name }}>{{ __("Reconcile") }}</button>
+		</div>
+	</div>
+</div>

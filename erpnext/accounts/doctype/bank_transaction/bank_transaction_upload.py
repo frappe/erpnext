@@ -32,10 +32,12 @@ def upload_bank_statement():
 
 @frappe.whitelist()
 def create_bank_entries(columns, data, bank_account):
-	bank_account = json.loads(bank_account)
 	header_map = get_header_mapping(columns, bank_account)
 
+	count = 0
 	for d in json.loads(data):
+		if all(item is None for item in d) is True:
+			continue
 		fields = {}
 		for key, value in header_map.iteritems():
 			fields.update({key: d[int(value)-1]})
@@ -46,10 +48,12 @@ def create_bank_entries(columns, data, bank_account):
 		})
 		bank_transaction.update(fields)
 		bank_transaction.date = getdate(bank_transaction.date)
-		bank_transaction.bank_account = bank_account["name"]
+		bank_transaction.bank_account = bank_account
 		bank_transaction.insert()
+		bank_transaction.submit()
+		count = count + 1
 
-	return 'success'
+	return count
 
 def get_header_mapping(columns, bank_account):
 	mapping = get_bank_mapping(bank_account)
@@ -62,7 +66,7 @@ def get_header_mapping(columns, bank_account):
 	return header_map
 
 def get_bank_mapping(bank_account):
-	bank_name = frappe.db.get_value("Bank Account", bank_account["name"], "bank")
+	bank_name = frappe.db.get_value("Bank Account", bank_account, "bank")
 	bank = frappe.get_doc("Bank", bank_name)
 
 	mapping = {row.file_field:row.bank_transaction_field for row in bank.bank_transaction_mapping}

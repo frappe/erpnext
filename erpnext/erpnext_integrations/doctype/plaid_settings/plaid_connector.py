@@ -42,7 +42,6 @@ class PlaidConnector():
 
 	def auth(self):
 		try:
-			print(self.access_token)
 			self.client.Auth.get(self.access_token)
 			print("Authentication successful.....")
 		except ItemError as e:

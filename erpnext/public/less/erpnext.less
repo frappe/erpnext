@@ -25,10 +25,10 @@
 
 .app-icon-svg {
 	display: inline-block;
-    margin: auto;
-    text-align: center;
-    border-radius: 16px;
-    cursor: pointer;
+	margin: auto;
+	text-align: center;
+	border-radius: 16px;
+	cursor: pointer;
 	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
 }
 
@@ -458,4 +458,31 @@ body[data-route="pos"] {
 	.list-item_content {
 		padding-right: 45px;
 	}
+}
+
+// Bank Reconciliation
+
+.plaid-btn {
+	margin-top: 24px;
+	color: #fff;
+	background-color: #5bc0de;
+	border-color: #46b8da;
+}
+
+.transactions-btn {
+	margin: 15px;
+}
+
+[data-fieldname='reconcile_data'],
+[data-fieldname='sync_data'],
+[data-fieldname='import_data'] {
+	.btn {
+		color: #fff;
+		background-color: #8d99a6;
+		border-color: #7f8c9b;
+	}
+}
+
+[data-fieldname='table_container'] {
+	margin: -15px -30px;
 }

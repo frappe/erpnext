@@ -16,13 +16,14 @@ class PlaidSettings(Document):
 
 @frappe.whitelist()
 def plaid_configuration():
-	return {"plaid_public_key": frappe.conf.get("plaid_public_key") or None, "plaid_env": frappe.conf.get("plaid_env") or None, "client_name": frappe.local.site }
-
+	if frappe.db.get_value("Plaid Settings", None, "enabled") == "1":
+		return {"plaid_public_key": frappe.conf.get("plaid_public_key") or None, "plaid_env": frappe.conf.get("plaid_env") or None, "client_name": frappe.local.site }
+	else:
+		return "disabled"
 
 @frappe.whitelist()
 def add_institution(token, response):
 	response = json.loads(response)
-	frappe.log_error(response)
 
 	plaid = PlaidConnector()
 	access_token = plaid.get_access_token(token)
@@ -46,12 +47,14 @@ def add_institution(token, response):
 	return bank
 
 @frappe.whitelist()
-def add_bank_accounts(response, bank):
+def add_bank_accounts(response, bank, company):
 	response = json.loads(response)
 	bank = json.loads(bank)
-	company = "Dokos"
 	result = []
+
 	default_gl_account = get_default_bank_cash_account(company, "Bank")
+	if not default_gl_account:
+		frappe.throw(_("Please setup a default bank account for company {0}".format(company)))
 
 	for account in response["accounts"]:
 		acc_type = frappe.db.get_value("Account Type", account["type"])
@@ -80,6 +83,8 @@ def add_bank_accounts(response, bank):
 
 				result.append(new_account.name)
 
+			except frappe.UniqueValidationError as e:
+				frappe.msgprint(_("Bank account {0} already exists and could not be created again").format(new_account.account_name))
 			except Exception:
 				frappe.throw(frappe.get_traceback())
 
@@ -135,7 +140,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 	access_token = None
 
 	if bank_account:
-		related_bank = frappe.db.get_values("Bank Account", dict(account_name=bank_account), ["bank", "integration_id"], as_dict=True)
+		related_bank = frappe.db.get_values("Bank Account", bank_account, ["bank", "integration_id"], as_dict=True)
 		access_token = frappe.db.get_value("Bank", related_bank[0].bank, "plaid_access_token")
 		account_id = related_bank[0].integration_id
 
@@ -175,6 +180,7 @@ def new_bank_transaction(transaction):
 				"description": transaction["name"]
 			})
 			new_transaction.insert()
+			new_transaction.submit()
 
 			result.append(new_transaction.name)
 
