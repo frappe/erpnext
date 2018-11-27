@@ -98,10 +98,14 @@ class Issue(Document):
 						self.resolution_time_period = service.resolution_time_period
 						if self.description:
 							issue_criticality = frappe.get_list("Issue Criticality")
+							print(issue_criticality)
 							for criticality in issue_criticality:
+								print(criticality)
 								doc = frappe.get_doc("Issue Criticality", criticality)
 								for keyword in doc.keyword:
 									if re.search(r''+ keyword.keyword +'', self.description):
+										self.issue_criticality = doc.name
+										self.employee_group = doc.employee_group
 										self.priority = doc.priority
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
@@ -113,10 +117,14 @@ class Issue(Document):
 								self.resolution_time_period = service.resolution_time_period
 								if self.description:
 									issue_criticality = frappe.get_list("Issue Criticality")
+									print(issue_criticality)
 									for criticality in issue_criticality:
+										print(criticality)
 										doc = frappe.get_doc("Issue Criticality", criticality)
 										for keyword in doc.keyword:
 											if re.search(r''+ keyword.keyword +'', self.description):
+												self.issue_criticality = doc.name
+												self.employee_group = doc.employee_group
 												self.priority = doc.priority
 				self.isset_sla = 1
 			else:
