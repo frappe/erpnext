@@ -807,15 +807,25 @@ frappe.ui.form.on('Payment Entry', {
 						var write_off_row = $.map(frm.doc["deductions"] || [], function(t) {
 							return t.account==r.message[account] ? t : null; });
 
-						if (!write_off_row.length) {
-							var row = frm.add_child("deductions");
+						var row = [];
+
+						var difference_amount = flt(frm.doc.difference_amount,
+							precision("difference_amount"));
+
+						if (!write_off_row.length && difference_amount) {
+							row = frm.add_child("deductions");
 							row.account = r.message[account];
 							row.cost_center = r.message["cost_center"];
 						} else {
-							var row = write_off_row[0];
+							row = write_off_row[0];
 						}
 
-						row.amount = flt(row.amount) + flt(frm.doc.difference_amount);
+						if (row) {
+							row.amount = flt(row.amount) + difference_amount;
+						} else {
+							frappe.msgprint(__("No gain or loss in the exchange rate"))
+						}
+
 						refresh_field("deductions");
 
 						frm.events.set_unallocated_amount(frm);

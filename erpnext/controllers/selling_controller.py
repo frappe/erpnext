@@ -41,6 +41,7 @@ class SellingController(StockController):
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
 		self.set_po_nos()
+		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 
 	def set_missing_values(self, for_validate=False):
@@ -345,7 +346,14 @@ class SellingController(StockController):
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+				if po_nos and po_nos[0].get('po_no'):
+					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+
+	def set_gross_profit(self):
+		if self.doctype == "Sales Order":
+			for item in self.items:
+				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
