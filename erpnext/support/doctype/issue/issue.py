@@ -98,7 +98,7 @@ class Issue(Document):
 				elif service.day == "Holiday" and service.holiday:
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
-						if holiday.holiday_date == datetime.now().date():
+						if holiday.holiday_date == utils.today():
 							self.response_time = service.response_time
 							#self.response_time_period = service.response_time_period
 							self.resolution_time = service.resolution_time
@@ -112,7 +112,8 @@ class Issue(Document):
 		
 	def sla_timer(self):
 		print("----------------------------------------")
-		print(utils.now())
+		print(utils.now().strftime('%A'))
+		print(utils.now().strftime('%H:%M:%S'))
 		print(utils.today())
 		#time = datetime.now().time().strftime('%H:%M:%S')
 		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
