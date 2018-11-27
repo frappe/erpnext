@@ -95,6 +95,11 @@ class Issue(Document):
 					#self.response_time_period = service.response_time_period
 					self.resolution_time = service.resolution_time
 					#self.resolution_time_period = service.resolution_time_period
+					if self.description:
+						issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
+						for keyword in issue_criticality.keyword:
+							if re.search(r''+ keyword.keyword +'', self.description):
+								self.priority = support_contract[0].priority
 				elif service.day == "Holiday" and service.holiday:
 					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 					for holiday in holiday_list.holidays:
@@ -103,18 +108,14 @@ class Issue(Document):
 							#self.response_time_period = service.response_time_period
 							self.resolution_time = service.resolution_time
 							#self.resolution_time_period = service.resolution_time_period
-			if self.description:
-				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-				for keyword in issue_criticality.keyword:
-					if re.search(r''+ keyword.keyword +'', self.description):
-						self.priority = support_contract[0].priority
 		self.sla_timer()
 		
 	def sla_timer(self):
 		print("----------------------------------------")
-		print(utils.now().strftime('%A'))
-		print(utils.now().strftime('%H:%M:%S'))
+		print(utils.now())
 		print(utils.today())
+		print(utils.nowdate())
+		print(utils.nowtime())
 		#time = datetime.now().time().strftime('%H:%M:%S')
 		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
 
