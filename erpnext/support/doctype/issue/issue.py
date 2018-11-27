@@ -85,7 +85,6 @@ class Issue(Document):
 		self.db_set("description", "")
 
 	def set_sla(self):
-		print(self.isset_sla)
 		if not self.isset_sla:
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group", "priority"], limit=1)
 			if support_contract:
@@ -93,44 +92,31 @@ class Issue(Document):
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				for service in service_level.support_and_resolution:
 					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
-						self.response_time = service.response_time
-						self.response_time_period = service.response_time_period
-						self.resolution_time = service.resolution_time
-						self.resolution_time_period = service.resolution_time_period
-						if self.description:
-							issue_criticality = frappe.get_list("Issue Criticality")
-							print(issue_criticality)
-							for criticality in issue_criticality:
-								print(criticality)
-								doc = frappe.get_doc("Issue Criticality", criticality)
-								for keyword in doc.keyword:
-									if re.search(r''+ keyword.keyword +'', self.description):
-										self.issue_criticality = doc.name
-										self.employee_group = doc.employee_group
-										self.priority = doc.priority
+						self.set_criticality(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 						for holiday in holiday_list.holidays:
 							if holiday.holiday_date == utils.today():
-								self.response_time = service.response_time
-								self.response_time_period = service.response_time_period
-								self.resolution_time = service.resolution_time
-								self.resolution_time_period = service.resolution_time_period
-								if self.description:
-									issue_criticality = frappe.get_list("Issue Criticality")
-									print(issue_criticality)
-									for criticality in issue_criticality:
-										print(criticality)
-										doc = frappe.get_doc("Issue Criticality", criticality)
-										for keyword in doc.keyword:
-											if re.search(r''+ keyword.keyword +'', self.description):
-												self.issue_criticality = doc.name
-												self.employee_group = doc.employee_group
-												self.priority = doc.priority
-				self.isset_sla = 1
+								self.set_criticality(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 			else:
 				pass
 		
+	def set_criticality(self, response_time, response_time_period, resolution_time, resolution_time_period):
+		self.response_time = response_time
+		self.response_time_period = response_time_period
+		self.resolution_time = resolution_time
+		self.resolution_time_period = resolution_time_period
+		if self.description:
+			issue_criticality = frappe.get_list("Issue Criticality")
+			for criticality in issue_criticality:
+				doc = frappe.get_doc("Issue Criticality", criticality)
+				for keyword in doc.keyword:
+					if re.search(r''+ keyword.keyword +'', self.description):
+						self.issue_criticality = doc.name
+						self.employee_group = doc.employee_group
+						self.priority = doc.priority
+						self.isset_sla = 1
+
 	def sla_timer(self):
 		print("----------------------------------------")
 		print(utils.now())
