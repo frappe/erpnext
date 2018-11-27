@@ -7,7 +7,7 @@ import json
 from frappe import _
 
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours
+from frappe.utils import now, today, time_diff_in_hours
 from frappe.utils.user import is_website_user
 import re
 from datetime import datetime, timedelta
@@ -108,14 +108,12 @@ class Issue(Document):
 				for keyword in issue_criticality.keyword:
 					if re.search(r''+ keyword.keyword +'', self.description):
 						self.priority = support_contract[0].priority
-		time = datetime.now().time().strftime('%H:%M:%S')
-		print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
-		#self.sla_timer()
+		self.sla_timer()
 		
 	def sla_timer(self):
-		pass
+		print(utils.now(), utils.today())
 		#time = datetime.now().time().strftime('%H:%M:%S')
-		#print(time_diff_in_hours((datetime.now() + timedelta(hours=self.response_time)).strftime('%H:%M:%S') , time))
+		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
