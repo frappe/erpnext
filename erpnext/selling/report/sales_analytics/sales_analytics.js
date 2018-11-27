@@ -67,23 +67,17 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		}
 	],
-	"formatter": function(value, row, column, data) {
-		if(!value){
-			value = 0
-		}
-		return value;
-	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					row_values = data.slice(5).map(function (column) {
+					length = data.length
+					row_values = data.slice(4,length-1).map(function (column) {
 						return column.content;
 					})
-
-					entry  = {
+					entry = {
 						'name':row_name,
 						'values':row_values
 					}
@@ -109,12 +103,12 @@ frappe.query_reports["Sales Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets
 					}
-					
+
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
 					},200)
-					
-					
+
+
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
 					}, 800)
