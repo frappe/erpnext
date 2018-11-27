@@ -100,17 +100,20 @@ class Issue(Document):
 					for holiday in holiday_list.holidays:
 						if holiday.holiday_date == datetime.datetime.now().date():
 							self.time_to_respond = service.response_time
-							self.response_time_period = service.response_time_period
+							#self.response_time_period = service.response_time_period
 							self.time_to_resolve = service.resolution_time
-							self.resolution_time_period = service.resolution_time_period
-			issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-			for keyword in issue_criticality.keyword:
-				if re.search(r''+ keyword.keyword +'', self.description):
-					self.priority = support_contract[0].priority
+							#self.resolution_time_period = service.resolution_time_period
+			if self.description:
+				issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
+				for keyword in issue_criticality.keyword:
+					if re.search(r''+ keyword.keyword +'', self.description):
+						self.priority = support_contract[0].priority
 		self.sla_timer()
 		
 	def sla_timer(self):
-		pass
+		time = datetime.datetime.now().time.strftime('%H:%M:%S')
+		print(time)
+		print(self.time_to_respond)
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
