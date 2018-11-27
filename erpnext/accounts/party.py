@@ -469,21 +469,23 @@ def get_dashboard_info(party_type, party):
 
 	company_wise_info = []
 
-	company_wise_grand_total = frappe._dict(frappe.db.sql("""
-		select company, sum(grand_total)
+	company_wise_grand_total = frappe.db.sql("""
+		select company, sum(grand_total) as grand_total, sum(base_grand_total) as base_grand_total
 		from `tab{0}`
 		where {1}=%s and docstatus=1 and posting_date between %s and %s
 		group by company"""
 		.format(doctype, party_type.lower()),
-		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date)))
+		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date), as_dict=1)
 
-	company_wise_base_grand_total = frappe._dict(frappe.db.sql("""
-		select company, sum(base_grand_total)
-		from `tab{0}`
-		where {1}=%s and docstatus=1 and posting_date between %s and %s
-		group by company"""
-		.format(doctype, party_type.lower()),
-		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date)))
+	company_wise_billing_this_year = frappe._dict()
+
+	for d in company_wise_grand_total:
+		company_wise_billing_this_year.setdefault(
+			d.company,{
+				"grand_total": d.grand_total,
+				"base_grand_total": d.base_grand_total
+			})
+
 
 	company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
@@ -496,9 +498,9 @@ def get_dashboard_info(party_type, party):
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
 		if party_account_currency==company_default_currency:
-			billing_this_year = flt(company_wise_base_grand_total.get(d.company))
+			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("base_grand_total"))
 		else:
-			billing_this_year = flt(company_wise_grand_total.get(d.company))
+			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("grand_total"))
 
 		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
 
