@@ -45,7 +45,7 @@ for(var i=0, l=data.length; i<l; i++) {
 		<tr>
 			<th class="text-center">{%= __("Voucher") %}</th>
 			{% if(show_ref_col) { %}
-			<th class="text-center">{%= __("Cheque/Reference") %}</th>
+			<th class="text-center">{%= __("Reference") %}</th>
 			{% } %}
 			{% if(!(filters.party || filters.account)) { %}
 			<th class="text-center">{%= __("Account") %}</th>
@@ -63,15 +63,15 @@ for(var i=0, l=data.length; i<l; i++) {
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i].posting_date) { %}
-				<td class="text-center">
+				<td class="text-center text-nowrap">
 					<strong><a href="#Form/{%= data[i].voucher_type %}/{%= data[i].voucher_no %}" target="_blank">{%= data[i].voucher_no %}</a></strong>
 					<br />{%= frappe.datetime.str_to_user(data[i].posting_date) %}
 				</td>
 
 				{% if(show_ref_col) { %}
-				<td class="text-center">
-					<strong>{%= data[i].reference_no %}</strong><br />
-					{%= frappe.datetime.str_to_user(data[i].reference_date) %}
+				<td class="text-center text-nowrap">
+					<strong>{%= data[i].reference_no %}</strong>
+					<div>{%= frappe.datetime.str_to_user(data[i].reference_date) %}</div>
 				</td>
 				{% } %}
 
@@ -103,15 +103,15 @@ for(var i=0, l=data.length; i<l; i++) {
 					{% } %}
 				</td>
 
-				<td class="text-right">
+				<td class="text-right text-nowrap">
 					{%= format_currency(data[i].debit, filters.presentation_currency) %}
 				</td>
 
-				<td class="text-right">
+				<td class="text-right text-nowrap">
 					{%= format_currency(data[i].credit, filters.presentation_currency) %}
 				</td>
 
-				<td class="text-right">
+				<td class="text-right text-nowrap">
 					{%= format_currency(data[i].balance, filters.presentation_currency) %}
 				</td>
 			{% } else { %}
@@ -127,13 +127,13 @@ for(var i=0, l=data.length; i<l; i++) {
 					{% if(!(filters.party || filters.account)) { colspan++; } %}
 					{% if(filters.against_in_print) { colspan++; } %}
 					<td class="text-right" colspan="{%= colspan %}"><strong>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</strong></td>
-					<td class="text-right">
+					<td class="text-right text-nowrap">
 						<b>{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}</b>
 					</td>
-					<td class="text-right">
+					<td class="text-right text-nowrap">
 						<b>{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}</b>
 					</td>
-					<td class="text-right">
+					<td class="text-right text-nowrap">
 						<b>{%= format_currency(data[i].balance, filters.presentation_currency) %}</b>
 					</td>
 				{% } %}
