@@ -85,6 +85,7 @@ class Issue(Document):
 		self.db_set("description", "")
 
 	def set_sla(self):
+		print(self.isset_sla)
 		if not self.isset_sla:
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group", "priority"], limit=1)
 			if support_contract:
