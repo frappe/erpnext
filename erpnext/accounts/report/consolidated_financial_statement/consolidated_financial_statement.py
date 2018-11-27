@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, cint
+from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
 from erpnext.accounts.report.balance_sheet.balance_sheet import (get_provisional_profit_loss,
 	check_opening_balance, get_chart_data)
@@ -48,7 +49,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	data.extend(liability or [])
 	data.extend(equity or [])
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = get_company_currency(filters)
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
 		companies, filters.get('company'), company_currency, True)
 
@@ -59,7 +60,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"warn_if_negative": True,
-			"currency": frappe.get_cached_value('Company',  filters.company,  "default_currency")
+			"currency": company_currency
 		}
 		for company in companies:
 			unclosed[company] = opening_balance
@@ -92,7 +93,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	return data, None, chart
 
 def get_income_expense_data(companies, fiscal_year, filters):
-	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
+	company_currency = get_company_currency(filters)
 	income = get_data(companies, "Income", "Credit", fiscal_year, filters, True)
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
@@ -107,7 +108,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
 
 	data = []
-	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
+	company_currency = get_company_currency(filters)
 
 	for cash_flow_account in cash_flow_accounts:
 		section_data = []
@@ -185,6 +186,7 @@ def get_columns(companies):
 			"fieldname": company,
 			"label": company,
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150
 		})
 
@@ -216,7 +218,8 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	return out
 
 def get_company_currency(filters=None):
-	return frappe.get_cached_value('Company',  filters.get('company'),  "default_currency")
+	return (filters.get('presentation_currency')
+		or frappe.get_cached_value('Company',  filters.company,  "default_currency"))
 
 def calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_year, filters):
 	for entries in gl_entries_by_account.values():
@@ -329,28 +332,42 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		filters.get('company'),  ["lft", "rgt"])
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
-
-	gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
-		gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
-		acc.account_name, acc.account_number
-		from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company in
-		(select name from `tabCompany` where lft >= %(company_lft)s and rgt <= %(company_rgt)s)
-		{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
-		order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
-		{
-			"from_date": from_date,
-			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt,
+	companies = frappe.db.sql(""" select name, default_currency from `tabCompany`
+		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""", {
 			"company_lft": company_lft,
 			"company_rgt": company_rgt,
-		},
-		as_dict=True)
+		}, as_dict=1)
 
-	for entry in gl_entries:
-		key = entry.account_number or entry.account_name
-		validate_entries(key, entry, accounts_by_name)
-		gl_entries_by_account.setdefault(key, []).append(entry)
+	currency_info = frappe._dict({
+		'report_date': to_date,
+		'presentation_currency': filters.get('presentation_currency')
+	})
+
+	for d in companies:
+		gl_entries = frappe.db.sql("""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
+			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
+			acc.account_name, acc.account_number
+			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s
+			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
+			order by gl.account, gl.posting_date""".format(additional_conditions=additional_conditions),
+			{
+				"from_date": from_date,
+				"to_date": to_date,
+				"lft": root_lft,
+				"rgt": root_rgt,
+				"company": d.name
+			},
+			as_dict=True)
+
+		if filters and filters.get('presentation_currency') != d.default_currency:
+			currency_info['company'] = d.name
+			currency_info['company_currency'] = d.default_currency
+			convert_to_presentation_currency(gl_entries, currency_info)
+
+		for entry in gl_entries:
+			key = entry.account_number or entry.account_name
+			validate_entries(key, entry, accounts_by_name)
+			gl_entries_by_account.setdefault(key, []).append(entry)
 
 	return gl_entries_by_account
 

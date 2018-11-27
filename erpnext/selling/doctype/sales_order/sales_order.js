@@ -150,6 +150,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					&& flt(doc.per_delivered, 6) < 100) {
 					this.frm.add_custom_button(__('Material Request'),
 						function() { me.make_material_request() }, __("Make"));
+					this.frm.add_custom_button(__('Request for Raw Materials'),
+						function() { me.make_raw_material_request() }, __("Make"));
 				}
 
 				// make purchase order
@@ -313,6 +315,86 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
+	make_raw_material_request: function() {
+		var me = this;
+		this.frm.call({
+			doc: this.frm.doc,
+			method: 'get_work_order_items',
+			args: {
+				for_raw_material_request: 1
+			},
+			callback: function(r) {
+				if(!r.message) {
+					frappe.msgprint({
+						message: __('No Items with Bill of Materials.'),
+						indicator: 'orange'
+					});
+					return;
+				}
+				else {
+					me.make_raw_material_request_dialog(r);
+				}
+			}
+		});
+	},
+
+	make_raw_material_request_dialog: function(r) {
+		var fields = [
+			{fieldtype:'Check', fieldname:'include_exploded_items',
+				label: __('Include Exploded Items')},
+			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
+				label: __('Ignore Existing Ordered Qty')},
+			{
+				fieldtype:'Table', fieldname: 'items',
+				description: __('Select BOM, Qty and For Warehouse'),
+				fields: [
+					{fieldtype:'Read Only', fieldname:'item_code',
+						label: __('Item Code'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
+						label: __('BOM'), in_list_view:1, get_query: function(doc) {
+							return {filters: {item: doc.item_code}};
+						}
+					},
+					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
+						label: __('Qty'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
+						label: __('For Warehouse')}
+				],
+				data: r.message,
+				get_data: function() {
+					return r.message
+				}
+			}
+		]
+		var d = new frappe.ui.Dialog({
+			title: __("Select from Items having BOM"),
+			fields: fields,
+			primary_action: function() {
+				var data = d.get_values();
+				me.frm.call({
+					method: 'erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request',
+					args: {
+						items: data,
+						company: me.frm.doc.company,
+						sales_order: me.frm.docname,
+						project: me.frm.project
+					},
+					freeze: true,
+					callback: function(r) {
+						if(r.message) {
+							frappe.msgprint(__('Material Request {0} submitted.',
+							['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+						}
+						d.hide();
+						me.frm.reload_doc();
+					}
+				});
+			},
+			primary_action_label: __('Make')
+		});
+		d.show();
+	},
+
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 
@@ -423,7 +505,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							filters: {'parent': me.frm.doc.name}
 						}
 					}},
-				
+
 				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
