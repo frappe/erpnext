@@ -36,10 +36,13 @@ class EmployeeBenefitClaim(Document):
 			frappe.throw(_("Maximum benefit amount of employee {0} exceeds {1}").format(self.employee, max_benefits))
 
 	def validate_max_benefit_for_component(self, payroll_period):
-		claimed_amount = self.claimed_amount
-		claimed_amount += get_previous_claimed_amount(self.employee, payroll_period, component = self.earning_component)
-		if claimed_amount > self.max_amount_eligible:
-			frappe.throw(_("Maximum amount eligible for the component {0} exceeds {1}").format(self.earning_component, self.max_amount_eligible))
+		if self.max_amount_eligible:
+			claimed_amount = self.claimed_amount
+			claimed_amount += get_previous_claimed_amount(self.employee,
+				payroll_period, component = self.earning_component)
+			if claimed_amount > self.max_amount_eligible:
+				frappe.throw(_("Maximum amount eligible for the component {0} exceeds {1}")
+					.format(self.earning_component, self.max_amount_eligible))
 
 	def validate_non_pro_rata_benefit_claim(self, max_benefits, payroll_period):
 		claimed_amount = self.claimed_amount
