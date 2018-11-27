@@ -236,7 +236,7 @@ class GrossProfitGenerator(object):
 							previous_stock_value = len(my_sle) > i+1 and \
 								flt(my_sle[i+1].stock_value) or 0.0
 							if previous_stock_value:
-								return previous_stock_value - flt(sle.stock_value)
+								return (previous_stock_value - flt(sle.stock_value)) * flt(row.qty) / abs(flt(sle.qty))
 							else:
 								return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 			else:
