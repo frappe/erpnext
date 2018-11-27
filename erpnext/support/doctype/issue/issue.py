@@ -7,10 +7,10 @@ import json
 from frappe import _
 
 from frappe.model.document import Document
-from frappe.utils import now
+from frappe.utils import now, time_diff_in_hours
 from frappe.utils.user import is_website_user
 import re
-import datetime
+from datetime import datetime, timedelta
 
 sender_field = "raised_by"
 
@@ -113,7 +113,9 @@ class Issue(Document):
 	def sla_timer(self):
 		time = datetime.datetime.now().time().strftime('%H:%M:%S')
 		print(time)
-		print(self.time_to_respond)
+		print(self.response_time)
+		end_time = time + timedelta(hours=self.response_time)
+		print(time_diff_in_hours(end_time, time))
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
