@@ -116,7 +116,7 @@ class Issue(Document):
 		print(utils.today())
 		print(utils.nowdate())
 		print(utils.nowtime())
-		#time = datetime.now().time().strftime('%H:%M:%S')
+		#time = 
 		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
 
 	def split_issue(self, subject, communication_id):
