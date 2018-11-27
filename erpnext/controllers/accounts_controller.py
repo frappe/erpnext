@@ -405,7 +405,8 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				allocated_amount = min(self.grand_total - advance_allocated, d.amount)
+				amount = self.rounded_total or self.grand_total
+				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
