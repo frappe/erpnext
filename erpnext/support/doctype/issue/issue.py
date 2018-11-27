@@ -85,30 +85,37 @@ class Issue(Document):
 		self.db_set("description", "")
 
 	def set_sla(self):
-		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group", "priority"], limit=1)
-		if support_contract:
-			self.support_contract = support_contract[0].name
-			service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-			for service in service_level.support_and_resolution:
-				if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
-					self.response_time = service.response_time
-					#self.response_time_period = service.response_time_period
-					self.resolution_time = service.resolution_time
-					#self.resolution_time_period = service.resolution_time_period
-					if self.description:
-						issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
-						for keyword in issue_criticality.keyword:
-							if re.search(r''+ keyword.keyword +'', self.description):
-								self.priority = support_contract[0].priority
-				elif service.day == "Holiday" and service.holiday:
-					holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
-					for holiday in holiday_list.holidays:
-						if holiday.holiday_date == utils.today():
-							self.response_time = service.response_time
-							#self.response_time_period = service.response_time_period
-							self.resolution_time = service.resolution_time
-							#self.resolution_time_period = service.resolution_time_period
-		self.sla_timer()
+		if not self.isset_sla:
+			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group", "priority"], limit=1)
+			if support_contract:
+				self.support_contract = support_contract[0].name
+				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
+				for service in service_level.support_and_resolution:
+					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
+						self.response_time = service.response_time
+						self.response_time_period = service.response_time_period
+						self.resolution_time = service.resolution_time
+						self.resolution_time_period = service.resolution_time_period
+						if self.description:
+							issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
+							for keyword in issue_criticality.keyword:
+								if re.search(r''+ keyword.keyword +'', self.description):
+									self.priority = support_contract[0].priority
+					elif service.day == "Holiday" and service.holiday:
+						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
+						for holiday in holiday_list.holidays:
+							if holiday.holiday_date == utils.today():
+								self.response_time = service.response_time
+								self.response_time_period = service.response_time_period
+								self.resolution_time = service.resolution_time
+								self.resolution_time_period = service.resolution_time_period
+								if self.description:
+									issue_criticality = frappe.get_doc("Issue Criticality", support_contract[0].issue_criticality)
+									for keyword in issue_criticality.keyword:
+										if re.search(r''+ keyword.keyword +'', self.description):
+											self.priority = support_contract[0].priority
+			else:
+				pass
 		
 	def sla_timer(self):
 		print("----------------------------------------")
