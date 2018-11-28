@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, today, time_diff_in_hours
+from frappe.utils import now, today, time_diff_in_hours, now_datetime
 from frappe.utils.user import is_website_user
 import re
 from datetime import datetime, timedelta
@@ -108,14 +108,18 @@ class Issue(Document):
 			self.response_time_period = response_time_period
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
+			print(utils.now())
+			print(utils.today())
+			print(utils.nowdate())
+			print(utils.nowtime())
 			if response_time == 'Hour/s':
-				print(self.creation)
+				pass
 			elif response_time == 'Day/s':
-				print(self.creation)
+				pass
 			elif response_time == 'Week/s':
-				print(self.creation)
+				pass
 			elif response_time == 'Month/s':
-				print(self.creation)
+				pass
 		else:
 			pass
 
