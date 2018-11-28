@@ -226,7 +226,7 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
-				
+
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -379,7 +379,7 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
-		# Checked both rounding_adjustment and rounded_total 
+		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 
@@ -859,7 +859,8 @@ def make_stock_entry(source_name, target_doc=None):
 		"Purchase Invoice Item": {
 			"doctype": "Stock Entry Detail",
 			"field_map": {
-				"stock_qty": "transfer_qty"
+				"stock_qty": "transfer_qty",
+				"batch_no": "batch_no"
 			},
 		}
 	}, target_doc)

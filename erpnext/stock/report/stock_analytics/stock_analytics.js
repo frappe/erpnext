@@ -88,10 +88,9 @@ frappe.query_reports["Stock Analytics"] = {
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					row_values = data.slice(6).map(function (column) {
+					row_values = data.slice(7).map(function (column) {
 						return column.content;
 					})
-
 					entry  = {
 						'name':row_name,
 						'values':row_values
@@ -118,12 +117,12 @@ frappe.query_reports["Stock Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets
 					}
-					
+
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
 					},200)
-					
-					
+
+
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
 					}, 800)
