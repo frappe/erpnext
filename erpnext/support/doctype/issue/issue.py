@@ -109,6 +109,7 @@ class Issue(Document):
 			self.response_time_period = response_time_period
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
+			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
 				print("-----------------------------")
 			elif response_time_period == 'Day/s':
@@ -117,6 +118,15 @@ class Issue(Document):
 				self.time_to_respond = date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())
 			else:
 				self.time_to_respond = date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
+			#Calculation of Time to Resolve
+			if resolution_time_period == 'Hour/s':
+				print("-----------------------------")
+			elif resolution_time_period == 'Day/s':
+				self.time_to_resolve = date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
+			elif resolution_time_period == 'Week/s':
+				self.time_to_resolve = date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())
+			else:
+				self.time_to_resolve = date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
 		else:
 			pass
 
