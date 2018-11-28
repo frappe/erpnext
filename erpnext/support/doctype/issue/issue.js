@@ -16,13 +16,15 @@ frappe.ui.form.on("Issue", {
 			});
 		}
 		if (frm.doc.service_contract_status == 'Ongoing') {
+				console.log("make_dashboard_call")
 				frm.trigger("make_dashboard");
 		}
 	},
 
 	make_dashboard: function(frm) {
-		
+		console.log("make_dashboard")
 		frm.dashboard.refresh();
+		
 		const timer = `
 			<div class="stopwatch" style="font-weight:bold">
 				<span class="hours">00</span>
