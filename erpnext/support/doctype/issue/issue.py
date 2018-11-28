@@ -91,10 +91,6 @@ class Issue(Document):
 				self.support_contract = support_contract[0].name
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				for service in service_level.support_and_resolution:
-					print("Workday")
-					print(service.day == "Workday" and service.weekday == datetime.now().strftime("%A"))
-					print("Holiday")
-					print(service.day == "Holiday" and service.holiday)
 					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
 						self.set_criticality()
 						self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
@@ -117,16 +113,16 @@ class Issue(Document):
 			print(utils.today())
 			print(utils.nowdate())
 			print(utils.nowtime())
-			if response_time == 'Hour/s':
+			if response_time_period == 'Hour/s':
 				pass
-			elif response_time == 'Day/s':
+			elif response_time_period == 'Day/s':
 				end_date = add_days(utils.today(), days=response_time)
 				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
-			elif response_time == 'Week/s':
+			elif response_time_period == 'Week/s':
 				response_time = 7 * int(response_time)
 				end_date = add_days(utils.today(), days=response_time)
 				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
-			elif response_time == 'Month/s':
+			elif response_time_period == 'Month/s':
 				end_date = add_months(utils.today(), months=response_time)
 				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
 		else:
