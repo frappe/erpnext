@@ -109,13 +109,13 @@ class Issue(Document):
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
 			if response_time == 'Hour/s':
-				pass
+				print(self.cretion)
 			elif response_time == 'Day/s':
-				pass
+				print(self.cretion)
 			elif response_time == 'Week/s':
-				pass
+				print(self.cretion)
 			elif response_time == 'Month/s':
-				pass
+				print(self.cretion)
 		else:
 			pass
 
