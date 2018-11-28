@@ -109,34 +109,21 @@ class Issue(Document):
 			self.response_time_period = response_time_period
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
-			today = utils.nowdate
+			today = utils.nowdate()
 			if response_time_period == 'Hour/s':
 				print("-----------------------------")
 			elif response_time_period == 'Day/s':
 				end_date = add_days(utils.today(), days=int(response_time))
-				print("-----------------------------")
-				print(today)
-				print(end_date)
-				#time_to_respond = date_diff(end_date, today)
-				#print(time_to_respond)
-				#self.time_to_respond = str(time_to_respond)
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = time_to_respond
 			elif response_time_period == 'Week/s':
-				response_time = 7 * int(response_time)
-				end_date = add_days(utils.today(), days=int(response_time))
-				print("-----------------------------")
-				print(today)
-				print(end_date)
-				#time_to_respond = date_diff(end_date, today)
-				#print(time_to_respond)
-				#self.time_to_respond = str(time_to_respond)
+				end_date = add_days(utils.today(), days=7 * int(response_time))
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = str(time_to_respond)
 			elif response_time_period == 'Month/s':
 				end_date = add_months(utils.today(), months=int(response_time))
-				print("-----------------------------")
-				print(today)
-				print(end_date)
-				#time_to_respond = date_diff(end_date, today)
-				#print(time_to_respond)
-				#self.time_to_respond = str(time_to_respond)
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = str(time_to_respond)
 		else:
 			pass
 
