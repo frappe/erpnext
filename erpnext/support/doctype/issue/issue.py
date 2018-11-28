@@ -140,8 +140,6 @@ class Issue(Document):
 				for keyword in doc.keyword:
 					if re.search(r''+ keyword.keyword +'', self.description):
 						self.issue_criticality = doc.name
-						self.employee_group = doc.employee_group
-						self.priority = doc.priority
 						self.isset_sla = 1
 
 	def split_issue(self, subject, communication_id):
