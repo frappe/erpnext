@@ -109,21 +109,14 @@ class Issue(Document):
 			self.response_time_period = response_time_period
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
-			today = utils.nowdate()
 			if response_time_period == 'Hour/s':
 				print("-----------------------------")
 			elif response_time_period == 'Day/s':
-				end_date = add_days(utils.today(), days=int(response_time))
-				time_to_respond = date_diff(end_date, today)
-				self.time_to_respond = time_to_respond
+				self.time_to_respond = date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			elif response_time_period == 'Week/s':
-				end_date = add_days(utils.today(), days=7 * int(response_time))
-				time_to_respond = date_diff(end_date, today)
-				self.time_to_respond = str(time_to_respond)
-			elif response_time_period == 'Month/s':
-				end_date = add_months(utils.today(), months=int(response_time))
-				time_to_respond = date_diff(end_date, today)
-				self.time_to_respond = str(time_to_respond)
+				self.time_to_respond = date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())
+			else:
+				self.time_to_respond = date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
 		else:
 			pass
 
@@ -135,6 +128,7 @@ class Issue(Document):
 				for keyword in doc.keyword:
 					if re.search(r''+ keyword.keyword +'', self.description):
 						self.issue_criticality = doc.name
+						self.employee_group = doc.employee_group
 						self.isset_sla = 1
 
 	def split_issue(self, subject, communication_id):
