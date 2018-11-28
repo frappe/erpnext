@@ -336,9 +336,13 @@ def install_company(args):
 		# Company
 		{
 			"doctype":"Company",
-			'company_name': args.company_name, 'enable_perpetual_inventory': 1,
-			'abbr': args.company_abbr, 'default_currency': args.currency, 'country': args.country,
+			'company_name': args.company_name,
+			'enable_perpetual_inventory': 1,
+			'abbr': args.company_abbr,
+			'default_currency': args.currency,
+			'country': args.country,
 			'create_chart_of_accounts_based_on': 'Standard Template',
+			'chart_of_accounts': args.chart_of_accounts,
 			'domain': args.domain
 		}
 	]
@@ -366,6 +370,7 @@ def install_post_company_fixtures(args=None):
 	]
 
 	make_records(records)
+
 
 def install_defaults(args=None):
 	records = [
@@ -435,32 +440,10 @@ def install_defaults(args=None):
 				# bank account same as a CoA entry
 				pass
 
-
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
-		# # Bank Account
-		# {
-		# 	"doctype": "Account",
-		# 	"__condition": lambda: c.bank_account and frappe.db.get_value("Account",
-		# 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
-		# 			"company": c.company_name}),
 
-		# 	"__exception": {
-		# 		"exception": RootNotEditable,
-		# 		"handler": lambda: frappe.throw(_("Bank account cannot be named as {0}").format(config.get("bank_account")))
-		# 	},
-		# 	'account_name': c.bank_account,
-
-		# 	'parent_account': lambda: frappe.db.get_value("Account",
-		# 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
-		# 			"company": c.company_name}),
-
-		# 	'is_group':0,
-		# 	'company': c.company_name,
-		# 	"account_type": "Bank",
-		# },
-
-		# # Shopping cart: needs price lists
+		# Shopping cart: needs price lists
 		{
 			"doctype": "Shopping Cart Settings",
 			"enabled": 1,
@@ -470,12 +453,8 @@ def install_defaults(args=None):
 			'default_customer_group': _("Individual"),
 			'quotation_series': "QTN-",
 		},
-
-		# # TODO: Email digest, logo, website
-		# {}
 	]
 
-	# TODO:
 	make_records(records, True)
 
 
