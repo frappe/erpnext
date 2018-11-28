@@ -594,22 +594,21 @@ def get_pos_profile(company, pos_profile=None, user=None):
 	if not user:
 		user = frappe.session['user']
 
-	pos_profile = frappe.db.sql("""select pf.*
-		from
-			`tabPOS Profile` pf, `tabPOS Profile User` pfu
-		where
-			pfu.parent = pf.name and pfu.user = %s and pf.company = %s
-			and pf.disabled = 0 and pfu.default=1""", (user, company), as_dict=1)
-
-	if not pos_profile:
-		pos_profile = frappe.db.sql("""select pf.*
-			from
-				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
-			on
+	pos_profile = frappe.db.sql("""SELECT pf.*
+		FROM
+			`tabPOS Profile` pf LEFT JOIN `tabPOS Profile User` pfu
+		ON
 				pf.name = pfu.parent
-			where
-				ifnull(pfu.user, '') = '' and pf.company = %s
-				and pf.disabled = 0""", (company), as_dict=1)
+		WHERE
+			(
+				(pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1)
+				OR (pfu.user = %(user)s AND pfu.default=1)
+				OR (ifnull(pfu.user, '') = '' AND pf.company = %(company)s)
+			) AND pf.disabled = 0
+	""", {
+		'user': user,
+		'company': company
+	}, as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
 
