@@ -86,7 +86,7 @@ class Issue(Document):
 
 	def set_sla(self):
 		if not self.isset_sla:
-			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "issue_criticality", "employee_group", "priority"], limit=1)
+			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level"], limit=1)
 			if support_contract:
 				self.support_contract = support_contract[0].name
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
@@ -109,13 +109,13 @@ class Issue(Document):
 			self.resolution_time = resolution_time
 			self.resolution_time_period = resolution_time_period
 			if response_time == 'Hour/s':
-				print(self.cretion)
+				print(self.creation)
 			elif response_time == 'Day/s':
-				print(self.cretion)
+				print(self.creation)
 			elif response_time == 'Week/s':
-				print(self.cretion)
+				print(self.creation)
 			elif response_time == 'Month/s':
-				print(self.cretion)
+				print(self.creation)
 		else:
 			pass
 
