@@ -92,20 +92,34 @@ class Issue(Document):
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				for service in service_level.support_and_resolution:
 					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
-						self.set_criticality(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
+						self.set_criticality()
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 						for holiday in holiday_list.holidays:
 							if holiday.holiday_date == utils.today():
-								self.set_criticality(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
+								self.set_criticality()
+				self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 			else:
 				pass
-		
-	def set_criticality(self, response_time, response_time_period, resolution_time, resolution_time_period):
-		self.response_time = response_time
-		self.response_time_period = response_time_period
-		self.resolution_time = resolution_time
-		self.resolution_time_period = resolution_time_period
+
+	def sla_timer(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
+		if response_time and resolution_time_period and resolution_time and resolution_time_period:
+			self.response_time = response_time
+			self.response_time_period = response_time_period
+			self.resolution_time = resolution_time
+			self.resolution_time_period = resolution_time_period
+			if response_time == 'Hour/s':
+				pass
+			elif response_time == 'Day/s':
+				pass
+			elif response_time == 'Week/s':
+				pass
+			elif response_time == 'Month/s':
+				pass
+		else:
+			pass
+
+	def set_criticality(self):
 		if self.description:
 			issue_criticality = frappe.get_list("Issue Criticality")
 			for criticality in issue_criticality:
@@ -116,15 +130,6 @@ class Issue(Document):
 						self.employee_group = doc.employee_group
 						self.priority = doc.priority
 						self.isset_sla = 1
-
-	def sla_timer(self):
-		print("----------------------------------------")
-		print(utils.now())
-		print(utils.today())
-		print(utils.nowdate())
-		print(utils.nowtime())
-		#time = 
-		#print(time_diff_in_hours((datetime.now() + timedelta(hours=int(service.response_time))).strftime('%H:%M:%S') , time))
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
