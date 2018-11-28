@@ -99,8 +99,8 @@ class Issue(Document):
 							if holiday.holiday_date == utils.today():
 								self.set_criticality()
 				self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
-			else:
-				pass
+		else:
+			pass
 
 	def sla_timer(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
 		if response_time and resolution_time_period and resolution_time and resolution_time_period:
