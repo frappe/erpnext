@@ -111,22 +111,22 @@ class Issue(Document):
 			self.resolution_time_period = resolution_time_period
 			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
-				self.time_to_resolve = "NA"
+				self.time_to_resolve = "NA" + "- Hour/s"
 			elif response_time_period == 'Day/s':
-				self.time_to_respond = date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
+				self.time_to_respond = str(date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())) + "- Day/s"
 			elif response_time_period == 'Week/s':
-				self.time_to_respond = date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())
+				self.time_to_respond = str(date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())) + "- Week/s"
 			else:
-				self.time_to_respond = date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
+				self.time_to_respond = str(date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())) + "- Month/s"
 			#Calculation of Time to Resolve
 			if resolution_time_period == 'Hour/s':
-				self.time_to_resolve = "NA"
+				self.time_to_resolve = "NA" + "- Hour/s"
 			elif resolution_time_period == 'Day/s':
-				self.time_to_resolve = date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
+				self.time_to_resolve = str(date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())) + "- Day/s"
 			elif resolution_time_period == 'Week/s':
-				self.time_to_resolve = date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())
+				self.time_to_resolve = str(date_diff(add_days(utils.today(), days=7 * int(response_time)), utils.nowdate())) + "- Week/s"
 			else:
-				self.time_to_resolve = date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
+				self.time_to_resolve = str(date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())) + "- Month/s"
 		else:
 			pass
 
