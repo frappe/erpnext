@@ -346,6 +346,11 @@ body[data-route="pos"] .btn-more {
 body[data-route="pos"] .collapse-btn {
   cursor: pointer;
 }
+@media (max-width: 767px) {
+  body[data-route="pos"] .page-actions {
+    max-width: 110px;
+  }
+}
 .price-info {
   position: absolute;
   left: 0;
