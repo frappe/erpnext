@@ -5,8 +5,8 @@ def get_data():
 		'fieldname': 'service_level',
 		'transactions': [
 			{
-				#'label': _('Transactions'),
-				#'items': ['Material Request', 'Stock Entry']
+				'label': _('Service Level'),
+				'items': ['Service Level']
 			}
 		]
 	}
