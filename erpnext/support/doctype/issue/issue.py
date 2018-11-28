@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, today, time_diff_in_hours, now_datetime
+from frappe.utils import now, today, time_diff_in_hours, now_datetime, add_days, add_months, date_diff
 from frappe.utils.user import is_website_user
 import re
 from datetime import datetime, timedelta
@@ -91,14 +91,19 @@ class Issue(Document):
 				self.support_contract = support_contract[0].name
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				for service in service_level.support_and_resolution:
+					print("Workday")
+					print(service.day == "Workday" and service.weekday == datetime.now().strftime("%A"))
+					print("Holiday")
+					print(service.day == "Holiday" and service.holiday)
 					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
 						self.set_criticality()
+						self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 						for holiday in holiday_list.holidays:
 							if holiday.holiday_date == utils.today():
 								self.set_criticality()
-				self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
+								self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 		else:
 			pass
 
@@ -115,11 +120,15 @@ class Issue(Document):
 			if response_time == 'Hour/s':
 				pass
 			elif response_time == 'Day/s':
-				pass
+				end_date = add_days(utils.today(), days=response_time)
+				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
 			elif response_time == 'Week/s':
-				pass
+				response_time = 7 * int(response_time)
+				end_date = add_days(utils.today(), days=response_time)
+				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
 			elif response_time == 'Month/s':
-				pass
+				end_date = add_months(utils.today(), months=response_time)
+				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
 		else:
 			pass
 
