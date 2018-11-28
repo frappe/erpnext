@@ -113,18 +113,19 @@ class Issue(Document):
 			print(utils.today())
 			print(utils.nowdate())
 			print(utils.nowtime())
+			today = utils.nowdate
 			if response_time_period == 'Hour/s':
 				pass
 			elif response_time_period == 'Day/s':
 				end_date = add_days(utils.today(), days=response_time)
-				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
+				self.time_to_respond = date_diff(end_date, today)
 			elif response_time_period == 'Week/s':
 				response_time = 7 * int(response_time)
 				end_date = add_days(utils.today(), days=response_time)
-				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
+				self.time_to_respond = date_diff(end_date, today)
 			elif response_time_period == 'Month/s':
 				end_date = add_months(utils.today(), months=response_time)
-				self.time_to_respond = date_diff(str(end_date), utils.nowdate)
+				self.time_to_respond = date_diff(end_date, today)
 		else:
 			pass
 
