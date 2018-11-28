@@ -118,14 +118,17 @@ class Issue(Document):
 				pass
 			elif response_time_period == 'Day/s':
 				end_date = add_days(utils.today(), days=response_time)
-				self.time_to_respond = date_diff(end_date, today)
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = time_to_respond
 			elif response_time_period == 'Week/s':
 				response_time = 7 * int(response_time)
 				end_date = add_days(utils.today(), days=response_time)
-				self.time_to_respond = date_diff(end_date, today)
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = time_to_respond
 			elif response_time_period == 'Month/s':
 				end_date = add_months(utils.today(), months=response_time)
-				self.time_to_respond = date_diff(end_date, today)
+				time_to_respond = date_diff(end_date, today)
+				self.time_to_respond = time_to_respond
 		else:
 			pass
 
