@@ -464,7 +464,8 @@ def get_dashboard_info(party_type, party):
 
 	companies = frappe.db.sql("""
 		select distinct company from `tab{0}`
-		where docstatus =1 and {1} = %s"""
+		where docstatus =1 and {1} = %s
+		"""
 		.format(doctype, party_type.lower()), (party), as_dict=1)
 
 	company_wise_info = []
@@ -473,7 +474,8 @@ def get_dashboard_info(party_type, party):
 		select company, sum(grand_total) as grand_total, sum(base_grand_total) as base_grand_total
 		from `tab{0}`
 		where {1}=%s and docstatus=1 and posting_date between %s and %s
-		group by company"""
+		group by company
+		"""
 		.format(doctype, party_type.lower()),
 		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date), as_dict=1)
 
