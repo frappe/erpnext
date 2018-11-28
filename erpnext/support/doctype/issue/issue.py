@@ -25,7 +25,7 @@ class Issue(Document):
 			self.raised_by = frappe.session.user
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
-		self.set_sla()
+		self.set_support_contract()
 
 		if self.status == "Closed":
 			from frappe.desk.form.assign_to import clear
@@ -84,7 +84,7 @@ class Issue(Document):
 
 		self.db_set("description", "")
 
-	def set_sla(self):
+	def set_support_contract(self):
 		if not self.isset_sla:
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level"], limit=1)
 			if support_contract:
@@ -92,18 +92,14 @@ class Issue(Document):
 				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
 				for service in service_level.support_and_resolution:
 					if service.day == "Workday" and service.weekday == datetime.now().strftime("%A"):
-						self.set_criticality()
-						self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
+						self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
 						for holiday in holiday_list.holidays:
 							if holiday.holiday_date == utils.today():
-								self.set_criticality()
-								self.sla_timer(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
-		else:
-			pass
+								self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 
-	def sla_timer(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
+	def set_criticality_and_time(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
 		if response_time and resolution_time_period and resolution_time and resolution_time_period:
 			self.response_time = response_time
 			self.response_time_period = response_time_period
@@ -129,19 +125,15 @@ class Issue(Document):
 				self.time_to_resolve = 24 * 7 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			else:
 				self.time_to_resolve = 24 * 7 * 30 * date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
-		else:
-			pass
-
-	def set_criticality(self):
-		if self.description:
-			issue_criticality = frappe.get_list("Issue Criticality")
-			for criticality in issue_criticality:
-				doc = frappe.get_doc("Issue Criticality", criticality)
-				for keyword in doc.keyword:
-					if re.search(r''+ keyword.keyword +'', self.description):
-						self.issue_criticality = doc.name
-						self.employee_group = doc.employee_group
-						self.isset_sla = 1
+		
+		issue_criticality = frappe.get_list("Issue Criticality")
+		for criticality in issue_criticality:
+			criticality_doc = frappe.get_doc("Issue Criticality", criticality)
+			for keyword in criticality_doc.keyword:
+				if re.search(r''+ keyword.keyword +'', self.description, re.IGNORECASE) or re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
+					self.issue_criticality = criticality_doc.name
+					self.employee_group = criticality_doc.employee_group
+					self.isset_sla = 1
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
