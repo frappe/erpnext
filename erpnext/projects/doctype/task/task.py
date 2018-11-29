@@ -2,11 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
 
-from frappe.utils import getdate, date_diff, add_days, cstr
+import json
+
+import frappe
 from frappe import _, throw
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
 from frappe.utils.nestedset import NestedSet
+
 
 class CircularReferenceError(frappe.ValidationError): pass
 
@@ -157,8 +160,10 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name):
-	return frappe.db.sql("""select name from `tabTask`
-		where parent_task = %s""", name)
+	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
+	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
+	return child_tasks
+
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
