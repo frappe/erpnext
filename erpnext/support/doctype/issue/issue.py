@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, today, time_diff_in_hours, now_datetime, add_days, add_months, date_diff
+from frappe.utils import now, today, time_diff_in_hours, now_datetime, add_days, add_months, date_diff, add_to_date
 from frappe.utils.user import is_website_user
 import re
 from datetime import datetime, timedelta
@@ -110,17 +110,17 @@ class Issue(Document):
 			elif response_time_period == 'Day/s':
 				self.time_to_respond = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 				print("Day")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.response_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			elif response_time_period == 'Week/s':
 				self.time_to_respond = 24 * 7 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 				print("Week")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.response_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			else:
 				self.time_to_respond = 24 * 7 * 30 * date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
 				print("Month")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.response_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			
 			#Calculation of Time to Resolve
@@ -131,17 +131,17 @@ class Issue(Document):
 			elif resolution_time_period == 'Day/s':
 				self.time_to_resolve = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 				print("Day")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.resolution_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			elif resolution_time_period == 'Week/s':
 				self.time_to_resolve = 24 * 7 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 				print("Week")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.resolution_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			else:
 				self.time_to_resolve = 24 * 7 * 30 * date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
 				print("Month")
-				print(str(add_days(utils.today(), days=int(response_time)), utils.nowdate()))
+				print(add_to_date(utils.today(), days=int(response_time)), utils.nowdate(), as_string=True)
 				#self.resolution_by = str(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 		
 		issue_criticality = frappe.get_list("Issue Criticality")
