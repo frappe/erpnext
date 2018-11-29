@@ -101,11 +101,7 @@ class Issue(Document):
 
 	def set_criticality_and_time(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
 		if response_time and resolution_time_period and resolution_time and resolution_time_period:
-			self.response_time = response_time
-			self.response_time_period = response_time_period
-			self.resolution_time = resolution_time
-			self.resolution_time_period = resolution_time_period
-			
+						
 			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
 				self.time_to_respond = response_time
