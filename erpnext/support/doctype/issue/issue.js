@@ -9,12 +9,26 @@ frappe.ui.form.on("Issue", {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
+			frm.trigger("countdown_timer");
 		} else {
 			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
 				frm.save();
 			});
 		}
+	},
+
+	countdown_timer: function(frm) {
+		const timer = `
+			<div class="stopwatch" style="font-weight:bold">
+				<span class="hours">00</span>
+				<span class="colon">:</span>
+				<span class="minutes">00</span>
+				<span class="colon">:</span>
+				<span class="seconds">00</span>
+			</div>`;
+		
+		var section = frm.dashboard.add_section(timer);
 	},
 
 	timeline_refresh: function(frm) {
