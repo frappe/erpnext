@@ -85,7 +85,6 @@ class Issue(Document):
 		self.db_set("description", "")
 
 	def set_support_contract(self):
-		print("-----------------------------------------SSC")
 		if not self.isset_sla:
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level"], limit=1)
 			if support_contract:
@@ -101,7 +100,6 @@ class Issue(Document):
 								self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 
 	def set_criticality_and_time(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
-		print("-----------------------------------------SCAT")
 		if response_time and resolution_time_period and resolution_time and resolution_time_period:
 			self.response_time = response_time
 			self.response_time_period = response_time_period
@@ -110,7 +108,7 @@ class Issue(Document):
 			
 			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
-				self.time_to_resolve = response_time
+				self.time_to_respond = response_time
 			elif response_time_period == 'Day/s':
 				self.time_to_respond = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 			elif response_time_period == 'Week/s':

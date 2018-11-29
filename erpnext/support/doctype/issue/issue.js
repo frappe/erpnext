@@ -27,7 +27,7 @@ frappe.ui.form.on("Issue", {
 				<span class="colon">:</span>
 				<span class="seconds">00</span>
 			</div>`;
-		$('<div class="form-dashboard-section custom">'+timer+'</div>').appendTo('.form-inner-toolbar');
+		frm.doc.time_to_respond = "HEllo"
 	},
 
 	timeline_refresh: function(frm) {
