@@ -100,8 +100,7 @@ class Issue(Document):
 								self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period)
 
 	def set_criticality_and_time(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None):
-		if response_time and resolution_time_period and resolution_time and resolution_time_period:
-						
+		if response_time and resolution_time_period and resolution_time and resolution_time_period:		
 			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
 				self.time_to_respond = response_time
@@ -130,14 +129,14 @@ class Issue(Document):
 				self.time_to_resolve = 24 * 7 * 30 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
 				self.resolution_by = add_days(utils.now_datetime(), days=int(response_time))
 		
-		issue_criticality = frappe.get_list("Issue Criticality")
-		for criticality in issue_criticality:
-			criticality_doc = frappe.get_doc("Issue Criticality", criticality)
-			for keyword in criticality_doc.keyword:
-				if re.search(r''+ keyword.keyword +'', self.description, re.IGNORECASE) or re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
-					self.issue_criticality = criticality_doc.name
-					self.employee_group = criticality_doc.employee_group
-					self.isset_sla = 1
+			issue_criticality = frappe.get_list("Issue Criticality")
+			for criticality in issue_criticality:
+				criticality_doc = frappe.get_doc("Issue Criticality", criticality)
+				for keyword in criticality_doc.keyword:
+					if re.search(r''+ keyword.keyword +'', self.description, re.IGNORECASE) or re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
+						self.issue_criticality = criticality_doc.name
+						self.employee_group = criticality_doc.employee_group
+						self.isset_sla = 1
 
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
