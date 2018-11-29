@@ -2,7 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Bank Transaction', {
-	refresh: function(frm) {
-
+	onload: function(frm) {
+		frm.set_query('payment_document', 'payment_entries', function(doc, cdt, cdn) {
+			return {
+				"filters": {
+					"name": ["in", ["Payment Entry", "Journal Entry", "Sales Invoice", "Purchase Invoice"]]
+				}
+			};
+		});
 	}
 });
