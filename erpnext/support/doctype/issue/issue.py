@@ -120,6 +120,7 @@ class Issue(Document):
 			if resolution_time_period == 'Hour/s':
 				self.time_to_resolve = resolution_time
 				self.resolution_by = utils.today()
+				
 			elif resolution_time_period == 'Day/s':
 				self.time_to_resolve = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
 				self.resolution_by = add_days(utils.today(), days=int(response_time))
