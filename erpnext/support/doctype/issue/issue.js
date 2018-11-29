@@ -19,7 +19,6 @@ frappe.ui.form.on("Issue", {
 	},
 
 	countdown_timer: function(frm) {
-		if (frm.doc.opening_time) {
 			console.log("Countdown Timer");
 			let currentIncrement = moment(frappe.datetime.now_datetime()).diff(moment(frm.doc.actual_start_date),"seconds");
 			initialiseTimer();
@@ -47,7 +46,6 @@ frappe.ui.form.on("Issue", {
 				currentIncrement += 1;
 				return currentIncrement;
 			}
-		}
 	},
 
 	timeline_refresh: function(frm) {
