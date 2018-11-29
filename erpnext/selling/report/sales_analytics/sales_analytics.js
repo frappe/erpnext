@@ -106,12 +106,12 @@ frappe.query_reports["Sales Analytics"] = {
 
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
+					}, 500)
 
 
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
