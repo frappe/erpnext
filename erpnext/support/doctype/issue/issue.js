@@ -27,11 +27,7 @@ frappe.ui.form.on("Issue", {
 				<span class="colon">:</span>
 				<span class="seconds">00</span>
 			</div>`;
-		$('<div class="form-dashboard-section custom">'+timer+'</div>').appendTo('form-inner-toolbar');
-		//$('<div class="form-dashboard-section custom">'+timer+'</div>').appendTo('.form-inner-toolbar');
-		//$(".form-inner-toolbar").prepend(timer);
-		//$(".form-inner-toolbar").append(timer);
-		var section = frm.dashboard.add_section(timer);
+		$('<div class="form-dashboard-section custom">'+timer+'</div>').appendTo('.form-inner-toolbar');
 	},
 
 	timeline_refresh: function(frm) {
