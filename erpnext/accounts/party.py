@@ -462,22 +462,22 @@ def get_dashboard_info(party_type, party):
 
 	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
 
-	companies = frappe.db.sql("""
-		select distinct company from `tab{0}`
-		where docstatus =1 and {1} = %s
-		"""
-		.format(doctype, party_type.lower()), (party), as_dict=1)
+	companies = frappe.get_all(doctype, filters={
+		'docstatus': 1,
+		party_type.lower(): party
+	}, distinct=1, fields=['company'])
 
 	company_wise_info = []
 
-	company_wise_grand_total = frappe.db.sql("""
-		select company, sum(grand_total) as grand_total, sum(base_grand_total) as base_grand_total
-		from `tab{0}`
-		where {1}=%s and docstatus=1 and posting_date between %s and %s
-		group by company
-		"""
-		.format(doctype, party_type.lower()),
-		(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date), as_dict=1)
+	company_wise_grand_total = frappe.get_all(doctype,
+		filters={
+			'docstatus': 1,
+			party_type.lower(): party,
+			'posting_date': ('between', [current_fiscal_year.year_start_date, current_fiscal_year.year_end_date])
+			},
+			group_by="company",
+			fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
+		)
 
 	company_wise_billing_this_year = frappe._dict()
 
