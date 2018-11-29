@@ -22,7 +22,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			columns += [ args.get("party_type") + " Name::140"]
 
 		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
-		
+
 		columns += [{
 			"label": _("Total Invoiced Amt"),
 			"fieldname": "total_invoiced_amt",
@@ -107,7 +107,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				"options": "Supplier Group",
 				"width": 80
 			}]
-			
+
 		columns.append({
 			"fieldname": "currency",
 			"label": _("Currency"),
@@ -138,7 +138,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				row += [self.get_territory(party), self.get_customer_group(party)]
 			if args.get("party_type") == "Supplier":
 				row += [self.get_supplier_group(party)]
-				
+
 			row.append(party_dict.currency)
 			data.append(row)
 
@@ -162,7 +162,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			for k in list(party_total[d.party]):
 				if k != "currency":
 					party_total[d.party][k] += flt(d.get(k, 0))
-				
+
 			party_total[d.party].currency = d.currency
 
 		return party_total
