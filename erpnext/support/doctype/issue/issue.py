@@ -105,31 +105,30 @@ class Issue(Document):
 			#Calculation on Time to Respond
 			if response_time_period == 'Hour/s':
 				self.time_to_respond = response_time
-				self.response_by = utils.today()
+				self.response_by = utils.now_datetime()
 			elif response_time_period == 'Day/s':
-				self.time_to_respond = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
-				self.response_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_respond = 24 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.response_by = add_days(utils.now_datetime(), days=int(response_time))
 			elif response_time_period == 'Week/s':
-				self.time_to_respond = 24 * 7 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
-				self.response_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_respond = 24 * 7 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.response_by = add_days(utils.now_datetime(), days=int(response_time))
 			else:
-				self.time_to_respond = 24 * 7 * 30 * date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
-				self.response_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_respond = 24 * 7 * 30 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.response_by = add_days(utils.now_datetime(), days=int(response_time))
 			
 			#Calculation of Time to Resolve
 			if resolution_time_period == 'Hour/s':
 				self.time_to_resolve = resolution_time
-				self.resolution_by = utils.today()
-				
+				self.resolution_by = utils.now_datetime()
 			elif resolution_time_period == 'Day/s':
-				self.time_to_resolve = 24 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
-				self.resolution_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_resolve = 24 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.resolution_by = add_days(utils.now_datetime(), days=int(response_time))
 			elif resolution_time_period == 'Week/s':
-				self.time_to_resolve = 24 * 7 * date_diff(add_days(utils.today(), days=int(response_time)), utils.nowdate())
-				self.resolution_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_resolve = 24 * 7 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.resolution_by = add_days(utils.now_datetime(), days=int(response_time))
 			else:
-				self.time_to_resolve = 24 * 7 * 30 * date_diff(add_months(utils.today(), months=int(response_time)), utils.nowdate())
-				self.resolution_by = add_days(utils.today(), days=int(response_time))
+				self.time_to_resolve = 24 * 7 * 30 * date_diff(add_days(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
+				self.resolution_by = add_days(utils.now_datetime(), days=int(response_time))
 		
 		issue_criticality = frappe.get_list("Issue Criticality")
 		for criticality in issue_criticality:
