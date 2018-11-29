@@ -277,10 +277,6 @@ class Analytics(object):
 	def get_chart_data(self):
 		length = len(self.columns)
 		labels = [d.get("label") for d in self.columns[2:length-1]]
-		entry = {
-			'name':self.data[0].get('entity_name')
-		}
-		print("##########")
 		self.chart = {
 			"data": {
 				'labels': labels,
