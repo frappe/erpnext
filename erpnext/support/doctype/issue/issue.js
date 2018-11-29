@@ -9,45 +9,12 @@ frappe.ui.form.on("Issue", {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
-			frm.trigger("countdown_timer");
 		} else {
 			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
 				frm.save();
 			});
 		}
-	},
-
-	countdown_timer: function(frm) {
-			console.log("Countdown Timer");
-			let currentIncrement = moment(frappe.datetime.now_datetime()).diff(moment(frm.doc.actual_start_date),"seconds");
-			initialiseTimer();
-
-			function initialiseTimer() {
-				const interval = setInterval(function() {
-					var current = setCurrentIncrement();
-					updateStopwatch(current);
-				}, 1000);
-			}
-
-			function updateStopwatch(increment) {
-				var hours = Math.floor(increment / 3600);
-				var minutes = Math.floor((increment - (hours * 3600)) / 60);
-				var seconds = increment - (hours * 3600) - (minutes * 60);
-
-				var time = hours < 10 ? ("0" + hours.toString()) : hours.toString() + ":" + minutes < 10 ? ("0" + minutes.toString()) : minutes.toString() + ":" + seconds < 10 ? ("0" + seconds.toString()) : seconds.toString();
-				//$(section).find(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
-				//$(section).find(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
-				//$(section).find(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
-				console.log(time);
-				frm.doc.time_to_respond = time;
-				frm.doc.time_to_resolve = time;
-			}
-
-			function setCurrentIncrement() {
-				currentIncrement += 1;
-				return currentIncrement;
-			}
 	},
 
 	timeline_refresh: function(frm) {
