@@ -39,7 +39,9 @@ frappe.ui.form.on("Issue", {
 				//$(section).find(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
 				//$(section).find(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
 				//$(section).find(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
+				console.log(time);
 				frm.doc.time_to_respond = time;
+				frm.doc.time_to_resolve = time;
 			}
 
 			function setCurrentIncrement() {
