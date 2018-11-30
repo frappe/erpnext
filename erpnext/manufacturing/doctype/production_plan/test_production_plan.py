@@ -48,7 +48,7 @@ class TestProductionPlan(unittest.TestCase):
 			filters = {'production_plan': pln.name}, as_list=1)
 
 		self.assertTrue(len(work_orders), len(pln.po_items))
-		
+
 		for name in material_requests:
 			mr = frappe.get_doc('Material Request', name[0])
 			mr.cancel()
@@ -179,7 +179,7 @@ def create_production_plan(**args):
 	mr_items = get_items_for_material_requests(pln.as_dict())
 	for d in mr_items:
 		pln.append('mr_items', d)
-	
+
 	if not args.do_not_save:
 		pln.insert()
 		if not args.do_not_submit:
@@ -197,7 +197,7 @@ def make_bom(**args):
 		'quantity': args.quantity or 1,
 		'company': args.company or '_Test Company'
 	})
-	
+
 	for item in args.raw_materials:
 		item_doc = frappe.get_doc('Item', item)
 
@@ -206,8 +206,8 @@ def make_bom(**args):
 			'qty': 1,
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
-			'rate': item_doc.valuation_rate or args.rate
+			'rate': item_doc.valuation_rate or args.rate,
 		})
-		
+
 	bom.insert(ignore_permissions=True)
 	bom.submit()
