@@ -189,15 +189,16 @@ class PurchaseInvoice(BuyingController):
 	def check_valuation_rate_with_previous_doc(self):
 		has_different_rate = False
 		for item in self.items:
-			receipt_valuation_rate = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "receipt_valuation_rate")
-			val_rate_db_precision = 6 if cint(self.precision("valuation_rate", item)) <= 6 else 9
+			if item.purchase_receipt:
+				receipt_valuation_rate = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "receipt_valuation_rate")
+				val_rate_db_precision = 6 if cint(self.precision("valuation_rate", item)) <= 6 else 9
 
-			# if valuation rates are different
-			if abs(item.valuation_rate - receipt_valuation_rate) >= 1.0 / (10 ** val_rate_db_precision):
-				has_different_rate = True
-				if not cint(self.revalue_purchase_receipt):
-					frappe.throw(_("Row {0}: Item Valuation Rate does not match the Valuation Rate in Purchase Receipt. "
-						"Check 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+				# if valuation rates are different
+				if abs(item.valuation_rate - receipt_valuation_rate) >= 1.0 / (10 ** val_rate_db_precision):
+					has_different_rate = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Valuation Rate does not match the Valuation Rate in Purchase Receipt. "
+							"Check 'Revalue Purchase Receipt' to confirm.").format(item.idx))
 
 		if not has_different_rate:
 			self.revalue_purchase_receipt = 0
