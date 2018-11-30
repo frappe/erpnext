@@ -216,7 +216,7 @@
 					{% if(!filters.show_pdc_in_print) { %}
 						<td style="text-align: right">
 							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"])  : format_currency(data[i]["Debit Note"], data[i]["currency"])  %} </td>
+						<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"])  : format_currency(data[i]["debit_note"], data[i]["currency"])  %} </td>
 					{% } %}
 					<td style="text-align: right">
 						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
