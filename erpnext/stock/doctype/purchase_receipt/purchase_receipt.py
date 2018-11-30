@@ -186,6 +186,8 @@ class PurchaseReceipt(BuyingController):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
 						"voucher_detail_no": d.name, "warehouse": d.warehouse}, "stock_value_difference")
+					valuation_net_amount = self.get_item_valuation_net_amount(d)
+					valuation_item_tax_amount = self.get_item_valuation_tax_amount(d)
 
 					if not stock_value_diff:
 						continue
@@ -197,19 +199,19 @@ class PurchaseReceipt(BuyingController):
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"]))
 
-					# stock received but not billed
+					# Item net amount
 					stock_rbnb_currency = get_account_currency(stock_rbnb)
 					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse]["account"],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+						"credit": valuation_net_amount,
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
 							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
 					}, stock_rbnb_currency))
 
-					negative_expense_to_be_booked += flt(d.item_tax_amount)
+					negative_expense_to_be_booked += valuation_item_tax_amount
 
 					# Amount added through landed-cost-voucher
 					if flt(d.landed_cost_voucher_amount):
@@ -233,8 +235,8 @@ class PurchaseReceipt(BuyingController):
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 
 					# divisional loss adjustment
-					valuation_amount_as_per_doc = flt(d.base_net_amount, d.precision("base_net_amount")) + \
-						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
+					valuation_amount_as_per_doc = valuation_net_amount + valuation_item_tax_amount + \
+						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
 
 					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff,
 						d.precision("base_net_amount"))
@@ -366,13 +368,14 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
-	def set_billed_valuation_amount(self):
+	def set_billed_valuation_amounts(self):
 		for d in self.get("items"):
-			data = frappe.db.sql("""select sum(valuation_rate * qty), sum(qty)
+			data = frappe.db.sql("""select sum(base_net_amount), sum(item_tax_amount), sum(qty)
 				from `tabPurchase Invoice Item`
 				where docstatus = 1 and pr_detail = %s""", d.name)
-			d.billed_valuation_amount = data[0][0] if data else 0.0
-			d.billed_qty = data[0][1] if data else 0.0
+			d.billed_net_amount = data[0][0] if data else 0.0
+			d.billed_item_tax_amount = data[0][1] if data else 0.0
+			d.billed_qty = data[0][2] if data else 0.0
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly

@@ -186,21 +186,28 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
-	def check_valuation_rate_with_previous_doc(self):
-		has_different_rate = False
+	def check_valuation_amounts_with_previous_doc(self):
+		does_revalue = False
 		for item in self.items:
 			if item.purchase_receipt:
-				receipt_valuation_rate = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "receipt_valuation_rate")
-				val_rate_db_precision = 6 if cint(self.precision("valuation_rate", item)) <= 6 else 9
+				pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
+					["base_net_rate", "item_tax_amount"], as_dict=1)
 
-				# if valuation rates are different
-				if abs(item.valuation_rate - receipt_valuation_rate) >= 1.0 / (10 ** val_rate_db_precision):
-					has_different_rate = True
+				# if rate is different
+				if abs(item.base_net_rate - pr_item.base_net_rate) >= 1.0 / (10 ** self.precision("base_net_rate", "items")):
+					does_revalue = True
 					if not cint(self.revalue_purchase_receipt):
-						frappe.throw(_("Row {0}: Item Valuation Rate does not match the Valuation Rate in Purchase Receipt. "
-							"Check 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+						frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
 
-		if not has_different_rate:
+				# if item tax amount is different
+				if abs(item.item_tax_amount - pr_item.item_tax_amount) >= 1.0 / (10 ** self.precision("item_tax_amount", "items")):
+					does_revalue = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+		if not does_revalue:
 			self.revalue_purchase_receipt = 0
 
 	def validate_warehouse(self):
@@ -328,7 +335,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
-		self.check_valuation_rate_with_previous_doc()
+		self.check_valuation_amounts_with_previous_doc()
 		self.update_status_updater_args()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -362,7 +369,7 @@ class PurchaseInvoice(BuyingController):
 			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
 
 			# set billed item tax amount and billed net amount in pr item
-			pr_doc.set_billed_valuation_amount()
+			pr_doc.set_billed_valuation_amounts()
 
 			# set valuation rate in pr item
 			pr_doc.update_valuation_rate("items")
