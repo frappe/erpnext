@@ -134,8 +134,7 @@ class Issue(Document):
 				criticality_doc = frappe.get_doc("Issue Criticality", criticality)
 				for keyword in criticality_doc.keyword:
 					if re.search(r''+ keyword.keyword +'', self.description, re.IGNORECASE) or re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
-						self.issue_criticality = criticality_doc.name
-						self.employee_group = criticality_doc.employee_group
+						self.priority = criticality_doc.priority
 						self.isset_sla = 1
 
 	def split_issue(self, subject, communication_id):
