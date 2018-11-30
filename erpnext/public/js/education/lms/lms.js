@@ -70,6 +70,5 @@ frappe.ready(() => {
 			if(lms.store.isLogin) lms.store.updateState()
 		}
 	});
-
 	lms.debug = true
 })
