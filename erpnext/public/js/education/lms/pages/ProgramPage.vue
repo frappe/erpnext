@@ -2,7 +2,7 @@
 <div>
 	<TopSection v-bind:title="program.program_name" v-bind:description="program.description">
     </TopSection>
-	<CardList :title="'Courses'" :description="''">
+	<CardList :title="'Courses'" :description="''" :sectionType="'section-padding section-bg'">
         <CourseCard slot="card-list-slot" v-for="course in courseData" :course="course" :program_name="program_name" :key="course.name"/>
     </CardList>
 </div>
