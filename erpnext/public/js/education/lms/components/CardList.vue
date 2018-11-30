@@ -1,5 +1,5 @@
 <template>
-	<section class='section-padding section-bg'>
+	<section :class='sectionType'>
 	<div class='container'>
 		<h3 class='text-center' v-html="title"></h3>
 		<p class='lead text-center' v-html="description"></p>
@@ -12,7 +12,7 @@
 </template>
 <script>
 export default {
-    props:['title', 'description'],
+    props:['title', 'description', 'sectionType'],
     name: "CardList",
 };
 </script>
