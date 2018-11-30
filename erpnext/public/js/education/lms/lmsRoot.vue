@@ -6,8 +6,5 @@
 <script>
 export default {
 	name: "lmsRoot",
-	mounted() {
-		$(document).scrollTop(0)
-	}
 };
 </script>

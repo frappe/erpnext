@@ -42,7 +42,7 @@ export default {
         }
     },
     mounted() {
-        this.getCourseMeta().then(data => this.courseMeta = data)
+        if(lms.store.checkLogin()) this.getCourseMeta().then(data => this.courseMeta = data)
     },
     components: {
         AButton

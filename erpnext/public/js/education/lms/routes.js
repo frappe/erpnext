@@ -40,7 +40,15 @@ const routes = [
 		name: 'profile',
 		path: '/Profile',
 		component: ProfilePage,
-		props: true
+		props: true,
+		beforeEnter: (to, from, next) => {
+			if(!lms.store.checkLogin()){
+				next({name: 'home'})
+			}
+			else {
+				next()
+			}
+		}
 	}
 ];
 
