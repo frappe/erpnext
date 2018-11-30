@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import now, today, time_diff_in_hours, now_datetime, add_days, add_months, date_diff, add_to_date
 from frappe.utils.user import is_website_user
 import re
-from datetime import datetime, timedelta
 
 sender_field = "raised_by"
 
