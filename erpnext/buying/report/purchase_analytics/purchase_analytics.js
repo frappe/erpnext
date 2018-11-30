@@ -68,6 +68,9 @@ frappe.query_reports["Purchase Analytics"] = {
 		}
 
 	],
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
