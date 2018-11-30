@@ -75,7 +75,8 @@ class PeriodClosingVoucher(AccountsController):
 				"debit_in_account_currency": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"debit": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"credit_in_account_currency": abs(net_pl_balance) if net_pl_balance < 0 else 0,
-				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0
+				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0,
+				"cost_center": self.cost_center
 			}))
 
 		from erpnext.accounts.general_ledger import make_gl_entries
