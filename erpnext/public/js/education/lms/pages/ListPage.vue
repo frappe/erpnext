@@ -3,7 +3,7 @@
 		<TopSection :title="portal.title" :description="portal.description">
         	<AButton v-if="isLogin" :type="'primary'" :size="'lg'" :route="{ name: 'signup'}">Sign Up</AButton>
     	</TopSection>
-		<CardList :title="'All Programs'" :description="''">
+		<CardList :title="'All Programs'" :description="''" :sectionType="'section-padding section-bg'">
 			<ProgramCard slot="card-list-slot" v-for="item in masterData" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
 		</CardList>
 	</div>
