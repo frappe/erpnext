@@ -212,7 +212,19 @@ def has_website_permission(doc, ptype, user, verbose=False):
 
 	return permission_based_on_customer or doc.raised_by==user
 
-
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+
+def update_support_timer():
+	issues = frappe.get_list("Issue", filters={"service_contract_status": "Ongoing"})
+	for issue in issues:
+		doc = frappe.get_doc("Issue", issue.name)
+
+		if doc.time_to_respond > 0 and not doc.first_responded_on:
+			doc.time_to_respond = 24 * date_diff(doc.response_by, utils.now_datetime())
+		elif doc.time_to_resolve > 0:
+			doc.time_to_resolve = 24 * date_diff(doc.resolution_by, utils.now_datetime())
+		else:
+			doc.service_contract_status = "Not Fulfilled"
+		doc.save()
