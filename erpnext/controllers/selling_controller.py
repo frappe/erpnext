@@ -9,6 +9,7 @@ from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import get_item_defaults, set_item_default
+from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -16,7 +17,7 @@ class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
 			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				 "print_taxes_with_zero_amount"))
+				"print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
 			self.print_templates = {
@@ -43,6 +44,7 @@ class SellingController(StockController):
 		self.set_po_nos()
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
+		self.set_customer_address()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -354,6 +356,17 @@ class SellingController(StockController):
 			for item in self.items:
 				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
+
+	def set_customer_address(self):
+		address_dict = {
+			'customer_address': 'address_display',
+			'shipping_address_name': 'shipping_address',
+			'company_address': 'company_address_display'
+		}
+
+		for address_field, address_display_field in address_dict.items():
+			if self.get(address_field):
+				self.set(address_display_field, get_address_display(self.get(address_field)))
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
