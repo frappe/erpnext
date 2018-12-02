@@ -579,4 +579,5 @@ erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
+erpnext.patches.v11_0.calculate_tax_exclusive_rates
 erpnext.patches.v11_0.rename_bom_wo_fields
