@@ -63,7 +63,9 @@ class calculate_taxes_and_totals(object):
 					item.rate = flt(item.price_list_rate *
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
-				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
+				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
+
+				if has_margin_field:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
@@ -75,7 +77,16 @@ class calculate_taxes_and_totals(object):
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
 
-				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
+				item.tax_exclusive_price_list_rate = item.price_list_rate
+				item.tax_exclusive_rate = item.rate
+				item.tax_exclusive_amount = item.amount
+				item.tax_exclusive_discount_amount = item.discount_amount
+				if has_margin_field:
+					item.tax_exclusive_rate_with_margin = item.rate_with_margin
+					item.base_tax_exclusive_rate_with_margin = item.base_rate_with_margin
+
+				self._set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount",
+					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount"])
 
 				item.item_tax_amount = 0.0
 
@@ -106,12 +117,16 @@ class calculate_taxes_and_totals(object):
 			self.doc.round_floats_in(tax)
 
 	def determine_exclusive_rate(self):
+		for item in self.doc.get("items"):
+			item.cumulated_tax_fraction = 0
+
 		if not any((cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))):
 			return
 
 		for item in self.doc.get("items"):
+			has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
-			cumulated_tax_fraction = 0
+
 			for i, tax in enumerate(self.doc.get("taxes")):
 				tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax, item_tax_map)
 
@@ -122,15 +137,35 @@ class calculate_taxes_and_totals(object):
 						self.doc.get("taxes")[i-1].grand_total_fraction_for_current_item \
 						+ tax.tax_fraction_for_current_item
 
-				cumulated_tax_fraction += tax.tax_fraction_for_current_item
+				item.cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
-			if cumulated_tax_fraction and not self.discount_amount_applied and item.qty:
-				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction))
-				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+			if item.cumulated_tax_fraction and not self.discount_amount_applied:
+				item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction),
+					item.precision("tax_exclusive_price_list_rate"))
+
+				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
+				item.tax_exclusive_rate = (item.tax_exclusive_amount / item.qty) if item.qty \
+					else (item.rate / (1 + item.cumulated_tax_fraction))
+				item.tax_exclusive_amount = flt(item.tax_exclusive_amount, item.precision("tax_exclusive_amount"))
+				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, item.precision("tax_exclusive_rate"))
+
+				if has_margin_field and flt(item.tax_exclusive_rate_with_margin) > 0:
+					item.tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin / (1 + item.cumulated_tax_fraction),
+						item.precision("tax_exclusive_rate_with_margin"))
+					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * self.doc.conversion_rate,
+						item.precision("base_tax_exclusive_rate_with_margin"))
+					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate)
+				else:
+					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate)
+
+				item.net_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
+				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
+
 				item.discount_percentage = flt(item.discount_percentage,
 					item.precision("discount_percentage"))
 
-				self._set_in_company_currency(item, ["net_rate", "net_amount"])
+				self._set_in_company_currency(item, ["net_rate", "net_amount", "tax_exclusive_price_list_rate",
+					"tax_exclusive_rate", "tax_exclusive_amount"])
 
 	def _load_item_tax_rate(self, item_tax_rate):
 		return json.loads(item_tax_rate) if item_tax_rate else {}

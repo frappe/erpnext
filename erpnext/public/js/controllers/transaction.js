@@ -15,12 +15,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(item.rate > item.price_list_rate && has_margin_field) {
 					// if rate is greater than price_list_rate, set margin
 					// or set discount
+					item.discount_amount = 0;
 					item.discount_percentage = 0;
 					item.margin_type = 'Amount';
 					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
 						precision("margin_rate_or_amount", item));
 					item.rate_with_margin = item.rate;
 				} else {
+					item.discount_amount = flt(item.price_list_rate - item.rate);
 					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 						precision("discount_percentage", item));
 					item.margin_type = '';
@@ -28,6 +30,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					item.rate_with_margin = 0;
 				}
 			} else {
+				item.discount_amount = 0;
 				item.discount_percentage = 0.0;
 				item.margin_type = '';
 				item.margin_rate_or_amount = 0;
@@ -57,6 +60,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		frappe.ui.form.on(this.frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.set_dynamic_labels();
 			cur_frm.cscript.calculate_taxes_and_totals();
+		});
+
+		frappe.ui.form.on(this.frm.cscript.tax_table, {
+			taxes_remove: function(frm, cdt, cdn) {
+				cur_frm.cscript.set_dynamic_labels();
+				cur_frm.cscript.calculate_taxes_and_totals();
+			}
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "apply_discount_on", function(frm) {
@@ -123,10 +133,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			&& !this.frm.doc.payment_schedule.length
 		){
 			this.frm.trigger("payment_terms_template");
-		}
-
-		if(this.frm.fields_dict["taxes"]) {
-			this["taxes_remove"] = this.calculate_taxes_and_totals;
 		}
 
 		if(this.frm.fields_dict["items"]) {
@@ -869,6 +875,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	},
 
+	tax_exclusive_rate: function(doc, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "rate", item.tax_exclusive_rate * (1 + item.cumulated_tax_fraction));
+	},
+
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
@@ -981,10 +992,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_grid_labels: function(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
+		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount",
+				"base_net_amount", "base_rate_with_margin", "base_tax_exclusive_price_list_rate",
+				"base_tax_exclusive_rate", "base_tax_exclusive_amount", "base_tax_exclusive_rate_with_margin"],
 			company_currency, "items");
 
-		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
+		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "rate_with_margin",
+				"discount_amount", "tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
+				"tax_exclusive_discount_amount", "tax_exclusive_rate_with_margin"],
 			this.frm.doc.currency, "items");
 
 		if(this.frm.fields_dict["operations"]) {
@@ -1022,22 +1037,35 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
-		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
+		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
 
-		var show = (cint(cur_frm.doc.discount_amount)) ||
-			((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
+		var show_exclusive = (cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length;
+
+		$.each(["tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
+		"tax_exclusive_discount_amount", "tax_exclusive_rate_with_margin"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, show_exclusive);
+		});
+
+		$.each(["base_tax_exclusive_price_list_rate", "base_tax_exclusive_rate", "base_tax_exclusive_amount",
+		"base_tax_exclusive_rate_with_margin"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, (show_exclusive && (me.frm.doc.currency != company_currency)));
+		});
+
+		var show_net = cint(cur_frm.doc.discount_amount) || show_exclusive;
 
 		$.each(["net_rate", "net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, show);
+				item_grid.set_column_disp(fname, show_net);
 		});
 
 		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != company_currency)));
+				item_grid.set_column_disp(fname, (show_net && (me.frm.doc.currency != company_currency)));
 		});
 
 		// set labels
@@ -1280,6 +1308,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						me.frm.set_value("taxes", r.message);
+						me.set_dynamic_labels();
 						me.calculate_taxes_and_totals();
 					}
 				}
