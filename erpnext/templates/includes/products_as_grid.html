@@ -3,8 +3,8 @@
 <a class="product-link" href="{{ route|abs_url }}">
 	<div class="col-sm-4 col-xs-4 product-image-wrapper">
 		<div class="product-image-img">
-			{{ product_image_square(thumbnail or website_image) }}
-			<div class="product-text" itemprop="name">{{ item_name }}</div>
+			{{ product_image_square(thumbnail or website_image or image) }}
+			<div class="product-text" itemprop="name">{{ item_name or name }}</div>
 			{% if price_sales_uom %}
 				<div>{{ price_sales_uom }}</div>
 				<div style='font-size: small; margin-bottom: 10px;'>({{ price_stock_uom }} / {{ stock_uom }})</div>

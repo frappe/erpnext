@@ -13,7 +13,7 @@ def get_data():
 			'goal_doctype_link': 'company',
 			'goal_field': 'base_grand_total',
 			'date_field': 'posting_date',
-			'filter_str': 'status != "Draft"',
+			'filter_str': 'docstatus = 1',
 			'aggregation': 'sum'
 		},
 

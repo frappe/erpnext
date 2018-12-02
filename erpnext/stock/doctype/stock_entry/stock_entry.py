@@ -17,7 +17,6 @@ from erpnext.stock.utils import get_bin
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 
 import json
-from erpnext.manufacturing.doctype.job_card.job_card import update_job_card_reference
 
 from six import string_types, itervalues, iteritems
 
@@ -89,10 +88,6 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
 
-
-		if self.job_card:
-			update_job_card_reference(self.job_card, 'stock_entry', self.name)
-
 	def on_cancel(self):
 
 		if self.purchase_order and self.purpose == "Subcontract":
@@ -106,9 +101,6 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
-
-		if self.job_card:
-			update_job_card_reference(self.job_card, 'stock_entry', None)
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -379,7 +371,7 @@ class StockEntry(StockController):
 
 	def calculate_rate_and_amount(self, force=False,
 			update_finished_item_rate=True, raise_error_if_no_rate=True):
-		self.set_basic_rate(force, update_finished_item_rate)
+		self.set_basic_rate(force, update_finished_item_rate, raise_error_if_no_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
@@ -642,19 +634,19 @@ class StockEntry(StockController):
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
-			'stock_uom'			  	: item.stock_uom,
+			'stock_uom'			: item.stock_uom,
 			'description'		  	: item.description,
-			'image'					: item.image,
+			'image'				: item.image,
 			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account"),
 			'cost_center'			: get_default_cost_center(args, item, item_group_defaults),
-			'qty'					: 0,
-			'transfer_qty'			: 0,
+			'qty'				: args.get("qty"),
+			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
-			'batch_no'				: '',
+			'batch_no'			: '',
 			'actual_qty'			: 0,
 			'basic_rate'			: 0,
-			'serial_no'				: '',
+			'serial_no'			: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity

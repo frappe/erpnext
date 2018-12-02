@@ -3,7 +3,7 @@
 
 from __future__ import print_function, unicode_literals
 
-import frappe, random
+import frappe, random, erpnext
 from frappe.desk import query_report
 from erpnext.stock.stock_ledger import NegativeStockError
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
@@ -45,7 +45,7 @@ def make_delivery_note():
 	# make purchase requests
 
 	# make delivery notes (if possible)
-	if random.random() < 0.3:
+	if random.random() < 0.6:
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"]
@@ -56,8 +56,9 @@ def make_delivery_note():
 				if not d.expense_account:
 					d.expense_account = ("Cost of Goods Sold - {0}".format(
 						frappe.get_cached_value('Company',  dn.company,  'abbr')))
-			dn.insert()
+
 			try:
+				dn.insert()
 				dn.submit()
 				frappe.db.commit()
 			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):
@@ -68,9 +69,10 @@ def make_stock_reconciliation():
 	from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation \
 		import OpeningEntryAccountError, EmptyStockReconciliationItemsError
 
-	if random.random() < 0.1:
+	if random.random() < 0.4:
 		stock_reco = frappe.new_doc("Stock Reconciliation")
 		stock_reco.posting_date = frappe.flags.current_date
+		stock_reco.company = erpnext.get_default_company()
 		stock_reco.get_items_for("Stores - WP")
 		if stock_reco.items:
 			for item in stock_reco.items:
@@ -87,7 +89,7 @@ def make_stock_reconciliation():
 
 def submit_draft_stock_entries():
 	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, \
-		DuplicateEntryForProductionOrderError, OperationsNotCompleteError
+		DuplicateEntryForWorkOrderError, OperationsNotCompleteError
 
 	# try posting older drafts (if exists)
 	frappe.db.commit()
@@ -98,7 +100,7 @@ def submit_draft_stock_entries():
 			ste.save()
 			ste.submit()
 			frappe.db.commit()
-		except (NegativeStockError, IncorrectValuationRateError, DuplicateEntryForProductionOrderError,
+		except (NegativeStockError, IncorrectValuationRateError, DuplicateEntryForWorkOrderError,
 			OperationsNotCompleteError):
 			frappe.db.rollback()
 

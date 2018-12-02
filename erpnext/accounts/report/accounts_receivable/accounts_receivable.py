@@ -83,30 +83,55 @@ class ReceivablePayableReport(object):
 			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
 				columns.append({
 					"label": label,
+					"fieldname":label,
 					"fieldtype": "Currency",
 					"options": "currency",
 					"width": 120
 				})
 
-		columns.append({
+		columns += [
+		{
 			"fieldname": "currency",
 			"label": _("Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
 			"width": 100
-		})
-
-		columns += [
-			_("PDC/LC Date") + ":Date:110",
-			_("PDC/LC Ref") + ":Data:110",
-			_("PDC/LC Amount") + ":Currency/currency:130",
-			_("Remaining Balance") + ":Currency/currency:130"
-		]
+		},
+		{
+			"fieldname": "pdc/lc_date",
+			"label": _("PDC/LC Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "pdc/lc_ref",
+			"label": _("PDC/LC Ref"),
+			"fieldtype": "Data",
+			"width": 110
+		},
+		{
+			"fieldname": "pdc/lc_amount",
+			"label": _("PDC/LC Amount"),
+			"fieldtype": "Currency",
+			"options": "Currency",
+			"width": 130
+		},
+		{
+			"fieldname": "remaining_balance",
+			"label": _("Remaining Balance"),
+			"fieldtype": "Currency",
+			"options": "Currency",
+			"width": 130
+		}]
 
 		if args.get('party_type') == 'Customer':
-			columns += [_("Customer LPO") + ":Data:100"]
+			columns.append({
+				"label": _("Customer LPO"),
+				"fieldtype": "Data",
+				"fieldname": "po_no",
+				"width": 100,
+			})
 			columns += [_("Delivery Note") + ":Data:100"]
-
 		if args.get("party_type") == "Customer":
 			columns += [
 				_("Territory") + ":Link/Territory:80",
@@ -135,7 +160,6 @@ class ReceivablePayableReport(object):
 
 		data = []
 		pdc_details = get_pdc_details(args.get("party_type"), self.filters.report_date)
-
 		gl_entries_data = self.get_entries_till(self.filters.report_date, args.get("party_type"))
 
 		if gl_entries_data:
@@ -448,18 +472,17 @@ def get_pdc_details(party_type, report_date):
 	for pdc in frappe.db.sql("""
 		select
 			pref.reference_name as invoice_no, pent.party, pent.party_type,
-			max(pent.reference_date) as pdc_date, sum(ifnull(pref.allocated_amount,0)) as pdc_amount,
+			max(pent.posting_date) as pdc_date, sum(ifnull(pref.allocated_amount,0)) as pdc_amount,
 			GROUP_CONCAT(pent.reference_no SEPARATOR ', ') as pdc_ref
 		from
 			`tabPayment Entry` as pent inner join `tabPayment Entry Reference` as pref
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus < 2 and pent.reference_date >= %s
+			pent.docstatus < 2 and pent.posting_date > %s
 			and pent.party_type = %s
 			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
-
 	if scrub(party_type):
 		amount_field = ("jea.debit_in_account_currency"
 			if party_type == 'Supplier' else "jea.credit_in_account_currency")
@@ -469,18 +492,23 @@ def get_pdc_details(party_type, report_date):
 	for pdc in frappe.db.sql("""
 		select
 			jea.reference_name as invoice_no, jea.party, jea.party_type,
-			max(je.cheque_date) as pdc_date, sum(ifnull({0},0)) as pdc_amount,
+			max(je.posting_date) as pdc_date, sum(ifnull({0},0)) as pdc_amount,
 			GROUP_CONCAT(je.cheque_no SEPARATOR ', ') as pdc_ref
 		from
 			`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
 		on
 			(jea.parent = je.name)
 		where
-			je.docstatus < 2 and je.cheque_date >= %s
+			je.docstatus < 2 and je.posting_date > %s
 			and jea.party_type = %s
 			group by jea.party, jea.reference_name""".format(amount_field), (report_date, party_type), as_dict=1):
 			if (pdc.invoice_no, pdc.party) in pdc_details:
-				pdc_details[(pdc.invoice_no, pdc.party)]["pdc_amount"] += pdc.pdc_amount
+				key = (pdc.invoice_no, pdc.party)
+				pdc_details[key]["pdc_amount"] += pdc.pdc_amount
+				if pdc.pdc_ref:
+					pdc_details[key]["pdc_ref"] += ", " + pdc.pdc_ref
+				if pdc.pdc_date:
+					pdc_details[key]["pdc_date"] = max(pdc_details[key]["pdc_date"], pdc.pdc_date)
 			else:
 				pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
 

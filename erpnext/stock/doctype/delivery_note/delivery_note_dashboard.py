@@ -14,7 +14,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Related'),
-				'items': ['Sales Invoice', 'Packing Slip']
+				'items': ['Sales Invoice', 'Packing Slip', 'Delivery Trip']
 			},
 			{
 				'label': _('Reference'),

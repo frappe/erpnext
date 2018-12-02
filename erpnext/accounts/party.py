@@ -22,17 +22,18 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
-	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True):
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
 	if not party:
 		return {}
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type,
-		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template)
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address, shipping_address)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
-	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True):
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
+	fetch_payment_terms_template=True, party_address=None, shipping_address=None):
 
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = out[party_type.lower()]
@@ -45,7 +46,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
 	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
-	set_address_details(out, party, party_type, doctype, company)
+	set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
@@ -71,19 +72,17 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	return out
 
-def set_address_details(out, party, party_type, doctype=None, company=None):
+def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):  
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
-	out[billing_address_field] = get_default_address(party_type, party.name)
+	out[billing_address_field] = party_address or get_default_address(party_type, party.name)
 	if doctype:
 		out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
-
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
-
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = get_party_shipping_address(party_type, party.name)
+		out.shipping_address_name = shipping_address or get_party_shipping_address(party_type, party.name)
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
@@ -97,7 +96,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 	elif doctype and doctype == "Purchase Invoice":
 		out.update(get_company_address(company))
 		if out.company_address:
-			out["shipping_address"] = out["company_address"]
+			out["shipping_address"] = shipping_address or out["company_address"]
+			out.shipping_address_display = get_address_display(out["shipping_address"])
 			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
 		get_regional_address_details(out, doctype, company)
 
@@ -335,7 +335,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 
 def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None):
 	if getdate(due_date) < getdate(posting_date):
-		frappe.throw(_("Due Date cannot be before Posting Date"))
+		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
 	else:
 		if not template_name: return
 

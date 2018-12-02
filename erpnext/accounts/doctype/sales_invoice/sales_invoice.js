@@ -35,6 +35,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	refresh: function(doc, dt, dn) {
+		const me = this;
 		this._super();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
@@ -82,9 +83,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment Request'),
-					this.make_payment_request, __("Make"));
+			if (doc.outstanding_amount>0 && !cint(doc.is_return)) {
+				cur_frm.add_custom_button(__('Payment Request'), function() {
+					me.make_payment_request();
+				}, __("Make"));
 			}
 
 			if(!doc.auto_repeat) {
@@ -102,7 +104,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
-		var me = this;
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
@@ -938,7 +939,9 @@ var set_primary_action= function(frm, dialog, $results, invoice_healthcare_servi
 	dialog.set_primary_action(__('Add'), function() {
 		let checked_values = get_checked_values($results);
 		if(checked_values.length > 0){
-			frm.set_value("patient", dialog.fields_dict.patient.input.value);
+			if(invoice_healthcare_services) {
+				frm.set_value("patient", dialog.fields_dict.patient.input.value);
+			}
 			frm.set_value("items", []);
 			add_to_item_line(frm, checked_values, invoice_healthcare_services);
 			dialog.hide();

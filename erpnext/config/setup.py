@@ -64,7 +64,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Users and Permissions"),
-					"youtube_id": "fnBoRhBrwR4"
+					"youtube_id": "8Slw1hsTmUI"
 				},
 				{
 					"type": "help",

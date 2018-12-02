@@ -26,6 +26,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.make_holiday_list()
 
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
@@ -323,11 +324,12 @@ def make_salary_component(salary_components, test_tax):
 def get_salary_component_account(sal_comp):
 	company = erpnext.get_default_company()
 	sal_comp = frappe.get_doc("Salary Component", sal_comp)
-	sal_comp.append("accounts", {
-		"company": company,
-		"default_account": create_account(company)
-	})
-	sal_comp.save()
+	if not sal_comp.get("accounts"):
+		sal_comp.append("accounts", {
+			"company": company,
+			"default_account": create_account(company)
+		})
+		sal_comp.save()
 
 def create_account(company):
 	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
@@ -347,7 +349,8 @@ def make_earning_salary_component(setup=False, test_tax=False):
 				"abbr":'BS',
 				"condition": 'base > 10000',
 				"formula": 'base*.5',
-				"type": "Earning"
+				"type": "Earning",
+				"amount_based_on_formula": 1
 			},
 			{
 				"salary_component": 'HRA',
@@ -360,7 +363,8 @@ def make_earning_salary_component(setup=False, test_tax=False):
 				"abbr":'SA',
 				"condition": 'H < 10000',
 				"formula": 'BS*.5',
-				"type": "Earning"
+				"type": "Earning",
+				"amount_based_on_formula": 1
 			},
 			{
 				"salary_component": "Leave Encashment",
@@ -401,7 +405,8 @@ def make_earning_salary_component(setup=False, test_tax=False):
 					"abbr":'BS',
 					"condition": 'base < 10000',
 					"formula": 'base*.2',
-					"type": "Earning"
+					"type": "Earning",
+					"amount_based_on_formula": 1
 				})
 	return data
 
@@ -412,13 +417,15 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 					"abbr":'PT',
 					"condition": 'base > 10000',
 					"formula": 'base*.1',
-					"type": "Deduction"
+					"type": "Deduction",
+					"amount_based_on_formula": 1
 				},
 				{
 					"salary_component": 'TDS',
 					"abbr":'T',
 					"formula": 'base*.1',
-					"type": "Deduction"
+					"type": "Deduction",
+					"amount_based_on_formula": 1
 				}
 			]
 	if not test_tax:
@@ -427,7 +434,8 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"abbr":'T',
 			"condition": 'employment_type=="Intern"',
 			"formula": 'base*.1',
-			"type": "Deduction"
+			"type": "Deduction",
+			"amount_based_on_formula": 1
 		})
 	if setup or test_tax:
 		make_salary_component(data, test_tax)

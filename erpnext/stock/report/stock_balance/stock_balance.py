@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, now
+from erpnext.stock.utils import update_included_uom_in_report
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 from six import iteritems
@@ -14,6 +15,7 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
+	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
@@ -27,6 +29,7 @@ def execute(filters=None):
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
+	conversion_factors = []
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
@@ -54,36 +57,40 @@ def execute(filters=None):
 				variants_attributes = get_variants_attributes()
 				report_data += [item_map[item].get(i) for i in variants_attributes]
 
+			if include_uom:
+				conversion_factors.append(item_map[item].conversion_factor)
+
 			data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
 
+	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():
 	"""return columns"""
 
 	columns = [
-		_("Item")+":Link/Item:100",
-		_("Item Name")+"::150",
-		_("Item Group")+":Link/Item Group:100",
-		_("Brand")+":Link/Brand:90",
-		_("Description")+"::140",
-		_("Warehouse")+":Link/Warehouse:100",
-		_("Stock UOM")+":Link/UOM:90",
-		_("Opening Qty")+":Float:100",
-		_("Opening Value")+":Float:110",
-		_("In Qty")+":Float:80",
-		_("In Value")+":Float:80",
-		_("Out Qty")+":Float:80",
-		_("Out Value")+":Float:80",
-		_("Balance Qty")+":Float:100",
-		_("Balance Value")+":Float:100",
-		_("Valuation Rate")+":Float:90",
-		_("Reorder Level")+":Float:80",
-		_("Reorder Qty")+":Float:80",
-		_("Company")+":Link/Company:100"
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
+		{"label": _("Description"), "fieldname": "description", "width": 140},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
+		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
+		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
+		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
 
 	return columns
@@ -210,11 +217,18 @@ def get_item_details(items, sle, filters):
 		items = list(set([d.item_code for d in sle]))
 
 	if items:
+		cf_field = cf_join = ""
+		if filters.get("include_uom"):
+			cf_field = ", ucd.conversion_factor"
+			cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+
 		for item in frappe.db.sql("""
-			select name, item_name, description, item_group, brand, stock_uom
-			from `tabItem`
-			where name in ({0}) and ifnull(disabled, 0) = 0
-			""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1):
+			select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+			from `tabItem` item
+			{cf_join}
+			where item.name in ({names}) and ifnull(item.disabled, 0) = 0
+			""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
+			{"include_uom": filters.get("include_uom")}, as_dict=1):
 				item_details.setdefault(item.name, item)
 
 	if filters.get('show_variant_attributes', 0) == 1:

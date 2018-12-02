@@ -12,6 +12,7 @@ from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
+from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
@@ -42,6 +43,7 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		self.set_supplier_address()
 
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -68,7 +70,8 @@ class BuyingController(StockController):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions, doctype=self.doctype, company=self.company))
+			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
+			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
 
 		self.set_missing_item_details(for_validate)
 
@@ -111,6 +114,16 @@ class BuyingController(StockController):
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
+
+	def set_supplier_address(self):
+		address_dict = {
+			'supplier_address': 'address_display',
+			'shipping_address': 'shipping_address_display'
+		}
+
+		for address_field, address_display_field in address_dict.items():
+			if self.get(address_field):
+				self.set(address_display_field, get_address_display(self.get(address_field)))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -661,7 +674,7 @@ class BuyingController(StockController):
 		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
 			return
 
-		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s and docstatus = 0", self.name)
+		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
