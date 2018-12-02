@@ -191,6 +191,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	is_return: function() {
+		if(!this.frm.doc.is_return && this.frm.doc.return_against) {
+			this.frm.set_value('return_against', '');
+		}
+	},
+
 	setup_quality_inspection: function() {
 		if(!in_list(["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)) {
 			return;
