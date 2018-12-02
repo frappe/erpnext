@@ -330,7 +330,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 
 def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None):
 	if getdate(due_date) < getdate(posting_date):
-		frappe.throw(_("Due Date cannot be before Posting Date"))
+		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
 	else:
 		if not template_name: return
 
