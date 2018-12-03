@@ -11,7 +11,7 @@ def execute(filters=None):
 	summ_data = []
 
 	data = get_bom_stock(filters)
-	qty_to_make = filters.get("qty_to_make")
+	qty_to_make = filters.get("qty_to_make", 1)
 
 	for rows in data:
 		item_map = get_item_details(rows[0])
