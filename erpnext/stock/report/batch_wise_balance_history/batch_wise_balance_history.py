@@ -16,6 +16,13 @@ def execute(filters=None):
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
 
 	data = []
+	total = frappe._dict({
+		'opening_qty': 0,
+		'in_qty': 0,
+		'out_qty': 0,
+		'bal_qty': 0
+	})
+
 	for item in sorted(iwb_map):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
@@ -26,6 +33,12 @@ def execute(filters=None):
 						flt(qty_dict.out_qty, float_precision), flt(qty_dict.bal_qty, float_precision),
 						 item_map[item]["stock_uom"]
 					])
+
+				for qty in ['opening_qty', 'in_qty', 'out_qty', 'bal_qty']:
+					total[qty] += qty_dict.get(qty, 0)
+
+	if data:
+		data.append([_('Total'), '', '', '', '', total.opening_qty, total.in_qty, total.out_qty, total.bal_qty, ''])
 
 	return columns, data
 
