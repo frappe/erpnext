@@ -42,6 +42,20 @@ frappe.ui.form.on('POS Profile', {
 			frm.toggle_display('offline_pos_section', is_offline);
 			frm.toggle_display('print_format_for_online', !is_offline);
 		});
+
+		frm.set_query('company_address', function(doc) {
+			if(!doc.company) {
+				frappe.throw(_('Please set Company'));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Company',
+					link_name: doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -49,11 +63,11 @@ frappe.ui.form.on('POS Profile', {
 			frm.trigger("toggle_display_account_head");
 		}
 	},
-	
+
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
 	},
-	
+
 	toggle_display_account_head: function(frm) {
 		frm.toggle_display('expense_account',
 			erpnext.is_perpetual_inventory_enabled(frm.doc.company));
