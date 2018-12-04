@@ -121,7 +121,8 @@ class Issue(Document):
 								self.set_criticality_and_time(str(service.start_time), str(service.end_time), service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period, support_days)
 
 	def set_criticality_and_time(self, start_time=None, end_time=None, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None, support_days=None):
-		week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday']
+		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
+		
 		#Calculation on Time to Respond
 		start_time = datetime.strptime(start_time, '%H:%M:%S').time()
 		end_time = datetime.strptime(end_time, '%H:%M:%S').time()
@@ -131,6 +132,9 @@ class Issue(Document):
 			self.time_to_respond = response_time
 			self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
 			if response_by.date() > utils.getdate():
+				for count, weekday in enumerate(support_days):
+					if week[(response_by.date()).weekday()] == weekday[0]:
+						print(week[(response_by.date()).weekday()])
 				print("Time to Response Hour Greater")
 			else:
 				print("Time to Response Hour Lesser")
