@@ -1,4 +1,4 @@
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +135,'Opening','Åbning'
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +153,'Opening','Åbning'
 DocType: Lead,Lead,Bly
 apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
 DocType: Timesheet,% Amount Billed,% Beløb Billed
@@ -16,7 +16,7 @@ DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
 apps/erpnext/erpnext/controllers/stock_controller.py +240,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
 apps/erpnext/erpnext/config/selling.py +169,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
-apps/erpnext/erpnext/controllers/accounts_controller.py +362, or ,o
+apps/erpnext/erpnext/controllers/accounts_controller.py +369, or ,o
 DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order
 DocType: SMS Center,All Lead (Open),Alle Bly (Open)
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,Hent opdateringer

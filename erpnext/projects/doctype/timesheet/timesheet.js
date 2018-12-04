@@ -90,6 +90,13 @@ frappe.ui.form.on("Timesheet", {
 		}
 	},
 
+	company: function(frm) {
+		frappe.db.get_value('Company', { 'company_name' : frm.doc.company }, 'standard_working_hours')
+			.then(({ message }) => {
+				(frappe.working_hours = message.standard_working_hours || 0);
+		});
+	},
+
 	make_invoice: function(frm) {
 		let dialog = new frappe.ui.Dialog({
 			title: __("Select Item (optional)"),
@@ -142,11 +149,21 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	to_time: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
+		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / ( 60 * 60 * 24);
+		var std_working_hours = 0;
 
 		if(frm._setting_hours) return;
-		frappe.model.set_value(cdt, cdn, "hours", moment(child.to_time).diff(moment(child.from_time),
-			"seconds") / 3600);
+
+		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
+		std_working_hours = time_diff * frappe.working_hours;
+
+		if (std_working_hours < hours && std_working_hours > 0) {
+			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
+		} else {
+			frappe.model.set_value(cdt, cdn, "hours", hours);
+		}
 	},
+
 	time_logs_add: function(frm) {
 		var $trigger_again = $('.form-grid').find('.grid-row').find('.btn-open-row');
 		$trigger_again.on('click', () => {
@@ -209,17 +226,23 @@ var calculate_end_time = function(frm, cdt, cdn) {
 
 	let d = moment(child.from_time);
 	if(child.hours) {
-		d.add(child.hours, "hours");
-		frm._setting_hours = true;
-		frappe.model.set_value(cdt, cdn, "to_time",
-			d.format(frappe.defaultDatetimeFormat)).then(() => {
-				frm._setting_hours = false;
-			});
-	}
+		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / (60 * 60 * 24);
+		var std_working_hours = 0;
+		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
 
+		std_working_hours = time_diff * frappe.working_hours;
 
-	if((frm.doc.__islocal || frm.doc.__onload.maintain_bill_work_hours_same) && child.hours){
-		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
+		if (std_working_hours < hours && std_working_hours > 0) {
+			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
+			frappe.model.set_value(cdt, cdn, "to_time", d.add(hours, "hours").format(frappe.defaultDatetimeFormat));
+		} else {
+			d.add(child.hours, "hours");
+			frm._setting_hours = true;
+			frappe.model.set_value(cdt, cdn, "to_time",
+				d.format(frappe.defaultDatetimeFormat)).then(() => {
+					frm._setting_hours = false;
+				});
+		}
 	}
 }
 
