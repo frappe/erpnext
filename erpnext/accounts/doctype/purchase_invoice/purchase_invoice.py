@@ -194,6 +194,30 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
+	def check_valuation_amounts_with_previous_doc(self):
+		does_revalue = False
+		for item in self.items:
+			if item.purchase_receipt:
+				pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
+					["base_net_rate", "item_tax_amount"], as_dict=1)
+
+				# if rate is different
+				if abs(item.base_net_rate - pr_item.base_net_rate) >= 1.0 / (10 ** self.precision("base_net_rate", "items")):
+					does_revalue = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+				# if item tax amount is different
+				if abs(item.item_tax_amount - pr_item.item_tax_amount) >= 1.0 / (10 ** self.precision("item_tax_amount", "items")):
+					does_revalue = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+		if not does_revalue:
+			self.revalue_purchase_receipt = 0
+
 	def validate_return_against(self):
 		if cint(self.is_return) and self.return_against:
 			against_doc = frappe.get_doc("Purchase Invoice", self.return_against)
@@ -331,6 +355,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+		self.check_valuation_amounts_with_previous_doc()
 		self.update_status_updater_args()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -358,21 +383,18 @@ class PurchaseInvoice(BuyingController):
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_receipts_valuation(self):
-		purchase_receipts = set()
-		for item in self.get("items"):
-			if item.purchase_receipt:
-				purchase_receipts.add(item.purchase_receipt)
+		purchase_receipts = set([item.purchase_receipt for item in self.items if item.purchase_receipt])
 
 		for pr_name in purchase_receipts:
 			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
 
-			# set invoiced item tax amount in pr item
-			pr_doc.set_invoiced_item_tax_amount()
+			# set billed item tax amount and billed net amount in pr item
+			pr_doc.set_billed_valuation_amounts()
 
-			# set valuation amount in pr item
+			# set valuation rate in pr item
 			pr_doc.update_valuation_rate("items")
 
-			# db_update will update and save invoiced item tax amount in PR
+			# db_update will update and save valuation_rate in PR
 			for item in pr_doc.get("items"):
 				item.db_update()
 
