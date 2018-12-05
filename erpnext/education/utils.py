@@ -125,3 +125,11 @@ def enroll_all_courses_in_program(program_enrollment, student):
 def check_activity_exists(enrollment, content_type, content):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
 	return bool(activity)
+
+# def get_home_page(user):
+# 	print("----------------------------------------------------------------------")
+# 	print("Let's do a lot of magic")
+# 	if get_current_student():
+# 		return 'lms#/Profile'
+# 	else:
+# 		return None
