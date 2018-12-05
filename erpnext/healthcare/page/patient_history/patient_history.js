@@ -102,24 +102,27 @@ var get_documents = function(patient, me){
 							label += "<br/>"+data[i].subject;
 						}
 						data[i] = add_date_separator(data[i])
-						if(data[i].practitioner_user){
+						if(data[i].practitioner_user && frappe.user_info(data[i].practitioner_user).image){
 							data[i].imgsrc = frappe.utils.get_file_link(frappe.user_info(data[i].practitioner_user).image);
 						}
 						else{
-							data[i].imgsrc = 'https://avatars1.githubusercontent.com/u/3784093?s=64&v=4';
+							data[i].imgsrc = false;
 						}
 						var time_line_heading = data[i].practitioner ? `${data[i].practitioner}` : ``
-						time_line_heading += `   <a target='_blank' href='#Form/${data[i].reference_doctype}/${data[i].reference_name}'>${data[i].reference_doctype}</a> `
+						time_line_heading += `<a target='_blank' href='#Form/${data[i].reference_doctype}/${data[i].reference_name}'>${data[i].reference_doctype}</a> `
 						details += `<li data-toggle='pill' class='patient_doc_menu'
 						data-doctype='${data[i].reference_doctype}' data-docname='${data[i].reference_name}'>
-						<div class='col-sm-12 d-flex border-bottom py-3'>
-							<span class='mr-3'>
-								<a>
-									<img class='avtar' src='${data[i].imgsrc}' width='32' height='32'>
-									</img>
-								</a>
-							</span>
-							<div class='d-flex flex-column width-full'>
+						<div class='col-sm-12 d-flex border-bottom py-3'>`
+						if (data[i].imgsrc){
+							details += `<span class='mr-3'>
+								<img class='avtar' src='${data[i].imgsrc}' width='32' height='32'>
+								</img>
+						</span>`;
+						}else{
+							details += `<span class='mr-3 avatar avatar-small' style='width:32px; height:32px;'><div align='center' class='standard-image'
+								style='background-color: #fafbfc;'>${data[i].practitioner ? data[i].practitioner.charAt(0) : "U"}</div></span>`;
+						}
+						details += `<div class='d-flex flex-column width-full'>
 								<div>
 									`+time_line_heading+` on
 										<!--<span class='${data[i].date_class}'>${data[i].date_sep}</span>-->
@@ -181,24 +184,28 @@ var show_patient_info = function(patient, me){
 		callback: function (r) {
 			var data = r.message;
 			var details = "";
+			if(data.image){
+				details += "<div><img class='thumbnail' width=75% src='"+data.image+"'></div>";
+			}
+			details += "<b>Name : " + data.patient_name +"<br>Gender : </b>" + data.sex;
 			if(data.email) details += "<br><b>Email :</b> " + data.email;
 			if(data.mobile) details += "<br><b>Mobile :</b> " + data.mobile;
 			if(data.occupation) details += "<br><b>Occupation :</b> " + data.occupation;
 			if(data.blood_group) details += "<br><b>Blood group : </b> " + data.blood_group;
-			if(data.allergies) details +=  "<br><br><b>Allergies : </b> "+  data.allergies;
-			if(data.medication) details +=  "<br><b>Medication : </b> "+  data.medication;
+			if(data.allergies) details +=  "<br><br><b>Allergies : </b> "+  data.allergies.replace("\n", "<br>");
+			if(data.medication) details +=  "<br><b>Medication : </b> "+  data.medication.replace("\n", "<br>");
 			if(data.alcohol_current_use) details +=  "<br><br><b>Alcohol use : </b> "+  data.alcohol_current_use;
 			if(data.alcohol_past_use) details +=  "<br><b>Alcohol past use : </b> "+  data.alcohol_past_use;
 			if(data.tobacco_current_use) details +=  "<br><b>Tobacco use : </b> "+  data.tobacco_current_use;
 			if(data.tobacco_past_use) details +=  "<br><b>Tobacco past use : </b> "+  data.tobacco_past_use;
-			if(data.medical_history) details +=  "<br><br><b>Medical history : </b> "+  data.medical_history;
-			if(data.surgical_history) details +=  "<br><b>Surgical history : </b> "+  data.surgical_history;
-			if(data.surrounding_factors) details +=  "<br><br><b>Occupational hazards : </b> "+  data.surrounding_factors;
-			if(data.other_risk_factors) details += "<br><b>Other risk factors : </b> " + data.other_risk_factors;
-			if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details;
+			if(data.medical_history) details +=  "<br><br><b>Medical history : </b> "+  data.medical_history.replace("\n", "<br>");
+			if(data.surgical_history) details +=  "<br><b>Surgical history : </b> "+  data.surgical_history.replace("\n", "<br>");
+			if(data.surrounding_factors) details +=  "<br><br><b>Occupational hazards : </b> "+  data.surrounding_factors.replace("\n", "<br>");
+			if(data.other_risk_factors) details += "<br><b>Other risk factors : </b> " + data.other_risk_factors.replace("\n", "<br>");
+			if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details.replace("\n", "<br>");
 
 			if(details){
-				details = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Patient Details</b>" + details + "</div>";
+				details = "<div style='padding-left:10px; font-size:13px;' align='center'>" + details + "</div>";
 			}
 			me.page.main.find(".patient_details").html(details);
 		}
@@ -278,7 +285,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 					}
 				});
 			}else{
-				me.page.main.find(".patient_vital_charts").html("<div class='text-muted' align='center'><br>Vitals not yet recorded<div>");
+				me.page.main.find(".patient_vital_charts").html("");
 				me.page.main.find(".show_chart_btns").html("");
 			}
 		}
