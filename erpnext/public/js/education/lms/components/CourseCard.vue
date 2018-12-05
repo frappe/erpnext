@@ -55,7 +55,7 @@ export default {
             if (this.courseMeta.flag == "Start Course" ){
                 return "primary"
             }
-            else if (this.courseMeta.flag == "Complete" ) {
+            else if (this.courseMeta.flag == "Completed" ) {
                 return "success"
             }
             else if (this.courseMeta.flag == "Continue" ) {

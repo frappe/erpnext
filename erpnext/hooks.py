@@ -165,8 +165,10 @@ default_roles = [
 ]
 
 role_home_page = {
-	"LMS User": "lms"
+	"LMS User": "`lms`"
 }
+
+# get_website_user_home_page = "erpnext.education.utils.get_home_page"
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",

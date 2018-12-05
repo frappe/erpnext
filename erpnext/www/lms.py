@@ -208,7 +208,7 @@ def get_course_meta(course_name, program_name):
 	if count == 0:
 		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count == len(progress):
-		return {'flag':'Complete', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+		return {'flag':'Completed', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count < len(progress):
 		next_item = next(item for item in progress if item['is_complete']==False)
 		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
