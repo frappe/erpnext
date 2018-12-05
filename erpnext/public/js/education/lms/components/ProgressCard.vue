@@ -11,7 +11,7 @@
                     Courses
                     <ul class="mb-0 mt-1">
                         <li v-for="item in programData.progress" :key="item.name">
-                            <span v-if="item.is_complete"><i class="text-success fa fa-check" aria-hidden="true"></i></span> 
+                            <span v-if="item.is_complete"><i class="text-success fa fa-check-circle" aria-hidden="true"></i></span> 
                             <span v-else><i class="text-secondary fa fa-circle-o" aria-hidden="true"></i></span> 
                             {{ item.course_name }}
                         </li>
