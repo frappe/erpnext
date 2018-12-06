@@ -8,23 +8,19 @@ from frappe.utils import cint
 from erpnext.healthcare.utils import render_docs_as_html
 
 @frappe.whitelist()
-def get_feed(name):
+def get_feed(name, start=0, page_length=20):
 	"""get feed"""
-	result = frappe.db.sql("""select name, owner, modified, creation,
-			reference_doctype, reference_name, subject
+	result = frappe.db.sql("""select name, owner, creation,
+		reference_doctype, reference_name, subject
 		from `tabPatient Medical Record`
 		where patient=%(patient)s
-		order by creation desc""",
+		order by creation desc
+		limit %(start)s, %(page_length)s""",
 		{
-			"patient": name
+			"patient": name,
+			"start": cint(start),
+			"page_length": cint(page_length)
 		}, as_dict=True)
-
-	for dict_item in result:
-		if dict_item.reference_doctype != "Vital Signs":
-			practitioner = frappe.db.get_value(dict_item.reference_doctype, dict_item.reference_name, 'practitioner')
-			practitioner_user = frappe.db.get_value("Healthcare Practitioner", practitioner, "user_id")
-			dict_item.update({'practitioner': practitioner, 'practitioner_user': practitioner_user})
-
 	return result
 
 @frappe.whitelist()
