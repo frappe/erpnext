@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -561,7 +562,7 @@
    "oldfieldname": "conversion_factor", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
-   "precision": "", 
+   "precision": "9",
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "print_width": "100px", 
@@ -700,10 +701,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -2341,7 +2344,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2018-09-07 07:16:58.258276", 
+ "modified": "2018-10-30 15:14:15.694415",
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 
@@ -2354,5 +2357,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }
