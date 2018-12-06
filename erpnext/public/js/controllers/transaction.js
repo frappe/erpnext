@@ -852,6 +852,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
 			}
+
+			if(frappe.meta.get_docfield(cdt, "alt_uom_size", cdn)) {
+				if (!item.alt_uom) {
+					item.alt_uom_size = 1.0
+				}
+				item.alt_uom_qty = flt(item.stock_qty * item.alt_uom_size, precision("alt_uom_qty", item));
+				refresh_field("alt_uom_qty", item.name, item.parentfield);
+			}
 		}
 	},
 

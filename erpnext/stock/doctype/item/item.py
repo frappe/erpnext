@@ -105,6 +105,7 @@ class Item(WebsiteGenerator):
 
 		self.validate_uom()
 		self.validate_description()
+		self.add_alt_uom_in_conversion_table()
 		self.compute_uom_conversion_factors()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -533,6 +534,18 @@ class Item(WebsiteGenerator):
 			for d in conv_factors:
 				self.append("uoms", d)
 
+	def add_alt_uom_in_conversion_table(self):
+		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]
+		if self.alt_uom and self.alt_uom != self.stock_uom \
+				and (self.stock_uom, self.alt_uom) not in uom_conv_list and (self.alt_uom, self.stock_uom) not in uom_conv_list:
+			if not flt(self.alt_uom_size):
+				frappe.throw(_("Container Size is invalid"))
+			ch = self.append('uom_conversion_graph', {})
+			ch.from_qty = 1.0
+			ch.from_uom = self.stock_uom
+			ch.to_qty = flt(self.alt_uom_size)
+			ch.to_uom = self.alt_uom
+
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
 
@@ -561,6 +574,9 @@ class Item(WebsiteGenerator):
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 				frappe.throw(
 					_("Conversion factor for default Unit of Measure must be 1"))
+
+			if self.alt_uom and d.uom == self.alt_uom:
+				self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
@@ -847,6 +863,11 @@ class Item(WebsiteGenerator):
 			if template_uom != self.stock_uom:
 				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
                                     .format(self.stock_uom, template_uom))
+
+		if self.alt_uom == self.stock_uom:
+			self.alt_uom = ""
+		if not self.alt_uom:
+			self.alt_uom_size = None
 
 	def validate_uom_conversion_factor(self):
 		if self.uoms:

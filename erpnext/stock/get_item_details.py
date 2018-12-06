@@ -286,6 +286,11 @@ def get_basic_details(args, item):
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
 
+	# Contents UOM conversion factor and qty
+	out.alt_uom = item.alt_uom
+	out.alt_uom_size = item.alt_uom_size if out.alt_uom else 1.0
+	out.alt_uom_qty = out.stock_qty * out.alt_uom_size
+
 	# calculate last purchase rate
 	from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 	out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.item_code, out.conversion_factor)
