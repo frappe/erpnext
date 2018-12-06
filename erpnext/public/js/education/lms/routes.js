@@ -4,20 +4,32 @@ import ContentPage from "./pages/ContentPage.vue";
 import ListPage from "./pages/ListPage.vue";
 import ProfilePage from "./pages/ProfilePage.vue";
 
-const routes = [
-	{name: 'home', path: '', component: Home},
-	{name: 'program', path: '/Program/:program_name', component: ProgramPage, props: true},
+const routes = [{
+		name: 'home',
+		path: '',
+		component: Home
+	},
+	{
+		name: 'program',
+		path: '/Program/:program_name',
+		component: ProgramPage,
+		props: true
+	},
 	{
 		name: 'content',
 		path: '/Program/:program_name/:course/:type/:content',
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
-			if(!lms.store.checkLogin()){
-				next({name: 'home'})
-			}
-			else {
+			if (lms.store.checkProgramEnrollment(this.program_name)) {
 				next()
+			} else {
+				next({
+					name: 'program',
+					params: {
+						program_name: to.params.program_name
+					}
+				})
 			}
 		}
 	},
@@ -31,9 +43,9 @@ const routes = [
 		name: 'signup',
 		path: '/Signup',
 		beforeEnter(to, from, next) {
-        	window.location = window.location.origin.toString() +'/login#signup'
-    	},
-		component: ListPage,
+			window.location = window.location.origin.toString() + '/login#signup'
+		},
+		component: Home,
 		props: true
 	},
 	{
@@ -42,10 +54,11 @@ const routes = [
 		component: ProfilePage,
 		props: true,
 		beforeEnter: (to, from, next) => {
-			if(!lms.store.checkLogin()){
-				next({name: 'home'})
-			}
-			else {
+			if (!lms.store.checkLogin()) {
+				next({
+					name: 'home'
+				})
+			} else {
 				next()
 			}
 		}

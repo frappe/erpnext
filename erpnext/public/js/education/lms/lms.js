@@ -31,7 +31,6 @@ frappe.ready(() => {
 					if (lms.debug) console.log('Updated Enrolled Programs', this.enrolledPrograms)
 				}
 			},
-
 			updateEnrolledCourses() {
 				if(this.isLogin) {
 					lms.call("get_all_course_enrollments").then(data => {
@@ -40,7 +39,6 @@ frappe.ready(() => {
 					if (lms.debug) console.log('Updated Enrolled Courses', this.enrolledCourses)
 				}
 			},
-
 			checkLogin() {
 				if(frappe.session.user === "Guest"){
 					if (lms.debug) console.log('No Session')
@@ -52,15 +50,31 @@ frappe.ready(() => {
 				}
 				return this.isLogin
 			},
-
 			updateState() {
 				this.checkLogin()
 				this.updateEnrolledPrograms()
 				this.updateEnrolledCourses()
 			},
+			checkProgramEnrollment(programName) {
+				if(this.checkLogin()){
+					if(this.enrolledPrograms) {
+						if(this.enrolledPrograms.includes(programName)) {
+							return true
+						}
+						else {
+							return false
+						}
+					}
+					else {
+						return false
+					}
+				}
+				else {
+					return false
+				}
+			}
 		}
 	});
-
 	lms.view = new Vue({
 		el: "#lms-app",
 		router: new VueRouter({ routes }),
@@ -70,5 +84,8 @@ frappe.ready(() => {
 			if(lms.store.isLogin) lms.store.updateState()
 		}
 	});
+	lms.view.$router.afterEach((to, from) => {
+		window.scrollTo(0,0)
+	  })
 	lms.debug = true
 })
