@@ -130,44 +130,44 @@ class Issue(Document):
 			self.time_to_respond = response_time
 			self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
 
-			time_to_respond = response_time
-			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)			
+			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, response_by=response_by, week=week, support_days=support_days)
 
 		elif response_time_period == 'Day/s':
-			self.time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
+			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
 			self.response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time))
 
-			time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
 			response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, response_by=response_by, week=week, support_days=support_days)
 
 		elif response_time_period == 'Week/s':
-			self.time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
+			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
 			self.response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time))
 
-			time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
 			response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, response_by=response_by, week=week, support_days=support_days)
 		
 		#Calculation of Time to Resolve
 		if resolution_time_period == 'Hour/s':
 			self.time_to_resolve = resolution_time
 			self.resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time))
 
-			time_to_resolve = resolution_time
 			resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, resolution_by=resolution_by, week=week, support_days=support_days)
 			
 		elif resolution_time_period == 'Day/s':
-			self.time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
+			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
 			self.resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time))
 
-			time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
 			resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, resolution_by=resolution_by, week=week, support_days=support_days)
 			
 		else:
-			self.time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
+			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
 			self.resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time))
 
-			time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
 			resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True)
+			self.calculate_support(start_time=start_time, end_time=end_time, resolution_by=resolution_by, week=week, support_days=support_days)
 	
 		issue_criticality = frappe.get_list("Issue Criticality")
 		for criticality in issue_criticality:
@@ -178,7 +178,14 @@ class Issue(Document):
 					self.isset_sla = 1
 
 	def calculate_support(self, start_time=None, end_time=None, response_by=None, resolution_by=None, week=None, support_days=None):
-		pass
+		if response_by:
+			time = response_by
+			print("response_by")
+			print(time)
+		else:
+			time = resolution_by
+			print("resolution_by")
+			print(time)
 
 def get_list_context(context=None):
 	return {
