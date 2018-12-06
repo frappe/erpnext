@@ -62,15 +62,6 @@ class Student(Document):
 			enrollments = [item['program'] for item in program_enrollments]
 			return enrollments
 
-	def get_completed_courses(self):
-		"""Returns a list of course enrollments linked with the current student"""
-		completed_courses = frappe.get_list("Course Enrollment", filters={"student": self.name, "completed":1}, fields=['course'])
-		if not completed_courses:
-			return None
-		else:
-			courses = [item['course'] for item in completed_courses]
-			return courses
-
 	def enroll_in_program(self, program_name):
 		enrollment = frappe.get_doc({
 				"doctype": "Program Enrollment",
