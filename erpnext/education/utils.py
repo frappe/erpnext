@@ -106,6 +106,7 @@ def create_student():
 		"first_name": user.first_name,
 		"last_name": user.last_name,
 		"student_email_id": user.email,
+		"user": frappe.session.user
 		})
 	student.save(ignore_permissions=True)
 	frappe.db.commit()
