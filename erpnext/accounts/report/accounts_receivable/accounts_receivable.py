@@ -198,10 +198,15 @@ class ReceivablePayableReport(object):
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
 						pdc_amount = flt(self.pdc_details.get((gle.voucher_no, gle.party), {}).get("pdc_amount"))
 						for d in self.payment_term_map.get(gle.voucher_no):
-							if payment_amount + credit_note_amount >= d[1]:
-								temp = payment_amount
-								payment_amount = payment_amount - d[1] + credit_note_amount
-								credit_note_amount = credit_note_amount - d[1] + temp - payment_amount
+							term_outstanding_amount = 0
+							if payment_amount >= d[1]:
+								payment_amount = payment_amount - d[1]
+								if credit_note_amount:
+										term_outstanding_amount -= credit_note_amount
+										row = self.prepare_row(party_naming_by, args, gle, term_outstanding_amount,
+										credit_note_amount, d[0], payment_amount , d[1], d[2], 0)
+										credit_note_amount = 0
+										data.append(row)
 							else:
 								outstanding_amount = d[1] - payment_amount - credit_note_amount
 								if pdc_amount > outstanding_amount:
@@ -222,7 +227,7 @@ class ReceivablePayableReport(object):
 						data.append(row)
 		return data
 
-	def prepare_row(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount, 
+	def prepare_row(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount,
 		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None, pdc_amount=None):
 		row = [gle.posting_date, gle.party]
 
@@ -258,8 +263,8 @@ class ReceivablePayableReport(object):
 
 		# ageing data
 		if self.filters.ageing_based_on == "Due Date":
-			entry_date = due_date 
-		elif self.filters.ageing_based_on == "Supplier Invoice Date": 
+			entry_date = due_date
+		elif self.filters.ageing_based_on == "Supplier Invoice Date":
 			entry_date = bill_date
 		else:
 			entry_date = gle.posting_date
@@ -450,7 +455,7 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
-			
+
 			if self.filters.get("territory"):
 				lft, rgt = frappe.db.get_value("Territory",
 					self.filters.get("territory"), ["lft", "rgt"])
@@ -482,7 +487,7 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select name from tabSupplier
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
-								
+
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):
@@ -505,7 +510,7 @@ class ReceivablePayableReport(object):
 			party_account_currency, currency, si.conversion_rate,
 			ps.due_date, ps.payment_amount, ps.description
 			from `tabSales Invoice` si, `tabPayment Schedule` ps
-			where si.name = ps.parent and 
+			where si.name = ps.parent and
 			si.docstatus = 1 and si.company = '%s' and
 			si.name in (%s) order by ps.due_date"""
 		% (self.filters.company, ','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict = 1):
@@ -577,7 +582,7 @@ def get_pdc_details(party_type, report_date):
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus < 2 and pent.posting_date > %s 
+			pent.docstatus < 2 and pent.posting_date > %s
 			and pent.party_type = %s
 			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
