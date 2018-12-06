@@ -196,7 +196,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * me.frm.doc.conversion_rate,
 						precision("base_tax_exclusive_rate_with_margin", item));
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate);
-				} else {
+				} else if(flt(item.tax_exclusive_price_list_rate) > 0) {
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate);
 				}
 
