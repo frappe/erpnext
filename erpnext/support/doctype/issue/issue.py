@@ -127,115 +127,58 @@ class Issue(Document):
 		start_time = datetime.strptime(start_time, '%H:%M:%S').time()
 		end_time = datetime.strptime(end_time, '%H:%M:%S').time()
 		if response_time_period == 'Hour/s':
-			time_to_respond = response_time
-			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)
 			self.time_to_respond = response_time
 			self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
-			if response_by.date() > utils.getdate():
-				for count, weekday in enumerate(support_days):
-					if week[(response_by.date()).weekday()] == weekday[0]:
-						print(week[(response_by.date()).weekday()])
-				print("Time to Response Hour Greater")
-			else:
-				print("Time to Response Hour Lesser")
-			print(response_by)
-			print(response_by.time())
-			print(week[(response_by.date()).weekday()])
+
+			time_to_respond = response_time
+			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)			
 
 		elif response_time_period == 'Day/s':
-			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
-			self.response_by = add_to_date(utils.now_datetime(), days=int(response_time))
-			time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=int(response_time)), utils.now_datetime())
-			response_by = add_to_date(utils.now_datetime(), days=int(response_time), as_datetime=True)
-			if response_by.date() > utils.getdate():
-				print("Time to Response Day Greater")
-			else:
-				print("Time to Response Day Lesser")
-			print(response_by)
-			print(response_by.time())
-			print(week[(response_by.date()).weekday()])
+			self.time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
+			self.response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time))
+
+			time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
+			response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True)
+
 		elif response_time_period == 'Week/s':
-			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=7 * int(response_time)), utils.now_datetime())
-			self.response_by = add_to_date(utils.now_datetime(), days=7 * int(response_time))
-			response_by = add_to_date(utils.now_datetime(), days=7 * int(response_time), as_datetime=True)
-			time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=7 * int(response_time)), utils.now_datetime())
-			if response_by.date() > utils.getdate():
-				print("Time to Response Week Greater")
-			else:
-				print("Time to Response Week Lesser")
-			print(response_by)
-			print(response_by.time())
-			print(week[(response_by.date()).weekday()])
-		else:
-			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=30 * 7 * int(response_time)), utils.now_datetime())
-			self.response_by = add_to_date(utils.now_datetime(), days=30 * 7 * int(response_time))
-			time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), days=30 * 7 * int(response_time)), utils.now_datetime())
-			response_by = add_to_date(utils.now_datetime(), days=30 * 7 * int(response_time), as_datetime=True)
-			if response_by.date() > utils.getdate():
-				print("Time to Response Month Greater")
-			else:
-				print("Time to Response Month Lesser")
-			print(response_by)
-			print(response_by.time())
-			print(week[(response_by.date()).weekday()])
+			self.time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
+			self.response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time))
+
+			time_to_respond = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
+			response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True)
 		
 		#Calculation of Time to Resolve
 		if resolution_time_period == 'Hour/s':
 			self.time_to_resolve = resolution_time
 			self.resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time))
+
 			time_to_resolve = resolution_time
 			resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True)
-			if resolution_by.date() > utils.getdate():
-				print("Time to Resolve Hour Greater")
-			else:
-				print("Time to Resolve Hour Lesser")
-			print(resolution_by)
-			print(resolution_by.time())
-			print(week[(resolution_by.date()).weekday()])
+			
 		elif resolution_time_period == 'Day/s':
-			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=int(resolution_time)), utils.now_datetime())
-			self.resolution_by = add_to_date(utils.now_datetime(), days=int(resolution_time))
-			resolution_by = add_to_date(utils.now_datetime(), days=int(resolution_time), as_datetime=True)
-			time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=int(resolution_time)), utils.now_datetime())
-			if resolution_by.date() > utils.getdate():
-				print("Time to Resolve Day Greater")
-			else:
-				print("Time to Resolve Day Lesser")
-			print(resolution_by)
-			print(resolution_by.time())
-			print(week[(resolution_by.date()).weekday()])
-		elif resolution_time_period == 'Week/s':
-			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=7 * int(resolution_time)), utils.now_datetime())
-			self.resolution_by = add_to_date(utils.now_datetime(), days=7 * int(resolution_time))
-			time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=7 * int(resolution_time)), utils.now_datetime())
-			resolution_by = add_to_date(utils.now_datetime(), days=7 * int(resolution_time), as_datetime=True)
-			if resolution_by.date() > utils.getdate():
-				print("Time to Resolve Week Greater")
-			else:
-				print("Time to Resolve Week Lesser")
-			print(resolution_by)
-			print(resolution_by.time())
-			print(week[(resolution_by.date()).weekday()])
+			self.time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
+			self.resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time))
+
+			time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
+			resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True)
+			
 		else:
-			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=30 * 7 * int(resolution_time)), utils.now_datetime())
-			self.resolution_by = add_to_date(utils.now_datetime(), days=30 * 7 * int(resolution_time))
-			time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), days=30 * 7 * int(resolution_time)), utils.now_datetime())
-			resolution_by = add_to_date(utils.now_datetime(), days=30 * 7 * int(resolution_time), as_datetime=True)
-			if resolution_by.date() > utils.getdate():
-				print("Time to Resolve Month Greater")
-			else:
-				print("Time to Resolve Month Lesser")
-			print(resolution_by)
-			print(resolution_by.time())
-			print(week[(resolution_by.date()).weekday()])
+			self.time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
+			self.resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time))
+
+			time_to_resolve = date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
+			resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True)
 	
 		issue_criticality = frappe.get_list("Issue Criticality")
 		for criticality in issue_criticality:
 			criticality_doc = frappe.get_doc("Issue Criticality", criticality)
 			for keyword in criticality_doc.keyword:
-				if re.search(r''+ keyword.keyword +'', self.description, re.IGNORECASE) or re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
+				if re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
 					self.priority = criticality_doc.priority
 					self.isset_sla = 1
+
+	def calculate_support(self, start_time=None, end_time=None, response_by=None, resolution_by=None, week=None, support_days=None):
+		pass
 
 def get_list_context(context=None):
 	return {
