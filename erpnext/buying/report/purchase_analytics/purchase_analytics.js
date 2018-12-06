@@ -68,11 +68,8 @@ frappe.query_reports["Purchase Analytics"] = {
 		}
 
 	],
-	"formatter": function(value, row, column, data) {
-		if(!value){
-			value = 0
-		}
-		return value;
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
 	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
@@ -110,19 +107,19 @@ frappe.query_reports["Purchase Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets
 					}
-					
+
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
-					
-					
+					},500)
+
+
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
 			}
-		})
-	},
+		});
+	}
 }

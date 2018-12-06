@@ -99,11 +99,11 @@ def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 	if filters.range == 'Weekly':
-		period = "Week " + str(posting_date.isocalendar()[1])
+		period = "Week " + str(posting_date.isocalendar()[1]) + " " + str(posting_date.year)
 	elif filters.range == 'Monthly':
-		period = months[posting_date.month - 1]
+		period = str(months[posting_date.month - 1]) + " " + str(posting_date.year)
 	elif filters.range == 'Quarterly':
-		period = "Quarter " + str(((posting_date.month-1)//3)+1)
+		period = "Quarter " + str(((posting_date.month-1)//3)+1) +" " + str(posting_date.year)
 	else:
 		year = get_fiscal_year(posting_date, company=filters.company)
 		period = str(year[2])
