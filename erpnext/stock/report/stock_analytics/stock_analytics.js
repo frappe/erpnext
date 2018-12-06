@@ -71,16 +71,8 @@ frappe.query_reports["Stock Analytics"] = {
 			reqd: 1
 		}
 	],
-	"formatter": function(value, row, column, data) {
-		if(!value && (column.fieldname == 'brand' || column.fieldname == 'uom')){
-			value = ""
-		}
-
-		if(Number(value)){
-			value = value.toFixed(2)
-		}
-
-		return value;
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
 	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
@@ -120,16 +112,16 @@ frappe.query_reports["Stock Analytics"] = {
 
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
+					},500)
 
 
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
 			}
-		})
-	},
+		});
+	}
 }
