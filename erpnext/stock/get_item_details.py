@@ -290,7 +290,7 @@ def get_basic_details(args, item):
 
 	# Contents UOM conversion factor and qty
 	out.alt_uom = item.alt_uom
-	out.alt_uom_size = item.alt_uom_size
+	out.alt_uom_size = item.alt_uom_size if out.alt_uom else 1.0
 	out.alt_uom_qty = out.stock_qty * out.alt_uom_size
 
 	# calculate last purchase rate

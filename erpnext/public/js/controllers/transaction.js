@@ -860,7 +860,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			if(frappe.meta.get_docfield(cdt, "alt_uom_size", cdn)) {
-				item.alt_uom_qty = item.stock_qty * item.alt_uom_size;
+				if (!item.alt_uom) {
+					item.alt_uom_size = 1.0
+				}
+				item.alt_uom_qty = flt(item.stock_qty * item.alt_uom_size, precision("alt_uom_qty", item));
 				refresh_field("alt_uom_qty", item.name, item.parentfield);
 			}
 		}

@@ -173,7 +173,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		template_field.refresh();
 
 		// hide properties for variant
-		['item_code', 'item_name', 'item_group', 'stock_uom'].forEach((d) => {
+		['item_code', 'item_name', 'item_group', 'stock_uom', 'alt_uom', 'alt_uom_size'].forEach((d) => {
 			let f = this.dialog.get_field(d);
 			f.df.hidden = for_variant;
 			f.refresh();

@@ -584,3 +584,4 @@ erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.set_transaction_tax_exclusive_fields
 erpnext.patches.v11_0.unset_against_voucher_in_receivable_payable_gl_entry
+erpnext.patches.v11_0.set_transaction_item_alt_uom_qty
