@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopSection :title="portal.title" :description="portal.description">
+		<TopSection :title="'Programs at ' + portal.title" :description="portal.description">
         	<AButton v-if="isLogin" :type="'primary'" :size="'lg'" :route="{ name: 'signup'}">Sign Up</AButton>
     	</TopSection>
 		<CardList :title="'All Programs'" :description="''" :sectionType="'section-padding section-bg'">

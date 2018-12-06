@@ -17,12 +17,12 @@
                 </span>
             </div>
             <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <a-button
+                <a-button v-if="isLogin"
                     :type="buttonType"
                     size="sm btn-block"
                     :route="firstContentRoute"
                 >
-                    {{ courseMeta.flag }}
+                    {{ buttonName }}
                 </a-button>
             </div>
         </div>
@@ -49,24 +49,39 @@ export default {
     },
     computed: {
         firstContentRoute() {
-            return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+            if(lms.store.checkLogin()){
+                return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+            }
+            else {
+                return {}
+            }
         },
         buttonType() {
-            if (this.courseMeta.flag == "Start Course" ){
+            if(lms.store.checkProgramEnrollment(this.program_name)){
+                if (this.courseMeta.flag == "Start Course" ){
                 return "primary"
-            }
-            else if (this.courseMeta.flag == "Completed" ) {
-                return "success"
-            }
-            else if (this.courseMeta.flag == "Continue" ) {
-                return "info"
+                }
+                else if (this.courseMeta.flag == "Completed" ) {
+                    return "success"
+                }
+                else if (this.courseMeta.flag == "Continue" ) {
+                    return "info"
+                }
             }
             else {
                 return " hidden"
             }
         },
         isLogin() {
-            return lms.store.checkLogin()
+            return lms.store.checkProgramEnrollment(this.program_name)
+        },
+        buttonName() {
+            if(lms.store.checkLogin()){
+                return this.courseMeta.flag
+            }
+            else {
+                return "Enroll"
+            }
         }
     },
     methods: {

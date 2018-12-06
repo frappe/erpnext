@@ -5,8 +5,11 @@ import frappe
 # LMS Utils to Update State for Vue Store
 @frappe.whitelist()
 def get_program_enrollments():
+	student = utils.get_current_student()
+	if student == None:
+		return None
 	try:
-		student = frappe.get_doc("Student", utils.get_current_student())
+		student = frappe.get_doc("Student", student)
 		return student.get_program_enrollments()
 	except:
 		return None
@@ -201,6 +204,9 @@ def check_quiz_completion(quiz, enrollment_name):
 @frappe.whitelist()
 def get_course_meta(course_name, program_name):
 	course_enrollment = utils.get_course_enrollment(course_name)
+	program_enrollment = utils.get_program_enrollment(program_name)
+	if not program_enrollment:
+		return None
 	if not course_enrollment:
 		utils.enroll_in_course(course_name, program_name)
 	progress = get_course_progress(course_enrollment)
