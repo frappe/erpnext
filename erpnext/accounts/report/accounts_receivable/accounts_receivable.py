@@ -112,12 +112,6 @@ class ReceivablePayableReport(object):
 			"options": "Currency",
 			"width": 100
 		},
-		# {
-		# 	"fieldname": "pdc/lc_date",
-		# 	"label": _("PDC/LC Date"),
-		# 	"fieldtype": "Date",
-		# 	"width": 110
-		# },
 		{
 			"fieldname": "pdc/lc_ref",
 			"label": _("PDC/LC Ref"),
