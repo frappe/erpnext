@@ -232,7 +232,7 @@ def get_program_progress(program_name):
 		for course in program.get_all_children():
 			meta = get_course_meta(course.course, program_name)
 			is_complete = False
-			if meta['flag'] == "Complete":
+			if meta['flag'] == "Completed":
 				is_complete = True
 			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
 		program_meta['progress'] = progress
@@ -245,3 +245,24 @@ def get_program_progress(program_name):
 def get_joining_date():
 	student = frappe.get_doc("Student", utils.get_current_student())
 	return student.joining_date
+
+@frappe.whitelist()
+def get_quiz_progress(program_name):
+	program = frappe.get_doc("Program", program_name)
+	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
+	quiz_meta = frappe._dict()
+	if not program_enrollment:
+		return None
+	else:
+		progress_list = []
+		for course in program.get_all_children():
+			course_enrollment = utils.get_course_enrollment(course.course)
+			meta = get_course_progress(course_enrollment)
+			for progress_item in meta:
+				if progress_item['content_type'] == "Quiz":
+					progress_item['course'] = course.course
+					progress_list.append(progress_item)
+		quiz_meta.quiz_attempt = progress_list
+		quiz_meta.name = program_name
+		quiz_meta.program = program.program_name
+		return quiz_meta
