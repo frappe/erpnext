@@ -18,6 +18,7 @@ class Analytics(object):
 			if self.filters.doc_type in ['Sales Order', 'Purchase Order'] else 'posting_date'
 		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 		self.get_period_date_ranges()
+		self.entity_names = {}
 
 	def run(self):
 		self.get_columns()
@@ -61,14 +62,12 @@ class Analytics(object):
 	def get_data(self):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
 			self.get_entries("s." + scrub(self.filters.tree_type), "s." + scrub(self.filters.tree_type) + "_name")
-			self.entity_names = {}
 			for d in self.entries:
 				self.entity_names.setdefault(d.entity, d.entity_name)
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Item':
 			self.get_entries("i.item_code", "i.item_name")
-			self.entity_names = {}
 			for d in self.entries:
 				self.entity_names.setdefault(d.entity, d.entity_name)
 			self.get_rows()
@@ -89,6 +88,10 @@ class Analytics(object):
 			self.get_entries("i.item_group")
 			self.get_groups()
 			self.get_rows_by_group()
+
+		elif self.filters.tree_type == 'Brand':
+			self.get_entries("i.brand")
+			self.get_rows()
 
 	def get_entries(self, entity_field, entity_name_field=None):
 		if entity_name_field:
