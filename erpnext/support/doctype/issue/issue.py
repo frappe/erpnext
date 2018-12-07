@@ -175,35 +175,64 @@ class Issue(Document):
 					self.isset_sla = 1
 
 	def calculate_support(self, time=None, support_days=None):
+		print("############################################################################")
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		flag = None
-
-		for weekday in week[(time.date()).weekday():]:
-			for support_day in support_days:
-				if weekday == support_day[0]:
-					start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
-					end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-					print(support_day[0])
-					print(support_day[1])
-					print(support_day[2])
-					flag = "set"
-					if time.time() > end_time:
-						print("True")
-					else:
-						print("False")
-		if flag == None:
-			for weekday in week[:((time.date()).weekday())-1]:
+		time_difference = None
+		day_difference = 0
+	
+		for count, weekday in enumerate(week):
+			if flag == "set":
+				print(flag)
+				break
+			if count >= (time.date()).weekday():
+				print("------------------:- Loop 1 -:------------------")
+				print("------------------:- " + str(weekday))
 				for support_day in support_days:
 					if weekday == support_day[0]:
 						start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 						end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-						print(support_day[0])
-						print(support_day[1])
-						print(support_day[2])
-						if time.time() > end_time:
-							print("True")
+						if time.time() > end_time and time_difference == None:
+							print(" -> Continue no. 1")
+							time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
+							continue
 						else:
-							print("False")
+							print(" -> Break no. 1")
+							time += timedelta(days=day_difference)
+							if time_difference != None:
+								time += timedelta(seconds=time_difference)
+							print(time)
+							print(day_difference)
+							flag = "set"
+							break
+				day_difference += 1
+		if flag == None:
+			for count, weekday in enumerate(week):
+				if flag == "set":
+					print(flag)
+					break
+				if count <= (time.date()).weekday():	
+					print("------------------:- Loop 2 -:------------------")
+					print("------------------:- " + str(weekday))
+					for support_day in support_days:
+						if weekday == support_day[0]:
+							start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
+							end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
+							if time.time() > end_time and time_difference == None:
+								print(" -> Continue no. 2")
+								time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
+								continue
+							else:
+								print(" -> Break no. 2")
+								time += timedelta(days=day_difference)
+								if time_difference != None:
+									time += timedelta(seconds=time_difference)
+								print(time)
+								print(day_difference)
+								flag = "set"
+								break
+					day_difference += 1
+		print("############################################################################")
 
 def get_list_context(context=None):
 	return {
