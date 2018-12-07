@@ -14,21 +14,23 @@ frappe.query_reports["Sales Analytics"] = {
 		},
 		{
 			fieldname: "doc_type",
-			label: __("based_on"),
+			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Sales Order","Delivery Note","Sales Invoice"],
 			default: "Sales Invoice",
 			reqd: 1
 		},
 		{
-			fieldname: "value_quantity",
+			fieldname: "value_field",
 			label: __("Value Or Qty"),
 			fieldtype: "Select",
 			options: [
-				{ "value": "Value", "label": __("Value") },
-				{ "value": "Quantity", "label": __("Quantity") },
+				{ "value": "base_net_amount", "label": __("Amount") },
+				{ "value": "stock_qty", "label": __("Stock Qty") },
+				{ "value": "alt_uom_qty", "label": __("Contents Qty") },
+				{ "value": "qty", "label": __("Sales Qty") },
 			],
-			default: "Value",
+			default: "base_net_amount",
 			reqd: 1
 		},
 		{

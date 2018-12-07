@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, cint
 from six import iteritems
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -26,13 +26,14 @@ class Analytics(object):
 		return self.columns, self.data , None, self.chart
 
 	def get_columns(self):
-		self.columns =[{
-				"label": _(self.filters.tree_type + " ID"),
-				"options": self.filters.tree_type,
-				"fieldname": "entity",
-				"fieldtype": "Link",
-				"width": 140
-			}]
+		self.columns = [{
+			"label": _(self.filters.tree_type),
+			"options": self.filters.tree_type,
+			"fieldname": "entity",
+			"fieldtype": "Link",
+			"width": 140
+		}]
+
 		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
 			self.columns.append({
 				"label": _(self.filters.tree_type + " Name"),
@@ -40,124 +41,73 @@ class Analytics(object):
 				"fieldtype": "Data",
 				"width": 140
 			})
+
+		self.columns.append({
+			"label": _("Total"),
+			"fieldname": "total",
+			"fieldtype": "Float",
+			"width": 110
+		})
+
 		for dummy, end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
 			self.columns.append({
 				"label": _(period),
 				"fieldname": scrub(period),
 				"fieldtype": "Float",
-				"width": 120
+				"width": 110
 			})
-
-		self.columns.append({
-			"label": _("Total"),
-			"fieldname": "total",
-			"fieldtype": "Float",
-			"width": 120
-		})
 
 	def get_data(self):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
-			self.get_sales_transactions_based_on_customers_or_suppliers()
+			self.get_entries("s." + scrub(self.filters.tree_type), "s." + scrub(self.filters.tree_type) + "_name")
+			self.entity_names = {}
+			for d in self.entries:
+				self.entity_names.setdefault(d.entity, d.entity_name)
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Item':
-			self.get_sales_transactions_based_on_items()
+			self.get_entries("i.item_code", "i.item_name")
+			self.entity_names = {}
+			for d in self.entries:
+				self.entity_names.setdefault(d.entity, d.entity_name)
 			self.get_rows()
 
 		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory"]:
-			self.get_sales_transactions_based_on_customer_or_territory_group()
+			if self.filters.tree_type == 'Customer Group':
+				entity_field = "s.customer_group"
+			elif self.filters.tree_type == 'Supplier Group':
+				entity_field = "s.supplier"
+				self.get_supplier_parent_child_map()
+			else:
+				entity_field = "s.territory"
+			self.get_entries(entity_field)
+			self.get_groups()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == 'Item Group':
-			self.get_sales_transactions_based_on_item_group()
+			self.get_entries("i.item_group")
+			self.get_groups()
 			self.get_rows_by_group()
 
-	def get_sales_transactions_based_on_customers_or_suppliers(self):
-		if self.filters["value_quantity"] == 'Value':
-			value_field = "base_net_total as value_field"
+	def get_entries(self, entity_field, entity_name_field=None):
+		if entity_name_field:
+			additional_field = ", {0} as entity_name".format(entity_name_field)
 		else:
-			value_field = "total_qty as value_field"
-
-		if self.filters.tree_type == 'Customer':
-			entity = "customer as entity"
-			entity_name = "customer_name as entity_name"
-		else:
-			entity = "supplier as entity"
-			entity_name = "supplier_name as entity_name"
-
-		self.entries = frappe.get_all(self.filters.doc_type,
-			fields=[entity, entity_name, value_field, self.date_field],
-			filters = {
-				"docstatus": 1,
-				"company": self.filters.company,
-				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
-			}
-		)
-
-		self.entity_names = {}
-		for d in self.entries:
-			self.entity_names.setdefault(d.entity, d.entity_name)
-
-	def get_sales_transactions_based_on_items(self):
-
-		if self.filters["value_quantity"] == 'Value':
-			value_field = 'base_amount'
-		else:
-			value_field = 'qty'
+			additional_field = ""
 
 		self.entries = frappe.db.sql("""
-			select i.item_code as entity, i.item_name as entity_name, i.{value_field} as value_field, s.{date_field}
-			from `tab{doctype} Item` i , `tab{doctype}` s
+			select {entity_field} as entity, i.{value_field} as value_field, s.{date_field} {additional_field}
+			from `tab{doctype} Item` i, `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
 			and s.{date_field} between %s and %s
-		"""
-		.format(date_field=self.date_field, value_field = value_field, doctype=self.filters.doc_type),
+		""".format(
+			entity_field=entity_field,
+			value_field=frappe.db.escape(self.filters.value_field),
+			date_field=self.date_field,
+			additional_field=additional_field,
+			doctype=self.filters.doc_type),
 		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
-
-		self.entity_names = {}
-		for d in self.entries:
-			self.entity_names.setdefault(d.entity, d.entity_name)
-
-	def get_sales_transactions_based_on_customer_or_territory_group(self):
-		if self.filters["value_quantity"] == 'Value':
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
-
-		if self.filters.tree_type == 'Customer Group':
-			entity_field = 'customer_group as entity'
-		elif self.filters.tree_type == 'Supplier Group':
-			entity_field = "supplier as entity"
-			self.get_supplier_parent_child_map()
-		else:
-			entity_field = "territory as entity"
-
-		self.entries = frappe.get_all(self.filters.doc_type,
-			fields=[entity_field, value_field, self.date_field],
-			filters = {
-				"docstatus": 1,
-				"company": self.filters.company,
-				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
-			}
-		)
-		self.get_groups()
-
-	def get_sales_transactions_based_on_item_group(self):
-		if self.filters["value_quantity"] == 'Value':
-			value_field = "base_amount"
-		else:
-			value_field = "qty"
-
-		self.entries = frappe.db.sql("""
-			select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
-			from `tab{doctype} Item` i , `tab{doctype}` s
-			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
-		""".format(date_field=self.date_field, value_field = value_field, doctype=self.filters.doc_type),
-		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
-
-		self.get_groups()
 
 	def get_rows(self):
 		self.data=[]

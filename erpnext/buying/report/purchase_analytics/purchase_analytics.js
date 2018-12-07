@@ -14,7 +14,7 @@ frappe.query_reports["Purchase Analytics"] = {
 		},
 		{
 			fieldname: "doc_type",
-			label: __("based_on"),
+			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Purchase Order","Purchase Receipt","Purchase Invoice"],
 			default: "Purchase Invoice",
@@ -25,10 +25,12 @@ frappe.query_reports["Purchase Analytics"] = {
 			label: __("Value Or Qty"),
 			fieldtype: "Select",
 			options: [
-				{ "value": "Value", "label": __("Value") },
-				{ "value": "Quantity", "label": __("Quantity") },
+				{ "value": "base_net_amount", "label": __("Amount") },
+				{ "value": "stock_qty", "label": __("Stock Qty") },
+				{ "value": "alt_uom_qty", "label": __("Contents Qty") },
+				{ "value": "qty", "label": __("Sales Qty") },
 			],
-			default: "Value",
+			default: "base_net_amount",
 			reqd: 1
 		},
 		{
