@@ -125,46 +125,52 @@ class Issue(Document):
 		#Calculation on Time to Respond
 		if response_time_period == 'Hour/s':
 			self.time_to_respond = response_time
-			self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
+			#self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)
-			self.calculate_support(time=response_by, support_days=support_days)
+			response_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.response_by = response_by
 
 		elif response_time_period == 'Day/s':
 			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), hours=24 * int(response_time)), utils.now_datetime())
-			self.response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time))
+			#self.response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True)
-			self.calculate_support(time=response_by, support_days=support_days)
+			response_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.response_by = response_by
 
 		elif response_time_period == 'Week/s':
 			self.time_to_respond = 24 * date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time)), utils.now_datetime())
-			self.response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time))
+			#self.response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True)
-			self.calculate_support(time=response_by, support_days=support_days)
+			response_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.response_by = response_by
 		
 		#Calculation of Time to Resolve
 		if resolution_time_period == 'Hour/s':
 			self.time_to_resolve = resolution_time
-			self.resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time))
+			#self.resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True)
-			self.calculate_support(time=resolution_by, support_days=support_days)
+			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.resolution_by = resolution_by
 			
 		elif resolution_time_period == 'Day/s':
 			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time)), utils.now_datetime())
-			self.resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time))
+			#self.resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True)
-			self.calculate_support(time=resolution_by, support_days=support_days)
+			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.resolution_by = resolution_by
 			
 		else:
 			self.time_to_resolve = 24 * date_diff(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time)), utils.now_datetime())
-			self.resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time))
+			#self.resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True)
-			self.calculate_support(time=resolution_by, support_days=support_days)
+			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			self.resolution_by = resolution_by
 	
 		issue_criticality = frappe.get_list("Issue Criticality")
 		for criticality in issue_criticality:
@@ -180,6 +186,7 @@ class Issue(Document):
 		flag = None
 		time_difference = None
 		day_difference = 0
+		response = time
 	
 		for count, weekday in enumerate(week):
 			if flag == "set":
@@ -200,9 +207,8 @@ class Issue(Document):
 							print(" -> Break no. 1")
 							time += timedelta(days=day_difference)
 							if time_difference != None:
+								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
-							print(time)
-							print(day_difference)
 							flag = "set"
 							break
 				day_difference += 1
@@ -226,12 +232,12 @@ class Issue(Document):
 								print(" -> Break no. 2")
 								time += timedelta(days=day_difference)
 								if time_difference != None:
+									time = datetime.combine(time.date(), start_time)
 									time += timedelta(seconds=time_difference)
-								print(time)
-								print(day_difference)
 								flag = "set"
 								break
 					day_difference += 1
+		return time
 		print("############################################################################")
 
 def get_list_context(context=None):
