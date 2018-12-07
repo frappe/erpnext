@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint
+from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -112,12 +112,12 @@ class ReceivablePayableReport(object):
 			"options": "Currency",
 			"width": 100
 		},
-		{
-			"fieldname": "pdc/lc_date",
-			"label": _("PDC/LC Date"),
-			"fieldtype": "Date",
-			"width": 110
-		},
+		# {
+		# 	"fieldname": "pdc/lc_date",
+		# 	"label": _("PDC/LC Date"),
+		# 	"fieldtype": "Date",
+		# 	"width": 110
+		# },
 		{
 			"fieldname": "pdc/lc_ref",
 			"label": _("PDC/LC Ref"),
@@ -195,40 +195,64 @@ class ReceivablePayableReport(object):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle,self.filters.report_date, self.dr_or_cr, return_entries)
 				if abs(outstanding_amount) > 0.1/10**self.currency_precision:
+					pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
-						pdc_amount = flt(self.pdc_details.get((gle.voucher_no, gle.party), {}).get("pdc_amount"))
 						for d in self.payment_term_map.get(gle.voucher_no):
-							term_outstanding_amount = 0
-							if payment_amount >= d[1]:
-								payment_amount = payment_amount - d[1]
-								if credit_note_amount:
-										term_outstanding_amount -= credit_note_amount
-										row = self.prepare_row(party_naming_by, args, gle, term_outstanding_amount,
-										credit_note_amount, d[0], payment_amount , d[1], d[2], 0)
-										credit_note_amount = 0
-										data.append(row)
-							else:
-								outstanding_amount = d[1] - payment_amount - credit_note_amount
-								if pdc_amount > outstanding_amount:
-									pdc = outstanding_amount
-									pdc_amount -= outstanding_amount
+							payment_amount, d.payment_amount = self.allocate_based_on_fifo(payment_amount, d.payment_term_amount)
+
+							term_outstanding_amount = d.payment_term_amount - d.payment_amount
+							credit_note_amount, d.credit_note_amount = self.allocate_based_on_fifo(credit_note_amount, term_outstanding_amount)
+
+							term_outstanding_amount -= d.credit_note_amount
+
+							row_outstanding = term_outstanding_amount
+							d.pdc_details = []
+							for pdc in pdc_list:
+								if row_outstanding <= pdc.pdc_amount:
+									d.pdc_amount += row_outstanding
+									pdc.pdc_amount -= row_outstanding
+									if row_outstanding and d.pdc_ref and d.pdc_date:
+										d.pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
+									row_outstanding = 0
+
 								else:
-									pdc = pdc_amount
-									pdc_amount = 0
-								if self.filters.get(gle.party_type):
-									d[1] = d[1] * d[3]
-								row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
-									credit_note_amount, d[0], payment_amount , d[1], d[2], pdc)
-								payment_amount = 0
-								credit_note_amount = 0
+									d.pdc_amount = pdc.pdc_amount
+									if pdc.pdc_amount and d.pdc_ref and d.pdc_date:
+										d.pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
+									pdc.pdc_amount = 0
+									row_outstanding -= d.pdc_amount
+
+							if term_outstanding_amount > 0:
+								row = self.prepare_row(party_naming_by, args, gle, term_outstanding_amount,
+									d.credit_note_amount, d.due_date, d.payment_amount , d.payment_term_amount,
+									d.description, d.pdc_amount, d.pdc_details)
 								data.append(row)
 					else:
-						row = self.prepare_row(party_naming_by, args, gle, outstanding_amount, credit_note_amount)
+						pdc_amount = 0
+						pdc_details = []
+						for d in pdc_list:
+							pdc_amount += flt(d.pdc_amount)
+							if pdc_amount and d.pdc_ref and d.pdc_date:
+								pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
+
+						row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
+							credit_note_amount, pdc_amount=pdc_amount, pdc_details=pdc_details)
 						data.append(row)
 		return data
 
+	def allocate_based_on_fifo(self, total_amount, row_amount):
+		allocated_amount = 0
+		if row_amount <= total_amount:
+			allocated_amount = row_amount
+			total_amount -= row_amount
+		else:
+			allocated_amount = total_amount
+			total_amount = 0
+
+		return total_amount, allocated_amount
+
 	def prepare_row(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount,
-		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None, pdc_amount=None):
+		due_date=None, paid_amt=None, payment_term_amount=None, payment_term=None, pdc_amount=None, pdc_details=None):
 		row = [gle.posting_date, gle.party]
 
 		# customer / supplier name
@@ -257,7 +281,7 @@ class ReceivablePayableReport(object):
 			if payment_term_amount:
 				invoiced_amount = payment_term_amount
 
-		if paid_amt == None:
+		if not payment_term_amount:
 			paid_amt = invoiced_amount - outstanding_amount - credit_note_amount
 		row += [invoiced_amount, paid_amt, credit_note_amount, outstanding_amount]
 
@@ -288,16 +312,9 @@ class ReceivablePayableReport(object):
 		else:
 			row.append(self.company_currency)
 
-		pdc = self.pdc_details.get((gle.voucher_no, gle.party), {})
-
-		if pdc_amount == None:
-			pdc_amount = flt(pdc.get("pdc_amount"))
-
-		pdc_date = pdc.get("pdc_date") if pdc_amount else ''
-		pdc_ref = pdc.get("pdc_ref") if pdc_amount else ''
-
-		remaining_balance = outstanding_amount - pdc_amount
-		row += [pdc_date, pdc_ref, pdc_amount, remaining_balance]
+		remaining_balance = outstanding_amount - flt(pdc_amount)
+		pdc_details = ", ".join(pdc_details)
+		row += [pdc_details, pdc_amount, remaining_balance]
 
 <<<<<<< HEAD
 					# customer territory / supplier group
@@ -506,22 +523,27 @@ class ReceivablePayableReport(object):
 
 	def get_payment_term_detail(self, voucher_nos):
 		payment_term_map = frappe._dict()
-		for d in frappe.db.sql(""" select si.name, si.payment_terms_template,
+		payment_terms_details = frappe.db.sql(""" select si.name,
 			party_account_currency, currency, si.conversion_rate,
 			ps.due_date, ps.payment_amount, ps.description
 			from `tabSales Invoice` si, `tabPayment Schedule` ps
 			where si.name = ps.parent and
 			si.docstatus = 1 and si.company = '%s' and
-			si.name in (%s) order by ps.due_date"""
-		% (self.filters.company, ','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict = 1):
-			if d.payment_terms_template:
-				if self.filters.get("customer") and d.currency == d.party_account_currency:
-					payment_term_amount = d.payment_amount
-				else:
-					payment_term_amount = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
+			si.name in (%s) order by ps.due_date
+		"""	% (self.filters.company, ','.join(['%s'] *len(voucher_nos))),
+		(tuple(voucher_nos)), as_dict = 1)
 
-				payment_term_map.setdefault(d.name, [])
-				payment_term_map[d.name].append((d.due_date, payment_term_amount, d.description))
+		for d in payment_terms_details:
+			if self.filters.get("customer") and d.currency == d.party_account_currency:
+				payment_term_amount = d.payment_amount
+			else:
+				payment_term_amount = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
+
+			payment_term_map.setdefault(d.name, []).append(frappe._dict({
+				"due_date": d.due_date,
+				"payment_term_amount": payment_term_amount,
+				"description": d.description
+			}))
 		return payment_term_map
 
 	def get_chart_data(self, columns, data):
@@ -571,12 +593,11 @@ def get_ageing_data(first_range, second_range, third_range, age_as_on, entry_dat
 
 def get_pdc_details(party_type, report_date):
 	pdc_details = frappe._dict()
-
-	for pdc in frappe.db.sql("""
+	pdc_via_pe = frappe.db.sql("""
 		select
 			pref.reference_name as invoice_no, pent.party, pent.party_type,
-			max(pent.posting_date) as pdc_date, sum(ifnull(pref.allocated_amount,0)) as pdc_amount,
-			GROUP_CONCAT(pent.reference_no SEPARATOR ', ') as pdc_ref
+			pent.posting_date as pdc_date, ifnull(pref.allocated_amount,0) as pdc_amount,
+			pent.reference_no as pdc_ref
 		from
 			`tabPayment Entry` as pent inner join `tabPayment Entry Reference` as pref
 		on
@@ -584,19 +605,22 @@ def get_pdc_details(party_type, report_date):
 		where
 			pent.docstatus < 2 and pent.posting_date > %s
 			and pent.party_type = %s
-			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
-			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
+		""", (report_date, party_type), as_dict=1)
+
+	for pdc in pdc_via_pe:
+			pdc_details.setdefault((pdc.invoice_no, pdc.party), []).append(pdc)
+
 	if scrub(party_type):
 		amount_field = ("jea.debit_in_account_currency"
 			if party_type == 'Supplier' else "jea.credit_in_account_currency")
 	else:
 		amount_field = "jea.debit + jea.credit"
 
-	for pdc in frappe.db.sql("""
+	pdc_via_je = frappe.db.sql("""
 		select
 			jea.reference_name as invoice_no, jea.party, jea.party_type,
-			max(je.posting_date) as pdc_date, sum(ifnull({0},0)) as pdc_amount,
-			GROUP_CONCAT(je.cheque_no SEPARATOR ', ') as pdc_ref
+			je.posting_date as pdc_date, ifnull({0},0) as pdc_amount,
+			je.cheque_no as pdc_ref
 		from
 			`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
 		on
@@ -604,16 +628,10 @@ def get_pdc_details(party_type, report_date):
 		where
 			je.docstatus < 2 and je.posting_date > %s
 			and jea.party_type = %s
-			group by jea.party, jea.reference_name""".format(amount_field), (report_date, party_type), as_dict=1):
-			if (pdc.invoice_no, pdc.party) in pdc_details:
-				key = (pdc.invoice_no, pdc.party)
-				pdc_details[key]["pdc_amount"] += pdc.pdc_amount
-				if pdc.pdc_ref:
-					pdc_details[key]["pdc_ref"] += ", " + pdc.pdc_ref
-				if pdc.pdc_date:
-					pdc_details[key]["pdc_date"] = max(pdc_details[key]["pdc_date"], pdc.pdc_date)
-			else:
-				pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
+		""".format(amount_field), (report_date, party_type), as_dict=1)
+
+	for pdc in pdc_via_je:
+		pdc_details.setdefault((pdc.invoice_no, pdc.party), []).append(pdc)
 
 	return pdc_details
 
