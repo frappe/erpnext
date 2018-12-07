@@ -21,7 +21,7 @@ frappe.query_reports["Purchase Analytics"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "value_quantity",
+			fieldname: "value_field",
 			label: __("Value Or Qty"),
 			fieldtype: "Select",
 			options: [

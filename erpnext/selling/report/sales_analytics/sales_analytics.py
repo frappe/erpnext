@@ -93,6 +93,11 @@ class Analytics(object):
 			self.get_entries("i.brand")
 			self.get_rows()
 
+		elif self.filters.tree_type == 'Sales Person':
+			self.get_entries_by_sales_person()
+			self.get_groups()
+			self.get_rows_by_group()
+
 	def get_entries(self, entity_field, entity_name_field=None):
 		if entity_name_field:
 			additional_field = ", {0} as entity_name".format(entity_name_field)
@@ -103,12 +108,24 @@ class Analytics(object):
 			select {entity_field} as entity, i.{value_field} as value_field, s.{date_field} {additional_field}
 			from `tab{doctype} Item` i, `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
+				and s.{date_field} between %s and %s
 		""".format(
 			entity_field=entity_field,
 			value_field=frappe.db.escape(self.filters.value_field),
 			date_field=self.date_field,
 			additional_field=additional_field,
+			doctype=self.filters.doc_type),
+		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
+
+	def get_entries_by_sales_person(self):
+		self.entries = frappe.db.sql("""
+			select sp.sales_person as entity, i.{value_field}*sp.allocated_percentage/100 as value_field, s.{date_field}
+			from `tab{doctype} Item` i, `tab{doctype}` s, `tabSales Team` sp
+			where s.name = i.parent and sp.parent = s.name and sp.parenttype = '{doctype}'
+				and i.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
+		""".format(
+			value_field=frappe.db.escape(self.filters.value_field),
+			date_field=self.date_field,
 			doctype=self.filters.doc_type),
 		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
 
@@ -211,6 +228,8 @@ class Analytics(object):
 			parent = 'parent_item_group'
 		if self.filters.tree_type == "Supplier Group":
 			parent = 'parent_supplier_group'
+		if self.filters.tree_type == "Sales Person":
+			parent = 'parent_sales_person'
 
 		self.depth_map = frappe._dict()
 
