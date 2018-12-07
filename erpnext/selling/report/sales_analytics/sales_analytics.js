@@ -67,6 +67,9 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		}
 	],
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
@@ -106,12 +109,12 @@ frappe.query_reports["Sales Analytics"] = {
 
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
+					}, 500)
 
 
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
