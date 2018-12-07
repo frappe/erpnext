@@ -70,12 +70,14 @@ class PeriodClosingVoucher(AccountsController):
 				net_pl_balance += flt(acc.balance_in_company_currency)
 
 		if net_pl_balance:
+			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 			gl_entries.append(self.get_gl_dict({
 				"account": self.closing_account_head,
 				"debit_in_account_currency": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"debit": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"credit_in_account_currency": abs(net_pl_balance) if net_pl_balance < 0 else 0,
-				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0
+				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0,
+				"cost_center": cost_center
 			}))
 
 		from erpnext.accounts.general_ledger import make_gl_entries
