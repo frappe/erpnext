@@ -128,6 +128,7 @@ class Issue(Document):
 			#self.response_by = add_to_date(utils.now_datetime(), hours=int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)
+			print("==:=" + str(response_by))
 			response_by = self.calculate_support(time=response_by, support_days=support_days)
 			self.response_by = response_by
 
@@ -136,6 +137,7 @@ class Issue(Document):
 			#self.response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True)
+			print("==:=" + str(response_by))
 			response_by = self.calculate_support(time=response_by, support_days=support_days)
 			self.response_by = response_by
 
@@ -144,6 +146,7 @@ class Issue(Document):
 			#self.response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time))
 
 			response_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True)
+			print("==:=" + str(response_by))
 			response_by = self.calculate_support(time=response_by, support_days=support_days)
 			self.response_by = response_by
 		
@@ -153,7 +156,8 @@ class Issue(Document):
 			#self.resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True)
-			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			print("==:=" + str(resolution_by))
+			resolution_by = self.calculate_support(time=resolution_by, support_days=support_days)
 			self.resolution_by = resolution_by
 			
 		elif resolution_time_period == 'Day/s':
@@ -161,7 +165,8 @@ class Issue(Document):
 			#self.resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True)
-			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			print("==:=" + str(resolution_by))
+			resolution_by = self.calculate_support(time=resolution_by, support_days=support_days)
 			self.resolution_by = resolution_by
 			
 		else:
@@ -169,7 +174,8 @@ class Issue(Document):
 			#self.resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time))
 
 			resolution_by = add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True)
-			resolution_by = self.calculate_support(time=response_by, support_days=support_days)
+			print("==:=" + str(resolution_by))
+			resolution_by = self.calculate_support(time=resolution_by, support_days=support_days)
 			self.resolution_by = resolution_by
 	
 		issue_criticality = frappe.get_list("Issue Criticality")
@@ -181,64 +187,67 @@ class Issue(Document):
 					self.isset_sla = 1
 
 	def calculate_support(self, time=None, support_days=None):
-		print("############################################################################")
+		
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		flag = None
 		time_difference = None
 		day_difference = 0
 		response = time
-	
+		print("*****************************************************************************************")
+		print("Loop 1")
 		for count, weekday in enumerate(week):
 			if flag == "set":
-				print(flag)
 				break
 			if count >= (time.date()).weekday():
-				print("------------------:- Loop 1 -:------------------")
-				print("------------------:- " + str(weekday))
+				print("---------------------------------------------:*- " + weekday)
 				for support_day in support_days:
 					if weekday == support_day[0]:
 						start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 						end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
+						print("start_time  :  " + str(start_time))
+						print("end_time  :  " + str(end_time))
 						if time.time() > end_time and time_difference == None:
-							print(" -> Continue no. 1")
+							print("IF - 1	")
 							time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
-							continue
+							print(time_difference/3600)
 						else:
-							print(" -> Break no. 1")
-							time += timedelta(days=day_difference)
+							print("ELSE - 1	")
+							response += timedelta(days=day_difference)
 							if time_difference != None:
-								time = datetime.combine(time.date(), start_time)
-								time += timedelta(seconds=time_difference)
+								response = datetime.combine(response.date(), start_time)
+								#response += timedelta(seconds=time_difference)
 							flag = "set"
 							break
 				day_difference += 1
 		if flag == None:
+			print("Loop 2")
 			for count, weekday in enumerate(week):
 				if flag == "set":
-					print(flag)
 					break
-				if count <= (time.date()).weekday():	
-					print("------------------:- Loop 2 -:------------------")
-					print("------------------:- " + str(weekday))
+				if count <= (time.date()).weekday():
+					print("---------------------------------------------:- " + weekday)
 					for support_day in support_days:
 						if weekday == support_day[0]:
 							start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 							end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
+							print("start_time  :  " + str(start_time))
+							print("end_time  :  " + str(end_time))
 							if time.time() > end_time and time_difference == None:
-								print(" -> Continue no. 2")
+								print("IF - 2")
 								time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
-								continue
+								print(time_difference/3600)
 							else:
-								print(" -> Break no. 2")
-								time += timedelta(days=day_difference)
+								print("ELSE - 2")
+								response += timedelta(days=day_difference)
 								if time_difference != None:
-									time = datetime.combine(time.date(), start_time)
-									time += timedelta(seconds=time_difference)
+									response = datetime.combine(response.date(), start_time)
+								#	response += timedelta(seconds=time_difference)
 								flag = "set"
 								break
 					day_difference += 1
-		return time
-		print("############################################################################")
+		print(response)
+		print("*****************************************************************************************")
+		return response
 
 def get_list_context(context=None):
 	return {
