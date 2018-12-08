@@ -25,7 +25,8 @@ frappe.query_reports["Sales Analytics"] = {
 			label: __("Value Or Qty"),
 			fieldtype: "Select",
 			options: [
-				{ "value": "base_net_amount", "label": __("Amount") },
+				{ "value": "base_net_amount", "label": __("Net Amount") },
+				{ "value": "base_amount", "label": __("Amount") },
 				{ "value": "stock_qty", "label": __("Stock Qty") },
 				{ "value": "alt_uom_qty", "label": __("Contents Qty") },
 				{ "value": "qty", "label": __("Sales Qty") },
