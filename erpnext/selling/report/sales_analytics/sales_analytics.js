@@ -13,7 +13,7 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "doc_type",
+			fieldname: "doctype",
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Sales Order","Delivery Note","Sales Invoice"],
@@ -68,6 +68,48 @@ frappe.query_reports["Sales Analytics"] = {
 			],
 			default: "Monthly",
 			reqd: 1
+		},
+		{
+			fieldname: "customer",
+			label: __("Customer"),
+			fieldtype: "Link",
+			options: "Customer"
+		},
+		{
+			fieldname: "customer_group",
+			label: __("Customer Group"),
+			fieldtype: "Link",
+			options: "Customer Group"
+		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "Link",
+			options: "Item"
+		},
+		{
+			fieldname: "item_group",
+			label: __("Item Group"),
+			fieldtype: "Link",
+			options: "Item Group"
+		},
+		{
+			fieldname: "brand",
+			label: __("Brand"),
+			fieldtype: "Link",
+			options: "Brand"
+		},
+		{
+			fieldname: "territory",
+			label: __("Territory"),
+			fieldtype: "Link",
+			options: "Territory"
+		},
+		{
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "Link",
+			options: "Sales Person"
 		}
 	],
 	after_datatable_render: function(datatable_obj) {

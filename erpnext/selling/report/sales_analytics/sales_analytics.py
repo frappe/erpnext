@@ -15,7 +15,7 @@ class Analytics(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.date_field = 'transaction_date' \
-			if self.filters.doc_type in ['Sales Order', 'Purchase Order'] else 'posting_date'
+			if self.filters.doctype in ['Sales Order', 'Purchase Order'] else 'posting_date'
 		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 		self.get_period_date_ranges()
 		self.entity_names = {}
@@ -60,83 +60,134 @@ class Analytics(object):
 			})
 
 	def get_data(self):
-		if self.filters.tree_type in ["Customer", "Supplier"]:
-			self.get_entries("s." + scrub(self.filters.tree_type), "s." + scrub(self.filters.tree_type) + "_name")
-			for d in self.entries:
-				self.entity_names.setdefault(d.entity, d.entity_name)
+		if self.filters.tree_type == 'Customer':
+			self.get_entries("s.customer", "s.customer_name")
+			self.get_rows()
+
+		if self.filters.tree_type == 'Supplier':
+			self.get_entries("s.supplier", "s.supplier_name")
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Item':
 			self.get_entries("i.item_code", "i.item_name")
-			for d in self.entries:
-				self.entity_names.setdefault(d.entity, d.entity_name)
 			self.get_rows()
-
-		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory"]:
-			if self.filters.tree_type == 'Customer Group':
-				entity_field = "s.customer_group"
-			elif self.filters.tree_type == 'Supplier Group':
-				entity_field = "s.supplier"
-				self.get_supplier_parent_child_map()
-			else:
-				entity_field = "s.territory"
-			self.get_entries(entity_field)
-			self.get_groups()
-			self.get_rows_by_group()
-
-		elif self.filters.tree_type == 'Item Group':
-			self.get_entries("i.item_group")
-			self.get_groups()
-			self.get_rows_by_group()
 
 		elif self.filters.tree_type == 'Brand':
 			self.get_entries("i.brand")
 			self.get_rows()
 
-		elif self.filters.tree_type == 'Sales Person':
-			self.get_entries_by_sales_person()
+		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory", "Item Group", "Sales Person"]:
+			if self.filters.tree_type == 'Customer Group':
+				entity_field = "s.customer_group"
+			elif self.filters.tree_type == 'Supplier Group':
+				entity_field = "sup.supplier_group"
+			elif self.filters.tree_type == 'Territory':
+				entity_field = "s.territory"
+			elif self.filters.tree_type == 'Item Group':
+				entity_field = "i.item_group"
+			else:
+				entity_field = "sp.sales_person"
+			self.get_entries(entity_field)
 			self.get_groups()
 			self.get_rows_by_group()
 
 	def get_entries(self, entity_field, entity_name_field=None):
-		if entity_name_field:
-			additional_field = ", {0} as entity_name".format(entity_name_field)
+		include_sales_person = self.filters.tree_type == "Sales Person" or self.filters.sales_person
+		sales_team_table = ", `tabSales Team` sp" if include_sales_person else ""
+		sales_person_condition = "and sp.parent = s.name and sp.parenttype = %(doctype)s" if include_sales_person else ""
+
+		include_supplier = self.filters.tree_type == "Supplier Group" or self.filters.supplier_group
+		supplier_table = ", `tabSupplier` sup" if include_supplier else ""
+		supplier_condition = "and sup.name = s.supplier" if include_supplier else ""
+
+		entity_name_field = "{0} as entity_name, ".format(entity_name_field) if entity_name_field else ""
+		if include_sales_person:
+			value_field = "i.{} * sp.allocated_percentage / 100".format(frappe.db.escape(self.filters.value_field))
 		else:
-			additional_field = ""
+			value_field = "i.{}".format(frappe.db.escape(self.filters.value_field))
 
 		self.entries = frappe.db.sql("""
-			select {entity_field} as entity, i.{value_field} as value_field, s.{date_field} {additional_field}
-			from `tab{doctype} Item` i, `tab{doctype}` s
-			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-				and s.{date_field} between %s and %s
+			select
+				{entity_field} as entity,
+				{entity_name_field}
+				{value_field} as value_field,
+				s.{date_field}
+			from 
+				`tab{doctype} Item` i, `tab{doctype}` s {sales_team_table} {supplier_table}
+			where i.parent = s.name and s.docstatus = 1 {sales_person_condition} {supplier_condition}
+				and s.company = %(company)s and s.{date_field} between %(from_date)s and %(to_date)s
+				{filter_conditions}
 		""".format(
 			entity_field=entity_field,
-			value_field=frappe.db.escape(self.filters.value_field),
+			entity_name_field=entity_name_field,
+			value_field=value_field,
 			date_field=self.date_field,
-			additional_field=additional_field,
-			doctype=self.filters.doc_type),
-		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
+			doctype=self.filters.doctype,
+			sales_team_table=sales_team_table,
+			sales_person_condition=sales_person_condition,
+			supplier_table=supplier_table,
+			supplier_condition=supplier_condition,
+			filter_conditions=self.get_conditions()
+		), self.filters, as_dict=1)
 
-	def get_entries_by_sales_person(self):
-		self.entries = frappe.db.sql("""
-			select sp.sales_person as entity, i.{value_field}*sp.allocated_percentage/100 as value_field, s.{date_field}
-			from `tab{doctype} Item` i, `tab{doctype}` s, `tabSales Team` sp
-			where s.name = i.parent and sp.parent = s.name and sp.parenttype = '{doctype}'
-				and i.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
-		""".format(
-			value_field=frappe.db.escape(self.filters.value_field),
-			date_field=self.date_field,
-			doctype=self.filters.doc_type),
-		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
+		if entity_name_field:
+			for d in self.entries:
+				self.entity_names.setdefault(d.entity, d.entity_name)
+
+	def get_conditions(self):
+		conditions = []
+
+		if self.filters.get("customer"):
+			conditions.append("s.customer=%(customer)s")
+
+		if self.filters.get("customer_group"):
+			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
+			conditions.append("""s.customer_group in (select name from `tabCustomer Group`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("supplier"):
+			conditions.append("s.supplier=%(supplier)s")
+
+		if self.filters.get("supplier_group"):
+			lft, rgt = frappe.db.get_value("Supplier Group", self.filters.supplier_group, ["lft", "rgt"])
+			conditions.append("""sup.supplier_group in (select name from `tabSupplier Group`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("item_code"):
+			conditions.append("i.item_code=%(item_code)s")
+
+		if self.filters.get("item_group"):
+			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
+			conditions.append("""i.item_group in (select name from `tabItem Group`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("brand"):
+			conditions.append("i.brand=%(brand)s")
+
+		if self.filters.get("territory"):
+			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])
+			conditions.append("""s.territory in (select name from `tabTerritory`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("sales_person"):
+			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
+			conditions.append("""sp.sales_person in (select name from `tabSales Person`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_rows(self):
 		self.data=[]
 		self.get_periodic_data()
 
+		total_row = frappe._dict({"entity": _("Total"), "total": 0})
+		self.data.append(total_row)
+
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
 				"entity": entity,
-				"entity_name": self.entity_names.get(entity)
+				"entity_name": self.entity_names.get(entity),
+				"indent": 1
 			}
 			total = 0
 			for dummy, end_date in self.periodic_daterange:
@@ -144,6 +195,10 @@ class Analytics(object):
 				amount = flt(period_data.get(period, 0.0))
 				row[scrub(period)] = amount
 				total += amount
+
+				total_row.setdefault(scrub(period), 0.0)
+				total_row[scrub(period)] += amount
+				total_row["total"] += amount
 
 			row["total"] = total
 			self.data.append(row)
@@ -174,8 +229,6 @@ class Analytics(object):
 		self.entity_periodic_data = frappe._dict()
 
 		for d in self.entries:
-			if self.filters.tree_type == "Supplier Group":
-				d.entity = self.parent_child_map.get(d.entity)
 			period = self.get_period(d.get(self.date_field))
 			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
 			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
@@ -242,9 +295,6 @@ class Analytics(object):
 				self.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)
 			else:
 				self.depth_map.setdefault(d.name, 0)
-
-	def get_supplier_parent_child_map(self):
-		self.parent_child_map = frappe._dict(frappe.db.sql(""" select name, supplier_group from `tabSupplier`"""))
 
 	def get_chart_data(self):
 		length = len(self.columns)

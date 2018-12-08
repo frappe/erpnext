@@ -8,12 +8,12 @@ frappe.query_reports["Purchase Analytics"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Supplier Group","Supplier","Item Group","Item"],
+			options: ["Supplier Group","Supplier","Item Group","Item","Brand"],
 			default: "Supplier",
 			reqd: 1
 		},
 		{
-			fieldname: "doc_type",
+			fieldname: "doctype",
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Purchase Order","Purchase Receipt","Purchase Invoice"],
@@ -68,8 +68,37 @@ frappe.query_reports["Purchase Analytics"] = {
 			],
 			default: "Monthly",
 			reqd: 1
+		},
+		{
+			fieldname: "supplier",
+			label: __("Supplier"),
+			fieldtype: "Link",
+			options: "Supplier"
+		},
+		{
+			fieldname: "supplier_group",
+			label: __("Supplier Group"),
+			fieldtype: "Link",
+			options: "Supplier Group"
+		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "Link",
+			options: "Item"
+		},
+		{
+			fieldname: "item_group",
+			label: __("Item Group"),
+			fieldtype: "Link",
+			options: "Item Group"
+		},
+		{
+			fieldname: "brand",
+			label: __("Brand"),
+			fieldtype: "Link",
+			options: "Brand"
 		}
-
 	],
 	after_datatable_render: function(datatable_obj) {
 		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
