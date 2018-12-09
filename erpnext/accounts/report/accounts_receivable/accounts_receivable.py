@@ -401,9 +401,14 @@ class ReceivablePayableReport(object):
 				values.append(self.filters.get("sales_partner"))
 
 			if self.filters.get("sales_person"):
-				conditions.append("""party in (select parent
-					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
-				values.append(self.filters.get("sales_person"))
+				lft, rgt = frappe.db.get_value("Sales Person",
+					self.filters.get("sales_person"), ["lft", "rgt"])
+
+				conditions.append("""exists(select name from `tabSales Team` steam where
+					steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
+					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
+						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
+						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
 		if party_type_field=="supplier":
 			if self.filters.get("supplier_group"):
