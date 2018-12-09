@@ -18,10 +18,9 @@ frappe.ui.form.on(cur_frm.doctype, {
 		}
 	},
 	employee: function(frm) {
-		frm.add_fetch("employee", "company", "company");
-	},
-	refresh: function(frm) {
 		var table;
+		frm.add_fetch("employee", "company", "company");
+
 		if(frm.doctype == "Employee Promotion"){
 			table = "promotion_details";
 		}else if (frm.doctype == "Employee Transfer") {
@@ -43,7 +42,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				}
 			});
 		});
-	}
+	},
 });
 
 var show_dialog = function(frm, table, field_labels) {
