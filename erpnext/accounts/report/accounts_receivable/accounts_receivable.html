@@ -156,7 +156,7 @@
 					</td>
 
 					{% if(report.report_name === "Accounts Receivable") { %}
-					<td>{%= data[i][__("Sales Person")] %}</td>
+					<td>{%= data[i]["sales_person"] %}</td>
 					{% } %}
 
 					{% if(!filters.show_pdc_in_print) { %}
