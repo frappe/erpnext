@@ -125,23 +125,25 @@ class ReceivablePayableReport(object):
 		}]
 
 		if args.get('party_type') == 'Customer':
-			columns.append({
-				"label": _("Customer LPO"),
-				"fieldtype": "Data",
-				"fieldname": "po_no",
-				"width": 100,
-			})
-			columns += [_("Delivery Note") + ":Data:100"]
-		if args.get("party_type") == "Customer":
 			columns += [
+				{
+					"label": _("Customer LPO"),
+					"fieldtype": "Data",
+					"fieldname": "po_no",
+					"width": 100,
+				},
+				_("Delivery Note") + ":Data:100",
 				_("Territory") + ":Link/Territory:80",
-				_("Customer Group") + ":Link/Customer Group:120"
+				_("Customer Group") + ":Link/Customer Group:120",
+				{
+					"label": _("Sales Person"),
+					"fieldtype": "Data",
+					"fieldname": "sales_person",
+					"width": 120,
+				}
 			]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
-
-		if args.get("party_type") == "Customer":
-			columns.append(_("Sales Person") + "::120")
 
 		columns.append(_("Remarks") + "::200")
 
@@ -241,12 +243,10 @@ class ReceivablePayableReport(object):
 
 					# customer territory / supplier group
 					if args.get("party_type") == "Customer":
-						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
+						row += [self.get_territory(gle.party), self.get_customer_group(gle.party),
+							voucher_details.get(gle.voucher_no, {}).get("sales_person")]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_group(gle.party)]
-
-					if args.get("party_type") == "Customer":
-						row.append(voucher_details.get(gle.voucher_no, {}).get("sales_person"))
 
 					row.append(gle.remarks)
 					data.append(row)

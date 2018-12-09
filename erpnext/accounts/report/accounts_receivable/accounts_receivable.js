@@ -11,6 +11,40 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"ageing_based_on",
+			"label": __("Ageing Based On"),
+			"fieldtype": "Select",
+			"options": 'Posting Date\nDue Date',
+			"default": "Posting Date"
+		},
+		{
+			"fieldname":"report_date",
+			"label": __("As on Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname":"range1",
+			"label": __("Ageing Range 1"),
+			"fieldtype": "Int",
+			"default": "30",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range2",
+			"label": __("Ageing Range 2"),
+			"fieldtype": "Int",
+			"default": "60",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range3",
+			"label": __("Ageing Range 3"),
+			"fieldtype": "Int",
+			"default": "90",
+			"reqd": 1
+		},
+		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
@@ -23,12 +57,19 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Customer",
 			on_change: () => {
 				var customer = frappe.query_report.get_filter_value('customer');
-				frappe.db.get_value('Customer', customer, ["tax_id", "customer_name", "credit_limit", "payment_terms"], function(value) {
-					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-					frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
-					frappe.query_report.set_filter_value('credit_limit', value["credit_limit"]);
-					frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
-				});
+				if (customer) {
+					frappe.db.get_value('Customer', customer, ["tax_id", "customer_name", "credit_limit", "payment_terms"], function(value) {
+						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+						frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
+						frappe.query_report.set_filter_value('credit_limit', value["credit_limit"]);
+						frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
+					});
+				} else {
+					frappe.query_report.set_filter_value('tax_id', "");
+					frappe.query_report.set_filter_value('customer_name', "");
+					frappe.query_report.set_filter_value('credit_limit', "");
+					frappe.query_report.set_filter_value('payment_terms', "");
+				}
 			}
 		},
 		{
@@ -60,43 +101,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Sales Person"),
 			"fieldtype": "Link",
 			"options": "Sales Person"
-		},
-		{
-			"fieldtype": "Break",
-		},
-		{
-			"fieldname":"report_date",
-			"label": __("As on Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
-		},
-		{
-			"fieldname":"ageing_based_on",
-			"label": __("Ageing Based On"),
-			"fieldtype": "Select",
-			"options": 'Posting Date\nDue Date',
-			"default": "Posting Date"
-		},
-		{
-			"fieldname":"range1",
-			"label": __("Ageing Range 1"),
-			"fieldtype": "Int",
-			"default": "30",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range2",
-			"label": __("Ageing Range 2"),
-			"fieldtype": "Int",
-			"default": "60",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range3",
-			"label": __("Ageing Range 3"),
-			"fieldtype": "Int",
-			"default": "90",
-			"reqd": 1
 		},
 		{
 			"fieldname":"show_pdc_in_print",
