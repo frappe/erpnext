@@ -259,8 +259,9 @@ def get_quiz_progress(program_name):
 			course_enrollment = utils.get_course_enrollment(course.course)
 			meta = get_course_progress(course_enrollment)
 			for progress_item in meta:
+				# if progress_item['content_type'] == "Quiz" and progress_item['is_complete'] == True:
 				if progress_item['content_type'] == "Quiz":
-					progress_item['course'] = course.course
+					progress_item['course'] = course.course_name
 					progress_list.append(progress_item)
 		quiz_meta.quiz_attempt = progress_list
 		quiz_meta.name = program_name
