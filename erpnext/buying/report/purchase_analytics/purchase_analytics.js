@@ -108,20 +108,24 @@ frappe.query_reports["Purchase Analytics"] = {
 			checkboxColumn: true,
 			events: {
 				onCheckRow: function(data) {
-					row_name = data[2].content;
-					row_values = data.slice(5).map(function (column) {
-						return column.content;
-					})
+					let row_name = data[2].content;
+					let period_columns = [];
+					$.each(frappe.query_report.columns || [], function(i, column) {
+						if (column.period_column) {
+							period_columns.push(i+2);
+						}
+					});
 
-					entry  = {
+					let row_values = period_columns.map(i => data[i].content);
+					let entry = {
 						'name':row_name,
 						'values':row_values
-					}
+					};
 
 					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
-					var found = false;
+					let found = false;
 
 					for(var i=0; i < new_datasets.length;i++){
 						if(new_datasets[i].name == row_name){
@@ -138,16 +142,16 @@ frappe.query_reports["Purchase Analytics"] = {
 					let new_data = {
 						labels: raw_data.labels,
 						datasets: new_datasets
-					}
+					};
 
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},500)
+					}, 500);
 
 
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 1000)
+					}, 1000);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
