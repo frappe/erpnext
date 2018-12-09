@@ -35,7 +35,17 @@ class Analytics(object):
 			"width": 140
 		}]
 
-		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+		show_name = False
+		if self.filters.tree_type == "Customer":
+			if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
+				show_name = True
+		if self.filters.tree_type == "Supplier":
+			if frappe.defaults.get_global_default('supp_master_name') == "Naming Series":
+				show_name = True
+		if self.filters.tree_type == "Item":
+			show_name = True
+
+		if show_name:
 			self.columns.append({
 				"label": _(self.filters.tree_type + " Name"),
 				"fieldname": "entity_name",
@@ -47,7 +57,7 @@ class Analytics(object):
 			"label": _("Total"),
 			"fieldname": "total",
 			"fieldtype": "Float",
-			"width": 110
+			"width": 120
 		})
 
 		for dummy, end_date in self.periodic_daterange:
@@ -56,7 +66,8 @@ class Analytics(object):
 				"label": _(period),
 				"fieldname": scrub(period),
 				"fieldtype": "Float",
-				"width": 110
+				"period_column": True,
+				"width": 120
 			})
 
 	def get_data(self):
@@ -297,8 +308,9 @@ class Analytics(object):
 				self.depth_map.setdefault(d.name, 0)
 
 	def get_chart_data(self):
+		period_column_start = 3 if self.entity_names else 2
 		length = len(self.columns)
-		labels = [d.get("label") for d in self.columns[2:length-1]]
+		labels = [d.get("label") for d in self.columns[period_column_start:length]]
 		self.chart = {
 			"data": {
 				'labels': labels,
