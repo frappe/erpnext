@@ -5,7 +5,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, cint
 from erpnext.stock.get_item_details import get_item_details
 
 from frappe.model.document import Document
@@ -17,6 +17,12 @@ def get_product_bundle_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
 		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
 		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
+
+def get_current_product_bundle_items(item_code, name):
+	cur_bundle = frappe.db.sql("""select pi.item_name, pi.item_code, pi.uom, pi.description, pi.qty
+		from `tabPacked Item` pi 
+		where pi.parent_item = %s and pi.parent_detail_docname= %s""",(item_code, name), as_dict=1)
+	return cur_bundle
 
 def get_packing_item_details(item, company):
 	return frappe.db.sql("""
@@ -30,7 +36,7 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or frappe._dict()
 
-def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
+def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description, packed_items_list):
 	item = get_packing_item_details(packing_item_code, doc.company)
 
 	# check if exists
@@ -63,38 +69,65 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	bin = get_bin_qty(packing_item_code, pi.warehouse)
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
+	packed_items_list.append(pi.idx)
 
-def make_packing_list(doc):
+def make_packing_list(doc, doctype=None, name=None, fieldname=None):
 	"""make packing list for Product Bundle item"""
 
 	if doc.get("_action") and doc._action == "update_after_submit": return
 
+	maintain_packed_items_list = 0
+	if doctype is not None and doctype == "Sales Order":
+		maintain_packed_items_list = cint(frappe.get_value(doctype, name, fieldname))
+	else:
+		if hasattr(doc, 'items'):
+			if hasattr(doc.get("items")[0], 'against_sales_order'):
+				maintain_packed_items_list = cint(frappe.get_value("Sales Order", doc.get("items")[0].against_sales_order,
+				                                                   "maintain_packed_items_list"))
+
+	if maintain_packed_items_list and doc.doctype == "Sales Order" and doc.docstatus != 0:
+		return
+
 	parent_items = []
+	packed_items_list = []
+
 	for d in doc.get("items"):
 		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
-			for i in get_product_bundle_items(d.item_code):
-				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description)
+			if maintain_packed_items_list and doc.doctype in ["Sales Invoice", "Delivery Note"] and d.so_detail is not None:
+				for i in get_current_product_bundle_items(d.item_code, d.so_detail):
+					update_packing_list_item(doc, i.item_code, flt(i.qty), d, i.description, packed_items_list)
+			else:
+				for i in get_product_bundle_items(d.item_code):
+					update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description, packed_items_list)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])
 
-	cleanup_packing_list(doc, parent_items)
+	cleanup_packing_list(doc, parent_items, packed_items_list, maintain_packed_items_list)
 
-def cleanup_packing_list(doc, parent_items):
+def cleanup_packing_list(doc, parent_items, packed_items_list, maintain_packed_items_list):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
 	for d in doc.get("packed_items"):
-		if [d.parent_item, d.parent_detail_docname] not in parent_items:
-			# mark for deletion from doclist
-			delete_list.append(d)
+		if maintain_packed_items_list:
+			if d.idx not in packed_items_list:
+				# mark for deletion from doclist
+				delete_list.append(d)
+		else:
+			if [d.parent_item, d.parent_detail_docname] not in parent_items:
+				# mark for deletion from doclist
+				delete_list.append(d)
 
 	if not delete_list:
 		return doc
 
 	packed_items = doc.get("packed_items")
 	doc.set("packed_items", [])
+	c = 1
 	for d in packed_items:
 		if d not in delete_list:
+			d.idx = c
+			c += 1
 			doc.append("packed_items", d)
 
 @frappe.whitelist()

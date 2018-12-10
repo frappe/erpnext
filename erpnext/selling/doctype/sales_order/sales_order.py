@@ -19,6 +19,7 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
+from erpnext.utilities.transaction_base import update_packing_list_suggested_from_sales_order_invoice
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -591,6 +592,8 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	target_doc = update_packing_list_suggested_from_sales_order_invoice(target_doc, 'Sales Order', source_name, 'maintain_packed_items_list')
+
 	return target_doc
 
 @frappe.whitelist()
@@ -659,6 +662,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
+
+	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Order', source_name, 'maintain_packed_items_list')
 
 	return doclist
 

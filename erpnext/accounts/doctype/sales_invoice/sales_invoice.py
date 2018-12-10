@@ -28,6 +28,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
 from six import iteritems
+from erpnext.utilities.transaction_base import update_packing_list_suggested_from_sales_order_invoice
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -1262,6 +1263,8 @@ def make_delivery_note(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, set_missing_values)
+
+	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Invoice', source_name, 'maintain_packed_items_list')
 
 	return doclist
 
