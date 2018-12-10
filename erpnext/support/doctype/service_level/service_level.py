@@ -7,4 +7,7 @@ import frappe
 from frappe.model.document import Document
 
 class ServiceLevel(Document):
-	pass
+	
+	def validate(self):
+		for support_and_resolution in self.support_and_resolution:
+			pass
