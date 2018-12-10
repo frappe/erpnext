@@ -217,7 +217,7 @@ $.extend(erpnext.utils, {
 		let unscrub_option = frappe.model.unscrub(option);
 		let user_permission = frappe.defaults.get_user_permissions();
 		if(user_permission && user_permission[unscrub_option]) {
-			return user_permission[unscrub_option]["docs"];
+			return user_permission[unscrub_option].map(perm => perm.doc);
 		} else {
 			return $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
 		}
