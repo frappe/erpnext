@@ -72,7 +72,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	return out
 
-def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):  
+def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
 	out[billing_address_field] = party_address or get_default_address(party_type, party.name)
@@ -151,10 +151,8 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions()
-		.get("Price List", {})
-		.get("docs", []))
-	price_list = list(price_list)
+	price_list = [d.get('doc') for d in get_user_permissions().get('Price List', []) \
+		if d.get('doc')]
 
 	if price_list:
 		price_list = price_list[0]
