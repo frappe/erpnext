@@ -102,7 +102,7 @@ frappe.ui.form.on('Material Request', {
 
 	update_status: function(frm, stop_status) {
 		frappe.call({
-			method: 'erpnext.stock.material_request.material_request.update_status',
+			method: 'erpnext.stock.doctype.material_request.material_request.update_status',
 			args: { name: frm.doc.name, status: stop_status },
 			callback(r) {
 				if (!r.exc) {
