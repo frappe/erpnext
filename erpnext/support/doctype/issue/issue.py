@@ -190,32 +190,34 @@ class Issue(Document):
 		
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		flag = None
-		time_difference = None
+		time_difference_greater = None
+		time_difference_smaller = None
 		day_difference = 0
-		response = time
+		reply = time
 		print("*****************************************************************************************")
 		print("Loop 1")
 		for count, weekday in enumerate(week):
 			if flag == "set":
 				break
 			if count >= (time.date()).weekday():
-				print("---------------------------------------------:*- " + weekday)
 				for support_day in support_days:
 					if weekday == support_day[0]:
 						start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 						end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-						print("start_time  :  " + str(start_time))
-						print("end_time  :  " + str(end_time))
-						if time.time() > end_time and time_difference == None:
+						if time.time() > end_time and time_difference_greater == None:
 							print("IF - 1	")
-							time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
-							print(time_difference/3600)
+							time_difference_greater = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
+							print("Greater Time : " + str(time_difference_greater/3600))
+						elif time.time() < start_time and time_difference_smaller == None:
+							print("ELIF - 1	")
+							time_difference_smaller =  (datetime.combine(time.date(), end_time) - datetime.combine(time.date(), time.time())).total_seconds()
+							print("Smaller Time : " + str(time_difference_smaller/3600))
 						else:
 							print("ELSE - 1	")
-							response += timedelta(days=day_difference)
-							if time_difference != None:
-								response = datetime.combine(response.date(), start_time)
-								#response += timedelta(seconds=time_difference)
+							reply += timedelta(days=day_difference)
+							if time_difference_greater != None:
+								reply = datetime.combine(reply.date(), start_time)
+								reply += timedelta(seconds=time_difference_greater)
 							flag = "set"
 							break
 				day_difference += 1
@@ -225,29 +227,30 @@ class Issue(Document):
 				if flag == "set":
 					break
 				if count <= (time.date()).weekday():
-					print("---------------------------------------------:- " + weekday)
 					for support_day in support_days:
 						if weekday == support_day[0]:
 							start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 							end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-							print("start_time  :  " + str(start_time))
-							print("end_time  :  " + str(end_time))
-							if time.time() > end_time and time_difference == None:
+							if time.time() > end_time and time_difference_greater == None:
 								print("IF - 2")
-								time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
-								print(time_difference/3600)
+								time_difference_greater = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), end_time)).total_seconds()
+								print("Greater Time : " + str(time_difference_greater/3600))
+							elif time.time() < start_time and time_difference_smaller == None:
+								print("ELIF - 2	")
+								time_difference_smaller =  (datetime.combine(time.date(), end_time) - datetime.combine(time.date(), time.time())).total_seconds()
+								print("Smaller Time : " + str(time_difference_smaller/3600))
 							else:
 								print("ELSE - 2")
-								response += timedelta(days=day_difference)
-								if time_difference != None:
-									response = datetime.combine(response.date(), start_time)
-								#	response += timedelta(seconds=time_difference)
+								reply += timedelta(days=day_difference)
+								if time_difference_greater != None:
+									reply = datetime.combine(reply.date(), start_time)
+									reply += timedelta(seconds=time_difference_greater)
 								flag = "set"
 								break
 					day_difference += 1
-		print(response)
 		print("*****************************************************************************************")
-		return response
+		print("==:= reply by : " + str(reply))
+		return reply
 
 def get_list_context(context=None):
 	return {
