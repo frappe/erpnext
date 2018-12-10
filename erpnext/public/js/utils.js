@@ -112,10 +112,10 @@ $.extend(erpnext.utils, {
 					frm.dashboard.stats_area_row.append(
 						'<div class="flex-column col-xs-6">'+
 							'<div style="margin-bottom:20px"><h6>'+info.company+'</h6></div>'+
-							'<div class="badge-link small" style="margin-bottom:10px">Annual Billing: '
-							+format_currency(info.billing_this_year, info.currency)+'</div>'+
-							'<div class="badge-link small" style="margin-bottom:20px">Total Unpaid: '
-							+format_currency(info.total_unpaid, info.currency)+'</div>'+
+							'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">Annual Billing: '
+							+format_currency(info.billing_this_year, info.currency)+'</span></div>'+
+							'<div class="badge-link small" style="margin-bottom:20px"><span class="indicator orange">Total Unpaid: '
+							+format_currency(info.total_unpaid, info.currency)+'</span></div>'+
 						'</div>'
 					);
 				});
