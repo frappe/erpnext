@@ -8,14 +8,14 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 	constructor(wrapper) {
 		this.page = frappe.ui.make_app_page({
 			parent: wrapper,
-			title: 'Bank Reconciliation',
+			title: __("Bank Reconciliation"),
 			single_column: true
 		});
 		this.parent = wrapper;
 		this.page = this.parent.page;
 
-		this.make();
 		this.add_plaid_btn();
+		this.make();
 	}
 
 	make() {
@@ -44,9 +44,12 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		const me = this;
 		frappe.db.get_value("Plaid Settings", "Plaid Settings", "enabled", (r) => {
 			if (r && r.enabled == "1") {
+				me.plaid_status = "active"
 				me.parent.page.add_inner_button(__('Link a new bank account'), function() {
 					new erpnext.accounts.plaidLink(this)
 				})
+			} else {
+				me.plaid_status = "inactive"
 			}
 		})
 	}
@@ -60,10 +63,14 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			me.clear_page_content();
 			new erpnext.accounts.bankTransactionUpload(me);
 		}, true)
-		me.page.add_action_item(__("Synchronize this account"), function() {
-			me.clear_page_content();
-			new erpnext.accounts.bankTransactionSync(me);
-		}, true)
+
+		if (me.plaid_status==="active") {
+			me.page.add_action_item(__("Synchronize this account"), function() {
+				me.clear_page_content();
+				new erpnext.accounts.bankTransactionSync(me);
+			}, true)
+		}
+
 		me.page.add_action_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
@@ -79,7 +86,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 	make_reconciliation_tool() {
 		const me = this;
 		frappe.model.with_doctype("Bank Transaction", () => {
-			new erpnext.accounts.ReconciliationTool({
+			erpnext.accounts.ReconciliationList = new erpnext.accounts.ReconciliationTool({
 				parent: me.parent,
 				doctype: "Bank Transaction"
 			});
@@ -310,11 +317,13 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 	constructor(opts) {
 		super(opts);
 		this.show();
+		console.log(this)
 	}
 
 	setup_defaults() {
 		super.setup_defaults();
 
+		this.page_title = __("Bank Reconciliation");
 		this.doctype = 'Bank Transaction';
 		this.fields = ['date', 'description', 'debit', 'credit', 'currency']
 
@@ -374,11 +383,6 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 			me.$result.append(frappe.render_template("bank_transaction_header"));
 		}
 	}
-
-	static trigger_list_update() {
-		const reconciliation_list = erpnext.accounts.ReconciliationTool;
-		reconciliation_list && reconciliation_list.on_update();
-	}
 }
 
 erpnext.accounts.ReconciliationRow = class ReconciliationRow {
@@ -396,6 +400,11 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 	bind_events() {
 		const me = this;
 		$(me.row).on('click', '.clickable-section', function() {
+			me.bank_entry = $(this).attr("data-name");
+			me.show_dialog($(this).attr("data-name"));
+		})
+
+		$(me.row).on('click', '.new-reconciliation', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.show_dialog($(this).attr("data-name"));
 		})
@@ -438,7 +447,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		frappe.xcall('erpnext.accounts.page.bank_reconciliation.bank_reconciliation.get_linked_payments', 
 			{bank_transaction: data, freeze:true, freeze_message:__("Finding linked payments")}
 		).then((result) => {
-			console.log(result)
 			me.make_dialog(result)
 		})
 	}
@@ -470,7 +478,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				get_query: () => {
 					return {
 						filters : {
-							"name": ["in", ["Payment Entry", "Journal Entry", "Sales Invoice"]]
+							"name": ["in", ["Payment Entry", "Journal Entry", "Sales Invoice", "Purchase Invoice", "Expense Claim"]]
 						}
 					}
 				}
@@ -504,6 +512,20 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 						return {
 							query: "erpnext.accounts.page.bank_reconciliation.bank_reconciliation.sales_invoices_query"
 						}
+					} else if (dt === "Purchase Invoice") {
+						return {
+							filters : [
+								["Purchase Invoice", "ifnull(clearance_date, '')", "=", ""],
+								["Purchase Invoice", "docstatus", "=", 1]
+							]
+						}
+					} else if (dt === "Expense Claim") {
+						return {
+							filters : [
+								["Expense Claim", "ifnull(clearance_date, '')", "=", ""],
+								["Expense Claim", "docstatus", "=", 1]
+							]
+						}
 					}
 				},
 				onchange: function() {
@@ -531,6 +553,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 		const proposals_wrapper = me.dialog.fields_dict.payment_proposals.$wrapper;
 		if (data && data.length > 0) {
+			proposals_wrapper.append(frappe.render_template("linked_payment_header"));
 			data.map(value => {
 				proposals_wrapper.append(frappe.render_template("linked_payment_row", value))
 			})
@@ -543,9 +566,11 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			const payment_entry = $(e.target).attr('data-name');
 			const payment_doctype = $(e.target).attr('data-doctype');
 			frappe.xcall('erpnext.accounts.page.bank_reconciliation.bank_reconciliation.reconcile',
-				{bank_transaction: me.bank_entry, payment_doctype: payment_doctype, payment_entry: payment_entry})
+				{bank_transaction: me.bank_entry, payment_doctype: payment_doctype, payment_name: payment_entry})
 			.then((result) => {
-				erpnext.accounts.ReconciliationTool.trigger_list_update();
+				setTimeout(function(){
+					erpnext.accounts.ReconciliationList.refresh();
+				}, 2000);
 				me.dialog.hide();
 			})
 		})
@@ -592,6 +617,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				}
 
 				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
+				details_wrapper.append(frappe.render_template("linked_payment_header"));
 				displayed_docs.forEach(values => {
 					details_wrapper.append(frappe.render_template("linked_payment_row", values));
 				})

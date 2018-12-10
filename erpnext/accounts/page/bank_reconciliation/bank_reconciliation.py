@@ -11,41 +11,77 @@ from frappe.utils import flt
 from six import iteritems
 
 @frappe.whitelist()
-def reconcile(bank_transaction, payment_doctype, payment_entry):
+def reconcile(bank_transaction, payment_doctype, payment_name):
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
-	payment_entry = frappe.get_doc(payment_doctype, payment_entry)
+	payment_entry = frappe.get_doc(payment_doctype, payment_name)
+
+	account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
+	gl_entry = frappe.get_doc("GL Entry", dict(account=account, voucher_type=payment_doctype, voucher_no=payment_name))
 
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
-	
-	"""
-	if transaction.credit > 0 and payment_entry.payment_type == "Pay":
+
+	if transaction.credit > 0 and gl_entry.credit > 0:
 		frappe.throw(_("The selected payment entry should be linked with a debitor bank transaction"))
 
-	if transaction.debit > 0 and payment_entry.payment_type == "Receive":
+	if transaction.debit > 0 and gl_entry.debit > 0:
 		frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
-	"""
 
-	add_payment_to_transaction(transaction, payment_doctype, payment_entry)
-	#clear_payment_entry(transaction, payment_doctype, payment_entry)
+	add_payment_to_transaction(transaction, payment_entry, gl_entry)
+	clear_payment_entry(transaction, payment_entry, gl_entry)
 
 	return 'reconciled'
 
-def add_payment_to_transaction(transaction, payment_doctype, payment_entry):
-	transaction.append("payment_entries", {"payment_document": payment_doctype, "payment_entry": payment_entry.name})
+def add_payment_to_transaction(transaction, payment_entry, gl_entry):
+	transaction.append("payment_entries", {
+		"payment_document": payment_entry.doctype, 
+		"payment_entry": payment_entry.name,
+		"allocated_amount": gl_entry.credit if gl_entry.credit > 0 else gl_entry.debit
+	})
 	transaction.save()
 
-def clear_payment_entry(transaction, payment_doctype, payment_entry):
-	pass
-	"""
-	linked_bank_transactions = frappe.get_all("Bank Transaction Payments", filters={"payment_entry": payment_entry, "docstatus": 1},
-		fields=["sum(debit) as debit", "sum(credit) as credit"])
+def clear_payment_entry(transaction, payment_entry, gl_entry):
+	linked_bank_transactions = frappe.db.sql("""
+		SELECT
+			bt.credit, bt.debit
+		FROM
+			`tabBank Transaction Payments` as btp
+		LEFT JOIN
+			`tabBank Transaction` as bt on btp.parent=bt.name
+		WHERE
+			btp.payment_document = '%s'
+		AND
+			btp.payment_entry = '%s'
+		AND
+			bt.docstatus = 1
+	""" % (payment_entry.doctype, payment_entry.name), as_dict=True)
 
-	cleared_amount = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
+	amount_cleared = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
+	amount_to_be_cleared = (flt(gl_entry.credit) - flt(gl_entry.debit))
 
-	if cleared_amount == payment_entry.paid_amount:
-		frappe.db.set_value(payment_doctype, payment_entry.name, "clearance_date", transaction.date)
-	"""
+	if payment_entry.doctype == "Payment Entry":
+		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
+
+	elif payment_entry.doctype == "Journal Entry":
+		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
+
+	elif payment_entry.doctype == "Sales Invoice":
+		clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
+
+	elif payment_entry.doctype == "Purchase Invoice":
+		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
+
+	elif payment_entry.doctype == "Expense Claim":
+		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
+
+def clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
+	if amount_cleared == amount_to_be_cleared:
+		frappe.db.set_value(payment_entry.doctype, payment_entry.name, "clearance_date", transaction.date)
+
+def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
+	if amount_cleared == amount_to_be_cleared:
+		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.doctype,
+			parent=payment_entry.name), "clearance_date", transaction.date)
 
 @frappe.whitelist()
 def get_linked_payments(bank_transaction):
@@ -63,10 +99,11 @@ def get_linked_payments(bank_transaction):
 	if amount_matching:
 		return check_amount_vs_description(amount_matching, description_matching)
 
+	elif description_matching:
+		return sorted(description_matching, key = lambda x: x["posting_date"], reverse=True)
+
 	else:
-		print("else")
-		#linked_payments = get_matching_transactions_payments(description_matching)
-		#return linked_payments
+		return []
 
 def check_matching_amount(bank_account, transaction):
 	payments = []
@@ -147,9 +184,11 @@ def get_matching_descriptions_data(bank_account, transaction):
 		if bank_transaction.description:
 			seq=difflib.SequenceMatcher(lambda x: x == " ", transaction.description, bank_transaction.description)
 
-			if seq.ratio() > 0.5:
+			if seq.ratio() > 0.6:
 				bank_transaction["ratio"] = seq.ratio()
 				selection.append(bank_transaction)
+
+	print(selection)
 
 	document_types = set([x["payment_document"] for x in selection])
 
@@ -165,9 +204,11 @@ def get_matching_descriptions_data(bank_account, transaction):
 		if key == "Journal Entry":
 			data.extend(frappe.get_all("Journal Entry", filters=[["name", "in", value]], fields=["'Journal Entry' as doctype", "posting_date", "paid_to_recd_from as party", "cheque_no as reference_no", "cheque_date as reference_date"]))
 		if key == "Sales Invoice":
-			data.extend(frappe.get_all("Sales Invoice", filters=[["name", "in", value]], fields=["'Sales Invoice' as doctype", "posting_date", "customer as party"]))
-		#if key == "Purchase Invoice":
-		#	data.append(frappe.get_all("Purchase Invoice", filters=[["name", "in", value]], fields=["posting_date", "customer as party"]))
+			data.extend(frappe.get_all("Sales Invoice", filters=[["name", "in", value]], fields=["'Sales Invoice' as doctype", "posting_date", "customer_name as party"]))
+		if key == "Purchase Invoice":
+			data.append(frappe.get_all("Purchase Invoice", filters=[["name", "in", value]], fields=["'Purchase Invoice' as doctype", "posting_date", "supplier_name as party"]))
+		if key == "Purchase Invoice":
+			data.append(frappe.get_all("Expense Claim", filters=[["name", "in", value]], fields=["'Expense Claim' as doctype", "posting_date", "employee_name as party"]))
 
 	return data
 
@@ -178,14 +219,18 @@ def check_amount_vs_description(amount_matching, description_matching):
 		for am_match in amount_matching:
 			for des_match in description_matching:
 				if am_match["party"] == des_match["party"]:
-					result.append(am_match)
-					continue
+					if am_match not in result:
+						result.append(am_match)
+						continue
 
 				if hasattr(am_match, "reference_no") and hasattr(des_match, "reference_no"):
 					if difflib.SequenceMatcher(lambda x: x == " ", am_match["reference_no"], des_match["reference_no"]) > 70:
-						result.append(am_match)
-
-		return sorted(result, key = lambda x: x["posting_date"], reverse=True)
+						if am_match not in result:
+							result.append(am_match)
+		if result:
+			return sorted(result, key = lambda x: x["posting_date"], reverse=True)
+		else:
+			return sorted(amount_matching, key = lambda x: x["posting_date"], reverse=True)
 
 	else:
 		return sorted(amount_matching, key = lambda x: x["posting_date"], reverse=True)
@@ -222,7 +267,7 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 		AND
 			jea.account = %(account)s
 		AND
-			jea.parent like %(txt)s
+			(jea.parent like %(txt)s or je.pay_to_recd_from like %(txt)s)
 		AND
 			je.docstatus = 1
 		ORDER BY
@@ -253,7 +298,7 @@ def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
 		WHERE
 			(sip.clearance_date is null or sip.clearance_date='0000-00-00')
 		AND
-			sip.parent like %(txt)s
+			(sip.parent like %(txt)s or si.customer like %(txt)s)
 		ORDER BY
 			if(locate(%(_txt)s, sip.parent), locate(%(_txt)s, sip.parent), 99999),
 			sip.parent

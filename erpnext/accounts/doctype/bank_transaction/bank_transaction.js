@@ -6,7 +6,7 @@ frappe.ui.form.on('Bank Transaction', {
 		frm.set_query('payment_document', 'payment_entries', function(doc, cdt, cdn) {
 			return {
 				"filters": {
-					"name": ["in", ["Payment Entry", "Journal Entry", "Sales Invoice", "Purchase Invoice"]]
+					"name": ["in", ["Payment Entry", "Journal Entry", "Sales Invoice", "Purchase Invoice", "Expense Claim"]]
 				}
 			};
 		});

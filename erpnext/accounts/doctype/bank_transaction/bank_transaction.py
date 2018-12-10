@@ -13,13 +13,12 @@ class BankTransaction(Document):
 		self.unallocated_amount = abs(flt(self.credit) - flt(self.debit))
 
 	def on_update_after_submit(self):
-		linked_payments = [x.payment_entry for x in self.payment_entries]
+		allocated_amount = reduce(lambda x, y: flt(x) + flt(y), [x.allocated_amount for x in self.payment_entries])
+		frappe.log_error(allocated_amount)
 
-		if linked_payments:
-			allocated_amount = frappe.get_all("Payment Entry", filters=[["name", "in", linked_payments]], fields=["sum(paid_amount) as total"])
-
-			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount[0].total))
-			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)) - flt(allocated_amount[0].total))
+		if allocated_amount:
+			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount))
+			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)) - flt(allocated_amount))
 		
 		else:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", 0)

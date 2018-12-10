@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe.utils import getdate
+from frappe.utils.dateutils import parse_date
 
 @frappe.whitelist()
 def upload_bank_statement():
@@ -47,7 +48,7 @@ def create_bank_entries(columns, data, bank_account):
 			"doctype": "Bank Transaction"
 		})
 		bank_transaction.update(fields)
-		bank_transaction.date = getdate(bank_transaction.date)
+		bank_transaction.date = getdate(parse_date(bank_transaction.date))
 		bank_transaction.bank_account = bank_account
 		bank_transaction.insert()
 		bank_transaction.submit()
