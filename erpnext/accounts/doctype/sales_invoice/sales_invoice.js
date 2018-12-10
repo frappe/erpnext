@@ -585,7 +585,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.set_query('company_address', function(doc) {
 			if(!doc.company) {
-				frappe.throw(_('Please set Company'));
+				frappe.throw(__('Please set Company'));
 			}
 
 			return {
