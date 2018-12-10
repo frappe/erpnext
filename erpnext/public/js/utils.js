@@ -120,7 +120,7 @@ $.extend(erpnext.utils, {
 					);
 				});
 			}
-			else {
+			else if (company_wise_info.length === 1) {
 				frm.dashboard.stats_area.removeClass('hidden');
 				frm.dashboard.stats_area_row.append(
 					'</div><div class="col-xs-6 small"><span class="indicator blue">Annual Billing: '
