@@ -85,11 +85,11 @@ frappe.ui.form.on('Delivery Trip', {
 							}
 							existing_trips += "</ul>"
 
-							let confirm_message = `The following deliveries already exist in recent
-								trip(s): ${existing_trips} Do you still want to continue?`;
+							let confirm_message = __(`The following deliveries already exist in recent
+								trip(s): ${existing_trips} Do you still want to continue?`);
 
 							frappe.confirm(
-								__(confirm_message),
+								confirm_message,
 								() => { resolve(); },  // If "Yes" is selected
 								() => { frappe.set_route("List", frm.doc.doctype); }  // If "No" is selected
 							);
@@ -109,10 +109,10 @@ frappe.ui.form.on('Delivery Trip', {
 				departure_time: [">", frappe.datetime.nowdate()]
 			}, "name", (r) => {
 				if (r) {
-					let confirm_message = `${frm.doc.driver_name} has already been assigned a Delivery Trip
-											today (${r.name}). Do you want to modify that instead?`;
+					let confirm_message = __(`${frm.doc.driver_name} has already been assigned a Delivery Trip
+						today (${r.name}). Do you want to modify that instead?`);
 
-					frappe.confirm(__(confirm_message), function () {
+					frappe.confirm(confirm_message, function () {
 						frappe.set_route("Form", "Delivery Trip", r.name);
 					});
 				};

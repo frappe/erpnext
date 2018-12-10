@@ -355,9 +355,8 @@ def validate_unique_delivery_notes(delivery_stops):
 		return {}
 
 	existing_trips = frappe.get_all("Delivery Stop",
-									filters={"delivery_note": ["IN", delivery_notes],
-											"docstatus": ["<", 2]},
-									fields=["parent", "delivery_note"])
+		filters={"delivery_note": ["IN", delivery_notes], "docstatus": ["<", 2]},
+		fields=["parent", "delivery_note"])
 	existing_trips = {stop.parent: stop.delivery_note for stop in existing_trips}
 
 	return existing_trips

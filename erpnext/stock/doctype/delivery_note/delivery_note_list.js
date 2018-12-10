@@ -18,8 +18,8 @@ frappe.listview_settings['Delivery Note'] = {
 
 			if (selected_docs.length > 0) {
 				for (let doc of selected_docs) {
-					if (doc.docstatus === 0 || in_list(["Return"], doc.status)) {
-						frappe.throw(__("Cannot create a Delivery Trip from 'Draft' or 'Return' Delivery Notes."));
+					if (doc.docstatus !== 1 || doc.is_return) {
+						frappe.throw(__("Cannot create a Delivery Trip from 'Cancelled', 'Draft' or 'Return' Delivery Notes."));
 					}
 				};
 
