@@ -92,21 +92,25 @@ def get_columns():
 	return columns
 
 def get_data():
-	sales_order_entry = frappe.db.sql("""select  so_item.item_code,
-					so_item.item_name,
-					so_item.description,
-					so.name,
-					so.transaction_date,
-					so.customer,
-					so.territory,
-					sum(so_item.qty) as net_qty,
-					so.company
-					from `tabSales Order` so, `tabSales Order Item` so_item 
-					where so.docstatus = 1
-					and so.name = so_item.parent
-					and so.status not in  ("Closed","Completed","Cancelled")
-					group by so.name,so_item.item_code 	
-					""", as_dict = 1)
+	sales_order_entry = frappe.db.sql("""
+		SELECT
+			so_item.item_code,
+			so_item.item_name,
+			so_item.description,
+			so.name,
+			so.transaction_date,
+			so.customer,
+			so.territory,
+			sum(so_item.qty) as net_qty,
+			so.company
+		FROM `tabSales Order` so, `tabSales Order Item` so_item 
+		WHERE
+			so.docstatus = 1
+			and so.name = so_item.parent
+			and so.status not in  ("Closed","Completed","Cancelled")
+		GROUP BY
+			so.name,so_item.item_code 	
+		""", as_dict = 1)
 
 	mr_records = frappe.get_all("Material Request Item", 
 		{"sales_order_item": ("!=",""), "docstatus": 1}, 
@@ -119,10 +123,12 @@ def get_data():
 
 	pending_so=[]
 	for so in sales_order_entry:
-		mr_list = grouped_records.get(so.name) or [{}]				
+		#fetch all the material request records for a sales order item				
+		mr_list = grouped_records.get(so.name) or [{}]
 		mr_item_record = ([mr for mr in mr_list if mr.get('item_code') == so.item_code] or [{}])
 
 		for mr in mr_item_record:
+			# check for pending sales order	
 			if cint(so.net_qty) > cint(mr.get('qty')):
 				so_record = {
 					"item_code": so.item_code,
