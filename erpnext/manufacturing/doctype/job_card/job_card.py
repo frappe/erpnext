@@ -110,7 +110,7 @@ class JobCard(Document):
 
 		if self.items:
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {'job_card': self.name,
-				'work_order': self.work_order, 'docstatus': 1}, 'sum(fg_completed_qty)')
+				'work_order': self.work_order, 'docstatus': 1}, 'sum(fg_completed_qty)') or 0
 
 		self.db_set("transferred_qty", self.transferred_qty)
 
