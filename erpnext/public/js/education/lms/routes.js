@@ -49,6 +49,24 @@ const routes = [{
 		props: true
 	},
 	{
+		name: 'login',
+		path: '/Login',
+		beforeEnter(to, from, next) {
+			window.location = window.location.origin.toString() + '/login#login'
+		},
+		component: Home,
+		props: true
+	},
+	{
+		name: 'logout',
+		path: '/Logout',
+		beforeEnter(to, from, next) {
+			window.location = window.location.origin.toString() + '/?cmd=web_logout'
+		},
+		component: Home,
+		props: true
+	},
+	{
 		name: 'profile',
 		path: '/Profile',
 		component: ProfilePage,
