@@ -54,8 +54,8 @@ export default {
     data() {
     	return{
             portal: {},
-            avatar: frappe.get_cookie("user_image"),
-            fullName: frappe.get_cookie("full_name"),
+            avatar: frappe.user_image,
+            fullName: frappe.full_name,
             isLogin: frappe.is_user_logged_in()
     	}
     },
