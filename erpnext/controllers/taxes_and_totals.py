@@ -263,10 +263,10 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
-				self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
+				self.doc.get("taxes")[cint(tax.idx) - 2].tax_amount_for_current_item
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
-				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+				self.doc.get("taxes")[cint(tax.idx) - 2].grand_total_for_current_item
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
