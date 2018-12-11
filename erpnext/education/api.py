@@ -39,18 +39,6 @@ def enroll_student(source_name):
 	program_enrollment.student_name = student.title
 	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
 	frappe.publish_realtime('enroll_student_progress', {"progress": [2, 4]}, user=frappe.session.user)
-	student_user = frappe.get_doc({
-		'doctype':'User',
-		'first_name': student.first_name,
-		'email': student.student_email_id,
-		'send_welcome_email': 1,
-		'user_type': 'Website User'
-		})
-	student_user.add_roles("Student", "LMS User")
-	student_user.save()
-	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)
-	update_password_link = student_user.reset_password()
-	print(update_password_link)
 	return program_enrollment
 
 
