@@ -312,7 +312,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	get_current_tax_amount: function(item, tax, item_tax_map) {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
-
 		if(tax.charge_type == "Actual") {
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.tax_amount, precision("tax_amount", tax));
@@ -323,11 +322,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
+				this.frm.doc["taxes"][cint(tax.idx) - 2].tax_amount_for_current_item;
 
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+				this.frm.doc["taxes"][cint(tax.idx) - 2].grand_total_for_current_item;
 		}
 
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
