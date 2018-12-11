@@ -115,7 +115,9 @@ class Issue(Document):
 				for service in service_level.support_and_resolution:
 					if service.day == "Workday" and service.workday == datetime.now().strftime("%A"):
 						self.response_by, self.time_to_respond = self.set_criticality_and_time(service.response_time, service.response_time_period, support_days)
-						self.resolve_by, self.time_to_resolution = self.set_criticality_and_time(service.resolution_time, service.resolution_time_period, support_days)
+						print("++++++++++++++++++++++" + str(self.response_by), str(self.time_to_respond))
+						self.resolution_by, self.time_to_resolve = self.set_criticality_and_time(service.resolution_time, service.resolution_time_period, support_days)
+						print("++++++++++++++++++++++" + str(self.resolution_by), str(self.time_to_resolve))
 						#self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period, support_days)
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
@@ -126,6 +128,7 @@ class Issue(Document):
 								#self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period, support_days)
 
 	def set_criticality_and_time(self, time=None, time_period=None, support_days=None):
+		print("TRURNNnNNNNNNNNNNNNNNNNNNTRURNNnNNNNNNNNNNNNNNNNNN")
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		now_datetime = utils.get_datetime()
 		if time_period == 'Hour/s':
@@ -167,11 +170,15 @@ class Issue(Document):
 			print(now_datetime)
 			print(week[(now_datetime.date()).weekday()])
 			print("-------------------------------------------------------------------------------")
-		return True, True
+		calc_supp = self.calculate_support(timenow=now_datetime, support_days=support_days)
+		print(calc_supp)
+		return calc_supp, time_diff_in_hours(calc_supp, utils.now_datetime())
 		
 
-	def calculate_support(self, time=None, support_days=None):
+	def calculate_support(self, timenow=None, support_days=None):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
+		time = timenow
+		print(type(time))
 		flag = None
 		time_difference_greater = None
 		time_difference_smaller = None
