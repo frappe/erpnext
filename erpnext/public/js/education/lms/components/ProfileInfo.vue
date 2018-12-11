@@ -49,8 +49,8 @@ export default {
 	name: "ProfileInfo",
 	data() {
 		return {
-			avatar: frappe.get_cookie("user_image"),
-			fullName: frappe.get_cookie("full_name"),
+			avatar: frappe.user_image,
+			fullName: frappe.full_name,
 			abbr: frappe.get_abbr(frappe.get_cookie("full_name")),
 			email: frappe.session.user,
 			joiningDate: 'fetching...'
