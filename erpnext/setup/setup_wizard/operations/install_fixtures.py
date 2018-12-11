@@ -8,7 +8,6 @@ import frappe, os, json
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
