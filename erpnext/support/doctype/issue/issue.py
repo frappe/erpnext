@@ -130,7 +130,6 @@ class Issue(Document):
 		now_datetime = utils.get_datetime()
 		if time_period == 'Hour/s':
 			now_datetime += timedelta(hours=int(time))
-			print(now_datetime)
 		else:
 			if time_period == 'Week/s':
 				time *= 7
@@ -140,36 +139,27 @@ class Issue(Document):
 			flag = 0
 			while loop != 'set':
 				for count, weekday in enumerate(week):
-					if time == 0:#1:
+					if time == 0:
 						loop = 'set'
 						break
-#					print("For weekday ==:= " + str(weekday))
-					elif count >= (now_datetime.date()).weekday() and flag == 0 and time != 0:#1:
-						print("***** START LOOP ONE *****")
-						print("Weekday ==:= " + str(weekday))
+					elif count >= (now_datetime.date()).weekday() and flag == 0 and time != 0:
 						for support_day in support_days:
 							if weekday == support_day[0]:
-								print("--")
 								if weekday == week[len(week)-1]:
 									flag = 1
 								time -= 1
 							elif weekday == week[len(week)-1]:
 								flag = 1
 						add_day += 1
-						print("***** END LOOP ONE *****")
-					elif count < (now_datetime.date()).weekday() and flag == 1 and time != 0:#1:
-						print("***** START LOOP TWO *****")
-						print("Weekday ==:= " + str(weekday))
+					elif count < (now_datetime.date()).weekday() and flag == 1 and time != 0:
 						for support_day in support_days:
 							if weekday == support_day[0]:
-								print("**")
 								if weekday == week[(now_datetime.date()).weekday()-1]:
 									flag = 0
 								time -= 1
 							elif weekday == week[(now_datetime.date()).weekday()-1]:
 								flag = 0
 						add_day += 1
-						print("***** END LOOP TWO *****")
 			now_datetime += timedelta(days=add_day)
 			print("-------------------------------------------------------------------------------")
 			print("time : " + str(time))
@@ -177,30 +167,6 @@ class Issue(Document):
 			print(now_datetime)
 			print(week[(now_datetime.date()).weekday()])
 			print("-------------------------------------------------------------------------------")
-		#else:
-		#	time *= 7
-		#	add_day = 0
-		#	loop = None
-		#	while loop != 'set':
-		#		flag = 0
-		#		for count, weekday in enumerate(week):
-		#			if count >= (now_datetime.date()).weekday() and time != 0:	
-		#				for support_day in support_days:
-		#					if weekday == support_day[0]:
-		#						time -= 1
-		#						if weekday == week[len(week)-1]:
-		#							flag = 1
-		#			elif count <= ((now_datetime).date()).weekday() and flag == 1 and time != 0:
-		#				for support_day in support_days:
-		#					if weekday == support_day[0]:
-		#						time -= 1
-		#			if time == 0:
-		#				loop = 'set'
-		#				break
-		#			else:
-		#				add_day += 1
-		#	now_datetime += timedelta(days=add_day)
-		#	print(now_datetime)
 		return True, True
 		
 
