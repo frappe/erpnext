@@ -47,37 +47,50 @@ class PartyLedgerSummaryReport(object):
 				"label": _("Opening Balance"),
 				"fieldname": "opening_balance",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
 			},
 			{
 				"label": _("Invoiced Amount"),
 				"fieldname": "invoiced_amount",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
 			},
 			{
 				"label": _("Paid Amount"),
 				"fieldname": "paid_amount",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
 			},
 			{
 				"label": _(credit_or_debit_note),
 				"fieldname": "return_amount",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
 			},
 			{
 				"label": _("Write Off Amount"),
 				"fieldname": "write_off_amount",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
 			},
 			{
 				"label": _("Closing Balance"),
 				"fieldname": "closing_balance",
 				"fieldtype": "Currency",
+				"options": "currency",
 				"width": 120
+			},
+			{
+				"label": _("Currency"),
+				"fieldname": "currency",
+				"fieldtype": "Link",
+				"options": "Currency",
+				"width": 50
 			}
 		]
 
@@ -87,7 +100,7 @@ class PartyLedgerSummaryReport(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		credit_or_debit_note = "Credit Note" if self.filters.party_type == "Customer" else "Debit Note"
+		company_currency = frappe.get_cached_value('Company',  self.filters.get("company"),  "default_currency")
 		invoice_dr_or_cr = "debit" if self.filters.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "credit" if self.filters.party_type == "Customer" else "debit"
 
@@ -105,7 +118,8 @@ class PartyLedgerSummaryReport(object):
 				"paid_amount": -self.party_write_off_amounts.get(gle.party, 0),
 				"return_amount": 0,
 				"write_off_amount": self.party_write_off_amounts.get(gle.party, 0),
-				"closing_balance": 0
+				"closing_balance": 0,
+				"currency": company_currency
 			}))
 
 			amount = gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Customer Ledger Summary"] = {
+frappe.query_reports["Supplier Ledger Summary"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -41,21 +41,21 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			on_change: () => {
 				var party = frappe.query_report.get_filter_value('party');
 				if (party) {
-					frappe.db.get_value('Customer', party, ["tax_id", "customer_name"], function(value) {
+					frappe.db.get_value('Supplier', party, ["tax_id", "supplier_name"], function(value) {
 						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-						frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
+						frappe.query_report.set_filter_value('supplier_name', value["supplier_name"]);
 					});
 				} else {
 					frappe.query_report.set_filter_value('tax_id', "");
-					frappe.query_report.set_filter_value('customer_name', "");
+					frappe.query_report.set_filter_value('supplier_name', "");
 				}
 			}
 		},
 		{
-			"fieldname":"customer_group",
-			"label": __("Customer Group"),
+			"fieldname":"supplier_group",
+			"label": __("Supplier Group"),
 			"fieldtype": "Link",
-			"options": "Customer Group"
+			"options": "Supplier Group"
 		},
 		{
 			"fieldname":"payment_terms_template",
@@ -88,8 +88,8 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"hidden": 1
 		},
 		{
-			"fieldname":"customer_name",
-			"label": __("Customer Name"),
+			"fieldname":"supplier_name",
+			"label": __("Supplier Name"),
 			"fieldtype": "Data",
 			"hidden": 1
 		}
