@@ -75,6 +75,11 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
+				
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Sales Invoice Item']:
+					item.tax_amount = flt(item.qty * item.rate / 100) * item.tax;
+					item.amount = item.amount + item.tax_amount;
+					item.net_amount = item.amount;	
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 

@@ -91,6 +91,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.net_rate = item.rate;
 				item.amount = flt(item.rate * item.qty, precision("amount", item));
 				item.net_amount = item.amount;
+				
+				item.tax_amount = flt(item.tax * item.amount / 100.00);
+				item.amount = item.amount + item.tax_amount;
+				item.net_amount = item.amount;	
+				
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 

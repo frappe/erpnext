@@ -366,6 +366,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super(doc, cdt, cdn);
 		this.set_batch_number(cdt, cdn);
 	},
+	
+	tax: function(doc, cdt, cdn) {
+		var me = this;
+		$.each(this.frm.doc["items"] || [], function(i, item) {
+				frappe.model.round_floats_in(item);
+				item.net_rate = item.rate;
+				item.amount = flt(item.rate * item.qty, precision("amount", item));
+				item.net_amount = item.amount;
+				
+				item.tax_amount = flt(item.tax * item.net_amount / 100.00);
+				item.amount = item.net_amount + item.tax_amount;
+		});
+	},
 
 	/* Determine appropriate batch number and set it in the form.
 	* @param {string} cdt - Document Doctype
