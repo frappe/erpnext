@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 import difflib
-from operator import itemgetter
 from frappe.utils import flt
 from six import iteritems
 
@@ -34,7 +33,7 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 
 def add_payment_to_transaction(transaction, payment_entry, gl_entry):
 	transaction.append("payment_entries", {
-		"payment_document": payment_entry.doctype, 
+		"payment_document": payment_entry.doctype,
 		"payment_entry": payment_entry.name,
 		"allocated_amount": gl_entry.credit if gl_entry.credit > 0 else gl_entry.debit
 	})
@@ -49,12 +48,12 @@ def clear_payment_entry(transaction, payment_entry, gl_entry):
 		LEFT JOIN
 			`tabBank Transaction` as bt on btp.parent=bt.name
 		WHERE
-			btp.payment_document = '%s'
+			btp.payment_document = %s
 		AND
-			btp.payment_entry = '%s'
+			btp.payment_entry = %s
 		AND
 			bt.docstatus = 1
-	""" % (payment_entry.doctype, payment_entry.name), as_dict=True)
+	""", (payment_entry.doctype, payment_entry.name), as_dict=True)
 
 	amount_cleared = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
 	amount_to_be_cleared = (flt(gl_entry.debit) - flt(gl_entry.credit))
@@ -87,7 +86,7 @@ def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, tra
 def get_linked_payments(bank_transaction):
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	bank_account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
-	
+
 	# Get all payment entries with a matching amount
 	amount_matching = check_matching_amount(bank_account, transaction)
 
@@ -110,7 +109,7 @@ def check_matching_amount(bank_account, transaction):
 	payment_type = "Receive" if transaction.credit > 0 else "Pay"
 	account_from_to = "paid_to" if transaction.credit > 0 else "paid_from"
 	currency_field = "paid_to_account_currency as currency" if transaction.credit > 0 else "paid_from_account_currency as currency"
-	payment_entries = frappe.get_all("Payment Entry", fields=["'Payment Entry' as doctype", "name", "paid_amount", "payment_type", "reference_no", "reference_date", 
+	payment_entries = frappe.get_all("Payment Entry", fields=["'Payment Entry' as doctype", "name", "paid_amount", "payment_type", "reference_no", "reference_date",
 		"party", "party_type", "posting_date", "{0}".format(currency_field)], filters=[["paid_amount", "like", "{0}%".format(amount)],
 		["docstatus", "=", "1"], ["payment_type", "=", payment_type], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
 
@@ -118,7 +117,7 @@ def check_matching_amount(bank_account, transaction):
 	journal_entries = frappe.db.sql("""
 		SELECT
 			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-			je.pay_to_recd_from as party, je.cheque_date as reference_date, %s as paid_amount
+			je.pay_to_recd_from as party, je.cheque_date as reference_date, {0} as paid_amount
 		FROM
 			`tabJournal Entry Account` as jea
 		JOIN
@@ -128,12 +127,12 @@ def check_matching_amount(bank_account, transaction):
 		WHERE
 			(je.clearance_date is null or je.clearance_date='0000-00-00')
 		AND
-			jea.account = '%s'
+			jea.account = %s
 		AND
-			%s like '%s'
+			{0} like %s
 		AND
 			je.docstatus = 1
-	""" % (payment_field, bank_account, payment_field, amount), as_dict=True)
+	""".format(payment_field), (bank_account, amount), as_dict=True)
 
 	sales_invoices = frappe.db.sql("""
 		SELECT
@@ -148,12 +147,12 @@ def check_matching_amount(bank_account, transaction):
 		WHERE
 			(sip.clearance_date is null or sip.clearance_date='0000-00-00')
 		AND
-			sip.account = '%s'
+			sip.account = %s
 		AND
-			sip.amount like '%s'
+			sip.amount like %s
 		AND
 			si.docstatus = 1
-	""" % (bank_account, amount), as_dict=True)
+	""", (bank_account, amount), as_dict=True)
 
 	for data in [payment_entries, journal_entries, sales_invoices]:
 		if data:
@@ -162,7 +161,10 @@ def check_matching_amount(bank_account, transaction):
 	return payments
 
 def get_matching_descriptions_data(bank_account, transaction):
-	bank_transactions = frappe.db.sql(""" 
+	if not transaction.description :
+		return []
+
+	bank_transactions = frappe.db.sql("""
 		SELECT
 			bt.name, bt.description, bt.date, btp.payment_document, btp.payment_entry
 		FROM
@@ -237,7 +239,7 @@ def get_matching_transactions_payments(description_matching):
 	payment_by_ratio = {x["payment_entry"]: x["ratio"] for x in description_matching}
 
 	if payments:
-		reference_payment_list = frappe.get_all("Payment Entry", fields=["name", "paid_amount", "payment_type", "reference_no", "reference_date", 
+		reference_payment_list = frappe.get_all("Payment Entry", fields=["name", "paid_amount", "payment_type", "reference_no", "reference_date",
 			"party", "party_type", "posting_date", "paid_to_account_currency"], filters=[["name", "in", payments]])
 
 		return sorted(reference_payment_list, key=lambda x: payment_by_ratio[x["name"]])

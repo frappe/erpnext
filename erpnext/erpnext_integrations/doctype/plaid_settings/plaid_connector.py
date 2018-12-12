@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import json
 import requests
 from plaid import Client
 from plaid.errors import APIError, ItemError
@@ -34,7 +33,7 @@ class PlaidConnector():
 	def get_access_token(self, public_token):
 		if public_token is None:
 			frappe.log_error(_("Public token is missing for this bank"), _("Plaid public token error"))
-		
+
 		response = self.client.Item.public_token.exchange(public_token)
 		access_token = response['access_token']
 
@@ -68,10 +67,10 @@ class PlaidConnector():
 				account_ids = [account_id]
 
 				response = self.client.Transactions.get(self.access_token, start_date=start_date, end_date=end_date, account_ids=account_ids)
-			
+
 			else:
 				response = self.client.Transactions.get(self.access_token, start_date=start_date, end_date=end_date)
-			
+
 			transactions = response['transactions']
 
 			while len(transactions) < response['total_transactions']:

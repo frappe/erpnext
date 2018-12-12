@@ -83,7 +83,7 @@ def add_bank_accounts(response, bank, company):
 
 				result.append(new_account.name)
 
-			except frappe.UniqueValidationError as e:
+			except frappe.UniqueValidationError:
 				frappe.msgprint(_("Bank account {0} already exists and could not be created again").format(new_account.account_name))
 			except Exception:
 				frappe.throw(frappe.get_traceback())
@@ -99,7 +99,7 @@ def add_account_type(account_type):
 			"doctype": "Account Type",
 			"account_type": account_type
 		}).insert()
-	except:
+	except Exception:
 		frappe.throw(frappe.get_traceback())
 
 

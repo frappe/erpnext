@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -18,9 +17,9 @@ class BankTransaction(Document):
 		if allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount))
 			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)) - flt(allocated_amount))
-		
+
 		else:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", 0)
 			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)))
-	
+
 		self.reload()

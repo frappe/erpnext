@@ -2,11 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Plaid Settings', {
-	refresh: function(frm) {
-
-	},
-
-	connect_btn: function(frm) {
+	connect_btn: function() {
 		frappe.set_route('bank-reconciliation');
 	}
 });
