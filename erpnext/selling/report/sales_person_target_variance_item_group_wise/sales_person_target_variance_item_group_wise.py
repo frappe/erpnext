@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, scrub
 from frappe.utils import flt
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -63,7 +63,7 @@ def get_columns(filters):
 def get_salesperson_details(filters):
 	return frappe.db.sql("""
 		select
-			sp.name, td.item_group, td.target_qty, td.target_amount, sp.distribution_id
+			sp.name, td.item_group, td.target_qty, td.target_alt_uom_qty, td.target_amount, sp.distribution_id
 		from
 			`tabSales Person` sp, `tabTarget Detail` td
 		where
@@ -95,7 +95,11 @@ def get_achieved_details(filters, sales_person, all_sales_persons, target_item_g
 		CASE
 			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * (st.allocated_percentage/100))
 			ELSE sum(soi.stock_qty * (st.allocated_percentage/100))
-		END as qty,
+		END as stock_qty,
+		CASE
+			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * soi.alt_uom_size * (st.allocated_percentage/100))
+			ELSE sum(soi.alt_uom_qty * (st.allocated_percentage/100))
+		END as alt_uom_qty,
 		CASE
 			WHEN so.status = "Closed" THEN sum(soi.delivered_qty * soi.conversion_factor * soi.base_net_rate * (st.allocated_percentage/100))
 			ELSE sum(soi.base_net_amount * (st.allocated_percentage/100))
@@ -116,12 +120,14 @@ def get_achieved_details(filters, sales_person, all_sales_persons, target_item_g
 	actual_details = {}
 	for d in item_details:
 		actual_details.setdefault(d.month_name, frappe._dict({
-			"quantity" : 0,
+			"stock_qty" : 0,
+			"contents_qty" : 0,
 			"amount" : 0
 		}))
 
 		value_dict = actual_details[d.month_name]
-		value_dict.quantity += flt(d.qty)
+		value_dict.stock_qty += flt(d.stock_qty)
+		value_dict.contents_qty += flt(d.alt_uom_qty)
 		value_dict.amount += flt(d.amount)
 
 	return actual_details
@@ -148,13 +154,15 @@ def get_salesperson_item_month_map(filters):
 			month_percentage = tdd.get(sd.distribution_id, {}).get(month, 0) \
 				if sd.distribution_id else 100.0/12
 
-			if (filters["target_on"] == "Quantity"):
+			if filters["target_on"] == "Stock Qty":
 				sales_target_achieved.target = flt(sd.target_qty) * month_percentage / 100
+			elif filters["target_on"] == "Contents Qty":
+				sales_target_achieved.target = flt(sd.target_alt_uom_qty) * month_percentage / 100
 			else:
 				sales_target_achieved.target = flt(sd.target_amount) * month_percentage / 100
 
 			sales_target_achieved.achieved = achieved_details.get(month, frappe._dict())\
-				.get(filters["target_on"].lower())
+				.get(scrub(filters["target_on"]))
 
 	return sales_person_achievement_dict
 
