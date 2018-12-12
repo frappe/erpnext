@@ -205,6 +205,35 @@ def make_custom_fields(update=True):
 		}
 	]
 
+	si_ewaybill_fields = [
+		dict(fieldname='transporter_info', label='Transporter Info', fieldtype='Section Break',
+			insert_after='terms', options='fa fa-truck', collapsible=1, collapsible_depends_on='transporter', print_hide=1),
+		dict(fieldname='transporter', label='Transporter', fieldtype='Link',
+			insert_after='transporter_info', options='Supplier', print_hide=1),
+		dict(fieldname='driver', label='Driver', fieldtype='Link', 
+			insert_after='transporter', options='Driver', print_hide=1),
+		dict(fieldname='lr_no', label='Transport Receipt No', fieldtype='Data', 
+			insert_after='driver', print_hide=1),
+		dict(fieldname='vehicle_no', label='Vehicle No', fieldtype='Data', 
+			insert_after='lr_no', print_hide=1),
+		dict(fieldname='distance', label='Distance (in km)', fieldtype='Float', 
+			insert_after='vehicle_no', print_hide=1),
+		dict(fieldname='transporter_col_break', fieldtype='Column Break', insert_after='distance'),
+		dict(fieldname='transporter_name', label='Transporter Name', fieldtype='Data',
+			insert_after='transporter_col_break', fetch_from='transporter.name', read_only=1, print_hide=1),
+		dict(fieldname='gst_transporter_id', label='GST Transporter ID', fieldtype='Data', 
+			insert_after='transporter_name', fetch_from='transporter.gst_transporter_id', translatable=1, print_hide=1),
+		dict(fieldname='driver_name', label='Driver Name', fieldtype='Data', 
+			insert_after='gst_transporter_id', fetch_from='driver.full_name', print_hide=1),
+		dict(fieldname='lr_date', label='Transport Receipt Date', fieldtype='Data', 
+			insert_after='driver_name', default='Today', print_hide=1),
+		dict(fieldname='mode_of_transport', label='Mode of Transport', fieldtype='Select', 
+			insert_after='lr_date', options='\nRoad\nAir\nRail\nShip', default='Road', translatable=1, print_hide=1),
+		dict(fieldname='gst_vehicle_type', label='GST Vehicle Type', fieldtype='Select', 
+			insert_after='mode_of_transport', options='\nRegular\nOver Dimensional Cargo (ODC)', default='Regular',
+			depends_on='eval:(doc.mode_of_transport === "Road")', translatable=1, print_hide=1),
+	]
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
@@ -215,7 +244,7 @@ def make_custom_fields(update=True):
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
-		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
+		'Sales Invoice': si_ewaybill_fields + invoice_gst_fields + sales_invoice_gst_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
