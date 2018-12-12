@@ -55,7 +55,6 @@ class Student(Document):
 			student_user.save()
 			self.user = student_user.name
 			self.save()
-			frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)
 			update_password_link = student_user.reset_password()
 			print(update_password_link)
 

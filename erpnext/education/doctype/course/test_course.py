@@ -10,3 +10,11 @@ import unittest
 
 class TestCourse(unittest.TestCase):
 	pass
+
+def make_course(name):
+	course = frappe.get_doc({
+		"doctype": "Program",
+		"course_name": name,
+		"course_code": name
+	}).insert()
+	return course.name
