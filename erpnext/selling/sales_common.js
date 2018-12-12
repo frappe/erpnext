@@ -374,7 +374,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				item.net_rate = item.rate;
 				item.amount = flt(item.rate * item.qty, precision("amount", item));
 				item.net_amount = item.amount;
-				
 				item.tax_amount = flt(item.tax * item.net_amount / 100.00);
 				item.amount = item.net_amount + item.tax_amount;
 		});
