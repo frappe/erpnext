@@ -206,7 +206,6 @@ erpnext.accounts.bankTransactionSync = class bankTransactionSync {
 				freeze: true
 			})
 			.then((result) => {
-				console.log(result)
 				let result_title = (result.length > 0) ? __("{0} bank transaction(s) created", [result.length]) : __("This bank account is already synchronized")
 				let result_msg = `
 					<div class="text-center">
@@ -305,7 +304,6 @@ erpnext.accounts.plaidLink = class plaidLink {
 					bank: result, company: me.company})
 			})
 			.then((result) => {
-				console.log(result)
 				frappe.show_alert({message:__("Bank accounts added"), indicator:'green'});
 			})
 		}, __("Select a company"), __("Continue"));
@@ -317,7 +315,6 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 	constructor(opts) {
 		super(opts);
 		this.show();
-		console.log(this)
 	}
 
 	setup_defaults() {
