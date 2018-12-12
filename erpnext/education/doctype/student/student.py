@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.desk.form.linked_with import get_linked_doctypes
-
+from erpnext.education.utils import check_content_completion, check_quiz_completion
 class Student(Document):
 	def validate(self):
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
@@ -81,6 +81,25 @@ class Student(Document):
 		else:
 			enrollments = [item['program'] for item in program_enrollments]
 			return enrollments
+
+	def get_topic_progress(self, course_enrollment_name, topic):
+		"""
+		Get Progress Dictionary of a student for a particular topic
+			:param self: Student Object
+			:param course_enrollment_name: Name of the Course Enrollment
+			:param topic: Topic DocType Object
+		"""
+		contents = topic.get_contents()
+		progress = []
+		for content in contents:
+			if content.doctype in ('Article', 'Video'):
+				status = check_content_completion(content.name, content.doctype, course_enrollment_name)
+				progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
+			elif content.doctype == 'Quiz':
+				status, score, result = check_quiz_completion(content, course_enrollment_name)
+				progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
+		return progress
+	
 
 	def enroll_in_program(self, program_name):
 		enrollment = frappe.get_doc({
