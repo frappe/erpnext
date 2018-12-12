@@ -25,10 +25,18 @@ class Course(Document):
 		content_list = [item for item in contents if item.doctype!="Quiz"]
 		return content_list, quiz_list
 
+	def get_topics(self):
+		try:
+			topic_list = self.get_all_children()
+			topic_data = [frappe.get_doc("Topic", topic.topic) for topic in topic_list]
+		except frappe.DoesNotExistError:
+			return None
+		return topic_data
+
 	def get_contents(self):
 		try:
-			course_content_list = self.get_all_children()
-			content_data = [frappe.get_doc(course_content.content_type, course_content.content) for course_content in course_content_list]
+			topics = self.get_topics()
+			content_data = [{'name':topic.name, 'topic_name': topic.topic_name ,'content':topic.get_contents()} for topic in topics]
 		except Exception as e:
 			return None
 		return content_data
