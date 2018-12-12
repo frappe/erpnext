@@ -26,8 +26,8 @@ frappe.query_reports["Sales Person Target Variance Item Group-Wise"] = {
 			fieldname: "target_on",
 			label: __("Target On"),
 			fieldtype: "Select",
-			options: "Quantity\nAmount",
-			default: "Quantity"
+			options: "Stock Qty\nContents Qty\nAmount",
+			default: "Stock Qty"
 		},
 	]
 }
