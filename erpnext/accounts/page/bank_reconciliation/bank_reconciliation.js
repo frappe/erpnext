@@ -418,6 +418,11 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_invoice();
 		})
+
+		$(me.row).on('click', '.new-expense', function() {
+			me.bank_entry = $(this).attr("data-name");
+			me.new_expense();
+		})
 	}
 
 	new_payment() {
@@ -436,6 +441,11 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 		frappe.new_doc(invoice_type)
 	}
+
+	new_invoice() {
+		frappe.new_doc("Expense Claim")
+	}
+
 
 	show_dialog(data) {
 		const me = this;

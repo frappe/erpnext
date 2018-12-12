@@ -113,7 +113,7 @@ def add_account_subtype(account_subtype):
 		frappe.throw(frappe.get_traceback())
 
 @frappe.whitelist()
-def sync_transactions(bank, bank_account=None):
+def sync_transactions(bank, bank_account):
 
 	last_sync_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
 	if last_sync_date:
@@ -134,7 +134,6 @@ def sync_transactions(bank, bank_account=None):
 		return result
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
-
 
 def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 	access_token = None
@@ -188,3 +187,12 @@ def new_bank_transaction(transaction):
 			frappe.throw(frappe.get_traceback())
 
 	return result
+
+def automatic_synchronization():
+	settings = frappe.get_doc("Plaid Settings", "Plaid Settings")
+
+	if settings.enabled == 1 and settings.automatic_sync == 1:
+		plaid_accounts = frappe.get_all("Bank Account", filter={"integration_id": ["!=", ""]}, fields=["name", "bank"])
+
+		for plaid_account in plaid_accounts:
+			frappe.enqueue("erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions", bank=plaid_account.bank, bank_account=plaid_account.name)

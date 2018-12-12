@@ -57,7 +57,7 @@ def clear_payment_entry(transaction, payment_entry, gl_entry):
 	""" % (payment_entry.doctype, payment_entry.name), as_dict=True)
 
 	amount_cleared = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
-	amount_to_be_cleared = (flt(gl_entry.credit) - flt(gl_entry.debit))
+	amount_to_be_cleared = (flt(gl_entry.debit) - flt(gl_entry.credit))
 
 	if payment_entry.doctype == "Payment Entry":
 		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
@@ -90,11 +90,9 @@ def get_linked_payments(bank_transaction):
 	
 	# Get all payment entries with a matching amount
 	amount_matching = check_matching_amount(bank_account, transaction)
-	print(amount_matching)
 
 	# Get some data from payment entries linked to a corresponding bank transaction
 	description_matching = get_matching_descriptions_data(bank_account, transaction)
-	print(description_matching)
 
 	if amount_matching:
 		return check_amount_vs_description(amount_matching, description_matching)
@@ -187,8 +185,6 @@ def get_matching_descriptions_data(bank_account, transaction):
 			if seq.ratio() > 0.6:
 				bank_transaction["ratio"] = seq.ratio()
 				selection.append(bank_transaction)
-
-	print(selection)
 
 	document_types = set([x["payment_document"] for x in selection])
 
