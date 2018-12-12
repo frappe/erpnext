@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-from .operations import install_fixtures as fixtures, taxes_setup, sample_data
+from .operations import install_fixtures as fixtures, company_setup, taxes_setup, sample_data
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -83,6 +83,8 @@ def setup_complete(args=None):
 	setup_company(args)
 	setup_taxes(args)
 	setup_post_company_fixtures(args)
+	fixtures.install_defaults(args)
+	stage_four(args)
 	fin(args)
 
 def stage_fixtures(args):
@@ -96,6 +98,11 @@ def setup_taxes(args):
 
 def setup_post_company_fixtures(args):
 	fixtures.install_post_company_fixtures(args)
+
+def stage_four(args):
+	company_setup.create_website(args)
+	company_setup.create_email_digest()
+	company_setup.create_logo(args)
 
 def fin(args):
 	frappe.local.message_log = []
