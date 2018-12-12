@@ -147,7 +147,6 @@ def enroll_in_program(program_name):
 		utils.create_student()
 	student = frappe.get_doc("Student", utils.get_current_student())
 	program_enrollment = student.enroll_in_program(program_name)
-	utils.enroll_all_courses_in_program(program_enrollment, student)
 	return program_name
 
 # Academty Activity 
@@ -168,39 +167,15 @@ def add_activity(course, content_type, content):
 		frappe.db.commit()
 
 def get_course_progress(course_enrollment):
+	student_id = utils.get_current_student()
+	student = frappe.get_doc("Student", student_id)
 	course = frappe.get_doc('Course', course_enrollment.course)
-	contents = course.get_contents()
+	topics = course.get_topics()
 	progress = []
-	for content in contents:
-		if content.doctype in ('Article', 'Video'):
-			status = check_content_completion(content.name, content.doctype, course_enrollment.name)
-			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
-		elif content.doctype == 'Quiz':
-			status, score, result = check_quiz_completion(content, course_enrollment.name)
-			progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
+	for topic in topics:
+			progress.append(student.get_topic_progress(course_enrollment.name, topic))
 	return progress
 
-def check_content_completion(content_name, content_type, enrollment_name):
-	activity = frappe.get_list("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
-	if activity:
-		return True
-	else:
-		return False
-
-def check_quiz_completion(quiz, enrollment_name):
-	attempts = frappe.get_list("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
-	status = bool(len(attempts) == quiz.max_attempts)
-	score = None
-	result = None
-	if attempts:
-		if quiz.grading_basis == 'Last Highest Score':
-			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
-		score = attempts[0]['score']
-		result = attempts[0]['status']
-		if result == 'Pass':
-			status = True
-	return status, score, result
-	
 @frappe.whitelist()
 def get_course_meta(course_name, program_name):
 	course_enrollment = utils.get_course_enrollment(course_name)
