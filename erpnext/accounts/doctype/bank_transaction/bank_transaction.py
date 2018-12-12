@@ -14,7 +14,6 @@ class BankTransaction(Document):
 
 	def on_update_after_submit(self):
 		allocated_amount = reduce(lambda x, y: flt(x) + flt(y), [x.allocated_amount for x in self.payment_entries])
-		frappe.log_error(allocated_amount)
 
 		if allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount))
