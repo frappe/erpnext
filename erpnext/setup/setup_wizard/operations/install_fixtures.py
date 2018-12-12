@@ -6,6 +6,9 @@ from __future__ import unicode_literals
 import frappe, os, json
 
 from frappe import _
+from frappe.desk.page.setup_wizard.setup_wizard import make_records
+from frappe.utils import cstr, getdate
+from erpnext.accounts.doctype.account.account import RootNotEditable
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -25,34 +28,6 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
-
-		# Setup Progress
-		{'doctype': "Setup Progress", "actions": [
-			{"action_name": "Add Company", "action_doctype": "Company", "min_doc_count": 1, "is_completed": 1,
-				"domains": '[]' },
-			{"action_name": "Set Sales Target", "action_doctype": "Company", "min_doc_count": 99,
-				"action_document": frappe.defaults.get_defaults().get("company") or '',
-				"action_field": "monthly_sales_target", "is_completed": 0,
-				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
-			{"action_name": "Add Customers", "action_doctype": "Customer", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
-			{"action_name": "Add Suppliers", "action_doctype": "Supplier", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
-			{"action_name": "Add Products", "action_doctype": "Item", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
-			{"action_name": "Add Programs", "action_doctype": "Program", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Education"]' },
-			{"action_name": "Add Instructors", "action_doctype": "Instructor", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Education"]' },
-			{"action_name": "Add Courses", "action_doctype": "Course", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Education"]' },
-			{"action_name": "Add Rooms", "action_doctype": "Room", "min_doc_count": 1, "is_completed": 0,
-				"domains": '["Education"]' },
-			{"action_name": "Add Users", "action_doctype": "User", "min_doc_count": 4, "is_completed": 0,
-				"domains": '[]' },
-			{"action_name": "Add Letterhead", "action_doctype": "Letter Head", "min_doc_count": 1, "is_completed": 0,
-				"domains": '[]' }
-		]},
 
 		# address template
 		{'doctype':"Address Template", "country": country},
@@ -124,8 +99,10 @@ def install(country=None):
 		{'doctype': 'Designation', 'designation_name': _('Designer')},
 		{'doctype': 'Designation', 'designation_name': _('Researcher')},
 
-		# territory
+		# territory: with two default territories, one for home country and one named Rest of the World
 		{'doctype': 'Territory', 'territory_name': _('All Territories'), 'is_group': 1, 'name': _('All Territories'), 'parent_territory': ''},
+		{'doctype': 'Territory', 'territory_name': country.replace("'", ""), 'is_group': 0, 'parent_territory': _('All Territories')},
+		{'doctype': 'Territory', 'territory_name': _("Rest Of The World"), 'is_group': 0, 'parent_territory': _('All Territories')},
 
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': _('All Customer Groups'), 'is_group': 1, 	'name': _('All Customer Groups'), 'parent_customer_group': ''},
@@ -231,7 +208,22 @@ def install(country=None):
 
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
-		{"doctype": "Share Type", "title": _("Preference")}
+		{"doctype": "Share Type", "title": _("Preference")},
+
+		# Market Segments
+		{"doctype": "Market Segment", "market_segment": _("Lower Income")},
+		{"doctype": "Market Segment", "market_segment": _("Middle Income")},
+		{"doctype": "Market Segment", "market_segment": _("Upper Income")},
+
+		# Sales Stages
+		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
+		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
+		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
+		{"doctype": "Sales Stage", "stage_name": _("Value Proposition")},
+		{"doctype": "Sales Stage", "stage_name": _("Identifying Decision Makers")},
+		{"doctype": "Sales Stage", "stage_name": _("Perception Analysis")},
+		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
+		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")}
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
@@ -260,7 +252,17 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
-	make_fixture_records(records)
+	make_records(records, True)
+
+	set_more_defaults()
+
+	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
+	# if os.path.exists(path.encode("utf-8")):
+	# 	frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
+
+
+def set_more_defaults():
+	# Do more setup stuff that can be done here with no dependencies
 
 	# set default customer group and territory
 	selling_settings = frappe.get_doc("Selling Settings")
@@ -268,6 +270,33 @@ def install(country=None):
 	selling_settings.save()
 
 	add_uom_data()
+
+	# set no copy fields of an item doctype to item variant settings
+	doc = frappe.get_doc('Item Variant Settings')
+	doc.set_default_fields()
+	doc.save()
+
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.cust_master_name = "Customer Name"
+	selling_settings.so_required = "No"
+	selling_settings.dn_required = "No"
+	selling_settings.allow_multiple_items = 1
+	selling_settings.sales_update_frequency = "Each Transaction"
+	selling_settings.save()
+
+	buying_settings = frappe.get_doc("Buying Settings")
+	buying_settings.supp_master_name = "Supplier Name"
+	buying_settings.po_required = "No"
+	buying_settings.pr_required = "No"
+	buying_settings.maintain_same_rate = 1
+	buying_settings.allow_multiple_items = 1
+	buying_settings.save()
+
+	hr_settings = frappe.get_doc("HR Settings")
+	hr_settings.emp_created_by = "Naming Series"
+	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
+	hr_settings.leave_status_notification_template = _("Leave Status Notification")
+	hr_settings.save()
 
 def add_uom_data():
 	# add UOMs
@@ -306,7 +335,7 @@ def add_market_segments():
 		{"doctype": "Market Segment", "market_segment": _("Upper Income")}
 	]
 
-	make_fixture_records(records)
+	make_records(records)
 
 def add_sale_stages():
 	# Sale Stages
@@ -320,46 +349,143 @@ def add_sale_stages():
 		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
 		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")}
 	]
-	make_fixture_records(records)
 
-def make_fixture_records(records):
-	from frappe.modules import scrub
-	for r in records:
-		doc = frappe.new_doc(r.get("doctype"))
-		doc.update(r)
+	make_records(records)
 
-		# ignore mandatory for root
-		parent_link_field = ("parent_" + scrub(doc.doctype))
-		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
-			doc.flags.ignore_mandatory = True
+def install_company(args):
+	records = [
+		# Fiscal Year
+		{ "doctype": "Fiscal Year", 'year': get_fy_details(args.fy_start_date, args.fy_end_date), 'year_start_date': args.fy_start_date, 'year_end_date': args.fy_end_date },
 
-		try:
-			doc.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError as e:
-			# pass DuplicateEntryError and continue
-			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
-				# make sure DuplicateEntryError is for the exact same doc and not a related doc
-				pass
-			else:
-				raise
+		# Company
+		{
+			"doctype":"Company",
+			'company_name': args.company_name,
+			'enable_perpetual_inventory': 1,
+			'abbr': args.company_abbr,
+			'default_currency': args.currency,
+			'country': args.country,
+			'create_chart_of_accounts_based_on': 'Standard Template',
+			'chart_of_accounts': args.chart_of_accounts,
+			'domain': args.domain
+		}
+	]
 
-def install_post_company_fixtures(company=None):
+	make_records(records, True)
+
+
+def install_post_company_fixtures(args=None):
 	records = [
 		# Department
 		{'doctype': 'Department', 'department_name': _('All Departments'), 'is_group': 1, 'parent_department': ''},
-		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments'), 'company': company},
-		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': company},
+		{'doctype': 'Department', 'department_name': _('Accounts'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Marketing'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Sales'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Purchase'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Operations'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Production'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Dispatch'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Customer Service'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Human Resources'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Management'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Quality Management'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Research & Development'), 'parent_department': _('All Departments'), 'company': args.company_name},
+		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': args.company_name},
 	]
 
-	make_fixture_records(records)
+	make_records(records)
+
+
+def install_defaults(args=None):
+	records = [
+		# Price Lists
+		{ "doctype": "Price List", "price_list_name": _("Standard Buying"), "enabled": 1, "buying": 1, "selling": 0, "currency": args.currency },
+		{ "doctype": "Price List", "price_list_name": _("Standard Selling"), "enabled": 1, "buying": 0, "selling": 1, "currency": args.currency },
+	]
+
+	make_records(records)
+
+	# enable default currency
+	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
+
+	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
+	current_fiscal_year = frappe.get_all("Fiscal Year")[0]
+
+	global_defaults.update({
+		'current_fiscal_year': current_fiscal_year.name,
+		'default_currency': args.get('currency'),
+		'default_company':args.get('company_name')	,
+		"country": args.get("country"),
+	})
+
+	global_defaults.save()
+
+	system_settings = frappe.get_doc("System Settings")
+	system_settings.email_footer_address = args.get("company_name")
+	system_settings.save()
+
+	domain_settings = frappe.get_single('Domain Settings')
+	domain_settings.set_active_domains(args.get('domains'))
+
+	stock_settings = frappe.get_doc("Stock Settings")
+	stock_settings.item_naming_by = "Item Code"
+	stock_settings.valuation_method = "FIFO"
+	stock_settings.default_warehouse = frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')})
+	stock_settings.stock_uom = _("Nos")
+	stock_settings.auto_indent = 1
+	stock_settings.auto_insert_price_list_rate_if_missing = 1
+	stock_settings.automatically_set_serial_nos_based_on_fifo = 1
+	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
+	stock_settings.save()
+
+	if args.bank_account:
+		company_name = args.company_name
+		bank_account_group =  frappe.db.get_value("Account",
+			{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
+				"company": company_name})
+		if bank_account_group:
+			bank_account = frappe.get_doc({
+				"doctype": "Account",
+				'account_name': args.bank_account,
+				'parent_account': bank_account_group,
+				'is_group':0,
+				'company': company_name,
+				"account_type": "Bank",
+			})
+			try:
+				doc = bank_account.insert()
+
+				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+
+				return doc
+			except RootNotEditable:
+				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
+			except frappe.DuplicateEntryError:
+				# bank account same as a CoA entry
+				pass
+
+	# Now, with fixtures out of the way, onto concrete stuff
+	records = [
+
+		# Shopping cart: needs price lists
+		{
+			"doctype": "Shopping Cart Settings",
+			"enabled": 1,
+			'company': args.company_name,
+			# uh oh
+			'price_list': frappe.db.get_value("Price List", {"selling": 1}),
+			'default_customer_group': _("Individual"),
+			'quotation_series': "QTN-",
+		},
+	]
+
+	make_records(records, True)
+
+
+def get_fy_details(fy_start_date, fy_end_date):
+	start_year = getdate(fy_start_date).year
+	if start_year == getdate(fy_end_date).year:
+		fy = cstr(start_year)
+	else:
+		fy = cstr(start_year) + '-' + cstr(start_year + 1)
+	return fy
