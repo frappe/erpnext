@@ -117,15 +117,30 @@ def enroll_in_course(course_name, program_name):
 	student = frappe.get_doc("Student", student_id)
 	student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
 
-def enroll_all_courses_in_program(program_enrollment, student):
-	program = frappe.get_doc("Program", program_enrollment.program)
-	course_list = [course.course for course in program.get_all_children()]
-	for course_name in course_list:
-		student.enroll_in_course(course_name=course_name, program_enrollment=program_enrollment.name)
-
 def check_activity_exists(enrollment, content_type, content):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
 	return bool(activity)
+
+def check_content_completion(content_name, content_type, enrollment_name):
+	activity = frappe.get_list("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
+	if activity:
+		return True
+	else:
+		return False
+
+def check_quiz_completion(quiz, enrollment_name):
+	attempts = frappe.get_list("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
+	status = bool(len(attempts) == quiz.max_attempts)
+	score = None
+	result = None
+	if attempts:
+		if quiz.grading_basis == 'Last Highest Score':
+			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+		score = attempts[0]['score']
+		result = attempts[0]['status']
+		if result == 'Pass':
+			status = True
+	return status, score, result
 
 # def get_home_page(user):
 # 	print("----------------------------------------------------------------------")
