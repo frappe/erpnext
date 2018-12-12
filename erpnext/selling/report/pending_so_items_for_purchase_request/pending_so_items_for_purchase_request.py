@@ -103,17 +103,17 @@ def get_data():
 			so.territory,
 			sum(so_item.qty) as net_qty,
 			so.company
-		FROM `tabSales Order` so, `tabSales Order Item` so_item 
+		FROM `tabSales Order` so, `tabSales Order Item` so_item
 		WHERE
 			so.docstatus = 1
 			and so.name = so_item.parent
 			and so.status not in  ("Closed","Completed","Cancelled")
 		GROUP BY
-			so.name,so_item.item_code 	
+			so.name,so_item.item_code
 		""", as_dict = 1)
 
-	mr_records = frappe.get_all("Material Request Item", 
-		{"sales_order_item": ("!=",""), "docstatus": 1}, 
+	mr_records = frappe.get_all("Material Request Item",
+		{"sales_order_item": ("!=",""), "docstatus": 1},
 		["parent", "qty", "sales_order", "item_code"])
 
 	grouped_records = {}
@@ -123,12 +123,12 @@ def get_data():
 
 	pending_so=[]
 	for so in sales_order_entry:
-		#fetch all the material request records for a sales order item				
+		#fetch all the material request records for a sales order item			
 		mr_list = grouped_records.get(so.name) or [{}]
 		mr_item_record = ([mr for mr in mr_list if mr.get('item_code') == so.item_code] or [{}])
 
 		for mr in mr_item_record:
-			# check for pending sales order	
+			# check for pending sales order
 			if cint(so.net_qty) > cint(mr.get('qty')):
 				so_record = {
 					"item_code": so.item_code,
@@ -138,8 +138,8 @@ def get_data():
 					"date": so.transaction_date,
 					"material_request": cstr(mr.get('parent')),
 					"customer": so.customer,
-					"territory": so.territory,  
-					"so_qty": so.net_qty, 
+					"territory": so.territory,
+					"so_qty": so.net_qty,
 					"requested_qty": cint(mr.get('qty')),
 					"pending_qty": so.net_qty - cint(mr.get('qty')),
 					"company": so.company
