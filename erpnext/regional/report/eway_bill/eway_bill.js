@@ -5,10 +5,16 @@
 frappe.query_reports["Eway Bill"] = {
 	"filters": [
 		{
-			'fieldname': 'delivery_note',
-			'label': __("Delivery Note"),
-			'fieldtype': 'Link',
-			'options': 'Delivery Note'
+			'fieldname': 'doc_name',
+			'label': __("Doc Name"),
+			'fieldtype': 'Dynamic Link',
+			"get_options": function() {
+				let doc_type = frappe.query_report.get_values().doc_type;
+				if(!doc_type) {
+					frappe.throw(__("Please select Doc Type first"));
+				}
+				return doc_type;
+			}
 		},
 		{
 			'fieldname': 'posting_date',
@@ -29,5 +35,12 @@ frappe.query_reports["Eway Bill"] = {
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
 		},
+		{
+			'fieldname': 'doc_type',
+			'label': __("Doc Type"),
+			'fieldtype': 'Select',
+			'options': "Delivery Note\nSales Invoice",
+			'default': "Delivery Note"
+		}
 	]
 }
