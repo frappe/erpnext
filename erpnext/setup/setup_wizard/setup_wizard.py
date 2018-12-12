@@ -60,6 +60,16 @@ def get_setup_stages(args=None):
 						'fn': setup_post_company_fixtures,
 						'args': args,
 						'fail_msg': _("Failed to setup post company fixtures")
+					},
+					{
+						'fn': setup_defaults,
+						'args': args,
+						'fail_msg': _("Failed to setup defaults")
+					},
+					{
+						'fn': stage_four,
+						'args': args,
+						'fail_msg': _("Failed to create website")
 					}
 				]
 			},
@@ -78,15 +88,6 @@ def get_setup_stages(args=None):
 
 	return stages
 
-def setup_complete(args=None):
-	stage_fixtures(args)
-	setup_company(args)
-	setup_taxes(args)
-	setup_post_company_fixtures(args)
-	fixtures.install_defaults(args)
-	stage_four(args)
-	fin(args)
-
 def stage_fixtures(args):
 	fixtures.install(args.get('country'))
 
@@ -98,6 +99,9 @@ def setup_taxes(args):
 
 def setup_post_company_fixtures(args):
 	fixtures.install_post_company_fixtures(args)
+
+def setup_defaults(args):
+	fixtures.install_defaults(frappe._dict(args))
 
 def stage_four(args):
 	company_setup.create_website(args)
@@ -122,3 +126,14 @@ def make_sample_data(domains):
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.login_as(args.get("email"))
+
+
+# Only for programmatical use
+def setup_complete(args=None):
+	stage_fixtures(args)
+	setup_company(args)
+	setup_taxes(args)
+	setup_post_company_fixtures(args)
+	setup_defaults(args)
+	stage_four(args)
+	fin(args)
