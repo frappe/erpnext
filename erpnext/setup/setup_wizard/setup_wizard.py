@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 
 from .operations import install_fixtures as fixtures, taxes_setup, sample_data
-from frappe.utils import getdate
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
