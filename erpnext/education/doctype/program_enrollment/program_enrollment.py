@@ -20,6 +20,7 @@ class ProgramEnrollment(Document):
 	def on_submit(self):
 		self.update_student_joining_date()
 		self.make_fee_records()
+		self.create_course_enrollments()
 	
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Program Enrollment", filters={
@@ -66,7 +67,13 @@ class ProgramEnrollment(Document):
 	def get_courses(self):
 		return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
 
-
+	def create_course_enrollments(self):
+		student = frappe.get_doc("Student", self.student)
+		program = frappe.get_doc("Program", self.program)
+		course_list = [course.course for course in program.get_all_children()]
+		for course_name in course_list:
+			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
+		
 @frappe.whitelist()
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get('program'):
