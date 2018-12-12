@@ -193,6 +193,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Topic"
+				},
+				{
+					"type": "doctype",
+					"name": "Room"
+				}
+			]
+		},
+		{
+			"label": _("Content Masters"),
+			"items": [
+				{
+					"type": "doctype",
 					"name": "Article"
 				},
 				{
@@ -202,10 +215,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Quiz"
-				},
-				{
-					"type": "doctype",
-					"name": "Room"
 				}
 			]
 		},
