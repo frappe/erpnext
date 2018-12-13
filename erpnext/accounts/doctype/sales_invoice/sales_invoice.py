@@ -1264,7 +1264,7 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Invoice', source_name, 'maintain_packed_items_list')
+	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Invoice', source_name)
 
 	return doclist
 
