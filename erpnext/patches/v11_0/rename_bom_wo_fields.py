@@ -13,7 +13,12 @@ def execute():
     for doctype in ['BOM', 'Work Order']:
         frappe.reload_doc('manufacturing', 'doctype', frappe.scrub(doctype))
 
-        frappe.db.sql(""" UPDATE `tab{0}`
-            SET transfer_material_against = CASE WHEN
-                transfer_material_against_job_card = 1 then 'Job Card' Else 'Work Order' END
-            WHERE docstatus < 2""".format(doctype))
+        if frappe.db.has_column(doctype, 'transfer_material_against_job_card'):
+            frappe.db.sql(""" UPDATE `tab%s`
+                SET transfer_material_against = CASE WHEN
+                    transfer_material_against_job_card = 1 then 'Job Card' Else 'Work Order' END
+                WHERE docstatus < 2""" % (doctype))
+        else:
+            frappe.db.sql(""" UPDATE `tab%s`
+                SET transfer_material_against = 'Work Order'
+                WHERE docstatus < 2""" % (doctype))

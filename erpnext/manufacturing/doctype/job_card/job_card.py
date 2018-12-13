@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, time_diff_in_hours, get_datetime, cstr
+from frappe.utils import flt, time_diff_in_hours, get_datetime
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -138,10 +138,10 @@ class JobCard(Document):
 
 	def set_status(self, update_status=False):
 		self.status = {
-			"0": "Open",
-			"1": "Submitted",
-			"2": "Cancelled"
-		}[cstr(self.docstatus or 0)]
+			0: "Open",
+			1: "Submitted",
+			2: "Cancelled"
+		}[self.docstatus or 0]
 
 		if self.actual_start_date:
 			self.status = 'Work In Progress'

@@ -117,7 +117,7 @@ frappe.ui.form.on("Work Order", {
 			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
-					return true
+					return true;
 				}
 			});
 
