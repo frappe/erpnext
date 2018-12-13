@@ -109,7 +109,7 @@ def add_account_subtype(account_subtype):
 			"doctype": "Account Subtype",
 			"account_subtype": account_subtype
 		}).insert()
-	except:
+	except Exception:
 		frappe.throw(frappe.get_traceback())
 
 @frappe.whitelist()

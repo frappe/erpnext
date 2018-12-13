@@ -20,7 +20,7 @@ let add_fields_to_mapping_table = function (frm) {
 			if (!["Section Break", "Column Break"].includes(value.fieldtype)) {
 				options.push(value.fieldname);
 			}
-		})
+		});
 	});
 
 	frappe.meta.get_docfield("Bank Transaction Mapping", "bank_transaction_field",
