@@ -137,10 +137,19 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
+		self.validate_techno_constraints()
 		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
+
+	def validate_techno_constraints(self):
+		if not self.brand:
+			frappe.throw(_("Brand is mandatory"))
+		if not self.item_group:
+			frappe.throw(_("Item Group is mandatory"))
+		if self.item_group == "All Item Groups":
+			frappe.throw(_("Item Group cannot be 'All Item Groups'"))
 
 	def validate_description(self):
 		'''Clean HTML description if set'''

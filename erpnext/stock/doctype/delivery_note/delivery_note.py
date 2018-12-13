@@ -201,6 +201,7 @@ class DeliveryNote(SellingController):
 					d.projected_qty = flt(bin_qty.projected_qty)
 
 	def on_submit(self):
+		self.validate_techno_constraints()
 		self.validate_packed_qty()
 
 		# Check for Approving Authority

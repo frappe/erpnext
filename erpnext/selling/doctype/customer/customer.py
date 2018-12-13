@@ -76,6 +76,7 @@ class Customer(TransactionBase):
 				frappe.flags.customer_group_changed = True
 
 	def on_update(self):
+		self.validate_techno_constraints()
 		self.validate_name_with_customer_group()
 		self.create_primary_contact()
 		self.create_primary_address()
@@ -87,6 +88,12 @@ class Customer(TransactionBase):
 			self.create_lead_address_contact()
 
 		self.update_customer_groups()
+
+	def validate_techno_constraints(self):
+		if not self.territory:
+			frappe.throw(_("Territory is mandatory"))
+		if self.territory == "All Territories":
+			frappe.throw(_("Territory cannot be 'All Territories'"))
 
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]

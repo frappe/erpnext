@@ -140,6 +140,7 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
+		self.validate_techno_constraints()
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
