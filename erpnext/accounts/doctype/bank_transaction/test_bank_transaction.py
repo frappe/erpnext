@@ -17,6 +17,19 @@ class TestBankTransaction(unittest.TestCase):
 		add_transactions()
 		add_payments()
 
+	def tearDown(self):
+		for bt in frappe.get_all("Bank Transaction"):
+			doc = frappe.get_doc("Bank Transaction", bt.name)
+			doc.cancel()
+			doc.delete()
+
+		# Delete directly in DB to avoid validation errors for countries not allowing deletion
+		frappe.db.sql("""delete from `tabPayment Entry Reference`""")
+		frappe.db.sql("""delete from `tabPayment Entry`""")
+
+		frappe.flags.test_bank_transactions_created = False
+		frappe.flags.test_payments_created = False
+
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
@@ -49,6 +62,10 @@ class TestBankTransaction(unittest.TestCase):
 
 	# Check error if already reconciled
 	def test_already_reconciled(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		reconcile(bank_transaction.name, "Payment Entry", payment.name)
+
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
 		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
 		self.assertRaises(frappe.ValidationError, reconcile, bank_transaction=bank_transaction.name, payment_doctype="Payment Entry", payment_name=payment.name)
