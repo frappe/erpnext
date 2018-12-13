@@ -114,7 +114,7 @@ def check_matching_amount(bank_account, transaction):
 		["docstatus", "=", "1"], ["payment_type", "=", payment_type], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
 
 	payment_field = "jea.debit_in_account_currency" if transaction.credit > 0 else "jea.credit_in_account_currency"
-	journal_entries = frappe.db.sql("""
+	query = """
 		SELECT
 			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
 			je.pay_to_recd_from as party, je.cheque_date as reference_date, {0} as paid_amount
@@ -132,7 +132,8 @@ def check_matching_amount(bank_account, transaction):
 			{0} like %s
 		AND
 			je.docstatus = 1
-	""".format(payment_field), (bank_account, amount), as_dict=True)
+	""".format(payment_field)
+	journal_entries = frappe.db.sql(query, (bank_account, amount), as_dict=True)
 
 	sales_invoices = frappe.db.sql("""
 		SELECT
@@ -249,8 +250,7 @@ def get_matching_transactions_payments(description_matching):
 
 def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
-
-	return frappe.db.sql("""
+	query = """
 		SELECT
 			jea.parent, je.pay_to_recd_from, 
 			if(jea.debit_in_account_currency > 0, jea.debit_in_account_currency, jea.credit_in_account_currency)
@@ -274,17 +274,20 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 		LIMIT
 			%(start)s, %(page_len)s""".format(**{
 				'key': searchfield,
-			}), {
-				'txt': "%%%s%%" % txt,
-				'_txt': txt.replace("%", ""),
-				'start': start,
-				'page_len': page_len,
-				'account': account
-			}
-		)
+			})
+
+	return frappe.db.sql(query,
+		{
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'account': account
+		}
+	)
 
 def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""
+	query = """
 		SELECT
 			sip.parent, si.customer, sip.amount, sip.mode_of_payment
 		FROM
@@ -303,10 +306,13 @@ def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
 		LIMIT
 			%(start)s, %(page_len)s""".format(**{
 				'key': searchfield,
-			}), {
-				'txt': "%%%s%%" % txt,
-				'_txt': txt.replace("%", ""),
-				'start': start,
-				'page_len': page_len
-			}
-		)
+			})
+
+	return frappe.db.sql(query,
+		{
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		}
+	)
