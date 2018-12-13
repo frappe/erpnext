@@ -730,6 +730,43 @@ class TestSalesOrder(unittest.TestCase):
 		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_maintain_product_bundle_items_during_sales_cycle(self):
+		if frappe.flags.test_events_created:
+			return
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		make_item("_Test Service Product Bundle_", {"is_stock_item": 0})
+		make_item("_Test Service Product Bundle Item 1_", {"is_stock_item": 0})
+		make_item("_Test Service Product Bundle Item 2_", {"is_stock_item": 0})
+
+		# NOT CHECKED - CHECKBOX
+		frappe.delete_doc("Product Bundle", "_Test Service Product Bundle_")
+		make_product_bundle("_Test Service Product Bundle_",
+		                    ["_Test Service Product Bundle Item 1_", "_Test Service Product Bundle Item 2_"])
+		so = make_sales_order(item_code="_Test Service Product Bundle_", warehouse=None, do_not_submit=True)
+		so.maintain_packed_items_list = 0
+		so.save()
+		so.submit()
+		frappe.db.sql("""delete from `tabProduct Bundle Item` where parent = '_Test Service Product Bundle_' and idx = 2""")
+		dn = create_dn_against_so(so.name, 1)
+		########################
+
+		# CHECKED - CHECKBOX
+		frappe.delete_doc("Product Bundle", "_Test Service Product Bundle_")
+		make_product_bundle("_Test Service Product Bundle_",
+		                    ["_Test Service Product Bundle Item 1_", "_Test Service Product Bundle Item 2_"])
+		so2 = make_sales_order(item_code="_Test Service Product Bundle_", warehouse=None, do_not_submit=True)
+		so2.maintain_packed_items_list = 1
+		so2.save()
+		so2.submit()
+		frappe.db.sql("""delete from `tabProduct Bundle Item` where parent = '_Test Service Product Bundle_' and idx = 2""")
+		dn2 = create_dn_against_so(so2.name, 1)
+		#####################
+
+		frappe.flags.test_events_created = True
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)

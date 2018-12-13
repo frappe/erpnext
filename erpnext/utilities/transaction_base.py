@@ -168,15 +168,15 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 					if abs(cint(qty) - flt(qty)) > 0.0000001:
 						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)
 
-def update_packing_list_suggested_from_sales_order_invoice(doclist, doctype, name, fieldname):
+def update_packing_list_suggested_from_sales_order_invoice(doclist, doctype, name):
 	# maintain_packed_items_list checkbox field in SO
-	if not cint(frappe.get_value(doctype, name, fieldname)):
+	if not cint(frappe.get_value(doctype, name, "maintain_packed_items_list")):
 		if hasattr(doclist, 'packed_items'):
 			# remove packed_items suggested from sales order
 			del doclist.packed_items[0:]
 
 		# make packed_items from product bundle
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(doclist, doctype, name, fieldname)
+		make_packing_list(doclist, doctype, name, "maintain_packed_items_list")
 
 	return doclist
