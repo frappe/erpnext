@@ -256,6 +256,9 @@ class TestSalarySlip(unittest.TestCase):
 			raise
 		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
 
+		# undelete fixture data
+		frappe.db.rollback()
+
 	def make_holiday_list(self):
 		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
 		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
