@@ -70,12 +70,12 @@ def get_courses(program_name):
 	return courses
 
 @frappe.whitelist()
-def get_next_content(content, content_type, course):
+def get_next_content(current_content, current_content_type, topic):
 	if frappe.session.user == "Guest":
 		return None
-	course_doc = frappe.get_doc("Course", course)
-	content_list = [{'content_type':item.content_type, 'content':item.content} for item in course_doc.get_all_children()]
-	current_index = content_list.index({'content': content, 'content_type': content_type})
+	topic = frappe.get_doc("Topic", topic)
+	content_list = [{'content_type':item.doctype, 'content':item.name} for item in topic.get_contents()]
+	current_index = content_list.index({'content': current_content, 'content_type': current_content_type})
 	try:
 		# print(content_list[current_index + 1])
 		return content_list[current_index + 1]
@@ -166,26 +166,22 @@ def add_activity(course, content_type, content):
 		activity.save()
 		frappe.db.commit()
 
-def get_course_progress(course_enrollment):
-	student_id = utils.get_current_student()
-	student = frappe.get_doc("Student", student_id)
-	course = frappe.get_doc('Course', course_enrollment.course)
-	topics = course.get_topics()
-	progress = []
-	for topic in topics:
-			progress.append(student.get_topic_progress(course_enrollment.name, topic))
-	return progress
-
 @frappe.whitelist()
 def get_course_meta(course_name, program_name):
+	"""
+	Return the porgress of a course in a program as well as the content to continue from.
+		:param course_name: 
+		:param program_name: 
+	"""
 	course_enrollment = utils.get_course_enrollment(course_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
+	student = frappe.get_doc("Student", utils.get_current_student())
 	if not program_enrollment:
 		return None
 	if not course_enrollment:
 		utils.enroll_in_course(course_name, program_name)
-	progress = get_course_progress(course_enrollment)
-	count = sum([act['is_complete'] for act in progress])
+	progress = course_enrollment.get_progress(student)
+	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
 		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count == len(progress):
@@ -198,7 +194,7 @@ def get_course_meta(course_name, program_name):
 def get_program_progress(program_name):
 	import math
 	program = frappe.get_doc("Program", program_name)
-	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
+	program_enrollment = utils.get_program_enrollment(program_name)
 	program_meta = {}
 	if not program_enrollment:
 		return None
@@ -224,15 +220,16 @@ def get_joining_date():
 @frappe.whitelist()
 def get_quiz_progress(program_name):
 	program = frappe.get_doc("Program", program_name)
-	program_enrollment = frappe.get_list("Program Enrollment", filters={'student': utils.get_current_student(), 'program': program_name })[0].name
+	program_enrollment = utils.get_program_enrollment(program_name)
 	quiz_meta = frappe._dict()
+	student = frappe.get_doc("Student", utils.get_current_student())
 	if not program_enrollment:
 		return None
 	else:
 		progress_list = []
 		for course in program.get_all_children():
 			course_enrollment = utils.get_course_enrollment(course.course)
-			meta = get_course_progress(course_enrollment)
+			meta = course_enrollment.get_progress(student)
 			for progress_item in meta:
 				# if progress_item['content_type'] == "Quiz" and progress_item['is_complete'] == True:
 				if progress_item['content_type'] == "Quiz":

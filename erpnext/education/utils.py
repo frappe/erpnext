@@ -65,7 +65,7 @@ def get_current_student():
 	if email in ('Administrator', 'Guest'):
 		return None
 	try:
-		student_id = frappe.db.get_all("Student", {"student_email_id": email}, ["name"])[0].name
+		student_id = frappe.get_all("Student", {"student_email_id": email}, ["name"])[0].name
 		return student_id
 	except IndexError:
 		return None
@@ -78,7 +78,7 @@ def get_program_enrollment(program_name):
 	if not student:
 		return None
 	else:
-		enrollment = frappe.get_list("Program Enrollment", filters={'student':student, 'program': program_name})
+		enrollment = frappe.get_all("Program Enrollment", filters={'student':student, 'program': program_name})
 		if enrollment:
 			return enrollment[0].name
 		else:
@@ -122,14 +122,14 @@ def check_activity_exists(enrollment, content_type, content):
 	return bool(activity)
 
 def check_content_completion(content_name, content_type, enrollment_name):
-	activity = frappe.get_list("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
+	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
 	if activity:
 		return True
 	else:
 		return False
 
 def check_quiz_completion(quiz, enrollment_name):
-	attempts = frappe.get_list("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
+	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
 	status = bool(len(attempts) == quiz.max_attempts)
 	score = None
 	result = None
