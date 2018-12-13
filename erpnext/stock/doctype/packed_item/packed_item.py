@@ -71,14 +71,14 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.projected_qty = flt(bin.get("projected_qty"))
 	packed_items_list.append(pi.idx)
 
-def make_packing_list(doc, doctype=None, name=None, fieldname=None):
+def make_packing_list(doc, source_doctype=None, source_name=None, source_fieldname=None):
 	"""make packing list for Product Bundle item"""
 
 	if doc.get("_action") and doc._action == "update_after_submit": return
 
 	maintain_packed_items_list = 0
-	if doctype is not None and doctype == "Sales Order":
-		maintain_packed_items_list = cint(frappe.get_value(doctype, name, fieldname))
+	if source_doctype is not None and source_doctype == "Sales Order":
+		maintain_packed_items_list = cint(frappe.get_value(source_doctype, source_name, source_fieldname))
 	else:
 		if hasattr(doc, 'items'):
 			if hasattr(doc.get("items")[0], 'against_sales_order'):
@@ -123,6 +123,8 @@ def cleanup_packing_list(doc, parent_items, packed_items_list, maintain_packed_i
 
 	packed_items = doc.get("packed_items")
 	doc.set("packed_items", [])
+	# c is to keep the item starting from 1 in the packing list after save/submit a delivery note created from sales order,
+	# otherwise it will increase through the number of items
 	c = 1
 	for d in packed_items:
 		if d not in delete_list:
