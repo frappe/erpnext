@@ -71,14 +71,14 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.projected_qty = flt(bin.get("projected_qty"))
 	packed_items_list.append(pi.idx)
 
-def make_packing_list(doc, source_doctype=None, source_name=None, source_fieldname=None):
+def make_packing_list(doc, source_doctype=None, source_name=None):
 	"""make packing list for Product Bundle item"""
 
 	if doc.get("_action") and doc._action == "update_after_submit": return
 
 	maintain_packed_items_list = 0
 	if source_doctype is not None and source_doctype == "Sales Order":
-		maintain_packed_items_list = cint(frappe.get_value(source_doctype, source_name, source_fieldname))
+		maintain_packed_items_list = cint(frappe.get_value(source_doctype, source_name, "maintain_packed_items_list"))
 	else:
 		if hasattr(doc, 'items'):
 			if hasattr(doc.get("items")[0], 'against_sales_order'):
