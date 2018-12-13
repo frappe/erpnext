@@ -78,12 +78,17 @@ def get_benefit_pro_rata_ratio_amount(employee, on_date, sal_struct):
 	total_pro_rata_max = 0
 	benefit_amount_total = 0
 	for sal_struct_row in sal_struct.get("earnings"):
-		pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+		try:
+			pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+		except TypeError:
+			# show the error in tests?
+			frappe.throw("Unable to find Salary Component {0}".format(sal_struct_row.salary_component))
 		if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 			total_pro_rata_max += max_benefit_amount
 	if total_pro_rata_max > 0:
 		for sal_struct_row in sal_struct.get("earnings"):
 			pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+
 			if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 				component_max = max_benefit_amount
 				benefit_amount = component_max * sal_struct.max_benefits / total_pro_rata_max

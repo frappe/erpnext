@@ -376,6 +376,14 @@ class SellingController(StockController):
 			if self.get(address_field):
 				self.set(address_display_field, get_address_display(self.get(address_field)))
 
+	def validate_techno_constraints(self):
+		if not self.get("customer_address") and not self.get("shipping_address_name"):
+			frappe.throw(_("Customer Address is mandatory"))
+		if not self.territory:
+			frappe.throw(_("Territory is mandatory"))
+		if self.territory == "All Territories":
+			frappe.throw(_("Territory cannot be 'All Territories'"))
+
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
