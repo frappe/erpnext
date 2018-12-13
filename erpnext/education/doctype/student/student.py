@@ -40,6 +40,9 @@ class Student(Document):
 			frappe.throw(_("Student {0} exist against student applicant {1}").format(student[0][0], self.student_applicant))
 
 	def after_insert(self):
+		self.create_student()
+		
+	def create_student(self):	
 		"""Create a website user for student creation if not already exists"""
 		if self.user == None:
 			student_user = frappe.get_doc({
@@ -56,8 +59,6 @@ class Student(Document):
 			self.user = student_user.name
 			self.save()
 			update_password_link = student_user.reset_password()
-			print(update_password_link)
-
 
 	def update_applicant_status(self):
 		"""Updates Student Applicant status to Admitted"""
@@ -66,7 +67,7 @@ class Student(Document):
 
 	def get_all_course_enrollments(self):
 		"""Returns a list of course enrollments linked with the current student"""
-		course_enrollments = frappe.get_list("Course Enrollment", filters={"student": self.name}, fields=['course', 'name'])
+		course_enrollments = frappe.get_all("Course Enrollment", filters={"student": self.name}, fields=['course', 'name'])
 		if not course_enrollments:
 			return None
 		else:
