@@ -592,7 +592,7 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	target_doc = update_packing_list_suggested_from_sales_order_invoice(target_doc, 'Sales Order', source_name, 'maintain_packed_items_list')
+	target_doc = update_packing_list_suggested_from_sales_order_invoice(target_doc, 'Sales Order', source_name)
 
 	return target_doc
 
@@ -663,7 +663,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 
-	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Order', source_name, 'maintain_packed_items_list')
+	doclist = update_packing_list_suggested_from_sales_order_invoice(doclist, 'Sales Order', source_name)
 
 	return doclist
 
