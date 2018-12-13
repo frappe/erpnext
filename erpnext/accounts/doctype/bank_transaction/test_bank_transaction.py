@@ -41,6 +41,11 @@ class TestBankTransaction(unittest.TestCase):
 		linked_payments = get_linked_payments(bank_transaction.name)
 		self.assertTrue(len(linked_payments)==1)
 
+	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
+	def test_debit_credit_output(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
+		linked_payments = get_linked_payments(bank_transaction.name)
+		self.assertTrue(linked_payments[0].payment_type == "Pay")
 
 def add_transactions():
 	if frappe.flags.test_bank_transactions_created:
@@ -173,8 +178,25 @@ def add_payments():
 	except frappe.DuplicateEntryError:
 		pass
 
+	try:
+		frappe.get_doc({
+			"doctype": "Customer",
+			"customer_group":"All Customer Groups",
+			"customer_type": "Company",
+			"customer_name": "Poore Simon's"
+		}).insert()
+	except frappe.DuplicateEntryError:
+		pass
+
 	pi = make_purchase_invoice(supplier="Poore Simon's", qty=1, rate=3900)
 	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+	pe.reference_no = "Poore Simon's Oct 18"
+	pe.reference_date = "2018-10-28"
+	pe.insert()
+	pe.submit()
+
+	si = create_sales_invoice(customer="Poore Simon's", qty=1, rate=3900)
+	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
 	pe.reference_no = "Poore Simon's Oct 18"
 	pe.reference_date = "2018-10-28"
 	pe.insert()

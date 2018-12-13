@@ -8,6 +8,7 @@ from frappe import _
 import difflib
 from frappe.utils import flt
 from six import iteritems
+from erpnext import get_company_currency
 
 @frappe.whitelist()
 def reconcile(bank_transaction, payment_doctype, payment_name):
@@ -85,13 +86,13 @@ def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, tra
 @frappe.whitelist()
 def get_linked_payments(bank_transaction):
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
-	bank_account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
+	bank_account = frappe.db.get_values("Bank Account", transaction.bank_account, ["account", "company"], as_dict=True)
 
 	# Get all payment entries with a matching amount
-	amount_matching = check_matching_amount(bank_account, transaction)
+	amount_matching = check_matching_amount(bank_account[0].account, bank_account[0].company, transaction)
 
 	# Get some data from payment entries linked to a corresponding bank transaction
-	description_matching = get_matching_descriptions_data(bank_account, transaction)
+	description_matching = get_matching_descriptions_data(bank_account[0].account, transaction)
 
 	if amount_matching:
 		return check_amount_vs_description(amount_matching, description_matching)
@@ -102,22 +103,24 @@ def get_linked_payments(bank_transaction):
 	else:
 		return []
 
-def check_matching_amount(bank_account, transaction):
+def check_matching_amount(bank_account, company, transaction):
 	payments = []
 	amount = transaction.credit if transaction.credit > 0 else transaction.debit
 
 	payment_type = "Receive" if transaction.credit > 0 else "Pay"
 	account_from_to = "paid_to" if transaction.credit > 0 else "paid_from"
 	currency_field = "paid_to_account_currency as currency" if transaction.credit > 0 else "paid_from_account_currency as currency"
+
 	payment_entries = frappe.get_all("Payment Entry", fields=["'Payment Entry' as doctype", "name", "paid_amount", "payment_type", "reference_no", "reference_date",
 		"party", "party_type", "posting_date", "{0}".format(currency_field)], filters=[["paid_amount", "like", "{0}%".format(amount)],
 		["docstatus", "=", "1"], ["payment_type", "=", payment_type], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
 
-	payment_field = "jea.debit_in_account_currency" if transaction.credit > 0 else "jea.credit_in_account_currency"
-	query = """
+	paid_amount_condition = "jea.debit_in_account_currency as paid_amount" if transaction.credit > 0 else "jea.credit_in_account_currency as paid_amount"
+	amount_condition = "AND jea.debit_in_account_currency like %s" if transaction.credit > 0 else "AND jea.credit_in_account_currency like %s"
+	journal_entries = frappe.db.sql("""
 		SELECT
 			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-			je.pay_to_recd_from as party, je.cheque_date as reference_date, {0} as paid_amount
+			je.pay_to_recd_from as party, je.cheque_date as reference_date, %s
 		FROM
 			`tabJournal Entry Account` as jea
 		JOIN
@@ -127,35 +130,49 @@ def check_matching_amount(bank_account, transaction):
 		WHERE
 			(je.clearance_date is null or je.clearance_date='0000-00-00')
 		AND
-			jea.account = %s
-		AND
-			{0} like %s
+			jea.account = '%s' %s
 		AND
 			je.docstatus = 1
-	""".format(payment_field)
-	journal_entries = frappe.db.sql(query, (bank_account, amount), as_dict=True)
+	""" % (paid_amount_condition, bank_account, amount_condition), amount, as_dict=True)
 
-	sales_invoices = frappe.db.sql("""
-		SELECT
-			'Sales Invoice' as doctype, si.name, si.customer as party,
-			si.posting_date, sip.amount as paid_amount
-		FROM
-			`tabSales Invoice Payment` as sip
-		JOIN
-			`tabSales Invoice` as si
-		ON
-			sip.parent = si.name
-		WHERE
-			(sip.clearance_date is null or sip.clearance_date='0000-00-00')
-		AND
-			sip.account = %s
-		AND
-			sip.amount like %s
-		AND
-			si.docstatus = 1
-	""", (bank_account, amount), as_dict=True)
+	if transaction.credit > 0:
+		sales_invoices = frappe.db.sql("""
+			SELECT
+				'Sales Invoice' as doctype, si.name, si.customer as party,
+				si.posting_date, sip.amount as paid_amount
+			FROM
+				`tabSales Invoice Payment` as sip
+			JOIN
+				`tabSales Invoice` as si
+			ON
+				sip.parent = si.name
+			WHERE
+				(sip.clearance_date is null or sip.clearance_date='0000-00-00')
+			AND
+				sip.account = %s
+			AND
+				sip.amount like %s
+			AND
+				si.docstatus = 1
+		""", (bank_account, amount), as_dict=True)
+	else:
+		sales_invoices = []
 
-	for data in [payment_entries, journal_entries, sales_invoices]:
+	if transaction.debit > 0:
+		purchase_invoices = frappe.get_all("Purchase Invoice", fields=["'Purchase Invoice' as doctype", "name", "paid_amount",
+			"supplier as party", "posting_date", "currency"], filters=[["paid_amount", "like", "{0}%".format(amount)],
+			["docstatus", "=", "1"], ["is_paid", "=", "1"], ["ifnull(clearance_date, '')", "=", ""], ["cash_bank_account", "=", "{0}".format(bank_account)]])
+
+		mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account", filters={"default_account": bank_account}, fields=["parent"])]
+		company_currency = get_company_currency(company)
+
+		expense_claims = frappe.get_all("Expense Claim", fields=["'Expense Claim' as doctype", "name", "total_sanctioned_amount as paid_amount",
+			"employee as party", "posting_date", "'{0}' as currency".format(company_currency)], filters=[["total_sanctioned_amount", "like", "{0}%".format(amount)],
+			["docstatus", "=", "1"], ["is_paid", "=", "1"], ["ifnull(clearance_date, '')", "=", ""], ["mode_of_payment", "in", "{0}".format(tuple(mode_of_payments))]])
+	else:
+		purchase_invoices = expense_claims = []
+
+	for data in [payment_entries, journal_entries, sales_invoices, purchase_invoices, expense_claims]:
 		if data:
 			payments.extend(data)
 
@@ -250,7 +267,8 @@ def get_matching_transactions_payments(description_matching):
 
 def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
-	query = """
+
+	return frappe.db.sql("""
 		SELECT
 			jea.parent, je.pay_to_recd_from, 
 			if(jea.debit_in_account_currency > 0, jea.debit_in_account_currency, jea.credit_in_account_currency)
@@ -272,11 +290,7 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, jea.parent), locate(%(_txt)s, jea.parent), 99999),
 			jea.parent
 		LIMIT
-			%(start)s, %(page_len)s""".format(**{
-				'key': searchfield,
-			})
-
-	return frappe.db.sql(query,
+			%(start)s, %(page_len)s""",
 		{
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),
@@ -287,7 +301,7 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
-	query = """
+	return frappe.db.sql("""
 		SELECT
 			sip.parent, si.customer, sip.amount, sip.mode_of_payment
 		FROM
@@ -304,11 +318,7 @@ def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, sip.parent), locate(%(_txt)s, sip.parent), 99999),
 			sip.parent
 		LIMIT
-			%(start)s, %(page_len)s""".format(**{
-				'key': searchfield,
-			})
-
-	return frappe.db.sql(query,
+			%(start)s, %(page_len)s""",
 		{
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),
