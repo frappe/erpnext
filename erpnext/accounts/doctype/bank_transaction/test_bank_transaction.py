@@ -17,6 +17,20 @@ class TestBankTransaction(unittest.TestCase):
 		add_transactions()
 		add_payments()
 
+	def tearDown(self):
+		for bt in frappe.get_all("Bank Transaction"):
+			doc = frappe.get_doc("Bank Transaction", bt.name)
+			doc.cancel()
+			doc.delete()
+
+		for pe in frappe.get_all("Payment Entry"):
+			doc = frappe.get_doc("Payment Entry", pe.name)
+			doc.cancel()
+			doc.delete()
+
+		frappe.flags.test_bank_transactions_created = False
+		frappe.flags.test_payments_created = False
+
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
@@ -47,6 +61,28 @@ class TestBankTransaction(unittest.TestCase):
 		linked_payments = get_linked_payments(bank_transaction.name)
 		self.assertTrue(linked_payments[0].payment_type == "Pay")
 
+	# Check error if already reconciled
+	def test_already_reconciled(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		reconcile(bank_transaction.name, "Payment Entry", payment.name)
+
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		self.assertRaises(frappe.ValidationError, reconcile, bank_transaction=bank_transaction.name, payment_doctype="Payment Entry", payment_name=payment.name)
+
+	# Raise an error if creditor transaction vs creditor payment
+	def test_invalid_creditor_reconcilation(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="I2015000011 VD/000002514 ATWWXXX AT4701345000003510057 Bio"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Conrad Electronic", paid_amount=690))
+		self.assertRaises(frappe.ValidationError, reconcile, bank_transaction=bank_transaction.name, payment_doctype="Payment Entry", payment_name=payment.name)
+
+	# Raise an error if debitor transaction vs debitor payment
+	def test_invalid_debitor_reconcilation(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Fayva", paid_amount=109080))
+		self.assertRaises(frappe.ValidationError, reconcile, bank_transaction=bank_transaction.name, payment_doctype="Payment Entry", payment_name=payment.name)
+
 def add_transactions():
 	if frappe.flags.test_bank_transactions_created:
 		return
@@ -66,7 +102,6 @@ def add_transactions():
 		}).insert()
 	except frappe.DuplicateEntryError:
 		pass
-
 
 	doc = frappe.get_doc({
 		"doctype": "Bank Transaction",
@@ -218,6 +253,5 @@ def add_payments():
 	pe.reference_date = "2018-10-29"
 	pe.insert()
 	pe.submit()
-
 
 	frappe.flags.test_payments_created = True
