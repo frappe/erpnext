@@ -908,6 +908,8 @@ def make_sales_order(customer, source_name, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.discount_percentage = 0
+		target.price_list_rate = 0
+		target.rate = 0
 
 	doc = get_mapped_doc("Purchase Invoice", source_name, {
 		"Purchase Invoice": {
