@@ -56,21 +56,21 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 	add_actions() {
 		const me = this;
 
-		me.page.show_actions_menu()
+		me.page.show_menu()
 
-		me.page.add_action_item(__("Upload a statement"), function() {
+		me.page.add_menu_item(__("Upload a statement"), function() {
 			me.clear_page_content();
 			new erpnext.accounts.bankTransactionUpload(me);
 		}, true)
 
 		if (me.plaid_status==="active") {
-			me.page.add_action_item(__("Synchronize this account"), function() {
+			me.page.add_menu_item(__("Synchronize this account"), function() {
 				me.clear_page_content();
 				new erpnext.accounts.bankTransactionSync(me);
 			}, true)
 		}
 
-		me.page.add_action_item(__("Reconcile this account"), function() {
+		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
 		}, true)
@@ -277,8 +277,6 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 			const row = $('<div class="list-row-container">').data("data", value).appendTo(me.$result).get(0);
 			new erpnext.accounts.ReconciliationRow(row, value);
 		})
-
-		me.parent.page.hide_menu()
 	}
 
 	render_header() {
