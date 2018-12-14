@@ -115,9 +115,7 @@ class Issue(Document):
 				for service in service_level.support_and_resolution:
 					if service.day == "Workday" and service.workday == datetime.now().strftime("%A"):
 						self.response_by, self.time_to_respond = self.set_criticality_and_time(service.response_time, service.response_time_period, support_days)
-						print("++++++++++++++++++++++" + str(self.response_by), str(self.time_to_respond))
 						self.resolution_by, self.time_to_resolve = self.set_criticality_and_time(service.resolution_time, service.resolution_time_period, support_days)
-						print("++++++++++++++++++++++" + str(self.resolution_by), str(self.time_to_resolve))
 						#self.set_criticality_and_time(service.response_time, service.response_time_period, service.resolution_time, service.resolution_time_period, support_days)
 					elif service.day == "Holiday" and service.holiday:
 						holiday_list = frappe.get_doc("Holiday List", ""+ str(service.holiday) +"")
@@ -130,7 +128,6 @@ class Issue(Document):
 	def set_criticality_and_time(self, time=None, time_period=None, support_days=None):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		now_datetime = utils.get_datetime()
-		start_now_datetime = utils.get_datetime()
 		if time_period == 'Hour/s':
 			now_datetime += timedelta(hours=int(time))
 		else:
@@ -168,21 +165,21 @@ class Issue(Document):
 		#print("add_days : " + str(add_day))
 		print("Final Time : ===================================" + str(now_datetime) + "=============" + str(week[(now_datetime.date()).weekday()]))
 		print("-------------------------------------------------------------------------------")
-		calc_supp = self.calculate_support(time=now_datetime, support_days=support_days)
-		print(calc_supp)
+		calc_supp = self.calculate_support1(time=now_datetime, support_days=support_days)
+		print("1. " + str(calc_supp))
+		#calc_supp = self.calculate_support1(time=now_datetime, support_days=support_days)
+		#print("2. " + str(calc_supp))
 		return calc_supp, time_diff_in_hours(calc_supp, utils.now_datetime())
 		
 	def calculate_support1(self, time=None, support_days=None):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-		time_difference_greater = None
-		time_difference_smaller = None
-		day_difference = 0
+		time_difference = 0
 		flag = 0
 		print("*****************************************************************************************")
 		loop = None
-		test = 1
-		while test != 2:#loop != 'set':
+		while loop != 'set':
 			for count, weekday in enumerate(week):
+				print("-------------" + str(weekday))
 				if loop == "set":
 					break
 				elif count >= (time.date()).weekday() and flag == 0:
@@ -191,49 +188,50 @@ class Issue(Document):
 						if weekday == support_day[0]:
 							start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 							end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-							if time.time() < end_time and time.time() > start_time:
-								print("YOULOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+							time += timedelta(seconds=time_difference)
+							if time.time() < end_time and time.time() > start_time and loop != 'set':
+								print("Time in Between")
 								loop = 'set'
-							elif time.time() < start_time:
-								time_difference_smaller = ((datetime.combine(time.date(), start_time) - datetime.combine(time.date(), time.time())).total_seconds())/3600
-								time += timedelta(seconds=time_difference_smaller)
-								print("time_difference_smaller" + str(time_difference_smaller))
+								break
+							elif time.time() < start_time and loop != 'set':
+								time_difference = (datetime.combine(time.date(), start_time) - datetime.combine(time.date(), time.time())).total_seconds()
+								print("time_difference_smaller" + str(time_difference))
 								if weekday == week[len(week)-1]:
 									flag = 1
-							elif time.time() > end_time:
-								time_difference_greater = ((datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), start_time)).total_seconds())/3600
-								time += timedelta(seconds=time_difference_greater)
-								day_difference += 1
+								break
+							elif time.time() > end_time and loop != 'set':
+								time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), start_time)).total_seconds()
 								if weekday == week[(time.date()).weekday()-1]:
 									flag = 1
-								print("time_difference_greater" + str(time_difference_greater))
-					day_difference += 1
-				elif count <= (time.date()).weekday() and flag == 1:
+								print("time_difference_greater" + str(time_difference))
+								break
+					time += timedelta(days=1)
+				elif count <= (time.date()).weekday() and flag == 1 and loop != 'set':
 					print("Elif 2")
 					for support_day in support_days:
-						print(weekday)
 						if weekday == support_day[0]:
 							start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
 							end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-							if time.time() < end_time and time.time() > start_time:
+							time += timedelta(seconds=time_difference)
+							if time.time() < end_time and time.time() > start_time and loop != 'set':
+								print("Time in Between")
 								loop = 'set'
-							elif time.time() < start_time:
-								time_difference_smaller = ((datetime.combine(time.date(), start_time) - datetime.combine(time.date(), time.time())).total_seconds())/3600
-								time += timedelta(seconds=time_difference_smaller)
-								day_difference += 1
-								print("time_difference_smaller" + str(time_difference_smaller))
+								break
+							elif time.time() < start_time and loop != 'set':
+								time_difference = (datetime.combine(time.date(), start_time) - datetime.combine(time.date(), time.time())).total_seconds()
+								time += timedelta(seconds=time_difference)
+								print("time_difference_smaller" + str(time_difference))
 								if weekday == week[(time.date()).weekday()-1]:
 									flag = 1
-							elif time.time() > end_time:
-								time_difference_greater = ((datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), start_time)).total_seconds())/3600
-								time += timedelta(seconds=time_difference_greater)
-								day_difference += 1
+								break
+							elif time.time() > end_time and loop != 'set':
+								time_difference = (datetime.combine(time.date(), time.time()) - datetime.combine(time.date(), start_time)).total_seconds()
 								if weekday == week[(time.date()).weekday()-1]:
 									flag = 1
-								print("time_difference_greater" + str(time_difference_greater))
-					day_difference += 1
-			test = 2
-			time += timedelta(days=day_difference)
+								print("time_difference_greater" + str(time_difference))
+								break
+					time += timedelta(days=1)
+		print(time)
 		return time
 
 	def calculate_support(self, time=None, support_days=None):
