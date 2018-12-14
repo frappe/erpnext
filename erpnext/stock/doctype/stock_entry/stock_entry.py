@@ -641,7 +641,7 @@ class StockEntry(StockController):
 			'image'				: item.image,
 			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account"),
-			'cost_center'			: get_default_cost_center(args, item, item_group_defaults),
+			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults),
 			'qty'				: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
