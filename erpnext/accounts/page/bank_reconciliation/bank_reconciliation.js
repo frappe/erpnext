@@ -22,6 +22,8 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		const me = this;
 
 		me.$main_section = $(`<div class="reconciliation page-main-content"></div>`).appendTo(me.page.main);
+		const empty_state = __("Upload a bank statement, link or reconcile a bank account")
+		me.$main_section.append(`<div class="text-center"><h5 class="text-muted">${empty_state}</h5></div>`)
 
 		me.page.add_field({
 			fieldtype: 'Link',
