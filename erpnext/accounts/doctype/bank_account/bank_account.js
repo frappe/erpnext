@@ -1,4 +1,4 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on('Bank Account', {
@@ -23,6 +23,14 @@ frappe.ui.form.on('Bank Account', {
 		}
 		else {
 			frappe.contacts.render_address_and_contact(frm);
+		}
+
+		if (frm.doc.integration_id) {
+			frm.add_custom_button(__("Unlink external integrations"), function() {
+				frappe.confirm(__("This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"), function() {
+					frm.set_value("integration_id", "")
+				})
+			})
 		}
 	}
 });

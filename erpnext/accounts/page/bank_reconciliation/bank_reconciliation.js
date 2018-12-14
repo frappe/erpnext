@@ -471,7 +471,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			})
 		} else {
 			const empty_data_msg = __("ERPNext could not find any matching payment entry")
-			proposals_wrapper.append(`<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_data_msg}</h5></div>`)
+			proposals_wrapper.append(`<div class="text-center"><h5 class="text-muted">${empty_data_msg}</h5></div>`)
 		}
 
 		$(me.dialog.body).on('click', '.reconciliation-btn', (e) => {
