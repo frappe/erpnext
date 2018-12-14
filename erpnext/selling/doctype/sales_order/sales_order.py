@@ -543,6 +543,8 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.discount_percentage = 0
+		target.price_list_rate = 0
+		target.rate = 0
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
 		target.project = source_parent.project
