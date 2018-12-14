@@ -177,6 +177,9 @@ class DeliveryNote(SellingController):
 					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
+			#Customer Provided parts will have zero valuation rate		
+			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
+				d.allow_zero_valuation_rate = 1
 
 	def validate_warehouse(self):
 		super(DeliveryNote, self).validate_warehouse()

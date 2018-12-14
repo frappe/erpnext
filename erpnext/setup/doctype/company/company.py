@@ -97,7 +97,7 @@ class Company(NestedSet):
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
-			install_post_company_fixtures(self.name)
+			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -363,7 +363,8 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center"]:
+	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()
 

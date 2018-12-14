@@ -50,7 +50,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) > 0) {
+			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
 				cur_frm.add_custom_button(__('Sales Order'),
 					cur_frm.cscript['Make Sales Order'], __("Make"));
 			}
@@ -206,7 +206,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 
 }
 
-frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
+frappe.ui.form.on("Quotation Item", "items_on_form_rendered", "packed_items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
 })
 

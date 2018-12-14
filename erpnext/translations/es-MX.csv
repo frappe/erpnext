@@ -5,7 +5,7 @@ DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudian
 DocType: Delivery Note,% Installed,% Instalado
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +55,The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.,La cantidad de {0} establecida en esta solicitud de pago es diferente de la cantidad calculada para todos los planes de pago: {1}. Verifique que esto sea correcto antes de enviar el documento.
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +549,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +550,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Loyalty Point Entry,Loyalty Point Entry,Entrada de Punto de Lealtad
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +372,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +76,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
@@ -14,7 +14,7 @@ apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batc
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +197,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +58,Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +48,The payment gateway account in plan {0} is different from the payment gateway account in this payment request,La cuenta para pasarela de pago en el plan {0} es diferente de la cuenta de pasarela de pago en en esta petición de pago
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +448,Show Salary Slip,Mostrar Recibo de Nómina
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +488,Show Salary Slip,Mostrar Recibo de Nómina
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +328,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
@@ -68,7 +68,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +72,Gross Purchase Amount is 
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
 DocType: Program Enrollment,School House,Casa Escuela
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +288,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +289,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +42,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Ejemplo: ABCD. #####. Si se establece una serie y no se menciona el número de lote en las transacciones, se creará un número de lote automático basado en esta serie. Si siempre quiere mencionar explícitamente el número de lote para este artículo, déjelo en blanco. Nota: esta configuración tendrá prioridad sobre el Prefijo de denominación de serie en Configuración de Inventario."
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
@@ -76,9 +76,9 @@ DocType: Education Settings,"For Course based Student Group, the Course will be 
 DocType: Leave Policy Detail,Leave Policy Detail,Detalles de política de Licencia
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
 DocType: Subscription Plan,Payment Plan,Plan de pago
-apps/erpnext/erpnext/stock/doctype/item/item.py +711,Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,No se pueden cambiar las propiedades de Variantes después de la transacción de inventario. Deberá crear un nuevo artículo para hacer esto.
+apps/erpnext/erpnext/stock/doctype/item/item.py +727,Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,No se pueden cambiar las propiedades de Variantes después de la transacción de inventario. Deberá crear un nuevo artículo para hacer esto.
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js +98,Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,La cantidad de existencias para comenzar el procedimiento no está disponible en el almacén. ¿Desea registrar una transferencia de inventario?
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +259,"Company, Payment Account, From Date and To Date is mandatory","Empresa, cuenta de pago, fecha de inicio y fecha final son obligatorios"
 DocType: Leave Encashment,Leave Encashment,Cobro de Permiso
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1128,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1210,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
 DocType: Salary Structure,Leave Encashment Amount Per Day,Cantidad por día para pago por Ausencia

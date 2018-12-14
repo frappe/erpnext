@@ -115,6 +115,8 @@ frappe.ui.form.on("Item", {
 		['is_stock_item', 'has_serial_no', 'has_batch_no'].forEach((fieldname) => {
 			frm.set_df_property(fieldname, 'read_only', stock_exists);
 		});
+
+		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
 	validate: function(frm){
@@ -123,6 +125,10 @@ frappe.ui.form.on("Item", {
 
 	image: function() {
 		refresh_field("image_view");
+	},
+	
+	is_customer_provided_item: function(frm) {
+		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
 	is_fixed_asset: function(frm) {
@@ -513,7 +519,7 @@ $.extend(erpnext.item, {
 							fields: ["attribute_value"],
 							limit_start: 0,
 							limit_page_length: 500,
-							parent: "Item",
+							parent: "Item Attribute",
 							order_by: "idx"
 						}
 					}).then((r) => {
@@ -651,7 +657,7 @@ $.extend(erpnext.item, {
 					frappe.call({
 						method:"erpnext.stock.doctype.item.item.get_item_attribute",
 						args:{
-							parent: i,
+							parent: "Item Attribute",
 							attribute_value: term
 						},
 						callback: function(r) {

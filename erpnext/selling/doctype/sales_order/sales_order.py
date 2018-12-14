@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
 from frappe import _
+from six import string_types
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
@@ -17,6 +18,7 @@ from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -30,7 +32,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-
 		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
@@ -219,8 +220,9 @@ class SalesOrder(SellingController):
 			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
 
 		if submit_dn:
+			submit_dn = [get_link_to_form("Delivery Note", dn) for dn in submit_dn]
 			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_dn)))
+				.format(", ".join(submit_dn)))
 
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
@@ -229,8 +231,9 @@ class SalesOrder(SellingController):
 			self.name)
 
 		if submit_rv:
+			submit_rv = [get_link_to_form("Sales Invoice", si) for si in submit_rv]
 			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_rv)))
+				.format(", ".join(submit_rv)))
 
 		#check maintenance schedule
 		submit_ms = frappe.db.sql_list("""
@@ -239,8 +242,9 @@ class SalesOrder(SellingController):
 			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
 
 		if submit_ms:
+			submit_ms = [get_link_to_form("Maintenance Schedule", ms) for ms in submit_ms]
 			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_ms)))
+				.format(", ".join(submit_ms)))
 
 		# check maintenance visit
 		submit_mv = frappe.db.sql_list("""
@@ -249,8 +253,9 @@ class SalesOrder(SellingController):
 			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
 
 		if submit_mv:
+			submit_mv = [get_link_to_form("Maintenance Visit", mv) for mv in submit_mv]
 			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_mv)))
+				.format(", ".join(submit_mv)))
 
 		# check work order
 		pro_order = frappe.db.sql_list("""
@@ -259,8 +264,9 @@ class SalesOrder(SellingController):
 			where sales_order = %s and docstatus = 1""", self.name)
 
 		if pro_order:
+			pro_order = [get_link_to_form("Work Order", po) for po in pro_order]
 			frappe.throw(_("Work Order {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(pro_order)))
+				.format(", ".join(pro_order)))
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
@@ -340,9 +346,11 @@ class SalesOrder(SellingController):
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-
-		self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
-			update_modified=False)
+		
+		if tot_qty != 0:
+			self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
+				update_modified=False)
+		
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -358,7 +366,7 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def get_work_order_items(self):
+	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
 
@@ -367,8 +375,13 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
+					if not for_raw_material_request:
+						total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
 							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+						pending_qty = stock_qty - total_work_order_qty
+					else:
+						pending_qty = stock_qty
+
 					if pending_qty:
 						items.append(dict(
 							name= i.name,
@@ -376,6 +389,7 @@ class SalesOrder(SellingController):
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
+							required_qty = pending_qty if for_raw_material_request else 0,
 							sales_order_item = i.name
 						))
 		return items
@@ -838,7 +852,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 				or supplier_name like %(txt)s)
 			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
 			and name not in (select supplier from `tabPurchase Order` po inner join `tabPurchase Order Item` poi
-			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)			
+			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
@@ -894,3 +908,44 @@ def get_default_bom_item(item_code):
 	bom = bom[0].name if bom else None
 
 	return bom
+
+@frappe.whitelist()
+def make_raw_material_request(items, company, sales_order, project=None):
+	if not frappe.has_permission("Sales Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	if isinstance(items, string_types):
+		items = frappe._dict(json.loads(items))
+
+	for item in items.get('items'):
+		item["include_exploded_items"] = items.get('include_exploded_items')
+		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
+
+	raw_materials = get_items_for_material_requests(items, company)
+	if not raw_materials:
+		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
+
+	material_request = frappe.new_doc('Material Request')
+	material_request.update(dict(
+		doctype = 'Material Request',
+		transaction_date = nowdate(),
+		company = company,
+		requested_by = frappe.session.user,
+		material_request_type = 'Purchase'
+	))
+	for item in raw_materials:
+		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
+		schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+		material_request.append('items', {
+		'item_code': item.get('item_code'),
+		'qty': item.get('quantity'),
+		'schedule_date': schedule_date,
+		'warehouse': item.get('warehouse'),
+		'sales_order': sales_order,
+		'project': project
+		})
+	material_request.insert()
+	material_request.flags.ignore_permissions = 1
+	material_request.run_method("set_missing_values")
+	material_request.submit()
+	return material_request

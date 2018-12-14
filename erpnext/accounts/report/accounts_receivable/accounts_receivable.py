@@ -89,33 +89,58 @@ class ReceivablePayableReport(object):
 					"width": 120
 				})
 
-		columns.append({
+		columns += [
+		{
 			"fieldname": "currency",
 			"label": _("Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
 			"width": 100
-		})
-
-		columns += [
-			_("PDC/LC Date") + ":Date:110",
-			_("PDC/LC Ref") + ":Data:110",
-			_("PDC/LC Amount") + ":Currency/currency:130",
-			_("Remaining Balance") + ":Currency/currency:130"
-		]
+		},
+		{
+			"fieldname": "pdc/lc_date",
+			"label": _("PDC/LC Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "pdc/lc_ref",
+			"label": _("PDC/LC Ref"),
+			"fieldtype": "Data",
+			"width": 110
+		},
+		{
+			"fieldname": "pdc/lc_amount",
+			"label": _("PDC/LC Amount"),
+			"fieldtype": "Currency",
+			"options": "Currency",
+			"width": 130
+		},
+		{
+			"fieldname": "remaining_balance",
+			"label": _("Remaining Balance"),
+			"fieldtype": "Currency",
+			"options": "Currency",
+			"width": 130
+		}]
 
 		if args.get('party_type') == 'Customer':
-			columns.append({
-				"label": _("Customer LPO"),
-				"fieldtype": "Data",
-				"fieldname": "po_no",
-				"width": 100,
-			})
-			columns += [_("Delivery Note") + ":Data:100"]
-		if args.get("party_type") == "Customer":
 			columns += [
+				{
+					"label": _("Customer LPO"),
+					"fieldtype": "Data",
+					"fieldname": "po_no",
+					"width": 100,
+				},
+				_("Delivery Note") + ":Data:100",
 				_("Territory") + ":Link/Territory:80",
-				_("Customer Group") + ":Link/Customer Group:120"
+				_("Customer Group") + ":Link/Customer Group:120",
+				{
+					"label": _("Sales Person"),
+					"fieldtype": "Data",
+					"fieldname": "sales_person",
+					"width": 120,
+				}
 			]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Group") + ":Link/Supplier Group:80"]
@@ -140,7 +165,6 @@ class ReceivablePayableReport(object):
 
 		data = []
 		pdc_details = get_pdc_details(args.get("party_type"), self.filters.report_date)
-
 		gl_entries_data = self.get_entries_till(self.filters.report_date, args.get("party_type"))
 
 		if gl_entries_data:
@@ -219,7 +243,8 @@ class ReceivablePayableReport(object):
 
 					# customer territory / supplier group
 					if args.get("party_type") == "Customer":
-						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
+						row += [self.get_territory(gle.party), self.get_customer_group(gle.party),
+							voucher_details.get(gle.voucher_no, {}).get("sales_person")]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_group(gle.party)]
 
@@ -376,9 +401,14 @@ class ReceivablePayableReport(object):
 				values.append(self.filters.get("sales_partner"))
 
 			if self.filters.get("sales_person"):
-				conditions.append("""party in (select parent
-					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
-				values.append(self.filters.get("sales_person"))
+				lft, rgt = frappe.db.get_value("Sales Person",
+					self.filters.get("sales_person"), ["lft", "rgt"])
+
+				conditions.append("""exists(select name from `tabSales Team` steam where
+					steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
+					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
+						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
+						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
 		if party_type_field=="supplier":
 			if self.filters.get("supplier_group"):
@@ -464,7 +494,6 @@ def get_pdc_details(party_type, report_date):
 			and pent.party_type = %s
 			group by pent.party, pref.reference_name""", (report_date, party_type), as_dict=1):
 			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
-
 	if scrub(party_type):
 		amount_field = ("jea.debit_in_account_currency"
 			if party_type == 'Supplier' else "jea.credit_in_account_currency")
@@ -532,8 +561,12 @@ def get_voucher_details(party_type, voucher_nos, dn_details):
 	voucher_details = frappe._dict()
 
 	if party_type == "Customer":
-		for si in frappe.db.sql("""select name, due_date, po_no
-			from `tabSales Invoice` where docstatus=1 and name in (%s)
+		for si in frappe.db.sql("""
+			select inv.name, inv.due_date, inv.po_no, GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person
+			from `tabSales Invoice` inv
+			left join `tabSales Team` steam on steam.parent = inv.name and steam.parenttype = 'Sales Invoice'
+			where inv.docstatus=1 and inv.name in (%s)
+			group by inv.name
 			""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
 				si['delivery_note'] = dn_details.get(si.name)
 				voucher_details.setdefault(si.name, si)
