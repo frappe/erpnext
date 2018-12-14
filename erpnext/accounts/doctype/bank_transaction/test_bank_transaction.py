@@ -82,6 +82,15 @@ class TestBankTransaction(unittest.TestCase):
 		payment = frappe.get_doc("Payment Entry", dict(party="Fayva", paid_amount=109080))
 		self.assertRaises(frappe.ValidationError, reconcile, bank_transaction=bank_transaction.name, payment_doctype="Payment Entry", payment_name=payment.name)
 
+	# Raise an error if debitor transaction vs debitor payment
+	def test_clear_sales_invoice(self):
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="I2015000011 VD/000002514 ATWWXXX AT4701345000003510057 Bio"))
+		payment = frappe.get_doc("Sales Invoice", dict(customer="Fayva", status=["=", "Paid"]))
+		reconcile(bank_transaction.name, "Sales Invoice", payment.name)
+
+		self.assertEqual(frappe.db.get_value("Bank Transaction", bank_transaction.name, "unallocated_amount"), 0)
+		self.assertTrue(frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date") is not None)
+
 def add_transactions():
 	if frappe.flags.test_bank_transactions_created:
 		return
@@ -92,7 +101,10 @@ def add_transactions():
 			"doctype": "Bank",
 			"bank_name":"Citi Bank",
 		}).insert()
+	except frappe.DuplicateEntryError:
+		pass
 
+	try:
 		frappe.get_doc({
 			"doctype": "Bank Account",
 			"account_name":"Checking Account",
@@ -252,5 +264,23 @@ def add_payments():
 	pe.reference_date = "2018-10-29"
 	pe.insert()
 	pe.submit()
+
+	company = frappe.db.get_single_value('Global Defaults', 'default_company')
+	frappe.get_doc({
+		"doctype": "Mode of Payment",
+		"name": "Cash"
+	}).append("accounts", {
+		"company": company,
+		"default_account": "_Test Bank - _TC"
+	}).save()
+	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_submit=1)
+	si.is_pos = 1
+	si.append("payments", {
+		"mode_of_payment": "Cash",
+		"account": "_Test Bank - _TC",
+		"amount": 109080
+	})
+	si.save()
+	si.submit()
 
 	frappe.flags.test_payments_created = True

@@ -14,7 +14,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		this.parent = wrapper;
 		this.page = this.parent.page;
 
-		this.add_plaid_btn();
+		this.check_plaid_status();
 		this.make();
 	}
 
@@ -23,7 +23,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 
 		me.$main_section = $(`<div class="reconciliation page-main-content"></div>`).appendTo(me.page.main);
 		const empty_state = __("Upload a bank statement, link or reconcile a bank account")
-		me.$main_section.append(`<div class="text-center"><h5 class="text-muted">${empty_state}</h5></div>`)
+		me.$main_section.append(`<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 
 		me.page.add_field({
 			fieldtype: 'Link',
@@ -42,14 +42,11 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		})
 	}
 
-	add_plaid_btn() {
+	check_plaid_status() {
 		const me = this;
 		frappe.db.get_value("Plaid Settings", "Plaid Settings", "enabled", (r) => {
 			if (r && r.enabled == "1") {
 				me.plaid_status = "active"
-				me.parent.page.add_inner_button(__('Link a new bank account'), function() {
-					new erpnext.accounts.plaidLink(this)
-				})
 			} else {
 				me.plaid_status = "inactive"
 			}
@@ -169,7 +166,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		).then((result) => {
 			let result_title = __("{0} bank transaction(s) created", [result])
 			let result_msg = `
-				<div class="text-center">
+				<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;">
 					<h5 class="text-muted">${result_title}</h5>
 				</div>`
 			me.parent.page.clear_primary_action();
@@ -210,105 +207,13 @@ erpnext.accounts.bankTransactionSync = class bankTransactionSync {
 			.then((result) => {
 				let result_title = (result.length > 0) ? __("{0} bank transaction(s) created", [result.length]) : __("This bank account is already synchronized")
 				let result_msg = `
-					<div class="text-center">
+					<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;">
 						<h5 class="text-muted">${result_title}</h5>
 					</div>`
 				this.parent.$main_section.append(result_msg)
 				frappe.show_alert({message:__("Bank account '{0}' has been synchronized", [me.parent.bank_account]), indicator:'green'});
 			})
 		})
-	}
-}
-
-erpnext.accounts.plaidLink = class plaidLink {
-	constructor(parent) {
-		this.parent = parent;
-		this.product = ["transactions", "auth"];
-		this.plaidUrl = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
-		this.init_config();
-	}
-
-	init_config() {
-		const me = this;
-		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
-		.then(result => {
-			if (result !== "disabled") {
-				me.plaid_env = result.plaid_env;
-				me.plaid_public_key = result.plaid_public_key;
-				me.client_name = result.client_name;
-				me.init_plaid()
-			}
-		})
-	}
-
-	init_plaid() {
-		const me = this;
-		me.loadScript(me.plaidUrl)
-			.then(() => {
-				me.onScriptLoaded(me);
-			})
-			.then(() => {
-				if (me.linkHandler) {
-					me.linkHandler.open();
-				}
-			})
-			.catch((error) => {
-				me.onScriptError(error)
-			})
-	}
-
-	loadScript(src) {
-		return new Promise(function (resolve, reject) {
-			if (document.querySelector('script[src="' + src + '"]')) {
-				resolve()
-				return
-			}
-			const el = document.createElement('script')
-			el.type = 'text/javascript'
-			el.async = true
-			el.src = src
-			el.addEventListener('load', resolve)
-			el.addEventListener('error', reject)
-			el.addEventListener('abort', reject)
-			document.head.appendChild(el)
-		})
-	}
-
-	onScriptLoaded(me) {
-		me.linkHandler = window.Plaid.create({
-			clientName: me.client_name,
-			env: me.plaid_env,
-			key: me.plaid_public_key,
-			onSuccess: me.plaid_success,
-			product: me.product
-		})
-	}
-
-	onScriptError(error) {
-		console.error('There was an issue loading the link-initialize.js script');
-		console.log(error);
-	}
-
-	plaid_success(token, response) {
-		const me = this;
-
-		frappe.prompt({
-			fieldtype:"Link", 
-			options: "Company",
-			label:__("Company"),
-			fieldname:"company",
-			reqd:1
-		}, (data) => {
-			me.company = data.company;
-			frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_institution', {token: token, response: response})
-			.then((result) => {
-				frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts', {response: response,
-					bank: result, company: me.company})
-			})
-			.then((result) => {
-				frappe.show_alert({message:__("Bank accounts added"), indicator:'green'});
-			})
-		}, __("Select a company"), __("Continue"));
 	}
 }
 
@@ -568,7 +473,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			})
 		} else {
 			const empty_data_msg = __("ERPNext could not find any matching payment entry")
-			proposals_wrapper.append(`<div class="text-center"><h5 class="text-muted">${empty_data_msg}</h5></div>`)
+			proposals_wrapper.append(`<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_data_msg}</h5></div>`)
 		}
 
 		$(me.dialog.body).on('click', '.reconciliation-btn', (e) => {
