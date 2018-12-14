@@ -106,8 +106,10 @@
 			"start": "date",
 			"end": "date",
 			"id": "name",
+			"title" : "title",
 			"docstatus": 1,
-			"description":"name"
+			"description":"title"
+			
 		},
 		"get_events_method": "erpnext.hr.doctype.shift_assignment.shift_assignment.get_events"
 	},
