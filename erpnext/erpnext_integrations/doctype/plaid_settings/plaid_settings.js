@@ -45,7 +45,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 			})
 			.catch((error) => {
 				me.onScriptError(error);
-			})
+			});
 	}
 
 	loadScript(src) {
