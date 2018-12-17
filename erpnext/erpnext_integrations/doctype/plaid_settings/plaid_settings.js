@@ -62,7 +62,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 			el.addEventListener('error', reject);
 			el.addEventListener('abort', reject);
 			document.head.appendChild(el);
-		})
+		});
 	}
 
 	onScriptLoaded(me) {
@@ -72,7 +72,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 			key: me.plaid_public_key,
 			onSuccess: me.plaid_success,
 			product: me.product
-		})
+		});
 	}
 
 	onScriptError(error) {
