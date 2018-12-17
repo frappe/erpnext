@@ -67,11 +67,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Issue Criticality",
-					"description": _("Issue Criticality."),
-				},
-				{
-					"type": "doctype",
 					"name": "Service Level",
 					"description": _("Service Level."),
 				},
