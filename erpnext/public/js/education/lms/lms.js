@@ -24,7 +24,7 @@ frappe.ready(() => {
 		data: store,
 		methods: {
 			updateEnrolledPrograms() {
-				if(this.isLogin) {
+				if(this.checkLogin()) {
 					lms.call("get_program_enrollments").then(data => {
 						this.enrolledPrograms = data
 					});
@@ -32,7 +32,7 @@ frappe.ready(() => {
 				}
 			},
 			updateEnrolledCourses() {
-				if(this.isLogin) {
+				if(this.checkLogin()) {
 					lms.call("get_all_course_enrollments").then(data => {
 						this.enrolledCourses = data
 					})
@@ -40,15 +40,7 @@ frappe.ready(() => {
 				}
 			},
 			checkLogin() {
-				if(frappe.session.user === "Guest"){
-					if (lms.debug) console.log('No Session')
-					this.isLogin = false
-				}
-				else {
-					if (lms.debug) console.log('Current User: ', frappe.session.user)
-					this.isLogin = true
-				}
-				return this.isLogin
+				return frappe.is_user_logged_in()
 			},
 			updateState() {
 				this.checkLogin()
@@ -81,7 +73,7 @@ frappe.ready(() => {
 		template: "<lms-root/>",
 		components: { lmsRoot },
 		mounted() {
-			if(lms.store.isLogin) lms.store.updateState()
+			lms.store.updateState()
 		}
 	});
 	lms.view.$router.afterEach((to, from) => {
