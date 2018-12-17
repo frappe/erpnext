@@ -28,9 +28,9 @@ frappe.ui.form.on('Bank Account', {
 		if (frm.doc.integration_id) {
 			frm.add_custom_button(__("Unlink external integrations"), function() {
 				frappe.confirm(__("This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"), function() {
-					frm.set_value("integration_id", "")
+					frm.set_value("integration_id", "");
 				})
-			})
+			});
 		}
 	}
 });

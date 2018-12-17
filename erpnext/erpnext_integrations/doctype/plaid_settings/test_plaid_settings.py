@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import plaid_configuration, add_account_type, add_account_subtype, new_bank_transaction, get_transactions, add_bank_accounts
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import plaid_configuration, add_account_type, add_account_subtype, new_bank_transaction, add_bank_accounts
 import json
 from frappe.utils.response import json_handler
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
@@ -153,10 +153,3 @@ class TestPlaidSettings(unittest.TestCase):
 		new_bank_transaction(transactions)
 
 		self.assertTrue(len(frappe.get_all("Bank Transaction")) == 1)
-
-
-	
-
-
-
-	
