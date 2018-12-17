@@ -189,32 +189,21 @@ class ReceivablePayableReport(object):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle,self.filters.report_date, self.dr_or_cr, return_entries)
 				if abs(outstanding_amount) > 0.1/10**self.currency_precision:
-					pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
 						for d in self.payment_term_map.get(gle.voucher_no):
+							# Allocate payment amount based on payment terms(FIFO order)
 							payment_amount, d.payment_amount = self.allocate_based_on_fifo(payment_amount, d.payment_term_amount)
 
 							term_outstanding_amount = d.payment_term_amount - d.payment_amount
+
+							# Allocate credit note based on payment terms(FIFO order)
 							credit_note_amount, d.credit_note_amount = self.allocate_based_on_fifo(credit_note_amount, term_outstanding_amount)
 
 							term_outstanding_amount -= d.credit_note_amount
 
 							row_outstanding = term_outstanding_amount
-							d.pdc_details = []
-							for pdc in pdc_list:
-								if row_outstanding <= pdc.pdc_amount:
-									d.pdc_amount += row_outstanding
-									pdc.pdc_amount -= row_outstanding
-									if row_outstanding and d.pdc_ref and d.pdc_date:
-										d.pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
-									row_outstanding = 0
-
-								else:
-									d.pdc_amount = pdc.pdc_amount
-									if pdc.pdc_amount and d.pdc_ref and d.pdc_date:
-										d.pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
-									pdc.pdc_amount = 0
-									row_outstanding -= d.pdc_amount
+							# Allocate PDC based on payment terms(FIFO order)
+							d.pdc_details, d.pdc_amount = self.allocate_pdc_amount_in_fifo(gle, row_outstanding)
 
 							if term_outstanding_amount > 0:
 								row = self.prepare_row(party_naming_by, args, gle, term_outstanding_amount,
@@ -226,29 +215,52 @@ class ReceivablePayableReport(object):
 							outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 							gle,self.filters.report_date, self.dr_or_cr, return_entries)
 
-							pdc_amount = 0
-							pdc_details = []
-							for d in pdc_list:
-								pdc_amount += flt(d.pdc_amount)
-								if pdc_amount and d.pdc_ref and d.pdc_date:
-									pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
-
-							row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
-								credit_note_amount, pdc_amount=pdc_amount, pdc_details=pdc_details)
+							row = self.prepare_row_without_payment_terms(party_naming_by, args, gle, outstanding_amount,
+								credit_note_amount)
 							data.append(row)
 
 					else:
-						pdc_amount = 0
-						pdc_details = []
-						for d in pdc_list:
-							pdc_amount += flt(d.pdc_amount)
-							if pdc_amount and d.pdc_ref and d.pdc_date:
-								pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
-
-						row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
-							credit_note_amount, pdc_amount=pdc_amount, pdc_details=pdc_details)
+						row = self.prepare_row_without_payment_terms(party_naming_by, args, gle, outstanding_amount,
+							credit_note_amount)
 						data.append(row)
 		return data
+
+	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
+		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
+
+		pdc_details = []
+		pdc_amount = 0
+		for pdc in pdc_list:
+			if row_outstanding <= pdc.pdc_amount:
+				pdc_amount += row_outstanding
+				pdc.pdc_amount -= row_outstanding
+				if row_outstanding and pdc.pdc_ref and pdc.pdc_date:
+					pdc_details.append(cstr(pdc.pdc_ref) + "/" + formatdate(pdc.pdc_date))
+				row_outstanding = 0
+
+			else:
+				pdc_amount = pdc.pdc_amount
+				if pdc.pdc_amount and pdc.pdc_ref and pdc.pdc_date:
+					pdc_details.append(cstr(pdc.pdc_ref) + "/" + formatdate(pdc.pdc_date))
+				pdc.pdc_amount = 0
+				row_outstanding -= pdc_amount
+
+		return pdc_details, pdc_amount
+
+	def prepare_row_without_payment_terms(self, party_naming_by, args, gle, outstanding_amount, credit_note_amount):
+		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
+		pdc_amount = 0
+		pdc_details = []
+		for d in pdc_list:
+			pdc_amount += flt(d.pdc_amount)
+			if pdc_amount and d.pdc_ref and d.pdc_date:
+				pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
+
+		row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
+			credit_note_amount, pdc_amount=pdc_amount, pdc_details=pdc_details)
+
+		return row
+
 
 	def allocate_based_on_fifo(self, total_amount, row_amount):
 		allocated_amount = 0
