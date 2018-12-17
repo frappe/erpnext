@@ -221,6 +221,22 @@ class ReceivablePayableReport(object):
 									d.credit_note_amount, d.due_date, d.payment_amount , d.payment_term_amount,
 									d.description, d.pdc_amount, d.pdc_details)
 								data.append(row)
+
+						if credit_note_amount:
+							outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
+							gle,self.filters.report_date, self.dr_or_cr, return_entries)
+
+							pdc_amount = 0
+							pdc_details = []
+							for d in pdc_list:
+								pdc_amount += flt(d.pdc_amount)
+								if pdc_amount and d.pdc_ref and d.pdc_date:
+									pdc_details.append(cstr(d.pdc_ref) + "/" + formatdate(d.pdc_date))
+
+							row = self.prepare_row(party_naming_by, args, gle, outstanding_amount,
+								credit_note_amount, pdc_amount=pdc_amount, pdc_details=pdc_details)
+							data.append(row)
+
 					else:
 						pdc_amount = 0
 						pdc_details = []
