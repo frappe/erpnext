@@ -29,7 +29,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 				} else {
 					frappe.throw(__("Please save your document before adding a new account"));
 				}
-			})
+			});
 	}
 
 	init_plaid() {
