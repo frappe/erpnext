@@ -120,10 +120,10 @@ class Issue(Document):
 					holidays.append(holiday.holiday_date)
 				for service in service_level.support_and_resolution:
 					if service.workday == datetime.now().strftime("%A"):
-						self.response_by, self.time_to_respond = self.set_criticality_and_time(time=service.response_time, time_period=service.response_time_period, support_days=support_days, holidays=holidays)
-						self.resolution_by, self.time_to_resolve = self.set_criticality_and_time(time=service.resolution_time, time_period=service.resolution_time_period, support_days=support_days, holidays=holidays)
+						self.response_by, self.time_to_respond = self.calculate_support_day(time=service.response_time, time_period=service.response_time_period, support_days=support_days, holidays=holidays)
+						self.resolution_by, self.time_to_resolve = self.calculate_support_day(time=service.resolution_time, time_period=service.resolution_time_period, support_days=support_days, holidays=holidays)
 
-	def set_criticality_and_time(self, time=None, time_period=None, support_days=None, holidays=None):
+	def calculate_support_day(self, time=None, time_period=None, support_days=None, holidays=None):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		now_datetime, add_day, flag, hours = utils.get_datetime(), 0, 0, None
 
@@ -157,12 +157,11 @@ class Issue(Document):
 		print("-------------------------------------------------------------------------------")
 		print("Final Time : ===================================" + str(now_datetime) + "=============" + str(week[(now_datetime.date()).weekday()]))
 		print("-------------------------------------------------------------------------------")
-		support = self.calculate_support(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays)
+		support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, time_diff_in_hours(support, utils.now_datetime())
 		
-	def calculate_support(self, time=None, hours=None, support_days=None, holidays=None):
-		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-		time_difference, flag, loop = 0, 0, None
+	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
+		time_difference, flag, loop, time_add = 0, 0, None, 0
 		
 		print("*****************************************************************************************")
 		if hours:
@@ -182,6 +181,9 @@ class Issue(Document):
 								time += timedelta(seconds=time_difference)
 
 							if time.time() <= end_time and time.time() >= start_time:
+								if hours and time_add != 1:
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								if time.date() in holidays:
@@ -189,15 +191,24 @@ class Issue(Document):
 								loop = 'set'
 								break
 							elif time.time() <= start_time:
+								if hours and time_add != 1:
+									time = datetime.combine(time.date(), start_time)
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								else:
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds()
 									print("time_difference_smaller" + str(time_difference/3600))
+									print(support_days[support_days.index(support_day)][2])
 								if time.date() in holidays:
 									continue
 								print("*** " + str(time))
 							elif time.time() >= end_time:
+								if hours and time_add != 1:
+									time = datetime.combine(time.date()+timedelta(days=1), start_time)
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								else:
@@ -231,6 +242,9 @@ class Issue(Document):
 								time += timedelta(seconds=time_difference)
 
 							if time.time() <= end_time and time.time() >= start_time:
+								if hours and time_add != 1:
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								if time.date() in holidays:
@@ -239,20 +253,33 @@ class Issue(Document):
 								break
 
 							elif time.time() <= start_time:
+								if hours and time_add != 1:
+									time = datetime.combine(time.date(), start_time)
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								else:
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds()
 									print("time_difference_smaller" + str(time_difference/3600))
+									print(support_days[support_days.index(support_day)][2])
 								print("*** " + str(time))
+								if time.date() in holidays:
+									continue
 
 							elif time.time() >= end_time:
+								if hours and time_add != 1:
+									time = datetime.combine(time.date()+timedelta(days=1), start_time)
+									time += timedelta(hours=hours)
+									time_add = 1
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								else:
 									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
 									print("time_difference_greater" + str(time_difference/3600))
 								print("*** " + str(time))
+								if time.date() in holidays:
+									continue
 								
 							if weekday == week[(time.date()).weekday()-1]:
 								flag = 0
@@ -265,14 +292,7 @@ class Issue(Document):
 						time += timedelta(days=1)
 					print(time)
 		print("*****************************************************************************************")		
-		
-		issue_criticality = frappe.get_list("Issue Criticality")
-		for criticality in issue_criticality:
-			criticality_doc = frappe.get_doc("Issue Criticality", criticality)
-			for keyword in criticality_doc.keyword:
-				if re.search(r''+ keyword.keyword +'', self.subject, re.IGNORECASE):
-					self.priority = criticality_doc.priority
-					self.isset_sla = 1
+
 		return time
 
 def get_list_context(context=None):
@@ -349,25 +369,25 @@ def update_support_timer():
 			doc.service_contract_status = "Failed"
 		doc.save()
 
-#	def set_criticality_and_time(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None, support_days=None):
+#	def calculate_support_time_day(self, response_time=None, response_time_period=None, resolution_time=None, resolution_time_period=None, support_days=None):
 #
 #		#Calculation on Time to Respond
 #		if response_time_period == 'Hour/s':
-#			response_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True), support_days=support_days)
+#			response_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True), support_days=support_days)
 #			self.response_by = response_by
 #			self.time_to_respond = 24 * date_diff(response_by, utils.now_datetime())
 #			#print("==:= reply by : " + str(add_to_date(utils.now_datetime(), hours=int(response_time), as_datetime=True)))
 #			#print("==:= reply by : " + str(response_by))
 #
 #		elif response_time_period == 'Day/s':
-#			response_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True), support_days=support_days)
+#			response_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True), support_days=support_days)
 #			self.response_by = response_by
 #			self.time_to_respond = 24 * date_diff(response_by, utils.now_datetime())
 #			#print("==:= reply by : " + add_to_date(utils.now_datetime(), hours=24 * int(response_time), as_datetime=True))
 #			#print("==:= reply by : " + str(response_by))
 #
 #		elif response_time_period == 'Week/s':
-#			response_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True), support_days=support_days)
+#			response_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True), support_days=support_days)
 #			self.response_by = response_by
 #			self.time_to_respond = 24 * date_diff(response_by, utils.now_datetime())
 #			#print("==:= reply by : " + add_to_date(utils.now_datetime(), hours=7 * 24 * int(response_time), as_datetime=True))
@@ -375,21 +395,21 @@ def update_support_timer():
 #		
 #		#Calculation of Time to Resolve
 #		if resolution_time_period == 'Hour/s':
-#			resolution_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True), support_days=support_days)
+#			resolution_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True), support_days=support_days)
 #			self.resolution_by = resolution_by
 #			self.time_to_resolve = 24 * date_diff(resolution_by, utils.now_datetime())
 #			#print("==:= reply by : " + str(add_to_date(utils.now_datetime(), hours=int(resolution_time), as_datetime=True)))
 #			#print("==:= reply by : " + str(resolution_by))
 #			
 #		elif resolution_time_period == 'Day/s':
-#			resolution_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True), support_days=support_days)
+#			resolution_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True), support_days=support_days)
 #			self.resolution_by = resolution_by
 #			self.time_to_resolve = 24 * date_diff(resolution_by, utils.now_datetime())
 #			#print("==:= reply by : " + str(add_to_date(utils.now_datetime(), hours=24 * int(resolution_time), as_datetime=True)))
 #			#print("==:= reply by : " + str(resolution_by))
 #			
 #		else:
-#			resolution_by = self.calculate_support(time=add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True), support_days=support_days)
+#			resolution_by = self.calculate_support_time(time=add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True), support_days=support_days)
 #			self.resolution_by = resolution_by
 #			self.time_to_resolve = 24 * date_diff(resolution_by, utils.now_datetime())
 #			#print("==:= reply by : " + str(add_to_date(utils.now_datetime(), hours=7 * 24 * int(resolution_time), as_datetime=True)))
@@ -404,7 +424,7 @@ def update_support_timer():
 #					self.isset_sla = 1
 
 
-#	def calculate_support(self, time=None, support_days=None):
+#	def calculate_support_time(self, time=None, support_days=None):
 #		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 #		flag = None
 #		time_difference_greater = None
@@ -468,7 +488,7 @@ def update_support_timer():
 ##		print("*****************************************************************************************")
 ##		return reply
 #
-#	def set_criticality_and_time(self, time=None, time_period=None, support_days=None):
+#	def calculate_support_day(self, time=None, time_period=None, support_days=None):
 #		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 #		now_datetime = utils.get_datetime()
 #		if time_period == 'Hour/s':
