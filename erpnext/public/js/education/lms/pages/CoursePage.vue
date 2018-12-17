@@ -15,7 +15,7 @@ import CourseCard from "../components/CourseCard.vue"
 
 export default {
 	props: ['program_name'],
-    name: "ProgramPage",
+    name: "CoursePage",
     components: {
 		TopSection,
 		CardList,

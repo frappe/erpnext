@@ -1,5 +1,6 @@
 import Home from "./pages/Home.vue";
 import ProgramPage from "./pages/ProgramPage.vue";
+import CoursePage from "./pages/CoursePage.vue";
 import ContentPage from "./pages/ContentPage.vue";
 import ListPage from "./pages/ListPage.vue";
 import ProfilePage from "./pages/ProfilePage.vue";
@@ -16,8 +17,14 @@ const routes = [{
 		props: true
 	},
 	{
+		name: 'course',
+		path: '/Program/:program_name/:course/',
+		component: CoursePage,
+		props: true,
+	},
+	{
 		name: 'content',
-		path: '/Program/:program_name/:course/:type/:content',
+		path: '/Program/:program_name/:course/:topic/:type/:content',
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
