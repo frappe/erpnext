@@ -16,8 +16,6 @@ def execute(filters=None):
 		return [], []
 
 	account_details = {}
-	if not filters.get("group_by"):
-		filters['group_by'] = _('Group by Voucher (Consolidated)')
 
 	if filters and filters.get('print_in_account_currency') and \
 		not filters.get('account'):

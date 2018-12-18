@@ -1,5 +1,5 @@
 frappe.listview_settings['Delivery Note'] = {
-	add_fields: ["grand_total", "is_return", "per_billed", "status"],
+	add_fields: ["grand_total", "is_return", "per_billed", "status", "currency"],
 	get_indicator: function (doc) {
 		if (cint(doc.is_return) == 1) {
 			return [__("Return"), "darkgrey", "is_return,=,Yes"];
