@@ -229,6 +229,7 @@ def get():
                         "account_number": "2110"
                     },
                     _("Payroll Payable"): {
+                        "account_type": "Payable",
                         "account_number": "2120"
                     },
                     "account_number": "2100"
