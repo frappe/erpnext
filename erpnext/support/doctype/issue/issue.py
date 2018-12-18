@@ -164,8 +164,6 @@ class Issue(Document):
 		time_difference, flag, loop, time_add = 0, 0, None, 0
 		
 		print("*****************************************************************************************")
-		if hours:
-			time += timedelta(hours=hours)
 
 		while loop != 'set':
 			for count, weekday in enumerate(week):
@@ -175,37 +173,39 @@ class Issue(Document):
 							print("Checking day Loop 1---------- " + support_day[0])
 							
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							
-							if time_difference:
+							print("---------------------------" + str(time))
+
+							if time.time() <= end_time and time.time() >= start_time and hours and time_add == 0: #	Add hours to time if the time is between start and end time orelse it'll add one more day to the count
+								time += timedelta(hours=hours)
+								time_add = 1
+
+							if time_difference:										#	Add time difference at every loop iteration
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
 
-							if time.time() <= end_time and time.time() >= start_time:
-								if hours and time_add != 1:
-									time += timedelta(hours=hours)
-									time_add = 1
-								if not hours:
+							if time.time() <= end_time and time.time() >= start_time:	#	If computed time is between start and end time then stop execution
+								if not hours:											#	If hours is None then append end time to the time
 									time = datetime.combine(time.date(), end_time)
-								if time.date() in holidays:
+								if time.date() in holidays:								#	If date is in holidays then continue
 									continue
-								loop = 'set'
+								loop = 'set'											#	Flag to stop while loop execution
 								break
-							elif time.time() <= start_time:
-								if hours and time_add != 1:
+							elif time.time() <= start_time:								#	Time is before start time
+								if hours and time_add == 0:								#	If hours then add hours to start time
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
-									time_add = 1
+									time_add = 1										#	Flag to stop adding of hours once
 								if not hours:
-									time = datetime.combine(time.date(), end_time)
+									time = datetime.combine(time.date(), end_time)		#	If computed hours if before start time then append end time of that day to computed time
 								else:
-									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds()
+									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
 									print("time_difference_smaller" + str(time_difference/3600))
 									print(support_days[support_days.index(support_day)][2])
 								if time.date() in holidays:
 									continue
 								print("*** " + str(time))
 							elif time.time() >= end_time:
-								if hours and time_add != 1:
+								if hours and time_add == 0:
 									time = datetime.combine(time.date()+timedelta(days=1), start_time)
 									time += timedelta(hours=hours)
 									time_add = 1
@@ -236,15 +236,20 @@ class Issue(Document):
 							print("--- " + str(time))
 							
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							
+							if time.time() <= end_time and time.time() >= start_time and hours and time_add == 0:
+								time += timedelta(hours=hours)
+								time_add = 1
 							if time_difference:
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
 
 							if time.time() <= end_time and time.time() >= start_time:
-								if hours and time_add != 1:
+								if hours and time_add == 0:
 									time += timedelta(hours=hours)
 									time_add = 1
+									if time.time() >= end_time or time.time() <= start_time:
+										print("IN HERE")
+										continue
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								if time.date() in holidays:
@@ -253,7 +258,7 @@ class Issue(Document):
 								break
 
 							elif time.time() <= start_time:
-								if hours and time_add != 1:
+								if hours and time_add == 0:
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
 									time_add = 1
@@ -268,7 +273,7 @@ class Issue(Document):
 									continue
 
 							elif time.time() >= end_time:
-								if hours and time_add != 1:
+								if hours and time_add == 0:
 									time = datetime.combine(time.date()+timedelta(days=1), start_time)
 									time += timedelta(hours=hours)
 									time_add = 1
