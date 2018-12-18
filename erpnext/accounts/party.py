@@ -509,6 +509,7 @@ def get_dashboard_info(party_type, party):
 		info["company"] = d.company
 
 		if party_type == "Supplier":
+			info["billing_this_year"] = -1 * info["billing_this_year"]
 			info["total_unpaid"] = -1 * info["total_unpaid"]
 
 		company_wise_info.append(info)
