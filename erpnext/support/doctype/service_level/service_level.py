@@ -7,8 +7,11 @@ import frappe
 from frappe.model.document import Document
 
 class ServiceLevel(Document):
-	
-	def validate(self):
-		week = ["Monday",  "Tuesday",  "Wednesday",  "Thursday", "Friday", "Saturday", "Sunday"]
-		for count, support_and_resolution in enumerate(self.support_and_resolution):
-			print(week.index(support_and_resolution.workday))
+	pass	
+#	def validate(self):
+#		week = ["Monday",  "Tuesday",  "Wednesday",  "Thursday", "Friday", "Saturday", "Sunday"]
+#		for count, support_and_resolution in enumerate(self.support_and_resolution):
+#			for j in range(0 , len(self.support_and_resolution)-count-1):
+#				if week.index(support_and_resolution[j].workday) > week.index(support_and_resolution[j+1].workday):
+#					support_and_resolution[j], support_and_resolution[j+1] = support_and_resolution[j+1], support_and_resolution[j]
+#		print(self.support_and_resolution)

@@ -366,9 +366,9 @@ def update_support_timer():
 	issues = frappe.get_list("Issue", filters={"service_contract_status": "Ongoing", "status": "Open"})
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.name)
-		if int(doc.time_to_respond) > 0 and not doc.first_responded_on:
+		if float(doc.time_to_respond) > 0 and not doc.first_responded_on:
 			doc.time_to_respond = time_diff_in_hours(doc.response_by, utils.now_datetime())
-		if int(doc.time_to_resolve) > 0:
+		if float(doc.time_to_resolve) > 0:
 			doc.time_to_resolve = time_diff_in_hours(doc.resolution_by, utils.now_datetime())
 		else:
 			doc.service_contract_status = "Failed"
