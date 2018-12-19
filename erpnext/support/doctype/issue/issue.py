@@ -105,6 +105,7 @@ class Issue(Document):
 		if not self.isset_sla:
 			support_days = []
 			holidays = []
+			#Cusotmer find in here
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
 			if not support_contract:
 				support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
@@ -162,13 +163,10 @@ class Issue(Document):
 		
 	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
 		time_difference, flag, loop, time_add = 0, 0, None, 0
-		
-		print("*****************************************************************************************")
-
 		while loop != 'set':
 			for count, weekday in enumerate(week):
-				if count >= (time.date()).weekday() and flag == 0 and loop != 'set':
-					for support_day in support_days:
+				if count >= (time.date()).weekday() and flag == 0 and loop != 'set':	#	To search the week from the current weekday
+					for support_day in support_days:									#	Check if the day is in the support day
 						if weekday == support_day[0]:
 							print("Checking day Loop 1---------- " + support_day[0])
 							

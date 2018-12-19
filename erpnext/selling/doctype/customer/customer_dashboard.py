@@ -15,6 +15,10 @@ def get_data():
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
+				'label': _('Support Contract'),
+				'items': ['Support Contract']
+			},
+			{
 				'label': _('Support'),
 				'items': ['Issue']
 			},

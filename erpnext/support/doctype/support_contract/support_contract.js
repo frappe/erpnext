@@ -5,13 +5,13 @@ frappe.ui.form.on('Support Contract', {
 	refresh: function(frm) {
 
 	},
-	contract_template: function(frm) {
+	service_level: function(frm) {
 		frm.fields_dict.support_and_resolution.grid.remove_all();
 		frappe.call({
 			"method": "frappe.client.get",
 			args: {
-				doctype: "Support Contract Template",
-				name: frm.doc.contract_template
+				doctype: "Service Level",
+				name: frm.doc.service_level
 			},
 			callback: function(data){
 				for (var i = 0; i < data.message.support_and_resolution.length; i++ ){
