@@ -16,7 +16,7 @@ def get_data():
 			},
 			{
 				'label': _('Support Contract'),
-				'items': ['Support Contract']
+				'items': ['Support Contract	']
 			},
 			{
 				'label': _('Support'),
