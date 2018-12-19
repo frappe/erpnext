@@ -123,7 +123,7 @@ def get_data():
 
 	pending_so=[]
 	for so in sales_order_entry:
-		#fetch all the material request records for a sales order item			
+		# fetch all the material request records for a sales order item
 		mr_list = grouped_records.get(so.name) or [{}]
 		mr_item_record = ([mr for mr in mr_list if mr.get('item_code') == so.item_code] or [{}])
 
