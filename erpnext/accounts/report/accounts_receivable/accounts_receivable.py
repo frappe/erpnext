@@ -188,6 +188,10 @@ class ReceivablePayableReport(object):
 			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle,self.filters.report_date, self.dr_or_cr, return_entries)
+
+				temp_outstanding_amt = outstanding_amount
+				temp_credit_note_amt = credit_note_amount
+
 				if abs(outstanding_amount) > 0.1/10**self.currency_precision:
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
 						for d in self.payment_term_map.get(gle.voucher_no):
@@ -212,11 +216,8 @@ class ReceivablePayableReport(object):
 								data.append(row)
 
 						if credit_note_amount:
-							outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
-							gle,self.filters.report_date, self.dr_or_cr, return_entries)
-
-							row = self.prepare_row_without_payment_terms(party_naming_by, args, gle, outstanding_amount,
-								credit_note_amount)
+							row = self.prepare_row_without_payment_terms(party_naming_by, args, gle, temp_outstanding_amt,
+								temp_credit_note_amt)
 							data.append(row)
 
 					else:
