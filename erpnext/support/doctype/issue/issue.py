@@ -106,6 +106,9 @@ class Issue(Document):
 			support_days = []
 			holidays = []
 			#Cusotmer find in here
+			print(self.email_id)
+			print(self.sender)
+			print(self.raised_by)
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
 			if not support_contract:
 				support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
