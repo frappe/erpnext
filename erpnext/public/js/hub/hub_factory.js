@@ -1,6 +1,6 @@
 frappe.provide('erpnext.hub');
 
-frappe.views.marketplaceFactory = class marketplaceFactory extends frappe.views.Factory {
+frappe.views.MarketplaceFactory = class MarketplaceFactory extends frappe.views.Factory {
 	show() {
 		is_marketplace_disabled()
 			.then(disabled => {
