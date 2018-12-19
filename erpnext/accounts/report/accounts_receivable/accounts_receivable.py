@@ -339,25 +339,17 @@ class ReceivablePayableReport(object):
 		pdc_details = ", ".join(pdc_details)
 		row += [pdc_details, pdc_amount, remaining_balance]
 
-<<<<<<< HEAD
-					# customer territory / supplier group
-					if args.get("party_type") == "Customer":
-						row += [self.get_territory(gle.party), self.get_customer_group(gle.party),
-							voucher_details.get(gle.voucher_no, {}).get("sales_person")]
-					if args.get("party_type") == "Supplier":
-						row += [self.get_supplier_group(gle.party)]
-=======
 		if args.get('party_type') == 'Customer':
 			# customer LPO
 			row += [self.voucher_details.get(gle.voucher_no, {}).get("po_no")]
->>>>>>> Accounts Receivable report based on payment terms
 
 			# Delivery Note
 			row += [self.voucher_details.get(gle.voucher_no, {}).get("delivery_note")]
 
 		# customer territory / supplier group
 		if args.get("party_type") == "Customer":
-			row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
+			row += [self.get_territory(gle.party), self.get_customer_group(gle.party),
+				self.voucher_details.get(gle.voucher_no, {}).get("sales_person")]
 		if args.get("party_type") == "Supplier":
 			row += [self.get_supplier_group(gle.party)]
 
