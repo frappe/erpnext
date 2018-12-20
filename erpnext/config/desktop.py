@@ -38,12 +38,10 @@ def get_data():
 			"link": "List/Employee"
 		},
 		{
-			"module_name": "Project",
-			"_doctype": "Project",
+			"module_name": "Projects",
 			"color": "#8e44ad",
 			"icon": "octicon octicon-rocket",
-			"type": "link",
-			"link": "List/Project"
+			"type": "module",
 		},
 		{
 			"module_name": "Issue",
