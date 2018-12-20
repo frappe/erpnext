@@ -206,7 +206,7 @@ class Issue(Document):
 					for support_day in support_days:
 						if weekday == support_day[0] and loop != 'set':
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							if time.time() <= end_time or time.time() >= start_time and hours and time_add == 0:
+							if time.time() <= end_time and time.time() >= start_time and hours and time_add == 0:
 								time += timedelta(hours=hours)
 								time_add = 1
 							if time_difference:
