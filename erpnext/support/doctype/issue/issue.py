@@ -191,8 +191,11 @@ class Issue(Document):
 								if not hours:
 									time = datetime.combine(time.date(), end_time)		#	If computed hours if before start time then append end time of that day to computed time
 								else:
-									if support_days.index(support_day) == 1:
+									if support_days.index(support_day) == 0:
 										prev_day_end_time = support_days[len(support_days)-1][2]
+										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+										print(support_days[len(support_days)-1][0])
+										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 									else:
 										prev_day_end_time = support_days[support_days.index(support_day)-1][2]
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds() #	Compute the time difference
@@ -264,8 +267,11 @@ class Issue(Document):
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
 								else:
-									if support_days.index(support_day) == 1:
+									if support_days.index(support_day) == 0:
 										prev_day_end_time = support_days[len(support_days)-1][2]
+										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+										print(support_days[len(support_days)-1][0])
+										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 									else:
 										prev_day_end_time = support_days[support_days.index(support_day)-1][2]
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds() #	Compute the time difference
