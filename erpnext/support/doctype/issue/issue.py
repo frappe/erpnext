@@ -121,13 +121,11 @@ class Issue(Document):
 	def calculate_support_day(self, time=None, time_period=None, support_days=None, holidays=None):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		now_datetime, add_day, flag, hours = utils.get_datetime(), 0, 0, None
-		
 		#	If time is in days, calculate further
 		if time_period == 'Hour/s':	#	If time is in hours, time is 0 since its the same day and pass hours to next function
 			time, hours = 0, time
 		elif time_period == 'Week/s':	#	If time is in weeks, convert it to days
 			time *= 7
-		
 		while time != 0:	#	Loop until the remaining time is not zero
 			for count, weekday in enumerate(week):
 				if count >= (now_datetime.date()).weekday() and flag == 0 and time != 0:	#	To search the week from the current weekday
@@ -149,10 +147,6 @@ class Issue(Document):
 							flag = 0
 					add_day += 1
 		now_datetime += timedelta(days=add_day)
-
-		print("-------------------------------------------------------------------------------")
-		print("Final Time : ===================================" + str(now_datetime) + "=============" + str(week[(now_datetime.date()).weekday()]))
-		print("-------------------------------------------------------------------------------")
 		support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, time_diff_in_hours(support, utils.now_datetime())
 		
@@ -162,28 +156,19 @@ class Issue(Document):
 			for count, weekday in enumerate(week):
 				if count >= (time.date()).weekday() and flag == 0 and loop != 'set':	#	To search the week from the current weekday
 					for support_day in support_days:									#	Check if the day is in the support day
-						if weekday == support_day[0]:
-							print("Checking day Loop 1---------- " + support_day[0])
-							
+						if weekday == support_day[0] and loop != 'set':
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							print("---------------------------" + str(time))
-
 							if time.time() <= end_time and time.time() >= start_time and hours and time_add == 0: #	Add hours to time if the time is between start and end time orelse it'll add one more day to the count
 								time += timedelta(hours=hours)
 								time_add = 1
-
-							if time_difference:										#	Add time difference at every loop iteration
+							if time_difference:								#	Add time difference at every loop iteration
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
-
 							if time.time() <= end_time and time.time() >= start_time:	#	If computed time is between start and end time then stop execution
 								if not hours:											#	If hours is None then append end time to the time
 									time = datetime.combine(time.date(), end_time)
-								if time.date() in holidays:								#	If date is in holidays then continue
-									continue
 								loop = 'set'											#	Flag to stop while loop execution
-								break
-							elif time.time() <= start_time:								#	Time is before start time
+							elif time.time() <= start_time:							#	Time is before start time
 								if hours and time_add == 0:								#	If hours then add hours to start time
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
@@ -193,19 +178,10 @@ class Issue(Document):
 								else:
 									if support_days.index(support_day) == 0:
 										prev_day_end_time = support_days[len(support_days)-1][2]
-										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-										print(support_days[len(support_days)-1][0])
-										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 									else:
-										prev_day_end_time = support_days[support_days.index(support_day)-1][2]
+										prev_day_end_time = support_days[support_days.index(support_day)][2]
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds() #	Compute the time difference
 									#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
-									print("time_difference_smaller" + str(time_difference/3600))
-									print(len(support_days))
-									print(support_days[support_days.index(support_day)-1][2])
-								if time.date() in holidays:
-									continue
-								print("*** " + str(time))
 							elif time.time() >= end_time:
 								if hours and time_add == 0:
 									time = datetime.combine(time.date()+timedelta(days=1), start_time)
@@ -215,50 +191,31 @@ class Issue(Document):
 									time = datetime.combine(time.date(), end_time)
 								else:
 									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
-									print("time_difference_greater" + str(time_difference/3600))
-								if time.date() in holidays:
-									continue
-								print("*** " + str(time))
-
+							if time.date() in holidays:
+								continue
 							if weekday == week[len(week)-1]:
 								flag = 1
 							if time.time() <= end_time and time.time() >= start_time:
 								loop = 'set'
 								break
-
 						elif weekday == week[len(week)-1]:
 							flag = 1
 					if loop != 'set':
 						time += timedelta(days=1)
-					print(time)
 				elif count <= (time.date()).weekday() and flag == 1 and loop != 'set':
 					for support_day in support_days:
-						if weekday == support_day[0]:
-							print("Checking day Loop 2---------- " + support_day[0])
-							print("--- " + str(time))
-							
+						if weekday == support_day[0] and loop != 'set':
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							if time.time() <= end_time and time.time() >= start_time and hours and time_add == 0:
+							if time.time() <= end_time or time.time() >= start_time and hours and time_add == 0:
 								time += timedelta(hours=hours)
 								time_add = 1
 							if time_difference:
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
-
 							if time.time() <= end_time and time.time() >= start_time:
-								if hours and time_add == 0:
-									time += timedelta(hours=hours)
-									time_add = 1
-									if time.time() >= end_time or time.time() <= start_time:
-										print("IN HERE")
-										continue
 								if not hours:
 									time = datetime.combine(time.date(), end_time)
-								if time.date() in holidays:
-									continue
 								loop = 'set'
-								break
-
 							elif time.time() <= start_time:
 								if hours and time_add == 0:
 									time = datetime.combine(time.date(), start_time)
@@ -269,19 +226,10 @@ class Issue(Document):
 								else:
 									if support_days.index(support_day) == 0:
 										prev_day_end_time = support_days[len(support_days)-1][2]
-										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-										print(support_days[len(support_days)-1][0])
-										print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 									else:
-										prev_day_end_time = support_days[support_days.index(support_day)-1][2]
+										prev_day_end_time = support_days[support_days.index(support_day)][2]
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds() #	Compute the time difference
 									#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds()
-									print("time_difference_smaller" + str(time_difference/3600))
-									print(support_days[support_days.index(support_day)][2])
-								print("*** " + str(time))
-								if time.date() in holidays:
-									continue
-
 							elif time.time() >= end_time:
 								if hours and time_add == 0:
 									time = datetime.combine(time.date()+timedelta(days=1), start_time)
@@ -291,11 +239,8 @@ class Issue(Document):
 									time = datetime.combine(time.date(), end_time)
 								else:
 									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
-									print("time_difference_greater" + str(time_difference/3600))
-								print("*** " + str(time))
-								if time.date() in holidays:
-									continue
-								
+							if time.date() in holidays:
+								continue
 							if weekday == week[(time.date()).weekday()-1]:
 								flag = 0
 							if time.time() <= end_time and time.time() >= start_time:
@@ -305,9 +250,6 @@ class Issue(Document):
 							flag = 0
 					if loop != 'set':
 						time += timedelta(days=1)
-					print(time)
-		print("*****************************************************************************************")		
-
 		return time
 
 def get_list_context(context=None):
