@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, today, time_diff_in_hours, now_datetime, add_days, date_diff, add_to_date, getdate, get_datetime
+from frappe.utils import time_diff_in_hours, now_datetime, add_days, get_datetime
 from frappe.utils.user import is_website_user
 import re
 from datetime import datetime, timedelta
@@ -103,10 +103,6 @@ class Issue(Document):
 
 	def set_support_contract(self):
 		if not self.isset_sla:
-			#support_days = []
-			#holidays = []
-			#Cusotmer find in here
-			print("------------------------------------" + str(self.raised_by))
 			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
 			if not support_contract:
 				support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
