@@ -394,7 +394,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 
-			frappe.prompt(this.get_promopt_fields(),
+			frappe.prompt(this.get_prompt_fields(),
 				on_submit,
 				__('Select POS Profile')
 			);
@@ -417,11 +417,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		]);
 	}
 
-	get_promopt_fields() {
+	get_prompt_fields() {
 		return [{
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
+			fieldname: 'pos_profile',
 			reqd: 1,
 			get_query: () => {
 				return {
@@ -433,7 +434,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			}
 		}, {
 			fieldtype: 'Check',
-			label: __('Set as default')
+			label: __('Set as default'),
+			fieldname: 'set_as_default'
 		}];
 	}
 
@@ -522,6 +524,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
+						this.frm.doc.campaign = r.message.campaign;
 					}
 				}
 
