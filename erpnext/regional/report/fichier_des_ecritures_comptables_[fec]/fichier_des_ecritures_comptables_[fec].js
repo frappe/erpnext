@@ -33,7 +33,7 @@ frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 			fec_export(query_report);
 		}
 	}
-}
+};
 
 let fec_export = function(query_report) {
 	const fiscal_year = query_report.get_values().fiscal_year;
@@ -42,7 +42,7 @@ let fec_export = function(query_report) {
 	frappe.db.get_value("Company", company, "siren_number", (value) => {
 		const company_data = value.siren_number;
 		if (company_data === null || company_data === undefined) {
-			frappe.msgprint(__("Please register the SIREN number in the company information file"))
+			frappe.msgprint(__("Please register the SIREN number in the company information file"));
 		} else {
 			frappe.db.get_value("Fiscal Year", fiscal_year, "year_end_date", (r) => {
 				const fy = r.year_end_date;
