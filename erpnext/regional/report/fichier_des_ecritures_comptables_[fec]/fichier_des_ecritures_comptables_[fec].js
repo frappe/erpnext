@@ -1,6 +1,5 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
 
 frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
 	"filters": [
@@ -40,43 +39,23 @@ let fec_export = function(query_report) {
 	const fiscal_year = query_report.get_values().fiscal_year;
 	const company = query_report.get_values().company;
 
-	frappe.call({
-		method: "frappe.client.get_value",
-		args: {
-			'doctype': "Company",
-			'fieldname': ['siren_number'],
-			'filters': {
-				'name': company
-			}
-		},
-		callback: function(data) {
-			const company_data = data.message.siren_number;
-			if (company_data === null || company_data === undefined) {
-				frappe.msgprint(__("Please register the SIREN number in the company information file"))
-			} else {
-				frappe.call({
-					method: "frappe.client.get_value",
-					args: {
-						'doctype': "Fiscal Year",
-						'fieldname': ['year_end_date'],
-						'filters': {
-							'name': fiscal_year
-						}
-					},
-					callback: function(data) {
-						const fy = data.message.year_end_date;
-						const title = company_data + "FEC" + moment(fy).format('YYYYMMDD');
-						const column_row = query_report.columns.map(col => col.label);
-						const column_data = query_report.get_data_for_csv(false);
-						const result = [column_row].concat(column_data);
-						downloadify(result, null, title);
-					}
-				});
+	frappe.db.get_value("Company", company, "siren_number", (value) => {
+		const company_data = value.siren_number;
+		if (company_data === null || company_data === undefined) {
+			frappe.msgprint(__("Please register the SIREN number in the company information file"))
+		} else {
+			frappe.db.get_value("Fiscal Year", fiscal_year, "year_end_date", (r) => {
+				const fy = r.year_end_date;
+				const title = company_data + "FEC" + moment(fy).format('YYYYMMDD');
+				const column_row = query_report.columns.map(col => col.label);
+				const column_data = query_report.get_data_for_csv(false);
+				const result = [column_row].concat(column_data);
+				downloadify(result, null, title);
+			});
 
-			}
 		}
 	});
-}
+};
 
 let downloadify = function(data, roles, title) {
 	if (roles && roles.length && !has_common(roles, roles)) {
