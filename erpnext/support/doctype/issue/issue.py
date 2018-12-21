@@ -127,7 +127,7 @@ class Issue(Document):
 										time_set = 1
 								add_days += 1
 
-	def calculate_support_day(self, now_datetime=None,time=None, time_period=None, support_days=None, holidays=None, week=None):
+	def calculate_support_day(self, now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
 		now_datetime, add_days, hours = now_datetime, 0, 0
 		#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
 		#	it to days and if time_period is Hours then time is passed to calculate time to next function
@@ -142,7 +142,8 @@ class Issue(Document):
 						for support_day in support_days:
 							if weekday == support_day[0]:
 								time -= 1
-						add_days += 1
+						if time != 0:
+							add_days += 1
 		now_datetime += timedelta(days=add_days)
 		support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, time_diff_in_hours(support, utils.now_datetime())
