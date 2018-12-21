@@ -149,12 +149,12 @@ def get_data():
 			"hidden": 1
 		},
 		{
-			"module_name": "Learn",
+			"module_name": "Help",
 			"color": "#FF888B",
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True,
-			"label": _("Learn"),
+			"label": _("Help"),
 			"hidden": 1
 		},
 		{
