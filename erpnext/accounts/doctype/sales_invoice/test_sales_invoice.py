@@ -375,7 +375,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		self.assertEqual(si.net_total, 4600)
-		
+
 		self.assertEqual(si.get("taxes")[0].tax_amount, 874.0)
 		self.assertEqual(si.get("taxes")[0].total, 5474.0)
 
@@ -405,12 +405,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(si.total, 975)
 		self.assertEqual(si.net_total, 900)
-		
+
 		self.assertEqual(si.get("taxes")[0].tax_amount, 216.0)
 		self.assertEqual(si.get("taxes")[0].total, 1116.0)
 
 		self.assertEqual(si.grand_total, 1116.0)
-		
+
 	def test_inclusive_rate_validations(self):
 		si = frappe.copy_doc(test_records[2])
 		for i, tax in enumerate(si.get("taxes")):
@@ -552,7 +552,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.grand_total, 1215.90)
 		self.assertEqual(si.rounding_adjustment, 0.01)
 		self.assertEqual(si.base_rounding_adjustment, 0.50)
-		
+
 
 	def test_outstanding(self):
 		w = self.make()
@@ -923,7 +923,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(SerialNoWarehouseError, si.submit)
 
 	def test_serial_numbers_against_delivery_note(self):
-		""" 
+		"""
 			check if the sales invoice item serial numbers and the delivery note items
 			serial numbers are same
 		"""
@@ -1238,7 +1238,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_item_wise_tax_breakup_india(self):
 		frappe.flags.country = "India"
-		
+
 		si = self.create_si_to_test_tax_breakup()
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
 
@@ -1256,12 +1256,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(itemised_tax, expected_itemised_tax)
 		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
-		
+
 		frappe.flags.country = None
 
 	def test_item_wise_tax_breakup_outside_india(self):
 		frappe.flags.country = "United States"
-		
+
 		si = self.create_si_to_test_tax_breakup()
 
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
@@ -1287,7 +1287,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(itemised_tax, expected_itemised_tax)
 		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
-		
+
 		frappe.flags.country = None
 
 	def create_si_to_test_tax_breakup(self):
@@ -1375,7 +1375,7 @@ class TestSalesInvoice(unittest.TestCase):
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
 
 		si = frappe.copy_doc(test_records[2])
-		
+
 		si.shipping_rule = shipping_rule.name
 		si.insert()
 
@@ -1392,14 +1392,14 @@ class TestSalesInvoice(unittest.TestCase):
 			"cost_center": shipping_rule.cost_center,
 			"tax_amount": shipping_amount,
 			"description": shipping_rule.name
-		}	
+		}
 		si.append("taxes", shipping_charge)
 		si.save()
 
 		self.assertEqual(si.net_total, 1250)
 
 		self.assertEqual(si.total_taxes_and_charges, 577.05)
-		self.assertEqual(si.grand_total, 1827.05)		
+		self.assertEqual(si.grand_total, 1827.05)
 
 	def test_create_invoice_without_terms(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -1496,7 +1496,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-		
+
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
 
@@ -1524,9 +1524,9 @@ def create_sales_invoice(**args):
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
-		"income_account": "Sales - _TC",
-		"expense_account": "Cost of Goods Sold - _TC",
-		"cost_center": "_Test Cost Center - _TC",
+		"income_account": args.income_account or "Sales - _TC",
+		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no
 	})
 
