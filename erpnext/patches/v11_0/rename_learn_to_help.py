@@ -5,7 +5,7 @@ def execute():
 	frappe.db.sql("""
 		UPDATE `tabDesktop Icon`
 		SET
-			`module_name`='Help', `label`=%s
+			`module_name`='Help', `label`='Help', `_label`=%s
 		WHERE
 			`module_name`='Learn' AND
 			`standard`=1
