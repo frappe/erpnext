@@ -436,8 +436,7 @@ def get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_
 	return bom_wise_item_details
 
 def add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, row, data, warehouse, company):
-	print("add item in material request")
-	total_qty = row.qty * planned_qty
+	total_qty = row['qty'] * planned_qty
 	projected_qty, actual_qty = get_bin_details(row)
 
 	requested_qty = 0
@@ -445,29 +444,27 @@ def add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered
 		requested_qty = total_qty
 	elif total_qty > projected_qty:
 		requested_qty = total_qty - projected_qty
-	if requested_qty > 0 and requested_qty < row.min_order_qty:
-		requested_qty = row.min_order_qty
+	if requested_qty > 0 and requested_qty < row['min_order_qty']:
+		requested_qty = row['min_order_qty']
 	item_group_defaults = get_item_group_defaults(item, company)
 
-	if not row.purchase_uom:
-		row.purchase_uom = row.stock_uom
+	if not row['purchase_uom']:
+		row['purchase_uom'] = row['stock_uom']
 
-	if row.purchase_uom != row.stock_uom:
-		if not row.conversion_factor:
-			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(row.purchase_uom, row.stock_uom, item))
-
-		requested_qty = requested_qty / row.conversion_factor
-	if frappe.db.get_value("UOM", row.purchase_uom, "must_be_whole_number"):
+	if row['purchase_uom'] != row['stock_uom']:
+		if not row['conversion_factor']:
+			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(row['purchase_uom'], row['stock_uom'], item))
+		requested_qty = requested_qty / row['conversion_factor']
+	if frappe.db.get_value("UOM", row['purchase_uom'], "must_be_whole_number"):
 		requested_qty = ceil(requested_qty)
-	print(row)
 	if requested_qty > 0:
 		doc.setdefault('mr_items', []).append({
 			'item_code': item,
-			'item_name': row.item_name,
+			'item_name': row['item_name'],
 			'quantity': requested_qty,
-			'warehouse': warehouse or row.source_warehouse or row.default_warehouse or item_group_defaults.get("default_warehouse"),
+			'warehouse': warehouse or row.get('source_warehouse') or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),
 			'actual_qty': actual_qty,
-			'min_order_qty': row.min_order_qty,
+			'min_order_qty': row['min_order_qty'],
 			'sales_order': data.get('sales_order')
 		})
 
@@ -515,20 +512,19 @@ def get_bin_details(row):
 		row = frappe._dict(json.loads(row))
 
 	conditions = ""
-	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
+	warehouse = row.get('source_warehouse') or row.get('default_warehouse')
 	if warehouse:
 		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
 		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`
 		where item_code = %(item_code)s {conditions}
-	""".format(conditions=conditions), { "item_code": row.item_code }, as_list=1)
+	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_list=1)
 
 	return item_projected_qty and item_projected_qty[0] or (0,0)
 
 @frappe.whitelist()
 def get_items_for_material_requests(doc, company=None):
-	print("get items for material request")
 	if isinstance(doc, string_types):
 		doc = frappe._dict(json.loads(doc))
 
@@ -539,7 +535,6 @@ def get_items_for_material_requests(doc, company=None):
 		warehouse = None
 		bom_wise_item_details = {}
 		if data.get("bom"):
-			print(doc),print("-------------------------------------------------")
 			if data.get('required_qty'):
 				planned_qty = data.get('required_qty')
 				bom_no = data.get('bom')
@@ -564,43 +559,39 @@ def get_items_for_material_requests(doc, company=None):
 				# fetch exploded items from BOM
 				bom_wise_item_details = get_exploded_items(bom_wise_item_details, company, bom_no, include_non_stock_items)
 			else:
-				bom_wise_item_details = get_subitems(doc, data, bom_wise_item_details, bom_no, company, include_non_stock_items, include_subcontracted_items, 1)
+				bom_wise_item_details = get_subitems(doc, data, bom_wise_item_details, bom_no, company,
+					include_non_stock_items, include_subcontracted_items, 1)
 			for item, item_details in bom_wise_item_details.items():
-				print(item),print(item_details)
 				if item_details.qty > 0:
-					add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, item_details, data, warehouse, company)
+					add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty,
+						item, item_details, data, warehouse, company)
 		else:
-			sales_order_item = frappe.get_doc('Sales OrderItem', data.sales_order_item).as_dict()
+			item_master = frappe.get_doc('Item', data['item_code']).as_dict()
 			planned_qty = data.get('required_qty')
-			ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty')
-			item = doc.item_code
-			purchase_uom = sales_order_item.uom
-			stock_uom = sales_order_item.stock_uom
-			conversion_factor = sales_order_item.conversion_factor
-			qty = doc.required_qty
-			if not purchase_uom == stock_uom:
-				qty = qty / conversion_factor
-			if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
-					qty = ceil(qty)
-			item_details = {
-			'item_name' = sales_order_item.item_name,
-			'default_bom' = doc.bom,
-			'purchase_uom' = purchase_uom,
-			'default_warehouse' = doc.warehouse,
-			'min_order_qty' =
-			'default_material_request_type' =
-			'qty' = qty,
-			'is_sub_contracted' = ,
-			'item_code' = doc.item_code,
-			'description' = sales_order_item.description,
-			'stock_uom' = stock_uom,
-			'conversion_factor' = conversion_factor,
-			'source_warehouse' = ,
-			}
-			warehouse = doc.warehouse
-			company =
-			if item_details.qty > 0:
-				add_item_in_material_request_items(doc, planned_qty, ignore_existing_ordered_qty, item, item_details, data, warehouse, company)
-			print(doc),print("-------------------------------------------------")
+
+			purchase_uom = item_master.purchase_uom or item_master.stock_uom
+			conversion_factor = 0
+			for d in item_master.get("uoms"):
+				if d.uom == purchase_uom:
+					conversion_factor = d.conversion_factor
+
+			item_details = frappe._dict({
+				'item_name' : item_master.item_name,
+				'default_bom' : doc.bom,
+				'purchase_uom' : purchase_uom,
+				'default_warehouse': item_master.default_warehouse,
+				'min_order_qty' : item_master.min_order_qty,
+				'default_material_request_type' : item_master.default_material_request_type,
+				'qty': 1,
+				'is_sub_contracted' : item_master.is_subcontracted_item,
+				'item_code' : item_master.name,
+				'description' : item_master.description,
+				'stock_uom' : item_master.stock_uom,
+				'conversion_factor' : conversion_factor,
+			})
+
+			if item_details['qty'] > 0:
+				add_item_in_material_request_items(doc, planned_qty, data.get('ignore_existing_ordered_qty'), item_master.name,
+					item_details, data, data.get('for_warehouse'), company)
 
 	return doc['mr_items']
