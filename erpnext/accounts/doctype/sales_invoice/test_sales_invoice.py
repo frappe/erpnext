@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
@@ -762,6 +762,21 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 		frappe.db.sql("delete from `tabPOS Profile`")
+	
+	def test_pos_si_without_payment(self):
+		set_perpetual_inventory()
+		make_pos_profile()
+
+		self._insert_purchase_receipt()
+		pos = copy.deepcopy(test_records[1])
+		pos["is_pos"] = 1
+		pos["update_stock"] = 1
+
+		si = frappe.copy_doc(pos)
+		si.insert()
+
+		# Check that the invoice cannot be submitted without payments
+		self.assertRaises(frappe.ValidationError, si.submit)
 
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
