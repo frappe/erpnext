@@ -767,7 +767,6 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory()
 		make_pos_profile()
 
-		self._insert_purchase_receipt()
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
