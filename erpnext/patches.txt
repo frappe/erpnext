@@ -36,7 +36,6 @@ execute:frappe.reload_doctype('Item')
 erpnext.patches.v4_0.fields_to_be_renamed
 erpnext.patches.v4_0.rename_sitemap_to_route
 erpnext.patches.v7_0.re_route #2016-06-27
-erpnext.patches.v4_0.fix_contact_address
 erpnext.patches.v4_0.customer_discount_to_pricing_rule
 execute:frappe.db.sql("""delete from `tabWebsite Item Group` where ifnull(item_group, '')=''""")
 erpnext.patches.v4_0.remove_module_home_pages
@@ -269,7 +268,6 @@ erpnext.patches.v6_27.fix_recurring_order_status
 erpnext.patches.v6_20x.update_product_bundle_description
 erpnext.patches.v7_0.update_party_status #2016-09-22
 erpnext.patches.v7_0.remove_features_setup
-erpnext.patches.v7_0.update_home_page
 execute:frappe.delete_doc_if_exists("Page", "financial-analytics")
 erpnext.patches.v7_0.update_project_in_gl_entry
 execute:frappe.db.sql('update tabQuotation set status="Cancelled" where docstatus=2')

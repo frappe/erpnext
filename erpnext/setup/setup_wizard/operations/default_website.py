@@ -6,6 +6,7 @@ import frappe
 
 from frappe import _
 from frappe.utils import nowdate
+from frappe.website.utils import get_website_settings
 
 class website_maker(object):
 	def __init__(self, args):
@@ -27,7 +28,7 @@ class website_maker(object):
 
 	def make_website_settings(self):
 		# update in home page in settings
-		website_settings = frappe.get_doc("Website Settings", "Website Settings")
+		website_settings = get_website_settings()
 		website_settings.home_page = 'home'
 		website_settings.brand_html = self.company
 		website_settings.copyright = self.company

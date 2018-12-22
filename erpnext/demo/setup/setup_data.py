@@ -5,6 +5,7 @@ import frappe, erpnext
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import flt, now_datetime, cstr, random_string
 from frappe.utils.make_random import add_random_children, get_random
+from frappe.website.utils import get_website_settings
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.demo.domains import data
 from frappe import _
@@ -76,7 +77,7 @@ def complete_setup(domain='Manufacturing'):
 
 def setup_demo_page():
 	# home page should always be "start"
-	website_settings = frappe.get_doc("Website Settings", "Website Settings")
+	website_settings = get_website_settings()
 	website_settings.home_page = "demo"
 	website_settings.save()
 

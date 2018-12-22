@@ -5,7 +5,7 @@ from frappe.installer import remove_from_installed_apps
 def execute():
 	reload_doctypes_for_schools_icons()
 
-	frappe.reload_doc('website', 'doctype', 'portal_settings')
+	# frappe.reload_doc('website', 'doctype', 'portal_settings')
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
 	frappe.reload_doc('buying', 'doctype', 'request_for_quotation')
 

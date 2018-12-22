@@ -208,10 +208,6 @@ doc_events = {
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
-
-	"Website Settings": {
-		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
-	},
 	"Sales Invoice": {
 		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
 		"on_trash": "erpnext.regional.check_deletion_permission"

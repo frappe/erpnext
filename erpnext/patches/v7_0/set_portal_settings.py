@@ -17,8 +17,6 @@ def execute():
 
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
 
-	frappe.get_doc('Portal Settings').sync_menu()
-
 	if 'schools' in frappe.get_installed_apps():
 		domain = frappe.get_doc('Domain', 'Education')
 		domain.setup_domain()

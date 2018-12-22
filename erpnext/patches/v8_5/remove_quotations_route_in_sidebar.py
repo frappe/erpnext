@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doctype("Portal Settings")
+	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
 
 	frappe.db.sql("""
 		delete from

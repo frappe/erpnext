@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
+from frappe.website.utils import get_website_name
 from .default_website import website_maker
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
@@ -103,18 +104,19 @@ def create_email_digest():
 
 def create_logo(args):
 	if args.get("attach_logo"):
+		website_name = get_website_name()
 		attach_logo = args.get("attach_logo").split(",")
 		if len(attach_logo)==3:
 			filename, filetype, content = attach_logo
 			_file = frappe.get_doc({
 				"doctype": "File",
 				"file_name": filename,
-				"attached_to_doctype": "Website Settings",
-				"attached_to_name": "Website Settings",
+				"attached_to_doctype": "Website",
+				"attached_to_name": website_name,
 				"decode": True})
 			_file.save()
 			fileurl = _file.file_url
-			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
+			frappe.db.set_value("Website", website_name, "brand_html",
 				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")))
 
 def create_website(args):

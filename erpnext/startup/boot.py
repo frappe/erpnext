@@ -5,12 +5,12 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
+from frappe.website.utils import get_website_settings
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
 
-	bootinfo.custom_css = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
-	bootinfo.website_settings = frappe.get_doc('Website Settings')
+	bootinfo.website_settings = get_website_settings()
 
 	if frappe.session['user']!='Guest':
 		update_page_info(bootinfo)
