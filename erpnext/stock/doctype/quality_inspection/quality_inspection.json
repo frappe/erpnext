@@ -224,7 +224,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nAccepted\nRejected",
+   "options": "\nAccepted\nRejected\nPartially Rejected\nSkipped",
    "reqd": 1
   }
  ],
