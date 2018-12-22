@@ -660,9 +660,6 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(work_order.qty) - flt(work_order.produced_qty))
-	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value('BOM',
-			work_order.bom_no, 'inspection_required')
 
 	if purpose=="Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse
@@ -672,8 +669,11 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
 		if purpose=="Manufacture":
-			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty,
-				company=work_order.company)
+			if work_order.bom_no:
+				stock_entry.inspection_required = frappe.db.get_value('BOM',
+					work_order.bom_no, 'inspection_required')
+
+			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.set_stock_entry_type()
