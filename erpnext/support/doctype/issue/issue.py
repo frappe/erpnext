@@ -142,8 +142,7 @@ class Issue(Document):
 						for support_day in support_days:
 							if weekday == support_day[0]:
 								time -= 1
-						if time != 0:
-							add_days += 1
+						add_days += 1
 		now_datetime += timedelta(days=add_days)
 		support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, time_diff_in_hours(support, utils.now_datetime())
@@ -173,25 +172,27 @@ class Issue(Document):
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
 									time_added = 1
-								if not hours:
-									time = datetime.combine(time.date(), end_time)
-								else:
-									#	If first day of the week then previous day is the last item of the list
-									if support_days.index(support_day) == 0:
-										prev_day_end_time = support_days[len(support_days)-1][2]
+								if not time.time() <= end_time and time.time() >= start_time:
+									if not hours:
+										time = datetime.combine(time.date(), end_time)
 									else:
-										prev_day_end_time = support_days[support_days.index(support_day)][2]
-									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
-									#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
+										#	If first day of the week then previous day is the last item of the list
+										if support_days.index(support_day) == 0:
+											prev_day_end_time = support_days[len(support_days)-1][2]
+										else:
+											prev_day_end_time = support_days[support_days.index(support_day)][2]
+										time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
+										#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
 							elif time.time() >= end_time:
 								if hours and time_added == 0:
 									time = datetime.combine(time.date()+timedelta(days=1), start_time)
 									time += timedelta(hours=hours)
 									time_added = 1
-								if not hours:
-									time = datetime.combine(time.date(), end_time)
-								else:
-									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
+								if not time.time() <= end_time and time.time() >= start_time:
+									if not hours:
+										time = datetime.combine(time.date(), end_time)
+									else:
+										time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
 							if time.date() in holidays:
 								continue
 							if time.time() <= end_time and time.time() >= start_time:
@@ -266,11 +267,11 @@ def update_issue(contact, method):
 def update_support_timer():
 	issues = frappe.get_list("Issue", filters={"service_contract_status": "Ongoing", "status": "Open"})
 	for issue in issues:
-		doc = frappe.get_doc("Issue", issue.name)
-		if float(doc.time_to_respond) > 0 and not doc.first_responded_on:
-			doc.time_to_respond = time_diff_in_hours(doc.response_by, utils.now_datetime())
-		if float(doc.time_to_resolve) > 0:
-			doc.time_to_resolve = time_diff_in_hours(doc.resolution_by, utils.now_datetime())
+		issue = frappe.get_doc("Issue", issue.name)
+		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
+			issue.time_to_respond = time_diff_in_hours(issue.response_by, utils.now_datetime())
+		if float(issue.time_to_resolve) > 0:
+			issue.time_to_resolve = time_diff_in_hours(issue.resolution_by, utils.now_datetime())
 		else:
-			doc.service_contract_status = "Failed"
-		doc.save()
+			issue.service_contract_status = "Failed"
+		issue.save()
