@@ -1,31 +1,31 @@
 {
- "add_total_row": 1, 
- "apply_user_permissions": 1, 
- "creation": "2013-07-30 18:35:10", 
- "disabled": 0, 
- "docstatus": 0, 
- "doctype": "Report", 
- "idx": 3, 
- "is_standard": "Yes", 
- "modified": "2017-11-06 13:04:26.094432", 
- "modified_by": "Administrator", 
- "module": "Accounts", 
- "name": "Received Items To Be Billed", 
- "owner": "Administrator", 
- "query": "select\n    `tabPurchase Receipt`.`name` as \"Purchase Receipt:Link/Purchase Receipt:120\",\n    `tabPurchase Receipt`.`supplier` as \"Supplier:Link/Supplier:120\",\n\t`tabPurchase Receipt`.`supplier_name` as \"Supplier Name::150\",\n\t`tabPurchase Receipt`.`posting_date` as \"Date:Date\",\n\t`tabPurchase Receipt Item`.`project` as \"Project\",\n\t`tabPurchase Receipt Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabPurchase Receipt Item`.`base_amount` - `tabPurchase Receipt Item`.`billed_amt`*ifnull(`tabPurchase Receipt`.conversion_rate, 1)) as \"Pending Amount:Currency:110\",\n\t`tabPurchase Receipt Item`.`item_name` as \"Item Name::150\",\n\t`tabPurchase Receipt Item`.`description` as \"Description::200\",\n\t`tabPurchase Receipt`.`company` as \"Company:Link/Company:\"\nfrom `tabPurchase Receipt`, `tabPurchase Receipt Item`\nwhere\n    `tabPurchase Receipt`.name = `tabPurchase Receipt Item`.parent \n    and `tabPurchase Receipt`.docstatus = 1 \n    and `tabPurchase Receipt`.status != \"Closed\" \n    and `tabPurchase Receipt Item`.amount > 0\n    and `tabPurchase Receipt Item`.billed_amt < `tabPurchase Receipt Item`.amount\norder by `tabPurchase Receipt`.`name` desc", 
- "ref_doctype": "Purchase Invoice", 
- "report_name": "Received Items To Be Billed", 
- "report_type": "Script Report", 
+ "add_total_row": 1,
+ "apply_user_permissions": 1,
+ "creation": "2013-07-30 18:35:10",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 3,
+ "is_standard": "Yes",
+ "modified": "2017-11-06 13:04:26.094432",
+ "modified_by": "Administrator",
+ "module": "Accounting",
+ "name": "Received Items To Be Billed",
+ "owner": "Administrator",
+ "query": "select\n    `tabPurchase Receipt`.`name` as \"Purchase Receipt:Link/Purchase Receipt:120\",\n    `tabPurchase Receipt`.`supplier` as \"Supplier:Link/Supplier:120\",\n\t`tabPurchase Receipt`.`supplier_name` as \"Supplier Name::150\",\n\t`tabPurchase Receipt`.`posting_date` as \"Date:Date\",\n\t`tabPurchase Receipt Item`.`project` as \"Project\",\n\t`tabPurchase Receipt Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabPurchase Receipt Item`.`base_amount` - `tabPurchase Receipt Item`.`billed_amt`*ifnull(`tabPurchase Receipt`.conversion_rate, 1)) as \"Pending Amount:Currency:110\",\n\t`tabPurchase Receipt Item`.`item_name` as \"Item Name::150\",\n\t`tabPurchase Receipt Item`.`description` as \"Description::200\",\n\t`tabPurchase Receipt`.`company` as \"Company:Link/Company:\"\nfrom `tabPurchase Receipt`, `tabPurchase Receipt Item`\nwhere\n    `tabPurchase Receipt`.name = `tabPurchase Receipt Item`.parent \n    and `tabPurchase Receipt`.docstatus = 1 \n    and `tabPurchase Receipt`.status != \"Closed\" \n    and `tabPurchase Receipt Item`.amount > 0\n    and `tabPurchase Receipt Item`.billed_amt < `tabPurchase Receipt Item`.amount\norder by `tabPurchase Receipt`.`name` desc",
+ "ref_doctype": "Purchase Invoice",
+ "report_name": "Received Items To Be Billed",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "Accounts User"
-  }, 
+  },
   {
    "role": "Purchase User"
-  }, 
+  },
   {
    "role": "Accounts Manager"
-  }, 
+  },
   {
    "role": "Auditor"
   }

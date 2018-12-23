@@ -572,7 +572,7 @@
  "max_attachments": 0,
  "modified": "2018-08-29 06:26:43.983024",
  "modified_by": "Administrator",
- "module": "Accounts",
+ "module": "Accounting",
  "name": "Shipping Rule",
  "owner": "Administrator",
  "permissions": [

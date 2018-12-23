@@ -1703,7 +1703,7 @@
  "menu_index": 0,
  "modified": "2018-09-06 06:30:32.703311",
  "modified_by": "Administrator",
- "module": "Accounts",
+ "module": "Accounting",
  "name": "Journal Entry",
  "owner": "Administrator",
  "permissions": [

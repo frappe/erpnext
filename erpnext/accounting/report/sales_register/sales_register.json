@@ -1,24 +1,24 @@
 {
- "add_total_row": 1, 
- "apply_user_permissions": 1, 
- "creation": "2013-04-23 18:15:29", 
- "disabled": 0, 
- "docstatus": 0, 
- "doctype": "Report", 
- "idx": 3, 
- "is_standard": "Yes", 
- "modified": "2017-02-24 20:14:35.208989", 
- "modified_by": "Administrator", 
- "module": "Accounts", 
- "name": "Sales Register", 
- "owner": "Administrator", 
- "ref_doctype": "Sales Invoice", 
- "report_name": "Sales Register", 
- "report_type": "Script Report", 
+ "add_total_row": 1,
+ "apply_user_permissions": 1,
+ "creation": "2013-04-23 18:15:29",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 3,
+ "is_standard": "Yes",
+ "modified": "2017-02-24 20:14:35.208989",
+ "modified_by": "Administrator",
+ "module": "Accounting",
+ "name": "Sales Register",
+ "owner": "Administrator",
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Sales Register",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "Accounts Manager"
-  }, 
+  },
   {
    "role": "Accounts User"
   }
