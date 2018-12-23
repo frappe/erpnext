@@ -17,6 +17,23 @@ class TestServiceLevel(unittest.TestCase):
 	
 def make_service_level():
 	employee_group = make_employee_group()
+	if not frappe.db.exists("Holiday List", "_Test Holiday List"):
+		holiday_list = frappe.get_doc({
+			"doctype": "Holiday List",
+			"holiday_list_name": "_Test Holiday List",
+			"from_date": "01-01-2019",
+			"to_date": "31-12-2019",
+			"holidays": [
+				{
+					"holiday_date": "01-01-2019",
+					"description": "_Test Holiday"
+				},
+				{
+					"holiday_date": "01-05-2019",
+					"description": "_Test Holiday"
+				}
+			]
+		}).insert()
 	service_level = frappe.get_doc({
 		"doctype": "Service Level",
 		"service_level": "_Test Service Level",
@@ -89,7 +106,6 @@ def make_service_level():
 			}
 		]
 	})
-
 	service_level_exist = frappe.db.exists("Service Level", "_Test Service Level")
 	if not service_level_exist:
 		service_level.insert()
