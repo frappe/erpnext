@@ -71,7 +71,7 @@ def get_data():
 
 		# old
 		{
-			"module_name": "Accounts",
+			"module_name": "Accounting",
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
 			"type": "module",
