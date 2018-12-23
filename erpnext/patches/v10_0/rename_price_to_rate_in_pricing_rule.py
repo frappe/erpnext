@@ -3,7 +3,7 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "pricing_rule")
+	frappe.reload_doc("accounting", "doctype", "pricing_rule")
 
 	try:
 		rename_field("Pricing Rule", "price_or_discount", "rate_or_discount")

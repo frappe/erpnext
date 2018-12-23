@@ -6,7 +6,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc("setup", 'doctype', "company")
-	frappe.reload_doc("accounts", 'doctype', "account")
+	frappe.reload_doc("accounting", 'doctype', "account")
 
 	frappe.db.sql("""update tabAccount set account_type='Cash'
 		where account_type='Bank or Cash' and account_name in ('Cash', 'Cash In Hand')""")

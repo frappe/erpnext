@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "tax_rule")
+	frappe.reload_doc("accounting", "doctype", "tax_rule")
 
 	customers = frappe.db.sql("""select name, default_taxes_and_charges from tabCustomer where
 		ifnull(default_taxes_and_charges, '') != '' """, as_dict=1)

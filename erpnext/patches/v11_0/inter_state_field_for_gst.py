@@ -9,10 +9,10 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "Employee Tax Exemption Proof Submission")
 	make_custom_fields()
 
-	frappe.reload_doc("accounts", "doctype", "sales_taxes_and_charges")
-	frappe.reload_doc("accounts", "doctype", "purchase_taxes_and_charges")
-	frappe.reload_doc("accounts", "doctype", "sales_taxes_and_charges_template")
-	frappe.reload_doc("accounts", "doctype", "purchase_taxes_and_charges_template")
+	frappe.reload_doc("accounting", "doctype", "sales_taxes_and_charges")
+	frappe.reload_doc("accounting", "doctype", "purchase_taxes_and_charges")
+	frappe.reload_doc("accounting", "doctype", "sales_taxes_and_charges_template")
+	frappe.reload_doc("accounting", "doctype", "purchase_taxes_and_charges_template")
 
 	# set is_inter_state in Taxes And Charges Templates
 	if frappe.db.has_column("Sales Taxes and Charges Template", "is_inter_state") and\

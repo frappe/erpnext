@@ -4,8 +4,8 @@ from frappe.email import sendmail_to_system_managers
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item')
 	frappe.reload_doc("stock", "doctype", "customs_tariff_number")
-	frappe.reload_doc("accounts", "doctype", "payment_terms_template")
-	frappe.reload_doc("accounts", "doctype", "payment_schedule")
+	frappe.reload_doc("accounting", "doctype", "payment_terms_template")
+	frappe.reload_doc("accounting", "doctype", "payment_schedule")
 
 	company = frappe.get_all('Company', filters = {'country': 'India'})
 	if not company:

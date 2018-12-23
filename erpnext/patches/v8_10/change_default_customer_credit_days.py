@@ -6,9 +6,9 @@ def execute():
 	frappe.reload_doc("selling", "doctype", "customer")
 	frappe.reload_doc("buying", "doctype", "supplier")
 	frappe.reload_doc("setup", "doctype", "supplier_type")
-	frappe.reload_doc("accounts", "doctype", "payment_term")
-	frappe.reload_doc("accounts", "doctype", "payment_terms_template_detail")
-	frappe.reload_doc("accounts", "doctype", "payment_terms_template")
+	frappe.reload_doc("accounting", "doctype", "payment_term")
+	frappe.reload_doc("accounting", "doctype", "payment_terms_template_detail")
+	frappe.reload_doc("accounting", "doctype", "payment_terms_template")
 
 	payment_terms = []
 	records = []

@@ -3,8 +3,8 @@ import frappe
 from erpnext.accounting.doctype.budget.budget import DuplicateBudgetError
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "budget")
-	frappe.reload_doc("accounts", "doctype", "budget_account")
+	frappe.reload_doc("accounting", "doctype", "budget")
+	frappe.reload_doc("accounting", "doctype", "budget_account")
 
 	existing_budgets = frappe.db.sql("""
 		select

@@ -5,7 +5,7 @@ from __future__ import print_function, unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "account")
+	frappe.reload_doc("accounting", "doctype", "account")
 
 	account_table_columns = frappe.db.get_table_columns("Account")
 	if "debit_or_credit" in account_table_columns and "is_pl_account" in account_table_columns:

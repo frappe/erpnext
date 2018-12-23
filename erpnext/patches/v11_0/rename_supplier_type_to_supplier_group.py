@@ -10,8 +10,8 @@ def execute():
 	elif frappe.db.table_exists("Supplier Type"):
 		rename_doc("DocType", "Supplier Type", "Supplier Group", force=True)
 		frappe.reload_doc('setup', 'doctype', 'supplier_group')
-		frappe.reload_doc("accounts", "doctype", "pricing_rule")
-		frappe.reload_doc("accounts", "doctype", "tax_rule")
+		frappe.reload_doc("accounting", "doctype", "pricing_rule")
+		frappe.reload_doc("accounting", "doctype", "tax_rule")
 		frappe.reload_doc("buying", "doctype", "buying_settings")
 		frappe.reload_doc("buying", "doctype", "supplier")
 		rename_field("Supplier Group", "supplier_type", "supplier_group_name")

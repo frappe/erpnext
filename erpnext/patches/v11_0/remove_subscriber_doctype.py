@@ -3,7 +3,7 @@ from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	""" copy subscribe field to customer """
-	frappe.reload_doc("accounts","doctype","subscription")
+	frappe.reload_doc("accounting","doctype","subscription")
 
 	if frappe.db.exists("DocType", "Subscriber"):
 		if frappe.db.has_column('Subscription','subscriber'):

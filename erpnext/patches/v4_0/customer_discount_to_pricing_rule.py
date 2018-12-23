@@ -6,7 +6,7 @@ import frappe
 from frappe.utils.nestedset import get_root_of
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "pricing_rule")
+	frappe.reload_doc("accounting", "doctype", "pricing_rule")
 
 	frappe.db.auto_commit_on_many_writes = True
 

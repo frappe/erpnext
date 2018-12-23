@@ -2,7 +2,7 @@ import frappe
 from erpnext import get_default_currency
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "journal_entry")
+	frappe.reload_doc("accounting", "doctype", "journal_entry")
 
 	frappe.db.sql(""" update `tabJournal Entry` set total_amount_currency = %s
 		where ifnull(multi_currency, 0) = 0

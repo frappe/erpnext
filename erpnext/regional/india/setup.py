@@ -82,7 +82,7 @@ def add_permissions():
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
-	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
+	frappe.reload_doc("accounting", "print_format", "gst_pos_invoice")
 
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('GST POS Invoice', 'GST Tax Invoice') """)

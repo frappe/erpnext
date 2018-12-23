@@ -2,7 +2,7 @@
 import frappe
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "sales_invoice_item")
+	frappe.reload_doc("accounting", "doctype", "sales_invoice_item")
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_item')
 	frappe.reload_doc('buying', 'doctype', 'purchase_order_item')
 	frappe.reload_doc('buying', 'doctype', 'supplier_quotation_item')

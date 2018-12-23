@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "sales_taxes_and_charges")
+	frappe.reload_doc("accounting", "doctype", "sales_taxes_and_charges")
 	docs_with_discount_amount = frappe._dict()
 	for dt in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 		records = frappe.db.sql_list("""select name from `tab%s`
