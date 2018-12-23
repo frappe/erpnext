@@ -109,7 +109,7 @@ def get_data():
 	]
 
 	for module, label, icon in (
-		("accounts", _("Accounts"), "fa fa-money"),
+		("accounting", _("Accounting"), "fa fa-money"),
 		("stock", _("Stock"), "fa fa-truck"),
 		("selling", _("Selling"), "fa fa-tag"),
 		("buying", _("Buying"), "fa fa-shopping-cart"),
