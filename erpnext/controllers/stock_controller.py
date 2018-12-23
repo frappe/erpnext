@@ -6,8 +6,8 @@ import frappe, erpnext
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
+from erpnext.accounting.utils import get_fiscal_year
+from erpnext.accounting.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
@@ -193,7 +193,7 @@ class StockController(AccountsController):
 						reference_name=self.name)).insert().name
 
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
-		from erpnext.accounts.utils import get_stock_and_account_difference
+		from erpnext.accounting.utils import get_stock_and_account_difference
 		account_list = [d.account for d in expected_gle]
 		acc_diff = get_stock_and_account_difference(account_list, expected_gle[0].posting_date)
 
@@ -223,7 +223,7 @@ class StockController(AccountsController):
 				])
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
+			from erpnext.accounting.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries)
 
 	def check_expense_account(self, item):

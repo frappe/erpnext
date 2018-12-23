@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import flt,cint, cstr, getdate
 
-from erpnext.accounts.party import get_party_details
+from erpnext.accounting.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -14,7 +14,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_i
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
 
-from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounting.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):

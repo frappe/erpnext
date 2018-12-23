@@ -7,9 +7,9 @@ from frappe import _
 from frappe.utils import get_fullname, flt, cstr
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
-from erpnext.accounts.party import get_party_account
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounting.party import get_party_account
+from erpnext.accounting.general_ledger import make_gl_entries
+from erpnext.accounting.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils.csvutils import getlink
 
@@ -18,7 +18,7 @@ class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def validate(self):
@@ -103,7 +103,7 @@ class ExpenseClaim(AccountsController):
 		self.validate_account_details()
 
 		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance_amount)
-		
+
 		# payable entry
 		if payable_amount:
 			gl_entry.append(
@@ -233,7 +233,7 @@ class ExpenseClaim(AccountsController):
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 
@@ -245,7 +245,7 @@ def update_reimbursed_amount(doc):
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
-	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+	from erpnext.accounting.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
 	expense_claim = frappe.get_doc(dt, dn)
 	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
@@ -288,7 +288,7 @@ def get_expense_claim_account(expense_claim_type, company):
 	if not account:
 		frappe.throw(_("Please set default account in Expense Claim Type {0}")
 			.format(expense_claim_type))
-	
+
 	return {
 		"account": account
 	}
@@ -301,9 +301,9 @@ def get_advances(employee, advance_id=None):
 		condition = 'name="{0}"'.format(frappe.db.escape(advance_id))
 
 	return frappe.db.sql("""
-		select 
+		select
 			name, posting_date, paid_amount, claimed_amount, advance_account
-		from 
+		from
 			`tabEmployee Advance`
 		where {0}
 	""".format(condition), as_dict=1)

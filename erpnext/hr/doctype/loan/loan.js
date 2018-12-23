@@ -146,7 +146,7 @@ frappe.ui.form.on('Loan', {
 						'payment_date': payment.payment_date,
 						'principal_amount': payment.principal_amount,
 						'interest_amount': payment.interest_amount,
-						'total_payment': payment.total_payment 
+						'total_payment': payment.total_payment
 					});
 					dialog.fields_dict.payments.grid.refresh();
 					$(dialog.wrapper.find(".grid-buttons")).hide();
@@ -173,7 +173,7 @@ frappe.ui.form.on('Loan', {
 
 	mode_of_payment: function (frm) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+			method: "erpnext.accounting.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
 				"mode_of_payment": frm.doc.mode_of_payment,
 				"company": frm.doc.company

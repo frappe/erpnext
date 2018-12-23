@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
-from erpnext.accounts.utils import get_company_default
+from erpnext.accounting.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance
 
 class OpeningEntryAccountError(frappe.ValidationError): pass

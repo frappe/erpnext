@@ -5,7 +5,7 @@ frappe.provide("erpnext.buying");
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
 
-{% include 'erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js' %}
+{% include 'erpnext/accounting/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js' %}
 
 cur_frm.email_field = "contact_email";
 
@@ -119,7 +119,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
 			item_rate = item.blanket_order_rate;
 		}
-		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;		
+		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
 		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
 
 		this.calculate_taxes_and_totals();
@@ -266,26 +266,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 								d.qty = d.qty  - my_qty;
 								cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 								cur_frm.doc.items[i].qty = my_qty;
-	
+
 								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
 								if (qty > 0)
 								{
 									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
 									var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 									item_length++;
-	
+
 									for (var key in cur_frm.doc.items[i])
 									{
 										newrow[key] = cur_frm.doc.items[i][key];
 									}
-	
+
 									newrow.idx = item_length;
 									newrow["stock_qty"] = newrow.conversion_factor*qty;
 									newrow["qty"] = qty;
-	
+
 									newrow["material_request"] = "";
 									newrow["material_request_item"] = "";
-	
+
 								}
 							}
 						});
@@ -302,7 +302,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if (doc.auto_repeat) {
 			frappe.call({
 				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
-				args:{ 
+				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
 				},

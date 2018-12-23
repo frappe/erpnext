@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounting.party import get_party_account_currency
 
 subject_field = "title"
 sender_field = "contact_email"

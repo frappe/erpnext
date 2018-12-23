@@ -9,7 +9,7 @@ import frappe.defaults
 from frappe.utils import flt, cint, cstr, today
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext.accounting.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.rename_doc import update_linked_doctypes
 
@@ -38,7 +38,7 @@ class Customer(TransactionBase):
 
 	def get_loyalty_points(self):
 		if self.loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
+			from erpnext.accounting.doctype.loyalty_program.loyalty_program import get_loyalty_details
 			return get_loyalty_details(self.name, self.loyalty_program)
 
 	def get_customer_name(self):

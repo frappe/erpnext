@@ -124,7 +124,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 
 	else:
 		so = frappe.get_doc("Sales Order", so)
-	
+
 	frappe.db.commit()
 	return so
 
@@ -146,7 +146,7 @@ def set_cost_center(items, cost_center):
 		item.cost_center = cost_center
 
 def make_payament_entry_against_sales_invoice(doc, shopify_settings):
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+	from erpnext.accounting.doctype.payment_entry.payment_entry import get_payment_entry
 	payemnt_entry = get_payment_entry(doc.doctype, doc.name, bank_account=shopify_settings.cash_bank_account)
 	payemnt_entry.flags.ignore_mandatory = True
 	payemnt_entry.reference_no = doc.name

@@ -5,7 +5,7 @@ import unittest
 import erpnext
 import frappe
 from dateutil.relativedelta import relativedelta
-from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
+from erpnext.accounting.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \

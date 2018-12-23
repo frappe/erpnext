@@ -10,7 +10,7 @@ from frappe.utils import cint, flt, cstr, today, random_string
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounting.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
@@ -337,7 +337,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.db.sql("delete from `tabAsset`")
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounting.doctype.cost_center.test_cost_center import create_cost_center
 		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
 		accounts_settings.save()
@@ -352,7 +352,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		set_perpetual_inventory(1, "_Test Company")
 		pr = make_purchase_receipt(cost_center=cost_center)
-		
+
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 

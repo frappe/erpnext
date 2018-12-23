@@ -14,7 +14,7 @@ from frappe.permissions import add_user_permission, remove_user_permission
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make_item_variant, create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounting.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
 
 from six import iteritems

@@ -7,7 +7,7 @@ import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounting.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):

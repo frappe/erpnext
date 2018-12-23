@@ -232,7 +232,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			? "Inward" : "Outward";
 
 		frappe.call({
-			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+			method:"erpnext.accounting.doctype.payment_request.payment_request.make_payment_request",
 			args: {
 				dt: me.frm.doc.doctype,
 				dn: me.frm.doc.name,
@@ -558,7 +558,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if(party && me.frm.doc.company) {
 					return frappe.call({
-						method: "erpnext.accounts.party.get_party_account",
+						method: "erpnext.accounting.party.get_party_account",
 						args: {
 							company: me.frm.doc.company,
 							party_type: party_type,
@@ -612,7 +612,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if ((this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) ||
 				(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.supplier)) {
 				return frappe.call({
-					method: "erpnext.accounts.party.get_due_date",
+					method: "erpnext.accounting.party.get_due_date",
 					args: {
 						"posting_date": me.frm.doc.posting_date,
 						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
@@ -1066,7 +1066,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 			return this.frm.call({
-				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+				method: "erpnext.accounting.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
 				args: { item_list: item_list },
 				callback: function(r) {
 					if (!r.exc && r.message) {
@@ -1089,7 +1089,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 		return this.frm.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
+			method: "erpnext.accounting.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc && r.message) {
@@ -1367,12 +1367,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_method_for_payment: function(){
-		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
+		var method = "erpnext.accounting.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
 			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
-				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice";
+				method = "erpnext.accounting.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice";
 			}else {
-				method= "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order";
+				method= "erpnext.accounting.doctype.journal_entry.journal_entry.get_payment_entry_against_order";
 			}
 		}
 

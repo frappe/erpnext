@@ -7,10 +7,10 @@ from frappe.model.document import Document
 import frappe, erpnext
 from frappe import _
 from frappe.utils import money_in_words
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounting.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import delete_gl_entries
+from erpnext.accounting.general_ledger import delete_gl_entries
 
 
 class Fees(AccountsController):
@@ -104,7 +104,7 @@ class Fees(AccountsController):
 			"credit_in_account_currency": self.grand_total,
 			"cost_center": self.cost_center
 		})
-		from erpnext.accounts.general_ledger import make_gl_entries
+		from erpnext.accounting.general_ledger import make_gl_entries
 		make_gl_entries([student_gl_entries, fee_gl_entry], cancel=(self.docstatus == 2),
 			update_outstanding="Yes", merge_entries=False)
 

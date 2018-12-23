@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import cstr, getdate
 from frappe.utils.file_manager import save_file
 from .default_website import website_maker
-from erpnext.accounts.doctype.account.account import RootNotEditable
+from erpnext.accounting.doctype.account.account import RootNotEditable
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):

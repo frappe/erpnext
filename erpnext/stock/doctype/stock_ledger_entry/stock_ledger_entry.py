@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.document import Document
 from datetime import date
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounting.utils import get_fiscal_year
 
 class StockFreezeError(frappe.ValidationError): pass
 
@@ -115,7 +115,7 @@ class StockLedgerEntry(Document):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
 		else:
-			from erpnext.accounts.utils import validate_fiscal_year
+			from erpnext.accounting.utils import validate_fiscal_year
 			validate_fiscal_year(self.posting_date, self.fiscal_year, self.company,
 				self.meta.get_label("posting_date"), self)
 
@@ -132,4 +132,4 @@ def on_doctype_update():
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
-	
+

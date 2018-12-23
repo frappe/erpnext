@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import frappe
 
-from erpnext.accounts.doctype.gl_entry.gl_entry import update_against_account
+from erpnext.accounting.doctype.gl_entry.gl_entry import update_against_account
 
 def execute():
     from_date = "2015-05-01"

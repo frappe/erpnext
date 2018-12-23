@@ -7,11 +7,11 @@ import json
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
+from erpnext.accounting.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.accounting.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 
@@ -173,7 +173,7 @@ class AccountsController(TransactionBase):
 	def validate_due_date(self):
 		if self.get('is_pos'): return
 
-		from erpnext.accounts.party import validate_due_date
+		from erpnext.accounting.party import validate_due_date
 		if self.doctype == "Sales Invoice":
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
@@ -527,7 +527,7 @@ class AccountsController(TransactionBase):
 				lst.append(args)
 
 		if lst:
-			from erpnext.accounts.utils import reconcile_against_document
+			from erpnext.accounting.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
@@ -563,7 +563,7 @@ class AccountsController(TransactionBase):
 							item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
-		from erpnext.accounts.utils import get_company_default
+		from erpnext.accounting.utils import get_company_default
 		return get_company_default(self.company, fieldname)
 
 	def get_stock_items(self):

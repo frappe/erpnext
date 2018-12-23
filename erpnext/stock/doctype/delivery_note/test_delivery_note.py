@@ -9,7 +9,7 @@ import json
 import frappe.defaults
 from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt, today
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.accounts.utils import get_balance_on
+from erpnext.accounting.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import get_gl_entries, set_perpetual_inventory
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_delivery_trip
@@ -19,7 +19,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWa
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.accounting.doctype.account.test_account import get_inventory_account, create_account
 
 class TestDeliveryNote(unittest.TestCase):
 	def tearDown(self):
@@ -550,7 +550,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_dn_billing_status_case4(self):
 		# SO -> SI -> DN
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
+		from erpnext.accounting.doctype.sales_invoice.sales_invoice import make_delivery_note
 
 		so = make_sales_order()
 
@@ -570,7 +570,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
 
 	def test_delivery_note_for_enable_allow_cost_center_in_entry_of_bs_account(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounting.doctype.cost_center.test_cost_center import create_cost_center
 		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
 		accounts_settings.save()

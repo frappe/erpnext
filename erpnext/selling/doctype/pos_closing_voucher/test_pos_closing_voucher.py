@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounting.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounting.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPOSClosingVoucher(unittest.TestCase):
 	def test_pos_closing_voucher(self):

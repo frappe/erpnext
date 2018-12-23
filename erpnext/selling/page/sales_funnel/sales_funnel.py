@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe import _
-from erpnext.accounts.report.utils import convert
+from erpnext.accounting.report.utils import convert
 import pandas as pd
 
 @frappe.whitelist()
@@ -15,7 +15,7 @@ def get_funnel_data(from_date, to_date, company):
 		and status != "Do Not Contact" and company=%s""", (from_date, to_date, company))[0][0]
 
 	active_leads += frappe.db.sql("""select count(distinct contact.name) from `tabContact` contact
-		left join `tabDynamic Link` dl on (dl.parent=contact.name) where dl.link_doctype='Customer' 
+		left join `tabDynamic Link` dl on (dl.parent=contact.name) where dl.link_doctype='Customer'
 		and (date(contact.modified) between %s and %s) and status != "Passive" """, (from_date, to_date))[0][0]
 
 	opportunities = frappe.db.sql("""select count(*) from `tabOpportunity`
@@ -72,7 +72,7 @@ def get_pipeline_data(from_date, to_date, company):
 
 	if opportunities:
 		default_currency = frappe.get_cached_value('Global Defaults', 'None',  'default_currency')
-		
+
 		cp_opportunities = [dict(x, **{'compound_amount': (convert(x['opportunity_amount'], x['currency'], default_currency, to_date) * x['probability']/100)}) for x in opportunities]
 
 		df = pd.DataFrame(cp_opportunities).groupby(['sales_stage'], as_index=True).agg({'compound_amount': 'sum'}).to_dict()

@@ -6,7 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import getdate, flt
 from six import iteritems
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounting.utils import get_fiscal_year
 
 def execute(filters=None):
 	return Analytics(filters).run()

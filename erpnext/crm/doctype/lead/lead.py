@@ -9,7 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 from frappe.contacts.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import set_taxes
+from erpnext.accounting.party import set_taxes
 
 sender_field = "email_id"
 
@@ -176,7 +176,7 @@ def make_quotation(source_name, target_doc=None):
 def get_lead_details(lead, posting_date=None, company=None):
 	if not lead: return {}
 
-	from erpnext.accounts.party import set_address_details
+	from erpnext.accounting.party import set_address_details
 	out = frappe._dict()
 
 	lead_doc = frappe.get_doc("Lead", lead)

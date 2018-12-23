@@ -10,8 +10,8 @@ from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounting.general_ledger import make_gl_entries, delete_gl_entries
+from erpnext.accounting.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Asset(AccountsController):
@@ -388,7 +388,7 @@ class Asset(AccountsController):
 			}))
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
+			from erpnext.accounting.general_ledger import make_gl_entries
 
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)

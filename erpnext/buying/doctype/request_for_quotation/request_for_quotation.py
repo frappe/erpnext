@@ -11,7 +11,7 @@ from frappe.utils.user import get_user_fullname
 from frappe.utils.print_format import download_pdf
 from frappe.desk.form.load import get_attachments
 from frappe.core.doctype.communication.email import make
-from erpnext.accounts.party import get_party_account_currency, get_party_details
+from erpnext.accounting.party import get_party_account_currency, get_party_details
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.buying.utils import validate_for_items

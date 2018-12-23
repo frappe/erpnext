@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounting.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)

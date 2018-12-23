@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext.accounting.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
 
 class Supplier(TransactionBase):

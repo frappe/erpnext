@@ -56,7 +56,7 @@ class SellingController(StockController):
 
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
-			from erpnext.accounts.party import _get_party_details
+			from erpnext.accounting.party import _get_party_details
 			fetch_payment_terms_template = False
 			if (self.get("__islocal") or
 				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):

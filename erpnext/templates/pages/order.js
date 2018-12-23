@@ -11,7 +11,7 @@ frappe.ready(function(){
 		var loyalty_points = parseInt(loyalty_points_input.value);
 		if (loyalty_points) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_redeemption_factor",
+				method: "erpnext.accounting.doctype.loyalty_program.loyalty_program.get_redeemption_factor",
 				args: {
 					"customer": doc_info.customer
 				},
@@ -29,7 +29,7 @@ frappe.ready(function(){
 							var remaining_amount = flt(doc_info.grand_total) - flt(loyalty_amount);
 							var payment_button = document.getElementById("pay-for-order");
 							payment_button.innerHTML = __("Pay Remaining");
-							payment_button.href = "/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn="+doc_info.doctype_name+"&dt="+doc_info.doctype+"&loyalty_points="+loyalty_points+"&submit_doc=1&order_type=Shopping Cart";
+							payment_button.href = "/api/method/erpnext.accounting.doctype.payment_request.payment_request.make_payment_request?dn="+doc_info.doctype_name+"&dt="+doc_info.doctype+"&loyalty_points="+loyalty_points+"&submit_doc=1&order_type=Shopping Cart";
 						}
 						loyalty_points_status.innerHTML = message;
 					}

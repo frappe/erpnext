@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_fullname, cstr
 from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
-from erpnext.accounts.utils import get_account_name
+from erpnext.accounting.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
 
 
@@ -288,7 +288,7 @@ def _set_price_list(quotation, cart_settings):
 	# check if customer price list exists
 	selling_price_list = None
 	if quotation.customer:
-		from erpnext.accounts.party import get_default_price_list
+		from erpnext.accounting.party import get_default_price_list
 		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.customer))
 
 	# else check for territory based price list
@@ -299,7 +299,7 @@ def _set_price_list(quotation, cart_settings):
 
 def set_taxes(quotation, cart_settings):
 	"""set taxes based on billing territory"""
-	from erpnext.accounts.party import set_taxes
+	from erpnext.accounting.party import set_taxes
 
 	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
 

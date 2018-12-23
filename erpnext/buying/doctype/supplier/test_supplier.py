@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 
 import frappe, unittest
-from erpnext.accounts.party import get_due_date
+from erpnext.accounting.party import get_due_date
 from erpnext.exceptions import PartyDisabled
 from frappe.test_runner import make_test_records
 

@@ -7,7 +7,7 @@ import frappe, random, json, erpnext
 from frappe.utils.make_random import how_many, get_random
 from frappe.desk import query_report
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounting.party import get_party_account_currency
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.material_request.material_request import make_request_for_quotation
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \

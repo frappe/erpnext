@@ -142,7 +142,7 @@ frappe.ui.form.on('Stock Entry', {
 		if (frm.doc.docstatus===0) {
 			frm.add_custom_button(__('Purchase Invoice'), function() {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
+					method: "erpnext.accounting.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
 					source_doctype: "Purchase Invoice",
 					target: frm,
 					date_field: "posting_date",
@@ -615,7 +615,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		if(this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
+				method: "erpnext.accounting.utils.get_company_default",
 				args: {
 					"fieldname": "stock_adjustment_account",
 					"company": this.frm.doc.company

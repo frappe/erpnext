@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from frappe.utils import flt,cstr
-from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounting.report.financial_statements import get_period_list
 
 def execute(filters=None):
 	columns, data, chart = [], [], []

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import cint, fmt_money, flt, nowdate, getdate
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.accounting.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):

@@ -81,7 +81,7 @@ def get_due_advance_amount(employee, posting_date):
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
-	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+	from erpnext.accounting.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
 	doc = frappe.get_doc(dt, dn)
 	payment_account = get_default_bank_cash_account(doc.company, account_type="Cash",

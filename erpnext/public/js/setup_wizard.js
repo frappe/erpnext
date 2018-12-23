@@ -149,7 +149,7 @@ erpnext.setup.slides_settings = [
 			if(me.values.bank_account){
 				frappe.call({
 					async: false,
-					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
+					method: "erpnext.accounting.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
 					args: {
 						"coa": me.values.chart_of_accounts,
 						"bank_account": me.values.bank_account
@@ -210,7 +210,7 @@ erpnext.setup.slides_settings = [
 
 			if (country) {
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+					method: "erpnext.accounting.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 					args: { "country": country, with_standard: true },
 					callback: function (r) {
 						if (r.message) {
@@ -268,7 +268,7 @@ erpnext.setup.slides_settings = [
 				parent: $(dialog.body),
 				label: parent,
 				expandable: true,
-				method: 'erpnext.accounts.utils.get_coa',
+				method: 'erpnext.accounting.utils.get_coa',
 				args: {
 					chart: chart_template,
 					parent: parent,

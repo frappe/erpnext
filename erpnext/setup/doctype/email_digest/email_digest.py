@@ -10,7 +10,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
 import frappe.desk.notifications
-from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
+from erpnext.accounting.utils import get_balance_on, get_count_on, get_fiscal_year
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -544,11 +544,11 @@ def get_digest_msg(name):
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
 		"""Get amounts for current and past periods"""
-		
+
 		val = 0.0
 		balance_on_to_date = get_balance_on(account, date = to_date)
 		balance_before_from_date = get_balance_on(account, date = from_date - timedelta(days=1))
-	
+
 		fy_start_date = get_fiscal_year(to_date)[1]
 
 		if from_date == fy_start_date:

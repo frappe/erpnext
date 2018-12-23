@@ -208,7 +208,7 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounting.doctype.payment_request.payment_request.make_status_as_paid"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
@@ -225,7 +225,7 @@ doc_events = {
 scheduler_events = {
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
+		"erpnext.accounting.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details"
 	],
 	"daily": [
@@ -234,7 +234,7 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
-		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
+		"erpnext.accounting.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
@@ -251,8 +251,8 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
 	"monthly": [
-		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
-		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
+		"erpnext.accounting.deferred_revenue.convert_deferred_revenue_to_income",
+		"erpnext.accounting.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }
@@ -278,7 +278,7 @@ bot_parsers = [
 
 get_site_info = 'erpnext.utilities.get_site_info'
 
-payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
+payment_gateway_enabled = "erpnext.accounting.utils.create_payment_gateway_account"
 
 regional_overrides = {
 	'France': {
@@ -288,7 +288,7 @@ regional_overrides = {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
-		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
+		'erpnext.accounting.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period'
 	},

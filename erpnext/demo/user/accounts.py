@@ -8,10 +8,10 @@ import frappe
 import random
 from frappe.utils import random_string
 from frappe.desk import query_report
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounting.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
+from erpnext.accounting.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils.make_random import get_random
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
+from erpnext.accounting.doctype.payment_request.payment_request import make_payment_request, make_payment_entry
 from erpnext.demo.user.sales import make_sales_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice

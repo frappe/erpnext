@@ -180,7 +180,7 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 	supplier: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn]
 		frappe.call({
-			method:"erpnext.accounts.party.get_party_details",
+			method:"erpnext.accounting.party.get_party_details",
 			args:{
 				party: d.supplier,
 				party_type: 'Supplier'

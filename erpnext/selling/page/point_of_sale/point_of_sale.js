@@ -126,7 +126,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					var me = this;
 					if (this.frm.doc.customer) {
 						frappe.call({
-							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+							method: "erpnext.accounting.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
 							args: {
 								"customer": me.frm.doc.customer,
 								"expiry_date": me.frm.doc.posting_date,
@@ -381,7 +381,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 				if (set_as_default) {
 					frappe.call({
-						method: "erpnext.accounts.doctype.pos_profile.pos_profile.set_default_profile",
+						method: "erpnext.accounting.doctype.pos_profile.pos_profile.set_default_profile",
 						args: {
 							'pos_profile': pos_profile,
 							'company': this.frm.doc.company
@@ -425,7 +425,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			reqd: 1,
 			get_query: () => {
 				return {
-					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+					query: 'erpnext.accounting.doctype.pos_profile.pos_profile.pos_profile_query',
 					filters: {
 						company: this.frm.doc.company
 					}

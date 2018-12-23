@@ -105,7 +105,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.login_as_customer()
 		quotation = self.create_quotation()
 
-		from erpnext.accounts.party import set_taxes
+		from erpnext.accounting.party import set_taxes
 
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \

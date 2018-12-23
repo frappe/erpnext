@@ -75,7 +75,7 @@ frappe.ui.form.on('Employee Loan', {
 	mode_of_payment: function (frm) {
 		if (frm.doc.mode_of_payment && frm.doc.company) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+				method: "erpnext.accounting.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 				args: {
 					"mode_of_payment": frm.doc.mode_of_payment,
 					"company": frm.doc.company

@@ -7,7 +7,7 @@ import frappe
 import erpnext
 import calendar
 import random
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounting.utils import get_fiscal_year
 from frappe.utils.make_random import get_random
 from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip

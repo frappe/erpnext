@@ -3,7 +3,7 @@
 
 
 cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-{% include 'erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
+{% include 'erpnext/accounting/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
 
 
 cur_frm.email_field = "contact_email";
@@ -184,7 +184,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.calculate_incentive(sales_person);
 			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
 				sales_person.parentfield);
-		}	
+		}
 	},
 
 	sales_person: function(doc, cdt, cdn) {
@@ -396,7 +396,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if (doc.auto_repeat) {
 			frappe.call({
 				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
-				args:{ 
+				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
 				},

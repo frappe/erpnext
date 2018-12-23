@@ -5,7 +5,7 @@ frappe.provide("erpnext.utils");
 
 erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if(!method) {
-		method = "erpnext.accounts.party.get_party_details";
+		method = "erpnext.accounting.party.get_party_details";
 	}
 	if(!args) {
 		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
@@ -128,7 +128,7 @@ erpnext.utils.set_taxes = function(frm, address_field, display_field, is_your_co
 	}
 
 	frappe.call({
-		method: "erpnext.accounts.party.set_taxes",
+		method: "erpnext.accounting.party.set_taxes",
 		args: {
 			"party": party,
 			"party_type": party_type,

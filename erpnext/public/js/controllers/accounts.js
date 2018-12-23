@@ -64,7 +64,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				}
 			})
 		}
-	}	
+	}
 });
 
 frappe.ui.form.on('Sales Invoice Payment', {
@@ -128,7 +128,7 @@ var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 	}
 
 	return  frappe.call({
-		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+		method: "erpnext.accounting.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 		args: {
 			"mode_of_payment": mode_of_payment,
 			"company": frm.doc.company

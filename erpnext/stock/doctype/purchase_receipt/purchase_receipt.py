@@ -10,7 +10,7 @@ from frappe import throw, _
 import frappe.defaults
 from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounting.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account
@@ -125,7 +125,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.status = "Completed"
 
-		
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -171,7 +171,7 @@ class PurchaseReceipt(BuyingController):
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 	def get_gl_entries(self, warehouse_account=None):
-		from erpnext.accounts.general_ledger import process_gl_map
+		from erpnext.accounting.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -311,7 +311,7 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
-		
+
 	def get_asset_gl_entry(self, gl_entries):
 		for d in self.get("items"):
 			if d.is_fixed_asset:

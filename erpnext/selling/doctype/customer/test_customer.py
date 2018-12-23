@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-from erpnext.accounts.party import get_due_date
+from erpnext.accounting.party import get_due_date
 from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
@@ -28,7 +28,7 @@ class TestCustomer(unittest.TestCase):
 		frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 0.0)
 
 	def test_party_details(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounting.party import get_party_details
 
 		to_check = {
 			'selling_price_list': None,
@@ -143,7 +143,7 @@ class TestCustomer(unittest.TestCase):
 
 	def test_customer_credit_limit(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.accounting.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 

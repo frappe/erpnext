@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounting.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
 def execute(filters=None):

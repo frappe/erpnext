@@ -166,7 +166,7 @@ $.extend(erpnext.utils, {
 
 	make_bank_account: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
+			method: "erpnext.accounting.doctype.bank_account.bank_account.make_bank_account",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -195,7 +195,7 @@ $.extend(erpnext.utils, {
 
 	make_pricing_rule: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
+			method: "erpnext.accounting.doctype.pricing_rule.pricing_rule.make_pricing_rule",
 			args: {
 				doctype: doctype,
 				docname: docname

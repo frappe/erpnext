@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt, nowdate, nowtime
-from erpnext.accounts.utils import get_stock_and_account_difference
+from erpnext.accounting.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError

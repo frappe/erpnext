@@ -17,7 +17,7 @@ def execute(filters=None):
 	bom_rate = get_item_bom_rate()
 	val_rate_map = get_valuation_rate()
 
-	from erpnext.accounts.utils import get_currency_precision
+	from erpnext.accounting.utils import get_currency_precision
 	precision = get_currency_precision() or 2
 	data = []
 	for item in sorted(item_map):

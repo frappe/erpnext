@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.accounts.doctype.budget.budget import DuplicateBudgetError
+from erpnext.accounting.doctype.budget.budget import DuplicateBudgetError
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "budget")

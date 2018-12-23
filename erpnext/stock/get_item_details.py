@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr, add_months
 import json
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
+from erpnext.accounting.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no

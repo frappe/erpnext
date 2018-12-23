@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, copy, os, json
 from frappe.utils import flt
-from erpnext.accounts.doctype.account.account import RootNotEditable
+from erpnext.accounting.doctype.account.account import RootNotEditable
 
 def create_sales_tax(args):
 	country_wise_tax = get_country_wise_tax(args.get("country"))

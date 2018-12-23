@@ -4,7 +4,7 @@
 from __future__ import print_function, unicode_literals
 
 import frappe
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
+from erpnext.accounting.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from .default_success_action import get_default_success_action
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
