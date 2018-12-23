@@ -132,61 +132,61 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// delivery note
 				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
-						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
+						function() { me.make_delivery_note_based_on_delivery_date(); }, __('Create'));
 					this.frm.add_custom_button(__('Work Order'),
-						function() { me.make_work_order() }, __("Make"));
+						function() { me.make_work_order() }, __('Create'));
 
-					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
+					this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 				}
 
 				// sales invoice
 				if(flt(doc.per_billed, 6) < 100) {
 					this.frm.add_custom_button(__('Invoice'),
-						function() { me.make_sales_invoice() }, __("Make"));
+						function() { me.make_sales_invoice() }, __('Create'));
 				}
 
 				// material request
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
 					&& flt(doc.per_delivered, 6) < 100) {
 					this.frm.add_custom_button(__('Material Request'),
-						function() { me.make_material_request() }, __("Make"));
+						function() { me.make_material_request() }, __('Create'));
 					this.frm.add_custom_button(__('Request for Raw Materials'),
-						function() { me.make_raw_material_request() }, __("Make"));
+						function() { me.make_raw_material_request() }, __('Create'));
 				}
 
 				// make purchase order
 				if(flt(doc.per_delivered, 6) < 100 && allow_purchase) {
 					this.frm.add_custom_button(__('Purchase Order'),
-						function() { me.make_purchase_order() }, __("Make"));
+						function() { me.make_purchase_order() }, __('Create'));
 				}
 
 				// payment request
 				if(flt(doc.per_billed)==0) {
 					this.frm.add_custom_button(__('Payment Request'),
-						function() { me.make_payment_request() }, __("Make"));
+						function() { me.make_payment_request() }, __('Create'));
 					this.frm.add_custom_button(__('Payment'),
-						function() { me.make_payment_entry() }, __("Make"));
+						function() { me.make_payment_entry() }, __('Create'));
 				}
 
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 &&
 						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
 					this.frm.add_custom_button(__('Maintenance Visit'),
-						function() { me.make_maintenance_visit() }, __("Make"));
+						function() { me.make_maintenance_visit() }, __('Create'));
 					this.frm.add_custom_button(__('Maintenance Schedule'),
-						function() { me.make_maintenance_schedule() }, __("Make"));
+						function() { me.make_maintenance_schedule() }, __('Create'));
 				}
 
 				// project
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 						this.frm.add_custom_button(__('Project'),
-							function() { me.make_project() }, __("Make"));
+							function() { me.make_project() }, __('Create'));
 				}
 
 				if(!doc.auto_repeat) {
 					this.frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(doc.doctype, doc.name)
-					}, __("Make"))
+					}, __('Create'))
 				}
 
 			} else {
@@ -292,7 +292,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								}
 							});
 						},
-						primary_action_label: __('Make')
+						primary_action_label: __('Create')
 					});
 					d.show();
 				}
@@ -390,7 +390,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 				});
 			},
-			primary_action_label: __('Make')
+			primary_action_label: __('Create')
 		});
 		d.show();
 	},
@@ -506,7 +506,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}
 					}},
 
-				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
+				{"fieldtype": "Button", "label": __('Create Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
 
