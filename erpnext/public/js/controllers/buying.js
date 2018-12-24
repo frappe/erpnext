@@ -68,12 +68,19 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if(me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
-			} else {
+			}
+			else if (me.frm.doc.material_request_type == "Customer Provided") {
+				return{
+					query: "erpnext.controllers.queries.item_query",
+					filters:{ 'customer': me.frm.doc.customer }
+				}
+			}
+			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters: {'is_purchase_item': 1}

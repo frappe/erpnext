@@ -104,7 +104,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, name
@@ -115,7 +115,7 @@ class ProductionPlan(Document):
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
@@ -139,7 +139,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code ='{0}'".format(frappe.db.escape(self.item_code))
+			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -325,8 +325,8 @@ class ProductionPlan(Document):
 		for item in self.mr_items:
 			item_doc = frappe.get_cached_doc('Item', item.item_code)
 
-			# key for Sales Order:Material Request Type
-			key = '{}:{}'.format(item.sales_order, item_doc.default_material_request_type)
+			# key for Sales Order:Material Request Type:Customer
+			key = '{}:{}:{}'.format(item.sales_order, item_doc.default_material_request_type,item_doc.customer or '')
 			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
@@ -338,7 +338,8 @@ class ProductionPlan(Document):
 					"status": "Draft",
 					"company": self.company,
 					"requested_by": frappe.session.user,
-					'material_request_type': item_doc.default_material_request_type
+					'material_request_type': item_doc.default_material_request_type,
+					'customer': item_doc.customer or ''
 				})
 				material_request_list.append(material_request)
 			else:
@@ -499,7 +500,7 @@ def get_bin_details(row):
 	conditions = ""
 	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
 	if warehouse:
-		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
+		conditions = " and warehouse={0}".format(frappe.db.escape(warehouse))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
 		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`

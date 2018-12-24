@@ -25,6 +25,7 @@ frappe.ui.form.on("Sales Order", {
 					frm: frm,
 					child_docname: "items",
 					child_doctype: "Sales Order Detail",
+					cannot_add_row: false,
 				})
 			});
 		}
