@@ -1132,6 +1132,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		else:
 			child_item.save()
 
+	parent.reload()
 	parent.flags.ignore_validate_update_after_submit = True
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
