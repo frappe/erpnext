@@ -120,13 +120,13 @@ $.extend(erpnext.utils, {
 					);
 				});
 			}
-			else {
+			else if (company_wise_info.length === 1) {
 				frm.dashboard.stats_area.removeClass('hidden');
 				frm.dashboard.stats_area_row.append(
 					'</div><div class="col-xs-6 small" style="margin-bottom:10px">Annual Billing: <b>'
 					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>' +
 					'<div class="col-xs-6 small" style="margin-bottom:10px">Total Unpaid: <b>'
-					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>'
+					+format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)+'</b></div>'
 				);
 			}
 		}
