@@ -2271,7 +2271,6 @@ DocType: Fee Validity,Fee Validity,Vlefshmëria e tarifës
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,Nuk u gjetën në tabelën e Pagesave të dhënat
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},Kjo {0} konfliktet me {1} për {2} {3}
 DocType: Student Attendance Tool,Students HTML,studentët HTML
-DocType: POS Profile,Apply Discount,aplikoni Discount
 DocType: GST HSN Code,GST HSN Code,GST Code HSN
 DocType: Employee External Work History,Total Experience,Përvoja Total
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,Projektet e hapura
@@ -2316,7 +2315,7 @@ DocType: Timesheet Detail,Expected Hrs,Orët e pritshme
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Detajet e Memphership
 DocType: Leave Block List,Block Holidays on important days.,Festat bllok në ditë të rëndësishme.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),Futni të gjitha vlerat (et) e kërkuara të rezultatit
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Llogaritë Arkëtueshme Përmbledhje
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Llogaritë Arkëtueshme Përmbledhje
 DocType: POS Closing Voucher,Linked Invoices,Faturat e lidhura
 DocType: Loan,Monthly Repayment Amount,Shuma mujore e pagesës
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Hapja e faturave
@@ -2438,7 +2437,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,Shuma e financuar
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,Previous Viti financiar nuk është e mbyllur
 DocType: Practitioner Schedule,Practitioner Schedule,Orari i praktikantit
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Mosha (ditë)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),Mosha (ditë)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS-.YYYY.-
 DocType: Additional Salary,Additional Salary,Paga shtesë
 DocType: Quotation Item,Quotation Item,Citat Item
@@ -2968,7 +2967,7 @@ DocType: Journal Entry,Accounts Receivable,Llogaritë e arkëtueshme
 DocType: Travel Itinerary,Meal Preference,Preferenca e vakteve
 ,Supplier-Wise Sales Analytics,Furnizuesi-i mençur Sales Analytics
 DocType: Purchase Invoice,Availed ITC Central Tax,Availed ITC Tax Qendrore
-DocType: POS Profile,Company Address Name,Adresa e Kompanisë Emri
+DocType: Sales Invoice,Company Address Name,Adresa e Kompanisë Emri
 DocType: Work Order,Use Multi-Level BOM,Përdorni Multi-Level bom
 DocType: Bank Reconciliation,Include Reconciled Entries,Përfshini gjitha pajtuar
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","Kursi Parent (Lini bosh, në qoftë se kjo nuk është pjesë e mëmë natyrisht)"
@@ -2983,7 +2982,7 @@ DocType: Woocommerce Settings,Enable Sync,Aktivizo sinkronizimin
 DocType: Tax Withholding Rate,Single Transaction Threshold,Pragu Single Transaction Pragu
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Kjo vlerë përditësohet në Listën e Çmimeve të Shitjes së Parazgjedhur.
 DocType: Email Digest,New Expenses,Shpenzimet e reja
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,Vlera PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,Vlera PDC / LC
 DocType: Shareholder,Shareholder,aksionari
 DocType: Purchase Invoice,Additional Discount Amount,Shtesë Shuma Discount
 DocType: Cash Flow Mapper,Position,pozitë
@@ -3578,7 +3577,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,Transferimi i punonjësve nuk mund të dorëzohet para datës së transferimit
 DocType: Certification Application,USD,USD
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,Bëni Faturë
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,Bilanci i mbetur
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,Bilanci i mbetur
 DocType: Selling Settings,Auto close Opportunity after 15 days,Auto Opportunity afër pas 15 ditësh
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,Urdhërat e blerjes nuk janë të lejuara për {0} për shkak të një pozicioni të rezultateve të {1}.
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,Barkodi {0} nuk është një kod valid {1}
@@ -3895,7 +3894,7 @@ DocType: Email Digest,Sales Orders to Bill,Urdhëron shitjet në Bill
 DocType: Price List,Price List Master,Lista e Çmimeve Master
 DocType: GST Account,CESS Account,Llogaria CESS
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Gjitha Shitjet Transaksionet mund të tagged kundër shumta ** Personat Sales ** në mënyrë që ju mund të vendosni dhe monitoruar objektivat.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,Lidhje me kërkesën materiale
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,Lidhje me kërkesën materiale
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,Aktiviteti i forumit
 ,S.O. No.,SO Nr
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,Parametrat e transaksionit të bankës
@@ -4955,7 +4954,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,Kërkohet për Krijimin e Punonjësve
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},Numri i llogarisë {0} që përdoret tashmë në llogarinë {1}
 DocType: GoCardless Mandate,Mandate,mandat
-DocType: POS Profile,POS Profile Name,Emri i Profilit POS
 DocType: Hotel Room Reservation,Booked,i rezervuar
 DocType: Detected Disease,Tasks Created,Detyrat e krijuara
 DocType: Purchase Invoice Item,Rate,Normë
@@ -5005,7 +5003,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,Viti Emri
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,Ka më shumë pushimet sesa ditëve pune këtë muaj.
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,Artikujt vijues {0} nuk janë të shënuar si {1} artikull. Ju mund t&#39;i aktivizoni ato si {1} pika nga mjeshtri i artikullit
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,Produkt Bundle Item
 DocType: Sales Partner,Sales Partner Name,Emri Sales Partner
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,Kërkesën për kuotimin
@@ -5361,7 +5359,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,Lë të përdorura
 DocType: Job Offer,Awaiting Response,Në pritje të përgjigjes
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.YYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,Sipër
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,Sipër
 DocType: Support Search Source,Link Options,Opsionet e Lidhjes
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},Shuma totale {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},atribut i pavlefshëm {0} {1}
@@ -5414,7 +5412,6 @@ DocType: Program Enrollment Tool,Get Students From,Get Studentët nga
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,Publikojnë artikuj në faqen
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,Grupi nxënësit tuaj në tufa
 DocType: Authorization Rule,Authorization Rule,Rregulla Autorizimi
-DocType: POS Profile,Offline POS Section,POS Seksioni Offline
 DocType: Sales Invoice,Terms and Conditions Details,Termat dhe Kushtet Detajet
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,Specifikimet
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Shitjet Taksat dhe Tarifat Stampa
@@ -5599,7 +5596,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,Item Tatimore urti Deta
 DocType: Employee Onboarding,Job Offer,Ofertë pune
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,Shkurtesa Institute
 ,Item-wise Price List Rate,Pika-mençur Lista e Çmimeve Rate
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Furnizuesi Citat
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Furnizuesi Citat
 DocType: Quotation,In Words will be visible once you save the Quotation.,Me fjalë do të jetë i dukshëm një herë ju ruani Kuotim.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},Sasi ({0}) nuk mund të jetë një pjesë në rradhë {1}
 DocType: Contract,Unsigned,i panënshkruar
@@ -5611,7 +5608,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,hapja Stock
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,Konsumatorit është e nevojshme
 DocType: Lab Test,Result Date,Data e Rezultatit
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,Data PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,Data PDC / LC
 DocType: Purchase Order,To Receive,Për të marrë
 DocType: Leave Period,Holiday List for Optional Leave,Lista e pushimeve për pushim fakultativ
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5966,7 +5963,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,në orë
 DocType: Blanket Order,Purchasing,blerje
 DocType: Announcement,Announcement,njoftim
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,LPO e konsumatorit
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,LPO e konsumatorit
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Për Grupin Batch bazuar Studentëve, grupi i Studentëve do të miratohet për çdo student nga Regjistrimi Programit."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Depo nuk mund të fshihet si ekziston hyrja aksioneve librit për këtë depo.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,Shpërndarje
@@ -6659,7 +6656,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),Rezultati i përgjithshëm (nga 5)
 DocType: Student Attendance Tool,Batch,Grumbull
 DocType: Support Search Source,Query Route String,Kërkoj String Strip
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,Norma e azhurnimit sipas blerjes së fundit
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,Norma e azhurnimit sipas blerjes së fundit
 DocType: Donor,Donor Type,Lloji i donatorit
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,Dokumenti i përsëritjes automatike përditësohej
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,Ekuilibër
