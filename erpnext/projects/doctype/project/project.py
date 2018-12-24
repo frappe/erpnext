@@ -16,7 +16,7 @@ from six import iteritems
 
 class Project(Document):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), self.project_name)
+		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
 
 	def onload(self):
 		"""Load project tasks for quick view"""
@@ -76,7 +76,7 @@ class Project(Document):
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(self.project_name))
+			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:
