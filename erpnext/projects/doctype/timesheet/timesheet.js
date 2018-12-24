@@ -106,7 +106,7 @@ frappe.ui.form.on("Timesheet", {
 			]
 		});
 
-		dialog.set_primary_action(__('Create Sales Invoice"), () => {
+		dialog.set_primary_action(__('Create Sales Invoice'), () => {
 			var args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();

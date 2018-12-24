@@ -506,7 +506,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}
 					}},
 
-				{"fieldtype": "Button", "label": __('Create Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
+				{"fieldtype": "Button", "label": __('Create Purchase Order'), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
 

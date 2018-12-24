@@ -449,7 +449,7 @@ $.extend(erpnext.item, {
 				].concat(fields)
 			});
 
-			me.multiple_variant_dialog.set_primary_action(__('Create Variants"), () => {
+			me.multiple_variant_dialog.set_primary_action(__('Create Variants'), () => {
 				let selected_attributes = get_selected_attributes();
 
 				me.multiple_variant_dialog.hide();
