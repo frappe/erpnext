@@ -147,7 +147,7 @@ frappe.ui.form.on("Request for Quotation",{
 					"fieldname": "supplier",
 					"options": doc.suppliers.map(d => d.supplier),
 					"reqd": 1 },
-				{	"fieldtype": "Button", "label": __('Create Supplier Quotation"),
+				{	"fieldtype": "Button", "label": __('Create Supplier Quotation'),
 					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary" },
 			]
 		});
