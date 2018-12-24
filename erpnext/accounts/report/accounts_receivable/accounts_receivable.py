@@ -543,7 +543,7 @@ class ReceivablePayableReport(object):
 			ps.due_date, ps.payment_amount, ps.description
 			from `tabSales Invoice` si, `tabPayment Schedule` ps
 			where si.name = ps.parent and
-			si.docstatus = 1 and si.company = '%s' and
+			si.docstatus = 1 and si.company = %s and
 			si.name in (%s) order by ps.due_date
 		"""	% (frappe.db.escape(self.filters.company), ','.join(['%s'] *len(voucher_nos))),
 		(tuple(voucher_nos)), as_dict = 1)
