@@ -8,7 +8,7 @@ import frappe
 from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
-from erpnext.stock.doctype.item.item import StockExistsForTemplate
+from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -305,6 +305,65 @@ class TestItem(unittest.TestCase):
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
+	def test_add_item_barcode(self):
+		# Clean up
+		frappe.db.sql("""delete from `tabItem Barcode`""")
+		item_code = "Test Item Barcode"
+		if frappe.db.exists("Item", item_code):
+			frappe.delete_doc("Item", item_code)
+
+		# Create new item and add barcodes
+		barcode_properties_list = [
+			{
+				"barcode": "0012345678905",
+				"barcode_type": "EAN"
+			},
+			{
+				"barcode": "012345678905",
+				"barcode_type": "UAN"
+			},
+			{
+				"barcode": "ARBITRARY_TEXT",
+			}
+		]
+		create_item(item_code)
+		for barcode_properties in barcode_properties_list:
+			item_doc = frappe.get_doc('Item', item_code)
+			new_barcode = item_doc.append('barcodes')
+			new_barcode.update(barcode_properties)
+			item_doc.save()
+
+		# Check values saved correctly
+		barcodes = frappe.get_list(
+			'Item Barcode',
+			fields=['barcode', 'barcode_type'],
+			filters={'parent': item_code})
+
+		for barcode_properties in barcode_properties_list:
+			barcode_to_find = barcode_properties['barcode']
+			matching_barcodes = [
+				x for x in barcodes
+				if x['barcode'] == barcode_to_find
+			]
+		self.assertEqual(len(matching_barcodes), 1)
+		details = matching_barcodes[0]
+
+		for key, value in iteritems(barcode_properties):
+			self.assertEqual(value, details.get(key))
+
+		# Add barcode again - should cause DuplicateEntryError
+		item_doc = frappe.get_doc('Item', item_code)
+		new_barcode = item_doc.append('barcodes')
+		new_barcode.update(barcode_properties_list[0])
+		self.assertRaises(frappe.DuplicateEntryError, item_doc.save)
+
+		# Add invalid barcode - should cause InvalidBarcode
+		item_doc = frappe.get_doc('Item', item_code)
+		new_barcode = item_doc.append('barcodes')
+		new_barcode.barcode = '9999999999999'
+		new_barcode.barcode_type = 'EAN'
+		self.assertRaises(InvalidBarcode, item_doc.save)
+
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
 	doc.set('fields', fields)
@@ -319,7 +378,7 @@ def make_item_variant():
 
 test_records = frappe.get_test_records('Item')
 
-def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None):
+def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None, is_customer_provided_item=None, customer=None, is_purchase_item=None):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
@@ -328,6 +387,9 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None)
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item or 1
 		item.valuation_rate = valuation_rate or 0.0
+		item.is_purchase_item = is_purchase_item
+		item.is_customer_provided_item = is_customer_provided_item
+		item.customer = customer or ''
 		item.append("item_defaults", {
 			"default_warehouse": warehouse or '_Test Warehouse - _TC',
 			"company": "_Test Company"

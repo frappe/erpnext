@@ -10,6 +10,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
@@ -47,7 +48,7 @@ class TestProductionPlan(unittest.TestCase):
 			filters = {'production_plan': pln.name}, as_list=1)
 
 		self.assertTrue(len(work_orders), len(pln.po_items))
-		
+
 		for name in material_requests:
 			mr = frappe.get_doc('Material Request', name[0])
 			mr.cancel()
@@ -142,12 +143,27 @@ class TestProductionPlan(unittest.TestCase):
 
 		self.assertEqual(sales_orders, [])
 
+	def test_pp_to_mr_customer_provided(self):
+		#Material Request from Production Plan for Customer Provided
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		create_item('Production Item CUST')
+		for item, raw_materials in {'Production Item CUST': ['Raw Material Item 1', 'CUST-0987']}.items():
+			if not frappe.db.get_value('BOM', {'item': item}):
+				make_bom(item = item, raw_materials = raw_materials)
+		production_plan = create_production_plan(item_code = 'Production Item CUST')
+		production_plan.make_material_request()
+		material_request = frappe.get_value('Material Request Item', {'production_plan': production_plan.name}, 'parent')
+		mr = frappe.get_doc('Material Request', material_request)
+		self.assertTrue(mr.material_request_type, 'Customer Provided')
+		self.assertTrue(mr.customer, '_Test Customer')
+
 def create_production_plan(**args):
 	args = frappe._dict(args)
 
 	pln = frappe.get_doc({
 		'doctype': 'Production Plan',
 		'company': args.company or '_Test Company',
+		'customer': args.customer or '_Test Customer',
 		'posting_date': nowdate(),
 		'include_non_stock_items': args.include_non_stock_items or 1,
 		'include_subcontracted_items': args.include_subcontracted_items or 1,
@@ -160,8 +176,10 @@ def create_production_plan(**args):
 			'planned_start_date': args.planned_start_date or now_datetime()
 		}]
 	})
-	pln.get_items_for_material_requests()
-	
+	mr_items = get_items_for_material_requests(pln.as_dict())
+	for d in mr_items:
+		pln.append('mr_items', d)
+
 	if not args.do_not_save:
 		pln.insert()
 		if not args.do_not_submit:
@@ -179,7 +197,7 @@ def make_bom(**args):
 		'quantity': args.quantity or 1,
 		'company': args.company or '_Test Company'
 	})
-	
+
 	for item in args.raw_materials:
 		item_doc = frappe.get_doc('Item', item)
 
@@ -188,8 +206,8 @@ def make_bom(**args):
 			'qty': 1,
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
-			'rate': item_doc.valuation_rate or args.rate
+			'rate': item_doc.valuation_rate or args.rate,
 		})
-		
+
 	bom.insert(ignore_permissions=True)
 	bom.submit()

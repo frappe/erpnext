@@ -179,6 +179,10 @@ class StockEntry(StockController):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
 
+			#Customer Provided parts will have zero valuation rate
+			if frappe.db.get_value('Item', item.item_code, 'is_customer_provided_item'):
+				item.allow_zero_valuation_rate = 1
+
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
 
@@ -634,19 +638,19 @@ class StockEntry(StockController):
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
-			'stock_uom'			  	: item.stock_uom,
+			'stock_uom'			: item.stock_uom,
 			'description'		  	: item.description,
-			'image'					: item.image,
+			'image'				: item.image,
 			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account"),
 			'cost_center'			: get_default_cost_center(args, item, item_group_defaults),
-			'qty'					: 0,
-			'transfer_qty'			: 0,
+			'qty'				: args.get("qty"),
+			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
-			'batch_no'				: '',
+			'batch_no'			: '',
 			'actual_qty'			: 0,
 			'basic_rate'			: 0,
-			'serial_no'				: '',
+			'serial_no'			: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity
