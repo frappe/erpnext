@@ -42,6 +42,7 @@ frappe.ui.form.on("Purchase Order", {
 					frm: frm,
 					child_docname: "items",
 					child_doctype: "Purchase Order Detail",
+					cannot_add_row: false,
 				})
 			});
 		}

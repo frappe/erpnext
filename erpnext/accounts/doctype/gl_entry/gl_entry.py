@@ -162,7 +162,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
 	if party_type and party:
-		party_condition = " and party_type='{0}' and party='{1}'"\
+		party_condition = " and party_type={0} and party={1}"\
 			.format(frappe.db.escape(party_type), frappe.db.escape(party))
 	else:
 		party_condition = ""
