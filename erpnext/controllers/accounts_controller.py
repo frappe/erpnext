@@ -1106,6 +1106,8 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	data = json.loads(trans_items)
 
+	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+
 	for d in data:
 		new_child_flag = False
 		if not d.get("docname"):
@@ -1125,43 +1127,43 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			child_item.rate = flt(d.get("rate"))
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
+			child_item.idx = len(parent.items) + 1
 			child_item.insert()
 		else:
 			child_item.save()
 
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-	p_doctype.flags.ignore_validate_update_after_submit = True
-	p_doctype.set_qty_as_per_stock_uom()
-	p_doctype.calculate_taxes_and_totals()
-	frappe.get_doc('Authorization Control').validate_approving_authority(p_doctype.doctype,
-		p_doctype.company, p_doctype.base_grand_total)
+	parent.flags.ignore_validate_update_after_submit = True
+	parent.set_qty_as_per_stock_uom()
+	parent.calculate_taxes_and_totals()
+	frappe.get_doc('Authorization Control').validate_approving_authority(parent.doctype,
+		parent.company, parent.base_grand_total)
 
-	p_doctype.set_payment_schedule()
+	parent.set_payment_schedule()
 	if parent_doctype == 'Purchase Order':
-		p_doctype.validate_minimum_order_qty()
-		p_doctype.validate_budget()
-		if p_doctype.is_against_so():
-			p_doctype.update_status_updater()
+		parent.validate_minimum_order_qty()
+		parent.validate_budget()
+		if parent.is_against_so():
+			parent.update_status_updater()
 	else:
-		p_doctype.check_credit_limit()
+		parent.check_credit_limit()
 
-	p_doctype.save()
+	parent.save()
 
 	if parent_doctype == 'Purchase Order':
-		update_last_purchase_rate(p_doctype, is_submit = 1)
-		p_doctype.update_prevdoc_status()
-		p_doctype.update_requested_qty()
-		p_doctype.update_ordered_qty()
-		p_doctype.update_ordered_and_reserved_qty()
-		p_doctype.update_receiving_percentage()
-		if p_doctype.is_subcontracted == "Yes":
-			p_doctype.update_reserved_qty_for_subcontract()
+		update_last_purchase_rate(parent, is_submit = 1)
+		parent.update_prevdoc_status()
+		parent.update_requested_qty()
+		parent.update_ordered_qty()
+		parent.update_ordered_and_reserved_qty()
+		parent.update_receiving_percentage()
+		if parent.is_subcontracted == "Yes":
+			parent.update_reserved_qty_for_subcontract()
 	else:
-		p_doctype.update_reserved_qty()
-		p_doctype.update_project()
-		p_doctype.update_prevdoc_status('submit')
-		p_doctype.update_delivery_status()
+		parent.update_reserved_qty()
+		parent.update_project()
+		parent.update_prevdoc_status('submit')
+		parent.update_delivery_status()
 
-	p_doctype.update_blanket_order()
-	p_doctype.update_billing_percentage()
-	p_doctype.set_status()
+	parent.update_blanket_order()
+	parent.update_billing_percentage()
+	parent.set_status()
