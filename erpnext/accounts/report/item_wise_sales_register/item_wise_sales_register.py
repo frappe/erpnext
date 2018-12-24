@@ -16,7 +16,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
 
-	company_currency = erpnext.get_company_currency(filters.company)
+	company_currency = erpnext.get_company_currency(filters.get('company'))
 
 	item_list = get_items(filters, additional_query_columns)
 	if item_list:
@@ -54,7 +54,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		]
 
 		row += [(d.base_net_rate * d.qty)/d.stock_qty, d.base_net_amount] \
-			if d.stock_uom != d.uom else [d.base_net_rate, d.base_net_amount]
+			if d.stock_uom != d.uom and d.stock_qty != 0 else [d.base_net_rate, d.base_net_amount]
 
 		total_tax = 0
 		for tax in tax_columns:
