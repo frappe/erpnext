@@ -149,7 +149,7 @@ class Issue(Document):
 		print("-----------------------------------------------------------------------------------------")
 
 		support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
-		return round(support, 2), round(time_diff_in_hours(support, utils.now_datetime()), 2)
+		return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
 		
 	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
 		time_difference, time_added, loop = 0, 0, None
