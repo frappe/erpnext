@@ -6,12 +6,11 @@ import frappe
 import json
 from frappe import _
 from frappe import utils
+
 from frappe.model.document import Document
-from frappe.utils import time_diff_in_hours, now_datetime, add_days, get_datetime, getdate
-from frappe.utils.user import is_website_user
-import re
+from frappe.utils import now, time_diff_in_hours, now_datetime, add_days, getdate
 from datetime import datetime, timedelta
-from itertools import cycle
+from frappe.utils.user import is_website_user
 
 sender_field = "raised_by"
 
@@ -112,7 +111,7 @@ class Issue(Document):
 			support_days = [[service.workday, str(service.start_time), str(service.end_time)] for service in service_level.support_and_resolution]
 			holiday_list = frappe.get_doc("Holiday List", support_contract[0].holiday_list)
 			holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
-			time, add_days, now_datetime = 0, 0, utils.get_datetime()
+			time, add_days, now_datetime = 0, 0, utils.now_datetime()
 			while time != 1:
 				for count, weekday in enumerate(week):
 					if count >= (utils.getdate()).weekday() or add_days != 0:
@@ -267,12 +266,15 @@ def update_issue(contact, method):
 
 def update_support_timer():
 	issues = frappe.get_list("Issue", filters={"service_contract_status": "Ongoing", "status": "Open"})
+	issues.reverse()
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
 		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
 			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, utils.now_datetime()), 2)
 		if float(issue.time_to_resolve) > 0:
 			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, utils.now_datetime()), 2)
-		else:
+		if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
 			issue.service_contract_status = "Failed"
+		else:
+			issue.service_contract_status = "Fulfilled"
 		issue.save()

@@ -32,7 +32,11 @@ def make_support_contract():
 		"priority": "Medium",
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
-		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100)
+		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
+		"response_time": "5",
+		"response_time_period": "Hour/s",
+		"resolution_time": "2",
+		"resolution_time_period": "Day/s",
 	})
 	support_contract_exists = frappe.db.exists("Support Contract", "Support Contract: _Test Customer")
 	if not support_contract_exists:

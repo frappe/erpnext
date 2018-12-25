@@ -19,8 +19,8 @@ class TestIssue(unittest.TestCase):
 def make_issue():
 	issue = frappe.get_doc({
 		"doctype": "Issue",
-		"name": "_Test Issue 2",
-		"subject": "Test Support 2",
+		"name": "_Test Issue 1",
+		"subject": "Test Support",
 		"raised_by": "test@example.com",
 		"customer": "_Test Customer"
 	})
@@ -32,6 +32,5 @@ def make_issue():
 		return issue_exists
 
 def get_issue():
-	issue = frappe.db.exists("Issue", "Test Support 2")
-	print(issue)
-	return issue
+	issue = frappe.get_list("Issue", filters={"subject": "Test Support"}, limit=1)
+	return issue[0].name
