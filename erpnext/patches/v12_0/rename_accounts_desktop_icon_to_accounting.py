@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 
-def execcute():
+def execute():
 	accounts_module_icons = frappe.get_all('Desktop Icon', filters={
 		'module_name': 'Accounts'
 	}, fields=['name'])
