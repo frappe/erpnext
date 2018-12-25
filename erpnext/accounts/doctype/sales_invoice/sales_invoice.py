@@ -138,6 +138,11 @@ class SalesInvoice(SellingController):
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
+		if self.is_return:
+			return_against = frappe.get_doc("Sales Invoice", self.return_against)
+			if abs(self.grand_total) > return_against.grand_total - return_against.outstanding_amount:
+				frappe.throw(_("Credit note amount cannot be greater than paid amount"))
+
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
