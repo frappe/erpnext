@@ -579,6 +579,6 @@ erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
-erpnext/patches/v12_0/rename_learn_to_help.py
+erpnext.patches.v12_0.rename_learn_to_help.py
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon
