@@ -41,16 +41,28 @@ def add_header(w):
 	return w
 
 def add_data(w, args):
+	data = get_data(args)
+	writedata(w, data)
+	return w
+
+def get_data(args):
 	dates = get_dates(args)
 	employees = get_active_employees()
 	existing_attendance_records = get_existing_attendance_records(args)
+	data = []
 	for date in dates:
 		for employee in employees:
+			if getdate(date) < getdate(employee.date_of_joining):
+				continue
+			if employee.relieving_date:
+				if getdate(date) > getdate(employee.relieving_date):
+					continue
 			existing_attendance = {}
 			if existing_attendance_records \
-				and tuple([getdate(date), employee.name]) in existing_attendance_records:
+				and tuple([getdate(date), employee.name]) in existing_attendance_records \
+				and getdate(employee.date_of_joining) >= getdate(date) \
+				and getdate(employee.relieving_date) <= getdate(date):
 					existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
-
 			row = [
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
@@ -58,8 +70,12 @@ def add_data(w, args):
 				existing_attendance and existing_attendance.leave_type or "", employee.company,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
-			w.writerow(row)
-	return w
+			data.append(row)
+	return data
+
+def writedata(w, data):
+	for row in data:
+		w.writerow(row)
 
 def get_dates(args):
 	"""get list of dates in between from date and to date"""
@@ -68,7 +84,7 @@ def get_dates(args):
 	return dates
 
 def get_active_employees():
-	employees = frappe.db.sql("""select name, employee_name, company
+	employees = frappe.db.sql("""select name, employee_name, date_of_joining, company, relieving_date
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
 

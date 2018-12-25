@@ -13,8 +13,8 @@ from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
 
-class EmployeeUserDisabledError(frappe.ValidationError):
-	pass
+class EmployeeUserDisabledError(frappe.ValidationError): pass
+class EmployeeLeftValidationError(frappe.ValidationError): pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -147,8 +147,18 @@ class Employee(NestedSet):
 			validate_email_add(self.personal_email, True)
 
 	def validate_status(self):
-		if self.status == 'Left' and not self.relieving_date:
-			throw(_("Please enter relieving date."))
+		if self.status == 'Left':
+			reports_to = frappe.db.sql("""select name,reports_to from `tabEmployee` where
+				reports_to=%s""", (self.name), as_dict=True)
+			if reports_to:
+				employee_names = []
+				for row in reports_to:
+					employee_names.append(row.name)
+				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee_name) for employee_name in employee_names]
+				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
+					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
+			if not self.relieving_date:
+				throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self, enabled):
 		if not self.status == 'Active':
