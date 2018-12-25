@@ -12,6 +12,9 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
 
+class QualityInspectionRequiredError(frappe.ValidationError): pass
+class QualityInspectionRejectedError(frappe.ValidationError): pass
+
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
@@ -317,7 +320,6 @@ class StockController(AccountsController):
 	def validate_inspection(self):
 		'''Checks if quality inspection is set for Items that require inspection.
 		On submit, throw an exception'''
-
 		inspection_required_fieldname = None
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			inspection_required_fieldname = "inspection_required_before_purchase"
@@ -330,17 +332,25 @@ class StockController(AccountsController):
 				return
 
 		for d in self.get('items'):
-			raise_exception = False
+			qa_required = False
 			if (inspection_required_fieldname and not d.quality_inspection and
 				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
-				raise_exception = True
+				qa_required = True
 			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
-				raise_exception = True
+				qa_required = True
 
-			if raise_exception:
+			if qa_required:
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
-					raise frappe.ValidationError
+					raise QualityInspectionRequiredError
+			elif self.docstatus == 1:
+				if d.quality_inspection:
+					qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
+					qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
+					if qa_failed:
+						frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
+							.format(d.idx, d.item_code), QualityInspectionRejectedError)
+
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
