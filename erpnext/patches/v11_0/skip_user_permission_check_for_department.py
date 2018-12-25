@@ -50,11 +50,11 @@ def execute():
 		frappe.db.sql('''
 			INSERT INTO `tabUser Permission`
 			(`name`, `user`, `allow`, `for_value`, `applicable_for`, `apply_to_all_doctypes`)
-			VALUES {}'''.format(', '.join(['%s'] * len(new_user_permissions_list))),
+			VALUES {}'''.format(', '.join(['%s'] * len(new_user_permissions_list))), # nosec
 			tuple(new_user_permissions_list)
 		)
 
 	if user_permissions_to_delete:
-		frappe.db.sql('DELETE FROM `tabUser Permission` WHERE `name` IN ({})'.format(
+		frappe.db.sql('DELETE FROM `tabUser Permission` WHERE `name` IN ({})'.format( # nosec
 			','.join(['%s'] * len(user_permissions_to_delete))
 		), tuple(user_permissions_to_delete))
