@@ -148,8 +148,11 @@ class Employee(NestedSet):
 
 	def validate_status(self):
 		if self.status == 'Left':
-			reports_to = frappe.db.sql("""select name,reports_to from `tabEmployee` where
-				reports_to=%s""", (self.name), as_dict=True)
+			reports_to = frappe.db.get_all('Employee',
+				fields=['name', 'reports_to'],
+				filters={'reports_to': self.name}
+			)
+
 			if reports_to:
 				employee_names = []
 				for row in reports_to:

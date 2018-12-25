@@ -84,8 +84,13 @@ def get_dates(args):
 	return dates
 
 def get_active_employees():
-	employees = frappe.db.sql("""select name, employee_name, date_of_joining, company, relieving_date
-		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
+	employees = frappe.db.get_all('Employee',
+		fields=['name', 'employee_name', 'date_of_joining', 'company', 'relieving_date'],
+		filters={
+			'docstatus': ['<', 2],
+			'status': 'Active'
+		}
+	)
 	return employees
 
 def get_existing_attendance_records(args):
