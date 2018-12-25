@@ -26,7 +26,6 @@ class Issue(Document):
 			self.raised_by = frappe.session.user
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
-		self.set_support_contract()
 
 		if self.status == "Closed":
 			from frappe.desk.form.assign_to import clear
@@ -101,43 +100,43 @@ class Issue(Document):
 			doc.save(ignore_permissions=True)
 		return replicated_issue.name
 	
-	def set_support_contract(self):
-		if not self.isset_sla:
-			week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-			support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
-			if not support_contract:
-				support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
-			if support_contract:
-				self.support_contract = support_contract[0].name
-				self.priority = support_contract[0].priority
-				service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
-				support_days = [[service.workday, str(service.start_time), str(service.end_time), str(service.response_time), str(service.resolution_time)] for service in service_level.support_and_resolution]
-				holiday_list = frappe.get_doc("Holiday List", support_contract[0].holiday_list)
-				holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
-				time, add_days, now_datetime = 0, 0, utils.get_datetime()
-				while time != 1:
-					for count, weekday in enumerate(week):
-						if count >= (utils.getdate()).weekday() or add_days != 0:
-							if time != 1:
-								for service in service_level.support_and_resolution:
-									if service.workday == weekday:
-										now_datetime += timedelta(days=add_days)
-										self.response_by, self.time_to_respond = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
-										self.resolution_by, self.time_to_resolve = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
-										time = 1
-								add_days += 1
+	def before_insert(self):
+		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
+		if not support_contract:
+			support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
+		if support_contract:
+			self.support_contract = support_contract[0].name
+			self.priority = support_contract[0].priority
+			service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
+			support_days = [[service.workday, str(service.start_time), str(service.end_time)] for service in service_level.support_and_resolution]
+			holiday_list = frappe.get_doc("Holiday List", support_contract[0].holiday_list)
+			holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
+			time, add_days, now_datetime = 0, 0, utils.get_datetime()
+			while time != 1:
+				for count, weekday in enumerate(week):
+					if count >= (utils.getdate()).weekday() or add_days != 0:
+						if time != 1:
+							for service in service_level.support_and_resolution:
+								if service.workday == weekday:
+									now_datetime += timedelta(days=add_days)
+									self.response_by, self.time_to_respond = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
+									self.resolution_by, self.time_to_resolve = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
+									time = 1
+							add_days += 1
 
 	def calculate_support_day(self, now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
 		now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
 		#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
-		#	it to days and if time_period is Hours then time is passed to calculate time to next function
+		#	it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
 		if time_period == 'Hour/s':
 			time, hours = 0, time
 		elif time_period == 'Week/s':
 			time *= 7
 		while time != 0:
 			for count, weekday in enumerate(week):
-				if count >= (now_datetime.date()).weekday() or add_days != 0:	#	To search the week from the current weekday
+				#	To search the week from the current weekday
+				if count >= (now_datetime.date()).weekday() or add_days != 0:
 					if time != 0:
 						for support_day in support_days:
 							if weekday == support_day[0]:
@@ -153,65 +152,54 @@ class Issue(Document):
 		return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
 		
 	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
-		time_difference, time_added, time_set = 0, 0, None
-		#Loop starts counting from current weekday and iterates till loop is set indicating the time has been calculated.
-		while time_set != 'set':
+		time_difference, time_added_flag, time_set_flag = 0, 0, 0
+		#Loop starts counting from current weekday and iterates till time_set_flag is set indicating the time has been calculated.
+		while time_set_flag != 1:
 			for count, weekday in enumerate(week):
-				# Initially time_added is zero and the code will only start executing if today and weekday is the same and keep executing henceforth as time_add is incremented.
-				if count >= (time.date()).weekday() or time_added != 0:
+				# Initially time_added_flag is zero and the code will only start executing if today and weekday is the same and keep executing 
+				# henceforth as time_add is incremented.
+				if count >= (time.date()).weekday() or time_added_flag != 0:
 					for support_day in support_days:
-						if weekday == support_day[0] and time_set != 'set':
+						if weekday == support_day[0] and time_set_flag != 1:
 							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-
-							if time.time() <= end_time and time.time() >= start_time and hours and time_added == 0:
+							# If the time is between start and end time then hours is added and then conditions are checked to avoid addition of extra day
+							if time.time() <= end_time and time.time() >= start_time and hours and time_added_flag == 0:
 								time += timedelta(hours=hours)
-								time_added = 1
-
+								time_added_flag = 1
 							if time_difference:
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(seconds=time_difference)
-
-							if time.time() <= end_time and time.time() >= start_time:
-								time_set = 'set'
-							elif time.time() <= start_time:
-								if time_added == 1:
+							if time.time() <= start_time:
+								if time_added_flag == 1:
 									#	If first day of the week then previous day is the last item of the list
 									if support_days.index(support_day) == 0:
 										prev_day_end_time = support_days[len(support_days)-1][2]
 									else:
 										prev_day_end_time = support_days[support_days.index(support_day)][2]
 									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
-									#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
-								if hours and time_added == 0:
+									time -= timedelta(days=1)	# Time is reduced by one day as one day is calculated extra
+								else:#if hours and time_added_flag == 0:
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
-									time_added = 1
+									time_added_flag = 1
+							#elif time.time() <= end_time and time.time() >= start_time:
+							#	print("time.time() <= end_time and time.time() >= start_time")
+							#	time_set_flag = 1
+							#	break
 							elif time.time() >= end_time:
-								if time_added == 1:
+								if time_added_flag == 1:
 									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
-
-								if hours and time_added == 0:
-									end = None
-									add_days = 0
-									while end != 'set':
-										for count, weekday in enumerate(week):
-											if count > (time.date()).weekday():
-												if end != 'set':
-													for support_day in support_days:
-														if weekday == support_day[0]:
-															end = 'set'
-															start_time = datetime.strptime(support_day[1], '%H:%M:%S').time()
-															end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-													add_days += 1
-									time = datetime.combine(time.date()+timedelta(days=add_days-1), start_time)
-									time += timedelta(hours=hours)
-									time_added = 1
+								else:#if hours and time_added_flag == 0:
+									time_difference = hours * 3600
+									time_added_flag = 1
+							#	Checks if date is present in the holiday list
 							if time.date() in holidays:
 								continue
+							#	Time is checked after every calculation whether time is between start and end time for the day to be sure if 
 							if time.time() <= end_time and time.time() >= start_time:
-								time_set = 'set'
+								time_set_flag = 1
 								break
-					if time_set != 'set':
+					if time_set_flag != 1:
 						time += timedelta(days=1)
 		return time
 
@@ -288,61 +276,3 @@ def update_support_timer():
 		else:
 			issue.service_contract_status = "Failed"
 		issue.save()
-
-#print("-----------------------------------------")
-#							print("in support : " + str(weekday))
-#							print("hours : " + str(hours))
-#							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-#
-#							if time.time() <= end_time and time.time() >= start_time and hours and time_added == 0:
-#								time += timedelta(hours=hours)
-#								print("hours added : " + str(time))
-#								time_added = 1
-#
-#							if time_difference:
-#								time = datetime.combine(time.date(), start_time)
-#								time += timedelta(seconds=time_difference)
-#								print("time_difference : " + str(time_difference/3600))
-#								print("time_difference : " + str(time))
-#
-#							if time.time() <= end_time and time.time() >= start_time:
-#								if not hours:
-#									time = datetime.combine(time.date(), end_time)
-#								loop = 'set'
-#							elif time.time() <= start_time:
-#								if hours and time_added == 0:
-#									time = datetime.combine(time.date(), start_time)
-#									time += timedelta(hours=hours)
-#									time_added = 1
-#									print("time less than start")
-#									print(time)
-#								if not hours:
-#									time = datetime.combine(time.date(), end_time)
-#								else:
-#									#	If first day of the week then previous day is the last item of the list
-#									if support_days.index(support_day) == 0:
-#										prev_day_end_time = support_days[len(support_days)-1][2]
-#									else:
-#										prev_day_end_time = support_days[support_days.index(support_day)][2]
-#									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
-#									#time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(support_days[support_days.index(support_day)][2], '%H:%M:%S').time())).total_seconds() #	Compute the time difference
-#							elif time.time() >= end_time:
-#								if hours and time_added == 0 and time.date().weekday() != (utils.getdate()).weekday():
-#									time = datetime.combine(time.date(), start_time)#+timedelta(days=1), start_time)
-#									time += timedelta(hours=hours)
-#									time_added = 1
-#									print("time greater than end")
-#									print(time)
-#								else:
-#									continue
-#								if not hours:
-#									time = datetime.combine(time.date(), end_time)
-#								else:
-#									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
-#							print(time)
-#							if time.date() in holidays:
-#								continue
-#							if time.time() <= end_time and time.time() >= start_time:
-#								loop = 'set'
-#								break
-#							print("-----------------------------------------")
