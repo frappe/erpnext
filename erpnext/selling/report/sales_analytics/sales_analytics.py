@@ -276,7 +276,11 @@ class Analytics(object):
 
 	def get_chart_data(self):
 		length = len(self.columns)
-		labels = [d.get("label") for d in self.columns[2:length-1]]
+
+		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+			labels = [d.get("label") for d in self.columns[2:length-1]]
+		else:
+			labels = [d.get("label") for d in self.columns[1:length-1]]
 		self.chart = {
 			"data": {
 				'labels': labels,

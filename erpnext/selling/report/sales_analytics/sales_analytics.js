@@ -76,10 +76,21 @@ frappe.query_reports["Sales Analytics"] = {
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					length = data.length
-					row_values = data.slice(4,length-1).map(function (column) {
-						return column.content;
-					})
+					length = data.length;
+
+					var tree_type = frappe.query_report.filters[0].value;
+
+					if(tree_type == "Customer" || tree_type == "Item") {
+						row_values = data.slice(4,length-1).map(function (column) {
+							return column.content;
+						})
+					}
+					else {
+						row_values = data.slice(3,length-1).map(function (column) {
+							return column.content;
+						})
+					}
+
 					entry = {
 						'name':row_name,
 						'values':row_values
