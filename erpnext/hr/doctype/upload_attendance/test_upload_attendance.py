@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import erpnext
 import unittest
 from frappe.utils import getdate
 from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
