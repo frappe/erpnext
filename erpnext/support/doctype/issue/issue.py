@@ -118,36 +118,36 @@ class Issue(Document):
 							for service in service_level.support_and_resolution:
 								if service.workday == weekday:
 									now_datetime += timedelta(days=add_days)
-									self.response_by, self.time_to_respond = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
-									self.resolution_by, self.time_to_resolve = self.calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
+									self.response_by, self.time_to_respond = calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
+									self.resolution_by, self.time_to_resolve = calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
 									time = 1
 							add_days += 1
 
-	def calculate_support_day(self, now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
-		now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
-		#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
-		#	it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
-		if time_period == 'Hour/s':
-			time, hours = 0, time
-		elif time_period == 'Week/s':
-			time *= 7
-		while time != 0:
-			for count, weekday in enumerate(week):
-				#	To search the week from the current weekday
-				if count >= (now_datetime.date()).weekday() or add_days != 0:
-					if time != 0:
-						for support_day in support_days:
-							if weekday == support_day[0]:
-								time -= 1
-								if not hours:
-									end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
-						add_days += 1
-		now_datetime += timedelta(days=add_days)
-		if not hours:
-			support = datetime.combine(now_datetime.date(), end_time)
-		else:
-			support = calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
-		return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
+def calculate_support_day(now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
+	now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
+	#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
+	#	it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
+	if time_period == 'Hour/s':
+		time, hours = 0, time
+	elif time_period == 'Week/s':
+		time *= 7
+	while time != 0:
+		for count, weekday in enumerate(week):
+			#	To search the week from the current weekday
+			if count >= (now_datetime.date()).weekday() or add_days != 0:
+				if time != 0:
+					for support_day in support_days:
+						if weekday == support_day[0]:
+							time -= 1
+							if not hours:
+								end_time = datetime.strptime(support_day[2], '%H:%M:%S').time()
+					add_days += 1
+	now_datetime += timedelta(days=add_days)
+	if not hours:
+		support = datetime.combine(now_datetime.date(), end_time)
+	else:
+		support = calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
+	return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
 
 def calculate_support_time(time=None, hours=None, support_days=None, holidays=None, week=None):
 	time_difference, time_added_flag, time_set_flag = 0, 0, 0

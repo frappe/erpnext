@@ -2,12 +2,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from erpnext.hr.doctype.employee.test_employee import make_employee
-
 import frappe
 import unittest
+from erpnext.hr.doctype.employee.test_employee import make_employee
+
 class TestEmployeeGroup(unittest.TestCase):
-	
+
 	def test_employee_group(self):
 		test_make_employee_group = make_employee_group()
 		test_get_employee_group = get_employee_group()
