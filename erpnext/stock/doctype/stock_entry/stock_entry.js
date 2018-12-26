@@ -199,12 +199,15 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	validate_purpose_consumption: function(frm) {
-		frappe.model.get_value('Manufacturing Settings', {'name': 'Manufacturing Settings'}, 'material_consumption', function(d) {
-			if (d.material_consumption==0 && frm.doc.purpose=="Material Consumption for Manufacture") {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings.is_material_consumption_enabled",
+		}).then(r => {
+			if (cint(r.message) == 0
+				&& frm.doc.purpose=="Material Consumption for Manufacture") {
 				frm.set_value("purpose", 'Manufacture');
 				frappe.throw(__('Material Consumption is not set in Manufacturing Settings.'));
 			}
-		})
+		});
 	},
 
 	company: function(frm) {

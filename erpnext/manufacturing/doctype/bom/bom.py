@@ -81,7 +81,7 @@ class BOM(WebsiteGenerator):
 
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
-			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate, allow_transfer_for_manufacture
+			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate, include_item_in_manufacturing
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		if not item:
@@ -109,7 +109,7 @@ class BOM(WebsiteGenerator):
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
 				"stock_qty": item.stock_qty,
-				"allow_transfer_for_manufacture": item.allow_transfer_for_manufacture
+				"include_item_in_manufacturing": item.include_item_in_manufacturing
 			})
 			for r in ret:
 				if not item.get(r):
@@ -128,8 +128,8 @@ class BOM(WebsiteGenerator):
 		self.validate_rm_item(item)
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
-		args['transfer_for_manufacture'] = (cstr(args.get('allow_transfer_for_manufacture', '')) or
-			item and item[0].allow_transfer_for_manufacture or 0)
+		args['transfer_for_manufacture'] = (cstr(args.get('include_item_in_manufacturing', '')) or
+			item and item[0].include_item_in_manufacturing or 0)
 		args.update(item[0])
 
 		rate = self.get_rm_rate(args)
@@ -145,7 +145,7 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate,
-			 'allow_transfer_for_manufacture': cint(args['transfer_for_manufacture']) or 0
+			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0
 		}
 
 		return ret_item
@@ -479,7 +479,7 @@ class BOM(WebsiteGenerator):
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
 					'rate'			: d.base_rate,
-					'allow_transfer_for_manufacture': d.allow_transfer_for_manufacture
+					'include_item_in_manufacturing': d.include_item_in_manufacturing
 				}))
 
 	def company_currency(self):
@@ -496,7 +496,7 @@ class BOM(WebsiteGenerator):
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
 			bom_item.description, bom_item.source_warehouse, bom_item.operation,
-			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.allow_transfer_for_manufacture,
+			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.include_item_in_manufacturing,
 			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
 			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
@@ -511,7 +511,7 @@ class BOM(WebsiteGenerator):
 				'stock_uom'				: d['stock_uom'],
 				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
 				'rate'					: flt(d['rate']),
-				'allow_transfer_for_manufacture': d.get('allow_transfer_for_manufacture', 0)
+				'include_item_in_manufacturing': d.get('include_item_in_manufacturing', 0)
 			}))
 
 	def add_exploded_items(self):
@@ -587,7 +587,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			is_stock_item=is_stock_item,
-			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.allow_transfer_for_manufacture,
+			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.include_item_in_manufacturing,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
@@ -596,7 +596,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
-			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.allow_transfer_for_manufacture")
+			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:

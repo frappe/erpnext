@@ -14,7 +14,7 @@ frappe.ui.form.on("Leave Application", {
 					doctype: frm.doc.doctype
 				}
 			};
-		}); 
+		});
 
 		frm.set_query("employee", erpnext.queries.employee);
 	},
@@ -83,7 +83,7 @@ frappe.ui.form.on("Leave Application", {
 		if (!frm.doc.employee && frappe.defaults.get_user_permissions()) {
 			const perm = frappe.defaults.get_user_permissions();
 			if (perm && perm['Employee']) {
-				frm.set_value('employee', perm['Employee']["docs"][0])
+				frm.set_value('employee', perm['Employee'].map(perm_doc => perm_doc.doc)[0]);
 			}
 		}
 	},

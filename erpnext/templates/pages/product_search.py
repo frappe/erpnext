@@ -26,7 +26,6 @@ def get_product_list(search=None, start=0, limit=12):
 		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where (I.show_in_website = 1)
 			and I.disabled = 0
-			and (I.variant_of is null or I.variant_of='')
 			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)"""
 
 	# search term condition

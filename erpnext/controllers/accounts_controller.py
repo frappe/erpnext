@@ -6,6 +6,7 @@ import frappe, erpnext
 import json
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -57,6 +58,8 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
 	def validate(self):
+
+		self.validate_qty_is_not_zero()
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -179,7 +182,7 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date,
 				"Customer", self.customer, self.company, self.payment_terms_template)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date,
+			validate_due_date(self.bill_date or self.posting_date, self.due_date,
 				"Supplier", self.supplier, self.company, self.bill_date, self.payment_terms_template)
 
 	def set_price_list_currency(self, buying_or_selling):
@@ -359,6 +362,11 @@ class AccountsController(TransactionBase):
 
 		return gl_dict
 
+	def validate_qty_is_not_zero(self):
+		for item in self.items:
+			if not item.qty:
+				frappe.throw("Item quantity can not be zero")
+
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
 		if self.get("currency") and self.currency != self.company_currency:
@@ -405,7 +413,8 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				allocated_amount = min(self.grand_total - advance_allocated, d.amount)
+				amount = self.rounded_total or self.grand_total
+				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
@@ -1059,56 +1068,103 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+	"""
+	Returns a Sales Order Item child item containing the default values
+	"""
+	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Sales Order Item', p_doctype, child_docname)
+	item = frappe.get_doc("Item", item_code)
+	child_item.item_code = item.item_code
+	child_item.item_name = item.item_name
+	child_item.description = item.description
+	child_item.reqd_by_date = p_doctype.delivery_date
+	child_item.uom = item.stock_uom
+	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	return child_item
+
+
+def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+	"""
+	Returns a Purchase Order Item child item containing the default values
+	"""
+	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Purchase Order Item', p_doctype, child_docname)
+	item = frappe.get_doc("Item", item_code)
+	child_item.item_code = item.item_code
+	child_item.item_name = item.item_name
+	child_item.description = item.description
+	child_item.schedule_date = p_doctype.schedule_date
+	child_item.uom = item.stock_uom
+	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.base_rate = 1 # Initiallize value will update in parent validation
+	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	return child_item
+
 
 @frappe.whitelist()
-def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
+def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	data = json.loads(trans_items)
-	for d in data:
-		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
-		child_item.qty = flt(d.get("qty"))
 
+	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+
+	for d in data:
+		new_child_flag = False
+		if not d.get("docname"):
+			new_child_flag = True
+			if parent_doctype == "Sales Order":
+				child_item  = set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
+			if parent_doctype == "Purchase Order":
+				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
+		else:
+			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		child_item.qty = flt(d.get("qty"))
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
 		child_item.flags.ignore_validate_update_after_submit = True
-		child_item.save()
+		if new_child_flag:
+			child_item.idx = len(parent.items) + 1
+			child_item.insert()
+		else:
+			child_item.save()
 
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
+	parent.reload()
+	parent.flags.ignore_validate_update_after_submit = True
+	parent.set_qty_as_per_stock_uom()
+	parent.calculate_taxes_and_totals()
+	frappe.get_doc('Authorization Control').validate_approving_authority(parent.doctype,
+		parent.company, parent.base_grand_total)
 
-	p_doctype.flags.ignore_validate_update_after_submit = True
-	p_doctype.set_qty_as_per_stock_uom()
-	p_doctype.calculate_taxes_and_totals()
-	frappe.get_doc('Authorization Control').validate_approving_authority(p_doctype.doctype,
-		p_doctype.company, p_doctype.base_grand_total)
-
-	p_doctype.set_payment_schedule()
+	parent.set_payment_schedule()
 	if parent_doctype == 'Purchase Order':
-		p_doctype.validate_minimum_order_qty()
-		p_doctype.validate_budget()
-		if p_doctype.is_against_so():
-			p_doctype.update_status_updater()
+		parent.validate_minimum_order_qty()
+		parent.validate_budget()
+		if parent.is_against_so():
+			parent.update_status_updater()
 	else:
-		p_doctype.check_credit_limit()
+		parent.check_credit_limit()
 
-	p_doctype.save()
+	parent.save()
 
 	if parent_doctype == 'Purchase Order':
-		update_last_purchase_rate(p_doctype, is_submit = 1)
-		p_doctype.update_prevdoc_status()
-		p_doctype.update_requested_qty()
-		p_doctype.update_ordered_qty()
-		p_doctype.update_ordered_and_reserved_qty()
-		p_doctype.update_receiving_percentage()
-		if p_doctype.is_subcontracted == "Yes":
-			p_doctype.update_reserved_qty_for_subcontract()
+		update_last_purchase_rate(parent, is_submit = 1)
+		parent.update_prevdoc_status()
+		parent.update_requested_qty()
+		parent.update_ordered_qty()
+		parent.update_ordered_and_reserved_qty()
+		parent.update_receiving_percentage()
+		if parent.is_subcontracted == "Yes":
+			parent.update_reserved_qty_for_subcontract()
 	else:
-		p_doctype.update_reserved_qty()
-		p_doctype.update_project()
-		p_doctype.update_prevdoc_status('submit')
-		p_doctype.update_delivery_status()
+		parent.update_reserved_qty()
+		parent.update_project()
+		parent.update_prevdoc_status('submit')
+		parent.update_delivery_status()
 
-	p_doctype.update_blanket_order()
-	p_doctype.update_billing_percentage()
-	p_doctype.set_status()
+	parent.update_blanket_order()
+	parent.update_billing_percentage()
+	parent.set_status()
