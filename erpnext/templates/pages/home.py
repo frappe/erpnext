@@ -16,14 +16,20 @@ def get_context(context):
 			item.route = '/' + route
 
 	context.title = homepage.title or homepage.company
-
-	# show atleast 3 products
-	if len(homepage.products) < 3:
-		for i in range(3 - len(homepage.products)):
-			homepage.append('products', {
-				'item_code': 'product-{0}'.format(i),
-				'item_name': frappe._('Product {0}').format(i),
-				'route': '#'
-			})
-
 	context.homepage = homepage
+
+	context.blogs = frappe.get_all('Blog Post',
+		fields=['title', 'blogger', 'blog_intro', 'route'],
+		filters={
+			'published': 1
+		},
+		order_by='modified desc',
+		limit=3
+	)
+
+	context.email = frappe.db.get_single_value('Contact Us Settings', 'email_id')
+	context.phone = frappe.db.get_single_value('Contact Us Settings', 'phone')
+	context.explore_link = '/products'
+
+	# homepage_sections = frappe.get_all('Homepage Section', order_by='section_order asc')
+	# context.custom_sections = [frappe.get_doc('Homepage Section', name) for name in homepage_sections]
