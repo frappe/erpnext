@@ -479,6 +479,8 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
 		)
 
+	loyalty_point_details = []
+
 	if party_type == "Customer":
 		loyalty_point_details = frappe._dict(frappe.get_all("Loyalty Point Entry",
 			filters={
