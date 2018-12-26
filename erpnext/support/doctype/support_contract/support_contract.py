@@ -5,12 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import _, utils
-import re
-from frappe.email.inbox import make_issue_from_communication
-from datetime import datetime, timedelta
+from frappe import _
+
 class SupportContract(Document):
-	
+
 	def before_insert(self):
 		if self.default_contract:
 			doc = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}])

@@ -26,7 +26,7 @@ def make_support_contract():
 		}).insert()
 	support_contract = frappe.get_doc({
 		"doctype": "Support Contract",
-		"customer": "_Test Customer",
+		"customer": customer.customer_name,
 		"service_level": "_Test Service Level",
 		"holiday_list": "_Test Holiday List",
 		"priority": "Medium",

@@ -101,9 +101,9 @@ class Issue(Document):
 	
 	def before_insert(self):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
+		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
 		if not support_contract:
-			support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "contract_template", "service_level", "holiday_list", "priority"], limit=1)
+			support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
 		if support_contract:
 			self.support_contract = support_contract[0].name
 			self.priority = support_contract[0].priority
@@ -114,7 +114,7 @@ class Issue(Document):
 			time, add_days, now_datetime = 0, 0, utils.now_datetime()
 			while time != 1:
 				for count, weekday in enumerate(week):
-					if count >= (utils.getdate()).weekday() or add_days != 0:
+					if count >= (getdate()).weekday() or add_days != 0:
 						if time != 1:
 							for service in service_level.support_and_resolution:
 								if service.workday == weekday:
@@ -149,7 +149,7 @@ class Issue(Document):
 		else:
 			support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
-		
+
 	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
 		time_difference, time_added_flag, time_set_flag = 0, 0, 0
 		#Loop starts counting from current weekday and iterates till time_set_flag is set indicating the time has been calculated.
@@ -194,7 +194,8 @@ class Issue(Document):
 							#	Checks if date is present in the holiday list
 							if time.date() in holidays:
 								continue
-							#	Time is checked after every calculation whether time is between start and end time for the day to be sure if 
+							# Time is checked after every calculation whether time is between start and end time for the day to be sure if
+							# calculated time is between start and end time fo the particular day
 							if time.time() <= end_time and time.time() >= start_time:
 								time_set_flag = 1
 								break
