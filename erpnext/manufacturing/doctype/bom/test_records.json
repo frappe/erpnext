@@ -11,7 +11,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    },
    {
     "amount": 2000.0,
@@ -23,7 +23,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    }
   ],
   "docstatus": 1,
@@ -57,7 +57,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    },
    {
     "amount": 2000.0,
@@ -69,7 +69,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    }
   ],
   "docstatus": 1,
@@ -102,7 +102,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    },
    {
     "amount": 3000.0,
@@ -115,7 +115,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    }
   ],
   "docstatus": 1,
@@ -150,7 +150,7 @@
     "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
     "source_warehouse": "_Test Warehouse - _TC",
-    "allow_transfer_for_manufacture": 1
+    "include_item_in_manufacturing": 1
    }
   ],
   "docstatus": 1,
