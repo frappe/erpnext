@@ -456,31 +456,40 @@ def raise_work_orders(material_request):
 	errors =[]
 	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
-			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
+			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
 				wo_order = frappe.new_doc("Work Order")
-				wo_order.production_item = d.item_code
-				wo_order.qty = d.qty - d.ordered_qty
-				wo_order.fg_warehouse = d.warehouse
-				wo_order.wip_warehouse = default_wip_warehouse
-				wo_order.description = d.description
-				wo_order.stock_uom = d.stock_uom
-				wo_order.expected_delivery_date = d.schedule_date
-				wo_order.sales_order = d.sales_order
-				wo_order.bom_no = get_item_details(d.item_code).bom_no
-				wo_order.material_request = mr.name
-				wo_order.material_request_item = d.name
-				wo_order.planned_start_date = mr.transaction_date
-				wo_order.company = mr.company
+				wo_order.update({
+					"production_item": d.item_code,
+					"qty": d.qty - d.ordered_qty,
+					"fg_warehouse": d.warehouse,
+					"wip_warehouse": default_wip_warehouse,
+					"description": d.description,
+					"stock_uom": d.stock_uom,
+					"expected_delivery_date": d.schedule_date,
+					"sales_order": d.sales_order,
+					"bom_no": get_item_details(d.item_code).bom_no,
+					"material_request": mr.name,
+					"material_request_item": d.name,
+					"planned_start_date": mr.transaction_date,
+					"company": mr.company
+				})
+
+				wo_order.set_work_order_operations()
 				wo_order.save()
+
 				work_orders.append(wo_order.name)
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
+
 	if work_orders:
 		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in work_orders]
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
+
 	if errors:
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
+
 	return work_orders
