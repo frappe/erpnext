@@ -2,9 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Support Contract', {
-	refresh: function(frm) {
-
-	},
 	service_level: function(frm) {
 		frm.fields_dict.support_and_resolution.grid.remove_all();
 		frappe.call({

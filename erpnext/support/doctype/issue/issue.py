@@ -8,7 +8,7 @@ from frappe import _
 from frappe import utils
 
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, add_days, getdate
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate
 from datetime import datetime, timedelta
 from frappe.utils.user import is_website_user
 
@@ -98,7 +98,7 @@ class Issue(Document):
 			doc.reference_name = replicated_issue.name
 			doc.save(ignore_permissions=True)
 		return replicated_issue.name
-	
+
 	def before_insert(self):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
@@ -155,7 +155,7 @@ class Issue(Document):
 		#Loop starts counting from current weekday and iterates till time_set_flag is set indicating the time has been calculated.
 		while time_set_flag != 1:
 			for count, weekday in enumerate(week):
-				# Initially time_added_flag is zero and the code will only start executing if today and weekday is the same and keep executing 
+				# Initially time_added_flag is zero and the code will only start executing if today and weekday is the same and keep executing
 				# henceforth as time_add is incremented.
 				if count >= (time.date()).weekday() or time_added_flag != 0:
 					for support_day in support_days:

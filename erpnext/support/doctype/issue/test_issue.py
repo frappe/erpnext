@@ -6,10 +6,8 @@ import frappe
 import unittest
 from erpnext.support.doctype.support_contract.test_support_contract import make_support_contract
 
-test_records = frappe.get_test_records('Issue')
-
 class TestIssue(unittest.TestCase):
-	
+
 	def test_issue(self):
 		make_support_contract()
 		test_make_issue = make_issue()

@@ -44,7 +44,7 @@ def make_support_contract():
 		return support_contract.name
 	else:
 		return support_contract_exists
-	
+
 def get_support_contract():
 	support_contract = frappe.db.exists("Support Contract", "Support Contract: _Test Customer")
 	return support_contract
