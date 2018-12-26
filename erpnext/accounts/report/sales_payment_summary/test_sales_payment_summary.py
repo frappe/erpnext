@@ -29,7 +29,7 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			new_doc.submit()
 			try:
 				new_doc.submit()
-			except Exception as e:
+			except Exception:
 				pass
 
 			if int(new_doc.name[-3:])%2 == 0:
@@ -71,7 +71,7 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			new_doc.submit()
 			try:
 				new_doc.submit()
-			except Exception as e:
+			except Exception:
 				pass
 
 			if int(new_doc.name[-3:])%2 == 0:
