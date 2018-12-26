@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-import erpnext
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import get_mode_of_payments, get_mode_of_payment_details
 from frappe.utils import nowdate
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -29,8 +28,8 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			new_doc.submit()
 			try:
 				new_doc.submit()
-			except Exception:
-				pass
+			except Exception as e:
+				print(e)
 
 			if int(new_doc.name[-3:])%2 == 0:
 				bank_account = "_Test Cash - _TC"
@@ -71,8 +70,8 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			new_doc.submit()
 			try:
 				new_doc.submit()
-			except Exception:
-				pass
+			except Exception as e:
+				print(e)
 
 			if int(new_doc.name[-3:])%2 == 0:
 				bank_account = "_Test Cash - _TC"
