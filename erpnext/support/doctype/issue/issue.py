@@ -147,7 +147,7 @@ def calculate_support_day(now_datetime=None, time=None, time_period=None, suppor
 		support = datetime.combine(now_datetime.date(), end_time)
 	else:
 		support = calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
-	return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
+	return support, round(time_diff_in_hours(support, now_datetime()), 2)
 
 def calculate_support_time(time=None, hours=None, support_days=None, holidays=None, week=None):
 	time_difference, time_added_flag, time_set_flag = 0, 0, 0
