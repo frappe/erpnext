@@ -77,8 +77,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Support Contract Template",
-					"description": _("Support Contract Template."),
+					"name": "Service Level Agreement",
+					"description": _("Service Level Agreement."),
 				}
 			]
 		},

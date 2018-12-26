@@ -7,14 +7,14 @@ import frappe
 import unittest
 from erpnext.support.doctype.service_level.test_service_level import make_service_level
 
-class TestSupportContract(unittest.TestCase):
+class TestServiceLevelAgreement(unittest.TestCase):
 
-	def test_support_contract(self):
-		test_make_support_contract = make_support_contract()
-		test_get_support_contract = get_support_contract()
-		self.assertEquals(test_make_support_contract, test_get_support_contract)
+	def test_service_level_agreement(self):
+		test_make_service_level_agreement = make_service_level_agreement()
+		test_get_service_level_agreement = get_service_level_agreement()
+		self.assertEquals(test_make_service_level_agreement, test_get_service_level_agreement)
 
-def make_support_contract():
+def make_service_level_agreement():
 	make_service_level()
 	if not frappe.db.exists("Customer", "_Test Customer"):
 		customer = frappe.get_doc({
@@ -24,8 +24,8 @@ def make_support_contract():
 			"customer_type": "Individual",
 			"territory": "Rest Of The World"
 		}).insert()
-	support_contract = frappe.get_doc({
-		"doctype": "Support Contract",
+	service_level_agreement = frappe.get_doc({
+		"doctype": "Service Level Agreement",
 		"customer": "_Test Customer",
 		"service_level": "_Test Service Level",
 		"holiday_list": "_Test Holiday List",
@@ -38,13 +38,13 @@ def make_support_contract():
 		"resolution_time": "2",
 		"resolution_time_period": "Day/s",
 	})
-	support_contract_exists = frappe.db.exists("Support Contract", "Support Contract: _Test Customer")
-	if not support_contract_exists:
-		support_contract.insert()
-		return support_contract.name
+	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "Service Level Agreement: _Test Customer")
+	if not service_level_agreement_exists:
+		service_level_agreement.insert()
+		return service_level_agreement.name
 	else:
-		return support_contract_exists
+		return service_level_agreement_exists
 
-def get_support_contract():
-	support_contract = frappe.db.exists("Support Contract", "Support Contract: _Test Customer")
-	return support_contract
+def get_service_level_agreement():
+	service_level_agreement = frappe.db.exists("Service Level Agreement", "Service Level Agreement: _Test Customer")
+	return service_level_agreement

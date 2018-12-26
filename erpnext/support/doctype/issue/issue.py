@@ -100,15 +100,16 @@ class Issue(Document):
 
 	def before_insert(self):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-		support_contract = frappe.get_list("Support Contract", filters=[{"customer": self.customer, "contract_status": "Active"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
-		if not support_contract:
-			support_contract = frappe.get_list("Support Contract", filters=[{"default_contract": "1"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
-		if support_contract:
-			self.support_contract = support_contract[0].name
-			self.priority = support_contract[0].priority
-			service_level = frappe.get_doc("Service Level", support_contract[0].service_level)
+		service_level_agreement = frappe.get_list("Service Level Agreement", filters=[{"customer": self.customer, "agreement_status": "Active"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
+		if not service_level_agreement:
+			service_level_agreement = frappe.get_list("Service Level Agreement", filters=[{"default_service_level_agreement": "1"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
+		if service_level_agreement:
+			print(service_level_agreement)
+			self.service_level_agreement = service_level_agreement[0].name
+			self.priority = service_level_agreement[0].priority
+			service_level = frappe.get_doc("Service Level", service_level_agreement[0].service_level)
 			support_days = [[service.workday, str(service.start_time), str(service.end_time)] for service in service_level.support_and_resolution]
-			holiday_list = frappe.get_doc("Holiday List", support_contract[0].holiday_list)
+			holiday_list = frappe.get_doc("Holiday List", service_level_agreement[0].holiday_list)
 			holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
 			time, add_days, now_datetime = 0, 0, utils.now_datetime()
 			while time != 1:
@@ -147,7 +148,7 @@ def calculate_support_day(now_datetime=None, time=None, time_period=None, suppor
 		support = datetime.combine(now_datetime.date(), end_time)
 	else:
 		support = calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
-	return support, round(time_diff_in_hours(support, now_datetime()), 2)
+	return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
 
 def calculate_support_time(time=None, hours=None, support_days=None, holidays=None, week=None):
 	time_difference, time_added_flag, time_set_flag = 0, 0, 0
