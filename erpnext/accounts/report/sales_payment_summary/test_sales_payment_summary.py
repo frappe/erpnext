@@ -24,6 +24,7 @@ class TestSalesPaymentSummary(unittest.TestCase):
 		for invoice in si[:2]:
 			doc = frappe.get_doc("Sales Invoice", invoice.name)
 			new_doc = frappe.copy_doc(doc)
+			new_doc.ignore_pricing_rule = 1
 			new_doc.insert()
 			new_doc.submit()
 			try:
