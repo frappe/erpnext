@@ -44,14 +44,14 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party = frappe.get_doc(party_type, party)
 	currency = party.default_currency if party.default_currency else get_company_currency(company)
 
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
-	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
-	set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
+	party_address, shipping_address = set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
 
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
+	out["tax_category"] = get_tax_category(party, party_address, shipping_address)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group,
+		out.supplier_group, out.tax_category, party_address, shipping_address)
 
 	if fetch_payment_terms_template:
 		out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
@@ -100,6 +100,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 			out.shipping_address_display = get_address_display(out["shipping_address"])
 			out.update(get_fetch_values(doctype, 'shipping_address', out.shipping_address))
 		get_regional_address_details(out, doctype, company)
+
+	return out.get(billing_address_field), out.shipping_address_name
 
 @erpnext.allow_regional
 def get_regional_address_details(out, doctype, company):
@@ -353,14 +355,20 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 				frappe.throw(_("Due / Reference Date cannot be after {0}")
 					.format(formatdate(default_due_date)))
 
+def get_tax_category(party, billing_address, shipping_address):
+	return party.get("tax_category")
+
 @frappe.whitelist()
-def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None,
+def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
 		"company":			company
 	}
+
+	if tax_category:
+		args['tax_category'] = tax_category
 
 	if customer_group:
 		args['customer_group'] = customer_group
