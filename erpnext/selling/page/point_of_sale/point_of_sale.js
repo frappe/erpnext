@@ -394,7 +394,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 
-			frappe.prompt(this.get_promopt_fields(),
+			frappe.prompt(this.get_prompt_fields(),
 				on_submit,
 				__('Select POS Profile')
 			);
@@ -417,11 +417,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		]);
 	}
 
-	get_promopt_fields() {
+	get_prompt_fields() {
 		return [{
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
+			fieldname: 'pos_profile',
 			reqd: 1,
 			get_query: () => {
 				return {
@@ -433,7 +434,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			}
 		}, {
 			fieldtype: 'Check',
-			label: __('Set as default')
+			label: __('Set as default'),
+			fieldname: 'set_as_default'
 		}];
 	}
 
@@ -522,6 +524,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
+						this.frm.doc.campaign = r.message.campaign;
 					}
 				}
 
@@ -1128,12 +1131,15 @@ class POSItems {
 		this.events = events;
 		this.currency = this.frm.doc.currency;
 
-		this.make_dom();
-		this.make_fields();
+		frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name", (r) => {
+			this.parent_item_group = r.name;
+			this.make_dom();
+			this.make_fields();
 
-		this.init_clusterize();
-		this.bind_events();
-		this.load_items_data();
+			this.init_clusterize();
+			this.bind_events();
+			this.load_items_data();
+		})
 	}
 
 	load_items_data() {
@@ -1175,6 +1181,7 @@ class POSItems {
 
 	make_fields() {
 		// Search field
+		const me = this;
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
@@ -1202,7 +1209,7 @@ class POSItems {
 				fieldtype: 'Link',
 				label: 'Item Group',
 				options: 'Item Group',
-				default: 'All Item Groups',
+				default: me.parent_item_group,
 				onchange: () => {
 					const item_group = this.item_group_field.get_value();
 					if (item_group) {
@@ -1258,7 +1265,7 @@ class POSItems {
 		this.clusterize.update(row_items);
 	}
 
-	filter_items({ search_term='', item_group='All Item Groups' }={}) {
+	filter_items({ search_term='', item_group=this.parent_item_group }={}) {
 		if (search_term) {
 			search_term = search_term.toLowerCase();
 
@@ -1271,7 +1278,7 @@ class POSItems {
 				this.set_item_in_the_cart(items);
 				return;
 			}
-		} else if (item_group == "All Item Groups") {
+		} else if (item_group == this.parent_item_group) {
 			this.items = this.all_items;
 			return this.render_items(this.all_items);
 		}
@@ -1376,7 +1383,7 @@ class POSItems {
 		return template;
 	}
 
-	get_items({start = 0, page_length = 40, search_value='', item_group="All Item Groups"}={}) {
+	get_items({start = 0, page_length = 40, search_value='', item_group=this.parent_item_group}={}) {
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
