@@ -152,11 +152,8 @@ class Employee(NestedSet):
 				fields=['name', 'reports_to'],
 				filters={'reports_to': self.name}
 			)
-
 			if reports_to:
-				employee_names = []
-				for row in reports_to:
-					employee_names.append(row.name)
+				employee_names = [row.name for row in reports_to]
 				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee_name) for employee_name in employee_names]
 				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
 					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
