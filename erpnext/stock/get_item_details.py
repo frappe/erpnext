@@ -252,7 +252,7 @@ def get_basic_details(args, item):
 			item.get("taxes")))),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-		"qty": float(args.qty) or 1.0,
+		"qty": args.qty and float(args.qty) or 1.0,
 		"stock_qty": args.qty or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
