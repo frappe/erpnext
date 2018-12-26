@@ -18,10 +18,10 @@ class TestSalesPaymentSummary(unittest.TestCase):
 		pass
 
 	def test_get_mode_of_payments(self):
-		si = frappe.get_all("Sales Invoice", fields=["name", "docstatus"])
+		si = frappe.get_all("Sales Invoice", filters={"company": "_Test Company", "customer": "_Test Customer"}, fields=["name", "docstatus"])
 		filters = get_filters()
 
-		for invoice in si[:2]:
+		for invoice in si[:-2]:
 			doc = frappe.get_doc("Sales Invoice", invoice.name)
 			new_doc = frappe.copy_doc(doc)
 			new_doc.ignore_pricing_rule = 1
@@ -61,10 +61,10 @@ class TestSalesPaymentSummary(unittest.TestCase):
 		self.assertTrue('Cash' not in mop.values()[0])
 
 	def test_get_mode_of_payments_details(self):
-		si = frappe.get_all("Sales Invoice", fields=["name", "docstatus"])
+		si = frappe.get_all("Sales Invoice", filters={"company": "_Test Company", "customer": "_Test Customer"}, fields=["name", "docstatus"])
 		filters = get_filters()
 
-		for invoice in si[:2]:
+		for invoice in si[:-2]:
 			doc = frappe.get_doc("Sales Invoice", invoice.name)
 			new_doc = frappe.copy_doc(doc)
 			new_doc.insert()
