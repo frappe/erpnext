@@ -576,7 +576,7 @@ def get_data():
 		},
 		{
 			"module_name": "Quality Management",
-			"color": "blue",
+			"color": "#7578f6",
 			"icon": "octicon octicon-package",
 			"type": "module",
 			"label": _("Quality Management")
