@@ -1,0 +1,17 @@
+<div class="media p-3 my-2 border rounded">
+	<a href="{{ item.route }}">
+		{% if item.image %}
+			<img class="product-image" src="{{ item.image }}" alt="{{ item.item_name }}">
+		{% else %}
+			<div class="product-image no-image">{{ item.item_name[0] }}</div>
+		{% endif %}
+	</a>
+	<div class="media-body">
+		<h5 class="mt-0">
+			<a class="text-dark" href="{{ item.route }}">
+				{{ item.item_name }}
+			</a>
+		</h5>
+		<p>{{ item.description }}</p>
+	</div>
+</div>

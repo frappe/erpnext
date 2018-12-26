@@ -1,0 +1,38 @@
+{% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+{% block page_content %}
+<h1>Products</h1>
+
+<div class="row">
+    <div class="col-8 products-list">
+        {% for item in items %}
+            {% include "erpnext/templates/pages/products_item.html" %}
+        {% endfor %}
+    </div>
+    <div class="col-4">
+        {% for attribute in attributes_for_filters %}
+            <div class="mb-4">
+                <h5>{{ attribute.name }}</h5>
+
+                {% for attr_value in attribute.item_attribute_values %}
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox"
+                        class="product-filter custom-control-input"
+                        id="{{attr_value.name}}"
+                        data-attribute="{{ attribute.name }}"
+                        data-attribute-value="{{ attr_value.attribute_value }}"
+                    >
+                    <label class="custom-control-label" for="{{attr_value.name}}">
+                        {{ attr_value.attribute_value }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+

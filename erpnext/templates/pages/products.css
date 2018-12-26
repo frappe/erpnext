@@ -1,0 +1,20 @@
+.product-image {
+    display: inline-block;
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    margin-right: 1rem;
+}
+
+.product-image.no-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    color: var(--gray);
+    background: var(--light);
+}
+
+.product-image a {
+    text-decoration: none;
+}
