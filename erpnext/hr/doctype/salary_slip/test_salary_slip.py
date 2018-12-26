@@ -26,6 +26,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.make_holiday_list()
 
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
@@ -254,6 +255,9 @@ class TestSalarySlip(unittest.TestCase):
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
 		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
+
+		# undelete fixture data
+		frappe.db.rollback()
 
 	def make_holiday_list(self):
 		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())

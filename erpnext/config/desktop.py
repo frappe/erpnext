@@ -573,5 +573,12 @@ def get_data():
 			"type": "module",
 			"label": _("Non Profit"),
 			"hidden": 1
+		},
+		{
+			"module_name": "Quality Management",
+			"color": "blue",
+			"icon": "octicon octicon-package",
+			"type": "module",
+			"label": _("Quality Management")
 		}
 	]

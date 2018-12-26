@@ -32,7 +32,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-
 		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
@@ -347,9 +346,11 @@ class SalesOrder(SellingController):
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-
-		self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
-			update_modified=False)
+		
+		if tot_qty != 0:
+			self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
+				update_modified=False)
+		
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -619,7 +620,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
+		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty - source.returned_qty
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")

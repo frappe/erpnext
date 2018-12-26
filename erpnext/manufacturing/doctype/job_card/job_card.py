@@ -11,9 +11,9 @@ from frappe.model.document import Document
 
 class JobCard(Document):
 	def validate(self):
-		self.status = 'Open'
 		self.validate_actual_dates()
 		self.set_time_in_mins()
+		self.set_status()
 
 	def validate_actual_dates(self):
 		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
@@ -48,7 +48,7 @@ class JobCard(Document):
 			return
 
 		doc = frappe.get_doc('Work Order', self.get('work_order'))
-		if not doc.transfer_material_against_job_card and doc.skip_transfer:
+		if doc.transfer_material_against == 'Work Order' and doc.skip_transfer:
 			return
 
 		for d in doc.required_items:
@@ -104,20 +104,23 @@ class JobCard(Document):
 			wo.set_actual_dates()
 			wo.save()
 
-	def set_transferred_qty(self):
+	def set_transferred_qty(self, update_status=False):
 		if not self.items:
 			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
 
 		if self.items:
-			self.transferred_qty = frappe.db.get_value('Stock Entry', {'job_card': self.name,
-				'work_order': self.work_order, 'docstatus': 1}, 'sum(fg_completed_qty)')
+			self.transferred_qty = frappe.db.get_value('Stock Entry', {
+				'job_card': self.name,
+				'work_order': self.work_order,
+				'docstatus': 1
+			}, 'sum(fg_completed_qty)') or 0
 
 		self.db_set("transferred_qty", self.transferred_qty)
 
 		qty = 0
 		if self.work_order:
 			doc = frappe.get_doc('Work Order', self.work_order)
-			if doc.transfer_material_against_job_card and not doc.skip_transfer:
+			if doc.transfer_material_against == 'Job Card' and not doc.skip_transfer:
 				completed = True
 				for d in doc.operations:
 					if d.status != 'Completed':
@@ -131,15 +134,28 @@ class JobCard(Document):
 
 			doc.db_set('material_transferred_for_manufacturing', qty)
 
-		self.set_status()
+		self.set_status(update_status)
 
-	def set_status(self):
-		status = 'Cancelled' if self.docstatus == 2 else 'Work In Progress'
+	def set_status(self, update_status=False):
+		self.status = {
+			0: "Open",
+			1: "Submitted",
+			2: "Cancelled"
+		}[self.docstatus or 0]
 
-		if self.for_quantity == self.transferred_qty:
-			status = 'Completed'
+		if self.actual_start_date:
+			self.status = 'Work In Progress'
 
-		self.db_set('status', status)
+		if (self.docstatus == 1 and
+			(self.for_quantity == self.transferred_qty or not self.items)):
+			self.status = 'Completed'
+
+		if self.status != 'Completed':
+			if self.for_quantity == self.transferred_qty:
+				self.status = 'Material Transferred'
+
+		if update_status:
+			self.db_set('status', self.status)
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
