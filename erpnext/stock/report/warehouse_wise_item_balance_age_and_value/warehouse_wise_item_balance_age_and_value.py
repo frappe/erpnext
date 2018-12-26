@@ -94,11 +94,10 @@ def validate_filters(filters):
 		filters["company"] = frappe.defaults.get_user_default("Company")
 
 def get_warehouse_list(filters):
-	from frappe.defaults import get_user_permissions
+	from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+
 	condition = ''
-	user_permitted_warehouse = filter(None, get_user_permissions()
-		.get("Warehouse", {})
-		.get("docs", []))
+	user_permitted_warehouse = get_permitted_documents('Warehouse')
 	value = ()
 	if user_permitted_warehouse:
 		condition = "and name in %s"
