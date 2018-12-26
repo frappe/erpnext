@@ -441,7 +441,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							weight_uom: item.weight_uom,
 							uom : item.uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
-							cost_center: item.cost_center
+							cost_center: item.cost_center,
+							tax_category: me.frm.doc.tax_category,
+							item_tax_template: item.item_tax_template
 						}
 					},
 
@@ -1280,6 +1282,62 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+	},
+
+	tax_category: function() {
+		var me = this;
+		var item_codes = [];
+		$.each(this.frm.doc.items || [], function(i, item) {
+			if(item.item_code) {
+				item_codes.push(item.item_code);
+			}
+		});
+
+		//todo run serially?
+		erpnext.utils.set_taxes(this.frm, "tax_category");
+
+		if(item_codes.length) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_item_tax_info",
+				args: {
+					tax_category: cstr(me.frm.doc.tax_category),
+					item_codes: item_codes
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						$.each(me.frm.doc.items || [], function(i, item) {
+							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
+								item.item_tax_template = r.message[item.item_code].item_tax_template;
+								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+							} else {
+								item.item_tax_template = "";
+								item.item_tax_rate = "";
+							}
+						});
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
+		}
+	},
+
+	item_tax_template: function(doc, cdt, cdn) {
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+
+		return this.frm.call({
+			method: "erpnext.stock.get_item_details.get_item_tax_map",
+			args: {
+				"item_tax_template": item.item_tax_template,
+				"as_json": true
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					item.item_tax_rate = r.message;
+					me.calculate_taxes_and_totals();
+				}
+			}
+		});
 	},
 
 	is_recurring: function() {

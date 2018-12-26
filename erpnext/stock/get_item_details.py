@@ -44,6 +44,9 @@ def get_item_details(args):
 
 	out = get_basic_details(args, item)
 
+	get_item_tax_template(args, item, out)
+	out["item_tax_rate"] = get_item_tax_map(out.get("item_tax_template"), as_json=True)
+
 	get_party_item_code(args, item, out)
 
 	set_valuation_rate(out, args)
@@ -248,8 +251,6 @@ def get_basic_details(args, item):
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
-		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
-			item.get("taxes")))),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": args.qty or 1.0,
@@ -303,6 +304,58 @@ def get_basic_details(args, item):
 		out[fieldname] = item.get(fieldname)
 
 	return out
+
+@frappe.whitelist()
+def get_item_tax_info(tax_category, item_codes):
+	out = {}
+	if isinstance(item_codes, string_types):
+		item_codes = json.loads(item_codes)
+
+	for item_code in item_codes:
+		if not item_code or item_code in out:
+			continue
+		out[item_code] = {}
+		item = frappe.get_cached_doc("Item", item_code)
+		get_item_tax_template({"tax_category": tax_category}, item, out[item_code])
+		out[item_code]["item_tax_rate"] = get_item_tax_map(out[item_code].get("item_tax_template"), as_json=True)
+
+	return out
+
+def get_item_tax_template(args, item, out):
+	"""
+		args = {
+			"tax_category": None
+			"item_tax_template": None
+		}
+	"""
+	item_tax_template = args.get("item_tax_template")
+
+	if not item_tax_template:
+		item_tax_template = _get_item_tax_template(args, item.taxes, out)
+
+	if not item_tax_template:
+		item_group = item.item_group
+		while item_group and not item_tax_template:
+			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
+			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
+			item_group = item_group_doc.parent_item_group
+
+def _get_item_tax_template(args, taxes, out):
+	for tax in taxes:
+		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
+			out["item_tax_template"] = tax.item_tax_template
+			return tax.item_tax_template
+	return None
+
+@frappe.whitelist()
+def get_item_tax_map(item_tax_template, as_json=True):
+	item_tax_map = {}
+	if item_tax_template:
+		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
+		for d in template.taxes:
+			item_tax_map[d.tax_type] = d.tax_rate
+
+	return json.dumps(item_tax_map) if as_json else item_tax_map
 
 @frappe.whitelist()
 def calculate_service_end_date(args, item=None):
