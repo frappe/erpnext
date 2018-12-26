@@ -552,7 +552,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
+		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty - source.returned_qty
 
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
