@@ -16,7 +16,7 @@ from six import iteritems
 
 class Project(Document):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), self.project_name)
+		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
 
 	def onload(self):
 		"""Load project tasks for quick view"""
@@ -76,7 +76,7 @@ class Project(Document):
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(self.project_name))
+			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:
@@ -258,13 +258,13 @@ class Project(Document):
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def update_sales_amount(self):
-		total_sales_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_sales_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
-		total_billed_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_billed_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Invoice` where project = %s and docstatus=1""", self.name)
 
 		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
