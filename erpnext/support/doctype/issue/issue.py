@@ -181,10 +181,9 @@ class Issue(Document):
 									time = datetime.combine(time.date(), start_time)
 									time += timedelta(hours=hours)
 									time_added_flag = 1
-							#elif time.time() <= end_time and time.time() >= start_time:
-							#	print("time.time() <= end_time and time.time() >= start_time")
-							#	time_set_flag = 1
-							#	break
+							elif time.time() <= end_time and time.time() >= start_time:
+								time_set_flag = 1
+								break
 							elif time.time() >= end_time:
 								if time_added_flag == 1:
 									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
@@ -271,9 +270,9 @@ def update_support_timer():
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
 		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
-			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, utils.now_datetime()), 2)
+			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, now_datetime()), 2)
 		if float(issue.time_to_resolve) > 0:
-			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, utils.now_datetime()), 2)
+			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2)
 		if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
 			issue.service_contract_status = "Failed"
 		else:

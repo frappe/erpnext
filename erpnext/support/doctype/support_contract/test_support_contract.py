@@ -8,7 +8,7 @@ import unittest
 from erpnext.support.doctype.service_level.test_service_level import make_service_level
 
 class TestSupportContract(unittest.TestCase):
-	
+
 	def test_support_contract(self):
 		test_make_support_contract = make_support_contract()
 		test_get_support_contract = get_support_contract()

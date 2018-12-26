@@ -6,7 +6,7 @@ import frappe
 import unittest
 
 class TestHolidayList(unittest.TestCase):
- 
+
     def test_holiday_list(self):
         test_make_holiday_list = make_holiday_list()
         test_get_holiday_list = get_holiday_list()
