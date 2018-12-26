@@ -12,7 +12,7 @@ class TestEmployeeGroup(unittest.TestCase):
 		test_make_employee_group = make_employee_group()
 		test_get_employee_group = get_employee_group()
 		self.assertEquals(test_make_employee_group, test_get_employee_group)
-	
+
 def make_employee_group():
 	employee = make_employee("testemployee@example.com")
 	employee_group = frappe.get_doc({

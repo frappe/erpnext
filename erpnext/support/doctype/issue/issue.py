@@ -6,7 +6,6 @@ import frappe
 import json
 from frappe import _
 from frappe import utils
-
 from frappe.model.document import Document
 from frappe.utils import now, time_diff_in_hours, now_datetime, getdate
 from datetime import datetime, timedelta
@@ -147,60 +146,60 @@ class Issue(Document):
 		if not hours:
 			support = datetime.combine(now_datetime.date(), end_time)
 		else:
-			support = self.calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
+			support = calculate_support_time(time=now_datetime, hours=hours, support_days=support_days, holidays=holidays, week=week)
 		return support, round(time_diff_in_hours(support, utils.now_datetime()), 2)
 
-	def calculate_support_time(self, time=None, hours=None, support_days=None, holidays=None, week=None):
-		time_difference, time_added_flag, time_set_flag = 0, 0, 0
-		#Loop starts counting from current weekday and iterates till time_set_flag is set indicating the time has been calculated.
-		while time_set_flag != 1:
-			for count, weekday in enumerate(week):
-				# Initially time_added_flag is zero and the code will only start executing if today and weekday is the same and keep executing
-				# henceforth as time_add is incremented.
-				if count >= (time.date()).weekday() or time_added_flag != 0:
-					for support_day in support_days:
-						if weekday == support_day[0] and time_set_flag != 1:
-							start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-							# If the time is between start and end time then hours is added and then conditions are checked to avoid addition of extra day
-							if time.time() <= end_time and time.time() >= start_time and hours and time_added_flag == 0:
+def calculate_support_time(time=None, hours=None, support_days=None, holidays=None, week=None):
+	time_difference, time_added_flag, time_set_flag = 0, 0, 0
+	# Loop starts counting from current weekday and iterates till time_set_flag is set indicating the time has been calculated.
+	while time_set_flag != 1:
+		for count, weekday in enumerate(week):
+			# Initially time_added_flag is zero and the code will only start executing if today and weekday is the same and keep executing
+			# henceforth as time_add is incremented.
+			if count >= (time.date()).weekday() or time_added_flag != 0:
+				for support_day in support_days:
+					if weekday == support_day[0] and time_set_flag != 1:
+						start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
+						# If the time is between start and end time then hours is added and then conditions are checked to avoid addition of extra day
+						if time.time() <= end_time and time.time() >= start_time and hours and time_added_flag == 0:
+							time += timedelta(hours=hours)
+							time_added_flag = 1
+						if time_difference:
+							time = datetime.combine(time.date(), start_time)
+							time += timedelta(seconds=time_difference)
+						if time.time() <= start_time:
+							if time_added_flag == 1:
+								# If first day of the week then previous day is the last item of the list
+								if support_days.index(support_day) == 0:
+									prev_day_end_time = support_days[len(support_days)-1][2]
+								else:
+									prev_day_end_time = support_days[support_days.index(support_day)][2]
+								time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
+								time -= timedelta(days=1)	# Time is reduced by one day as one day is calculated extra
+							else:
+								time = datetime.combine(time.date(), start_time)
 								time += timedelta(hours=hours)
 								time_added_flag = 1
-							if time_difference:
-								time = datetime.combine(time.date(), start_time)
-								time += timedelta(seconds=time_difference)
-							if time.time() <= start_time:
-								if time_added_flag == 1:
-									#	If first day of the week then previous day is the last item of the list
-									if support_days.index(support_day) == 0:
-										prev_day_end_time = support_days[len(support_days)-1][2]
-									else:
-										prev_day_end_time = support_days[support_days.index(support_day)][2]
-									time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
-									time -= timedelta(days=1)	# Time is reduced by one day as one day is calculated extra
-								else:#if hours and time_added_flag == 0:
-									time = datetime.combine(time.date(), start_time)
-									time += timedelta(hours=hours)
-									time_added_flag = 1
-							elif time.time() <= end_time and time.time() >= start_time:
-								time_set_flag = 1
-								break
-							elif time.time() >= end_time:
-								if time_added_flag == 1:
-									time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
-								else:#if hours and time_added_flag == 0:
-									time_difference = hours * 3600
-									time_added_flag = 1
-							#	Checks if date is present in the holiday list
-							if time.date() in holidays:
-								continue
-							# Time is checked after every calculation whether time is between start and end time for the day to be sure if
-							# calculated time is between start and end time fo the particular day
-							if time.time() <= end_time and time.time() >= start_time:
-								time_set_flag = 1
-								break
-					if time_set_flag != 1:
-						time += timedelta(days=1)
-		return time
+						elif time.time() <= end_time and time.time() >= start_time:
+							time_set_flag = 1
+							break
+						elif time.time() >= end_time:
+							if time_added_flag == 1:
+								time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
+							else:
+								time_difference = hours * 3600
+								time_added_flag = 1
+						#	Checks if date is present in the holiday list
+						if time.date() in holidays:
+							continue
+						# Time is checked after every calculation whether time is between start and end time for the day to be sure if
+						# calculated time is between start and end time fo the particular day
+						if time.time() <= end_time and time.time() >= start_time:
+							time_set_flag = 1
+							break
+				if time_set_flag != 1:
+					time += timedelta(days=1)
+	return time
 
 def get_list_context(context=None):
 	return {
