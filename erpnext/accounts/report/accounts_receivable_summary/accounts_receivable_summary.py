@@ -97,6 +97,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				"fieldtype": "Link",
 				"options": "Customer Group",
 				"width": 80
+			},
+			{
+				"label": _("Sales Person"),
+				"fieldtype": "Data",
+				"fieldname": "sales_person",
+				"width": 120,
 			}]
 
 		if args.get("party_type") == "Supplier":
@@ -135,7 +141,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			]
 
 			if args.get("party_type") == "Customer":
-				row += [self.get_territory(party), self.get_customer_group(party)]
+				row += [self.get_territory(party), self.get_customer_group(party), ", ".join(set(party_dict.sales_person))]
 			if args.get("party_type") == "Supplier":
 				row += [self.get_supplier_group(party)]
 
@@ -156,14 +162,18 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range1": 0,
 					"range2": 0,
 					"range3": 0,
-					"range4": 0
+					"range4": 0,
+					"sales_person": []
 				})
 			)
 			for k in list(party_total[d.party]):
-				if k != "currency":
+				if k not in ["currency", "sales_person"]:
 					party_total[d.party][k] += flt(d.get(k, 0))
 
 			party_total[d.party].currency = d.currency
+
+			if d.sales_person:
+				party_total[d.party].sales_person.append(d.sales_person)
 
 		return party_total
 
@@ -181,12 +191,13 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			cols += ["bill_no", "bill_date"]
 
 		cols += ["invoiced_amt", "paid_amt", "credit_amt",
-		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
+		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency", "pdc/lc_date", "pdc/lc_ref",
+		"pdc/lc_amount", "remaining_balance"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_group", "remarks"]
 		if args.get("party_type") == "Customer":
-			cols += ["territory", "customer_group", "remarks"]
+			cols += ["po_no", "do_no", "territory", "customer_group", "sales_person", "remarks"]
 
 		return self.make_data_dict(cols, voucherwise_data)
 
