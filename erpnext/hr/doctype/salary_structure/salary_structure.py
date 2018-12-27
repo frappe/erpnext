@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, cstr
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
@@ -22,7 +22,7 @@ class SalaryStructure(Document):
 		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
-				component_default_value = frappe.db.get_value("Salary Component", str(d.salary_component),
+				component_default_value = frappe.db.get_value("Salary Component", cstr(d.salary_component),
 					overwritten_fields + overwritten_fields_if_missing, as_dict=1)
 				if component_default_value:
 					for fieldname in overwritten_fields:

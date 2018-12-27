@@ -395,4 +395,3 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None,
 			"company": "_Test Company"
 		})
 		item.save()
-
