@@ -104,7 +104,6 @@ class Issue(Document):
 		if not service_level_agreement:
 			service_level_agreement = frappe.get_list("Service Level Agreement", filters=[{"default_service_level_agreement": "1"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
 		if service_level_agreement:
-			print(service_level_agreement)
 			self.service_level_agreement = service_level_agreement[0].name
 			self.priority = service_level_agreement[0].priority
 			service_level = frappe.get_doc("Service Level", service_level_agreement[0].service_level)
@@ -269,12 +268,14 @@ def update_support_timer():
 	issues.reverse()
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
-		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
+		if float(issue.time_to_respond) > 0 and issue.status == 'Open' and not issue.first_responded_on:
 			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, now_datetime()), 2)
-		if float(issue.time_to_resolve) > 0:
+		if float(issue.time_to_resolve) > 0 and issue.status == 'Open':
 			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2)
-		if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
-			issue.service_contract_status = "Failed"
+		
+		if issue.status == 'Open':
+			if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
+				issue.service_contract_status = "Failed"
 		else:
 			issue.service_contract_status = "Fulfilled"
 		issue.save()

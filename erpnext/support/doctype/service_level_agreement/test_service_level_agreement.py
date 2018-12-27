@@ -16,17 +16,20 @@ class TestServiceLevelAgreement(unittest.TestCase):
 
 def make_service_level_agreement():
 	make_service_level()
+	customer = frappe.get_doc({
+		"doctype": "Customer",
+		"customer_name": "_Test Customer",
+		"customer_group": "Commercial",
+		"customer_type": "Individual",
+		"territory": "Rest Of The World"
+	})
 	if not frappe.db.exists("Customer", "_Test Customer"):
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": "_Test Customer",
-			"customer_group": "Commercial",
-			"customer_type": "Individual",
-			"territory": "Rest Of The World"
-		}).insert()
+		customer.insert()
+	else:
+		customer = frappe.get_doc("Customer", "_Test Customer")
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
-		"customer": "_Test Customer",
+		"customer": customer.customer_name,
 		"service_level": "_Test Service Level",
 		"holiday_list": "_Test Holiday List",
 		"priority": "Medium",

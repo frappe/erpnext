@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.support.doctype.support_contract.test_support_contract import make_support_contract
+from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import make_service_level_agreement
 
 class TestIssue(unittest.TestCase):
 
 	def test_issue(self):
-		make_support_contract()
+		make_service_level_agreement()
 		test_make_issue = make_issue()
 		test_get_issue = get_issue()
 		self.assertEquals(test_make_issue, test_get_issue)
@@ -21,13 +21,8 @@ def make_issue():
 		"subject": "Test Support",
 		"raised_by": "test@example.com",
 		"customer": "_Test Customer"
-	})
-	issue_exists = frappe.db.exists("Issue", "Test Support 2")
-	if not issue_exists:
-		issue.insert()
-		return issue.name
-	else:
-		return issue_exists
+	}).insert()
+	return issue.name
 
 def get_issue():
 	issue = frappe.get_list("Issue", filters={"subject": "Test Support"}, limit=1)
