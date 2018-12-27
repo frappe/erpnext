@@ -49,9 +49,6 @@ class Task(NestedSet):
 				if frappe.db.get_value("Task", d.task, "status") != "Closed":
 					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
 
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
-
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
@@ -71,13 +68,7 @@ class Task(NestedSet):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
-		self.unassign_todo()
 		self.populate_depends_on()
-
-	def unassign_todo(self):
-		if self.status == "Closed" or self.status == "Cancelled":
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`

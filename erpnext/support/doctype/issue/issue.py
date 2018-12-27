@@ -24,10 +24,6 @@ class Issue(Document):
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
 
-		if self.status == "Closed":
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
-
 	def on_update(self):
 		# create the communication email and remove the description
 		if (self.flags.create_communication and self.via_customer_portal):
