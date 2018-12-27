@@ -106,7 +106,8 @@ class GLEntry(Document):
 					"Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
-
+		if self.company=='_Test Company' and self.cost_center =='Main - WP':
+			print(_get_cost_center_company())
 		if self.cost_center and _get_cost_center_company() != self.company:
 			print(self.account, self.cost_center, self.company)
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
