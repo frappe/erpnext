@@ -64,7 +64,7 @@ class TestTask(unittest.TestCase):
 		def assign():
 			from frappe.desk.form import assign_to
 			assign_to.add({
-				"assign_to": "sahil@erpnext.com",
+				"assign_to": "test_employee@company.com",
 				"doctype": task.doctype,
 				"name": task.name,
 				"description": "Close this task"
@@ -78,7 +78,7 @@ class TestTask(unittest.TestCase):
 
 		assign()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "sahil@erpnext.com")
+		self.assertEqual(todo.owner, "test_employee@company.com")
 		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
@@ -86,9 +86,9 @@ class TestTask(unittest.TestCase):
 		task.status = "Closed"
 		task.save()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "sahil@erpnext.com")
+		self.assertEqual(todo.owner, "test_employee@company.com")
 		self.assertEqual(todo.status, "Closed")
-		self.assertTrue("sahil@erpnext.com" in todo._assign)
+		self.assertTrue("test_employee@company.com" in todo._assign)
 
 
 	def test_overdue(self):
