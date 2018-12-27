@@ -344,8 +344,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				label: __('Include Exploded Items')},
 			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
 				label: __('Ignore Existing Ordered Qty')},
-			{fieldtype:'Check', fieldname:'include_raw_materials_from_sales_order',
-				label: __('Include raw materials from sales order')},
 			{
 				fieldtype:'Table', fieldname: 'items',
 				description: __('Select BOM, Qty and For Warehouse'),
