@@ -391,8 +391,24 @@ def get_invoiced_qty_map(delivery_note):
 
 	return invoiced_qty_map
 
+def get_returned_qty_map(sales_orders):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = {}
+
+	for name, returned_qty in frappe.get_all('Sales Order Item', fields = ["name", "returned_qty"],
+		filters = {'parent': ('in', sales_orders), 'docstatus': 1}, as_list=1):
+		if not returned_qty_map.get(name):
+				returned_qty_map[name] = 0
+		returned_qty_map[name] += returned_qty
+
+	return returned_qty_map
+
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
+	doc = frappe.get_doc('Delivery Note', source_name)
+	sales_orders = [d.against_sales_order for d in doc.items]
+	returned_qty_map = get_returned_qty_map(sales_orders)
+
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -412,7 +428,9 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		target_doc.qty = (source_doc.qty -
+			invoiced_qty_map.get(source_doc.name, 0) - returned_qty_map.get(source_doc.so_detail, 0))
+
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)

@@ -32,6 +32,10 @@ class StockExistsForTemplate(frappe.ValidationError):
 	pass
 
 
+class InvalidBarcode(frappe.ValidationError):
+	pass
+
+
 class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="item_name",
@@ -599,19 +603,19 @@ class Item(WebsiteGenerator):
 		from stdnum import ean
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
-				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split()
+				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split('\n')
 				if item_barcode.barcode:
 					duplicate = frappe.db.sql(
 						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
 					if duplicate:
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
-							item_barcode.barcode, duplicate[0][0]))
+							item_barcode.barcode, duplicate[0][0]), frappe.DuplicateEntryError)
 
 					item_barcode.barcode_type = "" if item_barcode.barcode_type not in options else item_barcode.barcode_type
-					if item_barcode.barcode_type:
+					if item_barcode.barcode_type and item_barcode.barcode_type.upper() in ('EAN', 'UPC-A', 'EAN-13', 'EAN-8'):
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
-								item_barcode.barcode, item_barcode.barcode_type))
+								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
