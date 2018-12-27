@@ -152,8 +152,7 @@ class Employee(NestedSet):
 				filters={'reports_to': self.name}
 			)
 			if reports_to:
-				employee_names = [row.name for row in reports_to]
-				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee_name) for employee_name in employee_names]
+				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name) for employee in reports_to]
 				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
 					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
 			if not self.relieving_date:
