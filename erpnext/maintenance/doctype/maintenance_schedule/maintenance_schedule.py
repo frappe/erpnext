@@ -7,7 +7,8 @@ import frappe
 from frappe.utils import add_days, getdate, cint, cstr
 
 from frappe import throw, _
-from erpnext.utilities.transaction_base import TransactionBase, delete_events
+from erpnext.utilities.transaction_base import TransactionBase
+from frappe.desk.doctype.event.event import delete_events
 from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
