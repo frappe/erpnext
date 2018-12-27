@@ -15,8 +15,11 @@ class TestSalesPaymentSummary(unittest.TestCase):
 	def setUpClass(self):
 		create_records()
 		pes = frappe.get_all("Payment Entry")
+		jes = frappe.get_all("Journal Entry")
 		for pe in pes:
 			frappe.db.set_value("Payment Entry", pe.name, "docstatus", 2)
+		for je in jes:
+			frappe.db.set_value("Journal Entry", je.name, "docstatus", 2)
 
 	def test_get_mode_of_payments(self):
 		filters = get_filters()
@@ -51,8 +54,6 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			pe.cancel()
 
 		mop = get_mode_of_payments(filters)
-		print(frappe.get_all("Payment Entry", filters={"docstatus": 1}))
-		print(mop)
 		self.assertTrue('Credit Card' in mop.values()[0])
 		self.assertTrue('Cash' not in mop.values()[0])
 
