@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 from frappe import _, msgprint, scrub
-from frappe.defaults import get_user_permissions
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
@@ -151,10 +151,7 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions()
-		.get("Price List", {})
-		.get("docs", []))
-	price_list = list(price_list)
+	price_list = get_permitted_documents('Price List')
 
 	if price_list:
 		price_list = price_list[0]
