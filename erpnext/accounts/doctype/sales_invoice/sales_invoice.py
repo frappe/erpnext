@@ -130,7 +130,7 @@ class SalesInvoice(SellingController):
 		#validate amount in mode of payments for returned invoices for pos must be negative
 		if self.is_pos and self.is_return:
 			self.verify_payment_amount_is_negative()
-			
+
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
@@ -323,7 +323,8 @@ class SalesInvoice(SellingController):
 			return {
 				"print_format": print_format,
 				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
-				"allow_edit_discount": pos.get("allow_user_to_edit_discount")
+				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
+				"campaign": pos.get("campaign")
 			}
 
 	def update_time_sheet(self, sales_invoice):
@@ -396,7 +397,7 @@ class SalesInvoice(SellingController):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
+				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account', 'company_address',
 				'write_off_account', 'write_off_cost_center', 'apply_discount_on'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
@@ -709,7 +710,7 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		# Checked both rounding_adjustment and rounded_total 
+		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		if grand_total:
@@ -1022,7 +1023,7 @@ class SalesInvoice(SellingController):
 	def verify_payment_amount_is_negative(self):
 		for entry in self.payments:
 			if entry.amount > 0:
-				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))				
+				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):

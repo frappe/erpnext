@@ -68,11 +68,8 @@ frappe.query_reports["Purchase Analytics"] = {
 		}
 
 	],
-	"formatter": function(value, row, column, data) {
-		if(!value){
-			value = 0
-		}
-		return value;
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
 	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
@@ -80,9 +77,20 @@ frappe.query_reports["Purchase Analytics"] = {
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					row_values = data.slice(5).map(function (column) {
-						return column.content;
-					})
+					length = data.length;
+
+					var tree_type = frappe.query_report.filters[0].value;
+
+					if(tree_type == "Supplier" || tree_type == "Item") {
+						row_values = data.slice(4,length-1).map(function (column) {
+							return column.content;
+						})
+					}
+					else {
+						row_values = data.slice(3,length-1).map(function (column) {
+							return column.content;
+						})
+					}
 
 					entry  = {
 						'name':row_name,
@@ -110,19 +118,19 @@ frappe.query_reports["Purchase Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets
 					}
-					
+
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
-					
-					
+					},500)
+
+
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
 			}
-		})
-	},
+		});
+	}
 }
