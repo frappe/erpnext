@@ -82,6 +82,7 @@ class TestTask(unittest.TestCase):
 		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
+		task = frappe.get_doc('Task', task.name)
 		task.status = "Closed"
 		task.save()
 		todo = get_owner_and_status()
