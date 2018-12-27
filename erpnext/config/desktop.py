@@ -577,7 +577,7 @@ def get_data():
 		{
 			"module_name": "Quality Management",
 			"color": "#1abc9c",
-			"icon": "fa fa-check-square-o ",
+			"icon": "fa fa-check-square-o",
 			"type": "module",
 			"label": _("Quality Management")
 		}
