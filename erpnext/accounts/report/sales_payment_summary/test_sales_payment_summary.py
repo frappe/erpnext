@@ -51,6 +51,8 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			pe.cancel()
 
 		mop = get_mode_of_payments(filters)
+		print(frappe.get_all("Payment Entry", filters={"docstatus": 1}))
+		print(mop)
 		self.assertTrue('Credit Card' in mop.values()[0])
 		self.assertTrue('Cash' not in mop.values()[0])
 
