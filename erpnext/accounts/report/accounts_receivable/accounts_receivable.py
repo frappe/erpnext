@@ -635,7 +635,7 @@ def get_pdc_details(party_type, report_date):
 		select
 			jea.reference_name as invoice_no, jea.party, jea.party_type,
 			je.posting_date as pdc_date, ifnull({0},0) as pdc_amount,
-			je.cheque_no as pdc_ref
+			jea.cheque_no as pdc_ref
 		from
 			`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
 		on
