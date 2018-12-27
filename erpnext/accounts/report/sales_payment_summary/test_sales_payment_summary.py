@@ -16,10 +16,13 @@ class TestSalesPaymentSummary(unittest.TestCase):
 		create_records()
 		pes = frappe.get_all("Payment Entry")
 		jes = frappe.get_all("Journal Entry")
+		sis = frappe.get_all("Sales Invoice")
 		for pe in pes:
 			frappe.db.set_value("Payment Entry", pe.name, "docstatus", 2)
 		for je in jes:
 			frappe.db.set_value("Journal Entry", je.name, "docstatus", 2)
+		for si in sis:
+			frappe.db.set_value("Sales Invoice", si.name, "docstatus", 2)
 
 	def test_get_mode_of_payments(self):
 		filters = get_filters()
