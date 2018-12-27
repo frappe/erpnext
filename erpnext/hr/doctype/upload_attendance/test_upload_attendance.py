@@ -24,9 +24,11 @@ class TestUploadAttendance(unittest.TestCase):
 			"to_date": to_date
 		}
 		data = get_data(args)
+		print(data)
 		filtered_data = []
 		for row in data:
 			if row[1] == employee:
 				filtered_data.append(row)
+		print(filtered_data)
 		for row in filtered_data:
 			self.assertTrue(getdate(row[3]) >= getdate(date_of_joining) and getdate(row[3]) <= getdate(relieving_date))
