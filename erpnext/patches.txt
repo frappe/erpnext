@@ -495,7 +495,7 @@ erpnext.patches.v10_0.set_b2c_limit
 erpnext.patches.v10_0.update_translatable_fields
 erpnext.patches.v10_0.rename_offer_letter_to_job_offer
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
-erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
+erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group # 24-12-2018
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
@@ -585,3 +585,4 @@ erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.set_transaction_tax_exclusive_fields
 erpnext.patches.v11_0.unset_against_voucher_in_receivable_payable_gl_entry
 erpnext.patches.v11_0.set_transaction_item_alt_uom_qty
+erpnext.patches.v11_0.rename_bom_wo_fields
