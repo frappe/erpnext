@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Support Contract", function (assert) {
+QUnit.test("test: Service Level Agreement", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Support Contract
-		() => frappe.tests.make('Support Contract', [
+		// insert a new Service Level Agreement
+		() => frappe.tests.make('Service Level Agreement', [
 			// values to be set
 			{key: 'value'}
 		]),
