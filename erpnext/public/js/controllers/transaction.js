@@ -1319,32 +1319,34 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
-		//todo run serially?
-		erpnext.utils.set_taxes(this.frm, "tax_category");
-
-		if(item_codes.length) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
-				args: {
-					tax_category: cstr(me.frm.doc.tax_category),
-					item_codes: item_codes
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-								item.item_tax_template = r.message[item.item_code].item_tax_template;
-								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
-							} else {
-								item.item_tax_template = "";
-								item.item_tax_rate = "{}";
+		frappe.run_serially([
+			() => {
+				if(item_codes.length) {
+					return this.frm.call({
+						method: "erpnext.stock.get_item_details.get_item_tax_info",
+						args: {
+							tax_category: cstr(me.frm.doc.tax_category),
+							item_codes: item_codes
+						},
+						callback: function(r) {
+							if(!r.exc) {
+								$.each(me.frm.doc.items || [], function(i, item) {
+									if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
+										item.item_tax_template = r.message[item.item_code].item_tax_template;
+										item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+									} else {
+										item.item_tax_template = "";
+										item.item_tax_rate = "{}";
+									}
+								});
+								me.calculate_taxes_and_totals();
 							}
-						});
-						me.calculate_taxes_and_totals();
-					}
+						}
+					});
 				}
-			});
-		}
+			},
+			() => erpnext.utils.set_taxes(this.frm, "tax_category"),
+		]);
 	},
 
 	item_tax_template: function(doc, cdt, cdn) {
