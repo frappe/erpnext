@@ -5,45 +5,34 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import get_mode_of_payments, get_mode_of_payment_details
-from frappe.utils import nowdate
+from frappe.utils import today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 test_dependencies = ["Sales Invoice"]
 
 class TestSalesPaymentSummary(unittest.TestCase):
-	def setUp(self):
-		pass
-
-	def tearDown(self):
-		pass
+	@classmethod
+	def setUpClass(self):
+		create_records()
 
 	def test_get_mode_of_payments(self):
-		si = frappe.get_all("Sales Invoice", filters={"company": "_Test Company", "customer": "_Test Customer"}, fields=["name", "docstatus"])
 		filters = get_filters()
 
-		for invoice in si[:-2]:
-			doc = frappe.get_doc("Sales Invoice", invoice.name)
-			new_doc = frappe.copy_doc(doc)
-			new_doc.ignore_pricing_rule = 1
-			for item in new_doc.items:
-				item.pricing_rule = ""
-			new_doc.insert()
-			new_doc.submit()
-			try:
-				new_doc.submit()
-			except Exception as e:
-				print(e)
+		for dummy in range(2):
+			si = create_sales_invoice_record()
+			si.insert()
+			si.submit()
 
-			if int(new_doc.name[-3:])%2 == 0:
+			if int(si.name[-3:])%2 == 0:
 				bank_account = "_Test Cash - _TC"
 				mode_of_payment = "Cash"
 			else:
 				bank_account = "_Test Bank - _TC"
 				mode_of_payment = "Credit Card"
 
-			pe = get_payment_entry("Sales Invoice", new_doc.name, bank_account=bank_account)
+			pe = get_payment_entry("Sales Invoice", si.name, bank_account=bank_account)
 			pe.reference_no = "_Test"
-			pe.reference_date = nowdate()
+			pe.reference_date = today()
 			pe.mode_of_payment = mode_of_payment
 			pe.insert()
 			pe.submit()
@@ -63,32 +52,23 @@ class TestSalesPaymentSummary(unittest.TestCase):
 		self.assertTrue('Cash' not in mop.values()[0])
 
 	def test_get_mode_of_payments_details(self):
-		si = frappe.get_all("Sales Invoice", filters={"company": "_Test Company", "customer": "_Test Customer"}, fields=["name", "docstatus"])
 		filters = get_filters()
 
-		for invoice in si[:-2]:
-			doc = frappe.get_doc("Sales Invoice", invoice.name)
-			new_doc = frappe.copy_doc(doc)
-			new_doc.ignore_pricing_rule = 1
-			for item in new_doc.items:
-				item.pricing_rule = ""
-			new_doc.insert()
-			new_doc.submit()
-			try:
-				new_doc.submit()
-			except Exception as e:
-				print(e)
+		for dummy in range(2):
+			si = create_sales_invoice_record()
+			si.insert()
+			si.submit()
 
-			if int(new_doc.name[-3:])%2 == 0:
+			if int(si.name[-3:])%2 == 0:
 				bank_account = "_Test Cash - _TC"
 				mode_of_payment = "Cash"
 			else:
 				bank_account = "_Test Bank - _TC"
 				mode_of_payment = "Credit Card"
 
-			pe = get_payment_entry("Sales Invoice", new_doc.name, bank_account=bank_account)
+			pe = get_payment_entry("Sales Invoice", si.name, bank_account=bank_account)
 			pe.reference_no = "_Test"
-			pe.reference_date = nowdate()
+			pe.reference_date = today()
 			pe.mode_of_payment = mode_of_payment
 			pe.insert()
 			pe.submit()
@@ -117,6 +97,60 @@ class TestSalesPaymentSummary(unittest.TestCase):
 def get_filters():
 	return {
 		"from_date": "1900-01-01",
-		"to_date": nowdate(),
+		"to_date": today(),
 		"company": "_Test Company"
 	}
+
+def create_sales_invoice_record(qty=1):
+	# return sales invoice doc object
+	return frappe.get_doc({
+		"doctype": "Sales Invoice",
+		"customer": frappe.get_doc('Customer', {"customer_name": "Prestiga-Biz"}).name,
+		"company": '_Test Company',
+		"due_date": today(),
+		"posting_date": today(),
+		"currency": "INR",
+		"taxes_and_charges": "",
+		"debit_to": "Debtors - _TC",
+		"taxes": [],
+		"items": [{
+			'doctype': 'Sales Invoice Item',
+			'item_code': frappe.get_doc('Item', {'item_name': 'Consulting'}).name,
+			'qty': qty,
+			"rate": 10000,
+			'income_account': 'Sales - _TC',
+			'cost_center': 'Main - _TC',
+			'expense_account': 'Cost of Goods Sold - _TC'
+		}]
+	})
+
+def create_records():
+	if frappe.db.exists("Customer", "Prestiga-Biz"):
+		return
+
+	#customer
+	frappe.get_doc({
+		"customer_group": "_Test Customer Group",
+		"customer_name": "Prestiga-Biz",
+		"customer_type": "Company",
+		"doctype": "Customer",
+		"territory": "_Test Territory"
+	}).insert()
+
+	# item
+	item = frappe.get_doc({
+		"doctype": "Item",
+		"item_code": "Consulting",
+		"item_name": "Consulting",
+		"item_group": "All Item Groups",
+		"company": "_Test Company",
+		"is_stock_item": 0
+	}).insert()
+
+	# item price
+	frappe.get_doc({
+		"doctype": "Item Price",
+		"price_list": "Standard Selling",
+		"item_code": item.item_code,
+		"price_list_rate": 10000
+	}).insert()
