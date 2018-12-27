@@ -19,12 +19,12 @@ class TestUploadAttendance(unittest.TestCase):
 		to_date = "2018-01-04"
 		employee_doc.date_of_joining = date_of_joining
 		employee_doc.relieving_date = relieving_date
+		employee_doc.save()
 		args = {
 			"from_date": from_date,
 			"to_date": to_date
 		}
 		data = get_data(args)
-		print(data)
 		filtered_data = []
 		for row in data:
 			if row[1] == employee:
