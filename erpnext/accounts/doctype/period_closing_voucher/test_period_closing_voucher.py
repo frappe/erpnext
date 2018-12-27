@@ -66,6 +66,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 				-1*random_expense_account[0].balance_in_account_currency)
 
 	def make_period_closing_voucher(self):
+		print(frappe.db.sql("select account, cost_center, voucher_type, voucher_no, company from `tabGL Entry` where account = 'Expenses Included In Valuation - _TC' and cost_center = 'Main - WP'"))
 		pcv = frappe.get_doc({
 			"doctype": "Period Closing Voucher",
 			"closing_account_head": "_Test Account Reserves and Surplus - _TC",
