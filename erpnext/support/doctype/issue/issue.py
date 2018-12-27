@@ -272,7 +272,7 @@ def update_support_timer():
 			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, now_datetime()), 2)
 		if float(issue.time_to_resolve) > 0 and issue.status == 'Open':
 			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2)
-		
+
 		if issue.status == 'Open':
 			if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
 				issue.service_contract_status = "Failed"
