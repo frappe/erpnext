@@ -264,18 +264,17 @@ def update_issue(contact, method):
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
 
 def update_support_timer():
-	issues = frappe.get_list("Issue", filters={"service_contract_status": "Ongoing", "status": "Open"})
+	issues = frappe.get_list("Issue", filters={"status": "Open"})
 	issues.reverse()
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
-		if float(issue.time_to_respond) > 0 and issue.status == 'Open' and not issue.first_responded_on:
+		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
 			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, now_datetime()), 2)
-		if float(issue.time_to_resolve) > 0 and issue.status == 'Open':
+		if float(issue.time_to_resolve) > 0:
 			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2)
 
-		if issue.status == 'Open':
-			if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
-				issue.service_contract_status = "Failed"
+		if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
+			issue.agreement_status = "Failed"
 		else:
-			issue.service_contract_status = "Fulfilled"
+			issue.agreement_status = "Fulfilled"
 		issue.save()
