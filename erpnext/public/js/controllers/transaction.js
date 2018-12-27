@@ -450,6 +450,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							frappe.run_serially([
+								() => {
+									var d = locals[cdt][cdn];
+									if(d.item_tax_template && d.item_tax_rate) {
+										me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									}
+								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
 								() => {
@@ -470,6 +476,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				});
 			}
+		}
+	},
+
+	add_taxes_from_item_tax_template: function(item_tax_map) {
+		let me = this;
+
+		if(cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+			if(typeof (item_tax_map) == "string") {
+				item_tax_map = JSON.parse(item_tax_map);
+			}
+
+			$.each(item_tax_map, function(tax, rate) {
+				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
+				if(!found) {
+					let child = frappe.model.add_child(me.frm.doc, "taxes");
+					child.charge_type = "On Net Total";
+					child.account_head = tax;
+					child.rate = 0;
+				}
+			});
 		}
 	},
 
@@ -1311,7 +1337,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
 							} else {
 								item.item_tax_template = "";
-								item.item_tax_rate = "";
+								item.item_tax_rate = "{}";
 							}
 						});
 						me.calculate_taxes_and_totals();
@@ -1325,19 +1351,25 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		return this.frm.call({
-			method: "erpnext.stock.get_item_details.get_item_tax_map",
-			args: {
-				"item_tax_template": item.item_tax_template,
-				"as_json": true
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					item.item_tax_rate = r.message;
-					me.calculate_taxes_and_totals();
+		if(item.item_tax_template) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_item_tax_map",
+				args: {
+					item_tax_template: item.item_tax_template,
+					as_json: true
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						item.item_tax_rate = r.message;
+						me.add_taxes_from_item_tax_template(item.item_tax_rate);
+						me.calculate_taxes_and_totals();
+					}
 				}
-			}
-		});
+			});
+		} else {
+			item.item_tax_rate = "{}";
+			me.calculate_taxes_and_totals();
+		}
 	},
 
 	is_recurring: function() {
