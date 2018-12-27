@@ -14,6 +14,9 @@ class TestSalesPaymentSummary(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		create_records()
+		pes = frappe.get_all("Payment Entry")
+		for pe in pes:
+			frappe.db.set_value("Payment Entry", pe.name, "docstatus", 2)
 
 	def test_get_mode_of_payments(self):
 		filters = get_filters()
