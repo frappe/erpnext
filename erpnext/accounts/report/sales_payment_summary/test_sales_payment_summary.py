@@ -19,10 +19,12 @@ class TestSalesPaymentSummary(unittest.TestCase):
 
 	def test_get_mode_of_payments(self):
 		si = frappe.get_all("Sales Invoice", filters={"company": "_Test Company", "customer": "_Test Customer"}, fields=["name", "docstatus"])
+		print(si)
 		filters = get_filters()
 
 		for invoice in si[:-2]:
 			doc = frappe.get_doc("Sales Invoice", invoice.name)
+			print(doc.__dict__)
 			new_doc = frappe.copy_doc(doc)
 			new_doc.ignore_pricing_rule = 1
 			new_doc.insert()
