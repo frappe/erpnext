@@ -67,7 +67,7 @@ class TestTask(unittest.TestCase):
 		def assign():
 			from frappe.desk.form import assign_to
 			assign_to.add({
-				"assign_to": employee_doc.name,
+				"assign_to": employee_doc.company_email,
 				"doctype": task.doctype,
 				"name": task.name,
 				"description": "Close this task"
@@ -77,21 +77,23 @@ class TestTask(unittest.TestCase):
 			return frappe.db.get_value("ToDo",
 				filters={"reference_type": task.doctype, "reference_name": task.name,
 					"description": "Close this task"},
-				fieldname=("owner", "status", "_assign"), as_dict=True)
+				fieldname=("owner", "status", "_assign", "name"), as_dict=True)
 
 		assign()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, employee_doc.name)
+		self.assertEqual(todo.owner, employee_doc.company_email)
 		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
 		task.load_from_db()
 		task.status = "Closed"
 		task.save()
+		todo = frappe.get_doc("ToDo", todo.name)
+		todo.status = "Closed"
+		todo.save
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, employee_doc.name)
 		self.assertEqual(todo.status, "Closed")
-		self.assertTrue("test_employee@company.com" in todo._assign)
+		self.assertEqual(todo.owner, employee_doc.company_email)
 
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
