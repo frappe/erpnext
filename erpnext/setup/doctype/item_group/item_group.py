@@ -147,7 +147,7 @@ def adjust_qty_for_expired_items(data):
 		if item.get('has_batch_no') and item.get('website_warehouse'):
 			stock_qty_dict = get_qty_in_stock(
 				item.get('name'), 'website_warehouse', item.get('website_warehouse'))
-			qty = stock_qty_dict.stock_qty[0][0]
+			qty = stock_qty_dict.stock_qty[0][0] if stock_qty_dict.stock_qty else 0
 			item['in_stock'] = 1 if qty else 0
 		adjusted_data.append(item)
 
