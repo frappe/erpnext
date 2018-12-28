@@ -14,17 +14,12 @@ frappe.ui.form.on("Supplier Scorecard", {
 	onload: function(frm) {
 		if (frm.doc.__unsaved == 1)	{
 			frm.doc.variables = [];
+			refresh_field("variables");
 			loadAllCriteria(frm);
 			loadAllStandings(frm);
 		}
 
 	},
-	refresh: function(frm) {
-		if (frm.dashboard.hasOwnProperty('heatmap')) {
-			frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"]);
-		}
-	}
-
 });
 
 frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
