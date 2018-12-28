@@ -11,7 +11,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty, get_batches
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
@@ -71,8 +71,6 @@ class StockEntry(StockController):
 
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
-		else:
-			set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
 		self.set_actual_qty()
@@ -119,6 +117,27 @@ class StockEntry(StockController):
 			self.work_order = data.work_order
 			self.from_bom = 1
 			self.bom_no = data.bom_no
+
+	def get_batch_details(self):
+		batch_details = []
+
+		for item in self.items:
+			has_batch_no = frappe.db.get_value("Item", item.item_code, "has_batch_no")
+
+			if has_batch_no and not item.batch_no and item.s_warehouse:
+				batches = get_batches(item.item_code, item.s_warehouse, item.qty)
+
+				if batches:
+					batch_details.append({
+						"id": item.name,
+						"item_code": item.item_code,
+						"s_warehouse": item.s_warehouse
+					})
+				else:
+					frappe.msgprint(_("Row #{0}: No batch found for item {1} in warehouse {2}"
+						.format(item.idx, item.item_code, item.s_warehouse)), indicator="red", alert=1)
+
+		return batch_details
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
