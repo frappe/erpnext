@@ -29,8 +29,8 @@ frappe.ui.form.on("Supplier Scorecard", {
 frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
 
 	standing_name: function(frm, cdt, cdn) {
-		if (frm.doc.standing_name != undefined) {
-			var d = frappe.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
+		if (d.standing_name) {
 			return frm.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_scoring_standing",
 				child: d,
@@ -45,8 +45,9 @@ frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
 frappe.ui.form.on("Supplier Scorecard Scoring Variable", {
 
 	variable_label: function(frm, cdt, cdn) {
-		if (frm.doc.variable_label != undefined) {
-			var d = frappe.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
+		if (d.variable_label) {
+			
 			return frm.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable.get_scoring_variable",
 				child: d,
@@ -61,8 +62,8 @@ frappe.ui.form.on("Supplier Scorecard Scoring Variable", {
 frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 
 	criteria_name: function(frm, cdt, cdn) {
-		if (frm.doc.criteria_name != undefined) {
-			var d = frappe.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
+		if (d.criteria_name) {
 			frm.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_variables",
 				args: {
