@@ -91,7 +91,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		if not from_repost:
 			validate_expense_against_budget(entry)
 		
-		if entry.voucher_type=='Purchase Receipt' and (entry.company == '_Test Company' or entry.cost_center=='Main - WP'):
+		if entry.company == '_Test Company' and entry.cost_center=='Main - WP':
 			print(gl_map)
 			import traceback
 			traceback.print_stack()
