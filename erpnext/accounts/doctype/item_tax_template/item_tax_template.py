@@ -18,7 +18,7 @@ class ItemTaxTemplate(Document):
 			if d.tax_type:
 				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
 
-				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
+				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation']:
 					frappe.throw(
 						_("Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable").format(
 							d.idx))
