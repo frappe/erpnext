@@ -170,7 +170,7 @@ def make_all_scorecards(docname):
 					AND scp.end_date > %(start_date)s))
 			ORDER BY
 				scp.end_date DESC""",
-				{"sc": docname, "start_date": start_date, "end_date": end_date, "supplier": supplier}, as_dict=1)
+				{"sc": docname, "start_date": start_date, "end_date": end_date}, as_dict=1)
 		if len(scorecards) == 0:
 			period_card = make_supplier_scorecard(docname, None)
 			period_card.start_date = start_date
