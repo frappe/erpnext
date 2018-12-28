@@ -20,7 +20,6 @@ install:
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
   - sudo python install.py --develop --user travis --without-bench-setup
   - sudo pip install -e ~/bench
-
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
@@ -31,6 +30,7 @@ before_script:
   - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
 
   - cd ~/frappe-bench
+  - cd apps/frappe ; git log --oneline | head ; cd ../..
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
   - bench reinstall --mariadb-root-username root --mariadb-root-password travis --yes
