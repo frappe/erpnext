@@ -90,7 +90,7 @@ class TestTask(unittest.TestCase):
 		task.save()
 		todo = frappe.get_doc("ToDo", todo.name)
 		todo.status = "Closed"
-		todo.save
+		todo.save()
 		todo = get_owner_and_status()
 		self.assertEqual(todo.status, "Closed")
 		self.assertEqual(todo.owner, employee_doc.company_email)
