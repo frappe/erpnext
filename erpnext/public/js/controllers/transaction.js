@@ -452,9 +452,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							frappe.run_serially([
 								() => {
 									var d = locals[cdt][cdn];
-									if(d.item_tax_template && d.item_tax_rate) {
-										me.add_taxes_from_item_tax_template(d.item_tax_rate);
-									}
+									me.add_taxes_from_item_tax_template(d.item_tax_rate);
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
@@ -482,7 +480,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	add_taxes_from_item_tax_template: function(item_tax_map) {
 		let me = this;
 
-		if(cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+		if(item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
 			if(typeof (item_tax_map) == "string") {
 				item_tax_map = JSON.parse(item_tax_map);
 			}
@@ -1312,6 +1310,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	tax_category: function() {
 		var me = this;
+		if(me.frm.updating_party_details) return;
+
 		var item_codes = [];
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if(item.item_code) {
@@ -1334,6 +1334,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
 										item.item_tax_template = r.message[item.item_code].item_tax_template;
 										item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+										me.add_taxes_from_item_tax_template(item.item_tax_rate);
 									} else {
 										item.item_tax_template = "";
 										item.item_tax_rate = "{}";
@@ -1351,6 +1352,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	item_tax_template: function(doc, cdt, cdn) {
 		var me = this;
+		if(me.frm.updating_party_details) return;
+
 		var item = frappe.get_doc(cdt, cdn);
 
 		if(item.item_tax_template) {
