@@ -43,6 +43,10 @@ class Task(NestedSet):
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
+		doc = frappe.get_doc("Project",self.project)
+		if  self.exp_end_date and doc.expected_end_date and getdate(self.exp_end_date) > getdate(doc.expected_end_date) :
+			frappe.throw(_("Expected end date cannot be after Project: "+doc.name+" Expected end date"))
+
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
 			for d in self.depends_on:
