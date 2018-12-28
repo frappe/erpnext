@@ -106,12 +106,10 @@ var loadAllCriteria = function(frm) {
 		method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_criteria_list",
 		callback: function(r) {
 			if(r.message){
-				if(frm.doc.criteria){
-					for (var j = 0; j < frm.doc.criteria.length; j++)
-					{
-						if(!frm.doc.criteria[j].hasOwnProperty("criteria_name")) {
-							frm.get_field("criteria").grid.grid_rows[j].remove();
-						}
+				for (var j = 0; j < frm.doc.criteria.length; j++)
+				{
+					if(!frm.doc.criteria[j].hasOwnProperty("criteria_name")) {
+						frm.get_field("criteria").grid.grid_rows[j].remove();
 					}
 				}
 				for (var i = 0; i < r.message.length; i++)
@@ -125,27 +123,24 @@ var loadAllCriteria = function(frm) {
 		}
 	});
 };
+
 var loadAllStandings = function(frm) {
 	frappe.call({
 		method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
 		callback: function(r) {
-			if(r.message){
-				if(frm.doc.criteria){
-					for (var j = 0; j < frm.doc.standings.length; j++)
-					{
-						if(!frm.doc.standings[j].hasOwnProperty("standing_name")) {
-							frm.get_field("standings").grid.grid_rows[j].remove();
-						}
-					}
+			for (var j = 0; j < frm.doc.standings.length; j++)
+			{
+				if(!frm.doc.standings[j].hasOwnProperty("standing_name")) {
+					frm.get_field("standings").grid.grid_rows[j].remove();
 				}
-				for (var i = 0; i < r.message.length; i++)
-				{
-					var new_row = frm.add_child("standings");
-					new_row.standing_name = r.message[i].name;
-					frm.script_manager.trigger("standing_name", new_row.doctype, new_row.name);
-				}
-				refresh_field("standings");
 			}
+			for (var i = 0; i < r.message.length; i++)
+			{
+				var new_row = frm.add_child("standings");
+				new_row.standing_name = r.message[i].name;
+				frm.script_manager.trigger("standing_name", new_row.doctype, new_row.name);
+			}
+			refresh_field("standings");
 		}
 	});
 };
