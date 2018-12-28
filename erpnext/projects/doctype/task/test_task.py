@@ -6,6 +6,7 @@ import unittest
 from frappe.utils import getdate, nowdate, add_days
 
 from erpnext.projects.doctype.task.task import CircularReferenceError
+from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
@@ -56,6 +57,8 @@ class TestTask(unittest.TestCase):
 			getdate(add_days(nowdate(), 30)))
 
 	def test_close_assignment(self):
+		employee = make_employee("test_employee@company.com")
+		employee_doc = frappe.get_doc("Employee", employee)
 		if not frappe.db.exists("Task", "Test Close Assignment"):
 			task = frappe.new_doc("Task")
 			task.subject = "Test Close Assignment"
@@ -64,7 +67,7 @@ class TestTask(unittest.TestCase):
 		def assign():
 			from frappe.desk.form import assign_to
 			assign_to.add({
-				"assign_to": "test_employee@company.com",
+				"assign_to": employee_doc.name,
 				"doctype": task.doctype,
 				"name": task.name,
 				"description": "Close this task"
@@ -78,18 +81,17 @@ class TestTask(unittest.TestCase):
 
 		assign()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "test_employee@company.com")
+		self.assertEqual(todo.owner, employee_doc.name)
 		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
-		task = frappe.get_doc('Task', task.name)
+		task.load_from_db()
 		task.status = "Closed"
 		task.save()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "test_employee@company.com")
+		self.assertEqual(todo.owner, employee_doc.name)
 		self.assertEqual(todo.status, "Closed")
 		self.assertTrue("test_employee@company.com" in todo._assign)
-
 
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
