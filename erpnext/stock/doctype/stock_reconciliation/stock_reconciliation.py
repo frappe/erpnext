@@ -270,24 +270,28 @@ class StockReconciliation(StockController):
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):
-	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	items = frappe.db.sql("""select item_code, warehouse from tabBin
+		where exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=`tabBin`.warehouse)
+	""", (lft, rgt))
 
-	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse},
-			as_list=1)
+	items += frappe.db.sql("""select name, default_warehouse from tabItem
+		where exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=`tabItem`.default_warehouse)
+			and is_stock_item = 1 and has_serial_no = 0 and has_batch_no = 0 and has_variants = 0 and disabled = 0
+	""", (lft, rgt))
 
 	res = []
-	for item in set(items):
-		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time,
+	for item, wh in set(items):
+		stock_bal = get_stock_balance(item, wh, posting_date, posting_time,
 			with_valuation_rate=True)
 
-		if frappe.db.get_value("Item",item[0],"disabled") == 0:
+		if frappe.db.get_value("Item", item, "disabled") == 0:
 
 			res.append({
-				"item_code": item[0],
-				"warehouse": warehouse,
+				"item_code": item,
+				"warehouse": wh,
 				"qty": stock_bal[0],
-				"item_name": frappe.db.get_value('Item', item[0], 'item_name'),
+				"item_name": frappe.db.get_value('Item', item, 'item_name'),
 				"valuation_rate": stock_bal[1],
 				"current_qty": stock_bal[0],
 				"current_valuation_rate": stock_bal[1]
