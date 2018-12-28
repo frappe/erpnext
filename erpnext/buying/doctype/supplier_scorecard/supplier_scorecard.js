@@ -13,6 +13,7 @@ frappe.ui.form.on("Supplier Scorecard", {
 	},
 	onload: function(frm) {
 		if (frm.doc.__unsaved == 1)	{
+			frm.doc.variables = [];
 			loadAllCriteria(frm);
 			loadAllStandings(frm);
 		}
@@ -47,7 +48,6 @@ frappe.ui.form.on("Supplier Scorecard Scoring Variable", {
 	variable_label: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if (d.variable_label) {
-			
 			return frm.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable.get_scoring_variable",
 				child: d,
@@ -70,26 +70,24 @@ frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 					criteria_name: d.criteria_name
 				},
 				callback: function(r) {
-					for (var i = 0; i < r.message.length; i++)
-					{
-						var exists = false;
-						for (var j = 0; j < frm.doc.variables.length; j++)
+					if(r.message){
+						for (var i = 0; i < r.message.length; i++)
 						{
-							if(!frm.doc.variables[j].hasOwnProperty("variable_label")) {
-								frm.get_field("variables").grid.grid_rows[j].remove();
+							var exists = false;
+							for (var j = 0; j < frm.doc.variables.length; j++)
+							{
+								if(frm.doc.variables[j].variable_label === r.message[i]) {
+									exists = true;
+								}
 							}
-							else if(frm.doc.variables[j].variable_label === r.message[i]) {
-								exists = true;
+							if (!exists){
+								var new_row = frm.add_child("variables");
+								new_row.variable_label = r.message[i];
+								frm.script_manager.trigger("variable_label", new_row.doctype, new_row.name);
 							}
 						}
-						if (!exists){
-							var new_row = frm.add_child("variables");
-							new_row.variable_label = r.message[i];
-							frm.script_manager.trigger("variable_label", new_row.doctype, new_row.name);
-						}
-
+						refresh_field("variables");
 					}
-					refresh_field("variables");
 				}
 			});
 			return frm.call({
@@ -107,19 +105,23 @@ var loadAllCriteria = function(frm) {
 	frappe.call({
 		method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_criteria_list",
 		callback: function(r) {
-			for (var j = 0; j < frm.doc.criteria.length; j++)
-			{
-				if(!frm.doc.criteria[j].hasOwnProperty("criteria_name")) {
-					frm.get_field("criteria").grid.grid_rows[j].remove();
+			if(r.message){
+				if(frm.doc.criteria){
+					for (var j = 0; j < frm.doc.criteria.length; j++)
+					{
+						if(!frm.doc.criteria[j].hasOwnProperty("criteria_name")) {
+							frm.get_field("criteria").grid.grid_rows[j].remove();
+						}
+					}
 				}
+				for (var i = 0; i < r.message.length; i++)
+				{
+					var new_row = frm.add_child("criteria");
+					new_row.criteria_name = r.message[i].name;
+					frm.script_manager.trigger("criteria_name", new_row.doctype, new_row.name);
+				}
+				refresh_field("criteria");
 			}
-			for (var i = 0; i < r.message.length; i++)
-			{
-				var new_row = frm.add_child("criteria");
-				new_row.criteria_name = r.message[i].name;
-				frm.script_manager.trigger("criteria_name", new_row.doctype, new_row.name);
-			}
-			refresh_field("criteria");
 		}
 	});
 };
@@ -127,19 +129,23 @@ var loadAllStandings = function(frm) {
 	frappe.call({
 		method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
 		callback: function(r) {
-			for (var j = 0; j < frm.doc.standings.length; j++)
-			{
-				if(!frm.doc.standings[j].hasOwnProperty("standing_name")) {
-					frm.get_field("standings").grid.grid_rows[j].remove();
+			if(r.message){
+				if(frm.doc.criteria){
+					for (var j = 0; j < frm.doc.standings.length; j++)
+					{
+						if(!frm.doc.standings[j].hasOwnProperty("standing_name")) {
+							frm.get_field("standings").grid.grid_rows[j].remove();
+						}
+					}
 				}
+				for (var i = 0; i < r.message.length; i++)
+				{
+					var new_row = frm.add_child("standings");
+					new_row.standing_name = r.message[i].name;
+					frm.script_manager.trigger("standing_name", new_row.doctype, new_row.name);
+				}
+				refresh_field("standings");
 			}
-			for (var i = 0; i < r.message.length; i++)
-			{
-				var new_row = frm.add_child("standings");
-				new_row.standing_name = r.message[i].name;
-				frm.script_manager.trigger("standing_name", new_row.doctype, new_row.name);
-			}
-			refresh_field("standings");
 		}
 	});
 };
