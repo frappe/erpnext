@@ -110,8 +110,9 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
+		if self._action != 'submit' and not self.is_return \
+			and frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
+				set_batch_nos(self, 'warehouse', True)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)

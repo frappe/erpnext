@@ -107,8 +107,9 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = 'No'
 
-		if self._action != 'submit' and self.update_stock and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
+		if self._action != 'submit' and self.update_stock and not self.is_return \
+			and frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
+				set_batch_nos(self, 'warehouse', True)
 
 		if self.redeem_loyalty_points:
 			lp = frappe.get_doc('Loyalty Program', self.loyalty_program)

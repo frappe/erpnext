@@ -10,7 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty, get_batches
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
@@ -66,7 +66,7 @@ class StockEntry(StockController):
 
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
-		else:
+		elif frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
 			set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
@@ -110,6 +110,35 @@ class StockEntry(StockController):
 			self.work_order = data.work_order
 			self.from_bom = 1
 			self.bom_no = data.bom_no
+
+	def get_batch_details(self):
+		if frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
+			return
+
+		batch_details = []
+
+		for item in self.items:
+			has_batch_no, create_new_batch = frappe.db.get_value('Item', item.item_code, ['has_batch_no', 'create_new_batch'])
+
+			if has_batch_no and not item.batch_no:
+				if not item.s_warehouse and item.t_warehouse and create_new_batch:
+					continue
+
+				batches = get_batches(item.item_code, item.s_warehouse or item.t_warehouse, item.qty)
+
+				if batches:
+					batch_details.append({
+						"id": item.name,
+						"item_code": item.item_code,
+						"qty": item.qty,
+						"s_warehouse": item.s_warehouse,
+						"t_warehouse": item.t_warehouse
+					})
+				else:
+					frappe.msgprint(_("Row #{0}: No batch found for item {1} in warehouse {2}"
+						.format(item.idx, item.item_code, item.s_warehouse or item.t_warehouse)), indicator="red", alert=1)
+
+		return batch_details
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -1306,3 +1335,8 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+
+@frappe.whitelist()
+def get_available_batches_in_warehouse(doctype, txt, searchfield, start, page_len, filters):
+	return get_batches(filters.get("item"), filters.get("s_warehouse"), filters.get("qty"), as_dict=False)
