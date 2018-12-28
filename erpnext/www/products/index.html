@@ -6,11 +6,24 @@
 
 <div class="row">
     <div class="col-8 products-list">
-        {% for item in items %}
-            {% include "erpnext/templates/pages/products_item.html" %}
-        {% endfor %}
+        {% if items %}
+            {% for item in items %}
+                {% include "erpnext/www/products/item_row.html" %}
+            {% endfor %}
+        {% else %}
+            {% include "erpnext/www/products/not_found.html" %}
+        {% endif %}
     </div>
     <div class="col-4">
+        <div class="col-8 p-0">
+            <div class="input-group input-group-sm mb-3">
+                <input type="search" class="form-control" placeholder="Search"
+                    aria-label="Product Search" aria-describedby="product-search"
+                    value="{{ frappe.form_dict.search or '' }}"
+                >
+            </div>
+        </div>
+
         {% for attribute in attributes_for_filters %}
             <div class="mb-4">
                 <h5>{{ attribute.name }}</h5>
@@ -22,6 +35,7 @@
                         id="{{attr_value.name}}"
                         data-attribute="{{ attribute.name }}"
                         data-attribute-value="{{ attr_value.attribute_value }}"
+                        {% if attr_value.checked %} checked {% endif %}
                     >
                     <label class="custom-control-label" for="{{attr_value.name}}">
                         {{ attr_value.attribute_value }}
@@ -30,6 +44,9 @@
                 {% endfor %}
             </div>
         {% endfor %}
+    </div>
+    <div class="col-12">
+        <button class="btn btn-secondary">More</button>
     </div>
 </div>
 
