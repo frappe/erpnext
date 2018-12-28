@@ -565,6 +565,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
+					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
 					() => me.apply_pricing_rule()
 				]);
@@ -1312,40 +1313,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		if(me.frm.updating_party_details) return;
 
-		var item_codes = [];
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if(item.item_code) {
-				item_codes.push(item.item_code);
-			}
-		});
-
 		frappe.run_serially([
-			() => {
-				if(item_codes.length) {
-					return this.frm.call({
-						method: "erpnext.stock.get_item_details.get_item_tax_info",
-						args: {
-							tax_category: cstr(me.frm.doc.tax_category),
-							item_codes: item_codes
-						},
-						callback: function(r) {
-							if(!r.exc) {
-								$.each(me.frm.doc.items || [], function(i, item) {
-									if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-										item.item_tax_template = r.message[item.item_code].item_tax_template;
-										item.item_tax_rate = r.message[item.item_code].item_tax_rate;
-										me.add_taxes_from_item_tax_template(item.item_tax_rate);
-									} else {
-										item.item_tax_template = "";
-										item.item_tax_rate = "{}";
-									}
-								});
-								me.calculate_taxes_and_totals();
-							}
-						}
-					});
-				}
-			},
+			() => this.update_item_tax_map(),
 			() => erpnext.utils.set_taxes(this.frm, "tax_category"),
 		]);
 	},
@@ -1360,6 +1329,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_item_tax_map",
 				args: {
+					company: me.frm.doc.company,
 					item_tax_template: item.item_tax_template,
 					as_json: true
 				},
@@ -1374,6 +1344,42 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		} else {
 			item.item_tax_rate = "{}";
 			me.calculate_taxes_and_totals();
+		}
+	},
+
+	update_item_tax_map: function() {
+		var me = this;
+		var item_codes = [];
+		$.each(this.frm.doc.items || [], function(i, item) {
+			if(item.item_code) {
+				item_codes.push(item.item_code);
+			}
+		});
+
+		if(item_codes.length) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_item_tax_info",
+				args: {
+					company: me.frm.doc.company,
+					tax_category: cstr(me.frm.doc.tax_category),
+					item_codes: item_codes
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						$.each(me.frm.doc.items || [], function(i, item) {
+							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
+								item.item_tax_template = r.message[item.item_code].item_tax_template;
+								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+								me.add_taxes_from_item_tax_template(item.item_tax_rate);
+							} else {
+								item.item_tax_template = "";
+								item.item_tax_rate = "{}";
+							}
+						});
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
 		}
 	},
 
