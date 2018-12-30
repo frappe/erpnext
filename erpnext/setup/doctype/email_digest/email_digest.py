@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import fmt_money, formatdate, format_time, now_datetime, \
-	get_url_to_form, get_url_to_list, flt, getdate
+	get_url_to_form, get_url_to_list, flt, getdate, get_link_to_report
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
@@ -289,7 +289,7 @@ class EmailDigest(Document):
 		income, past_income, count = self.get_period_amounts(self.get_roots("income"),'income')
 
 		return {
-			"label": self.meta.get_label("income"),
+			"label": get_link_to_report("Sales Register",self.meta.get_label("income")),
 			"value": income,
 			"last_value": past_income,
 			"count": count
@@ -336,7 +336,7 @@ class EmailDigest(Document):
 		expenses, past_expenses, count = self.get_period_amounts(self.get_roots("expense"), 'expenses_booked')
 
 		return {
-			"label": self.meta.get_label("expenses_booked"),
+			"label": get_link_to_report("Purchase Register",self.meta.get_label("expenses_booked")),
 			"value": expenses,
 			"last_value": past_expenses,
 			"count": count
@@ -370,7 +370,7 @@ class EmailDigest(Document):
 	def get_sales_orders_to_deliver(self):
 		"""Get value not delivered"""
 
-		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0), 
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
 					count(*) from `tabSales Order`
 					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered"
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
@@ -433,8 +433,15 @@ class EmailDigest(Document):
 				'value': balance,
 				'last_value': prev_balance			}
 		else:
+			if account_type == 'Payable':
+				label = get_link_to_report('Accounts Payable', self.meta.get_label(fieldname))
+			elif account_type == 'Receivable':
+				label = get_link_to_report('Accounts Receivable', self.meta.get_label(fieldname))
+			else:
+				label = self.meta.get_label(fieldname)
+
 			return {
-				'label': self.meta.get_label(fieldname),
+				'label': label,
 				'value': balance,
 				'last_value': prev_balance,
 				'count': count
@@ -597,13 +604,13 @@ class EmailDigest(Document):
 		fields_poi = "`tabPurchase Order Item`.parent, `tabPurchase Order Item`.schedule_date, item_code," \
 		             "received_qty, qty - received_qty as missing_qty, rate, amount"
 
-		sql_po = """select {fields} from `tabPurchase Order Item` 
+		sql_po = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
 			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
 			`tabPurchase Order Item`.schedule_date DESC""".format(fields=fields_po)
 
-		sql_poi = """select {fields} from `tabPurchase Order Item` 
+		sql_poi = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
 			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.idx""".format(fields=fields_poi)
@@ -631,11 +638,11 @@ def get_digest_msg(name):
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
 		"""Get amounts for current and past periods"""
-		
+
 		val = 0.0
 		balance_on_to_date = get_balance_on(account, date = to_date)
 		balance_before_from_date = get_balance_on(account, date = from_date - timedelta(days=1))
-	
+
 		fy_start_date = get_fiscal_year(to_date)[1]
 
 		if from_date == fy_start_date:
