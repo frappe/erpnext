@@ -27,17 +27,19 @@ frappe.ready(function() {
 						.html(r.message.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
 							(" + r.message.product_info.price.formatted_price + " / " + r.message.product_info.uom + ")</div>");
 
-				if (r.message.show_availability_status) {if(r.message.product_info.in_stock==0) {
-					$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
-				}
-				else if(r.message.product_info.in_stock==1) {
-					var qty_display = "{{ _("In stock") }}";
-					if (r.message.product_info.show_stock_qty) {
-						qty_display += " ("+r.message.product_info.stock_qty+")";
+					if (r.message.show_availability_status) {
+						if(r.message.product_info.in_stock==0) {
+							$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
+						}
+						else if(r.message.product_info.in_stock==1) {
+							var qty_display = "{{ _("In stock") }}";
+							if (r.message.product_info.show_stock_qty) {
+								qty_display += " ("+r.message.product_info.stock_qty+")";
+							}
+							$(".item-stock").html("<div style='color: green'>\
+								<i class='fa fa-check'></i> "+qty_display+"</div>");
+						}
 					}
-					$(".item-stock").html("<div style='color: green'>\
-						<i class='fa fa-check'></i> "+qty_display+"</div>");
-				}}
 
 					if(r.message.product_info.qty) {
 						qty = r.message.product_info.qty;
