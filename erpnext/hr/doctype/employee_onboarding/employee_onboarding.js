@@ -29,8 +29,8 @@ frappe.ui.form.on('Employee Onboarding', {
 					method: "erpnext.hr.doctype.employee_onboarding.employee_onboarding.make_employee",
 					frm: frm
 				});
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}, __('Create'));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.docstatus === 1 && frm.doc.project) {
 			frappe.call({

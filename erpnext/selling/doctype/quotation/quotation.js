@@ -52,7 +52,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
 				cur_frm.add_custom_button(__('Sales Order'),
-					cur_frm.cscript['Make Sales Order'], __("Make"));
+					cur_frm.cscript['Make Sales Order'], __('Create'));
 			}
 
 			if(doc.status!=="Ordered") {
@@ -63,10 +63,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __("Make"))
+				}, __('Create'))
 			}
 
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if (this.frm.doc.docstatus===0) {
