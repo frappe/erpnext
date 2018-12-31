@@ -578,6 +578,6 @@ def get_data():
 			"color": "#1abc9c",
 			"icon": "fa fa-check-square-o",
 			"type": "module",
-			"label": _("Quality Management")
+			"label": _("Quality")
 		}
 	]
