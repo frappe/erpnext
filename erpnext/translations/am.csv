@@ -2249,7 +2249,6 @@ DocType: Fee Validity,Fee Validity,የአገልግሎት ክፍያ ዋጋ
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,በክፍያ ሠንጠረዥ ውስጥ አልተገኘም ምንም መዝገቦች
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},ይህን {0} ግጭቶች {1} ለ {2} {3}
 DocType: Student Attendance Tool,Students HTML,ተማሪዎች ኤችቲኤምኤል
-DocType: POS Profile,Apply Discount,ቅናሽ ተግብር
 DocType: GST HSN Code,GST HSN Code,GST HSN ኮድ
 DocType: Employee External Work History,Total Experience,ጠቅላላ የሥራ ልምድ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,ክፍት ፕሮጀክቶች
@@ -2294,7 +2293,7 @@ DocType: Timesheet Detail,Expected Hrs,የሚጠበቁ ሰዓታት
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,የማስታወሻ ዝርዝሮች
 DocType: Leave Block List,Block Holidays on important days.,አስፈላጊ ቀናት ላይ አግድ በዓላት.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),እባክዎን ሁሉንም አስፈላጊ የፍጆታ እሴት (ሮች) ያስገቡ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,መለያዎች የሚሰበሰብ ሂሳብ ማጠቃለያ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,መለያዎች የሚሰበሰብ ሂሳብ ማጠቃለያ
 DocType: POS Closing Voucher,Linked Invoices,የተገናኙ ደረሰኞች
 DocType: Loan,Monthly Repayment Amount,ወርሃዊ የሚያየን መጠን
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,ክፍያ መጠየቂያዎች መክፈቻ
@@ -2415,7 +2414,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,የተመዘገበ መጠን
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,ቀዳሚ የፋይናንስ ዓመት ዝግ ነው
 DocType: Practitioner Schedule,Practitioner Schedule,የልምድ ፕሮግራም
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),የእድሜ (ቀኖች)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),የእድሜ (ቀኖች)
 DocType: Instructor,EDU-INS-.YYYY.-,ኢዲ-ኢዝ.
 DocType: Additional Salary,Additional Salary,ተጨማሪ ደመወዝ
 DocType: Quotation Item,Quotation Item,ትዕምርተ ንጥል
@@ -2934,7 +2933,7 @@ DocType: Journal Entry,Accounts Receivable,ለመቀበል የሚቻሉ አካ�
 DocType: Travel Itinerary,Meal Preference,የምግብ ምርጫ
 ,Supplier-Wise Sales Analytics,አቅራቢው-ጥበበኛ የሽያጭ ትንታኔ
 DocType: Purchase Invoice,Availed ITC Central Tax,የ ITC ማዕከላዊ ግብር ታክሏል
-DocType: POS Profile,Company Address Name,የኩባንያ አድራሻ ስም
+DocType: Sales Invoice,Company Address Name,የኩባንያ አድራሻ ስም
 DocType: Work Order,Use Multi-Level BOM,ባለብዙ-ደረጃ BOM ይጠቀሙ
 DocType: Bank Reconciliation,Include Reconciled Entries,የታረቀ ምዝግቦችን አካትት
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","የወላጅ ኮርስ (በዚህ ወላጅ የትምህርት ክፍል አይደለም ከሆነ, ባዶ ይተዉት)"
@@ -2948,7 +2947,7 @@ DocType: Woocommerce Settings,Enable Sync,ማመሳሰልን አንቃ
 DocType: Tax Withholding Rate,Single Transaction Threshold,ነጠላ የግብይት ጣሪያ
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,ይህ ዋጋ በነባሪው የሽያጭ ዋጋ ዝርዝር ውስጥ ይዘምናል.
 DocType: Email Digest,New Expenses,አዲስ ወጪዎች
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,PDC / LC መጠን
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,PDC / LC መጠን
 DocType: Shareholder,Shareholder,ባለአክስዮን
 DocType: Purchase Invoice,Additional Discount Amount,ተጨማሪ የቅናሽ መጠን
 DocType: Cash Flow Mapper,Position,ቦታ
@@ -3535,7 +3534,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,የተቀጣሪ ዝውውሩ ከመሸጋገሪያ ቀን በፊት መቅረብ አይችልም
 DocType: Certification Application,USD,ዩኤስዶላር
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,የገንዘብ መጠየቂያ ደረሰኝ አድርግ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,ቀሪ ቆንጆ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,ቀሪ ቆንጆ
 DocType: Selling Settings,Auto close Opportunity after 15 days,15 ቀናት በኋላ ራስ የቅርብ አጋጣሚ
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,የግዢ ትዕዛዞች በ {1} ውጤት መስጫ ነጥብ ምክንያት ለ {0} አይፈቀዱም.
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,ባር ኮድ {0} ትክክለኛ {1} ኮድ አይደለም
@@ -3851,7 +3850,7 @@ DocType: Email Digest,Sales Orders to Bill,የሽያጭ ትዕዛዞች ለ Bill
 DocType: Price List,Price List Master,የዋጋ ዝርዝር መምህር
 DocType: GST Account,CESS Account,CESS መለያ
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,ማዘጋጀት እና ዒላማዎች ለመከታተል እንዲችሉ ሁሉም የሽያጭ ግብይቶች በርካታ ** የሽያጭ አካላት ** ላይ መለያ ተሰጥተዋቸዋል ይችላል.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,ወደ ቁሳዊ ጥያቄ አገናኝ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,ወደ ቁሳዊ ጥያቄ አገናኝ
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,የውይይት መድረክ
 ,S.O. No.,ምት ቁ
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,የባንክ መግለጫ መግለጫ የግብይት አሠራር ንጥል
@@ -4900,7 +4899,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,ለሠራተኛ ፈጠራ ይፈለጋል
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},የመለያ ቁጥር {0} አስቀድሞ በመለያ {1} ውስጥ ጥቅም ላይ ውሏል
 DocType: GoCardless Mandate,Mandate,ኃላፊ
-DocType: POS Profile,POS Profile Name,POS የመገለጫ ስም
 DocType: Hotel Room Reservation,Booked,ተይዟል
 DocType: Detected Disease,Tasks Created,ተግባሮች ተፈጥረዋል
 DocType: Purchase Invoice Item,Rate,ደረጃ ይስጡ
@@ -4950,7 +4948,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,ዓመት ስም
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,ተከታታይ የሥራ ቀናት በላይ በዓላት በዚህ ወር አሉ.
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,{0} ንጥሎች መከተል እንደ {1} ንጥል ምልክት አልተደረገባቸውም. እንደ {1} ንጥል ከንጥል ዋናው ላይ ሊያነሯቸው ይችላሉ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC ማጣቀሻ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,PDC / LC ማጣቀሻ
 DocType: Production Plan Item,Product Bundle Item,የምርት ጥቅል ንጥል
 DocType: Sales Partner,Sales Partner Name,የሽያጭ የአጋር ስም
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,ጥቅሶች ጠይቅ
@@ -5304,7 +5302,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,ጥቅም ላይ የዋሉ ቅጠሎች
 DocType: Job Offer,Awaiting Response,ምላሽ በመጠባበቅ ላይ
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-yYYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,ከላይ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,ከላይ
 DocType: Support Search Source,Link Options,የአገናኝ አማራጮች
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},ጠቅላላ መጠን {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},ልክ ያልሆነ አይነታ {0} {1}
@@ -5355,7 +5353,6 @@ DocType: Program Enrollment Tool,Get Students From,ከ ተማሪዎች ያግኙ
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,ድህረ ገጽ ላይ ንጥሎች አትም
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,ቀድመህ ቡድን የእርስዎን ተማሪዎች
 DocType: Authorization Rule,Authorization Rule,የፈቃድ አሰጣጥ ደንብ
-DocType: POS Profile,Offline POS Section,ከመስመር ውጭ POS ክፍል
 DocType: Sales Invoice,Terms and Conditions Details,ውል እና ሁኔታዎች ዝርዝር
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,መግለጫዎች
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,የሽያጭ ግብሮች እና ክፍያዎች አብነት
@@ -5539,7 +5536,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,ንጥል ጥበበኛ 
 DocType: Employee Onboarding,Job Offer,የስራ እድል
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,ተቋም ምህፃረ ቃል
 ,Item-wise Price List Rate,ንጥል-ጥበብ ዋጋ ዝርዝር ተመን
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,አቅራቢው ትዕምርተ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,አቅራቢው ትዕምርተ
 DocType: Quotation,In Words will be visible once you save the Quotation.,የ ትዕምርተ ማስቀመጥ አንዴ ቃላት ውስጥ የሚታይ ይሆናል.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},ብዛት ({0}) ረድፍ ውስጥ ክፍልፋይ ሊሆን አይችልም {1}
 DocType: Contract,Unsigned,ያልተፈረመ
@@ -5551,7 +5548,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,በመክፈት ላይ የአክሲዮን
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,ደንበኛ ያስፈልጋል
 DocType: Lab Test,Result Date,ውጤት ቀን
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,PDC / LC ቀን
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,PDC / LC ቀን
 DocType: Purchase Order,To Receive,መቀበል
 DocType: Leave Period,Holiday List for Optional Leave,የአማራጭ ፈቃድ የአፈፃጸም ዝርዝር
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5906,7 +5903,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,በ ሰዓት
 DocType: Blanket Order,Purchasing,የግዥ
 DocType: Announcement,Announcement,ማስታወቂያ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,የደንበኛ LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,የደንበኛ LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","ባች የተመሠረተ የተማሪዎች ቡድን ለማግኘት, የተማሪዎች ባች በ ፕሮግራም ምዝገባ ከ እያንዳንዱ ተማሪ ሊረጋገጥ ይሆናል."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,የአክሲዮን የመቁጠር ግቤት ይህን መጋዘን የለም እንደ መጋዘን ሊሰረዝ አይችልም.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,ስርጭት
@@ -6593,7 +6590,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),(5 ውጪ) አጠቃላይ ነጥብ
 DocType: Student Attendance Tool,Batch,ባች
 DocType: Support Search Source,Query Route String,የፍለጋ መንገድ ሕብረቁምፊ
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,የዝማኔ ፍጥነት እንደ የመጨረሻው ግዢ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,የዝማኔ ፍጥነት እንደ የመጨረሻው ግዢ
 DocType: Donor,Donor Type,Donor Type
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,በቀጥታ ተዘምኗል
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,ሚዛን
