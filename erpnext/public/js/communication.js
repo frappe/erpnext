@@ -21,13 +21,13 @@ frappe.ui.form.on("Communication", {
 				frappe.confirm(__(confirm_msg, [__("Lead")]), () => {
 					frm.trigger('make_lead_from_communication');
 				})
-			}, __("Make"));
+			}, __('Create'));
 
 			frm.add_custom_button(__("Opportunity"), () => {
 				frappe.confirm(__(confirm_msg, [__("Opportunity")]), () => {
 					frm.trigger('make_opportunity_from_communication');
 				})
-			}, __("Make"));
+			}, __('Create'));
 		}
 	},
 
