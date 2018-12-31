@@ -94,7 +94,7 @@ apps/erpnext/erpnext/config/projects.py +46,Timesheet for tasks.,Potrošeno vrij
 DocType: Journal Entry,Remark,Napomena
 apps/erpnext/erpnext/config/selling.py +75,Tree of Item Groups.,Stablo Vrste artikala
 DocType: Employee Leave Approver,Users who can approve a specific employee's leave applications,Korisnici koji konkretnom Zaposlenom mogu odobriti odsustvo
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Pregled potraživanja od kupaca
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Pregled potraživanja od kupaca
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.js +47,From Delivery Note,Iz otpremnice
 DocType: Account,Tax,Porez
 DocType: Bank Reconciliation,Account Currency,Valuta računa
@@ -344,7 +344,7 @@ DocType: Grant Application,Requested Amount,Traženi iznos
 apps/erpnext/erpnext/config/crm.py +92,"Record of all communications of type email, phone, chat, visit, etc.","Snimanje svih komunikacija tipa email, telefon, poruke, posjete, itd."
 DocType: Purchase Order,Customer Contact Email,Kontakt e-mail kupca
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js +34,Primary Address Details,Detalji o primarnoj adresi
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,Iznad
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,Iznad
 DocType: Item,Variant Based On,Varijanta zasnovana na
 DocType: Project,Task Weight,Težina zadataka
 DocType: Payment Entry,Transaction ID,Transakcije
@@ -352,7 +352,7 @@ DocType: Payment Entry Reference,Allocated,Dodijeljeno
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +180,Add more items or open full form,Dodaj još stavki ili otvori kompletan prozor
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +49,Reserved for sale,Rezervisana za prodaju
 DocType: POS Item Group,Item Group,Vrste artikala
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Starost (Dani)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),Starost (Dani)
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +243,Opening (Dr),Početno stanje (Du)
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +50,Total Outstanding Amt,Preostalo za plaćanje
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +23,Go to the Desktop and start using ERPNext,Idite na radnu površinu i krenite sa radom u programu
@@ -503,7 +503,6 @@ DocType: Healthcare Practitioner,Mobile,Mobilni
 DocType: Purchase Invoice Item,Price List Rate,Cijena
 DocType: Purchase Invoice Item,Discount Amount,Vrijednost popusta
 ,Sales Invoice Trends,Trendovi faktura prodaje
-DocType: POS Profile,Apply Discount,Primijeni popust
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.py +110,You don't have enought Loyalty Points to redeem,Немате довољно Бодова Лојалности.
 DocType: Purchase Invoice,Tax Breakup,Porez po pozicijama
 DocType: Asset Maintenance Log,Task,Zadatak
@@ -619,7 +618,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +85,In Value,Pr
 DocType: Expense Claim,Employees Email Id,ID email Zaposlenih
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +54,Tree Type,Tip stabla
 DocType: Stock Entry,Update Rate and Availability,Izmijenite cijenu i dostupnost
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Ponuda dobavljača
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Ponuda dobavljača
 DocType: Material Request Item,Quantity and Warehouse,Količina i skladište
 DocType: Purchase Invoice,Taxes and Charges Added,Porezi i naknade dodate
 DocType: Work Order,Warehouses,Skladišta

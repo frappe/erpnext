@@ -2292,7 +2292,6 @@ DocType: Fee Validity,Fee Validity,Вознаграждение за дейст�
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,Не записи не найдено в таблице оплаты
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},Это {0} конфликты с {1} для {2} {3}
 DocType: Student Attendance Tool,Students HTML,Студенты HTML
-DocType: POS Profile,Apply Discount,Применить скидку
 DocType: GST HSN Code,GST HSN Code,Код GST HSN
 DocType: Employee External Work History,Total Experience,Суммарный опыт
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,Открыть проекты
@@ -2337,7 +2336,7 @@ DocType: Timesheet Detail,Expected Hrs,Ожидаемые часы
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Меморандум
 DocType: Leave Block List,Block Holidays on important days.,Блок Отдых на важных дней.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),Введите все необходимые значения результата (ов)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Сводка дебиторской задолженности
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Сводка дебиторской задолженности
 DocType: POS Closing Voucher,Linked Invoices,Связанные счета-фактуры
 DocType: Loan,Monthly Repayment Amount,Ежемесячная сумма погашения
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Открытие счетов-фактур
@@ -2460,7 +2459,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,Сумма финансирования
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,Предыдущий финансовый год не закрыт
 DocType: Practitioner Schedule,Practitioner Schedule,Расписание практикующих
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Возраст (дней)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),Возраст (дней)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS-.YYYY.-
 DocType: Additional Salary,Additional Salary,Дополнительная зарплата
 DocType: Quotation Item,Quotation Item,Цитата Пункт
@@ -2992,7 +2991,7 @@ DocType: Journal Entry,Accounts Receivable,Дебиторская задолже
 DocType: Travel Itinerary,Meal Preference,Предпочитаемая еда
 ,Supplier-Wise Sales Analytics,Аналитика продаж в разрезе поставщиков
 DocType: Purchase Invoice,Availed ITC Central Tax,Полученный центральный налог ЦМТ
-DocType: POS Profile,Company Address Name,Название компании
+DocType: Sales Invoice,Company Address Name,Название компании
 DocType: Work Order,Use Multi-Level BOM,Использование Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Включите примириться Записи
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","Родительский курс (оставьте поле пустым, если это не является частью родительского курса)"
@@ -3007,7 +3006,7 @@ DocType: Woocommerce Settings,Enable Sync,Включить синхрониза�
 DocType: Tax Withholding Rate,Single Transaction Threshold,Единый порог транзакции
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Это значение обновляется в прейскуранте продаж по умолчанию.
 DocType: Email Digest,New Expenses,Новые расходы
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,PDC / LC Amount
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,PDC / LC Amount
 DocType: Shareholder,Shareholder,акционер
 DocType: Purchase Invoice,Additional Discount Amount,Сумма Дополнительной Скидки
 DocType: Cash Flow Mapper,Position,Должность
@@ -3602,7 +3601,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,Передача сотрудника не может быть отправлена до даты передачи
 DocType: Certification Application,USD,доллар США
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,Создать счет-фактуру
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,Остаток средств
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,Остаток средств
 DocType: Selling Settings,Auto close Opportunity after 15 days,Авто близко Возможность через 15 дней
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,"Заказы на поставку не допускаются для {0} из-за того, что система показателей имеет значение {1}."
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,Barcode {0} не является допустимым кодом {1}
@@ -3939,7 +3938,7 @@ DocType: Email Digest,Sales Orders to Bill,Заказы на продажу Би
 DocType: Price List,Price List Master,Прайс-лист Мастер
 DocType: GST Account,CESS Account,CESS-аккаунт
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Все сделок купли-продажи могут быть помечены против нескольких ** продавцы ** так что вы можете устанавливать и контролировать цели.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,Ссылка на запрос материала
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,Ссылка на запрос материала
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,Активность в форуме
 ,S.O. No.,КО №
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,Параметры транзакции банковского вычета
@@ -5011,7 +5010,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,Требуется для создания сотрудников
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},"Номер счета {0}, уже использованный в учетной записи {1}"
 DocType: GoCardless Mandate,Mandate,мандат
-DocType: POS Profile,POS Profile Name,Название профиля POS
 DocType: Hotel Room Reservation,Booked,бронирования
 DocType: Detected Disease,Tasks Created,Созданные задачи
 DocType: Purchase Invoice Item,Rate,Цена
@@ -5061,7 +5059,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,Год
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,"Есть больше праздников, чем рабочих дней в этом месяце."
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,Следующие элементы {0} не помечены как {1}. Вы можете включить их как {1} из своего элемента
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,Продукт Связка товара
 DocType: Sales Partner,Sales Partner Name,Имя Партнера по продажам
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,Запрос на предложения
@@ -5424,7 +5422,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,Используемые листы
 DocType: Job Offer,Awaiting Response,В ожидании ответа
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.YYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,Выше
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,Выше
 DocType: Support Search Source,Link Options,Параметры ссылки
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},Общая сумма {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},Недопустимый атрибут {0} {1}
@@ -5478,7 +5476,6 @@ DocType: Program Enrollment Tool,Get Students From,Получить студен
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,Опубликовать товары на сайте
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,Группа ваших студентов в партиях
 DocType: Authorization Rule,Authorization Rule,Правило Авторизации
-DocType: POS Profile,Offline POS Section,Не в сети
 DocType: Sales Invoice,Terms and Conditions Details,Условия Подробности
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,Спецификации
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Продажи Налоги и сборы шаблона
@@ -5664,7 +5661,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,Пункт Мудрый
 DocType: Employee Onboarding,Job Offer,Предложение работы
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,институт Аббревиатура
 ,Item-wise Price List Rate,Цена продукта в прайс-листе
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Запрос Поставщику
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Запрос Поставщику
 DocType: Quotation,In Words will be visible once you save the Quotation.,По словам будет виден только вы сохраните цитаты.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},Количество ({0}) не может быть дробью в строке {1}
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},Количество ({0}) не может быть дробью в строке {1}
@@ -5677,7 +5674,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,Начальный запас
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,Требуется клиентов
 DocType: Lab Test,Result Date,Дата результата
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,Дата PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,Дата PDC / LC
 DocType: Purchase Order,To Receive,Получить
 DocType: Leave Period,Holiday List for Optional Leave,Список праздников для дополнительного отпуска
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -6037,7 +6034,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,в час
 DocType: Blanket Order,Purchasing,покупка
 DocType: Announcement,Announcement,Объявление
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,Клиент LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,Клиент LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Для пакетной студенческой группы, Студенческая партия будет подтверждена для каждого ученика из заявки на участие в программе."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Склад не может быть удалён, так как существует запись в складкой книге  этого склада."
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,Распределение
@@ -6734,7 +6731,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),Всего рейтинг (из 5)
 DocType: Student Attendance Tool,Batch,Партия
 DocType: Support Search Source,Query Route String,Строка маршрута запроса
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,Скорость обновления согласно последней покупке
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,Скорость обновления согласно последней покупке
 DocType: Donor,Donor Type,Тип донора
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,Автоматический повторный документ обновлен
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,Баланс

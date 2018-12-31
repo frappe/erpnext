@@ -990,7 +990,7 @@ apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_templat
 DocType: Landed Cost Voucher,Landed Cost Help,Custo de Desembarque Ajuda
 DocType: Purchase Invoice,Select Shipping Address,Selecione um Endereço de Entrega
 DocType: Leave Block List,Block Holidays on important days.,Bloco Feriados em dias importantes.
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Resumo do Contas a Receber
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Resumo do Contas a Receber
 DocType: Loan,Monthly Repayment Amount,Valor da Parcela Mensal
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +218,Please set User ID field in an Employee record to set Employee Role,"Por favor, defina o campo ID do usuário em um registro de empregado para definir Função Funcionário"
 DocType: UOM,UOM Name,Nome da Unidade de Medida
@@ -2172,7 +2172,6 @@ apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock: ,No Estoque:
 DocType: Notification Control,Custom Message,Mensagem personalizada
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +33,Investment Banking,Investimento Bancário
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +107,Cash or Bank Account is mandatory for making payment entry,Dinheiro ou conta bancária é obrigatória para a tomada de entrada de pagamento
-DocType: POS Profile,POS Profile Name,Nome do Perfil do PDV
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +82,Intern,internar
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +94,Stock transactions before {0} are frozen,Transações com ações antes {0} são congelados
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +219,Please click on 'Generate Schedule',"Por favor, clique em ""Gerar Agenda"""
@@ -2356,7 +2355,6 @@ DocType: Sales Team,Contact No.,Nº Contato.
 DocType: Bank Reconciliation,Payment Entries,Lançamentos de Pagamentos
 DocType: Program Enrollment Tool,Get Students From,Obter Alunos de
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,Publicar Itens no site
-DocType: POS Profile,Offline POS Section,Seção PDV Offline
 DocType: Sales Invoice,Terms and Conditions Details,Detalhes dos Termos e Condições
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Modelo de Encargos e Impostos sobre Vendas
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +67,Number of Order,Número de pedidos
@@ -2440,7 +2438,7 @@ DocType: POS Profile,Apply Discount On,Aplicar Discount On
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +95,Row # {0}: Serial No is mandatory,Linha # {0}: O número de série é obrigatório
 DocType: Purchase Taxes and Charges,Item Wise Tax Detail,Detalhes do Imposto Vinculados ao Item
 ,Item-wise Price List Rate,Lista de Preços por Item
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Orçamento de Fornecedor
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Orçamento de Fornecedor
 DocType: Quotation,In Words will be visible once you save the Quotation.,Por extenso será visível quando você salvar o orçamento.
 apps/erpnext/erpnext/stock/doctype/item/item.py +523,Barcode {0} already used in Item {1},Código de barras {0} já utilizado em item {1}
 apps/erpnext/erpnext/config/selling.py +86,Rules for adding shipping costs.,Regras para adicionar os custos de envio .
