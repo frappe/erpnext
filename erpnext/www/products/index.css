@@ -18,3 +18,8 @@
 .product-image a {
     text-decoration: none;
 }
+
+.filter-options {
+    max-height: 300px;
+    overflow: auto;
+}

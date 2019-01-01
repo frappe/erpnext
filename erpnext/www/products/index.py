@@ -2,11 +2,37 @@ import frappe, json
 
 def get_context(context):
 	context.items = get_products_for_website()
-	context.attributes_for_filters = get_filter_data()
+
+	product_settings = frappe.get_cached_doc('Products Settings')
+	context.field_filters = get_field_filter_data() \
+		if product_settings.enable_field_filters else []
+
+	context.attribute_filters = get_attribute_filter_data() \
+		if product_settings.enable_attribute_filters else []
+
+	context.product_settings = product_settings
+	context.page_length = product_settings.products_per_page
 
 
-def get_filter_data():
-	attributes = frappe.get_all('Item Attribute', {'show_in_website': 1})
+def get_field_filter_data():
+	product_settings = frappe.get_cached_doc('Products Settings')
+	filter_fields = [row.fieldname for row in product_settings.filter_fields]
+
+	meta = frappe.get_meta('Item')
+	fields = [df for df in meta.fields if df.fieldname in filter_fields]
+
+	filter_data = []
+	for f in fields:
+		doctype = f.options
+		values = [d.name for d in frappe.get_all(doctype)]
+		filter_data.append([f, values])
+
+	return filter_data
+
+
+def get_attribute_filter_data():
+	product_settings = frappe.get_cached_doc('Products Settings')
+	attributes = [row.attribute for row in product_settings.filter_attributes]
 	attribute_docs = [
 		frappe.get_doc('Item Attribute', attribute) for attribute in attributes
 	]
@@ -29,25 +55,41 @@ def get_filter_data():
 	return attribute_docs
 
 
-@frappe.whitelist(allow_guest=True)
-def get_products_for_website(attribute_data=None):
+def get_products_for_website(field_filters=None, attribute_filters=None):
 	search = None
-	if attribute_data and isinstance(attribute_data, frappe.string_types):
-		attribute_data = json.loads(attribute_data)
-	else:
+
+	if not (field_filters or attribute_filters):
 		if frappe.form_dict:
-			if frappe.form_dict.search:
-				search = frappe.form_dict.search
-			else:
-				attribute_data = frappe.form_dict
+			search = frappe.form_dict.search
+			field_filters = parse_if_json(frappe.form_dict.field_filters)
+			attribute_filters = parse_if_json(frappe.form_dict.attribute_filters)
 
-	if attribute_data:
-		item_codes = get_items_with_attributes(attribute_data)
+	if attribute_filters:
+		item_codes = get_item_codes_by_attributes(attribute_filters)
 
-		return get_items({
+		items_by_attributes = get_items({
 			'name': ['in', item_codes],
 			'show_variant_in_website': 1
 		})
+
+	if field_filters:
+		items_by_fields = get_items_by_fields(field_filters)
+
+	if attribute_filters and not field_filters:
+		return items_by_attributes
+
+	if field_filters and not attribute_filters:
+		return items_by_fields
+
+	if field_filters and attribute_filters:
+		items_intersection = []
+		item_codes_in_attribute = [item.name for item in items_by_attributes]
+
+		for item in items_by_fields:
+			if item.name in item_codes_in_attribute:
+				items_intersection.append(item)
+
+		return items_intersection
 
 	if search:
 		search = '%' + search + '%'
@@ -62,8 +104,11 @@ def get_products_for_website(attribute_data=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_products_html_for_website(attribute_data=None):
-	items = get_products_for_website(attribute_data)
+def get_products_html_for_website(field_filters=None, attribute_filters=None):
+	field_filters = parse_if_json(field_filters)
+	attribute_filters = parse_if_json(attribute_filters)
+
+	items = get_products_for_website(field_filters, attribute_filters)
 	html = ''
 	for item in items:
 		html += frappe.render_template('erpnext/www/products/item_row.html', {
@@ -76,14 +121,11 @@ def get_products_html_for_website(attribute_data=None):
 	return html
 
 
-def get_items_with_attributes(attribute_data):
+def get_item_codes_by_attributes(attribute_filters):
 	items = []
 
-	for attribute, value in attribute_data.iteritems():
-		if isinstance(value, frappe.string_types):
-			attribute_values = value.split(',')
-		else:
-			attribute_values = value
+	for attribute, values in attribute_filters.iteritems():
+		attribute_values = values
 
 		if not attribute_values: continue
 
@@ -114,14 +156,36 @@ def get_items_with_attributes(attribute_data):
 	return res
 
 
+def get_items_by_fields(field_filters):
+	filters = frappe._dict({})
+	for fieldname, values in field_filters.iteritems():
+		if not values: continue
+		if len(values) == 1:
+			filters[fieldname] = values[0]
+		else:
+			filters[fieldname] = ['in', values]
+
+	return get_items(filters)
+
+
 def get_items(filters=None, or_filters=None):
 	if not filters and not or_filters:
 		filters = {'variant_of': '', 'show_in_website': 1}
+
+	start = frappe.form_dict.start or 0
+	page_length = frappe.db.get_single_value('Products Settings', 'products_per_page')
 
 	return frappe.get_all('Item',
 		fields=['name', 'item_name', 'image', 'route', 'description'],
 		filters=filters,
 		or_filters=or_filters,
-		limit=10
+		start=start,
+		page_length=page_length
 	)
 
+
+def parse_if_json(dict_or_str):
+	if dict_or_str and isinstance(dict_or_str, frappe.string_types):
+		dict_or_str = json.loads(dict_or_str)
+
+	return dict_or_str
