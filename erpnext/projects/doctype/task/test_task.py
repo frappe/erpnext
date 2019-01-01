@@ -5,7 +5,7 @@ import frappe
 import unittest
 from frappe.utils import getdate, nowdate, add_days
 
-from erpnext.projects.doctype.task.task import CircularReferenceError
+from erpnext.projects.doctype.task.task import CircularReferenceError, EndDateConnotGreaterThanProjecteEndDateError
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
@@ -97,7 +97,16 @@ class TestTask(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
-def create_task(subject, start=None, end=None, depends_on=None, project=None):
+	def test_end_date_validation(self):
+		task_end = create_task("Testing_Enddate_validation", add_days(nowdate(), -10), add_days(nowdate(), 5), save=False)
+		pro = frappe.get_doc("Project", task_end.project)
+		pro.expected_end_date = add_days(nowdate(), 20)
+		pro.save()
+		self.assertRaises(EndDateConnotGreaterThanProjecteEndDateError, task_end.save)
+
+
+
+def create_task(subject, start=None, end=None, save=True, depends_on=None, project=None):
 	if not frappe.db.exists("Task", subject):
 		task = frappe.new_doc('Task')
 		task.status = "Open"
@@ -105,7 +114,8 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None):
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
 		task.project = project or "_Test Project"
-		task.save()
+		if save:
+			task.save()
 	else:
 		task = frappe.get_doc("Task", subject)
 
@@ -113,6 +123,7 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None):
 		task.append("depends_on", {
 			"task": depends_on
 		})
-		task.save()
+		if save:
+			task.save()
 
 	return task
