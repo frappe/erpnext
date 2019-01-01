@@ -343,8 +343,7 @@ class StockController(AccountsController):
 				qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
 				if qa_doc.docstatus == 0:
 					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
-					frappe.msgprint(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx))
-					raise QualityInspectionNotSubmittedError
+					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
 				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
 				if qa_failed:
