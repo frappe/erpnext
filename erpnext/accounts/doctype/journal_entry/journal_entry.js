@@ -39,8 +39,6 @@ frappe.ui.form.on("Journal Entry", {
 		// hide /unhide fields based on currency
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 
-		erpnext.journal_entry.set_naming_series_bbr_bbp(frm);
-
 		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_journal_entry_reference)) {
 			frm.add_custom_button(__("Make Inter Company Journal Entry"),
 				function() {
@@ -49,10 +47,6 @@ frappe.ui.form.on("Journal Entry", {
 			);
 		}
 	},
-
-	naming_series: function(frm) {
-		erpnext.journal_entry.set_naming_series_bbr_bbp(frm);
- 	},
 
 	make_inter_company_journal_entry: function(frm) {
 		var d = new frappe.ui.Dialog({
@@ -495,18 +489,7 @@ $.extend(erpnext.journal_entry, {
 			var df = frappe.meta.get_docfield("Journal Entry Account", fieldname, frm.doc.name);
 			df.label = frm.doc.multi_currency ? (label + " in Account Currency") : label;
 		})
-	},
-
-	set_naming_series_bbr_bbp: function(frm) {
-		if (frm.doc.__islocal) {
-			frm.set_df_property("voucher_type", "read_only", false);
-			var parts = frm.doc.naming_series.split("-");
-			if(parts[0] == "BBP" || parts[0] == "BBR") {
-				frm.set_value("voucher_type", "Bank Entry");
-				frm.set_df_property("voucher_type", "read_only", true);
-			}
-		}
-	},
+	}
 
 	set_debit_credit_in_company_currency: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
