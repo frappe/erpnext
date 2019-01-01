@@ -113,7 +113,7 @@ $.extend(erpnext.utils, {
 					[format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)]), 'blue');
 				frm.dashboard.add_indicator(__('Total Unpaid: {0}',
 					[format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)]),
-					company_wise_info[0].total_unpaid ? 'orange' : 'green');
+				company_wise_info[0].total_unpaid ? 'orange' : 'green');
 
 				if(company_wise_info[0].loyalty_points) {
 					frm.dashboard.add_indicator(__('Loyalty Points: {0}',
