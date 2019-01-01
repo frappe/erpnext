@@ -489,7 +489,7 @@ $.extend(erpnext.journal_entry, {
 			var df = frappe.meta.get_docfield("Journal Entry Account", fieldname, frm.doc.name);
 			df.label = frm.doc.multi_currency ? (label + " in Account Currency") : label;
 		})
-	}
+	},
 
 	set_debit_credit_in_company_currency: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
