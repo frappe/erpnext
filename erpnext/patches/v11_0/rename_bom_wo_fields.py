@@ -8,7 +8,19 @@ from frappe.model.utils.rename_field import rename_field
 def execute():
     for doctype in ['BOM Explosion Item', 'BOM Item', 'Work Order Item', 'Item']:
         if frappe.db.has_column(doctype, 'allow_transfer_for_manufacture'):
-            rename_field('BOM Item', "allow_transfer_for_manufacture", "include_item_in_manufacturing")
+            if doctype != 'Item':
+                frappe.reload_doc('manufacturing', 'doctype', frappe.scrub(doctype))
+            else:
+                frappe.reload_doc('stock', 'doctype', frappe.scrub(doctype))
+
+            rename_field(doctype, "allow_transfer_for_manufacture", "include_item_in_manufacturing")
+
+    if frappe.db.has_column('BOM', 'allow_same_item_multiple_times'):
+        frappe.db.sql(""" UPDATE tabBOM
+            SET
+                allow_same_item_multiple_times = 0
+            WHERE
+                trim(coalesce(allow_same_item_multiple_times, '')) = '' """)
 
     for doctype in ['BOM', 'Work Order']:
         frappe.reload_doc('manufacturing', 'doctype', frappe.scrub(doctype))
