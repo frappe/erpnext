@@ -258,13 +258,13 @@ class Project(Document):
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def update_sales_amount(self):
-		total_sales_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_sales_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
-		total_billed_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_billed_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Invoice` where project = %s and docstatus=1""", self.name)
 
 		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
