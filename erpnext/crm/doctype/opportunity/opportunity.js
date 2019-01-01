@@ -48,11 +48,11 @@ frappe.ui.form.on("Opportunity", {
 				frm.add_custom_button(__('Supplier Quotation'),
 					function() {
 						frm.trigger("make_supplier_quotation")
-					}, __("Make"));
+					}, __('Create'));
 			}
 
 			frm.add_custom_button(__('Quotation'),
-				cur_frm.cscript.create_quotation, __("Make"));
+				cur_frm.cscript.create_quotation, __('Create'));
 
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'), () => {
