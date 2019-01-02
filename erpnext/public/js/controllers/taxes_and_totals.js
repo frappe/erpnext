@@ -89,7 +89,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_item_values: function() {
 		var me = this;
-		var has_margin_field = frappe.meta.has_field(me.frm.fields_dict["items"].grid.doctype, 'margin_type');
 
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
@@ -102,6 +101,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.tax_exclusive_rate = item.rate;
 				item.tax_exclusive_amount = item.amount;
 				item.tax_exclusive_discount_amount = item.discount_amount;
+
+				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 				if(has_margin_field) {
 					item.tax_exclusive_rate_with_margin = item.rate_with_margin;
 					item.base_tax_exclusive_rate_with_margin = item.base_rate_with_margin;
@@ -161,8 +162,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(!has_inclusive_tax) return;
 
-		var has_margin_field = frappe.meta.has_field(me.frm.fields_dict["items"].grid.doctype, 'margin_type');
-
 		$.each(me.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 
@@ -190,6 +189,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.tax_exclusive_amount = flt(item.tax_exclusive_amount, precision("tax_exclusive_amount", item));
 				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, precision("tax_exclusive_rate", item));
 
+				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 				if(has_margin_field && flt(item.tax_exclusive_rate_with_margin) > 0) {
 					item.tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin / (1 + item.cumulated_tax_fraction),
 						precision("tax_exclusive_rate_with_margin", item));
