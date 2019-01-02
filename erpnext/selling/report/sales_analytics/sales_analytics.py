@@ -111,7 +111,7 @@ class Analytics(object):
 		supplier_table = ", `tabSupplier` sup" if include_supplier else ""
 		supplier_condition = "and sup.name = s.supplier" if include_supplier else ""
 
-		is_opening_condition = "and s.is_opening = 'No'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
+		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
 			else ""
 
 		entity_name_field = "{0} as entity_name, ".format(entity_name_field) if entity_name_field else ""
