@@ -369,7 +369,7 @@ def get_leave_details(employee, date):
 		date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, date, status="Approved")
 		leaves_pending = get_leaves_for_period(employee, d, allocation.from_date, date, status="Open")
-		remaining_leaves = allocation.total_leaves_allocated - leaves_taken - leaves_pending
+		remaining_leaves = allocation.total_leaves_allocated - leaves_taken - leaves_pending - allocation.total_leaves_encashed
 		leave_allocation[d] = {
 			"total_leaves": allocation.total_leaves_allocated,
 			"leaves_taken": leaves_taken,
