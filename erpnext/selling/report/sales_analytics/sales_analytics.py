@@ -111,6 +111,9 @@ class Analytics(object):
 		supplier_table = ", `tabSupplier` sup" if include_supplier else ""
 		supplier_condition = "and sup.name = s.supplier" if include_supplier else ""
 
+		is_opening_condition = "and s.is_opening = 'No'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
+			else ""
+
 		entity_name_field = "{0} as entity_name, ".format(entity_name_field) if entity_name_field else ""
 		if include_sales_person:
 			value_field = "i.{} * sp.allocated_percentage / 100".format(frappe.db.escape(self.filters.value_field))
@@ -127,7 +130,7 @@ class Analytics(object):
 				`tab{doctype} Item` i, `tab{doctype}` s {sales_team_table} {supplier_table}
 			where i.parent = s.name and s.docstatus = 1 {sales_person_condition} {supplier_condition}
 				and s.company = %(company)s and s.{date_field} between %(from_date)s and %(to_date)s
-				{filter_conditions}
+				{is_opening_condition} {filter_conditions}
 		""".format(
 			entity_field=entity_field,
 			entity_name_field=entity_name_field,
@@ -138,6 +141,7 @@ class Analytics(object):
 			sales_person_condition=sales_person_condition,
 			supplier_table=supplier_table,
 			supplier_condition=supplier_condition,
+			is_opening_condition=is_opening_condition,
 			filter_conditions=self.get_conditions()
 		), self.filters, as_dict=1)
 
