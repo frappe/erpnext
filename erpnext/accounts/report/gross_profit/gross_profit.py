@@ -200,7 +200,7 @@ class GrossProfitGenerator(object):
 
 	def skip_row(self, row, product_bundles):
 		if self.filters.get("group_by") != "Invoice":
-			if not row.get(scrub(self.filters.get("group_by"))):
+			if not row.get(scrub(self.filters.get("group_by", ""))):
 				return True
 		elif row.get("is_return") == 1:
 			return True
