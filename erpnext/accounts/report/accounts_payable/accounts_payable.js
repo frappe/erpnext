@@ -73,6 +73,12 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname":"mark_overdue_in_print",
+			"label": __("Mark Overdue in Print"),
+			"fieldtype": "Check",
+			on_change: function() { return false; }
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
