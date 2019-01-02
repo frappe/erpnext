@@ -312,9 +312,7 @@ class Analytics(object):
 				self.depth_map.setdefault(d.name, 0)
 
 	def get_chart_data(self):
-		period_column_start = 3 if self.entity_names else 2
-		length = len(self.columns)
-		labels = [d.get("label") for d in self.columns[period_column_start:length]]
+		labels = [d.get("label") for d in self.columns if d.get("period_column")]
 		self.chart = {
 			"data": {
 				'labels': labels,
