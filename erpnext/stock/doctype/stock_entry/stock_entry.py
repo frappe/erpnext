@@ -71,6 +71,8 @@ class StockEntry(StockController):
 
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
+		elif frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
+			set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
 		self.set_actual_qty()
@@ -119,23 +121,28 @@ class StockEntry(StockController):
 			self.bom_no = data.bom_no
 
 	def get_batch_details(self):
+		if frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo"):
+			return
+
 		batch_details = []
 
 		for item in self.items:
 			has_batch_no = frappe.db.get_value("Item", item.item_code, "has_batch_no")
 
-			if has_batch_no and not item.batch_no and item.s_warehouse:
-				batches = get_batches(item.item_code, item.s_warehouse, item.qty)
+			if has_batch_no and not item.batch_no:
+				batches = get_batches(item.item_code, item.s_warehouse or item.t_warehouse, item.qty)
 
 				if batches:
 					batch_details.append({
 						"id": item.name,
 						"item_code": item.item_code,
-						"s_warehouse": item.s_warehouse
+						"qty": item.qty,
+						"s_warehouse": item.s_warehouse,
+						"t_warehouse": item.t_warehouse
 					})
 				else:
 					frappe.msgprint(_("Row #{0}: No batch found for item {1} in warehouse {2}"
-						.format(item.idx, item.item_code, item.s_warehouse)), indicator="red", alert=1)
+						.format(item.idx, item.item_code, item.s_warehouse or item.t_warehouse)), indicator="red", alert=1)
 
 		return batch_details
 
@@ -1549,3 +1556,31 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+
+@frappe.whitelist()
+def batch_qty_in_warehouse(doctype, txt, searchfield, start, page_len, filters):
+	batches = frappe.db.sql("""
+		SELECT
+			batch_id,
+			sum(actual_qty) AS batch_qty
+		FROM
+			`tabBatch` AS batch
+				JOIN `tabStock Ledger Entry` AS sle ignore index (item_code, warehouse)
+					ON (batch.batch_id = sle.batch_no )
+		WHERE
+			sle.item_code = %s
+				AND sle.warehouse = %s
+				AND (batch.expiry_date >= CURDATE() or batch.expiry_date IS NULL)
+		GROUP BY
+			batch_id
+		HAVING
+			sum(actual_qty) > %s
+		ORDER BY
+			batch.expiry_date ASC,
+			batch.creation ASC
+		""",
+		(filters.get("item"), filters.get("s_warehouse"), filters.get("qty"))
+	)
+
+	return batches

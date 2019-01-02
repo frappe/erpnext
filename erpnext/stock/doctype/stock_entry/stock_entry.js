@@ -147,10 +147,21 @@ frappe.ui.form.on('Stock Entry', {
 										in_list_view: 1
 									},
 									{
+										label: __('Target Warehouse'),
+										fieldtype: 'Read Only',
+										fieldname: 't_warehouse',
+										in_list_view: 1
+									},
+									{
 										label: __('Item Code'),
 										fieldtype: 'Read Only',
 										fieldname: 'item_code',
 										in_list_view: 1
+									},
+									{
+										label: __('Quantity'),
+										fieldtype: 'Read Only',
+										fieldname: 'qty',
 									},
 									{
 										label: __('Batch No'),
@@ -158,12 +169,20 @@ frappe.ui.form.on('Stock Entry', {
 										fieldname: 'batch_no',
 										options: 'Batch',
 										get_query: function (doc) {
-											return { filters: { item: doc.item_code } };
+											return {
+												query: "erpnext.stock.doctype.stock_entry.stock_entry.batch_qty_in_warehouse",
+												filters: {
+													item: doc.item_code,
+													s_warehouse: doc.s_warehouse,
+													qty: doc.qty
+												}
+											};
 										},
 										in_list_view: 1,
 										reqd: 1
 									}
 								],
+								cannot_add_rows: true,
 								data: r.message,
 								get_data: function () {
 									return r.message
