@@ -584,3 +584,4 @@ erpnext.patches.v12_0.change_qms_icon
 erpnext.patches.v12_0.rename_learn_to_help
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon
+erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
