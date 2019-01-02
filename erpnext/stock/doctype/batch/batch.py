@@ -260,16 +260,28 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	return batch_no
 
 
-def get_batches(item_code, warehouse, qty=1, throw=False):
-	batches = frappe.db.sql(
-		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` ignore index (item_code, warehouse) '
-		'on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )'
-		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
-		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
-		'group by batch_id '
-		'order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC',
-		(item_code, warehouse),
-		as_dict=True
+def get_batches(item_code, warehouse, qty=1, throw=False, as_dict=True):
+	batches = frappe.db.sql("""
+		SELECT
+			batch_id,
+			sum(actual_qty) AS qty
+		FROM
+			`tabBatch` AS batch
+				JOIN `tabStock Ledger Entry` AS sle ignore index (item_code, warehouse)
+					ON (batch.batch_id = sle.batch_no )
+		WHERE
+			sle.item_code = %s
+				AND sle.warehouse = %s
+				AND (batch.expiry_date >= CURDATE() or batch.expiry_date IS NULL)
+		GROUP BY
+			batch_id
+		HAVING
+			sum(actual_qty) > %s
+		ORDER BY
+			batch.expiry_date ASC,
+			batch.creation ASC
+		""",
+		(item_code, warehouse, qty)
 	)
 
 	return batches

@@ -1560,27 +1560,4 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 
 @frappe.whitelist()
 def batch_qty_in_warehouse(doctype, txt, searchfield, start, page_len, filters):
-	batches = frappe.db.sql("""
-		SELECT
-			batch_id,
-			sum(actual_qty) AS batch_qty
-		FROM
-			`tabBatch` AS batch
-				JOIN `tabStock Ledger Entry` AS sle ignore index (item_code, warehouse)
-					ON (batch.batch_id = sle.batch_no )
-		WHERE
-			sle.item_code = %s
-				AND sle.warehouse = %s
-				AND (batch.expiry_date >= CURDATE() or batch.expiry_date IS NULL)
-		GROUP BY
-			batch_id
-		HAVING
-			sum(actual_qty) > %s
-		ORDER BY
-			batch.expiry_date ASC,
-			batch.creation ASC
-		""",
-		(filters.get("item"), filters.get("s_warehouse"), filters.get("qty"))
-	)
-
-	return batches
+	return get_batches(filters.get("item"), filters.get("s_warehouse"), filters.get("qty"), as_dict=False)
