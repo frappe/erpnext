@@ -45,7 +45,8 @@ def get_item_details(args):
 	out = get_basic_details(args, item)
 
 	get_item_tax_template(args, item, out)
-	out["item_tax_rate"] = get_item_tax_map(args.company, out.get("item_tax_template"), as_json=True)
+	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
+		else out.get("item_tax_template"), as_json=True)
 
 	get_party_item_code(args, item, out)
 
