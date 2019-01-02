@@ -1,0 +1,32 @@
+<div class="item-attribute-table mt-5">
+    {% if has_variants and variants %}
+        <h3>Item Variants</h3>
+        <table class="table table-bordered">
+            <thead>
+                <th>Item Code</th>
+            {% for attr_key in valid_attribute_keys %}
+                <th>{{ attributes_map[attr_key].field_name }}</th>
+            {% endfor %}
+                <th width="160"></th>
+                <th width="120"></th>
+            </thead>
+            <tbody>
+                {% for item_variant in variants %}
+                <tr data-variant-item-code="{{ item_variant.name }}">
+                    <td>{{ item_variant.name }}</td>
+                    {% for attr_key in valid_attribute_keys %}
+                        <td>{{ item_variant.attribute_map[attr_key] }}</td>
+                    {% endfor %}
+                    <td>
+                        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                            <h4 class="item-price" itemprop="price"></h4>
+                            <div class="item-stock" itemprop="availability"></div>
+                        </div>
+                    </td>
+                    <td><button data-item-code="{{item_variant.name}}" class="btn btn-outline-primary item-variant-add-to-cart">Add to Cart</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>

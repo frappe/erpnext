@@ -109,16 +109,56 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	attribute_filters = parse_if_json(attribute_filters)
 
 	items = get_products_for_website(field_filters, attribute_filters)
-	html = ''
-	for item in items:
-		html += frappe.render_template('erpnext/www/products/item_row.html', {
-			'item': item
-		})
+	html = ''.join(get_html_for_items(items))
 
 	if not items:
 		html = frappe.render_template('erpnext/www/products/not_found.html', {})
 
 	return html
+
+
+@frappe.whitelist(allow_guest=True)
+def get_items_by_attributes(attribute_filters):
+	attribute_filters = parse_if_json(attribute_filters)
+
+	for attribute, value in attribute_filters.items():
+		attribute_filters[attribute] = [value]
+
+	item_codes = get_item_codes_by_attributes(attribute_filters)
+	items = get_items({
+		'name': ['in', item_codes]
+	})
+
+	return ''.join(get_html_for_items(items))
+
+@frappe.whitelist(allow_guest=True)
+def get_attributes_and_values(item_code):
+	attributes = frappe.db.get_all('Item Variant Attribute',
+		fields=['attribute'],
+		filters={
+			'parenttype': 'Item',
+			'parent': item_code
+		},
+		order_by='idx asc'
+	)
+
+	attribute_names = [a.attribute for a in attributes]
+
+	values = frappe.db.get_all('Item Attribute Value',
+		fields=['attribute_value', 'parent'],
+		filters={
+			'parent': ['in', attribute_names]
+		}
+	)
+
+	for a in attributes:
+		a.setdefault('values', [])
+		for value in values:
+			attribute = value.parent
+			if attribute == a.attribute:
+				a['values'].append(value.attribute_value)
+
+	return attributes
 
 
 def get_item_codes_by_attributes(attribute_filters):
@@ -183,6 +223,13 @@ def get_items(filters=None, or_filters=None):
 		page_length=page_length
 	)
 
+def get_html_for_items(items):
+	html = []
+	for item in items:
+		html.append(frappe.render_template('erpnext/www/products/item_row.html', {
+			'item': item
+		}))
+	return html
 
 def parse_if_json(dict_or_str):
 	if dict_or_str and isinstance(dict_or_str, frappe.string_types):

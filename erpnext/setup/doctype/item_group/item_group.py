@@ -185,15 +185,20 @@ def get_group_item_count(item_group):
 
 
 def get_parent_item_groups(item_group_name):
+	base_parents = [
+		{"name": frappe._("Home"), "route":"/"},
+		{"name": frappe._("Products"), "route":"/products"},
+	]
 	if not item_group_name:
-		return [{"name": frappe._("Home"), "route":"/"}]
+		return base_parents
+
 	item_group = frappe.get_doc("Item Group", item_group_name)
 	parent_groups = frappe.db.sql("""select name, route from `tabItem Group`
 		where lft <= %s and rgt >= %s
 		and show_in_website=1
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
 
-	return 	[{"name": frappe._("Home"), "route":"/"}] + parent_groups
+	return base_parents + parent_groups
 
 def invalidate_cache_for(doc, item_group=None):
 	if not item_group:

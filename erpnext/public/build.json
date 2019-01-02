@@ -11,7 +11,7 @@
         "public/js/shopping_cart.js"
     ],
 	"css/erpnext-web.css": [
-		"public/less/website.less"
+		"public/scss/erpnext-web.scss"
 	],
     "js/marketplace.min.js": [
         "public/js/hub/marketplace.js"

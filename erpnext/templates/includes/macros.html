@@ -1,7 +1,4 @@
 {% macro product_image_square(website_image, css_class="") %}
-{% if website_image -%}
-	<meta itemprop="image" content="{{ frappe.utils.quoted(website_image) | abs_url }}">
-{%- endif %}
 <div class="product-image product-image-square
 	{% if not website_image -%} missing-image {%- endif %} {{ css_class }}"
 	{% if website_image -%}
@@ -11,10 +8,10 @@
 {% endmacro %}
 
 {% macro product_image(website_image, css_class="") %}
-    <div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
+    <div class="product-image border text-center rounded {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
     	{% if website_image -%}
 			<a href="{{ frappe.utils.quoted(website_image) }}">
-				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
+				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}">
 			</a>
     	{%- endif %}
     </div>

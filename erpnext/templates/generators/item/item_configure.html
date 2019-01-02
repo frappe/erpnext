@@ -1,0 +1,57 @@
+<div>
+    <button class="btn btn-primary btn-configure"
+        data-item-code="{{ doc.name }}"
+        data-item-name="{{ doc.item_name }}"
+    >
+        {{ _('Configure') }}
+    </button>
+</div>
+<script>
+    frappe.ready(() => {
+        $('.btn-configure').on('click', (e) => {
+            const { itemCode, itemName } = $(e.target).data();
+            configure_item(itemCode, itemName);
+        });
+
+        function configure_item(item_code, item_name) {
+            get_attributes_and_values(item_code)
+                .then(attribute_data => {
+                    const fields = attribute_data.map(a => {
+                        return {
+                            fieldtype: 'Select',
+                            label: a.attribute,
+                            fieldname: a.attribute,
+                            options: a.values
+                        }
+                    });
+                    const d = new frappe.ui.Dialog({
+                        title: 'Configure ' + item_name,
+                        fields,
+                        primary_action_label: __('Submit'),
+                        primary_action(values) {
+                            console.log(values);
+                            frappe.call('erpnext.www.products.index.get_items_by_attributes', {
+                                attribute_filters: values
+                            }).then(r => {
+                                console.log(r)
+                                if (r.message) {
+                                    $('.filtered-item-variants').show();
+                                    $('.filtered-item-variants .item-list').html(r.message);
+                                }
+                            })
+                        }
+                    });
+                    d.show();
+                })
+        }
+
+        function get_attributes_and_values(item_code) {
+            return new Promise(resolve => {
+                frappe.call('erpnext.www.products.index.get_attributes_and_values', {
+                    item_code
+                })
+                .then(r => resolve(r.message))
+            })
+        }
+    })
+</script>

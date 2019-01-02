@@ -1,0 +1,144 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+{% block meta_block %}
+	{% include "templates/generators/item/item_meta.html" %}
+{% endblock %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
+{% from "erpnext/templates/includes/macros.html" import product_image %}
+<div class="item-content">
+	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
+		<div class="row">
+			<div class="col-md-6">
+				{% include "templates/generators/item/item_image.html" %}
+			</div>
+			<div class="col-sm-6">
+				{% include "templates/generators/item/item_details.html" %}
+			</div>
+		</div>
+
+		<div class="row">
+			{% include "templates/generators/item/item_specifications.html" %}
+		</div>
+
+		<div class="row">
+			{% include "templates/generators/item/item_variant_table.html" %}
+		</div>
+
+		<div class="row">
+			<div class="filtered-item-variants col-7" style="display: none">
+				<h5>Found 23 items</h5>
+				<div class="item-list">
+
+				</div>
+			</div>
+		</div>
+
+		<!-- <div class="item-attribute-selectors">
+			{% if has_variants and attributes %}
+				{% for d in attributes %}
+					{% if attribute_values[d.attribute] -%}
+					<div class="item-view-attribute {% if (attribute_values[d.attribute] | len)==1 -%} hidden {%- endif %}"
+							style="margin-bottom: 10px;">
+						<h6 class="text-muted">{{ _(d.attribute) }}</h6>
+						<select class="form-control"
+							style="max-width: 140px"
+							data-attribute="{{ d.attribute }}">
+						{% for value in attribute_values[d.attribute] %}
+						<option value="{{ value }}"
+						{% if selected_attributes and selected_attributes[d.attribute]==value -%}
+							selected
+						{%- elif disabled_attributes and value in disabled_attributes.get(d.attribute, []) -%}
+							disabled
+						{%- endif %}>
+							{{ _(value) }}
+						</option>
+						{% endfor %}
+						</select>
+					</div>
+					{%- endif %}
+				{% endfor %}
+			{% endif %}
+		</div> -->
+	</div>
+</div>
+<script>
+
+	{% if variant_info %}
+	window.variant_info = {{ variant_info }};
+	{% else %}
+	window.variant_info = null;
+	{% endif %}
+
+	{% include "templates/includes/product_page.js" %}
+
+	/*
+	frappe.ready(() => {
+		$('.page_content').on('click', '.item-variant-add-to-cart', (e) => {
+			const item_code = $(e.currentTarget).data().itemCode;
+			erpnext.shopping_cart.update_cart({
+				item_code,
+				qty: 1
+			});
+		});
+
+		$('[data-variant-item-code]').each(function() {
+			const $this = $(this);
+			const item_code = $this.data().variantItemCode;
+			get_item_info(item_code)
+				.then(r => {
+					if (!r.message) return;
+					if(r.message.cart_settings.enabled) {
+						// $this.find(".item-cart, .item-price, .item-stock").toggleClass("hidden", (!!!r.message.product_info.price || !!!r.message.product_info.in_stock));
+					}
+					if(r.message.cart_settings.show_price) {
+						$this.find(".item-price").toggleClass("hidden", false);
+					}
+					if(r.message.cart_settings.show_stock_availability) {
+						$this.find(".item-stock").toggleClass("hidden", false);
+					}
+					if(r.message.product_info.price) {
+						$this.find(".item-price")
+							.html(r.message.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
+								(" + r.message.product_info.price.formatted_price + " / " + r.message.product_info.uom + ")</div>");
+
+						if(r.message.product_info.in_stock==0) {
+							$this.find(".item-stock").html(`<div style='color: red'> <i class='fa fa-close'></i> ${__('Not in stock')}</div>`);
+						}
+						else if(r.message.product_info.in_stock==1) {
+							var qty_display = __('In stock');
+							if (r.message.product_info.show_stock_qty) {
+								qty_display += " ("+r.message.product_info.stock_qty+")";
+							}
+							$this.find(".item-stock").html("<div style='color: green'>\
+								<i class='fa fa-check'></i> "+qty_display+"</div>");
+						}
+					}
+				})
+		})
+
+		function get_item_info(item_code) {
+			return frappe.call({
+				type: "POST",
+				method: "erpnext.shopping_cart.product_info.get_product_info_for_website",
+				args: { item_code }
+			})
+		}
+	})
+	*/
+</script>
+{% endblock %}
+
+{% block base_scripts %}
+<!-- js should be loaded in body! -->
+<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+<script type="text/javascript" src="/assets/js/control.min.js"></script>
+<script type="text/javascript" src="/assets/js/dialog.min.js"></script>
+<script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+{% endblock %}

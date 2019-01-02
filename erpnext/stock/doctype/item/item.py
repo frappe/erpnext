@@ -40,7 +40,7 @@ class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="item_name",
 		condition_field="show_in_website",
-		template="templates/generators/item.html",
+		template="templates/generators/item/item.html",
 		no_cache=1
 	)
 
