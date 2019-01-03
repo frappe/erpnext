@@ -286,7 +286,6 @@ def get_items(warehouse, posting_date, posting_time):
 			with_valuation_rate=True)
 
 		if frappe.db.get_value("Item", item, "disabled") == 0:
-
 			res.append({
 				"item_code": item,
 				"warehouse": wh,
