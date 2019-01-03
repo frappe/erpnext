@@ -15,24 +15,24 @@ frappe.ui.form.on("Job Offer", {
 		if ( frm.doc.salary_structure) {
 			frappe.model.with_doc("Salary Structure", frm.doc.salary_structure, function() {
 			 	var tabletransfer = frappe.model.get_doc("Salary Structure", frm.doc.salary_structure)
-				let earning = []
+				let earning = [];
 			 	$.each(tabletransfer.earnings, function(index, row){
 					let d = {};
 					d.salary_component = row.salary_component;
 					d.abbr = row.abbr;
 					d.formula = row.formula;
 					d.amount = row.amount;
-					earning.push(d)
+					earning.push(d);
 			 });
 			 frm.set_value("earnings", earning)
-			 let deduction = []
+			 let deduction = [];
 			 $.each(tabletransfer.deductions, function(index, row){
 				 	const d = {};
 					d.salary_component = row.salary_component;
 					d.abbr = row.abbr;
 					d.formula = row.formula;
 					d.amount = row.amount;
-					deduction.push(d)
+					deduction.push(d);
 			 });
 			 frm.set_value("deductions", deduction)
 	 		});
