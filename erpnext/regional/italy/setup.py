@@ -22,5 +22,5 @@ def make_custom_fields(update=True):
             dict(fieldname='recipient_pec', label='Recipient PEC', fieldtype='Data', insert_after='recipient_code', options="Email")
         ],
 	}
-    print(custom_fields)
+
     create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
