@@ -96,6 +96,15 @@ class TestCustomer(unittest.TestCase):
 
 		so.save()
 
+	def test_delete_customer_contact(self):
+		customer = frappe.get_doc(
+			get_customer_dict('_Test Customer for delete')).insert(ignore_permissions=True)
+
+		customer.mobile_no = "8989889890"
+		customer.save()
+		self.assertTrue(customer.customer_primary_contact)
+		frappe.delete_doc('Customer', customer.name)
+
 	def test_disabled_customer(self):
 		make_test_records("Item")
 
