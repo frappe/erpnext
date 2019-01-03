@@ -16,12 +16,22 @@
         function configure_item(item_code, item_name) {
             get_attributes_and_values(item_code)
                 .then(attribute_data => {
-                    const fields = attribute_data.map(a => {
+                    const fields = attribute_data.map((a, i) => {
                         return {
                             fieldtype: 'Select',
                             label: a.attribute,
                             fieldname: a.attribute,
-                            options: a.values
+                            options: a.values,
+                            change: () => {
+                                console.log()
+                                const values = d.get_values();
+                                get_next_attribute_and_values(item_code, values)
+                                    .then(data => {
+                                        d.set_df_property(a.attribute, 'description', data[2] + ' items found')
+                                        d.set_df_property(data[0], 'options', data[1])
+                                        console.log(data)
+                                    })
+                            }
                         }
                     });
                     const d = new frappe.ui.Dialog({
@@ -30,19 +40,28 @@
                         primary_action_label: __('Submit'),
                         primary_action(values) {
                             console.log(values);
-                            frappe.call('erpnext.www.products.index.get_items_by_attributes', {
-                                attribute_filters: values
+
+                            frappe.call('erpnext.www.products.index.get_next_attribute_and_values', {
+                                item_code,
+                                selected_attributes: values
                             }).then(r => {
                                 console.log(r)
-                                if (r.message) {
-                                    $('.filtered-item-variants').show();
-                                    $('.filtered-item-variants .item-list').html(r.message);
-                                }
+
                             })
                         }
                     });
                     d.show();
                 })
+        }
+
+        function get_next_attribute_and_values(item_code, selected_attributes) {
+            return new Promise(resolve => {
+                frappe.call('erpnext.www.products.index.get_next_attribute_and_values', {
+                    item_code,
+                    selected_attributes
+                })
+                .then(r => resolve(r.message))
+            })
         }
 
         function get_attributes_and_values(item_code) {

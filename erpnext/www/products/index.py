@@ -118,18 +118,20 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_items_by_attributes(attribute_filters):
+def get_items_by_attributes(attribute_filters, template_item_code=None):
 	attribute_filters = parse_if_json(attribute_filters)
 
 	for attribute, value in attribute_filters.items():
 		attribute_filters[attribute] = [value]
 
-	item_codes = get_item_codes_by_attributes(attribute_filters)
-	items = get_items({
-		'name': ['in', item_codes]
-	})
+	item_codes = get_item_codes_by_attributes(attribute_filters, template_item_code)
+	# items = get_items({
+	# 	'name': ['in', item_codes]
+	# })
 
-	return ''.join(get_html_for_items(items))
+	return item_codes
+
+	# return ''.join(get_html_for_items(items))
 
 @frappe.whitelist(allow_guest=True)
 def get_attributes_and_values(item_code):
@@ -160,8 +162,8 @@ def get_attributes_and_values(item_code):
 
 	return attributes
 
-
-def get_item_codes_by_attributes(attribute_filters):
+@frappe.whitelist(allow_guest=True)
+def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	items = []
 
 	for attribute, values in attribute_filters.iteritems():
@@ -175,16 +177,47 @@ def get_item_codes_by_attributes(attribute_filters):
 			wheres.append('( attribute = %s and attribute_value = %s )')
 			query_values += [attribute, attribute_value]
 
-		where = ' or '.join(wheres)
+		attribute_query = ' or '.join(wheres)
+
+		if template_item_code:
+			variant_of_query = 'AND t2.variant_of = %s'
+			query_values.append(template_item_code)
+		else:
+			variant_of_query = ''
+
+		# query = '''
+		# 	select
+		# 		parent
+		# 	from `tabItem Variant Attribute`
+		# 	where
+		# 		 {variant_query}
+		# 	group by parent
+		# '''.format(where=where, variant_query=variant_query)
 
 		query = '''
-			select
-				parent
-			from `tabItem Variant Attribute`
-			where
-				({where})
-			group by parent
-		'''.format(where=where)
+			SELECT
+				t1.parent
+			FROM
+				`tabItem Variant Attribute` t1
+			WHERE
+				1 = 1
+				AND (
+					{attribute_query}
+				)
+				AND EXISTS (
+					SELECT
+						1
+					FROM
+						`tabItem` t2
+					WHERE
+						t2.name = t1.parent
+						{variant_of_query}
+				)
+			GROUP BY
+				t1.parent
+			ORDER BY
+				NULL
+		'''.format(attribute_query=attribute_query, variant_of_query=variant_of_query)
 
 		print(query)
 
@@ -194,6 +227,70 @@ def get_item_codes_by_attributes(attribute_filters):
 	res = list(set.intersection(*items))
 
 	return res
+
+@frappe.whitelist(allow_guest=True)
+def get_next_attribute_and_values(item_code, selected_attributes):
+	selected_attributes = parse_if_json(selected_attributes)
+
+	attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
+		{'parent': item_code}, ['attribute'], order_by='idx asc')
+	]
+
+	next_attribute = None
+
+	for attribute in attributes:
+		if attribute not in selected_attributes:
+			next_attribute = attribute
+			break
+
+	item_attribute_value_map = get_item_attribute_value_map(item_code)
+	item_variants_data = get_item_variants_data(item_code)
+
+	items = []
+	for attribute, value in selected_attributes.items():
+		items.append(set(item_attribute_value_map[(attribute, value)]))
+
+	filtered_items = set.intersection(*items)
+
+	next_attribute_options = set([r[2] for r in item_variants_data if r[1] == next_attribute and r[0] in filtered_items])
+
+	return next_attribute, list(next_attribute_options), len(filtered_items)
+
+
+def get_item_variants_data(item_code):
+	val = frappe.cache().hget('item_variants_data', item_code)
+
+	if not val:
+		build_cache(item_code)
+
+	return frappe.cache().hget('item_variants_data', item_code)
+
+
+def get_item_attribute_value_map(item_code):
+	val = frappe.cache().hget('item_attribute_value_map', item_code)
+
+	if not val:
+		build_cache(item_code)
+
+	return frappe.cache().hget('item_attribute_value_map', item_code)
+
+
+def build_cache(item_code):
+	val = frappe.db.sql('''
+		select
+			parent, attribute, attribute_value
+		from
+			`tabItem Variant Attribute`
+		where
+			variant_of = %s
+	''', values=[item_code])
+
+	data = frappe._dict({})
+	for row in val:
+		data.setdefault((row[1], row[2]), []).append(row[0])
+
+	frappe.cache().hset('item_attribute_value_map', item_code, data)
+	frappe.cache().hset('item_variants_data', item_code, val)
 
 
 def get_items_by_fields(field_filters):
@@ -206,6 +303,55 @@ def get_items_by_fields(field_filters):
 			filters[fieldname] = ['in', values]
 
 	return get_items(filters)
+
+
+# def get_item_variant_data(item_code):
+# 	return frappe.db.sql('''
+# 		SELECT
+# 			t2.variant_of,
+# 			t1.parent,
+# 			t1.attribute,
+# 			t1.attribute_value
+# 		FROM
+# 			`tabItem Variant Attribute` t1
+# 		INNER JOIN
+# 			`tabItem` t2
+# 				ON t1.parent = t2.name
+# 		WHERE
+# 			t2.variant_of = %s
+# 	''', [item_code])
+
+
+# def build_cache():
+# 	import functools
+
+# 	# templates = [d.name for d in frappe.db.get_all('Item', {'has_variants': 1})]
+# 	query_values = []
+# 	values = []
+# 	templates = ['CAPVEL_ICT']
+# 	for item in templates:
+# 		print('building cache for ' + item)
+# 		data = get_item_variant_data(item)
+# 		if not data: continue
+
+# 		flattened_data = []
+# 		for d in data:
+# 			flattened_data += d
+
+# 		values.append(', '.join(['(' + ', '.join(['%s'] * len(data[0])) + ')'] * len(data)))
+# 		# flattened_data = functools.reduce(lambda a, b: a + b, data)
+# 		query_values += flattened_data
+# 		break
+
+# 	query = '''
+# 		INSERT INTO
+# 			`tabItem Variant Attribute Cache`
+# 				(item_template, item_variant, attribute, attribute_value)
+# 		VALUES
+# 			{values}
+# 	'''.format(values=','.join(values))
+
+# 	frappe.db.sql(query, query_values)
 
 
 def get_items(filters=None, or_filters=None):
