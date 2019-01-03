@@ -288,8 +288,9 @@ class EmailDigest(Document):
 		"""Get income for given period"""
 		income, past_income, count = self.get_period_amounts(self.get_roots("income"),'income')
 
+		label = get_link_to_report("Sales Register",self.meta.get_label("income"),filters={"company":self.company})
 		return {
-			"label": get_link_to_report("Sales Register",self.meta.get_label("income")),
+			"label": label,
 			"value": income,
 			"last_value": past_income,
 			"count": count
@@ -312,8 +313,20 @@ class EmailDigest(Document):
 			balance += get_balance_on(account, date = self.future_to_date)
 			count += get_count_on(account, fieldname, date = self.future_to_date)
 
+		if fieldname == 'income':
+			filters = {
+				"root_type": "Income",
+			}
+			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
+
+		elif fieldname == 'expenses_booked':
+			filters = {
+				"root_type": "Expense",
+			}
+			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
+
 		return {
-			"label": self.meta.get_label(root_type + "_year_to_date"),
+			"label": label,
 			"value": balance,
 			"count": count
 		}
@@ -335,8 +348,10 @@ class EmailDigest(Document):
 	def get_expenses_booked(self):
 		expenses, past_expenses, count = self.get_period_amounts(self.get_roots("expense"), 'expenses_booked')
 
+		label =  get_link_to_report("Purchase Register",self.meta.get_label("expenses_booked"),
+			filters={"company": self.company})
 		return {
-			"label": get_link_to_report("Purchase Register",self.meta.get_label("expenses_booked")),
+			"label": label,
 			"value": expenses,
 			"last_value": past_expenses,
 			"count": count
@@ -375,8 +390,11 @@ class EmailDigest(Document):
 					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered"
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
 
+		label = get_link_to_report("Pending Sales Order", label=self.meta.get_label("sales_orders_to_deliver"),
+			report_type="Report Builder", doctype="Sales Order")
+
 		return {
-			"label": self.meta.get_label("sales_orders_to_deliver"),
+			"label": label,
 			"value": value,
 			"count": count
 		}
@@ -389,8 +407,11 @@ class EmailDigest(Document):
 					where (transaction_date <= %(to_date)s) and per_received < 100
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
 
+		label = get_link_to_report("Pending Purchase Order", label=self.meta.get_label("purchase_orders_to_receive"),
+			report_type="Report Builder", doctype="Purchase Order")
+
 		return {
-			"label": self.meta.get_label("purchase_orders_to_receive"),
+			"label": label,
 			"value": value,
 			"count": count
 		}
@@ -428,15 +449,28 @@ class EmailDigest(Document):
 			prev_balance += get_balance_on(account, date=self.past_to_date, in_account_currency=False)
 
 		if fieldname in ("bank_balance","credit_balance"):
+			label = ""
+			if fieldname == "bank_balance":
+				filters = {
+					"root_type": "Asset",
+				}
+				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
+			else:
+				filters = {
+					"root_type": "Liability",
+				}
+				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
+
 			return {
-				'label': self.meta.get_label(fieldname),
+				'label': label,
 				'value': balance,
-				'last_value': prev_balance			}
+				'last_value': prev_balance
+			}
 		else:
 			if account_type == 'Payable':
-				label = get_link_to_report('Accounts Payable', self.meta.get_label(fieldname))
+				label = get_link_to_report('Accounts Payable', label=self.meta.get_label(fieldname))
 			elif account_type == 'Receivable':
-				label = get_link_to_report('Accounts Receivable', self.meta.get_label(fieldname))
+				label = get_link_to_report('Accounts Receivable', label=self.meta.get_label(fieldname))
 			else:
 				label = self.meta.get_label(fieldname)
 
@@ -494,10 +528,10 @@ class EmailDigest(Document):
 
 		return {
 			"label": self.meta.get_label(fieldname),
-            		"value": value,
+			"value": value,
 			"billed_value": billed_value,
 			"delivered_value": delivered_value,
-            		"count": count
+			"count": count
 		}
 
 	def get_summary_of_pending_quotations(self, fieldname):
@@ -512,11 +546,14 @@ class EmailDigest(Document):
 			and company = %(company)s
 			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date, "company": self.company})[0][0]
 
+		label = get_link_to_report("Pending Quotation", label=self.meta.get_label(fieldname),
+			report_type="Report Builder", doctype="Quotation")
+
 		return {
-			"label": self.meta.get_label(fieldname),
-            "value": value,
+			"label": label,
+			"value": value,
 			"last_value": last_value,
-            "count": count
+			"count": count
 		}
 
 	def get_summary_of_doc(self, doc_type, fieldname):
@@ -526,10 +563,16 @@ class EmailDigest(Document):
 
 		last_value =self.get_total_on(doc_type, self.past_from_date, self.past_to_date)[0]
 
+		filters = {
+			"transaction_date": getdate()
+		}
+		label = get_link_to_report(doc_type,label=self.meta.get_label(fieldname),
+			report_type="Report Builder", filters=filters, doctype=doc_type)
+
 		return {
-			"label": self.meta.get_label(fieldname),
-            "value": value,
-            "last_value": last_value,
+			"label": label,
+			"value": value,
+			"last_value": last_value,
 			"count": count
 		}
 
