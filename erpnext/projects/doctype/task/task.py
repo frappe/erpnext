@@ -12,7 +12,7 @@ from frappe.utils.nestedset import NestedSet
 
 
 class CircularReferenceError(frappe.ValidationError): pass
-class EndDateCannotGreaterThanProjecteEndDateError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
@@ -48,8 +48,7 @@ class Task(NestedSet):
 			if frappe.db.exists("Project", self.project):
 				doc = frappe.get_doc("Project", self.project)
 				if  self.exp_end_date and doc.expected_end_date and getdate(self.exp_end_date) > getdate(doc.expected_end_date) :
-					frappe.msgprint(_("Expected end date cannot be after Project: <b>'{0}'</b> Expected end date").format(doc.name))
-					raise EndDateCannotGreaterThanProjecteEndDateError
+					frappe.throw(_("Expected end date cannot be after Project: <b>'{0}'</b> Expected end date").format(doc.name), EndDateCannotBeGreaterThanProjectEndDateError)
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
