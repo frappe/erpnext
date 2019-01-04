@@ -11,38 +11,38 @@ frappe.ui.form.on("Job Offer", {
 			}
 		});
 	},
+
 	salary_structure: function(frm) {
-		if ( frm.doc.salary_structure) {
+		if (frm.doc.salary_structure) {
 			frappe.model.with_doc("Salary Structure", frm.doc.salary_structure, function() {
-			 	var tabletransfer = frappe.model.get_doc("Salary Structure", frm.doc.salary_structure)
+				var tabletransfer = frappe.model.get_doc("Salary Structure", frm.doc.salary_structure)
 				let earning = [];
-			 	$.each(tabletransfer.earnings, function(index, row){
+				$.each(tabletransfer.earnings, function(index, row){
 					let d = {};
 					d.salary_component = row.salary_component;
 					d.abbr = row.abbr;
 					d.formula = row.formula;
 					d.amount = row.amount;
 					earning.push(d);
-			 });
-			 frm.set_value("earnings", earning)
-			 let deduction = [];
-			 $.each(tabletransfer.deductions, function(index, row){
-				 	const d = {};
+				});
+				frm.set_value("earnings", earning)
+				let deduction = [];
+				$.each(tabletransfer.deductions, function(index, row){
+					const d = {};
 					d.salary_component = row.salary_component;
 					d.abbr = row.abbr;
 					d.formula = row.formula;
 					d.amount = row.amount;
 					deduction.push(d);
-			 });
-			 frm.set_value("deductions", deduction)
-	 		});
+				});
+				frm.set_value("deductions", deduction)
+			});
 		}
 		else {
 			frm.fields_dict.earnings.grid.remove_all();
 			frm.fields_dict.deductions.grid.remove_all();
 		}
 	},
-
 
 	refresh: function (frm) {
 		if ((!frm.doc.__islocal) && (frm.doc.status == 'Accepted')
