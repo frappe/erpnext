@@ -364,12 +364,13 @@ def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
 	if meta.get_field("currency") or args.get('currency'):
+		pl_details = get_price_list_currency_and_exchange_rate(args)
+		args.update(pl_details)
 		validate_price_list(args)
 		if meta.get_field("currency") and args.price_list:
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
-
 		# insert in database
 		if not price_list_rate:
 			if args.price_list and args.rate:
@@ -548,9 +549,10 @@ def validate_conversion_rate(args, meta):
 		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate,
 			meta.get_label("plc_conversion_rate"), args.company)
 
-		args.plc_conversion_rate = flt(args.plc_conversion_rate,
-			get_field_precision(meta.get_field("plc_conversion_rate"),
-			frappe._dict({"fields": args})))
+		if meta.get_field("plc_conversion_rate"):
+			args.plc_conversion_rate = flt(args.plc_conversion_rate,
+				get_field_precision(meta.get_field("plc_conversion_rate"),
+				frappe._dict({"fields": args})))
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
@@ -786,7 +788,7 @@ def get_price_list_uom_dependant(price_list):
 		if not result:
 			throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
-		return result.price_not_uom_dependant
+		return not result.price_not_uom_dependant
 
 
 def get_price_list_currency_and_exchange_rate(args):
