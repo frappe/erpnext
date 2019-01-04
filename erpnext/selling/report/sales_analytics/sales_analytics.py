@@ -235,7 +235,7 @@ class Analytics(object):
 		}.get(self.filters.range, 1)
 
 		self.periodic_daterange = []
-		for dummy in range(1, 53, increment):
+		for dummy in range(1, 53):
 			if self.filters.range == "Weekly":
 				period_end_date = from_date + relativedelta(days=6)
 			else:
