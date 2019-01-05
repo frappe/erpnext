@@ -1,0 +1,14 @@
+[
+ {
+  "doctype": "Item Tax Template",
+  "title": "_Test Account Excise Duty @ 10",
+  "taxes": [
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 10,
+    "tax_type": "_Test Account Excise Duty - _TC"
+   }
+  ]
+ }
+]
