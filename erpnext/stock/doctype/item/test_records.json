@@ -92,8 +92,8 @@
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
-    "tax_rate": 10,
-    "tax_type": "_Test Account Excise Duty - _TC"
+    "item_tax_template": "_Test Account Excise Duty @ 10",
+    "tax_category": ""
    }
   ],
   "stock_uom": "_Test UOM 1"
