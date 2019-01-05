@@ -97,6 +97,9 @@ erpnext.setup.slides_settings = [
 			if (!this.values.company_abbr) {
 				return false;
 			}
+			if (this.values.company_abbr.length > 5) {
+				return false;
+			}
 			return true;
 		}
 	},

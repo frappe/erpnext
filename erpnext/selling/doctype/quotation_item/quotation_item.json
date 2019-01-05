@@ -996,6 +996,7 @@
    "label": "Net Rate", 
    "length": 0, 
    "no_copy": 0, 
+   "options": "currency", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 1, 
