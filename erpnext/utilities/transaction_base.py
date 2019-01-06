@@ -146,8 +146,18 @@ class TransactionBase(StatusUpdater):
 		return ret
 
 def delete_events(ref_type, ref_name):
-	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
-		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
+	events = frappe.db.sql_list(""" SELECT
+			distinct `tabEvent`.name
+		from
+			`tabEvent`, `tabEvent Participants`
+		where
+			`tabEvent`.name = `tabEvent Participants`.parent
+			and `tabEvent Participants`.reference_doctype = %s
+			and `tabEvent Participants`.reference_docname = %s
+		""", (ref_type, ref_name)) or []
+
+	if events:
+		frappe.delete_doc("Event", events, for_reload=True)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, string_types):
