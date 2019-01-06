@@ -806,6 +806,10 @@ class Item(WebsiteGenerator):
 
 			validate_item_variant_attributes(self, args)
 
+			# copy variant_of value for each attribute row
+			for d in self.attributes:
+				d.variant_of = self.variant_of
+
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
