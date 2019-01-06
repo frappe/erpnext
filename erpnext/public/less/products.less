@@ -1,4 +1,6 @@
-.product-image {
+@import "variables.less";
+
+.products-list .product-image {
     display: inline-block;
     width: 160px;
     height: 160px;
@@ -22,4 +24,18 @@
 .filter-options {
     max-height: 300px;
     overflow: auto;
+}
+
+.item-slideshow-image {
+	height: 3rem;
+	width: 3rem;
+	object-fit: contain;
+	padding: 0.5rem;
+	border: 1px solid @border-color;
+	border-radius: 4px;
+	cursor: pointer;
+
+	&:hover, &.active {
+		border-color: var(--primary);
+	}
 }

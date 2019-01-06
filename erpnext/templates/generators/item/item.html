@@ -14,12 +14,8 @@
 <div class="item-content">
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="col-md-6">
-				{% include "templates/generators/item/item_image.html" %}
-			</div>
-			<div class="col-sm-6">
-				{% include "templates/generators/item/item_details.html" %}
-			</div>
+			{% include "templates/generators/item/item_image.html" %}
+			{% include "templates/generators/item/item_details.html" %}
 		</div>
 
 		<div class="row">

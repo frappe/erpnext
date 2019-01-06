@@ -1,8 +1,9 @@
-{{ product_image(website_image) }}
+<div class="col-md-4">
 {% if slides %}
+{{ product_image(slides[0].image) }}
 <div class="item-slideshow mt-2">
     {% for item in slides %}
-    <img class="item-slideshow-image {% if website_image == item.image %}active{% endif %}"
+    <img class="item-slideshow-image {% if loop.first %}active{% endif %}"
             src="{{ item.image }}" alt="{{ item.heading }}">
     {% endfor %}
 </div>
@@ -20,4 +21,7 @@
         });
     })
 </script>
+{% else %}
+{{ product_image(website_image) }}
 {% endif %}
+</div>
