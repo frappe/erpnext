@@ -23,13 +23,24 @@
                             fieldname: a.attribute,
                             options: a.values,
                             change: () => {
-                                console.log()
                                 const values = d.get_values();
                                 get_next_attribute_and_values(item_code, values)
                                     .then(data => {
-                                        d.set_df_property(a.attribute, 'description', data[2] + ' items found')
-                                        d.set_df_property(data[0], 'options', data[1])
-                                        console.log(data)
+                                        const [
+                                            next_attribute,
+                                            valid_options_for_attributes,
+                                            filtered_items_count
+                                        ] = data;
+
+                                        d.set_df_property(a.attribute, 'description',
+                                            filtered_items_count + ' items found');
+
+                                        for (let attribute in valid_options_for_attributes) {
+                                            d.set_df_property(attribute, 'options',
+                                                valid_options_for_attributes[attribute] || []);
+                                        }
+
+                                        d.get_field(next_attribute).$wrapper.show();
                                     })
                             }
                         }
@@ -50,6 +61,13 @@
                             })
                         }
                     });
+
+                    fields.forEach((df, i) => {
+                        if (i !== 0) {
+                            d.get_field(df.fieldname).$wrapper.hide();
+                        }
+                    });
+
                     d.show();
                 })
         }

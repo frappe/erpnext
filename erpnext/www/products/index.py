@@ -1,4 +1,6 @@
-import frappe, json
+import json
+import frappe
+from .item_variants_cache import ItemVariantsCacheManager
 
 def get_context(context):
 	context.items = get_products_for_website()
@@ -135,15 +137,7 @@ def get_items_by_attributes(attribute_filters, template_item_code=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_attributes_and_values(item_code):
-	attributes = frappe.db.get_all('Item Variant Attribute',
-		fields=['attribute'],
-		filters={
-			'parenttype': 'Item',
-			'parent': item_code
-		},
-		order_by='idx asc'
-	)
-
+	attributes = get_item_attributes(item_code)
 	attribute_names = [a.attribute for a in attributes]
 
 	values = frappe.db.get_all('Item Attribute Value',
@@ -154,13 +148,13 @@ def get_attributes_and_values(item_code):
 	)
 
 	for a in attributes:
-		a.setdefault('values', [])
 		for value in values:
 			attribute = value.parent
 			if attribute == a.attribute:
-				a['values'].append(value.attribute_value)
+				a.setdefault('values', []).append(value.attribute_value)
 
 	return attributes
+
 
 @frappe.whitelist(allow_guest=True)
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
@@ -232,65 +226,39 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 def get_next_attribute_and_values(item_code, selected_attributes):
 	selected_attributes = parse_if_json(selected_attributes)
 
-	attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
-		{'parent': item_code}, ['attribute'], order_by='idx asc')
-	]
+	item_cache = ItemVariantsCacheManager(item_code)
+	item_variants_data = item_cache.get_item_variants_data()
+
+	attributes = get_item_attributes(item_code)
+	attribute_list = [a.attribute for a in attributes]
+	filtered_items = get_items_with_selected_attributes(item_code, selected_attributes)
 
 	next_attribute = None
 
-	for attribute in attributes:
+	for attribute in attribute_list:
 		if attribute not in selected_attributes:
 			next_attribute = attribute
 			break
 
-	item_attribute_value_map = get_item_attribute_value_map(item_code)
-	item_variants_data = get_item_variants_data(item_code)
+	valid_options_for_attributes = frappe._dict({})
+
+	for row in item_variants_data:
+		item_code, attribute, attribute_value = row
+		if item_code in filtered_items and attribute not in selected_attributes and attribute in attribute_list:
+			valid_options_for_attributes.setdefault(attribute, set()).add(attribute_value)
+
+	return next_attribute, valid_options_for_attributes, len(filtered_items)
+
+
+def get_items_with_selected_attributes(item_code, selected_attributes):
+	item_cache = ItemVariantsCacheManager(item_code)
+	attribute_value_item_map = item_cache.get_attribute_value_item_map()
 
 	items = []
 	for attribute, value in selected_attributes.items():
-		items.append(set(item_attribute_value_map[(attribute, value)]))
+		items.append(set(attribute_value_item_map[(attribute, value)]))
 
-	filtered_items = set.intersection(*items)
-
-	next_attribute_options = set([r[2] for r in item_variants_data if r[1] == next_attribute and r[0] in filtered_items])
-
-	return next_attribute, list(next_attribute_options), len(filtered_items)
-
-
-def get_item_variants_data(item_code):
-	val = frappe.cache().hget('item_variants_data', item_code)
-
-	if not val:
-		build_cache(item_code)
-
-	return frappe.cache().hget('item_variants_data', item_code)
-
-
-def get_item_attribute_value_map(item_code):
-	val = frappe.cache().hget('item_attribute_value_map', item_code)
-
-	if not val:
-		build_cache(item_code)
-
-	return frappe.cache().hget('item_attribute_value_map', item_code)
-
-
-def build_cache(item_code):
-	val = frappe.db.sql('''
-		select
-			parent, attribute, attribute_value
-		from
-			`tabItem Variant Attribute`
-		where
-			variant_of = %s
-	''', values=[item_code])
-
-	data = frappe._dict({})
-	for row in val:
-		data.setdefault((row[1], row[2]), []).append(row[0])
-
-	frappe.cache().hset('item_attribute_value_map', item_code, data)
-	frappe.cache().hset('item_variants_data', item_code, val)
+	return set.intersection(*items)
 
 
 def get_items_by_fields(field_filters):
@@ -303,55 +271,6 @@ def get_items_by_fields(field_filters):
 			filters[fieldname] = ['in', values]
 
 	return get_items(filters)
-
-
-# def get_item_variant_data(item_code):
-# 	return frappe.db.sql('''
-# 		SELECT
-# 			t2.variant_of,
-# 			t1.parent,
-# 			t1.attribute,
-# 			t1.attribute_value
-# 		FROM
-# 			`tabItem Variant Attribute` t1
-# 		INNER JOIN
-# 			`tabItem` t2
-# 				ON t1.parent = t2.name
-# 		WHERE
-# 			t2.variant_of = %s
-# 	''', [item_code])
-
-
-# def build_cache():
-# 	import functools
-
-# 	# templates = [d.name for d in frappe.db.get_all('Item', {'has_variants': 1})]
-# 	query_values = []
-# 	values = []
-# 	templates = ['CAPVEL_ICT']
-# 	for item in templates:
-# 		print('building cache for ' + item)
-# 		data = get_item_variant_data(item)
-# 		if not data: continue
-
-# 		flattened_data = []
-# 		for d in data:
-# 			flattened_data += d
-
-# 		values.append(', '.join(['(' + ', '.join(['%s'] * len(data[0])) + ')'] * len(data)))
-# 		# flattened_data = functools.reduce(lambda a, b: a + b, data)
-# 		query_values += flattened_data
-# 		break
-
-# 	query = '''
-# 		INSERT INTO
-# 			`tabItem Variant Attribute Cache`
-# 				(item_template, item_variant, attribute, attribute_value)
-# 		VALUES
-# 			{values}
-# 	'''.format(values=','.join(values))
-
-# 	frappe.db.sql(query, query_values)
 
 
 def get_items(filters=None, or_filters=None):
@@ -369,6 +288,33 @@ def get_items(filters=None, or_filters=None):
 		page_length=page_length
 	)
 
+
+# utilities
+
+def get_item_attributes(item_code):
+	attributes = frappe.db.get_all('Item Variant Attribute',
+		fields=['attribute'],
+		filters={
+			'parenttype': 'Item',
+			'parent': item_code
+		},
+		order_by='idx asc'
+	)
+
+	optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
+
+	reqd_attributes = []
+	opt_attributes = []
+
+	for a in attributes:
+		if a.attribute in optional_attributes:
+			a.optional = True
+			opt_attributes.append(a)
+		else:
+			reqd_attributes.append(a)
+
+	return reqd_attributes + opt_attributes
+
 def get_html_for_items(items):
 	html = []
 	for item in items:
@@ -376,6 +322,7 @@ def get_html_for_items(items):
 			'item': item
 		}))
 	return html
+
 
 def parse_if_json(dict_or_str):
 	if dict_or_str and isinstance(dict_or_str, frappe.string_types):
