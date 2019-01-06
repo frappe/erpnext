@@ -51,8 +51,9 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	out["tax_category"] = get_address_tax_category(party.get("tax_category"),
 		party_address, shipping_address if party_type != "Supplier" else party_address)
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group,
-		out.supplier_group, out.tax_category, party_address, shipping_address)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
+		customer_group=out.customer_group, supplier_group=out.supplier_group, tax_category=out.tax_category,
+		billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
 		out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
