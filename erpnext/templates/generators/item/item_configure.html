@@ -26,14 +26,21 @@
                                 const values = d.get_values();
                                 get_next_attribute_and_values(item_code, values)
                                     .then(data => {
+                                        console.log(data)
+
                                         const [
                                             next_attribute,
                                             valid_options_for_attributes,
-                                            filtered_items_count
+                                            filtered_items_count,
+                                            exact_match
                                         ] = data;
 
-                                        d.set_df_property(a.attribute, 'description',
-                                            filtered_items_count + ' items found');
+                                        const item_status = `
+                                            ${filtered_items_count} items found.
+                                            ${exact_match.length > 0 ? `${exact_match.length} exact match.` : ''}
+                                        `;
+
+                                        d.set_df_property(a.attribute, 'description', item_status);
 
                                         for (let attribute in valid_options_for_attributes) {
                                             d.set_df_property(attribute, 'options',
@@ -41,25 +48,19 @@
                                         }
 
                                         d.get_field(next_attribute).$wrapper.show();
+
+                                        if (exact_match.length > 0) {
+                                            d.set_primary_action('View Item', () => {
+                                                console.log(exact_match);
+                                            })
+                                        }
                                     })
                             }
                         }
                     });
                     const d = new frappe.ui.Dialog({
                         title: 'Configure ' + item_name,
-                        fields,
-                        primary_action_label: __('Submit'),
-                        primary_action(values) {
-                            console.log(values);
-
-                            frappe.call('erpnext.www.products.index.get_next_attribute_and_values', {
-                                item_code,
-                                selected_attributes: values
-                            }).then(r => {
-                                console.log(r)
-
-                            })
-                        }
+                        fields
                     });
 
                     fields.forEach((df, i) => {

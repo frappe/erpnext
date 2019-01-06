@@ -247,7 +247,16 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		if item_code in filtered_items and attribute not in selected_attributes and attribute in attribute_list:
 			valid_options_for_attributes.setdefault(attribute, set()).add(attribute_value)
 
-	return next_attribute, valid_options_for_attributes, len(filtered_items)
+	optional_attributes = item_cache.get_optional_attributes()
+	exact_match = []
+	# search for exact match if all selected attributes are required attributes
+	if len(selected_attributes.keys()) >= (len(attribute_list) - len(optional_attributes)):
+		item_attribute_value_map = item_cache.get_item_attribute_value_map()
+		for item_code, attr_dict in item_attribute_value_map.items():
+			if item_code in filtered_items and set(attr_dict.keys()) == set(selected_attributes.keys()):
+				exact_match.append(item_code)
+
+	return next_attribute, valid_options_for_attributes, len(filtered_items), exact_match
 
 
 def get_items_with_selected_attributes(item_code, selected_attributes):
