@@ -11,13 +11,6 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
-
-		print(frappe.db.get_value("Company", "_Test Company", "cost_center"))
-		company = frappe.get_doc("Company", "_Test Company")
-		company.cost_center = "_Test Cost Center - _TC"
-		company.save()
-		print(frappe.db.get_value("Company", "_Test Company", "cost_center"))
-
 		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 
 		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
