@@ -62,8 +62,6 @@ class EmployeeBoardingController(Document):
 			if users:
 				self.assign_task_to_users(task, set(users))
 
-			users = []
-
 	def assign_task_to_users(self, task, users):
 		for user in users:
 			args = {
