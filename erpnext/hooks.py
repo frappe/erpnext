@@ -235,7 +235,9 @@ scheduler_events = {
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
-		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details"
+		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
+		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
+
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
