@@ -80,7 +80,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			"company": "_Test Company",
 			"fiscal_year": get_fiscal_year(today(), company="_Test Company")[0],
 			"posting_date": today(),
-			"cost_center": "_Test Cost Center - _TC",
 			"remarks": "test"
 		})
 		pcv.insert()
