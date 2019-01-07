@@ -125,6 +125,8 @@ class StockEntry(StockController):
 
 			if has_batch_no and not item.batch_no:
 				if not item.s_warehouse and item.t_warehouse and create_new_batch:
+					frappe.msgprint(_("Row #{0}: A new batch will be created after submit for item {1} in warehouse {2}"
+						.format(item.idx, item.item_code, item.s_warehouse or item.t_warehouse)), indicator="red", alert=1)
 					continue
 
 				batches = get_batches(item.item_code, item.s_warehouse or item.t_warehouse, item.qty)
@@ -140,6 +142,9 @@ class StockEntry(StockController):
 				else:
 					frappe.msgprint(_("Row #{0}: No batch found for item {1} in warehouse {2}"
 						.format(item.idx, item.item_code, item.s_warehouse or item.t_warehouse)), indicator="red", alert=1)
+
+		if not batch_details:
+			frappe.msgprint(_("No item batches found. Either none of the items require batches, or they are already set."))
 
 		return batch_details
 
