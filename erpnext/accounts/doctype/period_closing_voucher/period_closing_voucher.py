@@ -85,7 +85,7 @@ class PeriodClosingVoucher(AccountsController):
 
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
-		for_print = frappe.db.sql("""
+		return frappe.db.sql("""
 			select
 				t1.account, t1.cost_center, t2.account_currency,
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
@@ -97,5 +97,3 @@ class PeriodClosingVoucher(AccountsController):
 			and t1.posting_date between %s and %s
 			group by t1.account, t1.cost_center
 		""", (self.company, self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
-		print(for_print)
-		return for_print

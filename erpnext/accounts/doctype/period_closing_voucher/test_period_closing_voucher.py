@@ -13,6 +13,16 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 
+		update_error_data_name = frappe.db.sql("""
+			update `tabGL Entry` t1, `tabAccount` t2 set 
+				t1.cost_center = "Main - _TC"
+			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
+			and t1.company = %s
+			and t2.docstatus < 2 and t2.company = %s
+			and t1.posting_date between %s and %s
+			and t1.cost_center = 'Main - WP'
+		""", ("_Test Company", "_Test Company", year_start_date, now()), as_dict=1)
+
 		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
 			"_Test Cost Center - _TC", posting_date=now(), submit=True)
 
@@ -64,7 +74,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			self.assertEqual(gle_for_random_expense_account[0].amount, -1*random_expense_account[0].balance)
 			self.assertEqual(gle_for_random_expense_account[0].amount_in_account_currency,
 				-1*random_expense_account[0].balance_in_account_currency)
-		print("Did it work?")
 
 	def make_period_closing_voucher(self):
 		pcv = frappe.get_doc({
