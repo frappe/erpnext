@@ -11,7 +11,7 @@ def validate_gstin_for_india(doc, method):
 	if doc.gstin:
 		doc.gstin = doc.gstin.upper()
 		if doc.gstin not in ["NA", "na"]:
-			p = re.compile("[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}[0-9A-Z]{1}")
+			p = re.compile("[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}")
 			if not p.match(doc.gstin):
 				frappe.throw(_("Invalid GSTIN or Enter NA for Unregistered"))
 
