@@ -13,7 +13,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 
-		update_error_data_name = frappe.db.sql("""
+		frappe.db.sql("""
 			update `tabGL Entry` t1, `tabAccount` t2 set 
 				t1.cost_center = "Main - _TC"
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
