@@ -246,7 +246,7 @@ class BOM(WebsiteGenerator):
 			last_valuation_rate = frappe.db.sql("""select valuation_rate
 				from `tabStock Ledger Entry`
 				where item_code = %s and valuation_rate > 0
-				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
+				order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 

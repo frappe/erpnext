@@ -329,7 +329,7 @@ class GrossProfitGenerator(object):
 			where company=%(company)s
 			order by
 				item_code desc, warehouse desc, posting_date desc,
-				posting_time desc, name desc""", self.filters, as_dict=True)
+				posting_time desc, creation desc""", self.filters, as_dict=True)
 		self.sle = {}
 		for r in res:
 			if (r.item_code, r.warehouse) not in self.sle:
