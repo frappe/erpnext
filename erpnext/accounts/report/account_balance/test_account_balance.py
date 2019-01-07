@@ -54,7 +54,7 @@ class TestAccountBalance(unittest.TestCase):
 def make_sales_invoice():
 	frappe.set_user("Administrator")
 
-	si = create_sales_invoice(company="_Test Company 2",
+	create_sales_invoice(company="_Test Company 2",
 		customer = '_Test Customer 2',
 		currency = 'EUR',
 		warehouse = 'Finished Goods - _TC2',
