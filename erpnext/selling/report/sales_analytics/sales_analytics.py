@@ -166,7 +166,7 @@ class Analytics(object):
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
 				"entity": entity,
-				"entity_name": self.entity_names.get(entity) 
+				"entity_name": self.entity_names.get(entity)
 			}
 			total = 0
 			for dummy, end_date in self.periodic_daterange:
@@ -177,7 +177,7 @@ class Analytics(object):
 
 			row["total"] = total
 			self.data.append(row)
-	
+
 	def get_rows_by_group(self):
 		self.get_periodic_data()
 		out = []
@@ -185,7 +185,7 @@ class Analytics(object):
 		for d in reversed(self.group_entries):
 			row = {
 				"entity": d.name,
-				"indent": self.depth_map.get(d.name) 
+				"indent": self.depth_map.get(d.name)
 			}
 			total = 0
 			for dummy, end_date in self.periodic_daterange:
@@ -212,11 +212,11 @@ class Analytics(object):
 
 	def get_period(self, posting_date):
 		if self.filters.range == 'Weekly':
-			period = "Week " + str(posting_date.isocalendar()[1])
+			period = "Week " + str(posting_date.isocalendar()[1]) + " " + str(posting_date.year)
 		elif self.filters.range == 'Monthly':
-			period = self.months[posting_date.month - 1]
+			period = str(self.months[posting_date.month - 1]) + " " + str(posting_date.year)
 		elif self.filters.range == 'Quarterly':
-			period = "Quarter " + str(((posting_date.month-1)//3)+1)
+			period = "Quarter " + str(((posting_date.month-1)//3)+1) +" " + str(posting_date.year)
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
 			period = str(year[2])
@@ -275,12 +275,16 @@ class Analytics(object):
 		self.parent_child_map = frappe._dict(frappe.db.sql(""" select name, supplier_group from `tabSupplier`"""))
 
 	def get_chart_data(self):
-		labels = [d.get("label") for d in self.columns[3:]]
+		length = len(self.columns)
+
+		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+			labels = [d.get("label") for d in self.columns[2:length-1]]
+		else:
+			labels = [d.get("label") for d in self.columns[1:length-1]]
 		self.chart = {
 			"data": {
 				'labels': labels,
-				'datasets':[
-				]
+				'datasets':[]
 			},
 			"type": "line"
 		}

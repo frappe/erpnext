@@ -12,7 +12,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '12.x.x-develop'
-staging_version = '11.0.3-beta.24'
+staging_version = '11.0.3-beta.33'
 
 error_report_email = "support@erpnext.com"
 
@@ -254,7 +254,8 @@ scheduler_events = {
 		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
 		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
-		"erpnext.projects.doctype.project.project.update_project_sales_billing"
+		"erpnext.projects.doctype.project.project.update_project_sales_billing",
+		"erpnext.quality_management.doctype.quality_review.quality_review.review"
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"

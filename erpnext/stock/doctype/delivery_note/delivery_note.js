@@ -104,16 +104,16 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if (!doc.is_return && doc.status!="Closed") {
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				this.frm.add_custom_button(__('Installation Note'), function() {
-					me.make_installation_note() }, __("Make"));
+					me.make_installation_note() }, __('Create'));
 
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Sales Return'), function() {
-					me.make_sales_return() }, __("Make"));
+					me.make_sales_return() }, __('Create'));
 			}
 
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Delivery Trip'), function() {
-					me.make_delivery_trip() }, __("Make"));
+					me.make_delivery_trip() }, __('Create'));
 			}
 
 			if(doc.docstatus==0 && !doc.__islocal) {
@@ -121,11 +121,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
 						frm: me.frm
-					}) }, __("Make"));
+					}) }, __('Create'));
 			}
 
 			if (!doc.__islocal && doc.docstatus==1) {
-				this.frm.page.set_inner_btn_group_as_primary(__("Make"));
+				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 
 			if (this.frm.doc.docstatus===0) {
@@ -170,7 +170,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 			if(!from_sales_invoice) {
 				this.frm.add_custom_button(__('Invoice'), function() { me.make_sales_invoice() },
-					__("Make"));
+					__('Create'));
 			}
 		}
 
@@ -183,7 +183,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
 			cur_frm.add_custom_button(__('Subscription'), function() {
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
-			}, __("Make"))
+			}, __('Create'))
 		}
 	},
 
@@ -220,6 +220,10 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
+
+	packed_items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no();
 	},
 

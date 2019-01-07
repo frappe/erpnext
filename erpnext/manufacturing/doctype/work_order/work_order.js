@@ -112,11 +112,21 @@ frappe.ui.form.on("Work Order", {
 			frm.trigger('show_progress');
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.operations
+		if (frm.doc.docstatus === 1
+			&& frm.doc.operations && frm.doc.operations.length
 			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
-			frm.add_custom_button(__('Make Job Card'), () => {
-				frm.trigger("make_job_card")
-			}).addClass('btn-primary');
+
+			const not_completed = frm.doc.operations.filter(d => {
+				if(d.status != 'Completed') {
+					return true;
+				}
+			});
+
+			if(not_completed && not_completed.length) {
+				frm.add_custom_button(__('Create Job Card'), () => {
+					frm.trigger("make_job_card")
+				}).addClass('btn-primary');
+			}
 		}
 
 		if(frm.doc.required_items && frm.doc.allow_alternative_item) {
@@ -139,7 +149,7 @@ frappe.ui.form.on("Work Order", {
 
 		if (frm.doc.status == "Completed" &&
 			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
-			frm.add_custom_button(__("Make BOM"), () => {
+			frm.add_custom_button(__('Create BOM'), () => {
 				frm.trigger("make_bom");
 			});
 		}
@@ -294,7 +304,7 @@ frappe.ui.form.on("Work Order", {
 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
 						$.each(["description", "stock_uom", "project", "bom_no",
-							"allow_alternative_item", "transfer_material_against_job_card"], function(i, field) {
+							"allow_alternative_item", "transfer_material_against"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
@@ -340,9 +350,8 @@ frappe.ui.form.on("Work Order", {
 	before_submit: function(frm) {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
-		if (frm.doc.operations) {
-			frm.fields_dict.operations.grid.toggle_reqd("workstation", true);
-		}
+		frm.toggle_reqd("transfer_material_against", frm.doc.operations);
+		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
 	},
 
 	set_sales_order: function(frm) {
@@ -425,7 +434,7 @@ erpnext.work_order = {
 			}
 
 			const show_start_btn = (frm.doc.skip_transfer
-				|| frm.doc.transfer_material_against_job_card) ? 0 : 1;
+				|| frm.doc.transfer_material_against == 'Job Card') ? 0 : 1;
 
 			if (show_start_btn){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
@@ -546,7 +555,7 @@ erpnext.work_order = {
 					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
 			});
-		}, __("Select Quantity"), __("Make"));
+		}, __("Select Quantity"), __('Create'));
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {

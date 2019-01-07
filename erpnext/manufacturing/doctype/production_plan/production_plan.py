@@ -515,7 +515,7 @@ def get_items_for_material_requests(doc, company=None):
 		doc = frappe._dict(json.loads(doc))
 
 	doc['mr_items'] = []
-	po_items = doc['po_items'] if doc.get('po_items') else doc['items']
+	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
 
 	for data in po_items:
 		warehouse = None
@@ -534,10 +534,10 @@ def get_items_for_material_requests(doc, company=None):
 		else:
 			planned_qty = data.get('planned_qty')
 			bom_no = data.get('bom_no')
-			include_subcontracted_items = doc['include_subcontracted_items']
-			company = doc['company']
-			include_non_stock_items = doc['include_non_stock_items']
-			ignore_existing_ordered_qty = doc['ignore_existing_ordered_qty']
+			include_subcontracted_items = doc.get('include_subcontracted_items')
+			company = doc.get('company')
+			include_non_stock_items = doc.get('include_non_stock_items')
+			ignore_existing_ordered_qty = doc.get('ignore_existing_ordered_qty')
 		if not planned_qty:
 			frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get('idx')))
 

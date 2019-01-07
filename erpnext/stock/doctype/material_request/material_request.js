@@ -54,40 +54,40 @@ frappe.ui.form.on('Material Request', {
 				// make
 				if (frm.doc.material_request_type === "Material Transfer") {
 					frm.add_custom_button(__("Transfer Material"),
-						() => frm.events.make_stock_entry(frm), __("Make"));
+						() => frm.events.make_stock_entry(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Material Issue") {
 					frm.add_custom_button(__("Issue Material"),
-						() => frm.events.make_stock_entry(frm), __("Make"));
+						() => frm.events.make_stock_entry(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Customer Provided") {
 					frm.add_custom_button(__("Material Receipt"),
-						() => frm.events.make_stock_entry(frm), __("Make"));
+						() => frm.events.make_stock_entry(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Purchase") {
 					frm.add_custom_button(__('Purchase Order'),
-						() => frm.events.make_purchase_order(frm), __("Make"));
+						() => frm.events.make_purchase_order(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Purchase") {
 					frm.add_custom_button(__("Request for Quotation"),
-						() => frm.events.make_request_for_quotation(frm), __("Make"));
+						() => frm.events.make_request_for_quotation(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Purchase") {
 					frm.add_custom_button(__("Supplier Quotation"),
-						() => frm.events.make_supplier_quotation(frm), __("Make"));
+						() => frm.events.make_supplier_quotation(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Manufacture") {
 					frm.add_custom_button(__("Work Order"),
-						() => frm.events.raise_work_orders(frm), __("Make"));
+						() => frm.events.raise_work_orders(frm), __('Create'));
 				}
 
-				frm.page.set_inner_btn_group_as_primary(__("Make"));
+				frm.page.set_inner_btn_group_as_primary(__('Create'));
 
 				// stop
 				frm.add_custom_button(__('Stop'),
@@ -108,7 +108,7 @@ frappe.ui.form.on('Material Request', {
 
 	update_status: function(frm, stop_status) {
 		frappe.call({
-			method: 'erpnext.stock.material_request.material_request.update_status',
+			method: 'erpnext.stock.doctype.material_request.material_request.update_status',
 			args: { name: frm.doc.name, status: stop_status },
 			callback(r) {
 				if (!r.exc) {

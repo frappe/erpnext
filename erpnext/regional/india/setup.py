@@ -11,14 +11,18 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	setup_company_independent_fixtures()
+	if not patch:
+		update_address_template()
+		make_fixtures(company)
+
+# TODO: for all countries
+def setup_company_independent_fixtures():
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-	if not patch:
-		update_address_template()
-		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
@@ -350,12 +354,17 @@ def set_tax_withholding_category(company):
 
 def set_tds_account(docs, company):
 	abbr = frappe.get_value("Company", company, "abbr")
-	docs.extend([
-		{
-			"doctype": "Account", "account_name": "TDS Payable", "account_type": "Tax",
-			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
-		}
-	])
+	parent_account = frappe.db.get_value("Account", filters = {"account_name": "Duties and Taxes", "company": company})
+	if parent_account:
+		docs.extend([
+			{
+				"doctype": "Account",
+				"account_name": "TDS Payable",
+				"account_type": "Tax",
+				"parent_account": parent_account,
+				"company": company
+			}
+		])
 
 def get_tds_details(accounts, fiscal_year):
 	# bootstrap default tax withholding sections

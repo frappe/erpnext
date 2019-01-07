@@ -292,6 +292,7 @@ class TestWorkOrder(unittest.TestCase):
 			make_bom(item=fg_item, rate=1000, raw_materials = ['_Test FG Item', '_Test FG Non Stock Item'])
 
 		wo = make_wo_order_test_record(production_item = fg_item)
+
 		se = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
 		se.insert()
 		se.submit()
@@ -305,7 +306,7 @@ class TestWorkOrder(unittest.TestCase):
 		items = {'Finished Good Transfer Item': 1, '_Test FG Item': 1, '_Test FG Item 1': 0}
 		for item, allow_transfer in items.items():
 			make_item(item, {
-				'allow_transfer_for_manufacture': allow_transfer
+				'include_item_in_manufacturing': allow_transfer
 			})
 
 		fg_item = 'Finished Good Transfer Item'

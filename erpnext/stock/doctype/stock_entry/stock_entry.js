@@ -95,7 +95,7 @@ frappe.ui.form.on('Stock Entry', {
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
-			frm.add_custom_button(__('Make Material Request'), function() {
+			frm.add_custom_button(__('Create Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
 					var mr = frappe.model.get_new_doc('Material Request');
 					var items = frm.get_field('items').grid.get_selected_children();
@@ -184,7 +184,7 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt" && frm.get_sum('items', 			'sample_quantity')) {
-			frm.add_custom_button(__('Make Sample Retention Stock Entry'), function () {
+			frm.add_custom_button(__('Create Sample Retention Stock Entry'), function () {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
@@ -199,12 +199,15 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	validate_purpose_consumption: function(frm) {
-		frappe.model.get_value('Manufacturing Settings', {'name': 'Manufacturing Settings'}, 'material_consumption', function(d) {
-			if (d.material_consumption==0 && frm.doc.purpose=="Material Consumption for Manufacture") {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings.is_material_consumption_enabled",
+		}).then(r => {
+			if (cint(r.message) == 0
+				&& frm.doc.purpose=="Material Consumption for Manufacture") {
 				frm.set_value("purpose", 'Manufacture');
 				frappe.throw(__('Material Consumption is not set in Manufacturing Settings.'));
 			}
-		})
+		});
 	},
 
 	company: function(frm) {
@@ -707,7 +710,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise = locals['Journal Entry'][excise];
 				excise.voucher_type = 'Excise Entry';
 				frappe.set_route('Form', 'Journal Entry', excise.name);
-			}, __("Make"));
+			}, __('Create'));
 	},
 
 	items_add: function(doc, cdt, cdn) {
