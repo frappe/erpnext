@@ -124,6 +124,7 @@ frappe.ui.form.on('Salary Structure', {
 							"label":__("Employee"),
 							"fieldname":"employee",
 							"fieldtype":"Select",
+							"reqd": true,
 							options: employees
 						}, {
 							fieldname:"fetch",
