@@ -170,7 +170,7 @@ frappe.ui.form.on('Stock Entry', {
 										options: 'Batch',
 										get_query: function (doc) {
 											return {
-												query: "erpnext.stock.doctype.stock_entry.stock_entry.batch_qty_in_warehouse",
+												query: "erpnext.stock.doctype.stock_entry.stock_entry.get_available_batches_in_warehouse",
 												filters: {
 													item: doc.item_code,
 													s_warehouse: doc.s_warehouse,

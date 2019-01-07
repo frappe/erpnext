@@ -245,7 +245,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	"""
 
 	batch_no = None
-	batches = get_batches(item_code, warehouse, qty, throw)
+	batches = get_batches(item_code, warehouse, qty)
 
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
@@ -260,7 +260,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	return batch_no
 
 
-def get_batches(item_code, warehouse, qty=1, throw=False, as_dict=True):
+def get_batches(item_code, warehouse, qty=1, as_dict=True):
 	batches = frappe.db.sql("""
 		SELECT
 			batch_id,
@@ -276,12 +276,13 @@ def get_batches(item_code, warehouse, qty=1, throw=False, as_dict=True):
 		GROUP BY
 			batch_id
 		HAVING
-			sum(actual_qty) > %s
+			sum(actual_qty) >= %s
 		ORDER BY
 			batch.expiry_date ASC,
 			batch.creation ASC
 		""",
-		(item_code, warehouse, qty)
+		(item_code, warehouse, qty),
+		as_dict=as_dict
 	)
 
 	return batches
