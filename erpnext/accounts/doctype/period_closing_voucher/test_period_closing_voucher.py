@@ -11,6 +11,13 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
+
+		print(frappe.db.get_value("Company", "_Test Company", "cost_center"))
+		company = frappe.get_doc("Company", "_Test Company")
+		company.cost_center = "_Test Cost Center - _TC"
+		company.save()
+		print(frappe.db.get_value("Company", "_Test Company", "cost_center"))
+
 		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 
 		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
@@ -64,6 +71,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			self.assertEqual(gle_for_random_expense_account[0].amount, -1*random_expense_account[0].balance)
 			self.assertEqual(gle_for_random_expense_account[0].amount_in_account_currency,
 				-1*random_expense_account[0].balance_in_account_currency)
+		print("Did it work?")
 
 	def make_period_closing_voucher(self):
 		pcv = frappe.get_doc({
