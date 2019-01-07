@@ -4758,11 +4758,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
-<<<<<<< 31cb24f48d6d57cd8ab6991622c174390f6c2c51
- "modified": "2019-01-07 16:51:59.800081", 
-=======
  "modified": "2018-12-06 09:00:41.508642", 
->>>>>>> WIP
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
