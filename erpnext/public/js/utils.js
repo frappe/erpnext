@@ -126,7 +126,7 @@ $.extend(erpnext.utils, {
 					'</div><div class="col-xs-6 small" style="margin-bottom:10px">Annual Billing: <b>'
 					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>' +
 					'<div class="col-xs-6 small" style="margin-bottom:10px">Total Unpaid: <b>'
-					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</b></div>'
+					+format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)+'</b></div>'
 				);
 			}
 		}
@@ -237,7 +237,7 @@ $.extend(erpnext.utils, {
 		let unscrub_option = frappe.model.unscrub(option);
 		let user_permission = frappe.defaults.get_user_permissions();
 		if(user_permission && user_permission[unscrub_option]) {
-			return user_permission[unscrub_option]["docs"];
+			return user_permission[unscrub_option].map(perm => perm.doc);
 		} else {
 			return $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
 		}
