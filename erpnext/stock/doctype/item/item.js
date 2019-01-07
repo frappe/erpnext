@@ -651,7 +651,7 @@ $.extend(erpnext.item, {
 					frappe.call({
 						method:"erpnext.stock.doctype.item.item.get_item_attribute",
 						args:{
-							parent: "Item Attribute",
+							parent: i,
 							attribute_value: term
 						},
 						callback: function(r) {
