@@ -462,7 +462,7 @@ class BuyingController(StockController):
 		update_last_purchase_rate(self, is_submit = 0)
 
 	def validate_schedule_date(self):
-		if not self.schedule_date:
+		if not self.schedule_date and self.get("items"):
 			self.schedule_date = min([d.schedule_date for d in self.get("items")])
 
 		if self.schedule_date:

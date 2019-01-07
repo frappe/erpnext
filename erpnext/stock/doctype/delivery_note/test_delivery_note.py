@@ -564,6 +564,24 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_make_sales_invoice_from_dn_for_returned_qty(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+
+		so = make_sales_order(qty=2)
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-1, do_not_submit=True)
+		dn1.items[0].against_sales_order = so.name
+		dn1.items[0].so_detail = so.items[0].name
+		dn1.submit()
+
+		si = make_sales_invoice(dn.name)
+		self.assertEquals(si.items[0].qty, 1)
+
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
