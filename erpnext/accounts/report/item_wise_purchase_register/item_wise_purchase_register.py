@@ -34,35 +34,37 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 	data = []
 	for d in item_list:
-		if d.stock_qty:
-			purchase_receipt = None
-			if d.purchase_receipt:
-				purchase_receipt = d.purchase_receipt
-			elif d.po_detail:
-				purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
+		if not d.stock_qty:
+			continue
 
-			expense_account = d.expense_account or aii_account_map.get(d.company)
-			row = [d.item_code, d.item_name, d.item_group, d.description, d.parent, d.posting_date, d.supplier,
-				d.supplier_name]
+		purchase_receipt = None
+		if d.purchase_receipt:
+			purchase_receipt = d.purchase_receipt
+		elif d.po_detail:
+			purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
 
-			if additional_query_columns:
-				for col in additional_query_columns:
-					row.append(d.get(col))
+		expense_account = d.expense_account or aii_account_map.get(d.company)
+		row = [d.item_code, d.item_name, d.item_group, d.description, d.parent, d.posting_date, d.supplier,
+			d.supplier_name]
 
-			row += [
-				d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
-				purchase_receipt, expense_account, d.stock_qty, d.stock_uom, d.base_net_amount / d.stock_qty, d.base_net_amount
-			]
+		if additional_query_columns:
+			for col in additional_query_columns:
+				row.append(d.get(col))
 
-			total_tax = 0
-			for tax in tax_columns:
-				item_tax = itemised_tax.get(d.name, {}).get(tax, {})
-				row += [item_tax.get("tax_rate", 0), item_tax.get("tax_amount", 0)]
-				total_tax += flt(item_tax.get("tax_amount"))
+		row += [
+			d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
+			purchase_receipt, expense_account, d.stock_qty, d.stock_uom, d.base_net_amount / d.stock_qty, d.base_net_amount
+		]
 
-			row += [total_tax, d.base_net_amount + total_tax, company_currency]
+		total_tax = 0
+		for tax in tax_columns:
+			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+			row += [item_tax.get("tax_rate", 0), item_tax.get("tax_amount", 0)]
+			total_tax += flt(item_tax.get("tax_amount"))
 
-			data.append(row)
+		row += [total_tax, d.base_net_amount + total_tax, company_currency]
+
+		data.append(row)
 
 	return columns, data
 
