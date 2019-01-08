@@ -113,11 +113,6 @@ frappe.ui.form.on("Customer", {
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
-			//
-			if (frm.doc.__onload.dashboard_info.loyalty_point) {
-				frm.dashboard.add_indicator(__('Loyalty Point: {0}', [frm.doc.__onload.dashboard_info.loyalty_point]), 'blue');
-			}
-
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
