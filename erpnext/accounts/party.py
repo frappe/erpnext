@@ -473,7 +473,7 @@ def get_timeline_data(doctype, name):
 
 	return out
 
-def get_dashboard_info(party_type, party):
+def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
 	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
@@ -494,6 +494,19 @@ def get_dashboard_info(party_type, party):
 			group_by="company",
 			fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
 		)
+
+	loyalty_point_details = []
+
+	if party_type == "Customer":
+		loyalty_point_details = frappe._dict(frappe.get_all("Loyalty Point Entry",
+			filters={
+				'customer': party,
+				'expiry_date': ('>=', getdate()),
+				},
+				group_by="company",
+				fields=["company", "sum(loyalty_points) as loyalty_points"],
+				as_list =1
+			))
 
 	company_wise_billing_this_year = frappe._dict()
 
@@ -522,11 +535,17 @@ def get_dashboard_info(party_type, party):
 
 		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
 
+		if loyalty_point_details:
+			loyalty_points = loyalty_point_details.get(d.company)
+
 		info = {}
 		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 		info["currency"] = party_account_currency
 		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
 		info["company"] = d.company
+
+		if party_type == "Customer" and loyalty_point_details:
+			info["loyalty_points"] = loyalty_points
 
 		if party_type == "Supplier":
 			info["total_unpaid"] = -1 * info["total_unpaid"]

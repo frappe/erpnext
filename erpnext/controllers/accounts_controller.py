@@ -1073,6 +1073,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		if parent_doctype == "Sales Order" and flt(d.get("qty")) < child_item.delivered_qty:
+			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+
+		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < child_item.received_qty:
+			frappe.throw(_("Cannot set quantity less than received quantity"))
+
 		child_item.qty = flt(d.get("qty"))
 
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):
