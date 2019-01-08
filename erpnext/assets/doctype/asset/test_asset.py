@@ -495,7 +495,7 @@ class TestAsset(unittest.TestCase):
 
 		self.assertEqual(gle, expected_gle)
 
-	def test_expence_head(self):
+	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=2, rate=200000.0, location="Test Location")
 
