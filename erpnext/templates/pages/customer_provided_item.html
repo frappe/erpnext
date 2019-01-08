@@ -1,0 +1,42 @@
+{% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block header %}<h2>{{ title }}</h2>{% endblock %}
+
+{% block page_content %}
+<div class="items-content">
+	<div class="row order-items order-item-header text-muted">
+		<div class="col-sm-5 col-xs-5 h6 text-uppercase">
+			{{ _("Item") }}
+		</div>
+		<div class="col-sm-2 col-xs-2 text-right h6 text-uppercase">
+			{{ _("Stock Qty") }}
+		</div>
+		<div class="col-sm-3 col-xs-3 text-right h6 text-uppercase">
+			{{ _("Required Qty") }}
+		</div>
+		<div class="col-sm-2 col-xs-2 text-right h6 text-uppercase">
+			{{ _("Balance") }}
+		</div>
+	</div>
+	{% for item_info in items %}
+	<div class="row order-items">
+		<div class="col-sm-5 col-xs-5">
+			{{ item_name_and_description(item_info) }}
+		</div>
+		<div class="col-sm-2 col-xs-2 text-right">
+			{{ item_info.stock_qty }}
+		</div>
+		<div class="col-sm-3 col-xs-3 text-right">
+			{{ item_info.reqd_qty }}
+		</div>
+		<div class="col-sm-2 col-xs-2 text-right">
+			{{ item_info.bal_qty }}
+		</div>
+	</div>
+	<hr>
+	{% endfor %}
+</div>
+{% endblock %}
