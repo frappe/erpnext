@@ -1,0 +1,44 @@
+{
+ "add_total_row": 0, 
+ "creation": "2019-01-08 02:56:33.642465", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2019-01-08 02:56:33.642465", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Serialized Item Tracking", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Item", 
+ "report_name": "Serialized Item Tracking", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Item Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Purchase User"
+  }, 
+  {
+   "role": "Maintenance User"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Manufacturing User"
+  }
+ ]
+}
