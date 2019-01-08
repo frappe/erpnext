@@ -17,7 +17,7 @@ def make_custom_fields(update=True):
         'Company': [
             fiscal_code_field,
             dict(fieldname='fiscal_regime', label='Fiscal Regime',
-			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,                
+			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,
                 options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes)))
         ],
         'Customer': [
