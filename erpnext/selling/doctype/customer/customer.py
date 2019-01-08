@@ -23,10 +23,7 @@ class Customer(TransactionBase):
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
-		info = get_dashboard_info(self.doctype, self.name)
-		loyalty_point_details = self.get_loyalty_points()
-		if loyalty_point_details and loyalty_point_details.get("loyalty_points"):
-			info["loyalty_point"] = loyalty_point_details.loyalty_points
+		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
 		self.set_onload('dashboard_info', info)
 
 	def autoname(self):
@@ -35,11 +32,6 @@ class Customer(TransactionBase):
 			self.name = self.get_customer_name()
 		else:
 			set_name_by_naming_series(self)
-
-	def get_loyalty_points(self):
-		if self.loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
-			return get_loyalty_details(self.name, self.loyalty_program)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
