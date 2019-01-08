@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons
+from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons, mode_of_payment_codes
 
 def setup(company=None, patch=True):
 	make_custom_fields()
@@ -25,12 +25,19 @@ def make_custom_fields(update=True):
             dict(fieldname='recipient_code', label='Recipient Code',
                 fieldtype='Data', insert_after='fiscal_code', print_hide=1, default="0000000"),
             dict(fieldname='pec', label='Recipient PEC',
-                fieldtype='Data', insert_after='fiscal_code', print_hide=1)
+                fieldtype='Data', insert_after='fiscal_code', print_hide=1),
+            dict(fieldname='is_public_administration', label='Is Public Administration',
+			    fieldtype='Select', insert_after='company_type', print_hide=1, description="Set this if the customer is a Public Administration company.")
         ],
         'Sales Taxes and Charges': [
             dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
 		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
             options="\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons)))
+        ],
+        'Mode of Payment': [
+            dict(fieldname='e_invoicing_code', label='Code',
+		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
+            options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)))
         ]
     }
 
