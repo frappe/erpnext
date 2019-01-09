@@ -32,6 +32,8 @@ def get(filters= None):
     for row in report_results[1:-2]:
         _results.append([row[key] for key in interesting_fields])
 
+    _results = add_opening_balance(from_date, _results, report_results[0])
+
     grouped_results = groupby(_results, key=itemgetter(0))
 
     results = [list(values)[-1] for key, values in grouped_results]
@@ -60,6 +62,12 @@ def get_from_date_from_timespan(timespan):
         years = -1
     return add_to_date(None, years=years, months=months, days=days,
         as_string=True, as_datetime=True)
+
+
+def add_opening_balance(from_date, _results, opening):
+    if not _results or (_results[0][0] != getdate(from_date)):
+        _results.insert(0, [from_date, opening.balance])
+    return _results
 
 def add_missing_dates(incomplete_results, from_date, to_date):
     dates = [r[0] for r in incomplete_results]
