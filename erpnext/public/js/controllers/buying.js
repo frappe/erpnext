@@ -112,6 +112,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier_address: function() {
 		erpnext.utils.get_address_display(this.frm);
+		erpnext.utils.set_taxes_from_address(this.frm, "supplier_address", "supplier_address", "supplier_address");
 	},
 
 	buying_price_list: function() {
