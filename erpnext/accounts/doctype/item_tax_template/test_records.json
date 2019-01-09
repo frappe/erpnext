@@ -10,5 +10,65 @@
     "tax_type": "_Test Account Excise Duty - _TC"
    }
   ]
+ },
+ {
+  "doctype": "Item Tax Template",
+  "title": "_Test Account Excise Duty @ 12",
+  "taxes": [
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 12,
+    "tax_type": "_Test Account Excise Duty - _TC"
+   }
+  ]
+ },
+ {
+  "doctype": "Item Tax Template",
+  "title": "_Test Account Excise Duty @ 15",
+  "taxes": [
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 15,
+    "tax_type": "_Test Account Excise Duty - _TC"
+   }
+  ]
+ },
+ {
+  "doctype": "Item Tax Template",
+  "title": "_Test Account Excise Duty @ 20",
+  "taxes": [
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 20,
+    "tax_type": "_Test Account Excise Duty - _TC"
+   }
+  ]
+ },
+ {
+  "doctype": "Item Tax Template",
+  "title": "_Test Item Tax Template 1",
+  "taxes": [
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 5,
+    "tax_type": "_Test Account Excise Duty - _TC"
+   },
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 10,
+    "tax_type": "_Test Account Education Cess - _TC"
+   },
+   {
+    "doctype": "Item Tax Template Detail",
+    "parentfield": "taxes",
+    "tax_rate": 15,
+    "tax_type": "_Test Account S&H Education Cess - _TC"
+   }
+  ]
  }
 ]

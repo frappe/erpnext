@@ -344,5 +344,121 @@
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse Group-C1 - _TC"
+ },
+ {
+  "description": "_Test Item With Item Tax Template",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Item With Item Tax Template",
+  "item_group": "_Test Item Group",
+  "item_name": "_Test Item With Item Tax Template",
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
+  "taxes": [
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
+    "tax_category": ""
+   },
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 12",
+    "tax_category": "_Test Tax Category 1"
+   }
+  ]
+ },
+ {
+  "description": "_Test Item Inherit Group Item Tax Template 1",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Item Inherit Group Item Tax Template 1",
+  "item_group": "_Test Item Group Tax Parent",
+  "item_name": "_Test Item Inherit Group Item Tax Template 1",
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
+ },
+ {
+  "description": "_Test Item Inherit Group Item Tax Template 2",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Item Inherit Group Item Tax Template 2",
+  "item_group": "_Test Item Group Tax Child Override",
+  "item_name": "_Test Item Inherit Group Item Tax Template 2",
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
+ },
+ {
+  "description": "_Test Item Override Group Item Tax Template",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Item Override Group Item Tax Template",
+  "item_group": "_Test Item Group Tax Child Override",
+  "item_name": "_Test Item Override Group Item Tax Template",
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }],
+  "taxes": [
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 20",
+    "tax_category": ""
+   },
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Item Tax Template 1",
+    "tax_category": "_Test Tax Category 1"
+   }
+  ]
  }
 ]
