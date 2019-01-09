@@ -83,6 +83,19 @@ def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=No
 		order by
 		case when name like %s then 0 else 1 end,
 		case when first_name like %s then 0 else 1 end,
-		name, first_name limit %s, %s""".format(match_conditions=match_conditions) %
-		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
-		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
+		name, first_name limit %s, %s""".format(
+			match_conditions=match_conditions) %
+			(
+				", ".join(fields),
+				frappe.db.escape(searchfield),
+				"%s", "%s", "%s", "%s", "%s", "%s"
+			),
+			(
+				"%%%s%%" % frappe.db.escape(txt),
+				"%%%s%%" % frappe.db.escape(txt),
+				"%%%s%%" % frappe.db.escape(txt),
+				"%%%s%%" % frappe.db.escape(txt),
+				start,
+				page_len
+			)
+		)
