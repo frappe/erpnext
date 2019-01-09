@@ -74,6 +74,26 @@ class TestTaxRule(unittest.TestCase):
 		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer 2"}),
 			"_Test Sales Taxes and Charges Template 2 - _TC")
 
+	def test_select_tax_rule_based_on_tax_category(self):
+		make_tax_rule(customer="_Test Customer", tax_category="_Test Tax Category 1",
+			sales_tax_template="_Test Sales Taxes and Charges Template 1 - _TC", save=1)
+
+		make_tax_rule(customer="_Test Customer", tax_category="_Test Tax Category 2",
+			sales_tax_template="_Test Sales Taxes and Charges Template 2 - _TC", save=1)
+
+		self.assertFalse(get_tax_template("2015-01-01", {"customer": "_Test Customer"}))
+
+		self.assertEqual(get_tax_template("2015-01-01", {"customer": "_Test Customer", "tax_category": "_Test Tax Category 1"}),
+			"_Test Sales Taxes and Charges Template 1 - _TC")
+		self.assertEqual(get_tax_template("2015-01-01", {"customer": "_Test Customer", "tax_category": "_Test Tax Category 2"}),
+			"_Test Sales Taxes and Charges Template 2 - _TC")
+
+		make_tax_rule(customer="_Test Customer", tax_category="",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC", save=1)
+
+		self.assertEqual(get_tax_template("2015-01-01", {"customer": "_Test Customer"}),
+			"_Test Sales Taxes and Charges Template - _TC")
+
 	def test_select_tax_rule_based_on_better_match(self):
 		make_tax_rule(customer= "_Test Customer", billing_city = "Test City", billing_state = "Test State",
 			sales_tax_template = "_Test Sales Taxes and Charges Template - _TC", save=1)
