@@ -16,6 +16,7 @@ $.extend(shopping_cart, {
 	bind_events: function() {
 		shopping_cart.bind_address_select();
 		shopping_cart.bind_place_order();
+		shopping_cart.bind_request_quotation();
 		shopping_cart.bind_change_qty();
 		shopping_cart.bind_change_notes();
 		shopping_cart.bind_dropdown_cart_buttons();
@@ -47,6 +48,12 @@ $.extend(shopping_cart, {
 	bind_place_order: function() {
 		$(".btn-place-order").on("click", function() {
 			shopping_cart.place_order(this);
+		});
+	},
+
+	bind_request_quotation: function() {
+		$('.btn-request-for-quotation').on('click', function() {
+			shopping_cart.request_quotation(this);
 		});
 	},
 
@@ -156,6 +163,29 @@ $.extend(shopping_cart, {
 						.toggle(true);
 				} else {
 					window.location.href = "/orders/" + encodeURIComponent(r.message);
+				}
+			}
+		});
+	},
+
+	request_quotation: function(btn) {
+		return frappe.call({
+			type: "POST",
+			method: "erpnext.shopping_cart.cart.request_for_quotation",
+			btn: btn,
+			callback: function(r) {
+				if(r.exc) {
+					var msg = "";
+					if(r._server_messages) {
+						msg = JSON.parse(r._server_messages || []).join("<br>");
+					}
+
+					$("#cart-error")
+						.empty()
+						.html(msg || frappe._("Something went wrong!"))
+						.toggle(true);
+				} else {
+					window.location.href = '/printview?doctype=Quotation&name=' + r.message;
 				}
 			}
 		});

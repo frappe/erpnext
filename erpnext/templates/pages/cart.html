@@ -4,15 +4,22 @@
 
 {% block header %}<h1>{{ _("Shopping Cart") }}</h1>{% endblock %}
 
-<!-- {% block script %}
+<!--
+{% block script %}
 <script>{% include "templates/includes/cart.js" %}</script>
-{% endblock %} -->
+{% endblock %}
+-->
 
 
 {% block header_actions %}
-{% if doc.items %}
+{% if doc.items and cart_settings.enable_checkout %}
 <button class="btn btn-primary btn-place-order" type="button">
 	{{ _("Place Order") }}
+</button>
+{% endif %}
+{% if doc.items and not cart_settings.enable_checkout %}
+<button class="btn btn-primary btn-request-for-quotation" type="button">
+	{{ _("Request for Quotation") }}
 </button>
 {% endif %}
 {% endblock %}
@@ -72,9 +79,11 @@
 		</div>
 	{% endif %}
 
+	{% if cart_settings.enable_checkout %}
 	<div class="cart-addresses mt-5">
 	{% include "templates/includes/cart/cart_address.html" %}
 	</div>
+	{% endif %}
 	{% endif %}
 </div>
 

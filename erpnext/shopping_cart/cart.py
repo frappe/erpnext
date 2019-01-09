@@ -45,7 +45,8 @@ def get_cart_quotation(doc=None):
 			for address in addresses],
 		"billing_addresses": [{"name": address.name, "display": address.display}
 			for address in addresses],
-		"shipping_rules": get_applicable_shipping_rules(party)
+		"shipping_rules": get_applicable_shipping_rules(party),
+		"cart_settings": frappe.get_cached_doc("Shopping Cart Settings")
 	}
 
 @frappe.whitelist()
@@ -81,6 +82,13 @@ def place_order():
 		frappe.local.cookie_manager.delete_cookie("cart_count")
 
 	return sales_order.name
+
+@frappe.whitelist()
+def request_for_quotation():
+	quotation = _get_cart_quotation()
+	quotation.flags.ignore_permissions = True
+	quotation.submit()
+	return quotation.name
 
 @frappe.whitelist()
 def update_cart(item_code, qty, additional_notes=None, with_items=False):
