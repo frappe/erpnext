@@ -135,26 +135,6 @@ def get_items_by_attributes(attribute_filters, template_item_code=None):
 
 	# return ''.join(get_html_for_items(items))
 
-@frappe.whitelist(allow_guest=True)
-def get_attributes_and_values(item_code):
-	attributes = get_item_attributes(item_code)
-	attribute_names = [a.attribute for a in attributes]
-
-	values = frappe.db.get_all('Item Attribute Value',
-		fields=['attribute_value', 'parent'],
-		filters={
-			'parent': ['in', attribute_names]
-		}
-	)
-
-	for a in attributes:
-		for value in values:
-			attribute = value.parent
-			if attribute == a.attribute:
-				a.setdefault('values', []).append(value.attribute_value)
-
-	return attributes
-
 
 @frappe.whitelist(allow_guest=True)
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
@@ -221,6 +201,36 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	res = list(set.intersection(*items))
 
 	return res
+
+
+@frappe.whitelist(allow_guest=True)
+def get_attributes_and_values(item_code):
+	item_cache = ItemVariantsCacheManager(item_code)
+	item_variants_data = item_cache.get_item_variants_data()
+
+	attributes = get_item_attributes(item_code)
+	attribute_list = [a.attribute for a in attributes]
+
+	attribute_values = frappe.db.get_all('Item Attribute Value',
+		filters={'parent': ['in', attribute_list]},
+		fields=['parent as attribute', 'attribute_value'],
+		order_by='idx asc')
+
+	for a in attribute_values:
+		for attr in attributes:
+			if attr.attribute == a.attribute:
+				attr.setdefault('values', []).append(a.attribute_value)
+
+	valid_options = {}
+	for item_code, attribute, attribute_value in item_variants_data:
+		if attribute in attribute_list:
+			valid_options.setdefault(attribute, set()).add(attribute_value)
+
+	for attr in attributes:
+		attr['valid_values'] = valid_options[attr.attribute]
+
+	return attributes
+
 
 @frappe.whitelist(allow_guest=True)
 def get_next_attribute_and_values(item_code, selected_attributes):

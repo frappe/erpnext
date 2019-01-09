@@ -21,7 +21,13 @@
                             fieldtype: 'Select',
                             label: a.attribute,
                             fieldname: a.attribute,
-                            options: a.values,
+                            options: a.values.map(v => {
+                                return {
+                                    label: v,
+                                    value: v,
+                                    disabled: !a.valid_values.includes(v)
+                                }
+                            }),
                             change: () => {
                                 const values = d.get_values();
                                 get_next_attribute_and_values(item_code, values)
@@ -43,16 +49,30 @@
                                         d.set_df_property(a.attribute, 'description', item_status);
 
                                         for (let attribute in valid_options_for_attributes) {
-                                            d.set_df_property(attribute, 'options',
-                                                valid_options_for_attributes[attribute] || []);
+                                            const valid_options = valid_options_for_attributes[attribute];
+                                            const options = d.get_field(attribute).df.options;
+                                            const new_options = options.map(o => {
+                                                o.disabled = !valid_options.includes(o.value);
+                                                return o;
+                                            });
+                                            d.set_df_property(attribute, 'options', new_options);
                                         }
 
-                                        d.get_field(next_attribute).$wrapper.show();
+                                        if (next_attribute) {
+                                            d.get_field(next_attribute).$wrapper.show();
+                                        }
 
                                         if (exact_match.length > 0) {
-                                            d.set_primary_action('View Item', () => {
+                                            d.set_primary_action('Add Item to cart', () => {
+                                                erpnext.shopping_cart.update_cart({
+                                                    item_code: exact_match[0],
+                                                    qty: 1
+                                                });
+                                                d.hide();
                                                 console.log(exact_match);
-                                            })
+                                            }).show();
+                                        } else {
+                                            d.get_primary_btn().hide();
                                         }
                                     })
                             }
