@@ -12,8 +12,8 @@ def validate_gstin_for_india(doc, method):
 		doc.gstin = doc.gstin.upper()
 		if doc.gstin not in ["NA", "na"]:
 			p = re.compile("[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}")
-			if not p.match(doc.gstin):
-				frappe.throw(_("Invalid GSTIN or Enter NA for Unregistered"))
+			if not p.match(doc.gstin) or doc.gstin != get_gstin_with_check_digit(doc.gstin[:-1]):
+				frappe.throw(_("Invalid GSTIN!! Check for typos or Enter NA for Unregistered"))
 
 	if not doc.gst_state:
 		if doc.state in states:
@@ -24,6 +24,28 @@ def validate_gstin_for_india(doc, method):
 		if doc.gstin and doc.gstin != "NA" and doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
 				.format(doc.gst_state_number))
+
+def get_gstin_with_check_digit(gstin_without_check_digit):
+	''' Function to get the check digit for the gstin.
+
+		param: gstin_without_check_digit
+		return: GSTIN with check digit 
+	'''
+	factor = 1
+	total = 0
+	code_point_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	input_chars = gstin_without_check_digit.strip()
+	if not input_chars:
+		frappe.throw(_("GSTIN supplied for checkdigit calculation is blank"))
+	mod = len(code_point_chars)
+	for char in input_chars:
+		digit = factor * code_point_chars.find(char)
+		if digit < 0:
+			frappe.throw(_("GSTIN supplied for checkdigit contains invalid character"))
+		digit = (digit / mod) + (digit % mod)
+		total += digit
+		factor = 2 if factor == 1 else 1
+	return ''.join([gstin_without_check_digit,code_point_chars[((mod - (total % mod)) % mod)]])
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
