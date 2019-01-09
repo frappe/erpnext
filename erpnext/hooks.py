@@ -140,6 +140,7 @@ website_route_rules = [
 			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
 		}
 	},
+	{"from_route": "/customer-provided-items", "to_route": "customer_provided_item"}
 ]
 
 standard_portal_menu_items = [
@@ -163,6 +164,7 @@ standard_portal_menu_items = [
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
 	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application"},
 	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
+	{"title": _("Customer Provided Item"), "route": "/customer-provided-items", "reference_doctype": "Item", "role": "Customer"}
 ]
 
 default_roles = [
