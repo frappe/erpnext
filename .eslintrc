@@ -137,6 +137,12 @@
 		"get_server_fields": true,
 		"set_multiple": true,
 		"QUnit": true,
-		"Chart": true
+		"Chart": true,
+		"Cypress": true,
+		"cy": true,
+		"it": true,
+		"context": true,
+		"before": true,
+		"beforeEach": true
 	}
 }
