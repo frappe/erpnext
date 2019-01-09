@@ -1,26 +1,143 @@
 {% from "erpnext/templates/includes/cart/cart_macros.html" import show_address %}
-<div class="row">
-	{% if addresses|length == 1%}
-		{% set select_address = True %}
-	{% endif %}
-	<div class="col-sm-6">
-		<div class="h6 text-uppercase">{{ _("Shipping Address") }}</div>
-		<div id="cart-shipping-address" class="panel-group"
-			data-fieldname="shipping_address_name">
-            {% for address in shipping_addresses %}
-                {{ show_address(address, doc, "shipping_address_name", select_address) }}
-            {% endfor %}
-        </div>
-		<a class="btn btn-default btn-sm" href="/addresses">
-			{{ _("Manage Addresses") }}</a>
-	</div>
-	<div class="col-sm-6">
-        <div class="h6 text-uppercase">{{ _("Billing Address") }}</div>
-		<div id="cart-billing-address" class="panel-group"
-			data-fieldname="customer_address">
-            {% for address in billing_addresses %}
-                {{ show_address(address, doc, "customer_address", select_address) }}
-            {% endfor %}
-        </div>
+
+{% if addresses | length == 1%}
+	{% set select_address = True %}
+{% endif %}
+
+<div class="mb-3" data-section="shipping-address">
+	<h6 class="text-uppercase">{{ _("Shipping Address") }}</h6>
+	<div class="row no-gutters" data-fieldname="shipping_address_name">
+		{% for address in shipping_addresses %}
+			<div class="mr-3 mb-3 w-25" data-address-name="{{address.name}}" {% if doc.shipping_address_name == address.name %} data-active {% endif %}>
+				{% include "templates/includes/cart/address_card.html" %}
+			</div>
+		{% endfor %}
 	</div>
 </div>
+<div class="mb-3" data-section="billing-address">
+	<h6 class="text-uppercase">{{ _("Billing Address") }}</h6>
+	<div class="row no-gutters" data-fieldname="customer_address">
+		{% for address in billing_addresses %}
+			<div class="mr-3 mb-3 w-25" data-address-name="{{address.name}}" {% if doc.customer_address == address.name %} data-active {% endif %}>
+				{% include "templates/includes/cart/address_card.html" %}
+			</div>
+		{% endfor %}
+	</div>
+</div>
+<div class="custom-control custom-checkbox">
+	<input type="checkbox" class="custom-control-input" id="input_same_billing" checked>
+	<label class="custom-control-label" for="input_same_billing">{{ _('Billing Address is same as Shipping Address') }}</label>
+</div>
+<button class="btn btn-outline-primary btn-sm mt-3 btn-new-address">{{ _("Add a new address") }}</button>
+
+<script>
+frappe.ready(() => {
+	$(document).on('click', '.address-card', (e) => {
+		const $target = $(e.currentTarget);
+		const $section = $target.closest('[data-section]');
+		$section.find('.address-card').removeClass('active');
+		$target.addClass('active');
+	});
+
+	$('#input_same_billing').change((e) => {
+		const $check = $(e.target);
+		toggle_billing_address_section(!$check.is(':checked'));
+	});
+
+	$('.btn-new-address').click(() => {
+		const d = new frappe.ui.Dialog({
+			title: __('New Address'),
+			fields: [
+				{
+					label: __('Address Title'),
+					fieldname: 'address_title',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					label: __('Address Type'),
+					fieldname: 'address_type',
+					fieldtype: 'Select',
+					options: [
+						'Billing',
+						'Shipping'
+					],
+					reqd: 1
+				},
+				{
+					label: __('Address Line 1'),
+					fieldname: 'address_line1',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					label: __('Address Line 2'),
+					fieldname: 'address_line2',
+					fieldtype: 'Data'
+				},
+				{
+					label: __('City/Town'),
+					fieldname: 'city',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					label: __('State'),
+					fieldname: 'state',
+					fieldtype: 'Data'
+				},
+				{
+					label: __('Pin Code'),
+					fieldname: 'pincode',
+					fieldtype: 'Data'
+				},
+				{
+					label: __('Country'),
+					fieldname: 'country',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+			],
+			primary_action_label: __('Save'),
+			primary_action: (values) => {
+				console.log(values)
+
+				frappe.call('erpnext.shopping_cart.cart.add_new_address', { doc: values })
+					.then(r => {
+						d.hide();
+						window.location.reload();
+					});
+			}
+		})
+
+		d.show();
+	});
+
+	function setup_state() {
+		const shipping_address = $('[data-section="shipping-address"]')
+			.find('[data-address-name][data-active]').attr('data-address-name');
+
+		const billing_address = $('[data-section="billing-address"]')
+			.find('[data-address-name][data-active]').attr('data-address-name');
+
+		$('#input_same_billing').prop('checked', shipping_address === billing_address).trigger('change');
+
+		if (!shipping_address && !billing_address) {
+			$('#input_same_billing').prop('checked', true).trigger('change');
+		}
+
+		if (shipping_address) {
+			$(`[data-section="shipping-address"] [data-address-name="${shipping_address}"] .address-card`).addClass('active');
+		}
+		if (billing_address) {
+			$(`[data-section="billing-address"] [data-address-name="${billing_address}"] .address-card`).addClass('active');
+		}
+	}
+
+	setup_state();
+
+	function toggle_billing_address_section(flag) {
+		$('[data-section="billing-address"]').toggle(flag);
+	}
+});
+</script>

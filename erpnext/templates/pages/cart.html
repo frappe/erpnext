@@ -2,18 +2,18 @@
 
 {% block title %} {{ _("Shopping Cart") }} {% endblock %}
 
-{% block header %}<h2>{{ _("My Cart") }}</h2>{% endblock %}
+{% block header %}<h1>{{ _("Shopping Cart") }}</h1>{% endblock %}
 
-{% block script %}
+<!-- {% block script %}
 <script>{% include "templates/includes/cart.js" %}</script>
-{% endblock %}
+{% endblock %} -->
 
 
 {% block header_actions %}
 {% if doc.items %}
-<button class="btn btn-primary btn-place-order btn-sm"
-    type="button">
-    {{ _("Place Order") }}</button>
+<button class="btn btn-primary btn-place-order" type="button">
+	{{ _("Place Order") }}
+</button>
 {% endif %}
 {% endblock %}
 
@@ -22,58 +22,69 @@
 {% from "templates/includes/macros.html" import item_name_and_description %}
 
 <div class="cart-container">
-	<div id="cart-container">
-			<div id="cart-error" class="alert alert-danger"
-		style="display: none;"></div>
-		<div id="cart-items">
-			<div class="row cart-item-header text-muted">
-				<div class="col-sm-8 col-xs-6 h6 text-uppercase">
-				{{ _("Item") }}
-				</div>
-				<div class="col-sm-2 col-xs-3 text-center h6 text-uppercase">
-				{{ _("Qty") }}
-				</div>
-				<div class="col-sm-2 col-xs-3 text-right h6 text-uppercase">
-				{{ _("Subtotal") }}
-				</div>
-			</div>
-			{% if doc.items %}
-				<div class="cart-items">
-					{% include "templates/includes/cart/cart_items.html" %}
-				</div>
-			{% else %}
-				<p class="empty-cart">{{ _("Cart is Empty") }}</p>
-			{% endif %}
-		</div>
-		{% if doc.items %}
-		<!-- taxes -->
-		<div class="row cart-taxes">
-			<div class="col-sm-6"><!-- empty --></div>
-			<div class="col-sm-6 text-right cart-tax-items">
+	<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
+
+	{% if doc.items %}
+	<table class="table table-bordered mt-3">
+		<thead>
+			<tr>
+				<th width="60%">{{ _('Item') }}</th>
+				<th width="20%" class="text-right">{{ _('Quantity') }}</th>
+				<th width="20%" class="text-right">{{ _('Subtotal') }}</th>
+			</tr>
+		</thead>
+		<tbody class="cart-items">
+			{% include "templates/includes/cart/cart_items.html" %}
+		</tbody>
+		<tfoot class="cart-tax-items">
 			{% include "templates/includes/order/order_taxes.html" %}
-			</div>
+		</tfoot>
+	</table>
+	{% else %}
+	<p class="text-muted">{{ _('Your cart is Empty') }}</p>
+	{% endif %}
+
+	{% if doc.items %}
+	{% if doc.tc_name %}
+		<div class="terms-and-conditions-link">
+			<a href class="link-terms-and-conditions" data-terms-name="{{ doc.tc_name }}">
+				{{ _("Terms and Conditions") }}
+			</a>
+			<script>
+				frappe.ready(() => {
+					$('.link-terms-and-conditions').click((e) => {
+						e.preventDefault();
+						const $link = $(e.target);
+						const terms_name = $link.attr('data-terms-name');
+						show_terms_and_conditions(terms_name);
+					})
+				});
+				function show_terms_and_conditions(terms_name) {
+					frappe.call('erpnext.shopping_cart.cart.get_terms_and_conditions', { terms_name })
+					.then(r => {
+						frappe.msgprint({
+							title: terms_name,
+							message: r.message
+						});
+					});
+				}
+			</script>
 		</div>
+	{% endif %}
 
-		{% if doc.tc_name %}
-			<div class="cart-terms" style="display: none;" title={{doc.tc_name}}>
-				{{doc.tc_name}}
-				{{doc.terms}}
-			</div>
-			<div class="cart-link">
-				<a href="#" onclick="show_terms();return false;">*{{ __("Terms and Conditions") }}</a>
-			</div>
-		{% endif %}
-
-		<div class="cart-addresses">
-		{% include "templates/includes/cart/cart_address.html" %}
-		</div>
-
-		<p class="cart-footer text-right">
-		<button class="btn btn-primary btn-place-order btn-sm" type="button">
-		{{ _("Place Order") }}</button></p>
-		{% endif %}
+	<div class="cart-addresses mt-5">
+	{% include "templates/includes/cart/cart_address.html" %}
 	</div>
+	{% endif %}
 </div>
 
+{% endblock %}
 
+{% block base_scripts %}
+<!-- js should be loaded in body! -->
+<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+<script type="text/javascript" src="/assets/js/control.min.js"></script>
+<script type="text/javascript" src="/assets/js/dialog.min.js"></script>
+<script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
 {% endblock %}

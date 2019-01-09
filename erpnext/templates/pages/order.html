@@ -8,23 +8,22 @@
 {% block title %}{{ doc.name }}{% endblock %}
 
 {% block header %}
-	<h1>{{ doc.name }}</h1>
+	<h1 class="m-0">{{ doc.name }}</h1>
 {% endblock %}
 
 {% block header_actions %}
-<a class='btn btn-xs btn-default' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
+<a href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
 {% endblock %}
 
 {% block page_content %}
 
 <div class="row transaction-subheading">
-	<div class="col-xs-6">
-
+	<div class="col-6">
 		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
 			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
 		</span>
 	</div>
-	<div class="col-xs-6 text-muted text-right small">
+	<div class="col-6 text-muted text-right small">
 		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
 		{% if doc.valid_till %}
 		<p>
@@ -55,7 +54,7 @@
 	<!-- items -->
 	<div class="order-item-table">
 		<div class="row order-items order-item-header text-muted">
-			<div class="col-sm-6 col-xs-6 h6 text-uppercase">
+			<div class="col-sm-6 col-6 h6 text-uppercase">
 				{{ _("Item") }}
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right h6 text-uppercase">
@@ -67,7 +66,7 @@
 		</div>
 		{% for d in doc.items %}
 		<div class="row order-items">
-			<div class="col-sm-6 col-xs-6">
+			<div class="col-sm-6 col-6">
 				{{ item_name_and_description(d) }}
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right">
@@ -79,8 +78,7 @@
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right">
 				{{ d.get_formatted("amount")	 }}
-				<p class="text-muted small">{{
-					_("@ {0}").format(d.get_formatted("rate")) }}</p>
+				<p class="text-muted small">@ {{ d.get_formatted('rate') }}</p>
 			</div>
 		</div>
 		{% endfor %}

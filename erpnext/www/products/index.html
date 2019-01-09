@@ -1,9 +1,10 @@
 {% extends "templates/web.html" %}
 {% from "erpnext/templates/includes/macros.html" import product_image_square %}
 
-{% block page_content %}
-<h1>Products</h1>
+{% block title %}{{ _('Products') }}{% endblock %}
+{% block header %}<h1>{{ _('Products') }}</h1>{% endblock header %}
 
+{% block page_content %}
 <div class="row">
     <div class="col-8 products-list">
         {% if items %}
