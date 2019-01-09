@@ -5,13 +5,14 @@ from __future__ import unicode_literals
 from itertools import groupby
 from operator import itemgetter
 import frappe
+from frappe.utils import add_to_date
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 
 
-def get():
+def get(filters=None):
     filters = frappe._dict({
         "company": "Gadget Technologies Pvt. Ltd.",
-        "from_date": "2000-01-01",
+        "from_date": get_from_date_from_timespan(filters.get("timespan")),
         "to_date": "2020-12-12",
         "account": "Cash - GTPL",
         "group_by": "Group by Voucher (Consolidated)"
@@ -37,3 +38,16 @@ def get():
             "values": [result[1] for result in results]
         }]
     }
+
+def get_from_date_from_timespan(timespan):
+    days = months = years = 0
+    if "Last Week" == timespan:
+        days = -7
+    if "Last Month" == timespan:
+        months = -1
+    elif "Last Quarter" == timespan:
+        months = -3
+    elif "Last Year" == timespan:
+        years = -1
+    return add_to_date(None, years=years, months=months, days=days,
+        as_string=True, as_datetime=True)
