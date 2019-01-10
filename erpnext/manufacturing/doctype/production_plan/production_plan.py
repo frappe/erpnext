@@ -499,7 +499,8 @@ def get_bin_details(row):
 	conditions = ""
 	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
 	if warehouse:
-		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		conditions = " and exists(select name from `tabWarehouse` where lft >= {0} and rgt <= {1} and name=`tabBin`.warehouse)".format(lft, rgt)
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
 		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`
