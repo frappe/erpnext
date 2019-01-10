@@ -84,7 +84,7 @@ class TestStockReconciliation(unittest.TestCase):
 	def test_get_items(self):
 		create_warehouse("_Test Warehouse Group 1", {"is_group": 1})
 		create_warehouse("_Test Warehouse Ledger 1", {"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC"})
-		item1 = make_item("_Test Stock Reco Item", {"default_warehouse": "_Test Warehouse Ledger 1 - _TC",
+		make_item("_Test Stock Reco Item", {"default_warehouse": "_Test Warehouse Ledger 1 - _TC",
 			"is_stock_item": 1, "opening_stock": 100, "valuation_rate": 100})
 
 		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime())
