@@ -21,7 +21,9 @@ def validate_gstin_for_india(doc, method):
 
 	validate_gstin_check_digit(doc.gstin)
 
-	if not doc.gst_state and doc.state:
+	if not doc.gst_state:
+		if not doc.state:
+			return
 		state = doc.state.lower()
 		states_lowercase = {s.lower():s for s in states}
 		if state in states_lowercase:
