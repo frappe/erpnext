@@ -145,7 +145,7 @@ def get_tax_template(posting_date, args):
 	conditions = ["""(from_date is null or from_date <= '{0}')
 		and (to_date is null or to_date >= '{0}')""".format(posting_date)]
 
-	conditions.append("ifnull(tax_category, '') = '{0}'".format(frappe.db.escape(cstr(args.get("tax_category")))))
+	conditions.append("ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category")))))
 	if 'tax_category' in args.keys():
 		del args['tax_category']
 
