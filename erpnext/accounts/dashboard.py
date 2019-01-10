@@ -13,13 +13,14 @@ def get(filters= None):
     print(filters)
     timespan = filters.get("timespan")
     timegrain = filters.get("timegrain")
+    account = filters.get("account")
     from_date = get_from_date_from_timespan(timespan)
     to_date = nowdate()
     filters = frappe._dict({
         "company": "Gadget Technologies Pvt. Ltd.",
         "from_date": from_date,
         "to_date": to_date,
-        "account": "Cash - GTPL",
+        "account": account,
         "group_by": "Group by Voucher (Consolidated)"
     })
     report_columns, report_results = execute(filters=filters)
@@ -45,7 +46,7 @@ def get(filters= None):
     return {
         "labels": [result[0] for result in results],
         "datasets": [{
-            "name": "Cash - GTPL",
+            "name": account,
             "values": [result[1] for result in results]
         }]
     }
