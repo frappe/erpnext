@@ -46,9 +46,9 @@ class Task(NestedSet):
 
 		if(self.project):
 			if frappe.db.exists("Project", self.project):
-				doc = frappe.get_doc("Project", self.project)
-				if  self.exp_end_date and doc.expected_end_date and getdate(self.exp_end_date) > getdate(doc.expected_end_date) :
-					frappe.throw(_("Expected end date cannot be after Project: <b>'{0}'</b> Expected end date").format(doc.name), EndDateCannotBeGreaterThanProjectEndDateError)
+				expected_end_date = frappe.db.get_value("Project", self.project, "expected_end_date")
+				if  self.exp_end_date and expected_end_date and getdate(self.exp_end_date) > getdate(expected_end_date) :
+					frappe.throw(_("Expected end date cannot be after Project: <b>'{0}'</b> Expected end date").format(self.project), EndDateCannotBeGreaterThanProjectEndDateError)
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
