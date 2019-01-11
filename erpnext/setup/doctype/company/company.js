@@ -52,7 +52,7 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			frm.add_custom_button(__('Make Tax Template'), function() {
+			frm.add_custom_button(__('Create Tax Template'), function() {
 				frm.trigger("make_default_tax_template");
 			});
 
@@ -74,7 +74,7 @@ frappe.ui.form.on("Company", {
 
 			frm.add_custom_button(__('Default Tax Template'), function() {
 				frm.trigger("make_default_tax_template");
-			}, __("Make"));
+			}, __('Create'));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);

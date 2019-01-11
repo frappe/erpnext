@@ -46,40 +46,40 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.add_custom_button(
 					__('Unblock Invoice'),
 					function() {me.unblock_invoice()},
-					__('Make')
+					__('Create')
 				);
 			} else if (!doc.on_hold) {
 				this.frm.add_custom_button(
 					__('Block Invoice'),
 					function() {me.block_invoice()},
-					__('Make')
+					__('Create')
 				);
 			}
 		}
 
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
 			&& !(doc.is_return && doc.return_against)) {
-			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __('Create'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if(!doc.is_return && doc.docstatus==1) {
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Debit Note'),
-					this.make_debit_note, __("Make"));
+					this.make_debit_note, __('Create'));
 			}
 
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __("Make"))
+				}, __('Create'))
 			}
 		}
 
 		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
 			cur_frm.add_custom_button(__('Payment Request'), function() {
 				me.make_payment_request()
-			}, __("Make"));
+			}, __('Create'));
 		}
 
 		if(doc.docstatus===0) {
@@ -128,7 +128,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				if (internal == 1 && disabled == 0) {
 					me.frm.add_custom_button("Inter Company Invoice", function() {
 						me.make_inter_company_invoice(me.frm);
-					}, __("Make"));
+					}, __('Create'));
 				}
 			});
 		}

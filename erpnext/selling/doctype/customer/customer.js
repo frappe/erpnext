@@ -108,15 +108,10 @@ frappe.ui.form.on("Customer", {
 
 			frm.add_custom_button(__('Pricing Rule'), function () {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-			}, __("Make"));
+			}, __('Create'));
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
-
-			//
-			if (frm.doc.__onload.dashboard_info.loyalty_point) {
-				frm.dashboard.add_indicator(__('Loyalty Point: {0}', [frm.doc.__onload.dashboard_info.loyalty_point]), 'blue');
-			}
 
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
