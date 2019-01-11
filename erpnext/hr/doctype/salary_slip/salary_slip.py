@@ -277,7 +277,7 @@ class SalarySlip(TransactionBase):
 
 			self.add_earning_for_hourly_wages(self, self._salary_structure_doc.salary_component, wages_amount)
 
-		make_salary_slip(self._salary_structure_doc.name, self)
+		make_salary_slip(self._salary_structure_doc.name, self, employee=self.employee)
 
 	def process_salary_structure(self):
 		'''Calculate salary after salary structure details have been updated'''
@@ -441,7 +441,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-		
+
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		self.total_deduction = 0
@@ -455,7 +455,7 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
-		
+
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannnot be negative"))
 

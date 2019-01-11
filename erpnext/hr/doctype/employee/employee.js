@@ -38,6 +38,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 });
 frappe.ui.form.on('Employee',{
 	setup: function(frm) {
+		frm.add_fetch("department", "payroll_cost_center", "payroll_cost_center");
+
 		frm.set_query("leave_policy", function() {
 			return {
 				"filters": {
@@ -55,8 +57,8 @@ frappe.ui.form.on('Employee',{
 			};
 		});
 	},
-	prefered_contact_email:function(frm){		
-		frm.events.update_contact(frm)		
+	prefered_contact_email:function(frm){
+		frm.events.update_contact(frm)
 	},
 	personal_email:function(frm){
 		frm.events.update_contact(frm)

@@ -45,7 +45,7 @@ class TestEmployee(unittest.TestCase):
 		employee1_doc.status = 'Left'
 		self.assertRaises(EmployeeLeftValidationError, employee1_doc.save)
 
-def make_employee(user):
+def make_employee(user, **kwargs):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
 			"doctype": "User",
@@ -60,18 +60,20 @@ def make_employee(user):
 			"doctype": "Employee",
 			"naming_series": "EMP-",
 			"first_name": user,
-			"company": erpnext.get_default_company(),
+			"company": "_Test Company",
 			"user_id": user,
 			"date_of_birth": "1990-05-08",
 			"date_of_joining": "2013-01-01",
-			"department": frappe.get_all("Department", fields="name")[0].name,
 			"gender": "Female",
 			"company_email": user,
 			"prefered_contact_email": "Company Email",
 			"prefered_email": user,
 			"status": "Active",
 			"employment_type": "Intern"
-		}).insert()
+		})
+		if kwargs:
+			employee.update(kwargs)
+		employee.insert()
 		return employee.name
 	else:
 		return frappe.get_value("Employee", {"employee_name":user}, "name")

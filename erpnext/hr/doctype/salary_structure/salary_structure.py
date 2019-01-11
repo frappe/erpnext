@@ -126,7 +126,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 
 def get_existing_assignments(employees, salary_structure,from_date):
 	salary_structures_assignments = frappe.db.sql_list("""
-		select distinct employee from `tabSalary Structure Assignment` 
+		select distinct employee from `tabSalary Structure Assignment`
 		where salary_structure=%s and employee in (%s)
 		and from_date=%s and docstatus=1
 	""" % ('%s', ', '.join(['%s']*len(employees)),'%s'), [salary_structure] + employees+[from_date])
@@ -140,12 +140,16 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 	def postprocess(source, target):
 		if employee:
 			employee_details = frappe.db.get_value("Employee", employee,
-				["employee_name", "branch", "designation", "department"], as_dict=1)
+				["employee_name", "branch", "designation", "department", "payroll_cost_center"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name
 			target.branch = employee_details.branch
 			target.designation = employee_details.designation
 			target.department = employee_details.department
+			target.payroll_cost_center = employee_details.payroll_cost_center
+			if not target.payroll_cost_center and target.department:
+				target.payroll_cost_center = frappe.db.get_value("Department", target.department, "payroll_cost_center")
+
 		target.run_method('process_salary_structure')
 
 	doc = get_mapped_doc("Salary Structure", source_name, {

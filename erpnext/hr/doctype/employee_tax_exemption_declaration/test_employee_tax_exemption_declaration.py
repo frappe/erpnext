@@ -39,7 +39,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company": erpnext.get_default_company(),
+			"company": "_Test Company",
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -55,7 +55,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company":  erpnext.get_default_company(),
+			"company": "_Test Company",
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -70,7 +70,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company":  erpnext.get_default_company(),
+			"company":  "_Test Company",
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
 							exemption_category = "_Test Category",
@@ -87,7 +87,7 @@ def create_payroll_period():
 		payroll_period = frappe.get_doc(dict(
 			doctype = 'Payroll Period',
 			name = "_Test Payroll Period",
-			company =  erpnext.get_default_company(),
+			company =  "_Test Company",
 			start_date = date(date.today().year, 1, 1),
 			end_date = date(date.today().year, 12, 31)
 		)).insert()

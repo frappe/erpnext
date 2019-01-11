@@ -25,7 +25,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.make_holiday_list()
 
-		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", "Salary Slip Test Holiday List")
 		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
 	def tearDown(self):
@@ -65,7 +65,6 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 40500)
-		self.assertEqual(ss.net_pay, 29918)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -145,7 +144,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
-		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())[0]
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]
 		month = "%02d" % getdate(nowdate()).month
 		m = get_month_details(fiscal_year, month)
 
@@ -260,7 +259,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.rollback()
 
 	def make_holiday_list(self):
-		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
+		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")
 		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
 			holiday_list = frappe.get_doc({
 				"doctype": "Holiday List",
@@ -324,26 +323,41 @@ def make_salary_component(salary_components, test_tax):
 			frappe.get_doc(salary_component).insert()
 		get_salary_component_account(salary_component["salary_component"])
 
-def get_salary_component_account(sal_comp):
-	company = erpnext.get_default_company()
+def get_salary_component_account(sal_comp, company="_Test Company"):
+	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	sal_comp = frappe.get_doc("Salary Component", sal_comp)
-	if not sal_comp.get("accounts"):
+	if sal_comp.type == "Earning":
+		account_name = "Salary"
+		parent_account = "Indirect Expenses - " + company_abbr
+	else:
+		account_name = "Salary Deductions"
+		parent_account = "Current Liabilities - " + company_abbr
+
+	account_exists = False
+	if sal_comp.get("accounts"):
+		for d in sal_comp.accounts:
+			if d.company == company and d.default_account:
+				account_exists = True
+
+	if not account_exists:
 		sal_comp.append("accounts", {
 			"company": company,
-			"default_account": create_account(company)
+			"default_account": create_account(account_name, company, parent_account)
 		})
 		sal_comp.save()
 
-def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
-	if not salary_account:
+def create_account(account_name, company, parent_account):
+	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
+	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
+
+	if not account:
 		frappe.get_doc({
 		"doctype": "Account",
-		"account_name": "Salary",
-		"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
+		"account_name": account_name,
+		"parent_account": parent_account,
 		"company": company
 		}).insert()
-	return salary_account
+	return account
 
 def make_earning_salary_component(setup=False, test_tax=False):
 	data = [
@@ -456,7 +470,7 @@ def create_exemption_declaration(employee, payroll_period):
 	declaration = frappe.get_doc({"doctype": "Employee Tax Exemption Declaration",
 									"employee": employee,
 									"payroll_period": payroll_period,
-									"company": erpnext.get_default_company()})
+									"company": "_Test Company"})
 	declaration.append("declarations", {"exemption_sub_category": "_Test Sub Category",
 							"exemption_category": "_Test Category",
 							"amount": 100000})
@@ -527,7 +541,7 @@ def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_p
 def create_additional_salary(employee, payroll_period, amount):
 	salary_date = add_months(payroll_period.start_date, random.randint(0, 11))
 	frappe.get_doc({"doctype": "Additional Salary", "employee": employee,
-					"company": erpnext.get_default_company(),
+					"company": "_Test Company",
 					"salary_component": "Perfomance Bonus",
 					"payroll_date": salary_date,
 					"amount": amount, "type": "Earning"}).submit()

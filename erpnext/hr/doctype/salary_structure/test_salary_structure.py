@@ -85,14 +85,14 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.base, 5000)
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False, company=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 	if not frappe.db.exists('Salary Structure', salary_structure):
 		details = {
 			"doctype": "Salary Structure",
 			"name": salary_structure,
-			"company": erpnext.get_default_company(),
+			"company": company or "_Test Company",
 			"earnings": make_earning_salary_component(test_tax=test_tax),
 			"deductions": make_deduction_salary_component(test_tax=test_tax),
 			"payroll_frequency": payroll_frequency,

@@ -14,7 +14,7 @@ class TestLoan(unittest.TestCase):
 		create_loan_type("Personal Loan", 500000, 8.4)
 		self.applicant = make_employee("robert_loan@loan.com")
 		create_loan(self.applicant, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
-	
+
 	def test_loan(self):
 		loan = frappe.get_doc("Loan", {"applicant":self.applicant})
 		self.assertEquals(loan.monthly_repayment_amount, 15052)
@@ -60,10 +60,12 @@ def	create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 				"disbursement_date": nowdate(),
 				"repayment_start_date": nowdate(),
 				"status": "Disbursed",
+				"company": "_Test Company",
 				"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
-				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"interest_income_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': "_Test Company",'is_group':0}, "name"),
+				"loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': "_Test Company",'is_group':0}, "name"),
+				"interest_income_account": frappe.db.get_value('Account',
+					{'account_type': 'Cash', 'company': "_Test Company",'is_group':0}, "name")
 			})
 		loan.insert()
 		return loan
