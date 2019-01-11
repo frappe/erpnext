@@ -106,7 +106,7 @@ class GLEntry(Document):
 					"Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
-		if self.company=='_Test Company' and self.cost_center =='Main - WP':
+		if self.company=='_Test Company' and self.cost_center =='Main - WP' and self.account=="Expenses Included In Valuation - _TC":
 			print(_get_cost_center_company(), self.company)
 			import traceback
 			print(traceback.print_stack())
