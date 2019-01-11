@@ -106,12 +106,11 @@ class GLEntry(Document):
 					"Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
-		if self.company=='_Test Company' and self.cost_center =='Main - WP' and self.account=="Expenses Included In Valuation - _TC":
-			print(_get_cost_center_company(), self.company)
+		if self.voucher_no=='PREC-00023':
+			print(self.account, self.cost_center, self.company, _get_cost_center_company())
 			import traceback
 			print(traceback.print_stack())
 		if self.cost_center and frappe.db.get_value("Cost Center", self.cost_center, "company") != self.company:
-			print(self.account, self.cost_center, self.company)
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
