@@ -56,6 +56,64 @@ class TestCustomer(unittest.TestCase):
 		for key, value in iteritems(to_check):
 			self.assertEqual(value, details.get(key))
 
+	def test_party_details_tax_category(self):
+		from erpnext.accounts.party import get_party_details
+
+		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
+		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Shipping")
+
+		# Tax Category without Address
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 1")
+
+		billing_address = frappe.get_doc(dict(
+			doctype='Address',
+			address_title='_Test Address With Tax Category',
+			tax_category='_Test Tax Category 2',
+			address_type='Billing',
+			address_line1='Station Road',
+			city='_Test City',
+			country='India',
+			links=[dict(
+				link_doctype='Customer',
+				link_name='_Test Customer With Tax Category'
+			)]
+		)).insert()
+		shipping_address = frappe.get_doc(dict(
+			doctype='Address',
+			address_title='_Test Address With Tax Category',
+			tax_category='_Test Tax Category 3',
+			address_type='Shipping',
+			address_line1='Station Road',
+			city='_Test City',
+			country='India',
+			links=[dict(
+				link_doctype='Customer',
+				link_name='_Test Customer With Tax Category'
+			)]
+		)).insert()
+
+		settings = frappe.get_single("Accounts Settings")
+		rollback_setting = settings.determine_address_tax_category_from
+
+		# Tax Category from Billing Address
+		settings.determine_address_tax_category_from = "Billing Address"
+		settings.save()
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 2")
+
+		# Tax Category from Shipping Address
+		settings.determine_address_tax_category_from = "Shipping Address"
+		settings.save()
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 3")
+
+		# Rollback
+		settings.determine_address_tax_category_from = rollback_setting
+		settings.save()
+		billing_address.delete()
+		shipping_address.delete()
+
 	def test_rename(self):
 		# delete communication linked to these 2 customers
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
