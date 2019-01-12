@@ -2297,11 +2297,7 @@ DocType: Timesheet Detail,Expected Hrs,প্রত্যাশিত ঘন্�
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,মেমরিরশিপ বিস্তারিত
 DocType: Leave Block List,Block Holidays on important days.,গুরুত্বপূর্ণ দিন অবরোধ ছুটির দিন.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),সব প্রয়োজনীয় ফলাফল মান (গুলি) ইনপুট করুন
-<<<<<<< HEAD
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,গ্রহনযোগ্য অ্যাকাউন্ট সারাংশ
-=======
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,গ্রহনযোগ্য অ্যাকাউন্ট সারাংশ
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 DocType: POS Closing Voucher,Linked Invoices,লিঙ্কড ইনভয়েসেস
 DocType: Loan,Monthly Repayment Amount,মাসিক পরিশোধ পরিমাণ
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,খোলা ইনভয়েসাস
@@ -2944,11 +2940,7 @@ DocType: Journal Entry,Accounts Receivable,গ্রহনযোগ্য অ্
 DocType: Travel Itinerary,Meal Preference,খাবারের পছন্দসমূহ
 ,Supplier-Wise Sales Analytics,সরবরাহকারী প্রজ্ঞাময় বিক্রয় বিশ্লেষণ
 DocType: Purchase Invoice,Availed ITC Central Tax,আসন্ন আইটিসি কেন্দ্রীয় কর
-<<<<<<< HEAD
-DocType: POS Profile,Company Address Name,কোম্পানির ঠিকানা নাম
-=======
 DocType: Sales Invoice,Company Address Name,কোম্পানির ঠিকানা নাম
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 DocType: Work Order,Use Multi-Level BOM,মাল্টি লেভেল BOM ব্যবহার
 DocType: Bank Reconciliation,Include Reconciled Entries,মীমাংসা দাখিলা অন্তর্ভুক্ত
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","মূল কোর্স (ফাঁকা ছেড়ে দিন, যদি এই মূল কোর্সের অংশ নয়)"
@@ -3867,11 +3859,7 @@ DocType: Email Digest,Sales Orders to Bill,বিল অর্ডার বি�
 DocType: Price List,Price List Master,মূল্য তালিকা মাস্টার
 DocType: GST Account,CESS Account,CESS অ্যাকাউন্ট
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,আপনি সেট এবং নির্দেশকের লক্ষ্যমাত্রা নজর রাখতে পারেন যাতে সব বিক্রয় লেনদেন একাধিক ** বিক্রয় ব্যক্তি ** বিরুদ্ধে ট্যাগ করা যায়.
-<<<<<<< HEAD
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,উপাদান অনুরোধ লিঙ্ক
-=======
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,উপাদান অনুরোধ লিঙ্ক
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,ফোরাম কার্যক্রম
 ,S.O. No.,তাই নং
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,ব্যাংক স্টেটমেন্ট লেনদেন সেটিং আইটেম
@@ -5561,11 +5549,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,আইটেম অন�
 DocType: Employee Onboarding,Job Offer,কাজের প্রস্তাব
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,ইনস্টিটিউট সমাহার
 ,Item-wise Price List Rate,আইটেম-জ্ঞানী মূল্য তালিকা হার
-<<<<<<< HEAD
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,সরবরাহকারী উদ্ধৃতি
-=======
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,সরবরাহকারী উদ্ধৃতি
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 DocType: Quotation,In Words will be visible once you save the Quotation.,আপনি উধৃতি সংরক্ষণ একবার শব্দ দৃশ্যমান হবে.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},পরিমাণ ({0}) সারিতে ভগ্নাংশ হতে পারে না {1}
 DocType: Contract,Unsigned,অস্বাক্ষরিত
@@ -5932,11 +5916,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,প্রতি ঘণ্টা
 DocType: Blanket Order,Purchasing,ক্রয়
 DocType: Announcement,Announcement,ঘোষণা
-<<<<<<< HEAD
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,গ্রাহক এলপো
-=======
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,গ্রাহক এলপো
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","ব্যাচ ভিত্তিক স্টুডেন্ট গ্রুপের জন্য, শিক্ষার্থী ব্যাচ প্রোগ্রাম তালিকাভুক্তি থেকে শিক্ষার্থীর জন্য যাচাই করা হবে না।"
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,শেয়ার খতিয়ান এন্ট্রি এই গুদাম জন্য বিদ্যমান হিসাবে ওয়্যারহাউস মোছা যাবে না.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,বিতরণ
@@ -6625,11 +6605,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),(5 এর মধ্যে) মোট স্কোর
 DocType: Student Attendance Tool,Batch,ব্যাচ
 DocType: Support Search Source,Query Route String,প্রশ্ন রুট স্ট্রিং
-<<<<<<< HEAD
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,সর্বশেষ ক্রয় অনুযায়ী হার আপডেট করুন
-=======
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,সর্বশেষ ক্রয় অনুযায়ী হার আপডেট করুন
->>>>>>> c466825a8a1d482e57723c4be53b1d5ab1cbf1c9
 DocType: Donor,Donor Type,দাতার প্রকার
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,স্বতঃ পুনরাবৃত্ত নথি আপডেট করা হয়েছে
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,ভারসাম্য
