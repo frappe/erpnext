@@ -21,24 +21,24 @@ class TestAccountsReceivable(unittest.TestCase):
 
 		expected_data = [[100,30], [100,50], [100,20]]
 
-		self.assertEqual(expected_data[0], report[1][0][6:8])
-		self.assertEqual(expected_data[1], report[1][1][6:8])
-		self.assertEqual(expected_data[2], report[1][2][6:8])
+		self.assertEqual(expected_data[0], report[1][0][7:9])
+		self.assertEqual(expected_data[1], report[1][1][7:9])
+		self.assertEqual(expected_data[2], report[1][2][7:9])
 
 		make_payment(name)
 		report = execute(filters)
 
 		expected_data_after_payment = [[100,50], [100,20]]
 
-		self.assertEqual(expected_data_after_payment[0], report[1][0][6:8])
-		self.assertEqual(expected_data_after_payment[1], report[1][1][6:8])
+		self.assertEqual(expected_data_after_payment[0], report[1][0][7:9])
+		self.assertEqual(expected_data_after_payment[1], report[1][1][7:9])
 
 		make_credit_note(name)
 		report = execute(filters)
 
 		expected_data_after_credit_note = [[100,100,30,100,-30]]
 
-		self.assertEqual(expected_data_after_credit_note[0], report[1][0][6:11])
+		self.assertEqual(expected_data_after_credit_note[0], report[1][0][7:12])
 
 
 def make_sales_invoice():

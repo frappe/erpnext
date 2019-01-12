@@ -252,8 +252,8 @@ def get_basic_details(args, item):
 			item.get("taxes")))),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-		"qty": args.qty or 1.0,
-		"stock_qty": args.qty or 1.0,
+		"qty": flt(args.qty) or 1.0,
+		"stock_qty": flt(args.qty) or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -281,7 +281,7 @@ def get_basic_details(args, item):
 		out.conversion_factor = 1.0
 	else:
 		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.item_code, args.uom).get("conversion_factor") or 1.0
+			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
@@ -651,7 +651,7 @@ def get_conversion_factor(item_code, uom):
 	if not conversion_factor:
 		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
 		conversion_factor = get_uom_conv_factor(uom, stock_uom)
-	return {"conversion_factor": conversion_factor}
+	return {"conversion_factor": conversion_factor or 1.0}
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
