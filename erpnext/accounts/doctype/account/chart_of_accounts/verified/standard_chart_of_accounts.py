@@ -38,7 +38,12 @@ def get():
 	            },
 	            _("Tax Assets"): {
 					"is_group": 1
-				}
+				},
+                _("Goods in Transit"): {
+                    _("Letters of Credit"): {
+                        "account_type": "Payable"
+                    }
+                }
 	        },
 	        _("Fixed Assets"): {
 	            _("Capital Equipments"): {
@@ -147,10 +152,7 @@ def get():
 			        _("Creditors"): {
 			            "account_type": "Payable"
 			        },
-			        _("Payroll Payable"): {},
-			        _("Letter of Credit Payable"): {
-			            "account_type": "Payable"
-			        }
+			        _("Payroll Payable"): {}
 			    },
 			    _("Stock Liabilities"): {
 				    _("Stock Received But Not Billed"): {
