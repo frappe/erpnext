@@ -17,12 +17,12 @@ class LetterofCredit(Document):
 		else:
 			self.title = "{0}{1}".format(self.naming_prefix, self.letter_of_credit_number)
 
-	def get_default_lc_payable_account(self):
-		lc_payable_account = frappe.get_cached_value('Company',
-			{"company_name": self.company},  "default_lc_payable_account")
+	def get_default_letter_of_credit_account(self):
+		default_letter_of_credit_account = frappe.get_cached_value('Company',
+			{"company_name": self.company},  "default_letter_of_credit_account")
 
-		if not lc_payable_account:
-			frappe.throw(_("Please set Default Letter of Credit Payable Account in Company {0}")
+		if not default_letter_of_credit_account:
+			frappe.throw(_("Please set Default Letter of Credit Account in Company {0}")
 				.format(self.company))
 
-		return lc_payable_account
+		return default_letter_of_credit_account

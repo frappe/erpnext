@@ -203,7 +203,7 @@ def get_party_account(party_type, party, company):
 		elif party_type == "Supplier":
 			default_account_name = "default_payable_account"
 		else:
-			default_account_name = "default_lc_payable_account"
+			default_account_name = "default_letter_of_credit_account"
 
 		account = frappe.get_cached_value('Company',  company,  default_account_name)
 

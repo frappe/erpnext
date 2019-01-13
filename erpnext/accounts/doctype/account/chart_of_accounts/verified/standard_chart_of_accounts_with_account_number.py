@@ -52,6 +52,13 @@ def get():
                     "is_group": 1,
                     "account_number": "1500"
                 },
+                _("Goods in Transit"): {
+                    _("Letters of Credit"): {
+                        "account_type": "Payable",
+                        "account_number": "1610"
+                    },
+                    "account_number": "1600"
+                },
                 "account_number": "1100-1600"
             },
             _("Fixed Assets"): {
@@ -230,10 +237,6 @@ def get():
                     },
                     _("Payroll Payable"): {
                         "account_number": "2120"
-                    },
-                    _("Letter of Credit Payable"): {
-                        "account_type": "Payable",
-                        "account_number": "2130"
                     },
                     "account_number": "2100"
                 },
