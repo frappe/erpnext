@@ -170,6 +170,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Tax Category",
+					"description": _("Tax Category for overriding tax rates.")
+				},
+				{
+					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},
@@ -177,6 +182,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Tax Template",
+					"description": _("Tax template for item tax rates.")
 				},
 				{
 					"type": "doctype",
