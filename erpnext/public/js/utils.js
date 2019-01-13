@@ -105,31 +105,50 @@ $.extend(erpnext.utils, {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var company_wise_info = frm.doc.__onload.dashboard_info;
 			if(company_wise_info.length > 1) {
-				frm.dashboard.stats_area.removeClass('hidden');
-				frm.dashboard.stats_area_row.addClass('flex');
-				frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 				company_wise_info.forEach(function(info) {
-					frm.dashboard.stats_area_row.append(
-						'<div class="flex-column col-xs-6">'+
-							'<div style="margin-bottom:20px"><h6>'+info.company+'</h6></div>'+
-							'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">Annual Billing: '
-							+format_currency(info.billing_this_year, info.currency)+'</span></div>'+
-							'<div class="badge-link small" style="margin-bottom:20px"><span class="indicator orange">Total Unpaid: '
-							+format_currency(info.total_unpaid, info.currency)+'</span></div>'+
-						'</div>'
-					);
+					erpnext.utils.add_indicator_for_multicompany(frm, info);
 				});
-			}
-			else if (company_wise_info.length === 1) {
-				frm.dashboard.stats_area.removeClass('hidden');
-				frm.dashboard.stats_area_row.append(
-					'</div><div class="col-xs-6 small"><span class="indicator blue">Annual Billing: '
-					+format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)+'</span></div>'
-					+'<div class="col-xs-6 small"><span class="indicator orange">Total Unpaid: '
-					+format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)+'</span></div>'
-				);
+			} else if (company_wise_info.length === 1) {
+				frm.dashboard.add_indicator(__('Annual Billing: {0}',
+					[format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)]), 'blue');
+				frm.dashboard.add_indicator(__('Total Unpaid: {0}',
+					[format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)]),
+				company_wise_info[0].total_unpaid ? 'orange' : 'green');
+
+				if(company_wise_info[0].loyalty_points) {
+					frm.dashboard.add_indicator(__('Loyalty Points: {0}',
+						[company_wise_info[0].loyalty_points]), 'blue');
+				}
 			}
 		}
+	},
+
+	add_indicator_for_multicompany: function(frm, info) {
+		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area_row.addClass('flex');
+		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+
+		var color = info.total_unpaid ? 'orange' : 'green';
+
+		var indicator = $('<div class="flex-column col-xs-6">'+
+			'<div style="margin-top:10px"><h6>'+info.company+'</h6></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Annual Billing: '+format_currency(info.billing_this_year, info.currency)+'</span></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px">'+
+			'<span class="indicator '+color+'">Total Unpaid: '
+			+format_currency(info.total_unpaid, info.currency)+'</span></div>'+
+
+
+			'</div>').appendTo(frm.dashboard.stats_area_row);
+
+		if(info.loyalty_points){
+			$('<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Loyalty Points: '+info.loyalty_points+'</span></div>').appendTo(indicator);
+		}
+
+		return indicator;
 	},
 
 	get_party_name: function(party_type) {
