@@ -342,9 +342,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 	taxes_add: function() {
 		this.update_manual_distribution();
+		this.calculate_taxes_and_totals();
 	},
 	taxes_remove: function() {
 		this.update_manual_distribution();
+		this.calculate_taxes_and_totals();
 	},
 	taxes_move: function() {
 		this.update_manual_distribution();
