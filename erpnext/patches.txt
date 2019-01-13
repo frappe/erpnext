@@ -586,3 +586,4 @@ erpnext.patches.v11_0.unset_against_voucher_in_receivable_payable_gl_entry
 erpnext.patches.v11_0.set_transaction_item_alt_uom_qty
 erpnext.patches.v11_0.migrate_reference_and_clearance_to_journal_entry_accounts_table
 erpnext.patches.v11_0.rename_bom_wo_fields
+erpnext.patches.saif.rename_letter_of_credit_account
