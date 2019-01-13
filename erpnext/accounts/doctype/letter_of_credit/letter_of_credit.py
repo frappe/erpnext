@@ -13,9 +13,9 @@ class LetterofCredit(Document):
 
 	def set_title(self):
 		if self.reference_text:
-			self.title = "LC #{0} - {1}".format(self.lc_number, self.reference_text)
+			self.title = "{0}{1} - {2}".format(self.naming_prefix, self.letter_of_credit_number, self.reference_text)
 		else:
-			self.title = "LC #{0}".format(self.lc_number)
+			self.title = "{0}{1}".format(self.naming_prefix, self.letter_of_credit_number)
 
 	def get_default_lc_payable_account(self):
 		lc_payable_account = frappe.get_cached_value('Company',
