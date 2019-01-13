@@ -13,12 +13,30 @@ def setup(company=None, patch=True):
 
 def make_custom_fields(update=True):
     fiscal_code_field = dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='tax_id', print_hide=1)
+    invoice_item_fields = [
+        dict(fieldname='tax_rate', label='Tax Rate',
+			fieldtype='Float', insert_after='description',
+			print_hide=1, hidden=1, read_only=1),
+		dict(fieldname='tax_amount', label='Tax Amount',
+			fieldtype='Currency', insert_after='tax_rate',
+			print_hide=1, hidden=1, read_only=1, options="currency"),
+		dict(fieldname='total_amount', label='Total Amount',
+			fieldtype='Currency', insert_after='tax_amount',
+			print_hide=1, hidden=1, read_only=1, options="currency")
+    ]
+
     custom_fields = {
         'Company': [
             fiscal_code_field,
             dict(fieldname='fiscal_regime', label='Fiscal Regime',
 			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,                
                 options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes)))
+        ],
+        'Account': [
+            dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
+		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
+            depends_on='eval:doc.account_type==__("Tax") && doc.tax_rate==0.0',
+            options="\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons)))
         ],
         'Customer': [
             fiscal_code_field,
@@ -29,16 +47,19 @@ def make_custom_fields(update=True):
             dict(fieldname='is_public_administration', label='Is Public Administration',
 			    fieldtype='Select', insert_after='company_type', print_hide=1, description="Set this if the customer is a Public Administration company.")
         ],
-        'Sales Taxes and Charges': [
-            dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
-		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
-            options="\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons)))
-        ],
         'Mode of Payment': [
             dict(fieldname='e_invoicing_code', label='Code',
 		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
             options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)))
-        ]
+        ],
+        'Purchase Invoice Item': invoice_item_fields,
+		'Sales Order Item': invoice_item_fields,
+		'Delivery Note Item': invoice_item_fields,
+        'Sales Invoice Item': invoice_item_fields,
+		'Quotation Item': invoice_item_fields,
+		'Purchase Order Item': invoice_item_fields,
+		'Purchase Receipt Item': invoice_item_fields,
+		'Supplier Quotation Item': invoice_item_fields
     }
 
     create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
