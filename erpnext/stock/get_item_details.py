@@ -37,6 +37,7 @@ def get_item_details(args):
 			"is_subcontracted": "Yes" / "No",
 			"ignore_pricing_rule": 0/1
 			"project": ""
+			"set_warehouse": ""
 		}
 	"""
 	args = process_args(args)
@@ -194,7 +195,6 @@ def get_basic_details(args, item):
 			"project": "",
 			barcode: "",
 			serial_no: "",
-			warehouse: "",
 			currency: "",
 			update_stock: "",
 			price_list: "",
@@ -225,7 +225,7 @@ def get_basic_details(args, item):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or\
+	warehouse = args.get("set_warehouse") or user_default_warehouse or item_defaults.get("default_warehouse") or\
 		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
