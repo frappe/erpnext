@@ -589,3 +589,4 @@ erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.saif.rename_letter_of_credit_account
 erpnext.patches.v11_0.move_item_tax_to_item_tax_template
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
+erpnext.patches.v11_0.update_billing_status
