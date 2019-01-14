@@ -457,7 +457,7 @@ def get_material_request_items(row, sales_order, company, ignore_existing_ordere
 	if row['purchase_uom'] != row['stock_uom']:
 		if not row['conversion_factor']:
 			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}")
-				.format(row['purchase_uom'], row['stock_uom'], item))
+				.format(row['purchase_uom'], row['stock_uom'], row.item_code))
 		requested_qty = requested_qty / row['conversion_factor']
 
 	if frappe.db.get_value("UOM", row['purchase_uom'], "must_be_whole_number"):
@@ -546,7 +546,7 @@ def get_items_for_material_requests(doc, sales_order=None, company=None):
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or doc.get('ignore_existing_ordered_qty')
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		item_details = {}
-		if data.get("bom"):
+		if data.get("bom") or data.get("bom_no"):
 			if data.get('required_qty'):
 				bom_no = data.get('bom')
 				include_non_stock_items = 1
@@ -563,7 +563,7 @@ def get_items_for_material_requests(doc, sales_order=None, company=None):
 				if data.get('include_exploded_items') and include_subcontracted_items:
 					# fetch exploded items from BOM
 					item_details = get_exploded_items(item_details,
-						company, bom_no,include_non_stock_items, planned_qty=planned_qty)
+						company, bom_no, include_non_stock_items, planned_qty=planned_qty)
 				else:
 					item_details = get_subitems(doc, data, item_details, bom_no, company,
 						include_non_stock_items, include_subcontracted_items, 1, planned_qty=planned_qty)
@@ -591,7 +591,6 @@ def get_items_for_material_requests(doc, sales_order=None, company=None):
 					'conversion_factor' : conversion_factor,
 				}
 			)
-
 		if not sales_order:
 			sales_order = doc.get("sales_order")
 
