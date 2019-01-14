@@ -621,9 +621,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.redeem_loyalty_points = 1
 
 	def update_item(source, target, source_parent):
-		target.amount = flt(source.amount) - flt(source.billed_amt)
-		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
+		target.base_amount = (flt(source.qty) - flt(source.billed_amt)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.billed_amt)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.billed_amt)
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
@@ -651,7 +651,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
+			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.qty))
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

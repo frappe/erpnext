@@ -39,12 +39,12 @@ class SalesInvoice(SellingController):
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
 			'target_field': 'billed_amt',
-			'target_ref_field': 'amount',
+			'target_ref_field': 'qty',
 			'target_dt': 'Sales Order Item',
 			'join_field': 'so_detail',
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
-			'source_field': 'amount',
+			'source_field': 'qty',
 			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
@@ -930,7 +930,7 @@ class SalesInvoice(SellingController):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
+				billed_amt = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
