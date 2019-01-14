@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from erpnext.accounts.report.sales_register.sales_register import _execute
+import frappe
 
 def execute(filters=None):
-	return _execute(filters)
+	columns, data = [], []
+	return columns, data
