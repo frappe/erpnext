@@ -1,0 +1,21 @@
+{
+ "add_total_row": 0, 
+ "color": "green", 
+ "creation": "2019-01-13 17:43:21.903589", 
+ "disabled": 1, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "icon": "fa fa-file-code-o", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2019-01-13 19:03:56.187748", 
+ "modified_by": "Administrator", 
+ "module": "Regional", 
+ "name": "Electronic Invoice Register", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Sales Invoice", 
+ "report_name": "Electronic Invoice Register", 
+ "report_type": "Script Report", 
+ "roles": []
+}
