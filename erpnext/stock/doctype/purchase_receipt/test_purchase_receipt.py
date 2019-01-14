@@ -325,7 +325,8 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
-		"uom": args.uom or "_Test UOM"
+		"uom": args.uom or "_Test UOM",
+		"cost_center": "_Test Cost Center - _TC"
 	})
 
 	if not args.do_not_save:
