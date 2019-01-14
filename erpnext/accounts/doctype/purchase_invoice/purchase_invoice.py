@@ -39,8 +39,8 @@ class PurchaseInvoice(BuyingController):
 			'target_field': 'billed_amt',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
-			'target_ref_field': 'amount',
-			'source_field': 'amount',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'billing'
 		}]

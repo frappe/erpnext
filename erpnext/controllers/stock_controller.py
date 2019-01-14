@@ -312,7 +312,7 @@ class StockController(AccountsController):
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
-			"target_ref_field": "amount",
+			"target_ref_field": "qty",
 			"target_field": "billed_amt",
 			"name": self.name,
 		}, update_modified)

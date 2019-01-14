@@ -382,9 +382,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 		target.set_advances()
 
 	def update_item(obj, target, source_parent):
-		target.amount = flt(obj.amount) - flt(obj.billed_amt)
-		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
+		target.qty = flt(obj.qty) - flt(obj.billed_amt)
+		target.amount = (flt(obj.qty) - flt(obj.billed_amt)) * flt(obj.rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.billed_amt)) * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
