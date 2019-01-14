@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate
+from frappe.utils import flt, fmt_money, getdate, formatdate, cint
 from frappe.model.document import Document
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency
@@ -12,6 +12,8 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
+
+class ClosedAccountingPeriod(frappe.ValidationError): pass
 
 class GLEntry(Document):
 	def validate(self):
@@ -30,6 +32,7 @@ class GLEntry(Document):
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
+			self.validate_accounting_period()
 			check_freezing_date(self.posting_date, adv_adj)
 
 		validate_frozen_account(self.account, adv_adj)
@@ -96,6 +99,30 @@ class GLEntry(Document):
 		if ret.company != self.company:
 			frappe.throw(_("{0} {1}: Account {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.account, self.company))
+
+	def validate_accounting_period(self):
+		accounting_periods = frappe.db.sql(""" SELECT
+				`tabAccounting Period`.name, `tabAccounting Period`.status,
+				`tabClosed Document`.closed, `tabClosed Document`.document_type
+			FROM
+				`tabAccounting Period`, `tabClosed Document`
+			WHERE
+				`tabAccounting Period`.name = `tabClosed Document`.parent and
+				`tabAccounting Period`.company = %(company)s and `tabAccounting Period`.start_date <= %(date)s
+				and `tabAccounting Period`.end_date >= %(date)s""", {
+					'date': self.posting_date,
+					'company': self.company
+				}, as_dict=1)
+
+		if accounting_periods:
+			if accounting_periods[0].status == 'Closed':
+				frappe.throw(_("You can't create the accounting entries in the closed accounting period {0}")
+					.format(accounting_periods[0].name), ClosedAccountingPeriod)
+
+			for period in accounting_periods:
+				if period.document_type == self.voucher_type and cint(period.closed):
+					frappe.throw(_("You can't create the accounting entries in the closed accounting period {0}")
+						.format(period.name), ClosedAccountingPeriod)
 
 	def validate_cost_center(self):
 		if not hasattr(self, "cost_center_company"):

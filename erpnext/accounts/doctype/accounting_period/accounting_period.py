@@ -4,7 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
+
+class OverlapError(frappe.ValidationError): pass
 
 class AccountingPeriod(Document):
 	def validate(self):
@@ -33,12 +36,14 @@ class AccountingPeriod(Document):
 			}, as_dict=True)
 
 		if len(existing_accounting_period) > 0:
-			frappe.throw("Accounting Period overlaps with {0}".format(existing_accounting_period[0].get("name")))
+			frappe.throw(_("Accounting Period overlaps with {0}")
+				.format(existing_accounting_period[0].get("name")), OverlapError)
 
 	def get_doctypes_for_closing(self):
 		docs_for_closing = []
 		#if not self.closed_documents or len(self.closed_documents) == 0:
-		doctypes = ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Payroll Entry", "Bank Reconciliation", "Asset", "Purchase Order", "Sales Order", "Leave Application", "Leave Allocation", "Stock Entry"]
+		doctypes = ["Sales Invoice", "Purchase Invoice", "Journal Entry",
+			"Payroll Entry", "Fees", "Asset", "Stock Entry", "Purchase Receipt", "Delivery Note"]
 		closed_doctypes = [{"document_type": doctype, "closed": 1} for doctype in doctypes]
 		for closed_doctype in closed_doctypes:
 			docs_for_closing.append(closed_doctype)
@@ -49,6 +54,6 @@ class AccountingPeriod(Document):
 		if len(self.closed_documents) == 0:
 			for doctype_for_closing in self.get_doctypes_for_closing():
 				self.append('closed_documents', {
-					"document_type": doctype_for_closing.document_type,
-					"closed": doctype_for_closing.closed
+					"document_type": doctype_for_closing.get("document_type"),
+					"closed": doctype_for_closing.get("closed", 0)
 				})
