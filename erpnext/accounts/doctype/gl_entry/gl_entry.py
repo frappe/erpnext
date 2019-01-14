@@ -18,9 +18,9 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
+		self.pl_must_have_cost_center()
 		self.validate_cost_center()
 		if not self.flags.from_repost:
-			self.pl_must_have_cost_center()
 			self.check_pl_account()
 			self.validate_party()
 			self.validate_currency()
@@ -107,6 +107,7 @@ class GLEntry(Document):
 			return self.cost_center_company[self.cost_center]
 
 		if self.cost_center and frappe.db.get_value("Cost Center", self.cost_center, "company") != self.company:
+			print(self.account, self.cost_center)
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
