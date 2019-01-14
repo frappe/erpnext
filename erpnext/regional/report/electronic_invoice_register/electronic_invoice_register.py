@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.accounts.report.sales_register.sales_register import _execute
 
 def execute(filters=None):
-	columns, data = [], []
-	return columns, data
+	return _execute(filters)
