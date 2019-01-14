@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id }}</IdCodice>
+      </IdTrasmittente>
+      {%- if doc.company_fiscal_code %}
+        <CodiceFiscale>{{ doc.company_fiscal_code}}</CodiceFiscale>
+      {%- endif %}
+      <ProgressivoInvio>{{ doc.name }}</ProgressivoInvio>
+      <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
+      <CodiceDestinatario>{{ doc.recipient_code }}</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>{{ doc.company_tax_id }}</IdCodice>
+        </IdFiscaleIVA>
+        {%- if doc.company_fiscal_code %}
+        <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
+        {%- endif %}
+        <Anagrafica>
+          <Denominazione>{{ doc.company }}</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>{{ doc.fiscal_regime }}</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>{{ doc.company_address_data.address_line1 }}</Indirizzo>
+        <CAP>{{ doc.company_address_data.pincode }}</CAP>
+        <Comune>{{ doc.company_address_data.city }}</Comune>
+        {%- if doc.company_address_data.state %}
+        <Provincia>{{ doc.company_address_data.state }}</Provincia>
+        {%- endif %}
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        {%- if doc.customer_type == "Individual" %}
+        <CodiceFiscale>{{ doc.customer.fiscal_code }}</CodiceFiscale>
+        <Anagrafica>
+          <Nome>{{ doc.customer.first_name }}</Nome>
+          <Cognome>{{ doc.customer_last_name }}</Cognome>
+        </Anagrafica>
+        {%- else %}
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>{{ doc.tax_id }}</IdCodice>
+        </IDFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>{{ doc.customer_name }}</Denominazione>
+        </Anagrafica>
+        {%- endif %}
+      </DatiAnagrafici>
+      {%- if doc.customer_contact %}
+      <Contatti>
+      {%- if doc.contact.phone %}<Telefono>{{ doc.contact.phone }}</Telefono>{%- endif %}
+      {%- if doc.contact.email %}<Email>{{ doc.contact.email }}</Email>{%- endif %}
+      </Contatti>
+      {%- endif %}
+      {%- if doc.customer_address_data %}
+      <Sede>
+        <Indirizzo>{{ doc.customer_address_data.address_line1 }}</Indirizzo>
+        <CAP>{{ doc.customer_address_data.pincode }}</CAP>
+        <Comune>{{ doc.customer_address_data.city }}</Comune>
+        {%- if doc.customer_address_data.state %}
+        <Provincia>{{ doc.customer_address_data.state }}</Provincia>
+        {%- endif %}
+        <Nazione>IT</Nazione>
+      </Sede>
+      {%- endif %}
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>{{ doc.type_of_document }}</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>{{ doc.posting_date }}</Data>
+        <Numero>{{ doc.name }}</Numero>
+        <ImportoTotaleDocumento>{{ doc.grand_total }}</ImportoTotaleDocumento>
+        <Causale>VENDITA</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      {%- for item in doc.invoice_items %}
+      <DettaglioLinee>
+        <NumeroLinea>{{ item.idx }}</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>CODICE</CodiceTipo>
+          <CodiceValore>{{ item.item_code }}</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>{{ item.item_name }}</Descrizione>
+        <Quantita>{{ item.qty }}</Quantita>
+        <PrezzoUnitario>{{ item.net_rate }}</PrezzoUnitario>
+        <PrezzoTotale>{{ item.net_amount }}</PrezzoTotale>
+        <AliquotaIVA>{{ item.tax_rate }}</AliquotaIVA>
+      </DettaglioLinee>
+      {%- endfor %}
+      {%- for rate, data in doc.tax_data.items() %}
+      <DatiRiepilogo>
+        <AliquotaIVA>{{ rate }}</AliquotaIVA>
+        <ImponibileImporto>{{ data.taxable_amount }}</ImponibileImporto>
+        <Imposta>{{ data.tax_amount }}</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+      {%- endfor %}
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
