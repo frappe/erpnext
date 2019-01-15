@@ -311,9 +311,14 @@ def calculate_service_end_date(args, item=None):
 		item = frappe.get_cached_doc("Item", args.item_code)
 
 	doctype = args.get("parenttype") or args.get("doctype")
-	enable_deferred = "enable_deferred_revenue" if doctype=="Sales Invoice" else "enable_deferred_expense"
-	no_of_months = "no_of_months" if doctype=="Sales Invoice" else "no_of_months_exp"
-	account = "deferred_revenue_account" if doctype=="Sales Invoice" else "deferred_expense_account"
+	if doctype == "Sales Invoice":
+		enable_deferred = "enable_deferred_revenue"
+		no_of_months = "no_of_months"
+		account = "deferred_revenue_account"
+	else:
+		enable_deferred = "enable_deferred_expense"
+		no_of_months = "no_of_months_exp"
+		account = "deferred_expense_account"
 
 	service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
 	service_end_date = add_months(service_start_date, item.get(no_of_months))
