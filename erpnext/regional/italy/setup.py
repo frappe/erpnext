@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons, mode_of_payment_codes
+from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons, mode_of_payment_codes, vat_collectability_options
 
 def setup(company=None, patch=True):
 	make_custom_fields()
@@ -58,6 +58,11 @@ def make_custom_fields(update=True):
             dict(fieldname='e_invoicing_code', label='Code',
 		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
             options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)))
+        ],
+        "Sales Invoice": [
+            dict(fieldname='vat_collectability', label='VAT Collectability',
+			    fieldtype='Select', insert_after='taxes_and_charges', print_hide=1,
+                options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options)))
         ],
         'Purchase Invoice Item': invoice_item_fields,
 		'Sales Order Item': invoice_item_fields,
