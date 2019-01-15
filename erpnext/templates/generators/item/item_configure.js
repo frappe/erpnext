@@ -42,6 +42,7 @@ class ItemConfigure {
 
         this.append_alert_box();
         this.dialog.show();
+        $('.btn-configure').prop('disabled', false);
     }
 
     on_attribute_selection() {
@@ -168,6 +169,8 @@ class ItemConfigure {
 
 frappe.ready(() => {
     $('.btn-configure').on('click', (e) => {
+        const $btn = $(e.target);
+        $btn.prop('disabled', true);
         const { itemCode, itemName } = $(e.target).data();
         new ItemConfigure(itemCode, itemName);
     });
