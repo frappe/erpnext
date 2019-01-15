@@ -10,7 +10,7 @@
 			 <span class="text-muted">&ndash; {%= contact_list[i].designation %}</span>
 			{% } %}
 			<a href="#Form/Contact/{%= encodeURIComponent(contact_list[i].name) %}"
-				class="btn btn-xs btn-default pull-right"
+				class="btn btn-xs btn-light pull-right"
 				style="margin-top:-3px; margin-right: -5px;">
 				{%= __("Edit") %}</a>
 		</p>
@@ -33,6 +33,6 @@
 {% if(!contact_list.length) { %}
 <p class="text-muted small">{%= __("No contacts added yet.") %}</p>
 {% } %}
-<p><button class="btn btn-xs btn-default btn-contact">
+<p><button class="btn btn-xs btn-light btn-contact">
 	{{ __("New Contact") }}</button>
 </p>

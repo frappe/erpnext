@@ -23,10 +23,10 @@
 		</div>
 		<div class="text-center item-group-nav-buttons">
 			{% if frappe.form_dict.start|int > 0 %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
+			<a class="btn btn-light" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
 			{% endif %}
 			{% if items|length > page_length %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
+			<a class="btn btn-light" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
 			{% endif %}
 		</div>
 		{% else %}

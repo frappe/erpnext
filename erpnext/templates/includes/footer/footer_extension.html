@@ -1,11 +1,14 @@
 {% if not hide_footer_signup %}
-<div class='input-group input-group-sm pull-right footer-subscribe'>
-	<input class="form-control" type="text" id="footer-subscribe-email"
-		placeholder="{{ _('Your email address') }}...">
-	<span class='input-group-btn'>
-		<button class="btn btn-default" type="button"
-			id="footer-subscribe-button">{{ _("Get Updates") }}</button>
-	</span>
+<div class="input-group">
+	<input type="text" class="form-control"
+		id="footer-subscribe-email"
+		placeholder="{{ _('Your email address...') }}"
+		aria-label="{{ _('Your email address...') }}"
+		aria-describedby="footer-subscribe-button">
+	<div class="input-group-append">
+		<button class="btn btn-outline-secondary"
+			type="button" id="footer-subscribe-button">{{ _("Get Updates") }}</button>
+	</div>
 </div>
 
 <script>

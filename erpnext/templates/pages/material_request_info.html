@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a class='btn btn-xs btn-default' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
+<a class='btn btn-xs btn-light' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
 {% endblock %}
 
 {% block page_content %}
@@ -70,5 +70,5 @@
 		{% endif %}
 		{% endfor %}
 	</div>
-</div>	
+</div>
 {% endblock %}
