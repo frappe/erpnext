@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+  xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  versione="{{ doc.transmission_format_code }}" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
   <FatturaElettronicaHeader>
     <DatiTrasmissione>
       <IdTrasmittente>
@@ -11,7 +14,7 @@
       {%- endif %}
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
-      <CodiceDestinatario>{{ doc.recipient_code }}</CodiceDestinatario>
+      <CodiceDestinatario>{{ doc.customer_data.recipient_code }}</CodiceDestinatario>
     </DatiTrasmissione>
     <CedentePrestatore>
       <DatiAnagrafici>
@@ -39,11 +42,11 @@
     </CedentePrestatore>
     <CessionarioCommittente>
       <DatiAnagrafici>
-        {%- if doc.customer_type == "Individual" %}
-        <CodiceFiscale>{{ doc.customer.fiscal_code }}</CodiceFiscale>
+        {%- if doc.customer_data.customer_type == "Individual" %}
+        <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
         <Anagrafica>
-          <Nome>{{ doc.customer.first_name }}</Nome>
-          <Cognome>{{ doc.customer_last_name }}</Cognome>
+          <Nome>{{ doc.customer_data.first_name }}</Nome>
+          <Cognome>{{ doc.customer_data.last_name }}</Cognome>
         </Anagrafica>
         {%- else %}
         <IdFiscaleIVA>
@@ -55,10 +58,12 @@
         </Anagrafica>
         {%- endif %}
       </DatiAnagrafici>
-      {%- if doc.customer_contact %}
+      {%- if doc.customer_contact_data %}
       <Contatti>
-      {%- if doc.contact.phone %}<Telefono>{{ doc.contact.phone }}</Telefono>{%- endif %}
-      {%- if doc.contact.email %}<Email>{{ doc.contact.email }}</Email>{%- endif %}
+        <Telefono>{{ doc.customer_contact_data.phone or doc.customer_contact_data.mobile }}</Telefono>
+      {%- if doc.customer_contact_data.email %}
+        <Email>{{ doc.customer_contact_data.email }}</Email>
+      {%- endif %}
       </Contatti>
       {%- endif %}
       {%- if doc.customer_address_data %}
