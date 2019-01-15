@@ -14,10 +14,12 @@ def get(filters= None):
     timespan = filters.get("timespan")
     timegrain = filters.get("timegrain")
     account = filters.get("account")
+    company = filters.get("company")
+
     from_date = get_from_date_from_timespan(timespan)
     to_date = nowdate()
     filters = frappe._dict({
-        "company": "Gadget Technologies Pvt. Ltd.",
+        "company": company,
         "from_date": from_date,
         "to_date": to_date,
         "account": account,
