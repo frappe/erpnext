@@ -90,7 +90,7 @@ class TestWarehouse(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Merging 2 - _TC"}))
 
-def create_warehouse(warehouse_name):
+def create_warehouse(warehouse_name, properties=None):
 	if not frappe.db.exists("Warehouse", warehouse_name + " - _TC"):
 		w = frappe.new_doc("Warehouse")
 		w.warehouse_name = warehouse_name
@@ -98,11 +98,13 @@ def create_warehouse(warehouse_name):
 		w.company = "_Test Company"
 		make_account_for_warehouse(warehouse_name, w)
 		w.account = warehouse_name + " - _TC"
+		if properties:
+			w.update(properties)
 		w.save()
 
 def make_account_for_warehouse(warehouse_name, warehouse_obj):
 	if not frappe.db.exists("Account", warehouse_name + " - _TC"):
-		parent_account = frappe.db.get_value('Account', 
+		parent_account = frappe.db.get_value('Account',
 			{'company': warehouse_obj.company, 'is_group':1, 'account_type': 'Stock'},'name')
 		account = create_account(account_name=warehouse_name, \
 				account_type="Stock", parent_account= parent_account, company=warehouse_obj.company)
