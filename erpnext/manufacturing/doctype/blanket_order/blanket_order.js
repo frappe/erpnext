@@ -31,5 +31,12 @@ frappe.ui.form.on('Blanket Order', {
 				});
 			}).addClass("btn-primary");
 		}
+	},
+	tc_name: function(frm) {
+		erpnext.utils.get_terms(frm.doc.tc_name, frm.doc, function (r) {
+			if (!r.exc) {
+				frm.set_value("terms", r.message);
+			}
+		});
 	}
 });
