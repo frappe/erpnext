@@ -63,8 +63,8 @@ def get_products_for_website(field_filters=None, attribute_filters=None):
 	if not (field_filters or attribute_filters):
 		if frappe.form_dict:
 			search = frappe.form_dict.search
-			field_filters = parse_if_json(frappe.form_dict.field_filters)
-			attribute_filters = parse_if_json(frappe.form_dict.attribute_filters)
+			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
+			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
 
 	if attribute_filters:
 		item_codes = get_item_codes_by_attributes(attribute_filters)
@@ -107,8 +107,8 @@ def get_products_for_website(field_filters=None, attribute_filters=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_products_html_for_website(field_filters=None, attribute_filters=None):
-	field_filters = parse_if_json(field_filters)
-	attribute_filters = parse_if_json(attribute_filters)
+	field_filters = frappe.parse_json(field_filters)
+	attribute_filters = frappe.parse_json(attribute_filters)
 
 	items = get_products_for_website(field_filters, attribute_filters)
 	html = ''.join(get_html_for_items(items))
@@ -121,7 +121,7 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_items_by_attributes(attribute_filters, template_item_code=None):
-	attribute_filters = parse_if_json(attribute_filters)
+	attribute_filters = frappe.parse_json(attribute_filters)
 
 	for attribute, value in attribute_filters.items():
 		attribute_filters[attribute] = [value]
@@ -234,7 +234,7 @@ def get_attributes_and_values(item_code):
 
 @frappe.whitelist(allow_guest=True)
 def get_next_attribute_and_values(item_code, selected_attributes):
-	selected_attributes = parse_if_json(selected_attributes)
+	selected_attributes = frappe.parse_json(selected_attributes)
 
 	item_cache = ItemVariantsCacheManager(item_code)
 	item_variants_data = item_cache.get_item_variants_data()
@@ -349,10 +349,3 @@ def get_html_for_items(items):
 			'item': item
 		}))
 	return html
-
-
-def parse_if_json(dict_or_str):
-	if dict_or_str and isinstance(dict_or_str, frappe.string_types):
-		dict_or_str = json.loads(dict_or_str)
-
-	return dict_or_str
