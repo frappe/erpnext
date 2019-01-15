@@ -30,6 +30,13 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+		frm.set_query("bank_account", function() {
+			return{
+				"filters": {
+					"party": frm.doc.party,
+				}
+			}
+		});
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -832,6 +839,23 @@ frappe.ui.form.on('Payment Entry', {
 					}
 				}
 			})
+		}
+	},
+
+	bank_account: function(frm) {
+		const field = frm.doc.payment_type == "Pay" ? "paid_from":"paid_to";
+		if (frm.doc.bank_account && in_list(['Pay', 'Receive'], frm.doc.payment_type)) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account",
+				args: {
+					bank_account: frm.doc.bank_account
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value(field, r.message);
+					}
+				}
+			});
 		}
 	}
 });
