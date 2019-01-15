@@ -1,3 +1,6 @@
+{%- macro format_float(value) -%}
+{{ "%.2f" % value }}
+{%- endmacro -%}
 <?xml version='1.0' encoding='UTF-8'?>
 <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
   xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
@@ -10,7 +13,7 @@
         <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
       {%- if doc.company_fiscal_code %}
-        <CodiceFiscale>{{ doc.company_fiscal_code}}</CodiceFiscale>
+        <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
       {%- endif %}
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
@@ -28,7 +31,7 @@
         <Anagrafica>
           <Denominazione>{{ doc.company }}</Denominazione>
         </Anagrafica>
-        <RegimeFiscale>{{ doc.fiscal_regime }}</RegimeFiscale>
+        <RegimeFiscale>{{ doc.fiscal_regime.split("-")[0] }}</RegimeFiscale>
       </DatiAnagrafici>
       <Sede>
         <Indirizzo>{{ doc.company_address_data.address_line1 }}</Indirizzo>
@@ -51,21 +54,13 @@
         {%- else %}
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>{{ doc.tax_id }}</IdCodice>
+          <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>{{ doc.customer_name }}</Denominazione>
         </Anagrafica>
         {%- endif %}
       </DatiAnagrafici>
-      {%- if doc.customer_contact_data %}
-      <Contatti>
-        <Telefono>{{ doc.customer_contact_data.phone or doc.customer_contact_data.mobile }}</Telefono>
-      {%- if doc.customer_contact_data.email %}
-        <Email>{{ doc.customer_contact_data.email }}</Email>
-      {%- endif %}
-      </Contatti>
-      {%- endif %}
       {%- if doc.customer_address_data %}
       <Sede>
         <Indirizzo>{{ doc.customer_address_data.address_line1 }}</Indirizzo>
@@ -85,8 +80,8 @@
         <TipoDocumento>{{ doc.type_of_document }}</TipoDocumento>
         <Divisa>EUR</Divisa>
         <Data>{{ doc.posting_date }}</Data>
-        <Numero>{{ doc.name }}</Numero>
-        <ImportoTotaleDocumento>{{ doc.grand_total }}</ImportoTotaleDocumento>
+        <Numero>{{ doc.progressive_number }}</Numero>
+        <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
         <Causale>VENDITA</Causale>
       </DatiGeneraliDocumento>
     </DatiGenerali>
@@ -99,18 +94,24 @@
           <CodiceValore>{{ item.item_code }}</CodiceValore>
         </CodiceArticolo>
         <Descrizione>{{ item.item_name }}</Descrizione>
-        <Quantita>{{ item.qty }}</Quantita>
-        <PrezzoUnitario>{{ item.net_rate }}</PrezzoUnitario>
-        <PrezzoTotale>{{ item.net_amount }}</PrezzoTotale>
-        <AliquotaIVA>{{ item.tax_rate }}</AliquotaIVA>
+        <Quantita>{{ format_float(item.qty) }}</Quantita>
+        <PrezzoUnitario>{{ format_float(item.net_rate) }}</PrezzoUnitario>
+        <PrezzoTotale>{{ format_float(item.net_amount) }}</PrezzoTotale>
+        <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
+        {%- if item.tax_exemption_reason %}
+        <Natura>{{ item.tax_exemption_reason.split("-")[0] }}</Natura>
+        {%- endif %}
       </DettaglioLinee>
       {%- endfor %}
-      {%- for rate, data in doc.tax_data.items() %}
+      {%- for tax, data in doc.tax_data.items() %}
       <DatiRiepilogo>
-        <AliquotaIVA>{{ rate }}</AliquotaIVA>
-        <ImponibileImporto>{{ data.taxable_amount }}</ImponibileImporto>
-        <Imposta>{{ data.tax_amount }}</Imposta>
-        <EsigibilitaIVA>I</EsigibilitaIVA>
+        <AliquotaIVA>{{ format_float(data.tax_rate) }}</AliquotaIVA>
+        <ImponibileImporto>{{ format_float(data.taxable_amount) }}</ImponibileImporto>
+        <Imposta>{{ format_float(data.tax_amount) }}</Imposta>
+        <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
+        {%- if data.tax_exemption_reason %}
+        <Natura>{{ data.tax_exemption_reason.split("-")[0] }}</Natura>
+        {%- endif %}
       </DatiRiepilogo>
       {%- endfor %}
     </DatiBeniServizi>
