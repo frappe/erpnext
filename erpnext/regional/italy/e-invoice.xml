@@ -106,12 +106,12 @@
       {%- for tax, data in doc.tax_data.items() %}
       <DatiRiepilogo>
         <AliquotaIVA>{{ format_float(data.tax_rate) }}</AliquotaIVA>
-        <ImponibileImporto>{{ format_float(data.taxable_amount) }}</ImponibileImporto>
-        <Imposta>{{ format_float(data.tax_amount) }}</Imposta>
-        <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
         {%- if data.tax_exemption_reason %}
         <Natura>{{ data.tax_exemption_reason.split("-")[0] }}</Natura>
         {%- endif %}
+        <ImponibileImporto>{{ format_float(data.taxable_amount) }}</ImponibileImporto>
+        <Imposta>{{ format_float(data.tax_amount) }}</Imposta>
+        <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
       </DatiRiepilogo>
       {%- endfor %}
     </DatiBeniServizi>
