@@ -846,7 +846,7 @@ frappe.ui.form.on('Payment Entry', {
 		const field = frm.doc.payment_type == "Pay" ? "paid_from":"paid_to";
 		if (frm.doc.bank_account && in_list(['Pay', 'Receive'], frm.doc.payment_type)) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account",
+				method: "erpnext.accounts.doctype.bank_account.bank_account.get_account_from_bank_acc",
 				args: {
 					bank_account: frm.doc.bank_account
 				},

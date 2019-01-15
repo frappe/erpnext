@@ -32,9 +32,7 @@ def make_bank_account(doctype, docname):
 
 	return doc
 
-
 @frappe.whitelist()
-def get_bank_account(bank_account):
-	if bank_account:
-		return frappe.db.get_value('Bank Account',
-			bank_account, 'account')
+def get_account_from_bank_acc(name):
+	return frappe.db.get_value('Bank Account',
+		name, 'account')
