@@ -266,7 +266,15 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			if item_code in filtered_items and set(attr_dict.keys()) == set(selected_attributes.keys()):
 				exact_match.append(item_code)
 
-	return next_attribute, valid_options_for_attributes, len(filtered_items), exact_match
+	filtered_items_count = len(filtered_items)
+
+	return {
+		'next_attribute': next_attribute,
+		'valid_options_for_attributes': valid_options_for_attributes,
+		'filtered_items_count': filtered_items_count,
+		'filtered_items': filtered_items if filtered_items_count < 10 else [],
+		'exact_match': exact_match
+	}
 
 
 def get_items_with_selected_attributes(item_code, selected_attributes):
