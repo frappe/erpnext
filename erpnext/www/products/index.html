@@ -2,84 +2,91 @@
 {% from "erpnext/templates/includes/macros.html" import product_image_square %}
 
 {% block title %}{{ _('Products') }}{% endblock %}
-{% block header %}<h1>{{ _('Products') }}</h1>{% endblock header %}
+{% block header %}
+<h1>{{ _('Products') }}</h1>
+{% endblock header %}
 
 {% block page_content %}
 <div class="row">
-    <div class="col-8 products-list">
-        {% if items %}
-            {% for item in items %}
-                {% include "erpnext/www/products/item_row.html" %}
-            {% endfor %}
-        {% else %}
-            {% include "erpnext/www/products/not_found.html" %}
-        {% endif %}
-    </div>
-    <div class="col-4">
-        <div class="col-8 p-0">
-            <div class="input-group input-group-sm mb-3">
-                <input type="search" class="form-control" placeholder="Search"
-                    aria-label="Product Search" aria-describedby="product-search"
-                    value="{{ frappe.form_dict.search or '' }}"
-                >
-            </div>
-        </div>
+	<div class="col-8 products-list">
+		{% if items %}
+			{% for item in items %}
+				{% include "erpnext/www/products/item_row.html" %}
+			{% endfor %}
+		{% else %}
+			{% include "erpnext/www/products/not_found.html" %}
+		{% endif %}
+	</div>
+	<div class="col-4">
 
-        {% for field_filter in field_filters %}
-            {%- set item_field =  field_filter[0] %}
-            {%- set values =  field_filter[1] %}
-            <div class="mb-4">
-                <h6>{{ item_field.label }}</h6>
+		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.search %}
+		<a class="mb-3 d-inline-block" href="/products">{{ _('Reset filters') }}</a>
+		{% endif  %}
 
-                <div class="filter-options">
-                    {% for value in values %}
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox"
-                            class="product-filter field-filter custom-control-input"
-                            id="{{value}}"
-                            data-filter-name="{{ item_field.fieldname }}"
-                            data-filter-value="{{ value }}"
-                        >
-                        <label class="custom-control-label" for="{{value}}">
-                            {{ value }}
-                        </label>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
+		<div class="col-8 p-0">
+			<div class="input-group input-group-sm mb-3">
+				<input type="search" class="form-control" placeholder="Search"
+					aria-label="Product Search" aria-describedby="product-search"
+					value="{{ frappe.form_dict.search or '' }}"
+				>
+			</div>
+		</div>
 
-        {% for attribute in attribute_filters %}
-            <div class="mb-4">
-                <h6>{{ attribute.name }}</h6>
+		{% for field_filter in field_filters %}
+			{%- set item_field =  field_filter[0] %}
+			{%- set values =  field_filter[1] %}
+			<div class="mb-4">
+				<h6>{{ item_field.label }}</h6>
 
-                <div class="filter-options">
-                    {% for attr_value in attribute.item_attribute_values %}
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox"
-                            class="product-filter attribute-filter custom-control-input"
-                            id="{{attr_value.name}}"
-                            data-attribute-name="{{ attribute.name }}"
-                            data-attribute-value="{{ attr_value.attribute_value }}"
-                            {% if attr_value.checked %} checked {% endif %}
-                        >
-                        <label class="custom-control-label" for="{{attr_value.name}}">
-                            {{ attr_value.attribute_value }}
-                        </label>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-    <div class="col-12">
-        {% if frappe.form_dict.start|int > 0 %}
-        <a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
-        {% endif %}
-        {% if items|length >= page_length %}
-        <a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
-        {% endif %}
-    </div>
+				<div class="filter-options">
+					{% for value in values %}
+					<div class="custom-control custom-checkbox">
+						<input type="checkbox"
+							class="product-filter field-filter custom-control-input"
+							id="{{value}}"
+							data-filter-name="{{ item_field.fieldname }}"
+							data-filter-value="{{ value }}"
+						>
+						<label class="custom-control-label" for="{{value}}">
+							{{ value }}
+						</label>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		{% endfor %}
+
+		{% for attribute in attribute_filters %}
+			<div class="mb-4">
+				<h6>{{ attribute.name }}</h6>
+
+				<div class="filter-options">
+					{% for attr_value in attribute.item_attribute_values %}
+					<div class="custom-control custom-checkbox">
+						<input type="checkbox"
+							class="product-filter attribute-filter custom-control-input"
+							id="{{attr_value.name}}"
+							data-attribute-name="{{ attribute.name }}"
+							data-attribute-value="{{ attr_value.attribute_value }}"
+							{% if attr_value.checked %} checked {% endif %}
+						>
+						<label class="custom-control-label" for="{{attr_value.name}}">
+							{{ attr_value.attribute_value }}
+						</label>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+	<div class="col-12">
+		{% if frappe.form_dict.start|int > 0 %}
+		<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
+		{% endif %}
+		{% if items|length >= page_length %}
+		<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
+		{% endif %}
+	</div>
 </div>
 
 {% endblock %}
