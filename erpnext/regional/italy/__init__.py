@@ -55,3 +55,9 @@ mode_of_payment_codes = [
     "MP21-SEPA Direct Debit B2B",
     "MP22-Trattenuta su somme già riscosse"
 ]
+
+vat_collectability_options = [
+    "I-Immediata",
+    "D-Differita",
+    "S-Scissione dei Pagamenti"
+]
