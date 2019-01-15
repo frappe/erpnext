@@ -185,6 +185,9 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if party_naming_by == "Naming Series":
 			cols += ["party_name"]
 
+		if args.get("party_type") == 'Customer':
+			cols += ["contact"]
+
 		cols += ["voucher_type", "voucher_no", "due_date"]
 
 		if args.get("party_type") == "Supplier":
