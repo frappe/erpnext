@@ -19,11 +19,14 @@ def update_itemised_tax_data(doc):
 	
 def get_rate_wise_tax_data(items):
 	tax_data = {}
-	for rate in set([item.tax_rate for item in items]):
-		tax_data.setdefault(str(rate), {
-			"taxable_amount": sum([item.net_amount for item in items if item.tax_rate == rate]),
-			"tax_amount": sum([item.tax_amount for item in items if item.tax_rate == rate])
-		})
+	for rate in set([item.item_tax_rate for item in items]):
+		for key, value in json.loads(rate).items():
+			tax_data.setdefault(key, {
+				"tax_rate": value,
+				"taxable_amount": sum([item.net_amount for item in items if item.item_tax_rate == rate]),
+				"tax_amount": sum([item.tax_amount for item in items if item.item_tax_rate == rate]),
+				"tax_exemption_reason": frappe.db.get_value("Account", key, "tax_exemption_reason")
+			})
 	return tax_data
 
 @frappe.whitelist()
@@ -56,10 +59,10 @@ def prepare_invoice(invoice):
 	company_fiscal_code, fiscal_regime, company_tax_id = frappe.db.get_value("Company", invoice.company, ["fiscal_code", "fiscal_regime", "tax_id"])
 	invoice["progressive_number"] = extract_doc_number(invoice)
 	invoice["company_fiscal_code"] = company_fiscal_code
-	invoice["fiscal_regime"] = fiscal_regime.split("-")[0] #If RF-01-Ordinario, only take RF01
+	invoice["fiscal_regime"] = fiscal_regime
 	invoice["company_tax_id"] = company_tax_id
 	invoice["company_address_data"] = frappe.get_doc("Address", invoice.company_address)
-	
+
 	#Set invoice type
 	if invoice.is_return and invoice.return_against:
 		invoice["type_of_document"] = "TD04" #Credit Note (Nota di Credito)
@@ -69,7 +72,10 @@ def prepare_invoice(invoice):
 	#set customer information
 	invoice["customer_data"] = frappe.get_doc("Customer", invoice.customer)
 	invoice["customer_address_data"] = frappe.get_doc("Address", invoice.customer_address)
-	invoice["customer_contact_data"] = frappe.get_doc("Contact", invoice.contact_person)
+
+
+	if not invoice["vat_collectability"]:
+		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability") 
 
 	if invoice["customer_data"].is_public_administration:
 		invoice["transmission_format_code"] = "FPA12"
@@ -77,7 +83,13 @@ def prepare_invoice(invoice):
 		invoice["transmission_format_code"] = "FPR12"
 	
 	#append items
-	invoice["invoice_items"] = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
+	items = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
+	for item in items:
+		tax_rate = json.loads(item.item_tax_rate)
+		for account, rate in tax_rate.items():
+			item["tax_exemption_reason"] = frappe.db.get_value("Account", account, "tax_exemption_reason")
+
+	invoice["invoice_items"] = items
 
 	#tax rate wise grouping of tax amount and taxable amount.
 	invoice["tax_data"] = get_rate_wise_tax_data(invoice["invoice_items"])
