@@ -22,9 +22,11 @@
 			{% include "templates/generators/item/item_specifications.html" %}
 		</div>
 
+		{% if frappe.db.get_value('Products Settings', 'Products Settings', 'show_item_attribute_table') %}
 		<div class="row">
 			{% include "templates/generators/item/item_variant_table.html" %}
 		</div>
+		{% endif %}
 
 		<div class="row">
 			<div class="filtered-item-variants col-7" style="display: none">

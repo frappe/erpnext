@@ -227,7 +227,7 @@ def get_attributes_and_values(item_code):
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
 	for attr in attributes:
-		attr['valid_values'] = valid_options[attr.attribute]
+		attr['valid_values'] = valid_options.get(attr.attribute, [])
 
 	return attributes
 
