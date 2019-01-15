@@ -34,14 +34,17 @@ def export_invoices(filters=None):
 		invoice = prepare_invoice(invoice)
 		invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
 
-		xml_filename = "{company_tax_id}_{invoice_name}.xml".format(company_tax_id=invoice["company_tax_id"], invoice_name=invoice.name)
+		xml_filename = "{company_tax_id}_{invoice_number}.xml".format(
+			company_tax_id=invoice["company_tax_id"], 
+			invoice_number=extract_doc_number(invoice)
+		)
 		xml_filename = frappe.get_site_path("private", "files", xml_filename)
 		
 		with open(xml_filename, "wb") as xml_file:
 			xml_file.write(invoice_xml)
 			saved_xmls.append(xml_filename)
 
-	zip_filename = "test_output_{0}.zip".format(frappe.generate_hash(length=6))
+	zip_filename = "e-invoices_{0}.zip".format(frappe.generate_hash(length=6))
 	
 	download_zip(saved_xmls, zip_filename)
 	
@@ -51,9 +54,10 @@ def export_invoices(filters=None):
 def prepare_invoice(invoice):
 	#set company information
 	company_fiscal_code, fiscal_regime, company_tax_id = frappe.db.get_value("Company", invoice.company, ["fiscal_code", "fiscal_regime", "tax_id"])
+	invoice["progressive_number"] = extract_doc_number(invoice)
 	invoice["company_fiscal_code"] = company_fiscal_code
 	invoice["fiscal_regime"] = fiscal_regime.split("-")[0] #If RF-01-Ordinario, only take RF01
-	invoice["company_tax_id"] = company_tax_id.replace("IT", "").strip() #Remove prefix "IT" if it exists
+	invoice["company_tax_id"] = company_tax_id
 	invoice["company_address_data"] = frappe.get_doc("Address", invoice.company_address)
 	
 	#Set invoice type
@@ -73,7 +77,7 @@ def prepare_invoice(invoice):
 		invoice["transmission_format_code"] = "FPR12"
 	
 	#append items
-	invoice["invoice_items"] = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"])
+	invoice["invoice_items"] = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
 
 	#tax rate wise grouping of tax amount and taxable amount.
 	invoice["tax_data"] = get_rate_wise_tax_data(invoice["invoice_items"])
@@ -116,3 +120,17 @@ def download_zip(files, output_filename):
 def cleanup_files(files):
 	#TODO: Clean up XML files after ZIP gets downloaded
 	pass
+
+def extract_doc_number(doc):
+	if not hasattr(doc, "naming_series"):
+		return doc.name
+	
+	name_parts = doc.name.split("-")
+
+	if hasattr(doc, "amended_from"):
+		if doc.amended_from:
+			return name_parts[-2:-1][0]
+		else:
+			return name_parts[-1:][0]
+	else:
+		return doc.name

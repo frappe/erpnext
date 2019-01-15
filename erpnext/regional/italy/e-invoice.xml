@@ -4,12 +4,12 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id }}</IdCodice>
+        <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
       {%- if doc.company_fiscal_code %}
         <CodiceFiscale>{{ doc.company_fiscal_code}}</CodiceFiscale>
       {%- endif %}
-      <ProgressivoInvio>{{ doc.name }}</ProgressivoInvio>
+      <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
       <CodiceDestinatario>{{ doc.recipient_code }}</CodiceDestinatario>
     </DatiTrasmissione>
@@ -17,7 +17,7 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>{{ doc.company_tax_id }}</IdCodice>
+          <IdCodice>{{ doc.company_tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
         {%- if doc.company_fiscal_code %}
         <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
@@ -49,7 +49,7 @@
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
           <IdCodice>{{ doc.tax_id }}</IdCodice>
-        </IDFiscaleIVA>
+        </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>{{ doc.customer_name }}</Denominazione>
         </Anagrafica>
