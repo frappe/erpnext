@@ -69,7 +69,7 @@ def prepare_invoice(invoice):
 	#set customer information
 	invoice["customer_data"] = frappe.get_doc("Customer", invoice.customer)
 	invoice["customer_address_data"] = frappe.get_doc("Address", invoice.customer_address)
-	invoice["contact_data"] = frappe.get_doc("Contact", invoice.contact_person)
+	invoice["customer_contact_data"] = frappe.get_doc("Contact", invoice.contact_person)
 
 	if invoice["customer_data"].is_public_administration:
 		invoice["transmission_format_code"] = "FPA12"
