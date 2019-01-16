@@ -6,6 +6,7 @@ import frappe
 import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint
+from six import iteritems
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
@@ -19,6 +20,11 @@ class PartyLedgerSummaryReport(object):
 
 		self.filters.party_type = args.get("party_type")
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
+
+		discount_account_field = "discount_allowed_account" if self.filters.party_type == "Customer" \
+			else "discount_received_account"
+		self.round_off_account, self.write_off_account, self.discount_account = frappe.get_cached_value('Company',
+			self.filters.company, ["round_off_account", "write_off_account", discount_account_field])
 
 		columns = self.get_columns()
 		data = self.get_data()
@@ -42,6 +48,8 @@ class PartyLedgerSummaryReport(object):
 			})
 
 		credit_or_debit_note = "Credit Note" if self.filters.party_type == "Customer" else "Debit Note"
+		discount_allowed_or_received = "Discount Allowed" if self.filters.party_type == "Customer" else "Discount Received"
+
 		columns += [
 			{
 				"label": _("Opening Balance"),
@@ -72,8 +80,22 @@ class PartyLedgerSummaryReport(object):
 				"width": 120
 			},
 			{
+				"label": _(discount_allowed_or_received),
+				"fieldname": "discount_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
 				"label": _("Write Off Amount"),
 				"fieldname": "write_off_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
+				"label": _("Other Adjustments"),
+				"fieldname": "adjustment_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
@@ -106,18 +128,17 @@ class PartyLedgerSummaryReport(object):
 
 		self.get_gl_entries()
 		self.get_return_invoices()
-		self.get_party_write_off_amounts()
+		self.get_party_adjustment_amounts()
 
 		self.party_data = frappe._dict({})
 		for gle in self.gl_entries:
 			self.party_data.setdefault(gle.party, frappe._dict({
 				"party": gle.party,
-				"party_name": "", # TODO add party_name
+				"party_name": "",  # TODO add party_name
 				"opening_balance": 0,
 				"invoiced_amount": 0,
-				"paid_amount": -self.party_write_off_amounts.get(gle.party, 0),
+				"paid_amount": 0,
 				"return_amount": 0,
-				"write_off_amount": self.party_write_off_amounts.get(gle.party, 0),
 				"closing_balance": 0,
 				"currency": company_currency
 			}))
@@ -135,8 +156,18 @@ class PartyLedgerSummaryReport(object):
 				else:
 					self.party_data[gle.party].paid_amount -= amount
 
-		return [d for d in self.party_data.values() if d.opening_balance or d.invoiced_amount or d.paid_amount
-			or d.return_amount or d.write_off_amount or d.closing_amount]
+		out = []
+		for party, row in iteritems(self.party_data):
+			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
+				total_party_adjustment = sum([amount for account, amount in iteritems(self.party_adjustment_details.get(party, {}))])
+				row.paid_amount -= total_party_adjustment
+				row.discount_amount = self.party_adjustment_details.get(party, {}).get(self.discount_account, 0)
+				row.write_off_amount = self.party_adjustment_details.get(party, {}).get(self.write_off_account, 0)
+				row.adjustment_amount = total_party_adjustment - row.discount_amount - row.write_off_amount
+
+				out.append(row)
+
+		return out
 
 	def get_gl_entries(self):
 		conditions = self.prepare_conditions()
@@ -215,12 +246,11 @@ class PartyLedgerSummaryReport(object):
 		self.return_invoices = [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1,
 			"posting_date": ["between", [self.filters.from_date, self.filters.to_date]]})]
 
-	def get_party_write_off_amounts(self):
+	def get_party_adjustment_amounts(self):
 		conditions = self.prepare_conditions()
-		income_or_expense = "Expense Account" if self.filters.party_type == "Customer" else "Income Account"
+		income_or_expense = "Expense" if self.filters.party_type == "Customer" else "Income"
 		invoice_dr_or_cr = "debit" if self.filters.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "credit" if self.filters.party_type == "Customer" else "debit"
-		round_off_account = frappe.get_cached_value('Company', self.filters.company, "round_off_account")
 
 		gl_entries = frappe.db.sql("""
 			select
@@ -231,7 +261,7 @@ class PartyLedgerSummaryReport(object):
 				docstatus < 2
 				and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
-					where acc.name = gle.account and acc.account_type = '{income_or_expense}'
+					where acc.name = gle.account and acc.root_type = '{income_or_expense}'
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2
 				) and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle
@@ -241,39 +271,42 @@ class PartyLedgerSummaryReport(object):
 			order by posting_date
 		""".format(conditions=conditions, income_or_expense=income_or_expense), self.filters, as_dict=True)
 
-		self.party_write_off_amounts = {}
-		write_off_voucher_entries = {}
+		self.party_adjustment_details = {}
+		adjustment_voucher_entries = {}
 		for gle in gl_entries:
-			write_off_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
-			write_off_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
+			adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
+			adjustment_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
 
-		for voucher, voucher_gl_entries in write_off_voucher_entries.iteritems():
+		for voucher, voucher_gl_entries in iteritems(adjustment_voucher_entries):
 			parties = {}
-			write_offs = {}
+			accounts = {}
 			has_irrelevant_entry = False
 
 			for gle in voucher_gl_entries:
-				if gle.account == round_off_account:
+				if gle.account == self.round_off_account:
 					continue
 				elif gle.party:
 					parties.setdefault(gle.party, 0)
 					parties[gle.party] += gle.get(reverse_dr_or_cr) - gle.get(invoice_dr_or_cr)
-				elif frappe.get_cached_value("Account", gle.account, "account_type") == income_or_expense:
-					write_offs.setdefault(gle.account, 0)
-					write_offs[gle.account] += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
+				elif frappe.get_cached_value("Account", gle.account, "root_type") == income_or_expense:
+					accounts.setdefault(gle.account, 0)
+					accounts[gle.account] += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 				else:
 					has_irrelevant_entry = True
 
-			if parties and write_offs:
+			if parties and accounts:
 				if len(parties) == 1:
-					for account, amount in write_offs.iteritems():
-						party = parties.keys()[0]
-						self.party_write_off_amounts.setdefault(party, 0)
-						self.party_write_off_amounts[party] += amount
-				elif len(write_offs) == 1 and not has_irrelevant_entry:
-					for party, amount in parties.iteritems():
-						self.party_write_off_amounts.setdefault(party, 0)
-						self.party_write_off_amounts[party] += amount
+					party = parties.keys()[0]
+					for account, amount in iteritems(accounts):
+						self.party_adjustment_details.setdefault(party, {})
+						self.party_adjustment_details[party].setdefault(account, 0)
+						self.party_adjustment_details[party][account] += amount
+				elif len(accounts) == 1 and not has_irrelevant_entry:
+					account = accounts.keys()[0]
+					for party, amount in iteritems(parties):
+						self.party_adjustment_details.setdefault(party, {})
+						self.party_adjustment_details[party].setdefault(account, 0)
+						self.party_adjustment_details[party][account] += amount
 
 def execute(filters=None):
 	args = {
