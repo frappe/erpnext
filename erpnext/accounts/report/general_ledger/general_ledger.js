@@ -129,6 +129,12 @@ frappe.query_reports["General Ledger"] = {
 			}
 		},
 		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person",
+		},
+		{
 			"fieldname":"voucher_no",
 			"label": __("Voucher No"),
 			"fieldtype": "Data",

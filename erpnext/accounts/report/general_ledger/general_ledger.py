@@ -194,6 +194,14 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
 
+	if filters.get("sales_person"):
+		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
+		conditions.append("""exists(select name from `tabSales Team` steam where
+			steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
+			and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
+				or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
+				or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
+
 	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
 	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
 		filters['finance_book'] = company_finance_book
