@@ -1,5 +1,6 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
@@ -442,7 +443,6 @@ erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017 #22-11-2
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
-erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
 erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
