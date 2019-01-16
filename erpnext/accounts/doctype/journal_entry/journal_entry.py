@@ -920,7 +920,7 @@ def get_outstanding(args):
 		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
 		invoice = frappe.db.get_value(args["doctype"], args["docname"],
 			["outstanding_amount", "conversion_rate", scrub(party_type)]
-				+ ["letter_of_credit"] if args.get("doctype") == "Purchase Invoice" else [], as_dict=1)
+				+ (["letter_of_credit"] if args.get("doctype") == "Purchase Invoice" else []), as_dict=1)
 
 		if invoice.get("letter_of_credit"):
 			party_type = "Letter of Credit"
