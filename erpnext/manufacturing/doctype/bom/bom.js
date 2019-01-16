@@ -121,9 +121,11 @@ frappe.ui.form.on("BOM", {
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false
+				from_child_bom:false,
+				save: false
 			},
 			callback: function(r) {
+				refresh_field("items");
 				if(!r.exc) frm.refresh_fields();
 			}
 		});
