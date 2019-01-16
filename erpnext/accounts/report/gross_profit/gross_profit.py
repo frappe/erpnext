@@ -200,7 +200,7 @@ class GrossProfitGenerator(object):
 
 	def skip_row(self, row, product_bundles):
 		if self.filters.get("group_by") != "Invoice":
-			if not row.get(scrub(self.filters.get("group_by"))):
+			if not row.get(scrub(self.filters.get("group_by", ""))):
 				return True
 		elif row.get("is_return") == 1:
 			return True
@@ -316,7 +316,7 @@ class GrossProfitGenerator(object):
 					on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
 				{sales_team_table}
 			where
-				`tabSales Invoice`.docstatus=1 {conditions} {match_cond}
+				`tabSales Invoice`.docstatus=1 and `tabSales Invoice`.is_opening!='Yes' {conditions} {match_cond}
 			order by
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
 			.format(conditions=conditions, sales_person_cols=sales_person_cols,
