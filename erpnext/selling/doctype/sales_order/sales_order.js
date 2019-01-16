@@ -367,7 +367,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 		]
 		var d = new frappe.ui.Dialog({
-			title: __("Select from Items having BOM"),
+			title: __("Items for Raw Material Request"),
 			fields: fields,
 			primary_action: function() {
 				var data = d.get_values();
