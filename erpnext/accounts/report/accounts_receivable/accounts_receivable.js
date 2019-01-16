@@ -103,6 +103,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"show_pdc_in_print",
 			"label": __("Show PDC in Print"),
 			"fieldtype": "Check",
