@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
+from collections import OrderedDict
+from six import iteritems
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -18,8 +20,10 @@ class ReceivablePayableReport(object):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 		columns = self.get_columns(party_naming_by, args)
 		data = self.get_data(party_naming_by, args)
+		data_out = self.get_grouped_data(columns, data)
 		chart = self.get_chart_data(columns, data)
-		return columns, data, None, chart
+
+		return columns, data_out, None, chart
 
 	def get_columns(self, party_naming_by, args):
 		columns = [
@@ -322,6 +326,40 @@ class ReceivablePayableReport(object):
 						data.append(row)
 		return data
 
+	def get_grouped_data(self, columns, data):
+		if not self.filters.get("group_by") or self.filters.get("group_by") == "Ungrouped":
+			return data
+
+		total_fields = [c['fieldname'] for c in columns
+			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
+		group_field = self.filters.get("group_by").replace("Group by ", "")
+		group_fieldname = scrub(group_field)
+		group_fieldname = "party" if group_fieldname in ['customer', 'supplier'] else group_fieldname
+		group_rows = OrderedDict()
+		group_totals = {}
+		for row in data:
+			group = row.get(group_fieldname)
+			group_rows.setdefault(group, [])
+			group_rows[group].append(row)
+
+			group_totals.setdefault(group, {})
+			for total_field in total_fields:
+				group_totals[group].setdefault(total_field, 0)
+				group_totals[group][total_field] += row[total_field]
+
+		out = []
+		for group, rows in iteritems(group_rows):
+			group_totals[group]['party'] = "'Total for {0}'".format(group)
+			if group_fieldname == 'party':
+				group_totals[group]['currency'] = rows[0]['currency']
+
+			out.append({"party": "'{0}: {1}'".format(group_field, group)})
+			out += rows
+			out.append(group_totals[group])
+			out.append({})
+
+		return out
+
 	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
 		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
 
@@ -460,7 +498,7 @@ class ReceivablePayableReport(object):
 		if args.get("party_type") == "Customer":
 			row["territory"] = self.get_territory(gle.party)
 			row["customer_group"] = self.get_customer_group(gle.party)
-			row["sales_person"] = self.voucher_details.get(gle.voucher_no, {}).get("sales_person")
+			row["sales_person"] = self.get_sales_person(gle.voucher_no, gle.against_voucher, gle.party)
 		if args.get("party_type") == "Supplier":
 			row["supplier_group"] = self.get_supplier_group(gle.party)
 
@@ -522,23 +560,39 @@ class ReceivablePayableReport(object):
 		return self.get_party_map(party_type).get(party_name, {}).get("customer_primary_contact")
 
 	def get_territory(self, party_name):
-		return self.get_party_map("Customer").get(party_name, {}).get("territory") or ""
+		return self.get_party_map("Customer").get(party_name, {}).get("territory")
+
+	def get_sales_person(self, voucher_no, against_voucher, party_name):
+		return self.voucher_details.get(voucher_no, {}).get("sales_person")\
+			or self.voucher_details.get(against_voucher, {}).get("sales_person")\
+			or self.get_party_map("Customer").get(party_name, {}).get("sales_person")
 
 	def get_customer_group(self, party_name):
-		return self.get_party_map("Customer").get(party_name, {}).get("customer_group") or ""
+		return self.get_party_map("Customer").get(party_name, {}).get("customer_group")
 
 	def get_supplier_group(self, party_name):
-		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_group") or ""
+		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_group")
 
 	def get_party_map(self, party_type):
 		if not hasattr(self, "party_map"):
 			if party_type == "Customer":
-				select_fields = "name, customer_name, territory, customer_group, customer_primary_contact"
+				party_data = frappe.db.sql("""
+					select
+						p.name, p.customer_name, p.territory, p.customer_group, p.customer_primary_contact,
+						GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person
+					from `tabCustomer` p
+					left join `tabSales Team` steam on steam.parent = p.name and steam.parenttype = 'Customer'
+					group by p.name
+				""", as_dict=True)
 			elif party_type == "Supplier":
-				select_fields = "name, supplier_name, supplier_group"
+				party_data = frappe.db.sql("""
+					select p.name, p.supplier_name, p.supplier_group
+					from `tabSupplier` p
+				""", as_dict=True)
+			else:
+				party_data = []
 
-			self.party_map = dict(((r.name, r) for r in frappe.db.sql("select {0} from `tab{1}`"
-				.format(select_fields, party_type), as_dict=True)))
+			self.party_map = dict([(r.name, r) for r in party_data])
 
 		return self.party_map
 
