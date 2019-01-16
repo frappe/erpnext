@@ -341,11 +341,11 @@ class SalesOrder(SellingController):
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-		
+
 		if tot_qty != 0:
 			self.db_set("per_delivered", flt(delivered_qty/tot_qty) * 100,
 				update_modified=False)
-		
+
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -372,24 +372,33 @@ class SalesOrder(SellingController):
 	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
-
 		for table in [self.items, self.packed_items]:
 			for i in table:
 				bom = get_default_bom_item(i.item_code)
-				if bom:
-					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					if not for_raw_material_request:
-						total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
-							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
-						pending_qty = stock_qty - total_work_order_qty
-					else:
-						pending_qty = stock_qty
+				stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
+				if not for_raw_material_request:
+					total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
+						where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+					pending_qty = stock_qty - total_work_order_qty
+				else:
+					pending_qty = stock_qty
 
-					if pending_qty:
+				if pending_qty:
+					if bom:
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
 							bom = bom,
+							warehouse = i.warehouse,
+							pending_qty = pending_qty,
+							required_qty = pending_qty if for_raw_material_request else 0,
+							sales_order_item = i.name
+						))
+					else:
+						items.append(dict(
+							name= i.name,
+							item_code= i.item_code,
+							bom = '',
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
 							required_qty = pending_qty if for_raw_material_request else 0,
@@ -623,7 +632,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
+		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty - source.returned_qty
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
@@ -923,10 +932,12 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	for item in items.get('items'):
 		item["include_exploded_items"] = items.get('include_exploded_items')
 		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
+		item["include_raw_materials_from_sales_order"] = items.get('include_raw_materials_from_sales_order')
 
-	raw_materials = get_items_for_material_requests(items, company)
+	raw_materials = get_items_for_material_requests(items, sales_order, company)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
+		return
 
 	material_request = frappe.new_doc('Material Request')
 	material_request.update(dict(
