@@ -10,7 +10,6 @@ from erpnext.accounts.report.general_ledger.general_ledger import execute
 
 
 def get(filters= None):
-	print(filters)
 	timespan = filters.get("timespan")
 	timegrain = filters.get("timegrain")
 	account = filters.get("account")
