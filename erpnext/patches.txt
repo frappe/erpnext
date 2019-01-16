@@ -1,9 +1,9 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
 erpnext.patches.v10_0.rename_schools_to_education
-erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee
