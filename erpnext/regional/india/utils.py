@@ -11,7 +11,7 @@ def validate_gstin_for_india(doc, method):
 	if not hasattr(doc, 'gstin'):
 		return
 
-	doc.gstin = doc.gstin.upper().strip()
+	doc.gstin = doc.gstin.upper().strip() if doc.gstin else ""
 	if not doc.gstin or doc.gstin == 'NA':
 		return
 
