@@ -21,8 +21,6 @@ class TestPricingRule(unittest.TestCase):
 		from erpnext.stock.get_item_details import get_item_details
 		from frappe import MandatoryError
 
-
-
 		test_record = {
 			"doctype": "Pricing Rule",
 			"title": "_Test Pricing Rule",
@@ -93,7 +91,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)
-		self.assertEqual(details.get("discount_percentage"), 15)
+		self.assertEquals(details.get("discount_percentage"), 15)
 
 	def test_pricing_rule_for_margin(self):
 		from erpnext.stock.get_item_details import get_item_details
@@ -137,8 +135,8 @@ class TestPricingRule(unittest.TestCase):
 			"name": None
 		})
 		details = get_item_details(args)
-		self.assertEqual(details.get("margin_type"), "Percentage")
-		self.assertEqual(details.get("margin_rate_or_amount"), 10)
+		self.assertEquals(details.get("margin_type"), "Percentage")
+		self.assertEquals(details.get("margin_rate_or_amount"), 10)
 
 	def test_pricing_rule_for_variants(self):
 		from erpnext.stock.get_item_details import get_item_details
@@ -253,6 +251,7 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_with_margin_and_discount(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
 		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10, discount_percentage=10)
 		si = create_sales_invoice(do_not_save=True)
 		si.items[0].price_list_rate = 1000
@@ -260,12 +259,11 @@ class TestPricingRule(unittest.TestCase):
 		si.insert(ignore_permissions=True)
 
 		item = si.items[0]
-		self.assertEqual(item.margin_rate_or_amount, 10)
-		self.assertEqual(item.rate_with_margin, 1100)
+		self.assertEquals(item.margin_rate_or_amount, 10)
+		self.assertEquals(item.rate_with_margin, 1100)
 		self.assertEqual(item.discount_percentage, 10)
-		self.assertEqual(item.discount_amount, 110)
-		self.assertEqual(item.rate, 990)
-
+		self.assertEquals(item.discount_amount, 110)
+		self.assertEquals(item.rate, 990)
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
