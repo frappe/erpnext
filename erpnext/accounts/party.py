@@ -567,7 +567,7 @@ def get_partywise_advanced_payment_amount(party_type="Customer"):
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
 		WHERE party_type = %s and against_voucher is null GROUP BY party"""
-		.format("credit" if party_type == "Customer" else "debit") , party_type, debug=1)
+		.format(("credit - debit") if party_type == "Customer" else "debit") , party_type, debug=1)
 
 	if data:
 		return frappe._dict(data)

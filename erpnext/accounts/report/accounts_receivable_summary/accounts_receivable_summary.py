@@ -25,8 +25,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
 
 		columns += [{
-			"label": _("On Account Amount"),
-			"fieldname": "on_account_amt",
+			"label": _("Advance Amount"),
+			"fieldname": "advance_amount",
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 100
