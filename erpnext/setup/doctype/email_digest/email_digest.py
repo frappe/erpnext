@@ -640,10 +640,10 @@ class EmailDigest(Document):
 		date_field = 'posting_date' if doc_type in ['Sales Invoice', 'Purchase Invoice'] \
 			else 'transaction_date'
 
-		value = self.get_total_on(doc_type, self.future_from_date, self.future_to_date)[0]
-		count = self.get_total_on(doc_type, self.future_from_date, self.future_to_date)[1]
+		value = flt(self.get_total_on(doc_type, self.future_from_date, self.future_to_date)[0].grand_total)
+		count = self.get_total_on(doc_type, self.future_from_date, self.future_to_date)[0].count
 
-		last_value =self.get_total_on(doc_type, self.past_from_date, self.past_to_date)[0]
+		last_value = flt(self.get_total_on(doc_type, self.past_from_date, self.past_to_date)[0].grand_total)
 
 		filters = {
 			date_field: [['>=', self.future_from_date], ['<=', self.future_to_date]],
@@ -666,10 +666,13 @@ class EmailDigest(Document):
 		date_field = 'posting_date' if doc_type in ['Sales Invoice', 'Purchase Invoice'] \
 			else 'transaction_date'
 
-		return frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tab{0}`
-			where ({1} between %(from_date)s and %(to_date)s) and company=%(company)s
-			and status not in ('Cancelled')""".format(doc_type, date_field),
-			{"from_date": from_date, "to_date": to_date, "company": self.company})[0]
+		return frappe.get_all(doc_type,
+			filters={
+				date_field: ['between', (from_date, to_date)],
+				'status': ['not in', ('Cancelled')],
+				'company': self.company
+			},
+			fields=['count(*) as count', 'sum(grand_total) as grand_total'])
 
 	def get_from_to_date(self):
 		today = now_datetime().date()
