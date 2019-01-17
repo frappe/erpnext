@@ -30,13 +30,6 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
-		frm.set_query("bank_account", function() {
-			return{
-				"filters": {
-					"party": frm.doc.party,
-				}
-			}
-		});
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {

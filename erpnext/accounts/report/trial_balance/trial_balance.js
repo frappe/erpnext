@@ -83,8 +83,8 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldtype": "Check"
 			},
 			{
-				"fieldname": "include_non_finance_book_entries",
-				"label": __("Include Non Finance Book Entries"),
+				"fieldname": "include_default_book_entries",
+				"label": __("Include Default Book Entries"),
 				"fieldtype": "Check"
 			}
 		],
