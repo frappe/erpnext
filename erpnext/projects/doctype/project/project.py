@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-import datetime
 from frappe import _
 from six import iteritems
 from email_reply_parser import EmailReplyParser
@@ -476,7 +475,7 @@ def send_project_update_email_to_users(project):
 		"naming_series": "UPDATE-.project.-.YY.MM.DD.-",
 	}).insert()
 
-	subject = "<b>Project %s</b> update your project status" % (project)
+	subject = "For project %s, update your status" % (project)
 
 	incoming_email_account = frappe.db.get_value('Email Account',
 		dict(enable_incoming=1, default_incoming=1), 'email_id')
@@ -490,7 +489,7 @@ def send_project_update_email_to_users(project):
 	)
 
 def collect_project_status():
-	for data in frappe.get_all("Project Update", 
+	for data in frappe.get_all("Project Update",
 		{'date': today(), 'sent': 0}):
 		replies = frappe.get_all('Communication',
 			fields=['content', 'text_content', 'sender'],
@@ -517,7 +516,7 @@ def collect_project_status():
 			doc.save(ignore_permissions=True)
 
 def send_project_status_email_to_users():
-	yesterday = today()
+	yesterday = add_days(today(), -1)
 
 	for d in frappe.get_all("Project Update",
 		{'date': yesterday, 'sent': 0}):
