@@ -24,11 +24,9 @@ def get(filters= None):
 		"account": account,
 		"group_by": "Group by Voucher (Consolidated)"
 	})
-	report_columns, report_results = execute(filters=filters)
+	report_results = execute(filters=filters)[1]
 
 	interesting_fields = ["posting_date", "balance"]
-
-	columns = [column for column in report_columns if column["fieldname"] in interesting_fields]
 
 	_results = []
 	for row in report_results[1:-2]:
@@ -68,15 +66,13 @@ def add_opening_balance(from_date, _results, opening):
 	return _results
 
 def add_missing_dates(incomplete_results, from_date, to_date):
-	dates = [r[0] for r in incomplete_results]
 	day_count = date_diff(to_date, from_date)
 
 	results_dict = dict(incomplete_results)
-	last_date, last_balance = incomplete_results[0]
+	last_balance = incomplete_results[0][1]
 	results = []
 	for date in (add_to_date(getdate(from_date), days=n) for n in range(day_count + 1)):
 		if date in results_dict:
-			last_date = date
 			last_balance = results_dict[date]
 		results.append([date, last_balance])
 	return results
