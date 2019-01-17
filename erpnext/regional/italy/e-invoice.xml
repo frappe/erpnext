@@ -1,6 +1,16 @@
 {%- macro format_float(value) -%}
 {{ "%.2f" % value }}
 {%- endmacro -%}
+
+{%- macro render_address(address) -%}
+<Indirizzo>{{ address.address_line1 }}</Indirizzo>
+<CAP>{{ address.pincode }}</CAP>
+<Comune>{{ address.city }}</Comune>
+{%- if address.state %}
+<Provincia>{{ address.state }}</Provincia>
+{%- endif %}
+<Nazione>IT</Nazione>
+{%- endmacro -%}
 <?xml version='1.0' encoding='UTF-8'?>
 <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
   xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
@@ -34,13 +44,7 @@
         <RegimeFiscale>{{ doc.fiscal_regime.split("-")[0] }}</RegimeFiscale>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>{{ doc.company_address_data.address_line1 }}</Indirizzo>
-        <CAP>{{ doc.company_address_data.pincode }}</CAP>
-        <Comune>{{ doc.company_address_data.city }}</Comune>
-        {%- if doc.company_address_data.state %}
-        <Provincia>{{ doc.company_address_data.state }}</Provincia>
-        {%- endif %}
-        <Nazione>IT</Nazione>
+      {{ render_address(doc.company_address_data) }}
       </Sede>
     </CedentePrestatore>
     <CessionarioCommittente>
@@ -63,13 +67,7 @@
       </DatiAnagrafici>
       {%- if doc.customer_address_data %}
       <Sede>
-        <Indirizzo>{{ doc.customer_address_data.address_line1 }}</Indirizzo>
-        <CAP>{{ doc.customer_address_data.pincode }}</CAP>
-        <Comune>{{ doc.customer_address_data.city }}</Comune>
-        {%- if doc.customer_address_data.state %}
-        <Provincia>{{ doc.customer_address_data.state }}</Provincia>
-        {%- endif %}
-        <Nazione>IT</Nazione>
+      {{ render_address(doc.customer_address_data) }}
       </Sede>
       {%- endif %}
     </CessionarioCommittente>
@@ -91,6 +89,13 @@
         <Data>{{ doc.po_date }}</Data>
         {%- endif %}
       </DatiOrdineAcquisto>
+      {%- endif %}
+      {%- if doc.shipping_address_data %}
+      <DatiTrasporto>
+      <IndirizzoResa>
+        {{ render_address(doc.shipping_address_data) }}
+      </IndirizzoResa>
+      </DatiTrasporto>
       {%- endif %}
     </DatiGenerali>
     <DatiBeniServizi>
