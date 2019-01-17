@@ -292,7 +292,11 @@ class EmailDigest(Document):
 
 		income_account = frappe.db.get_all('Account',
 			fields=["name"],
-			filters={"root_type":"Income", "parent_account":''})
+			filters={
+				"root_type":"Income",
+				"parent_account":'',
+				"company": self.company
+			})
 
 		label = get_link_to_report("General Ledger",self.meta.get_label("income"),
 			filters={"company": self.company,
@@ -364,7 +368,12 @@ class EmailDigest(Document):
 
 		expense_account = frappe.db.get_all('Account',
 			fields=["name"],
-			filters={"root_type":"Expense", "parent_account":''})
+			filters={
+				"root_type": "Expense",
+				"parent_account": '',
+				"company": self.company
+				}
+			)
 
 		label = get_link_to_report("General Ledger",self.meta.get_label("expenses_booked"),
 			filters={"company":self.company,
