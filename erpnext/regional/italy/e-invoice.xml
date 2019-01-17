@@ -84,6 +84,14 @@
         <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
         <Causale>VENDITA</Causale>
       </DatiGeneraliDocumento>
+      {%- if doc.po_no %}
+      <DatiOrdineAcquisto>
+        <IdDocumento>{{ doc.po_no }}</IdDocumento>
+        {%- if doc.po_date %}
+        <Data>{{ doc.po_date }}</Data>
+        {%- endif %}
+      </DatiOrdineAcquisto>
+      {%- endif %}
     </DatiGenerali>
     <DatiBeniServizi>
       {%- for item in doc.invoice_items %}
