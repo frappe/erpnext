@@ -104,8 +104,8 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	if filters.finance_book:
 		fb_conditions = " and finance_book = %(finance_book)s"
-		if filters.include_non_finance_book_entries:
-			fb_conditions = " and (finance_book = %(finance_book)s or finance_book is null)"
+		if filters.include_default_book_entries:
+			fb_conditions = " and (finance_book in (%(finance_book)s, %(company_fb)s) or finance_book is null)"
 
 		additional_conditions += fb_conditions
 
@@ -124,7 +124,8 @@ def get_rootwise_opening_balances(filters, report_type):
 			"from_date": filters.from_date,
 			"report_type": report_type,
 			"year_start_date": filters.year_start_date,
-			"finance_book": filters.finance_book
+			"finance_book": filters.finance_book,
+			"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
 		},
 		as_dict=True)
 
