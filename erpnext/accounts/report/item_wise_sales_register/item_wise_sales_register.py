@@ -90,7 +90,7 @@ def get_columns(additional_table_columns):
 		_("Income Account") + ":Link/Account:140", _("Cost Center") + ":Link/Cost Center:140",
 		_("Stock Qty") + ":Float:120", _("Stock UOM") + "::100",
 		_("Rate") + ":Currency/currency:120",
-		_("Amount") + ":Currency/currency:120"
+		_("Net Total") + ":Currency/currency:120"
 	]
 
 	return columns
@@ -267,6 +267,6 @@ def get_tax_accounts(item_list, columns, company_currency,
 		columns.append(desc + " Rate:Data:80")
 		columns.append(desc + " Amount:Currency/currency:100")
 
-	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:100"]
+	columns += ["Total Tax:Currency/currency:80", "Grand Total:Currency/currency:100"]
 
 	return itemised_tax, tax_columns
