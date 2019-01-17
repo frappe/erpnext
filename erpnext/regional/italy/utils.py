@@ -73,6 +73,8 @@ def prepare_invoice(invoice):
 	invoice["customer_data"] = frappe.get_doc("Customer", invoice.customer)
 	invoice["customer_address_data"] = frappe.get_doc("Address", invoice.customer_address)
 
+	if invoice.shipping_address_name:
+		invoice["shipping_address_data"] = frappe.get_doc("Address", invoice.shipping_address_name)
 
 	if not invoice["vat_collectability"]:
 		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability") 
