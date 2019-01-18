@@ -42,6 +42,15 @@ class ReceivablePayableReport(object):
 			}
 		]
 
+		if args.get("party_type") == 'Customer':
+			columns.append({
+				"label": _("Customer Contact"),
+				"fieldtype": "Link",
+				"fieldname": "contact",
+				"options":"Contact",
+				"width": 100
+			})
+
 		if party_naming_by == "Naming Series":
 			columns.append({
 				"label": _(args.get("party_type") + " Name"),
@@ -407,6 +416,9 @@ class ReceivablePayableReport(object):
 		if party_naming_by == "Naming Series":
 			row["party_name"] = self.get_party_name(gle.party_type, gle.party)
 
+		if args.get("party_type") == 'Customer':
+			row += [self.get_customer_contact(gle.party_type, gle.party)]
+
 		# get due date
 		if not due_date:
 			due_date = self.voucher_details.get(gle.voucher_no, {}).get("due_date", "")
@@ -543,6 +555,9 @@ class ReceivablePayableReport(object):
 
 	def get_party_name(self, party_type, party_name):
 		return self.get_party_map(party_type).get(party_name, {}).get("customer_name" if party_type == "Customer" else "supplier_name") or ""
+
+	def get_customer_contact(self, party_type, party_name):
+		return self.get_party_map(party_type).get(party_name, {}).get("customer_primary_contact")
 
 	def get_territory(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("territory")
