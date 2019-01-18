@@ -49,12 +49,12 @@ def make_custom_fields(update=True):
             dict(fieldname='pec', label='Recipient PEC',
                 fieldtype='Data', insert_after='fiscal_code', print_hide=1),
             dict(fieldname='is_public_administration', label='Is Public Administration',
-			    fieldtype='Check', insert_after='is_internal_customer', print_hide=1, 
-                description=_("Set this if the customer is a Public Administration company."), 
+			    fieldtype='Check', insert_after='is_internal_customer', print_hide=1,
+                description=_("Set this if the customer is a Public Administration company."),
                 depends_on='eval:doc.customer_type=="Company"'),
-            dict(fieldname='first_name', label='First Name', fieldtype='Data', 
+            dict(fieldname='first_name', label='First Name', fieldtype='Data',
                 insert_after='salutation', print_hide=1, depends_on='eval:doc.customer_type!="Company"'),
-            dict(fieldname='last_name', label='Last Name', fieldtype='Data', 
+            dict(fieldname='last_name', label='Last Name', fieldtype='Data',
                 insert_after='first_name', print_hide=1, depends_on='eval:doc.customer_type!="Company"')
         ],
         'Mode of Payment': [
