@@ -36,6 +36,7 @@ def get_item_details(args):
 			"is_subcontracted": "Yes" / "No",
 			"ignore_pricing_rule": 0/1
 			"project": ""
+			"set_warehouse": ""
 		}
 	"""
 	args = process_args(args)
@@ -193,7 +194,6 @@ def get_basic_details(args, item):
 			"project": "",
 			barcode: "",
 			serial_no: "",
-			warehouse: "",
 			currency: "",
 			update_stock: "",
 			price_list: "",
@@ -223,7 +223,7 @@ def get_basic_details(args, item):
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 
-	warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or\
+	warehouse = args.get("set_warehouse") or user_default_warehouse or item_defaults.get("default_warehouse") or\
 		item_group_defaults.get("default_warehouse") or args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
@@ -254,8 +254,8 @@ def get_basic_details(args, item):
 		"batch_no": None,
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-		"qty": args.qty or 1.0,
-		"stock_qty": args.qty or 1.0,
+		"qty": flt(args.qty) or 1.0,
+		"stock_qty": flt(args.qty) or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -275,7 +275,7 @@ def get_basic_details(args, item):
 		"transaction_date": args.get("transaction_date")
 	})
 
-	if item.enable_deferred_revenue:
+	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		out.update(calculate_service_end_date(args, item))
 
 	# calculate conversion factor
@@ -365,9 +365,15 @@ def calculate_service_end_date(args, item=None):
 	if not item:
 		item = frappe.get_cached_doc("Item", args.item_code)
 
-	enable_deferred = "enable_deferred_revenue" if args.doctype=="Sales Invoice" else "enable_deferred_expense"
-	no_of_months = "no_of_months" if args.doctype=="Sales Invoice" else "no_of_months_exp"
-	account = "deferred_revenue_account" if args.doctype=="Sales Invoice" else "deferred_expense_account"
+	doctype = args.get("parenttype") or args.get("doctype")
+	if doctype == "Sales Invoice":
+		enable_deferred = "enable_deferred_revenue"
+		no_of_months = "no_of_months"
+		account = "deferred_revenue_account"
+	else:
+		enable_deferred = "enable_deferred_expense"
+		no_of_months = "no_of_months_exp"
+		account = "deferred_expense_account"
 
 	service_start_date = args.service_start_date if args.service_start_date else args.transaction_date
 	service_end_date = add_months(service_start_date, item.get(no_of_months))
@@ -391,7 +397,7 @@ def get_default_expense_account(args, item, item_group):
 		or args.expense_account)
 
 def get_default_deferred_account(args, item, fieldname=None):
-	if item.enable_deferred_revenue:
+	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		return (item.get(fieldname)
 			or args.get(fieldname)
 			or frappe.get_cached_value('Company',  args.company,  "default_"+fieldname))
@@ -419,21 +425,23 @@ def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
 	if meta.get_field("currency") or args.get('currency'):
+		pl_details = get_price_list_currency_and_exchange_rate(args)
+		args.update(pl_details)
 		validate_price_list(args)
 		if meta.get_field("currency") and args.price_list:
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
+		# variant
+		if not price_list_rate and item_doc.variant_of:
+			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+
 		# insert in database
 		if not price_list_rate:
 			if args.price_list and args.rate:
 				insert_item_price(args)
 			return {}
-
-		# variant
-		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
@@ -603,9 +611,10 @@ def validate_conversion_rate(args, meta):
 		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate,
 			meta.get_label("plc_conversion_rate"), args.company)
 
-		args.plc_conversion_rate = flt(args.plc_conversion_rate,
-			get_field_precision(meta.get_field("plc_conversion_rate"),
-			frappe._dict({"fields": args})))
+		if meta.get_field("plc_conversion_rate"):
+			args.plc_conversion_rate = flt(args.plc_conversion_rate,
+				get_field_precision(meta.get_field("plc_conversion_rate"),
+				frappe._dict({"fields": args})))
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
@@ -841,7 +850,7 @@ def get_price_list_uom_dependant(price_list):
 		if not result:
 			throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
-		return result.price_not_uom_dependant
+		return not result.price_not_uom_dependant
 
 
 def get_price_list_currency_and_exchange_rate(args):

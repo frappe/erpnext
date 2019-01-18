@@ -27,7 +27,7 @@ def get_sle(**args):
 		values.append(value)
 
 	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, name desc limit 1"""% condition,
+		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
 class TestStockEntry(unittest.TestCase):
