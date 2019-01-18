@@ -62,6 +62,7 @@ def prepare_invoice(invoice):
 	invoice["fiscal_regime"] = fiscal_regime
 	invoice["company_tax_id"] = company_tax_id
 	invoice["company_address_data"] = frappe.get_doc("Address", invoice.company_address)
+	invoice["company_contact_data"] = frappe.db.get_value("Company", filters=invoice.company, fieldname=["phone_no", "email"], as_dict=1)
 
 	#Set invoice type
 	if invoice.is_return and invoice.return_against:
