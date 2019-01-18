@@ -572,7 +572,7 @@ execute:frappe.delete_doc_if_exists("Page", "sales-analytics")
 execute:frappe.delete_doc_if_exists("Page", "purchase-analytics")
 execute:frappe.delete_doc_if_exists("Page", "stock-analytics")
 execute:frappe.delete_doc_if_exists("Page", "production-analytics")
-erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13 #2019-01-09
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
