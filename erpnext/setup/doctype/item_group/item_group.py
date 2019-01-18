@@ -136,7 +136,10 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 			rgt = ('<', item_group.rgt),
 		),
 		or_filters = search_filters,
-		order_by = 'weightage desc, name asc')
+		order_by = 'weightage desc, name asc',
+		start = start,
+		limit = limit
+	)
 
 	return [get_item_for_list_in_html(r) for r in data]
 
