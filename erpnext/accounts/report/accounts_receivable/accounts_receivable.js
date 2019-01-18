@@ -157,7 +157,10 @@ frappe.query_reports["Accounts Receivable"] = {
 			events: {
 				accumulator: function(acc, cell, row, row_count) {
 					if (row.posting_date) {
-						return frappe.utils.report_accumulator(acc, cell, row, row_count);
+						frappe.utils.report_accumulator(acc, cell, row, row_count);
+						if (cell.column.fieldname == "age" && cell.rowIndex === row_count-1) {
+							acc.content = flt(acc.content) / row_count;
+						}
 					}
 				}
 			}
