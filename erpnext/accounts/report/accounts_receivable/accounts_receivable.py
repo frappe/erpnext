@@ -417,7 +417,7 @@ class ReceivablePayableReport(object):
 			row["party_name"] = self.get_party_name(gle.party_type, gle.party)
 
 		if args.get("party_type") == 'Customer':
-			row += [self.get_customer_contact(gle.party_type, gle.party)]
+			row["contact"] = self.get_customer_contact(gle.party_type, gle.party)
 
 		# get due date
 		if not due_date:
