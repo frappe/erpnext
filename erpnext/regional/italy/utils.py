@@ -38,7 +38,7 @@ def export_invoices(filters=None):
 		invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
 
 		xml_filename = "{company_tax_id}_{invoice_number}.xml".format(
-			company_tax_id=invoice["company_tax_id"], 
+			company_tax_id=invoice["company_tax_id"],
 			invoice_number=extract_doc_number(invoice)
 		)
 		xml_filename = frappe.get_site_path("private", "files", xml_filename)
@@ -77,18 +77,18 @@ def prepare_invoice(invoice):
 		invoice["shipping_address_data"] = frappe.get_doc("Address", invoice.shipping_address_name)
 
 	if not invoice["vat_collectability"]:
-		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability") 
+		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability")
 
 	if invoice["customer_data"].is_public_administration:
 		invoice["transmission_format_code"] = "FPA12"
 	else:
 		invoice["transmission_format_code"] = "FPR12"
 	
-	#append items
+	#append items, and tax exemption reason.
 	items = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
 	for item in items:
-		tax_rate = json.loads(item.item_tax_rate)
-		for account, rate in tax_rate.items():
+		item_tax_rate = json.loads(item.item_tax_rate)
+		for account in item_tax_rate.keys():
 			item["tax_exemption_reason"] = frappe.db.get_value("Account", account, "tax_exemption_reason")
 
 	invoice["invoice_items"] = items
