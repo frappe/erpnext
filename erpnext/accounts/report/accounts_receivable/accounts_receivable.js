@@ -150,5 +150,17 @@ frappe.query_reports["Accounts Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
 		});
+	},
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			events: {
+				accumulator: function(acc, cell, row, row_count) {
+					if (row.posting_date) {
+						return frappe.utils.report_accumulator(acc, cell, row, row_count);
+					}
+				}
+			}
+		});
 	}
 }
