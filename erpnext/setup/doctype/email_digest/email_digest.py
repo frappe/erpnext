@@ -299,10 +299,11 @@ class EmailDigest(Document):
 			})
 
 		label = get_link_to_report("General Ledger",self.meta.get_label("income"),
-			filters={"company": self.company,
+			filters={
 				"from_date": self.future_from_date,
 				"to_date": self.future_to_date,
-				"account": income_account[0].name
+				"account": income_account[0].name,
+				"company": self.company
 			}
 		)
 		return {
@@ -332,14 +333,16 @@ class EmailDigest(Document):
 		if fieldname == 'income':
 			filters = {
 				"root_type": "Income",
-				"report_date":self.future_to_date,
+				"report_date": self.future_to_date,
+				"company": self.company
 			}
 			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
 
 		elif fieldname == 'expenses_booked':
 			filters = {
 				"root_type": "Expense",
-				"report_date":self.future_to_date,
+				"report_date": self.future_to_date,
+				"company": self.company
 			}
 			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
 
@@ -376,10 +379,11 @@ class EmailDigest(Document):
 			)
 
 		label = get_link_to_report("General Ledger",self.meta.get_label("expenses_booked"),
-			filters={"company":self.company,
-			"from_date":self.future_from_date,
-			"to_date":self.future_to_date,
-			"account": expense_account[0].name
+			filters={
+				"company":self.company,
+				"from_date":self.future_from_date,
+				"to_date":self.future_to_date,
+				"account": expense_account[0].name
 			}
 		)
 		return {
@@ -414,7 +418,8 @@ class EmailDigest(Document):
 			filters = {
 				"status": [['!=', "Closed"], ['!=', "Cancelled"], ['!=', "Completed"]],
 				"billing_status": [['!=', "Fully Billed"]],
-				"transaction_date": [['<=', self.future_to_date]]
+				"transaction_date": [['<=', self.future_to_date]],
+				"company": self.company
 			}
 		)
 
@@ -438,7 +443,8 @@ class EmailDigest(Document):
 			filters = {
 				"status": [['!=', "Closed"], ['!=', "Cancelled"], ['!=', "Completed"]],
 				"delivery_status": [['!=', "Fully Delivered"]],
-				"transaction_date": [['<=', self.future_to_date]]
+				"transaction_date": [['<=', self.future_to_date]],
+				"company": self.company
 			}
 		)
 
@@ -462,7 +468,8 @@ class EmailDigest(Document):
 			filters = {
 				"status": [['!=', "Closed"], ['!=', "Cancelled"], ['!=', "Completed"]],
 				"per_received": [['<', 100]],
-				"transaction_date": [['<=', self.future_to_date]]
+				"transaction_date": [['<=', self.future_to_date]],
+				"company": self.company
 			}
 		)
 
@@ -486,7 +493,8 @@ class EmailDigest(Document):
 			filters = {
 				"status": [['!=', "Closed"], ['!=', "Cancelled"], ['!=', "Completed"]],
 				"per_received": [['<', 100]],
-				"transaction_date": [['<=', self.future_to_date]]
+				"transaction_date": [['<=', self.future_to_date]],
+				"company": self.company
 			}
 		)
 
@@ -520,14 +528,16 @@ class EmailDigest(Document):
 				filters = {
 					"root_type": "Asset",
 					"account_type": "Bank",
-					"date": self.future_to_date
+					"date": self.future_to_date,
+					"company": self.company
 				}
 				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
 			else:
 				filters = {
 					"root_type": "Liability",
 					"account_type": "Bank",
-					"to_date": self.future_to_date
+					"to_date": self.future_to_date,
+					"company": self.company
 				}
 				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
 
@@ -539,10 +549,16 @@ class EmailDigest(Document):
 		else:
 			if account_type == 'Payable':
 				label = get_link_to_report('Accounts Payable', label=self.meta.get_label(fieldname),
-					filters={"report_date": self.future_to_date} )
+					filters={
+						"report_date": self.future_to_date,
+						"company": self.company
+					} )
 			elif account_type == 'Receivable':
 				label = get_link_to_report('Accounts Receivable', label=self.meta.get_label(fieldname),
-					filters={"report_date": self.future_to_date})
+					filters={
+						"report_date": self.future_to_date,
+						"company": self.company
+					})
 			else:
 				label = self.meta.get_label(fieldname)
 
