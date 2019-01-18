@@ -351,6 +351,7 @@ erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
 erpnext.patches.v7_1.add_account_user_role_for_timesheet
 erpnext.patches.v7_0.set_base_amount_in_invoice_payment_table
 erpnext.patches.v7_1.update_invoice_status
+erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v7_0.po_status_issue_for_pr_return
 erpnext.patches.v7_1.update_missing_salary_component_type
 erpnext.patches.v7_1.rename_quality_inspection_field
@@ -442,7 +443,6 @@ erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017 #22-11-2
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
-erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
