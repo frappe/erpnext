@@ -5,11 +5,11 @@ import frappe
 import unittest
 from frappe.utils import getdate, nowdate, add_days
 
-from erpnext.projects.doctype.task.task import CircularReferenceError
+from erpnext.projects.doctype.task.task import CircularReferenceError, EndDateCannotBeGreaterThanProjectEndDateError
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
-		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
+		task1 = create_task("_Test Task 1", add_days(nowdate(), -15), add_days(nowdate(), -10))
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
 		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
 
@@ -97,7 +97,16 @@ class TestTask(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
-def create_task(subject, start=None, end=None, depends_on=None, project=None):
+	def test_end_date_validation(self):
+		task_end = create_task("Testing_Enddate_validation", add_days(nowdate(), 35), add_days(nowdate(), 45), save=False)
+		pro = frappe.get_doc("Project", task_end.project)
+		pro.expected_end_date = add_days(nowdate(), 40)
+		pro.save()
+		self.assertRaises(EndDateCannotBeGreaterThanProjectEndDateError, task_end.save)
+
+
+
+def create_task(subject, start=None, end=None, depends_on=None, project=None, save=True):
 	if not frappe.db.exists("Task", subject):
 		task = frappe.new_doc('Task')
 		task.status = "Open"
@@ -105,7 +114,8 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None):
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
 		task.project = project or "_Test Project"
-		task.save()
+		if save:
+			task.save()
 	else:
 		task = frappe.get_doc("Task", subject)
 
@@ -113,6 +123,7 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None):
 		task.append("depends_on", {
 			"task": depends_on
 		})
-		task.save()
+		if save:
+			task.save()
 
 	return task
