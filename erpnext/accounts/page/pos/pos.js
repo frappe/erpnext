@@ -1135,18 +1135,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	apply_category: function() {
-		frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name", (r) => {
-			category = this.selected_item_group || r.name;
-
-			if(category == r.name) {
-				return this.item_data
-			} else {
-				return this.item_data.filter(function(element, index, array){
-					return element.item_group == category;
-				});
-			}
-		})
-		
+		var me = this;
+		category = this.selected_item_group || "All Item Groups";
+		if(category == 'All Item Groups') {
+	
+			return this.item_data
+		} else {
+			return this.item_data.filter(function(element, index, array){
+				return element.item_group == category;
+			});
+		}
 	},
 
 	bind_items_event: function() {
