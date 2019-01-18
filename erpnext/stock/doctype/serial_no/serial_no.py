@@ -139,7 +139,7 @@ class SerialNo(StockController):
 			order by posting_date desc, posting_time desc, name desc""",
 			("%%%s%%" % self.name, self.item_code), as_dict=1):
 				if self.name.upper() in get_serial_nos(sle.serial_no):
-					if sle.actual_qty > 0:
+					if cint(sle.actual_qty) > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
 					else:
 						sle_dict.setdefault("outgoing", []).append(sle)
@@ -218,7 +218,7 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if sle.actual_qty > 0 and has_duplicate_serial_no(sr, sle):
+					if cint(sle.actual_qty) > 0 and has_duplicate_serial_no(sr, sle):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
@@ -228,7 +228,7 @@ def validate_serial_no(sle, item_det):
 						if return_against and return_against != sr.delivery_document_no:
 							frappe.throw(_("Serial no {0} has been already returned").format(sr.name))
 
-					if sle.actual_qty < 0:
+					if cint(sle.actual_qty) < 0:
 						if sr.warehouse!=sle.warehouse:
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
@@ -279,16 +279,16 @@ def validate_serial_no(sle, item_det):
 											"parent": sales_invoice, "item_code": sle.item_code}, "sales_order")
 										if sales_order and get_reserved_qty_for_so(sales_order, sle.item_code):
 											validate_so_serial_no(sr, sales_order)
-				elif sle.actual_qty < 0:
+				elif cint(sle.actual_qty) < 0:
 					# transfer out
 					frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
-		elif sle.actual_qty < 0 or not item_det.serial_no_series:
+		elif cint(sle.actual_qty) < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
 	elif serial_nos:
 		for serial_no in serial_nos:
 			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and sle.actual_qty < 0 and sr.warehouse != sle.warehouse:
+			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
 				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
 					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
 
@@ -323,7 +323,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 		in Manufacture / Repack type Stock Entry
 	"""
 	allow_serial_nos = False
-	if sle.voucher_type=="Stock Entry" and sle.actual_qty > 0:
+	if sle.voucher_type=="Stock Entry" and cint(sle.actual_qty) > 0:
 		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no)
 		if stock_entry.purpose in ("Repack", "Manufacture"):
 			for d in stock_entry.get("items"):
@@ -335,7 +335,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	return allow_serial_nos
 
 def update_serial_nos(sle, item_det):
-	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 \
+	if sle.is_cancelled == "No" and not sle.serial_no and cint(sle.actual_qty) > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
 		frappe.db.set(sle, "serial_no", serial_nos)
