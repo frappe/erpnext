@@ -166,18 +166,22 @@
 
 					{% if(!filters.show_pdc_in_print) { %}
 					<td>
-						{% if(!(filters.customer || filters.supplier)) { %}
-							{%= data[i]["party"] %}
-							{% if(data[i]["party_name"] && data[i]["party_name"] != data[i]["party"]) { %}
-								<br>{%= data[i]["party_name"] %}
+						{% if(!data[i]["posting_date"]) { %}
+							<strong>{%= data[i]["party"].substr(1, data[i]["party"].length-2) %}</strong>
+						{% } else { %}
+							{% if(!(filters.customer || filters.supplier)) { %}
+								{%= data[i]["party"] %}
+								{% if(data[i]["party_name"] && data[i]["party_name"] != data[i]["party"]) { %}
+									<br>{%= data[i]["party_name"] %}
+								{% } %}
 							{% } %}
 						{% } %}
-						<div>
 						{% if data[i]["remarks"] %}
+						<div>
 							{% if (!filters.customer && !filters.supplier) { %}{%= __("Remarks") %}:{% } %}
 							{%= data[i]["remarks"] %}
-						{% } %}
 						</div>
+						{% } %}
 					</td>
 					{% } %}
 
@@ -188,7 +192,7 @@
 						<td style="text-align: right">
 							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
 						<td style="text-align: right">
-							{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"]) : format_currency(data[i]["debit_note"], data[i]["currency"])  %}</td>
+							{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %}</td>
 					{% } %}
 					<td style="text-align: right">
 						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
@@ -212,27 +216,47 @@
 					<td></td>
 					{% } %}
 					<td></td>
-					<td style="text-align: right"><b>{%= __("Total") %}</b></td>
-					<td style="text-align: right">
-						{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
 
-					{% if(!filters.show_pdc_in_print) { %}
-						<td style="text-align: right">
-							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"])  : format_currency(data[i]["debit_note"], data[i]["currency"])  %} </td>
-					{% } %}
-					<td style="text-align: right">
-						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
-
-					{% if(filters.show_pdc_in_print) { %}
-						{% if(report.report_name === "Accounts Receivable") { %}
-							<td style="text-align: right">
-								{%= data[i]["po_no"] %}</td>
+					{% if($.isEmptyObject(data[i])) { %}
+						<td></td>
+						<td></td>
+						{% if(!filters.show_pdc_in_print) { %}
+							<td></td>
+							<td></td>
 						{% } %}
-						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i]["pdc/lc_date"]) %}</td>
-						<td style="text-align: right">{%= data[i][("pdc/lc_ref")] %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
+						<td></td>
+						{% if(filters.show_pdc_in_print) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td></td>
+							{% } %}
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						{% } %}
+					{% } else { %}
+						<td style="text-align: right"><b>{%= __("Total") %}</b></td>
+						<td style="text-align: right">
+							{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
+
+						{% if(!filters.show_pdc_in_print) { %}
+							<td style="text-align: right">
+								{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %} </td>
+						{% } %}
+						<td style="text-align: right">
+							{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
+
+						{% if(filters.show_pdc_in_print) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td style="text-align: right">
+									{%= data[i]["po_no"] %}</td>
+							{% } %}
+							<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i]["pdc/lc_date"]) %}</td>
+							<td style="text-align: right">{%= data[i][("pdc/lc_ref")] %}</td>
+							<td style="text-align: right">{%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
+						{% } %}
 					{% } %}
 				{% } %}
 			{% } else { %}

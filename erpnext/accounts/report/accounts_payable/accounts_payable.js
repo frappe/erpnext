@@ -73,6 +73,13 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Sales Person",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"mark_overdue_in_print",
 			"label": __("Mark Overdue in Print"),
 			"fieldtype": "Check",
@@ -89,6 +96,18 @@ frappe.query_reports["Accounts Payable"] = {
 		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
+		});
+	},
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			events: {
+				accumulator: function(acc, cell, row, row_count) {
+					if (row.posting_date) {
+						return frappe.utils.report_accumulator(acc, cell, row, row_count);
+					}
+				}
+			}
 		});
 	}
 }

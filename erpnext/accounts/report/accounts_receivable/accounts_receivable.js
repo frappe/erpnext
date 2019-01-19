@@ -103,6 +103,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"show_pdc_in_print",
 			"label": __("Show PDC in Print"),
 			"fieldtype": "Check",
@@ -149,6 +156,21 @@ frappe.query_reports["Accounts Receivable"] = {
 		report.page.add_inner_button(__("Accounts Receivable Summary"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
+		});
+	},
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			events: {
+				accumulator: function(acc, cell, row, row_count) {
+					if (row.posting_date) {
+						frappe.utils.report_accumulator(acc, cell, row, row_count);
+						if (cell.column.fieldname == "age" && cell.rowIndex === row_count-1) {
+							acc.content = flt(acc.content) / row_count;
+						}
+					}
+				}
+			}
 		});
 	}
 }

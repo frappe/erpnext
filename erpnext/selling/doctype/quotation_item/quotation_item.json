@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -1913,7 +1914,7 @@
  "istable": 1, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-12-12 05:52:46.135944", 
+ "modified": "2019-01-07 16:51:56.248107", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 
