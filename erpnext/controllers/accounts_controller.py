@@ -933,22 +933,22 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 	# JVs against order documents
 	if order_list or against_all_orders:
 		if order_list:
-			order_condition = "and ifnull(jea.reference_name, '') in ('{0}')" \
-				.format("', '".join([frappe.db.escape(d) for d in order_list]))
+			order_condition = "and ifnull(jea.reference_name, '') in ({0})" \
+				.format(", ".join([frappe.db.escape(d) for d in order_list]))
 		else:
 			order_condition = "and ifnull(jea.reference_name, '') != ''"
 
-		against_account_condition = "and jea.against_account like '%%{0}%%'".format(frappe.db.escape(against_account)) \
-			if against_account else ""
+		against_account = "%" + against_account + "%" if against_account else ""
+		against_account_condition = "and jea.against_account like %(against_account)s" if against_account else ""
 
 		journal_entries += frappe.db.sql("""
 			select
-				"Journal Entry" as reference_type, je.name as reference_name, je.remark as remarks,
+				'Journal Entry' as reference_type, je.name as reference_name, je.remark as remarks,
 				jea.{dr_or_cr} as amount, jea.name as reference_row, jea.reference_name as against_order
 			from
 				`tabJournal Entry` je, `tabJournal Entry Account` jea
 			where
-				je.name = jea.parent and jea.account = %(account)s
+				jea.parent = je.name and jea.account = %(account)s
 				and jea.party_type = %(party_type)s and jea.party = %(party)s
 				and {dr_or_cr} > 0 and jea.reference_type = '{order_doctype}' and je.docstatus = 1
 				{order_condition} {against_account_condition}
@@ -960,14 +960,15 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 			), {
 			"party_type": party_type,
 			"party": party,
-			"account": party_account
-			}, as_dict=1)
+			"account": party_account,
+			"against_account": against_account
+			}, as_dict=1, debug=1)
 
 	# Unallocated payment JVs
 	if include_unallocated:
 		against_account_condition = ""
 		if against_account:
-			against_account_condition = "and GROUP_CONCAT(gle_je.against) like '%%{0}%%'".format(frappe.db.escape(against_account))
+			against_account_condition = "and GROUP_CONCAT(gle_je.against) like %(against_account)s"
 
 		journal_entries += frappe.db.sql("""
 		select
@@ -998,8 +999,9 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 		), {
 			"party_type": party_type,
 			"party": party,
-			"account": party_account
-		}, as_dict=True)
+			"account": party_account,
+			"against_account": against_account
+		}, as_dict=True, debug=1)
 
 	return list(journal_entries)
 
