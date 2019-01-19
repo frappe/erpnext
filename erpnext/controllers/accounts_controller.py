@@ -604,13 +604,14 @@ class AccountsController(TransactionBase):
 								advance.account_currency)
 
 			if advance.account_currency == self.currency:
-				order_total = self.grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("rounded_total") or self.grand_total
+				precision = "rounded_total" if self.get("rounded_total") else "grand_total"
 			else:
-				order_total = self.base_grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("base_rounded_total") or self.base_grand_total
+				precision = "base_rounded_total" if self.get("base_rounded_total") else "base_grand_total"
+
+			formatted_order_total = fmt_money(order_total, precision=self.precision(precision),
+											  currency=advance.account_currency)
 
 			if self.currency == self.company_currency and advance_paid > order_total:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
@@ -1073,6 +1074,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		if parent_doctype == "Sales Order" and flt(d.get("qty")) < child_item.delivered_qty:
+			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+
+		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < child_item.received_qty:
+			frappe.throw(_("Cannot set quantity less than received quantity"))
+
 		child_item.qty = flt(d.get("qty"))
 
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):

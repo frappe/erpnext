@@ -605,7 +605,7 @@ class StockEntry(StockController):
 
 		if self.job_card:
 			job_doc = frappe.get_doc('Job Card', self.job_card)
-			job_doc.set_transferred_qty()
+			job_doc.set_transferred_qty(update_status=True)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -999,7 +999,7 @@ class StockEntry(StockController):
 
 		for d in pro_order.get("required_items"):
 			if (flt(d.required_qty) > flt(d.transferred_qty) and
-				(d.allow_transfer_for_manufacture or self.purpose != "Material Transfer for Manufacture")):
+				(d.include_item_in_manufacturing or self.purpose != "Material Transfer for Manufacture")):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse

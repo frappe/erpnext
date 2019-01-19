@@ -121,9 +121,11 @@ frappe.ui.form.on("BOM", {
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false
+				from_child_bom:false,
+				save: false
 			},
 			callback: function(r) {
+				refresh_field("items");
 				if(!r.exc) frm.refresh_fields();
 			}
 		});
@@ -402,6 +404,8 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 
 var toggle_operations = function(frm) {
 	frm.toggle_display("operations_section", cint(frm.doc.with_operations) == 1);
+	frm.toggle_display("transfer_material_against", cint(frm.doc.with_operations) == 1);
+	frm.toggle_reqd("transfer_material_against", cint(frm.doc.with_operations) == 1);
 };
 
 frappe.ui.form.on("BOM", "with_operations", function(frm) {
