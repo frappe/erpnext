@@ -349,7 +349,7 @@ class ReceivablePayableReport(object):
 
 		out = []
 		for group, rows in iteritems(group_rows):
-			group_totals[group]['party'] = "'Total for {0}'".format(group)
+			group_totals[group]['party'] = "'Total: {0}'".format(group)
 			if group_fieldname == 'party':
 				group_totals[group]['currency'] = rows[0]['currency']
 
