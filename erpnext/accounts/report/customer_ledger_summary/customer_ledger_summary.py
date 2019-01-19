@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
-from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint
-from six import iteritems
+from frappe import _
+from frappe.utils import getdate, nowdate
+from six import iteritems, itervalues
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
@@ -159,7 +159,7 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for account, amount in iteritems(self.party_adjustment_details.get(party, {}))])
+				total_party_adjustment = sum([amount for amount in itervalues(self.party_adjustment_details.get(party, {}))])
 				row.paid_amount -= total_party_adjustment
 				row.discount_amount = self.party_adjustment_details.get(party, {}).get(self.discount_account, 0)
 				row.write_off_amount = self.party_adjustment_details.get(party, {}).get(self.write_off_account, 0)
@@ -230,9 +230,6 @@ class PartyLedgerSummaryReport(object):
 					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
 						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
 						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
-				#conditions.append("""party in (select parent from `tabSales Team`
-				#	where parenttype = 'Customer' and exists(select name from `tabSales Person`
-				#		where lft >= {0} and rgt <= {1} and name=`tabSales Team`.sales_person))""".format(lft, rgt))
 
 		if self.filters.party_type == "Supplier":
 			if self.filters.get("supplier_group"):
@@ -277,7 +274,7 @@ class PartyLedgerSummaryReport(object):
 			adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
 			adjustment_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
 
-		for voucher, voucher_gl_entries in iteritems(adjustment_voucher_entries):
+		for voucher_gl_entries in itervalues(adjustment_voucher_entries):
 			parties = {}
 			accounts = {}
 			has_irrelevant_entry = False
