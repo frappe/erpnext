@@ -1,9 +1,9 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
 erpnext.patches.v10_0.rename_schools_to_education
-erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee
@@ -495,7 +495,7 @@ erpnext.patches.v10_0.set_b2c_limit
 erpnext.patches.v10_0.update_translatable_fields
 erpnext.patches.v10_0.rename_offer_letter_to_job_offer
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
-erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
+erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group # 24-12-2018
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
@@ -579,3 +579,5 @@ erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
+erpnext.patches.v11_0.rename_bom_wo_fields
+erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
