@@ -117,22 +117,22 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
-				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
+				and customer in ({0})""".format(", ".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
-			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
+			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > {0} and is_return != 1 and customer in ('{1}')""".\
-					format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
+				and grand_total > {0} and is_return != 1 and customer in ({1})""".\
+					format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-					or grand_total <= {0}) and is_return != 1 and customer in ('{1}')""".\
-						format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
+					or grand_total <= {0}) and is_return != 1 and customer in ({1})""".\
+						format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
@@ -201,7 +201,7 @@ class Gstr1Report(object):
 		if unidentified_gst_accounts:
 			frappe.msgprint(_("Following accounts might be selected in GST Settings:")
 				+ "<br>" + "<br>".join(unidentified_gst_accounts), alert=True)
-		
+
 		# Build itemised tax for export invoices where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
 			if invoice not in self.items_based_on_tax_rate \

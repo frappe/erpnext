@@ -12,6 +12,7 @@ from frappe.utils.nestedset import NestedSet
 
 
 class CircularReferenceError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
@@ -42,6 +43,12 @@ class Task(NestedSet):
 
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
+
+		if(self.project):
+			if frappe.db.exists("Project", self.project):
+				expected_end_date = frappe.db.get_value("Project", self.project, "expected_end_date")
+				if  self.exp_end_date and expected_end_date and getdate(self.exp_end_date) > getdate(expected_end_date) :
+					frappe.throw(_("Expected end date cannot be after Project: <b>'{0}'</b> Expected end date").format(self.project), EndDateCannotBeGreaterThanProjectEndDateError)
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
@@ -168,12 +175,16 @@ def check_if_child_exists(name):
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	return frappe.db.sql(""" select name from `tabProject`
-			where %(key)s like "%(txt)s"
+			where %(key)s like %(txt)s
 				%(mcond)s
 			order by name
-			limit %(start)s, %(page_len)s """ % {'key': searchfield,
-			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})
+			limit %(start)s, %(page_len)s""" % {
+				'key': searchfield,
+				'txt': frappe.db.escape('%' + txt + '%'),
+				'mcond':get_match_cond(doctype),
+				'start': start,
+				'page_len': page_len
+			})
 
 
 @frappe.whitelist()

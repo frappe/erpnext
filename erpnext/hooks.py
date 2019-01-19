@@ -133,6 +133,13 @@ website_route_rules = [
 	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
+	{"from_route": "/material-requests", "to_route": "Material Request"},
+	{"from_route": "/material-requests/<path:name>", "to_route": "material_request_info",
+		"defaults": {
+			"doctype": "Material Request",
+			"parents": [{"label": _("Material Request"), "route": "material-requests"}]
+		}
+	},
 ]
 
 standard_portal_menu_items = [
@@ -155,6 +162,7 @@ standard_portal_menu_items = [
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
 	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application"},
+	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
 ]
 
 default_roles = [
@@ -168,6 +176,7 @@ has_website_permission = {
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Material Request": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -226,7 +235,9 @@ scheduler_events = {
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
-		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details"
+		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
+		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
+
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -245,7 +256,8 @@ scheduler_events = {
 		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
 		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
-		"erpnext.projects.doctype.project.project.update_project_sales_billing"
+		"erpnext.projects.doctype.project.project.update_project_sales_billing",
+		"erpnext.quality_management.doctype.quality_review.quality_review.review"
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"

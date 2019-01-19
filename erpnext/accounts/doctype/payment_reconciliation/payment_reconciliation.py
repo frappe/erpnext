@@ -13,7 +13,7 @@ class PaymentReconciliation(Document):
 	def get_unreconciled_entries(self):
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
-		
+
 	def get_nonreconciled_payment_entries(self):
 		self.check_mandatory_to_fetch()
 
@@ -64,7 +64,7 @@ class PaymentReconciliation(Document):
 		self.validate_invoice()
 		dr_or_cr = ("credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
-			
+
 		lst = []
 		for e in self.get('payments'):
 			if e.invoice_number and e.allocated_amount:
@@ -81,11 +81,11 @@ class PaymentReconciliation(Document):
 					'unadjusted_amount' : flt(e.amount),
 					'allocated_amount' : flt(e.allocated_amount)
 				}))
-				
+
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-			
+
 			msgprint(_("Successfully Reconciled"))
 			self.get_unreconciled_entries()
 
@@ -128,8 +128,8 @@ class PaymentReconciliation(Document):
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
 
 	def check_condition(self):
-		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
-		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
+		cond = " and posting_date >= {0}".format(frappe.db.escape(self.from_date)) if self.from_date else ""
+		cond += " and posting_date <= {0}".format(frappe.db.escape(self.to_date)) if self.to_date else ""
 		dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
 			else "credit_in_account_currency")
 

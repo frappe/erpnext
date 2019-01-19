@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from frappe.model.rename_doc import rename_doc
 from frappe.model.utils.rename_field import rename_field

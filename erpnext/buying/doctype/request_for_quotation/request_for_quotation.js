@@ -31,7 +31,7 @@ frappe.ui.form.on("Request for Quotation",{
 
 	refresh: function(frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__("Make"),
+			frm.add_custom_button(__('Create'),
 				function(){ frm.trigger("make_suppplier_quotation") }, __("Supplier Quotation"));
 
 			frm.add_custom_button(__("View"),
@@ -147,7 +147,7 @@ frappe.ui.form.on("Request for Quotation",{
 					"fieldname": "supplier",
 					"options": doc.suppliers.map(d => d.supplier),
 					"reqd": 1 },
-				{	"fieldtype": "Button", "label": __("Make Supplier Quotation"),
+				{	"fieldtype": "Button", "label": __('Create Supplier Quotation'),
 					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary" },
 			]
 		});

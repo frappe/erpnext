@@ -6,22 +6,29 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
+from frappe.model.naming import set_name_from_naming_options
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency, get_balance_on_voucher, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
-
 class GLEntry(Document):
+	def autoname(self):
+		"""
+		Temporarily name doc for fast insertion
+		name will be changed using autoname options (in a scheduled job)
+		"""
+		self.name = frappe.generate_hash(txt="", length=10)
+
 	def validate(self):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
+		self.pl_must_have_cost_center()
+		self.validate_cost_center()
 
 		if not self.flags.from_repost:
-			self.pl_must_have_cost_center()
 			self.check_pl_account()
-			self.validate_cost_center()
 			self.validate_party()
 			self.validate_currency()
 
@@ -199,3 +206,17 @@ def update_against_account(voucher_type, voucher_no):
 
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
+
+
+def rename_gle_sle_docs():
+	for doctype in ["GL Entry", "Stock Ledger Entry"]:
+		rename_temporarily_named_docs(doctype)
+
+def rename_temporarily_named_docs(doctype):
+	"""Rename temporarily named docs using autoname options"""
+	docs_to_rename = frappe.get_all(doctype, {"to_rename": "1"}, order_by="creation")
+	for doc in docs_to_rename:
+		oldname = doc.name
+		set_name_from_naming_options(frappe.get_meta(doctype).autoname, doc)
+		newname = doc.name
+		frappe.db.sql("""UPDATE `tab{}` SET name = %s, to_rename = 0 where name = %s""".format(doctype), (newname, oldname))

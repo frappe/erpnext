@@ -729,7 +729,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
+			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = get_inventory_account('_Test Company')
@@ -762,7 +762,7 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 		frappe.db.sql("delete from `tabPOS Profile`")
-	
+
 	def test_pos_si_without_payment(self):
 		set_perpetual_inventory()
 		make_pos_profile()

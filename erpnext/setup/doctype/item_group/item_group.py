@@ -88,7 +88,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 			# return child item groups if the type is of "Is Group"
 			return get_child_groups_for_list_in_html(item_group, start, limit, search)
 
-	child_groups = ", ".join(['"' + frappe.db.escape(i[0]) + '"' for i in get_child_groups(product_group)])
+	child_groups = ", ".join([frappe.db.escape(i[0]) for i in get_child_groups(product_group)])
 
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
@@ -136,7 +136,10 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 			rgt = ('<', item_group.rgt),
 		),
 		or_filters = search_filters,
-		order_by = 'weightage desc, name asc')
+		order_by = 'weightage desc, name asc',
+		start = start,
+		limit = limit
+	)
 
 	return [get_item_for_list_in_html(r) for r in data]
 

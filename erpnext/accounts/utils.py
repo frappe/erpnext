@@ -99,7 +99,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -127,7 +127,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			)""" % (cc.lft, cc.rgt))
 
 		else:
-			cond.append("""gle.cost_center = "%s" """ % (frappe.db.escape(cost_center, percent=False), ))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
 
 
 	if account:
@@ -158,14 +158,14 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			if acc.account_currency == frappe.get_cached_value('Company',  acc.company,  "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 	if party_type and party:
-		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+		cond.append("""gle.party_type = %s and gle.party = %s """ %
 			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if company:
-		cond.append("""gle.company = "%s" """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -201,7 +201,7 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -236,7 +236,7 @@ def get_count_on(account, fieldname, date):
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 		entries = frappe.db.sql("""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
