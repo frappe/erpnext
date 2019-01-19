@@ -962,7 +962,7 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 			"party": party,
 			"account": party_account,
 			"against_account": against_account
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 	# Unallocated payment JVs
 	if include_unallocated:
@@ -1001,7 +1001,7 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 			"party": party,
 			"account": party_account,
 			"against_account": against_account
-		}, as_dict=True, debug=1)
+		}, as_dict=True)
 
 	return list(journal_entries)
 
