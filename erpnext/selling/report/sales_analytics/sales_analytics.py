@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, add_to_date, add_days
 from six import iteritems
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -40,7 +40,7 @@ class Analytics(object):
 				"fieldtype": "Data",
 				"width": 140
 			})
-		for dummy, end_date in self.periodic_daterange:
+		for end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
 			self.columns.append({
 				"label": _(period),
@@ -169,7 +169,7 @@ class Analytics(object):
 				"entity_name": self.entity_names.get(entity)
 			}
 			total = 0
-			for dummy, end_date in self.periodic_daterange:
+			for end_date in self.periodic_daterange:
 				period = self.get_period(end_date)
 				amount = flt(period_data.get(period, 0.0))
 				row[scrub(period)] = amount
@@ -188,7 +188,7 @@ class Analytics(object):
 				"indent": self.depth_map.get(d.name)
 			}
 			total = 0
-			for dummy, end_date in self.periodic_daterange:
+			for end_date in self.periodic_daterange:
 				period = self.get_period(end_date)
 				amount = flt(self.entity_periodic_data.get(d.name, {}).get(period, 0.0))
 				row[scrub(period)] = amount
@@ -219,12 +219,11 @@ class Analytics(object):
 			period = "Quarter " + str(((posting_date.month-1)//3)+1) +" " + str(posting_date.year)
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
-			period = str(year[2])
-
+			period = str(year[0])
 		return period
 
 	def get_period_date_ranges(self):
-		from dateutil.relativedelta import relativedelta
+		from dateutil.relativedelta import relativedelta, MO
 		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
 		increment = {
@@ -234,18 +233,26 @@ class Analytics(object):
 			"Yearly": 12
 		}.get(self.filters.range, 1)
 
+		if self.filters.range in ['Monthly', 'Quarterly']:
+			from_date = from_date.replace(day = 1)
+		elif self.filters.range == "Yearly":
+			from_date = get_fiscal_year(from_date)[1]
+		else:
+			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
+
 		self.periodic_daterange = []
-		for dummy in range(1, 53, increment):
+		for dummy in range(1, 53):
 			if self.filters.range == "Weekly":
-				period_end_date = from_date + relativedelta(days=6)
+				period_end_date = add_days(from_date, 6)
 			else:
-				period_end_date = from_date + relativedelta(months=increment, days=-1)
+				period_end_date = add_to_date(from_date, months=increment, days=-1)
 
 			if period_end_date > to_date:
 				period_end_date = to_date
-			self.periodic_daterange.append([from_date, period_end_date])
 
-			from_date = period_end_date + relativedelta(days=1)
+			self.periodic_daterange.append(period_end_date)
+
+			from_date = add_days(period_end_date, 1)
 			if period_end_date == to_date:
 				break
 
