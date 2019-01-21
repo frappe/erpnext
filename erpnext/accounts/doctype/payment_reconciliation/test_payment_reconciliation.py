@@ -241,6 +241,7 @@ class TestPaymentReconciliation(unittest.TestCase):
 		pe_against_so.unallocated_amount = 100
 		pe_against_so.reference_no = "1"
 		pe_against_so.reference_date = nowdate()
+		pe_against_so.allocate_payment_amount = 0
 		pe_against_so.insert()
 		pe_against_so.submit()
 
@@ -258,6 +259,7 @@ class TestPaymentReconciliation(unittest.TestCase):
 
 		pe_half_allocated = frappe.copy_doc(pe_unallocated)
 		pe_half_allocated.paid_from = "_Test Receivable - _TC"
+		pe_half_allocated.allocate_payment_amount = 0
 		pe_half_allocated.received_amount = 200
 		pe_half_allocated.paid_amount = 200
 		pe_half_allocated.set("references", [])
@@ -280,6 +282,9 @@ class TestPaymentReconciliation(unittest.TestCase):
 		for d in advances:
 			advance_vouchers.setdefault(d.reference_name, [])
 			advance_vouchers[d.reference_name].append(d)
+
+		import pprint
+		print(pprint.pprint(advance_vouchers, indent=2))
 
 		self.assertEqual(len(advance_vouchers[pe_against_so.name]), 2)
 		self.assertEqual(advance_vouchers[pe_against_so.name][0].reference_row, pe_against_so.references[0].name)
