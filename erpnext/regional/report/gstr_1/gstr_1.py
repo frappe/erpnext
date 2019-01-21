@@ -2,9 +2,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, json, os
 from frappe import _
-from frappe.utils import flt, formatdate
+from frappe.utils import flt, formatdate, now_datetime, getdate
 from datetime import date
 from six import iteritems
 
@@ -494,3 +494,96 @@ class Gstr1Report(object):
 				}
 			]
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
+
+@frappe.whitelist()
+def get_json():
+	data = frappe._dict(frappe.local.form_dict)
+
+	del data["cmd"]
+	if "csrf_token" in data:
+		del data["csrf_token"]
+
+	filters = json.loads(data["filters"])
+	report_data = json.loads(data["data"])
+	report_name = data["report_name"]
+	gstin = get_company_gstin_number(filters["company"])
+
+	res = {}
+	for item in report_data:
+		res.setdefault(item["customer_gstin"], []).append(item)
+
+	fp = "%02d%s" % (now_datetime().month, now_datetime().year)
+
+	gst_json = {"gstin": "", "fp": "", "version": "GST2.2.9",
+		"hash": "hash", "gstin": gstin, "fp": fp}
+
+	if filters["type_of_business"] == "B2B":
+		out = get_b2b_json(res, gstin)
+		gst_json["b2b"] = out
+
+	download_json_file(report_name, gst_json)
+
+def get_b2b_json(res, gstin):
+	inv_type, out = {"Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
+
+	for gst_in in res:
+		b2b_item, inv = {"ctin": gst_in, "inv": []}, []
+		if not gst_in: continue
+
+		for d in res[gst_in]:
+			inv_items = {}
+			inv_items.update({
+				"inum": d["invoice_number"],
+				"idt": getdate(d["posting_date"]).strftime('%d-%m-%Y'),
+				"val": d["invoice_value"],
+				"pos": "%02d" % int(d["place_of_supply"].split('-')[0]),
+				"rchrg": d["reverse_charge"],
+				"inv_typ": inv_type[d["invoice_type"]],
+			})
+
+			if inv_items["pos"]=="00": continue
+
+			itm_det = {"txval": d["taxable_value"], "rt": 18, "csamt": (d["cess_amount"] or 0)}
+
+			tax = flt(d["taxable_value"]/18, 2)
+			if gstin[0:2] == d["customer_gstin"][0:2]:
+				itm_det.update({"camt": flt(tax/2, 2), "samt": flt(tax/2, 2)})
+			else:
+				itm_det.update({"iamt": tax})
+
+			inv_items.update({
+				"itms": [{
+					"num": 1801,
+					"itm_det": itm_det
+				}]
+			})
+
+			inv.append(inv_items)
+
+		if not inv: continue
+		b2b_item["inv"] = inv
+		out.append(b2b_item)
+
+	return out
+
+def get_company_gstin_number(company):
+	filters = [
+		["is_your_company_address", "=", 1],
+		["Dynamic Link", "link_doctype", "=", "Company"],
+		["Dynamic Link", "link_name", "=", company],
+		["Dynamic Link", "parenttype", "=", "Address"],
+	]
+
+	gstin = frappe.get_all("Address", filters=filters, fields=["gstin"])
+
+	if gstin:
+		return gstin[0]["gstin"]
+	else:
+		frappe.throw(_("No GST No. found for the Company."))
+
+def download_json_file(filename, data):
+	''' download json content in a file '''
+	frappe.local.flags.download_json = True
+	frappe.response['filename'] = frappe.scrub(filename)
+	frappe.response['filecontent'] = data
+	frappe.response['type'] = 'json'
