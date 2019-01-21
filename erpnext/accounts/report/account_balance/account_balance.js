@@ -44,7 +44,7 @@ frappe.query_reports["Account Balance"] = {
 				{ "value": "Cost of Goods Sold", "label": __("Cost of Goods Sold") },
 				{ "value": "Depreciation", "label": __("Depreciation") },
 				{ "value": "Equity", "label": __("Equity") },
-				{ "value": "Expense Account", "label": __("MonExpense Accountthly") },
+				{ "value": "Expense Account", "label": __("Expense Account") },
 				{ "value": "Expenses Included In Asset Valuation", "label": __("Expenses Included In Asset Valuation") },
 				{ "value": "Expenses Included In Valuation", "label": __("Expenses Included In Valuation") },
 				{ "value": "Fixed Asset", "label": __("Fixed Asset") },
