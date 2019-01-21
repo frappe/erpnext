@@ -87,6 +87,13 @@
         <Numero>{{ doc.progressive_number }}</Numero>
         <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
         <Causale>VENDITA</Causale>
+        {%- if doc.additional_discount_percentage or doc.additional_discount_amount %}
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          {%- if doc.additional_discount_percentage -%}<Percentuale>{{ doc.additional_discount_percentage }}</Percentuale>{%- endif -%}
+          {%- if doc.additional_discount_amount -%}<Importo>{{ doc.additional_discount_amount }}</Percentuale>{%- endif -%}
+        </ScontoMaggiorazione>
+        {%- endif %}
       </DatiGeneraliDocumento>
       {%- if doc.po_no %}
       <DatiOrdineAcquisto>
@@ -114,6 +121,13 @@
         </CodiceArticolo>
         <Descrizione>{{ item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
+        <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
+        {%- if item.discount_percentage  %}
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>{{ item.discount_percentage }}</Percentuale>
+        </ScontoMaggiorazione>
+        {%- endif %}
         <PrezzoUnitario>{{ format_float(item.net_rate) }}</PrezzoUnitario>
         <PrezzoTotale>{{ format_float(item.net_amount) }}</PrezzoTotale>
         <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
