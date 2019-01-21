@@ -149,5 +149,22 @@
       </DatiRiepilogo>
       {%- endfor %}
     </DatiBeniServizi>
+    {%- if doc.payment_terms %}
+    <DatiPagamento>
+      {%- if payment_terms|length > 1 %}
+      <CondizioniPagamento>TP01</CondizioniPagamento>
+      {%- else %}
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      {%- endif %}
+      {%- for payment_term in doc.payment_terms %}
+      <DettaglioPagamento>
+        <ModalitaPagamento>{{ payment_term.mode_of_payment_code }}</ModalitaPagamento>
+        <ImportoPagamento>{{ payment_term.payment_amount }}</ImportoPagamento>
+        <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
+        {%- if payment_term.iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
+      </DettaglioPagamento>
+      {%- endfor %}
+    </DatiPagamento>
+    {%- endif %}
   </FatturaElettronicaBody>
 </p:FatturaElettronica>
