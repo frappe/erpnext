@@ -9,7 +9,7 @@
 {%- if address.state %}
 <Provincia>{{ address.state }}</Provincia>
 {%- endif %}
-<Nazione>IT</Nazione>
+<Nazione>{{ address.country_code }}</Nazione>
 {%- endmacro -%}
 <?xml version='1.0' encoding='UTF-8'?>
 <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
@@ -19,7 +19,7 @@
   <FatturaElettronicaHeader>
     <DatiTrasmissione>
       <IdTrasmittente>
-        <IdPaese>IT</IdPaese>
+        <IdPaese>{{ doc.company_address_data.country_code }}</IdPaese>
         <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
       {%- if doc.company_fiscal_code %}
@@ -38,7 +38,7 @@
     <CedentePrestatore>
       <DatiAnagrafici>
         <IdFiscaleIVA>
-          <IdPaese>IT</IdPaese>
+          <IdPaese>{{ doc.company_address_data.country_code }}</IdPaese>
           <IdCodice>{{ doc.company_tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
         {%- if doc.company_fiscal_code %}
@@ -63,7 +63,7 @@
         </Anagrafica>
         {%- else %}
         <IdFiscaleIVA>
-          <IdPaese>IT</IdPaese>
+          <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
           <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>

@@ -61,8 +61,18 @@ def prepare_invoice(invoice):
 	invoice["company_fiscal_code"] = company_fiscal_code
 	invoice["fiscal_regime"] = fiscal_regime
 	invoice["company_tax_id"] = company_tax_id
-	invoice["company_address_data"] = frappe.get_doc("Address", invoice.company_address)
-	invoice["company_contact_data"] = frappe.db.get_value("Company", filters=invoice.company, fieldname=["phone_no", "email"], as_dict=1)
+	
+	invoice["company_address_data"] = frappe.db.get_value("Address",
+		filters=invoice.company_address,
+		fieldname=["address_line1", "city", "state", "country", "pincode"],
+		as_dict=1
+	)
+	invoice["company_address_data"]["country_code"] = frappe.db.get_value("Country",
+		invoice["company_address_data"]["country"], "code").upper()
+
+	invoice["company_contact_data"] = frappe.db.get_value("Company",
+		filters=invoice.company, 
+		fieldname=["phone_no", "email"], as_dict=1)
 
 	#Set invoice type
 	if invoice.is_return and invoice.return_against:
@@ -72,10 +82,22 @@ def prepare_invoice(invoice):
 	
 	#set customer information
 	invoice["customer_data"] = frappe.get_doc("Customer", invoice.customer)
-	invoice["customer_address_data"] = frappe.get_doc("Address", invoice.customer_address)
+	invoice["customer_address_data"] = frappe.db.get_value("Address",
+		filters=invoice.customer_address,
+		fieldname=["address_line1", "city", "state", "country", "pincode"],
+		as_dict=1
+	)
+	invoice["customer_address_data"]["country_code"] = frappe.db.get_value("Country",
+		invoice["customer_address_data"]["country"], "code").upper()
 
 	if invoice.shipping_address_name:
-		invoice["shipping_address_data"] = frappe.get_doc("Address", invoice.shipping_address_name)
+		invoice["shipping_address_data"] = frappe.db.get_value("Address",
+			filters=invoice.shipping_address_name,
+			fieldname=["address_line1", "city", "state", "country", "pincode"],
+			as_dict=1
+		)
+		invoice["shipping_address_data"]["country_code"] = frappe.db.get_value("Country",
+			invoice["shipping_address_data"]["country"], "code").upper()
 
 	if not invoice["vat_collectability"]:
 		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability")
