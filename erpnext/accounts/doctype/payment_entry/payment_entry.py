@@ -60,13 +60,15 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 
+	def before_submit(self):
+		self.update_reference_details()
+
 	def on_submit(self):
 		self.set_remarks()
 		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.update_reference_details()
 		self.update_advance_paid()
 		self.update_expense_claim()
 
