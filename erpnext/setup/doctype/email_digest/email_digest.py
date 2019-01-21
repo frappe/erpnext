@@ -332,19 +332,15 @@ class EmailDigest(Document):
 
 		if fieldname == 'income':
 			filters = {
-				"root_type": "Income",
-				"report_date": self.future_to_date,
-				"company": self.company
+				"currency": self.currency
 			}
-			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
+			label = get_link_to_report('Profit and Loss Statement', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
 
 		elif fieldname == 'expenses_booked':
 			filters = {
-				"root_type": "Expense",
-				"report_date": self.future_to_date,
-				"company": self.company
+				"currency": self.currency
 			}
-			label = get_link_to_report('Account Balance', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
+			label = get_link_to_report('Profit and Loss Statement', label=self.meta.get_label(root_type + "_year_to_date"), filters=filters)
 
 		return {
 			"label": label,
@@ -416,8 +412,8 @@ class EmailDigest(Document):
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters = {
-				"status": [['!=', "Closed"], ['!=', "Cancelled"], ['!=', "Completed"]],
-				"billing_status": [['!=', "Fully Billed"]],
+				"status": [['!=', "Closed"], ['!=', "Cancelled"]],
+				"per_billed": [['<', 100]],
 				"transaction_date": [['<=', self.future_to_date]],
 				"company": self.company
 			}
