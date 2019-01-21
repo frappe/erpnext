@@ -429,12 +429,16 @@ def update_reference_in_journal_entry(d, jv_doc):
 			"account": d["account"]
 		})
 
+	to_update_advance_amount = []
 	amt_allocated = 0.0
 	for jv_detail in rows_to_reconcile:
 		amt_allocatable = min(jv_detail.get(d["dr_or_cr"]), d["allocated_amount"] - amt_allocated)
 		original_dr_or_cr = jv_detail.get(d["dr_or_cr"])
 		original_reference_type = jv_detail.reference_type
 		original_reference_name = jv_detail.reference_name
+
+		if original_reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+			to_update_advance_amount.append((original_reference_type, original_reference_name))
 
 		jv_detail.set(d["dr_or_cr"], amt_allocatable)
 		jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
@@ -483,6 +487,9 @@ def update_reference_in_journal_entry(d, jv_doc):
 	jv_doc.flags.ignore_validate_update_after_submit = True
 	jv_doc.save(ignore_permissions=True)
 
+	for dn, dt in set(to_update_advance_amount):
+		frappe.get_doc(dn, dt).set_total_advance_paid()
+
 def update_reference_in_payment_entry(d, payment_entry):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -493,10 +500,15 @@ def update_reference_in_payment_entry(d, payment_entry):
 		"exchange_rate": d.exchange_rate
 	}
 
+	to_update_advance_amount = []
+
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 		original_row = existing_row.as_dict().copy()
 		existing_row.update(reference_details)
+
+		if original_row.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
+			to_update_advance_amount.append((original_row.reference_doctype, original_row.reference_name))
 
 		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
@@ -515,6 +527,9 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)
+
+	for dn, dt in set(to_update_advance_amount):
+		frappe.get_doc(dn, dt).set_total_advance_paid()
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
