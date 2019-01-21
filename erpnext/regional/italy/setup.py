@@ -58,9 +58,26 @@ def make_custom_fields(update=True):
                 insert_after='first_name', print_hide=1, depends_on='eval:doc.customer_type!="Company"')
         ],
         'Mode of Payment': [
-            dict(fieldname='e_invoicing_code', label='Code',
+            dict(fieldname='mode_of_payment_code', label='Code',
 		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
             options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)))
+        ],
+        'Payment Schedule': [
+            dict(fieldname='mode_of_payment_code', label='Code',
+		    fieldtype='Select', insert_after='mode_of_payment', print_hide=1,
+            options="mode_of_payment.mode_of_payment_code"),
+            dict(fieldname='bank_account', label='Bank Account',
+		    fieldtype='Link', insert_after='mode_of_payment_code', print_hide=1,
+            options="Bank Account"),
+            dict(fieldname='bank_account_name', label='Bank Account Name',
+		    fieldtype='Data', insert_after='bank_account', print_hide=1,
+            options="bank_account.account_name", read_only=1),
+            dict(fieldname='bank_account_no', label='Bank Account No',
+		    fieldtype='Data', insert_after='bank_account_name', print_hide=1,
+            options="bank_account.bank_account_no", read_only=1),
+            dict(fieldname='bank_account_iban', label='IBAN',
+		    fieldtype='Data', insert_after='bank_account_name', print_hide=1,
+            options="bank_account.bank_account_no", read_only=1),
         ],
         "Sales Invoice": [
             dict(fieldname='vat_collectability', label='VAT Collectability',

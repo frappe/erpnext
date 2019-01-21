@@ -119,6 +119,8 @@ def prepare_invoice(invoice):
 	#tax rate wise grouping of tax amount and taxable amount.
 	invoice["tax_data"] = get_rate_wise_tax_data(invoice["invoice_items"])
 
+	invoice["payment_terms"] = frappe.get_all("Payment Schedule", filters={"parent": invoice.name}, fields=["*"])
+
 	return invoice
 
 def get_conditions(filters):
