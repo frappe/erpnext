@@ -27,6 +27,9 @@ class TestPaymentReconciliation(unittest.TestCase):
 		# }).insert()
 
 	def test_reconcile_advance_journal_entries(self):
+		self.assertFalse(get_advance_journal_entries(self.customer.doctype, self.customer.name, "_Test Receivable - _TC",
+			"Sales Order", against_all_orders=True))
+
 		# Test records
 		jv_simple = make_payment_jv(self.customer, 100)
 		jv_simple.insert()
@@ -226,8 +229,10 @@ class TestPaymentReconciliation(unittest.TestCase):
 		self.assertEqual(len(advance_vouchers[jv_against_so.name]), 1)
 		self.assertEqual(advance_vouchers[jv_against_so.name][0].amount, 100)
 
-
 	def test_reconcile_advance_payment_entries(self):
+		self.assertFalse(get_advance_payment_entries(self.customer.doctype, self.customer.name, "_Test Receivable - _TC",
+			"Sales Order", against_all_orders=True))
+
 		# Test records
 		so = make_sales_order(self.customer)
 		pe_against_so = get_payment_entry(so.doctype, so.name, party_amount=200, bank_amount=200)
