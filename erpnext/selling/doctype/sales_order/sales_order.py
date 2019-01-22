@@ -147,7 +147,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["company", "="], ["currency", "="]]
+				"compare_fields": [["company", "="]]
 			}
 		})
 
