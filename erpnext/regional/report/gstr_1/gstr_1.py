@@ -583,7 +583,7 @@ def get_company_gstin_number(company):
 
 def download_json_file(filename, data):
 	''' download json content in a file '''
-	frappe.local.flags.download_json = True
-	frappe.response['filename'] = frappe.scrub(filename)
-	frappe.response['filecontent'] = data
-	frappe.response['type'] = 'json'
+	frappe.response['filename'] = frappe.scrub(filename) + '.json'
+	frappe.response['filecontent'] = json.dumps(data)
+	frappe.response['content_type'] = 'application/json'
+	frappe.response['type'] = 'download'
