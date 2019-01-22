@@ -190,7 +190,7 @@ class ReceivablePayableReport(object):
 			dn_details = get_dn_details(args.get("party_type"), voucher_nos)
 			self.voucher_details = get_voucher_details(args.get("party_type"), voucher_nos, dn_details)
 
-		if self.filters.based_on_payment_terms:
+		if self.filters.based_on_payment_terms and gl_entries_data:
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
