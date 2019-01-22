@@ -250,10 +250,12 @@ def get_serial_no_data(pos_profile, company):
 
 	cond = "1=1"
 	if pos_profile.get('update_stock') and pos_profile.get('warehouse'):
-		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+		cond = "warehouse = %(warehouse)s"
 
-	serial_nos = frappe.db.sql("""select name, warehouse, item_code from `tabSerial No` where {0}
-				and company = %(company)s """.format(cond), {'company': company}, as_dict=1)
+	serial_nos = frappe.db.sql("""select name, warehouse, item_code
+		from `tabSerial No` where {0} and company = %(company)s """.format(cond),{
+			'company': company, 'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
+		}, as_dict=1)
 
 	itemwise_serial_no = {}
 	for sn in serial_nos:
