@@ -248,7 +248,6 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 					ret = get_item_details(args)
-
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -267,9 +266,10 @@ class AccountsController(TransactionBase):
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
+						item.set("pricing_rule", ret.get("pricing_rule"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
-						if ret.get("pricing_rule_for") == "Price":
-							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+						if ret.get("pricing_rule_for") == "Rate":
+							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
