@@ -145,6 +145,13 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			// payroll entry
+			if(jvd.reference_type==="Payroll Entry") {
+				return {
+					query: "erpnext.hr.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
+				};
+			}
+
 			var out = {
 				filters: [
 					[jvd.reference_type, "docstatus", "=", 1]
