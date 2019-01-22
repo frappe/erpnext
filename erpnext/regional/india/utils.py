@@ -5,10 +5,10 @@ from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 
 def validate_gstin_for_india(doc, method):
-	if not hasattr(doc, 'gstin'):
+	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
-	doc.gstin = doc.get('gstin','').upper().strip()
+	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == 'NA':
 		return
 
