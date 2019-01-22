@@ -1,5 +1,6 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
@@ -442,7 +443,6 @@ erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017 #22-11-2
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
-erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
@@ -572,7 +572,7 @@ execute:frappe.delete_doc_if_exists("Page", "sales-analytics")
 execute:frappe.delete_doc_if_exists("Page", "purchase-analytics")
 execute:frappe.delete_doc_if_exists("Page", "stock-analytics")
 execute:frappe.delete_doc_if_exists("Page", "production-analytics")
-erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13 #2019-01-09
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
@@ -580,9 +580,10 @@ erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
+erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
+erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v12_0.change_qms_icon
 erpnext.patches.v12_0.rename_learn_to_help
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon
-erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v12_0.unset_against_voucher_in_receivable_payable_gl_entry
