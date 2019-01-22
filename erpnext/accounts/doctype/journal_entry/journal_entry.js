@@ -175,9 +175,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
 			}
 
-			if(jvd.party_type && jvd.party) {
-				out.filters.push([jvd.reference_type,
-					(jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier"), "=", jvd.party]);
+			var party_field = "";
+			if(jvd.reference_type.indexOf("Sales")===0) {
+				var party_field = "customer";
+			} else if (jvd.reference_type.indexOf("Purchase")===0) {
+				var party_field = "supplier";
+			}
+
+			if (party_field) {
+				out.filters.push([jvd.reference_type, party_field, "=", jvd.party]);
 			}
 
 			return out;
