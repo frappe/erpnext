@@ -118,11 +118,11 @@ class PaymentEntry(AccountsController):
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
-			if not self.party_balance:
+			if not self.get("party_balance"):
 				self.party_balance = get_balance_on(party_type=self.party_type,
 					party=self.party, date=self.posting_date, company=self.company)
 
-			if not self.party_account:
+			if not self.get("party_account"):
 				party_account = get_party_account(self.party_type, self.party, self.company)
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
