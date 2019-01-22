@@ -216,11 +216,6 @@ class TestPaymentReconciliation(unittest.TestCase):
 			advance_vouchers.setdefault(d.reference_name, [])
 			advance_vouchers[d.reference_name].append(d)
 
-		import pprint
-		print("-------------------------------")
-		pprint.pprint(advance_vouchers)
-		print("-------------------------------")
-
 		self.assertEqual(len(advance_vouchers[pe_against_so.name]), 2)
 		self.assertEqual(advance_vouchers[pe_against_so.name][0].reference_row, pe_against_so.references[0].name)
 		self.assertEqual(advance_vouchers[pe_against_so.name][0].amount, 100)
@@ -341,11 +336,6 @@ def make_payment_entry(party, unallocated_amount, against_dt=None, against_dn=No
 	doc.set_missing_values()
 	doc.insert()
 	doc.submit()
-
-	import pprint
-	print("-------------------------------")
-	pprint.pprint(doc.as_dict())
-	print("-------------------------------")
 
 	return doc
 
