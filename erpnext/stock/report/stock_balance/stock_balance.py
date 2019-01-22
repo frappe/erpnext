@@ -130,7 +130,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.name""" %
+		order by sle.posting_date, sle.posting_time, sle.creation""" %
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):

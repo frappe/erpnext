@@ -1,9 +1,9 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
 erpnext.patches.v10_0.rename_schools_to_education
-erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee
@@ -580,6 +580,8 @@ erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
+erpnext.patches.v12_0.change_qms_icon
 erpnext.patches.v12_0.rename_learn_to_help
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon
+erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
