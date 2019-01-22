@@ -1,0 +1,26 @@
+{
+ "attach_print": 0,
+ "condition": "doc.docstatus==1",
+ "creation": "2018-05-15 18:52:36.362838",
+ "date_changed": "bonus_payment_date",
+ "days_in_advance": 14,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Retention Bonus",
+ "enabled": 1,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "<p>{{ _(\"Hello\") }},</p>\n\n<p> {{ _(\"Retention Bonus for\") }} {{ doc.employee_name }} {{ _(\"due on\") }} {{ doc.bonus_payment_date }}</p>",
+ "modified": "2018-05-15 19:00:24.294418",
+ "modified_by": "ranjith@earthianslive.com",
+ "module": "HR",
+ "name": "Retention Bonus",
+ "owner": "ranjith@earthianslive.com",
+ "recipients": [
+  {
+   "email_by_role": "HR Manager"
+  }
+ ],
+ "subject": "Retention Bonus alert for {{ doc.employee }}"
+}

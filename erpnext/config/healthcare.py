@@ -11,12 +11,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Patient Appointment",
-					"description": _("Patient Appointment"),
+					"label": _("Patient Appointment"),
 				},
 				{
 					"type": "doctype",
-					"name": "Consultation",
-					"label": _("Consultation"),
+					"name": "Patient Encounter",
+					"label": _("Patient Encounter"),
 				},
 				{
 					"type": "doctype",
@@ -33,6 +33,16 @@ def get_data():
 					"type": "page",
 					"name": "appointment-analytic",
 					"label": _("Appointment Analytics"),
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure",
+					"label": _("Clinical Procedure"),
+				},
+				{
+					"type": "doctype",
+					"name": "Inpatient Record",
+					"label": _("Inpatient Record"),
 				}
 			]
 		},
@@ -43,7 +53,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Lab Test",
-					"description": _("Results"),
+					"label": _("Lab Test"),
 				},
 				{
 					"type": "doctype",
@@ -53,7 +63,8 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Lab Test Report",
-					"is_query_report": True
+					"is_query_report": True,
+					"label": _("Lab Test Report"),
 				}
 			]
 		},
@@ -68,13 +79,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Physician",
-					"label": "Physician",
+					"name": "Healthcare Practitioner",
+					"label": _("Healthcare Practitioner"),
 				},
 				{
 					"type": "doctype",
-					"name": "Physician Schedule",
-					"label": _("Physician Schedule"),
+					"name": "Practitioner Schedule",
+					"label": _("Practitioner Schedule"),
 				},
 				{
 					"type": "doctype",
@@ -85,6 +96,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Medical Code",
 					"label": _("Medical Code"),
+				},
+				{
+					"type": "doctype",
+					"name": "Healthcare Service Unit",
+					"label": _("Healthcare Service Unit")
 				}
 			]
 		},
@@ -100,57 +116,67 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Medical Department",
-					"label": "Medical Department"
+					"label": _("Medical Department"),
 				},
 				{
 					"type": "doctype",
 					"name": "Appointment Type",
-					"description": _("Appointment Type Master"),
+					"label": _("Appointment Type"),
 				},
 				{
 					"type": "doctype",
 					"name": "Prescription Dosage",
-					"description": _("Prescription Dosage")
+					"label": _("Prescription Dosage")
 				},
 				{
 					"type": "doctype",
 					"name": "Prescription Duration",
-					"description": _("Prescription Period")
+					"label": _("Prescription Duration")
 				},
 				{
 					"type": "doctype",
 					"name": "Complaint",
-					"description": _("Complaint")
+					"label": _("Complaint")
 				},
 				{
 					"type": "doctype",
 					"name": "Diagnosis",
-					"description": _("Diagnosis")
+					"label": _("Diagnosis")
 				},
 				{
 					"type": "doctype",
 					"name": "Lab Test Sample",
-					"description": _("Test Sample Master."),
+					"label": _("Lab Test Sample"),
 				},
 				{
 					"type": "doctype",
 					"name": "Lab Test UOM",
-					"description": _("Lab Test UOM.")
+					"label": _("Lab Test UOM")
 				},
 				{
 					"type": "doctype",
 					"name": "Antibiotic",
-					"description": _("Antibiotic.")
+					"label": _("Antibiotic")
 				},
 				{
 					"type": "doctype",
 					"name": "Sensitivity",
-					"description": _("Sensitivity Naming.")
+					"label": _("Sensitivity")
 				},
 				{
 					"type": "doctype",
 					"name": "Lab Test Template",
-					"description": _("Lab Test Configurations.")
+					"label": _("Lab Test Template")
+				},
+				{
+					"type": "doctype",
+					"name": "Clinical Procedure Template",
+					"label": _("Clinical Procedure Template"),
+				},
+				{
+					"type": "doctype",
+					"name": "Healthcare Service Unit Type",
+					"label": _("Healthcare Service Unit Type")
 				}
 			]
 		}

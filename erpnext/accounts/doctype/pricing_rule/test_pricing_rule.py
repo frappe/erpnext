@@ -26,9 +26,10 @@ class TestPricingRule(unittest.TestCase):
 			"title": "_Test Pricing Rule",
 			"apply_on": "Item Code",
 			"item_code": "_Test Item",
+			"currency": "USD",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 10,
 			"company": "_Test Company"
 		}
@@ -48,7 +49,7 @@ class TestPricingRule(unittest.TestCase):
 			"name": None
 		})
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 10)
+		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Customer"
@@ -59,7 +60,7 @@ class TestPricingRule(unittest.TestCase):
 		prule.discount_percentage = 20
 		prule.insert()
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 20)
+		self.assertEqual(details.get("discount_percentage"), 20)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.apply_on = "Item Group"
@@ -70,7 +71,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.customer = "_Test Customer 1"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 10)
+		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Campaign"
@@ -82,7 +83,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.campaign = "_Test Campaign"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 5)
+		self.assertEqual(details.get("discount_percentage"), 5)
 
 		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
 		from erpnext.accounts.doctype.pricing_rule.pricing_rule	import MultiplePricingRuleConflict
@@ -102,8 +103,9 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "_Test FG Item 2",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"currency": "USD",
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"margin_type": "Percentage",
 			"margin_rate_or_amount": 10,
 			"company": "_Test Company"
@@ -163,10 +165,11 @@ class TestPricingRule(unittest.TestCase):
 			"doctype": "Pricing Rule",
 			"title": "_Test Pricing Rule 1",
 			"apply_on": "Item Code",
+			"currency": "USD",
 			"item_code": "_Test Variant Item",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 7.5,
 			"company": "_Test Company"
 		}).insert()
@@ -186,7 +189,7 @@ class TestPricingRule(unittest.TestCase):
 		})
 
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 7.5)
+		self.assertEqual(details.get("discount_percentage"), 7.5)
 
 		# add a new pricing rule for that item code, it should take priority
 		frappe.get_doc({
@@ -194,25 +197,27 @@ class TestPricingRule(unittest.TestCase):
 			"title": "_Test Pricing Rule 2",
 			"apply_on": "Item Code",
 			"item_code": "Test Variant PRT",
+			"currency": "USD",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 17.5,
 			"company": "_Test Company"
 		}).insert()
 
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 17.5)
+		self.assertEqual(details.get("discount_percentage"), 17.5)
 
 	def test_pricing_rule_for_stock_qty(self):
 		test_record = {
 			"doctype": "Pricing Rule",
 			"title": "_Test Pricing Rule",
 			"apply_on": "Item Code",
+			"currency": "USD",
 			"item_code": "_Test Item",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"min_qty": 5,
 			"max_qty": 7,
 			"discount_percentage": 17.5,
@@ -234,16 +239,16 @@ class TestPricingRule(unittest.TestCase):
 		so.items[0].price_list_rate = 100
 		so.submit()
 		so = frappe.get_doc('Sales Order', so.name)
-		self.assertEquals(so.items[0].discount_percentage, 17.5)
-		self.assertEquals(so.items[0].rate, 82.5)
+		self.assertEqual(so.items[0].discount_percentage, 17.5)
+		self.assertEqual(so.items[0].rate, 82.5)
 
 		# Without pricing rule
 		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
 		so.items[0].price_list_rate = 100
 		so.submit()
 		so = frappe.get_doc('Sales Order', so.name)
-		self.assertEquals(so.items[0].discount_percentage, 0)
-		self.assertEquals(so.items[0].rate, 100)
+		self.assertEqual(so.items[0].discount_percentage, 0)
+		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
@@ -271,12 +276,13 @@ def make_pricing_rule(**args):
 		"item_code": args.item_code or "_Test Item",
 		"applicable_for": args.applicable_for,
 		"selling": args.selling or 0,
+		"currency": "USD",
 		"buying": args.buying or 0,
 		"min_qty": args.min_qty or 0.0,
 		"max_qty": args.max_qty or 0.0,
-		"price_or_discount": args.price_or_discount or "Discount Percentage",
+		"rate_or_discount": args.rate_or_discount or "Discount Percentage",
 		"discount_percentage": args.discount_percentage or 0.0,
-		"price": args.price or 0.0,
+		"rate": args.rate or 0.0,
 		"margin_type": args.margin_type,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0
 	}).insert(ignore_permissions=True)

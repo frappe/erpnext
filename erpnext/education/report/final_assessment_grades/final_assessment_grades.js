@@ -21,7 +21,7 @@ frappe.query_reports["Final Assessment Grades"] = {
 				return{
 					filters: {
 						"group_based_on": "Batch",
-						"academic_year": frappe.query_report_filters_by_name.academic_year.value
+						"academic_year": frappe.query_report.get_filter_value('academic_year')
 					}
 				};
 			}

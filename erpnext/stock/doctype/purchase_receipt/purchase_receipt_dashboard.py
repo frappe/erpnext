@@ -5,8 +5,9 @@ def get_data():
 		'fieldname': 'purchase_receipt_no',
 		'non_standard_fieldnames': {
 			'Purchase Invoice': 'purchase_receipt',
+			'Asset': 'purchase_receipt',
 			'Landed Cost Voucher': 'receipt_document',
-			'Subscription': 'reference_document',
+			'Auto Repeat': 'reference_document',
 			'Purchase Receipt': 'return_against'
 		},
 		'internal_links': {
@@ -17,7 +18,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Related'),
-				'items': ['Purchase Invoice', 'Landed Cost Voucher']
+				'items': ['Purchase Invoice', 'Landed Cost Voucher', 'Asset']
 			},
 			{
 				'label': _('Reference'),
@@ -29,7 +30,7 @@ def get_data():
 			},
 			{
 				'label': _('Subscription'),
-				'items': ['Subscription']
+				'items': ['Auto Repeat']
 			},
 		]
 	}

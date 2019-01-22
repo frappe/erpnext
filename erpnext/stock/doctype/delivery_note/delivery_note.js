@@ -21,6 +21,9 @@ frappe.ui.form.on("Delivery Note", {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 			})
 
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 		erpnext.queries.setup_warehouse_query(frm);
 
 		frm.set_query('project', function(doc) {
@@ -32,9 +35,19 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		})
 
-		frm.set_query('transporter_name', function(doc) {
+		frm.set_query('transporter', function() {
 			return {
-				filters: { 'supplier_type': "transporter" }
+				filters: {
+					'is_transporter': 1
+				}
+			}
+		});
+
+		frm.set_query('driver', function(doc) {
+			return {
+				filters: {
+					'transporter': doc.transporter
+				}
 			}
 		});
 
@@ -66,11 +79,6 @@ frappe.ui.form.on("Delivery Note", {
 	},
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
-	},
-	on_submit: function(frm) {
-		if(cint(frappe.boot.notification_settings.delivery_note)) {
-			frm.email_doc(frappe.boot.notification_settings.delivery_note_message);
-		}
 	}
 });
 
@@ -101,6 +109,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Sales Return'), function() {
 					me.make_sales_return() }, __("Make"));
+			}
+
+			if (doc.docstatus==1) {
+				this.frm.add_custom_button(__('Delivery Trip'), function() {
+					me.make_delivery_trip() }, __("Make"));
 			}
 
 			if(doc.docstatus==0 && !doc.__islocal) {
@@ -167,7 +180,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
-		if(doc.docstatus==1 && !doc.subscription) {
+		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
 			cur_frm.add_custom_button(__('Subscription'), function() {
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __("Make"))
@@ -195,11 +208,22 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		})
 	},
 
+	make_delivery_trip: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+			frm: this.frm
+		})
+	},
+
 	tc_name: function() {
 		this.get_terms();
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
+
+	packed_items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no();
 	},
 

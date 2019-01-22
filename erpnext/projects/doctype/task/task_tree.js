@@ -44,23 +44,39 @@ frappe.treeview_settings['Task'] = {
 				return node.expandable;
 			},
 			click: function(node) {
-				var d = new frappe.ui.Dialog({
-					'fields': [
-						{'fieldname': 'tasks', 'label': 'Tasks', 'fieldtype': 'Text'},
+				this.data = [];
+				const dialog = new frappe.ui.Dialog({
+					title: __("Add Multiple Tasks"),
+					fields: [
+						{
+							fieldname: "multiple_tasks", fieldtype: "Table",
+							in_place_edit: true, data: this.data,
+							get_data: () => {
+								return this.data;
+							},
+							fields: [{
+								fieldtype:'Data',
+								fieldname:"subject",
+								in_list_view: 1,
+								reqd: 1,
+								label: __("Subject")
+							}]
+						},
 					],
 					primary_action: function() {
-						d.hide();
+						dialog.hide();
 						return frappe.call({
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",
 							args: {
-								data: d.get_values(),
+								data: dialog.get_values()["multiple_tasks"],
 								parent: node.data.value
 							},
 							callback: function() { }
 						});
-					}
+					},
+					primary_action_label: __('Create')
 				});
-				d.show();
+				dialog.show();
 			}
 		}
 	],

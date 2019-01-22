@@ -22,7 +22,7 @@ class ShoppingCartSettings(Document):
 
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
-		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
+		company_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 		if not company_currency:
 			msgprint(_("Please specify currency in Company") + ": " + self.company,
 				raise_exception=ShoppingCartSetupError)
@@ -90,6 +90,4 @@ def check_shopping_cart_enabled():
 		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
 
 def show_attachments():
-        return get_shopping_cart_settings().show_attachments
-
-
+	return get_shopping_cart_settings().show_attachments

@@ -53,8 +53,6 @@ frappe.ui.form.on("Opportunity", {
 			frm.add_custom_button(__('Quotation'),
 				cur_frm.cscript.create_quotation, __("Make"));
 
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
-
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
@@ -109,6 +107,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
 			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
 				{ company:frappe.defaults.get_user_default("Company") });
+		if(!this.frm.doc.currency)
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { currency:frappe.defaults.get_user_default("Currency") });
 
 		this.setup_queries();
 	},

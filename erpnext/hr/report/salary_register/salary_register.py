@@ -9,6 +9,8 @@ from frappe import _
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
+	if not salary_slips: return [], []
+
 	columns, earning_types, ded_types = get_columns(salary_slips)
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
@@ -23,7 +25,7 @@ def execute(filters=None):
 		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
 		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
 		if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
-			
+
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -53,7 +55,7 @@ def get_columns(salary_slips):
 		_("Department") + ":Link/Department:-1", _("Designation") + ":Link/Designation:-1",
 		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80", _("Leave Without Pay") + ":Float:-1",
 		_("Payment Days") + ":Float:120"
-	]	
+	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
@@ -70,20 +72,22 @@ def get_columns(salary_slips):
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
 def get_salary_slips(filters):
-	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
+	filters.update({"from_date": filters.get("from_date"), "to_date":filters.get("to_date")})
 	conditions, filters = get_conditions(filters)
-	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where docstatus = 1 %s
+	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where %s
 		order by employee""" % conditions, filters, as_dict=1)
 
-	if not salary_slips:
-		frappe.throw(_("No salary slip found between {0} and {1}").format(
-			filters.get("from_date"), filters.get("to_date")))
-	return salary_slips
+	return salary_slips or []
 
 def get_conditions(filters):
 	conditions = ""
-	if filters.get("date_range"): conditions += " and start_date >= %(from_date)s"
-	if filters.get("date_range"): conditions += " and end_date <= %(to_date)s"
+	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
+
+	if filters.get("docstatus"):
+		conditions += "docstatus = {0}".format(doc_status[filters.get("docstatus")])
+
+	if filters.get("from_date"): conditions += " and start_date >= %(from_date)s"
+	if filters.get("to_date"): conditions += " and end_date <= %(to_date)s"
 	if filters.get("company"): conditions += " and company = %(company)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
 

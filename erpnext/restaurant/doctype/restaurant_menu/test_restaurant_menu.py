@@ -38,15 +38,15 @@ class TestRestaurantMenu(unittest.TestCase):
 		menu2.save()
 
 		self.assertTrue(frappe.db.get_value('Price List', 'Test Restaurant 1 Menu 1'))
-		self.assertEquals(frappe.db.get_value('Item Price',
+		self.assertEqual(frappe.db.get_value('Item Price',
 			dict(price_list = 'Test Restaurant 1 Menu 1', item_code='Food Item 1'), 'price_list_rate'), 400)
-		self.assertEquals(frappe.db.get_value('Item Price',
+		self.assertEqual(frappe.db.get_value('Item Price',
 			dict(price_list = 'Test Restaurant 1 Menu 2', item_code='Food Item 1'), 'price_list_rate'), 450)
 
 		menu1.items[0].rate = 401
 		menu1.save()
 
-		self.assertEquals(frappe.db.get_value('Item Price',
+		self.assertEqual(frappe.db.get_value('Item Price',
 			dict(price_list = 'Test Restaurant 1 Menu 1', item_code='Food Item 1'), 'price_list_rate'), 401)
 
 		menu1.items[0].rate = 400

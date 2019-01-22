@@ -33,14 +33,14 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Medical Record'), function () {
 				create_medical_record(frm);
 			}, "Create");
-			frm.add_custom_button(__('Consultation'), function () {
-				btn_create_consultation(frm);
+			frm.add_custom_button(__('Patient Encounter'), function () {
+				btn_create_encounter(frm);
 			}, "Create");
 		}
 	},
 	onload: function (frm) {
 		if(!frm.doc.dob){
-			$(frm.fields_dict['age_html'].wrapper).html("Age not specified");
+			$(frm.fields_dict['age_html'].wrapper).html("");
 		}
 		if(frm.doc.dob){
 			$(frm.fields_dict['age_html'].wrapper).html("AGE : " + get_age(frm.doc.dob));
@@ -49,17 +49,20 @@ frappe.ui.form.on('Patient', {
 });
 
 frappe.ui.form.on("Patient", "dob", function(frm) {
-	if(frm.doc.dob){
+	if(frm.doc.dob) {
 		var today = new Date();
 		var birthDate = new Date(frm.doc.dob);
 		if(today < birthDate){
-			frappe.msgprint("Please select a valid Date");
+			frappe.msgprint(__("Please select a valid Date"));
 			frappe.model.set_value(frm.doctype,frm.docname, "dob", "");
 		}
 		else{
 			var age_str = get_age(frm.doc.dob);
 			$(frm.fields_dict['age_html'].wrapper).html("AGE : " + age_str);
 		}
+	}
+	else {
+		$(frm.fields_dict['age_html'].wrapper).html("");
 	}
 });
 
@@ -83,7 +86,7 @@ var get_age = function (birth) {
 
 var btn_create_vital_signs = function (frm) {
 	if (!frm.doc.name) {
-		frappe.throw("Please save the patient first");
+		frappe.throw(__("Please save the patient first"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
@@ -91,14 +94,14 @@ var btn_create_vital_signs = function (frm) {
 	frappe.new_doc("Vital Signs");
 };
 
-var btn_create_consultation = function (frm) {
+var btn_create_encounter = function (frm) {
 	if (!frm.doc.name) {
-		frappe.throw("Please save the patient first");
+		frappe.throw(__("Please save the patient first"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
 	};
-	frappe.new_doc("Consultation");
+	frappe.new_doc("Patient Encounter");
 };
 
 var btn_invoice_registration = function (frm) {
@@ -117,3 +120,16 @@ var btn_invoice_registration = function (frm) {
 		}
 	});
 };
+
+frappe.ui.form.on('Patient Relation', {
+	patient_relation_add: function(frm){
+		frm.fields_dict['patient_relation'].grid.get_field('patient').get_query = function(frm){
+			var patient_list = [];
+			if(!frm.doc.__islocal) patient_list.push(frm.doc.name);
+			$.each(frm.doc.patient_relation, function(idx, val){
+				if (val.patient) patient_list.push(val.patient);
+			});
+			return { filters: [['Patient', 'name', 'not in', patient_list]] };
+		};
+	}
+});

@@ -34,7 +34,7 @@ def execute(filters=None):
 		student_guardians = guardian_map.get(d.student)
 
 		if student_guardians:
-			for i in xrange(2):
+			for i in range(2):
 				if i < len(student_guardians):
 					g = student_guardians[i]
 					row += [g.guardian_name, g.relation, g.mobile_number, g.email_address]
