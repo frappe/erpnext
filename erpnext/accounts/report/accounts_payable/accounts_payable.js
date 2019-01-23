@@ -95,11 +95,12 @@ frappe.query_reports["Accounts Payable"] = {
 
 	get_datatable_options(options) {
 		return Object.assign(options, {
-			events: {
-				accumulator: function(acc, cell, row, row_count) {
-					if (row.posting_date) {
-						return frappe.utils.report_accumulator(acc, cell, row, row_count);
-					}
+			hooks: {
+				totalAccumulator: function(column, values) {
+					const me = this;
+					values = values.filter(d => me.datamanager.getData(d.rowIndex).posting_date);
+					let type = column.fieldname == "age" ? "mean" : null;
+					return frappe.utils.report_total_accumulator(column, values, type);
 				}
 			}
 		});
