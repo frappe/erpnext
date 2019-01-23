@@ -40,22 +40,8 @@ class SupplierScorecardPeriod(Document):
 
 	def calculate_criteria(self):
 		for crit in self.criteria:
-			my_eval_statement = crit.formula.replace("\r", "").replace("\n", "")
-
-			for var in self.variables:
-				if var.value:
-					if var.param_name in my_eval_statement:
-						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', "{:.2f}".format(var.value))
-				else:
-					if var.param_name in my_eval_statement:
-						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
-
-			#frappe.msgprint(my_eval_statement )
-
-			my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
-
 			try:
-				crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})))
+				crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(self.get_eval_statement(crit.formula),  None, {'max':max, 'min': min})))
 			except Exception:
 				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.".format(crit.criteria_name)),frappe.ValidationError)
 				crit.score = 0
@@ -67,25 +53,26 @@ class SupplierScorecardPeriod(Document):
 		self.total_score = myscore
 
 	def calculate_weighted_score(self, weighing_function):
-		my_eval_statement = weighing_function.replace("\r", "").replace("\n", "")
-
-		for var in self.variables:
-			if var.value:
-				if var.param_name in my_eval_statement:
-					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', "{:.2f}".format(var.value))
-			else:
-				if var.param_name in my_eval_statement:
-					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
-
-		my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
-
 		try:
-			weighed_score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})
+			weighed_score = frappe.safe_eval(self.get_eval_statement(weighing_function),  None, {'max':max, 'min': min})
 		except Exception:
 			frappe.throw(_("Could not solve weighted score function. Make sure the formula is valid."),frappe.ValidationError)
 			weighed_score = 0
 		return weighed_score
 
+
+	def get_eval_statement(self, input):
+		my_eval_statement = input.replace("\r", "").replace("\n", "")
+
+		for var in self.variables:
+				if var.value:
+					if var.param_name in my_eval_statement:
+						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', "{:.2f}".format(var.value))
+				else:
+					if var.param_name in my_eval_statement:
+						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
+
+		return my_eval_statement
 
 
 def import_string_path(path):
@@ -108,7 +95,7 @@ def make_supplier_scorecard(source_name, target_doc=None):
 			for var in get_variables(cr.criteria_name):
 				if var not in variables:
 					variables.append(var)
-		
+
 		target.extend('variables', variables)
 
 	doc = get_mapped_doc("Supplier Scorecard", source_name,	{
