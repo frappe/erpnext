@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_default_currency, get_company_currency
+from erpnext import get_company_currency
 
 from six import iteritems
 
