@@ -61,8 +61,8 @@ class SupplierScorecardPeriod(Document):
 		return weighed_score
 
 
-	def get_eval_statement(self, input):
-		my_eval_statement = input.replace("\r", "").replace("\n", "")
+	def get_eval_statement(self, formula):
+		my_eval_statement = formula.replace("\r", "").replace("\n", "")
 
 		for var in self.variables:
 				if var.value:
