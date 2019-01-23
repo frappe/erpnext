@@ -8,7 +8,9 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 def execute(filters=None):
 	validate_filters(filters)
 
-	columns = get_columns()
+	filters.naming_series = frappe.db.get_single_value('Buying Settings', 'supp_master_name')
+
+	columns = get_columns(filters)
 	res = get_result(filters)
 
 	return columns, res
@@ -29,7 +31,8 @@ def get_result(filters):
 	# if no supplier selected, fetch data for all tds applicable supplier
 	# else fetch relevant data for selected supplier
 	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
-	fields = ["name", pan+" as pan", "tax_withholding_category", "supplier_type"]
+	fields = ["name", pan+" as pan", "tax_withholding_category", "supplier_type", "supplier_name"]
+
 	if filters.supplier:
 		filters.supplier = frappe.db.get_list('Supplier',
 			{"name": filters.supplier}, fields)
@@ -49,8 +52,13 @@ def get_result(filters):
 			filters.company, filters.from_date, filters.to_date)
 
 		if total_invoiced_amount or tds_deducted:
-			out.append([supplier.pan, supplier.name, tds.name, supplier.supplier_type,
-				rate, total_invoiced_amount, tds_deducted])
+			row = [supplier.pan, supplier.name]
+
+			if filters.naming_series == 'Naming Series':
+				row.append(supplier.supplier_name)
+
+			row.extend([tds.name, supplier.supplier_type, rate, total_invoiced_amount, tds_deducted])
+			out.append(row)
 
 	return out
 
@@ -86,7 +94,7 @@ def get_invoice_and_tds_amount(supplier, account, company, from_date, to_date):
 
 	return total_invoiced_amount, tds_deducted
 
-def get_columns():
+def get_columns(filters):
 	columns = [
 		{
 			"label": _("PAN"),
@@ -100,7 +108,17 @@ def get_columns():
 			"fieldname": "supplier",
 			"fieldtype": "Link",
 			"width": 180
-		},
+		}]
+
+	if filters.naming_series == 'Naming Series':
+		columns.append({
+			"label": _("Supplier Name"),
+			"fieldname": "supplier_name",
+			"fieldtype": "Data",
+			"width": 180
+		})
+
+	columns.extend([
 		{
 			"label": _("Section Code"),
 			"options": "Tax Withholding Category",
@@ -132,6 +150,6 @@ def get_columns():
 			"fieldtype": "Float",
 			"width": 90
 		}
-	]
+	])
 
 	return columns
