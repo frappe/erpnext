@@ -527,7 +527,6 @@ def payroll_entry_has_bank_entries(name):
 	return response
 
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
-	print(doctype)
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`
 		where `{key}` LIKE %(txt)s
