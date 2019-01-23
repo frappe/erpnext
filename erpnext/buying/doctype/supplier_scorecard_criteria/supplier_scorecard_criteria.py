@@ -36,15 +36,6 @@ class SupplierScorecardCriteria(Document):
 		except Exception:
 			frappe.throw(_("Error evaluating the criteria formula"))
 
-
-
-@frappe.whitelist()
-def get_scoring_criteria(criteria_name):
-	criteria = frappe.get_doc("Supplier Scorecard Criteria", criteria_name)
-
-	return criteria
-
-
 @frappe.whitelist()
 def get_criteria_list():
 	criteria = frappe.db.sql("""
@@ -56,7 +47,6 @@ def get_criteria_list():
 
 	return criteria
 
-@frappe.whitelist()
 def get_variables(criteria_name):
 	criteria = frappe.get_doc("Supplier Scorecard Criteria", criteria_name)
 	return _get_variables(criteria)
@@ -69,21 +59,16 @@ def _get_variables(criteria):
 	for dummy1, match in enumerate(mylist):
 		for dummy2 in range(0, len(match.groups())):
 			try:
-				#var = frappe.get_doc("Supplier Scorecard Variable", {'param_name' : d})
 				var = frappe.db.sql("""
 					SELECT
-						scv.name
+						scv.variable_label, scv.description, scv.param_name, scv.path
 					FROM
 						`tabSupplier Scorecard Variable` scv
 					WHERE
 						param_name=%(param)s""",
-						{'param':match.group(1)},)[0][0]
+						{'param':match.group(1)}, as_dict=1)[0]
 				my_variables.append(var)
 			except Exception:
-				# Ignore the ones where the variable can't be found
 				frappe.throw(_('Unable to find variable: ') + str(match.group(1)), InvalidFormulaVariable)
-				#pass
 
-
-	#frappe.msgprint(str(my_variables))
 	return my_variables
