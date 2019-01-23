@@ -953,11 +953,12 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 	return list(journal_entries)
 
 
-def get_advance_payment_entries(party_type, party, party_account,
-								order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
+def get_advance_payment_entries(party_type, party, party_account, order_doctype,
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
+	limit_cond = "limit %s" % (limit or 1000)
 
 	if order_list or against_all_orders:
 		if order_list:
@@ -977,8 +978,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
 				and t2.reference_doctype = %s {1}
-			order by t1.posting_date
-		""".format(party_account_field, reference_condition),
+			order by t1.posting_date {2}
+		""".format(party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
@@ -990,8 +991,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
 					and docstatus = 1 and unallocated_amount > 0
-				order by posting_date
-			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
+				order by posting_date {1}
+			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
