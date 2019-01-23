@@ -5,6 +5,10 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc('buying', 'doctype', 'supplier_scorecard_criteria')
+	frappe.reload_doc('buying', 'doctype', 'supplier_scorecard_scoring_criteria')
+	frappe.reload_doc('buying', 'doctype', 'supplier_scorecard')
+
 	for criteria in frappe.get_all('Supplier Scorecard Criteria', fields=['name', 'formula'], limit_page_length=None):
 		frappe.db.set_value('Supplier Scorecard Criteria', criteria.name,
 			'formula', criteria.formula.replace('&lt;','<').replace('&gt;','>'))
