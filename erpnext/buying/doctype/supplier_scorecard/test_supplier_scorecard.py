@@ -21,12 +21,6 @@ class TestSupplierScorecard(unittest.TestCase):
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError,my_doc.insert)
 
-	def test_missing_variable(self):
-		delete_test_scorecards()
-		my_doc = make_supplier_scorecard()
-		del my_doc.variables
-		self.assertRaises(frappe.ValidationError,my_doc.insert)
-
 def make_supplier_scorecard():
 	my_doc = frappe.get_doc(valid_scorecard[0])
 
@@ -118,56 +112,6 @@ valid_scorecard = [
 			}
 		],
 		"prevent_pos":0,
-		"variables": [
-			{
-				"param_name":"cost_of_on_time_shipments",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"Cost of On Time Shipments",
-				"path":"get_cost_of_on_time_shipments",
-				"parentfield":"variables"
-			},
-			{
-				"param_name":"tot_cost_shipments",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"Total Cost of Shipments",
-				"path":"get_total_cost_of_shipments",
-				"parentfield":"variables"
-			},
-			{
-				"param_name":"tot_days_late",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"Total Days Late",
-				"path":"get_total_days_late",
-				"parentfield":"variables"
-			},
-			{
-				"param_name":"total_working_days",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"Total Working Days",
-				"path":"get_total_workdays",
-				"parentfield":"variables"
-			},
-			{
-				"param_name":"on_time_shipment_num",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"# of On Time Shipments",
-				"path":"get_on_time_shipments",
-				"parentfield":"variables"
-			},
-			{
-				"param_name":"total_shipments",
-				"doctype":"Supplier Scorecard Scoring Variable",
-				"parenttype":"Supplier Scorecard",
-				"variable_label":"Total Shipments",
-				"path":"get_total_shipments",
-				"parentfield":"variables"
-			}
-		],
 		"period":"Per Month",
 		"doctype":"Supplier Scorecard",
 		"warn_pos":0,
@@ -177,14 +121,12 @@ valid_scorecard = [
 			{
 				"weight":100.0,
 				"doctype":"Supplier Scorecard Scoring Criteria",
-				"formula":"(({cost_of_on_time_shipments} / {tot_cost_shipments}) if {tot_cost_shipments} > 0 else 1 )* 100 ",
-				"criteria_name":"Delivery",
-				"max_score":100.0,
+				"criteria_name":"Delivery"
 			}
 		],
 		"supplier":"_Test Supplier",
 		"name":"_Test Supplier",
-		"weighting_function":"{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )",
+		"weighting_function":"{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )"
 	}
 ]
 
