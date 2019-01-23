@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
 from frappe.utils import flt, cint
+from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
 from six import iteritems
@@ -38,6 +39,13 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
 
 		columns += [
+			{
+				"label": _("Advance Amount"),
+				"fieldname": "advance_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 100
+			},
 			{
 				"label": _("Total Invoiced Amt"),
 				"fieldname": "invoiced_amount",
@@ -128,6 +136,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		data = []
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
+		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type")) or {}
 
 		for party, party_dict in iteritems(partywise_total):
 			row = frappe._dict({"party": party})
@@ -135,6 +144,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			if party_naming_by == "Naming Series":
 				row["party_name"] = self.get_party_name(args.get("party_type"), party)
 
+			row["advance_amount"] = partywise_advance_amount.get(party, 0)
 			row["invoiced_amount"] = party_dict.invoiced_amount
 			row["paid_amount"] = party_dict.paid_amount
 			row["return_amount"] = party_dict.return_amount
