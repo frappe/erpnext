@@ -94,6 +94,9 @@ class Company(NestedSet):
 
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
+			self.create_default_tax_template()
+
+
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
