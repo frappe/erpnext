@@ -27,6 +27,86 @@ def get_data():
 					"name": "Contact",
 					"description": _("All Contacts."),
 				},
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
+				},
+				{
+					"type": "doctype",
+					"name": "Lead Source",
+					"description": _("Track Leads by Lead Source.")
+				},
+			]
+		},
+		{
+			"label": _("Support"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Issue",
+					"description": _("Support queries from customers."),
+				},
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Communication log."),
+				},
+				{
+					"type": "doctype",
+					"name": "Warranty Claim",
+					"description": _("Warranty Claim against Serial No."),
+				},
+				{
+					"type": "doctype",
+					"name": "Serial No",
+					"description": _("Single unit of an Item."),
+				},
+				{
+					"type": "page",
+					"name": "support-analytics",
+					"label": _("Support Analytics"),
+					"icon": "fa fa-bar-chart"
+				},
+				{
+					"type": "report",
+					"name": "Minutes to First Response for Issues",
+					"doctype": "Issue",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Support Hours",
+					"doctype": "Issue",
+					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Maintenance"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Maintenance Schedule",
+					"description": _("Plan for maintenance visits."),
+				},
+				{
+					"type": "doctype",
+					"name": "Maintenance Visit",
+					"description": _("Visit report for maintenance call."),
+				},
+				{
+					"type": "report",
+					"name": "Maintenance Schedules",
+					"is_query_report": True,
+					"doctype": "Maintenance Schedule"
+				},
+				{
+					"type": "doctype",
+					"name": "Warranty Claim",
+					"description": _("Warranty Claim against Serial No."),
+				},
 			]
 		},
 		{
@@ -84,17 +164,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Communication"),
-			"icon": "fa fa-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
-				},
-			]
-		},
-		{
 			"label": _("Setup"),
 			"icon": "fa fa-cog",
 			"items": [
@@ -129,17 +198,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Lead Source",
-					"description": _("Track Leads by Lead Source.")
-				},
-			]
-		},
-		{
-			"label": _("SMS"),
-			"icon": "fa fa-wrench",
-			"items": [
-				{
-					"type": "doctype",
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},
@@ -155,19 +213,19 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("Help"),
-			"items": [
-				{
-					"type": "help",
-					"label": _("Lead to Quotation"),
-					"youtube_id": "TxYX4r4JAKA"
-				},
-				{
-					"type": "help",
-					"label": _("Newsletters"),
-					"youtube_id": "muLKsCrrDRo"
-				},
-			]
-		},
+		# {
+		# 	"label": _("Help"),
+		# 	"items": [
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Lead to Quotation"),
+		# 			"youtube_id": "TxYX4r4JAKA"
+		# 		},
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Newsletters"),
+		# 			"youtube_id": "muLKsCrrDRo"
+		# 		},
+		# 	]
+		# },
 	]

@@ -12,6 +12,36 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Employee Transfer",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Promotion",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding"
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation Template",
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding Template"
+				}
+			]
+		},
+
+		{
+			"label": _("Attendance and Leaves"),
+			"items": [
+				{
+					"type": "doctype",
 					"name": "Employee Attendance Tool",
 					"hide_count": True
 				},
@@ -27,12 +57,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True
-				}
-			]
-		},
-		{
-			"label": _("Leaves and Holiday"),
-			"items": [
+				},
 				{
 					"type": "doctype",
 					"name": "Leave Application",
@@ -114,11 +139,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Retention Bonus",
 				},
-			]
-		},
-		{
-			"label": _("Payroll Setup"),
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Payroll Period",
@@ -131,19 +151,32 @@ def get_data():
 					"type": "doctype",
 					"name": "Salary Structure",
 				},
-				{
-					"type": "doctype",
-					"name": "Employee Tax Exemption Category",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Tax Exemption Sub Category"
-				}
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Employee Tax Exemption Category",
+				# },
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Employee Tax Exemption Sub Category"
+				# }
 			]
 		},
 		{
-			"label": _("Travel and Expense Claim"),
+			"label": _("Appraisals, Expense Claims and Loans"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Appraisal",
+				},
+				{
+					"type": "doctype",
+					"name": "Appraisal Template",
+				},
+				{
+					"type": "page",
+					"name": "team-updates",
+					"label": _("Team Updates")
+				},
 				{
 					"type": "doctype",
 					"name": "Employee Advance",
@@ -160,30 +193,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Travel Request",
 				},
-			]
-		},
-		{
-			"label": _("Appraisals"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Appraisal",
-				},
-				{
-					"type": "doctype",
-					"name": "Appraisal Template",
-				},
-				{
-					"type": "page",
-					"name": "team-updates",
-					"label": _("Team Updates")
-				},
-			]
-		},
-		{
-			"label": _("Loan Management"),
-			"icon": "icon-list",
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Loan Type",
@@ -199,36 +208,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Lifecycle"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Transfer",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Promotion",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Separation",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Onboarding"
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Separation Template",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Onboarding Template"
-				}
-			]
-		},
-		{
-			"label": _("Recruitment"),
+			"label": _("Recruitment and Training"),
 			"items": [
 				{
 					"type": "doctype",
@@ -242,11 +222,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Job Offer",
 				},
-			]
-		},
-		{
-			"label": _("Training"),
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Training Program"
@@ -266,7 +241,60 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Shift Management"),
+			"label": _("Reports"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Leave Balance",
+					"doctype": "Leave Application"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Birthday",
+					"doctype": "Employee"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employees working on a holiday",
+					"doctype": "Employee"
+				},
+				{
+					"type": "report",
+					"name": "Employee Information",
+					"doctype": "Employee"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Register",
+					"doctype": "Salary Slip"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Monthly Attendance Sheet",
+					"doctype": "Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Expenses",
+					"doctype": "Vehicle"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Department Analytics",
+					"doctype": "Employee"
+				},
+			]
+		},
+		{
+			"label": _("Shifts and Fleet Management"),
 			"items": [
 				{
 					"type": "doctype",
@@ -279,12 +307,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Shift Assignment",
-				}
-			]
-		},
-		{
-			"label": _("Fleet Management"),
-			"items": [
+				},
 				{
 					"type": "doctype",
 					"name": "Vehicle"
@@ -337,84 +360,25 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("Reports"),
-			"icon": "fa fa-list",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Leave Balance",
-					"doctype": "Leave Application"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Birthday",
-					"doctype": "Employee"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employees working on a holiday",
-					"doctype": "Employee"
-				},
-				{
-					"type": "report",
-					"name": "Employee Information",
-					"doctype": "Employee"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Salary Register",
-					"doctype": "Salary Slip"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Monthly Attendance Sheet",
-					"doctype": "Attendance"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Expenses",
-					"doctype": "Vehicle"
-				},
-
-			]
-		},
-		{
-			"label": _("Help"),
-			"icon": "fa fa-facetime-video",
-			"items": [
-				{
-					"type": "help",
-					"label": _("Setting up Employees"),
-					"youtube_id": "USfIUdZlUhw"
-				},
-				{
-					"type": "help",
-					"label": _("Leave Management"),
-					"youtube_id": "fc0p_AXebc8"
-				},
-				{
-					"type": "help",
-					"label": _("Expense Claims"),
-					"youtube_id": "5SZHJF--ZFY"
-				}
-			]
-		},
-		{
-			"label": _("Analytics"),
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Department Analytics",
-					"doctype": "Employee"
-				},
-			]
-		}
+		# {
+		# 	"label": _("Help"),
+		# 	"icon": "fa fa-facetime-video",
+		# 	"items": [
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Setting up Employees"),
+		# 			"youtube_id": "USfIUdZlUhw"
+		# 		},
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Leave Management"),
+		# 			"youtube_id": "fc0p_AXebc8"
+		# 		},
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Expense Claims"),
+		# 			"youtube_id": "5SZHJF--ZFY"
+		# 		}
+		# 	]
+		# },
 	]
