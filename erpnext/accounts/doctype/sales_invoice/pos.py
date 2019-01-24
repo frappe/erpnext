@@ -333,10 +333,12 @@ def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
 	cond = "1=1"
 	if pos_profile.get('warehouse'):
-		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+		cond = "warehouse = %(warehouse)s"
 
 	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
-		where actual_qty > 0 and {cond}""".format(cond=cond), as_dict=1)
+		where actual_qty > 0 and {cond}""".format(cond=cond), {
+			'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
+		}, as_dict=1)
 
 	for bins in bin_data:
 		if bins.item_code not in itemwise_bin_data:
