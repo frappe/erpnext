@@ -32,7 +32,6 @@ class GLEntry(Document):
 			self.validate_party()
 			self.validate_currency()
 
-
 	def on_update_with_args(self, adv_adj, from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
