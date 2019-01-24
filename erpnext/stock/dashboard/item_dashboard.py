@@ -19,7 +19,7 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		if DatabaseQuery('Warehouse', user=frappe.session.user).build_match_conditions():
 			filters.append(['warehouse', 'in', [w.name for w in frappe.get_list('Warehouse')]])
 	except frappe.PermissionError:
-		# user does not have access to warehouse
+		# user does not have access on warehouse
 		return []
 
 	return frappe.db.get_all('Bin', fields=['item_code', 'warehouse', 'projected_qty',
