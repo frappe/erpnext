@@ -1,4 +1,4 @@
-import unittest, frappe, requests, os, time, erpnext
+import unittest, frappe, requests, os, time
 from erpnext.erpnext_integrations.connectors.woocommerce_connection import order
 
 class TestWoocommerce(unittest.TestCase):

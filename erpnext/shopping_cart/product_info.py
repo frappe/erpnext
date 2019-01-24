@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from erpnext.shopping_cart.cart import _get_cart_quotation
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings \
-	import is_cart_enabled, get_shopping_cart_settings, show_quantity_in_website
+	import get_shopping_cart_settings, show_quantity_in_website
 from erpnext.utilities.product import get_price, get_qty_in_stock
 
 @frappe.whitelist(allow_guest=True)
