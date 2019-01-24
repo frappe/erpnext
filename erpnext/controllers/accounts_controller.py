@@ -993,14 +993,16 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 			and abs({bal_dr_or_cr}) > 0
 		group by gle_je.voucher_no
 		having amount > 0.005 {against_account_condition}
-		order by gle_je.posting_date""".format(
+		order by gle_je.posting_date
+		limit %(limit)s""".format(
 			bal_dr_or_cr=bal_dr_or_cr,
 			payment_dr_or_cr=payment_dr_or_cr,
 			against_account_condition=against_account_condition
 		), {
 			"party_type": party_type,
 			"party": party,
-			"account": party_account
+			"account": party_account,
+			"limit": limit or 1000
 		}, as_dict=True)
 
 	return list(journal_entries)
