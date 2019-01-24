@@ -136,13 +136,6 @@ def get_data():
 			"label": _("Leaderboard")
 		},
 		{
-			"module_name": "Projects",
-			"color": "#8e44ad",
-			"icon": "octicon octicon-rocket",
-			"type": "module",
-			"hidden": 1
-		},
-		{
 			"module_name": "Support",
 			"color": "#2c3e50",
 			"icon": "octicon octicon-issue-opened",
