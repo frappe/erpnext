@@ -23,7 +23,7 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		return []
 
 	return frappe.db.get_all('Bin', fields=['item_code', 'warehouse', 'projected_qty',
-			'reserved_qty', 'reserved_qty_for_sub_contract', 'actual_qty', 'valuation_rate'],
+			'reserved_qty', 'reserved_qty_for_production', 'reserved_qty_for_sub_contract', 'actual_qty', 'valuation_rate'],
 		or_filters={
 			'projected_qty': ['!=', 0],
 			'reserved_qty': ['!=', 0],
