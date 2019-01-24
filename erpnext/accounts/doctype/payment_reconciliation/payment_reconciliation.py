@@ -20,9 +20,9 @@ class PaymentReconciliation(Document):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 
 		payment_entries = get_advance_payment_entries(self.party_type, self.party, self.receivable_payable_account,
-			order_doctype, against_all_orders=True, against_account=self.bank_cash_account)
+			order_doctype, against_all_orders=True, against_account=self.bank_cash_account, limit=self.limit)
 		journal_entries = get_advance_journal_entries(self.party_type, self.party, self.receivable_payable_account,
-			order_doctype, against_all_orders=True, against_account=self.bank_cash_account)
+			order_doctype, against_all_orders=True, against_account=self.bank_cash_account, limit=self.limit)
 				
 		self.add_payment_entries(payment_entries + journal_entries)
 
@@ -38,7 +38,7 @@ class PaymentReconciliation(Document):
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition)
+			self.receivable_payable_account, condition=condition, limit=self.limit)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
