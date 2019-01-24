@@ -123,10 +123,6 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 
-	validate: function (frm) {
-		frm.trigger("select_batch_no");
-	},
-
 	refresh: function(frm) {
 		frm.add_custom_button(__('Select Item Batches'), () => {
 			frm.trigger("select_batch_no");
