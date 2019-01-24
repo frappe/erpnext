@@ -118,6 +118,9 @@ class StockEntry(StockController):
 		batch_details = []
 
 		for item in self.items:
+			if not item.item_code:
+				continue
+
 			has_batch_no, create_new_batch = frappe.db.get_value('Item', item.item_code, ['has_batch_no', 'create_new_batch'])
 
 			if has_batch_no and not item.batch_no:
