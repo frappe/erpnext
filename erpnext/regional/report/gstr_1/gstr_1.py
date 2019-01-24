@@ -508,20 +508,26 @@ def get_json():
 	report_name = data["report_name"]
 	gstin = get_company_gstin_number(filters["company"])
 
-	res = {}
-	for item in report_data:
-		res.setdefault(item["customer_gstin"], []).append(item)
-
 	fp = "%02d%s" % (now_datetime().month, now_datetime().year)
 
 	gst_json = {"gstin": "", "fp": "", "version": "GST2.2.9",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
+	res = {}
 	if filters["type_of_business"] == "B2B":
+		for item in report_data:
+			res.setdefault(item["customer_gstin"], []).append(item)
+
 		out = get_b2b_json(res, gstin)
 		gst_json["b2b"] = out
+	elif filters["type_of_business"] == "EXPORT":
+		for item in report_data:
+			res.setdefault(item["export_type"], []).append(item)
 
-	download_json_file(report_name, gst_json)
+		out = get_export_json(res)
+		gst_json["exp"] = out
+
+	download_json_file(report_name, filters["type_of_business"], gst_json)
 
 def get_b2b_json(res, gstin):
 	inv_type, out = {"Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
@@ -543,18 +549,10 @@ def get_b2b_json(res, gstin):
 
 			if inv_items["pos"]=="00": continue
 
-			itm_det = {"txval": d["taxable_value"], "rt": 18, "csamt": (d["cess_amount"] or 0)}
-
-			tax = flt(d["taxable_value"]/18, 2)
-			if gstin[0:2] == d["customer_gstin"][0:2]:
-				itm_det.update({"camt": flt(tax/2, 2), "samt": flt(tax/2, 2)})
-			else:
-				itm_det.update({"iamt": tax})
-
 			inv_items.update({
 				"itms": [{
 					"num": 1801,
-					"itm_det": itm_det
+					"itm_det": get_rate_and_tax_details(d, gstin)
 				}]
 			})
 
@@ -565,6 +563,46 @@ def get_b2b_json(res, gstin):
 		out.append(b2b_item)
 
 	return out
+
+def get_export_json(res):
+	out = []
+	for exp_type in res:
+		exp_item, inv = {"exp_typ": exp_type, "inv": []}, []
+
+		for d in res[exp_type]:
+			inv_items = {
+				"inum": d["invoice_number"],
+				"idt": getdate(d["posting_date"]).strftime('%d-%m-%Y'),
+				"val": flt(d["invoice_value"], 2)
+			}
+
+			inv_items["itms"] = [{
+				"txval": flt(d["taxable_value"], 2),
+				"rt": d["rate"] or 0,
+				"iamt": 0,
+				"csamt": 0
+			}]
+
+			inv.append(inv_items)
+
+		exp_item["inv"] = inv
+		out.append(exp_item)
+
+	return out
+
+def get_rate_and_tax_details(row, gstin):
+	itm_det = {"txval": row["taxable_value"],
+		"rt": row["rate"],
+		"csamt": (row["cess_amount"] or 0)
+	}
+
+	tax = flt(row["taxable_value"]/row["rate"], 2)
+	if gstin[0:2] == row["customer_gstin"][0:2]:
+		itm_det.update({"camt": flt(tax/2, 2), "samt": flt(tax/2, 2)})
+	else:
+		itm_det.update({"iamt": tax})
+
+	return itm_det
 
 def get_company_gstin_number(company):
 	filters = [
@@ -581,9 +619,9 @@ def get_company_gstin_number(company):
 	else:
 		frappe.throw(_("No GST No. found for the Company."))
 
-def download_json_file(filename, data):
+def download_json_file(filename, report_type, data):
 	''' download json content in a file '''
-	frappe.response['filename'] = frappe.scrub(filename) + '.json'
+	frappe.response['filename'] = frappe.scrub("{0} {1}".format(filename, report_type)) + '.json'
 	frappe.response['filecontent'] = json.dumps(data)
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'
