@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_default_currency, get_company_currency
+from erpnext import get_company_currency
 
 from six import iteritems, string_types
 
@@ -581,3 +581,12 @@ def get_party_shipping_address(doctype, name):
 		return out[0][0]
 	else:
 		return ''
+
+def get_partywise_advanced_payment_amount(party_type="Customer"):
+	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
+		FROM `tabGL Entry`
+		WHERE party_type = %s and against_voucher is null GROUP BY party"""
+		.format(("credit - debit") if party_type == "Customer" else "debit") , party_type)
+
+	if data:
+		return frappe._dict(data)
