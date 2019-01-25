@@ -164,7 +164,7 @@ def set_price_list(out, party, party_type, given_price_list, pos=None):
 			price_list = customer_price_list
 		else:
 			pos_price_list = frappe.get_value('Pos Profile', pos, 'selling_price_list')
-			price_list = pos_price_list
+			price_list = pos_price_list or given_price_list
 	else:
 		price_list = get_default_price_list(party) or given_price_list
 
