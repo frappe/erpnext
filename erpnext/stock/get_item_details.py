@@ -424,7 +424,7 @@ def insert_item_price(args):
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
 					args.price_list), alert=True)
 
-def get_item_price(args, item_code):
+def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
 			Check if the Derised qty is within the increment of the packing list.
@@ -434,16 +434,19 @@ def get_item_price(args, item_code):
 	"""
 
 	args['item_code'] = item_code
-	conditions = "where (customer is null or customer = '') and (supplier is null or supplier = '')"
-	if args.get("customer"):
-		conditions = "where customer=%(customer)s"
 
-	if args.get("supplier"):
-		conditions = "where supplier=%(supplier)s"
-
-	conditions += """ and item_code=%(item_code)s
+	conditions = """where item_code=%(item_code)s
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
+
+	if not ignore_party:
+		conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+		if args.get("customer"):
+			conditions += " and customer=%(customer)s"
+
+		if args.get("supplier"):
+			conditions += " and supplier=%(supplier)s"
+
 
 	if args.get('min_qty'):
 		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
@@ -490,10 +493,10 @@ def get_price_list_rate_for(args, item_code):
 		for field in ["customer", "supplier", "min_qty"]:
 			del item_price_args[field]
 
-		general_price_list_rate = get_item_price(item_price_args, item_code)
+		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
 			item_price_args["args"] = args.get("stock_uom")
-			general_price_list_rate = get_item_price(item_price_args, item_code)
+			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 
 		if general_price_list_rate:
 			item_price_data = general_price_list_rate
