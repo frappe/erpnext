@@ -326,12 +326,12 @@ frappe.help.help_links['List/Item'] = [
 	{ label: 'Managing Fixed Assets', url: docsUrl + 'user/manual/en/accounts/managing-fixed-assets' },
 	{ label: 'Item Codification', url: docsUrl + 'user/manual/en/stock/item/item-codification' },
 	{ label: 'Item Variants', url: docsUrl + 'user/manual/en/stock/item/item-variants' },
-	{ label: 'Item Valuation', url: docsUrl + 'user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },				
+	{ label: 'Item Valuation', url: docsUrl + 'user/manual/en/stock/item/item-valuation-fifo-and-moving-average' },
 ]
 
 frappe.help.help_links['Form/Item'] = [
 	{ label: 'Item', url: 'http://erpnext.com/docs/user/manual/en/stock/item' },
-	{ label: 'Item Price', url: docsUrl + 'user/manual/en/stock/item/item-price' },	
+	{ label: 'Item Price', url: docsUrl + 'user/manual/en/stock/item/item-price' },
 	{ label: 'Barcode', url: docsUrl + 'user/manual/en/stock/articles/track-items-using-barcode' },
 	{ label: 'Item Wise Taxation', url: docsUrl + 'user/manual/en/accounts/item-wise-taxation' },
 	{ label: 'Managing Fixed Assets', url: docsUrl + 'user/manual/en/accounts/managing-fixed-assets' },
