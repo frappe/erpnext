@@ -1,24 +1,24 @@
 <div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
-    <div class="col-md-6" id="item-spinner">
-        <div class="input-group mb-3 number-spinner w-100">
-            <div class="input-group-prepend">
-                <button class="btn btn-outline-secondary" type="button" data-dir="dwn">-</button>
-            </div>
-            <input type="number" class="form-control border-secondary text-right cart-qty" value="1">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" data-dir="up">+</button>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div id="item-add-to-cart">
-            <button data-item-code="{{item_code}}" class="btn btn-outline-primary item-variant-add-to-cart">{{ _("Add to Cart") }}</button>
-        </div>
-        <div id="item-update-cart" style="display: none;">
-            <a href="/cart" class='btn btn-light'>
-                <i class='octicon octicon-check'></i>
-                {{ _("View in Cart") }}
-            </a>
-        </div>
-    </div>
+	<div class="col-md-6" id="item-spinner">
+		<div class="input-group mb-3 number-spinner w-100">
+			<div class="input-group-prepend">
+				<button class="btn btn-outline-secondary" type="button" data-dir="dwn">-</button>
+			</div>
+			<input type="number" class="form-control border-secondary text-right cart-qty" value="1">
+			<div class="input-group-append">
+				<button class="btn btn-outline-secondary" type="button" data-dir="up">+</button>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div id="item-add-to-cart">
+			<button data-item-code="{{item_code}}" class="btn btn-outline-primary item-variant-add-to-cart">{{ _("Add to Cart") }}</button>
+		</div>
+		<div id="item-update-cart" style="display: none;">
+			<a href="/cart" class='btn btn-light'>
+				<i class='octicon octicon-check'></i>
+				{{ _("View in Cart") }}
+			</a>
+		</div>
+	</div>
 </div>

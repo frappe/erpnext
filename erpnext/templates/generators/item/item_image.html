@@ -2,24 +2,24 @@
 {% if slides %}
 {{ product_image(slides[0].image) }}
 <div class="item-slideshow mt-2">
-    {% for item in slides %}
-    <img class="item-slideshow-image {% if loop.first %}active{% endif %}"
-            src="{{ item.image }}" alt="{{ item.heading }}">
-    {% endfor %}
+	{% for item in slides %}
+	<img class="item-slideshow-image {% if loop.first %}active{% endif %}"
+			src="{{ item.image }}" alt="{{ item.heading }}">
+	{% endfor %}
 </div>
 <script>
-    frappe.ready(() => {
-        $('.page_content').on('click', '.item-slideshow-image', (e) => {
-            const $img = $(e.currentTarget);
-            const link = $img.prop('src');
-            const $product_image = $('.product-image');
-            $product_image.find('a').prop('href', link);
-            $product_image.find('img').prop('src', link);
+	frappe.ready(() => {
+		$('.page_content').on('click', '.item-slideshow-image', (e) => {
+			const $img = $(e.currentTarget);
+			const link = $img.prop('src');
+			const $product_image = $('.product-image');
+			$product_image.find('a').prop('href', link);
+			$product_image.find('img').prop('src', link);
 
-            $('.item-slideshow-image').removeClass('active');
-            $img.addClass('active');
-        });
-    })
+			$('.item-slideshow-image').removeClass('active');
+			$img.addClass('active');
+		});
+	})
 </script>
 {% else %}
 {{ product_image(website_image) }}

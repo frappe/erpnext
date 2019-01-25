@@ -1,23 +1,23 @@
 <div class="col-md-8">
 <!-- title -->
 <h1 itemprop="name">
-    {{ item_name }}
+	{{ item_name }}
 </h1>
 <p class="text-muted">
-    <span>{{ _("Item Code") }}:</span>
-    <span itemprop="productID">{{ doc.name }}</span>
+	<span>{{ _("Item Code") }}:</span>
+	<span itemprop="productID">{{ doc.name }}</span>
 </p>
 <!-- description -->
 <h6 class="text-uppercase text-muted mt-4">{{ _("Description") }}</h6>
 <div itemprop="description">
-    {{ doc.web_long_description or doc.description or _("No description given") | safe }}
+	{{ doc.web_long_description or doc.description or _("No description given") | safe }}
 </div>
 
 {% if has_variants %}
-    <!-- configure template -->
-    {% include "templates/generators/item/item_configure.html" %}
+	<!-- configure template -->
+	{% include "templates/generators/item/item_configure.html" %}
 {% else %}
-    <!-- add variant to cart -->
-    {% include "templates/generators/item/item_add_to_cart.html" %}
+	<!-- add variant to cart -->
+	{% include "templates/generators/item/item_add_to_cart.html" %}
 {% endif %}
 </div>
