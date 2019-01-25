@@ -34,11 +34,17 @@ class ItemConfigure {
 			fields
 		});
 
-		fields.forEach((df, i) => {
-			if (i !== 0) {
-				this.dialog.get_field(df.fieldname).$wrapper.hide();
+		this.attribute_data.forEach(a => {
+			if (a.optional) {
+				const field = this.dialog.get_field(a.attribute);
+				const $a = $('<a href>Reset</a>');
+				$a.on('click', (e) => {
+					e.preventDefault();
+					this.dialog.set_value(a.attribute, '');
+				});
+				field.$wrapper.find('.help-box').append($a);
 			}
-		});
+		})
 
 		this.append_alert_box();
 		this.dialog.show();
@@ -47,8 +53,10 @@ class ItemConfigure {
 
 	on_attribute_selection() {
 		const values = this.dialog.get_values();
+		if (Object.keys(values).length === 0) return;
 
-		this.dialog.$item_status.show();
+		// show
+		this.dialog.$item_status.addClass('d-flex').removeClass('hidden');
 		this.dialog.$item_status.text(__('Loading...'));
 
 		this.get_next_attribute_and_values(values)
@@ -56,11 +64,7 @@ class ItemConfigure {
 				console.log(data)
 
 				const {
-					next_attribute,
 					valid_options_for_attributes,
-					filtered_items_count,
-					filtered_items,
-					exact_match
 				} = data;
 
 				this.dialog.$item_status.html(this.get_alert_message(data));
@@ -73,13 +77,8 @@ class ItemConfigure {
 						return o;
 					});
 					this.dialog.set_df_property(attribute, 'options', new_options);
+					this.dialog.get_field(attribute).set_options();
 				}
-
-				if (next_attribute) {
-					this.dialog.get_field(next_attribute).$wrapper.show();
-				}
-
-				this.show_remaining_optional_attributes();
 			});
 	}
 
@@ -138,7 +137,7 @@ class ItemConfigure {
 			});
 			this.dialog.hide();
 		});
-		$alert.hide();
+		$alert.addClass('hidden').removeClass('d-flex');
 		this.dialog.$item_status = $alert;
 		this.dialog.$wrapper.find('.modal-body').prepend($alert);
 		this.dialog.$body.css({ maxHeight: '75vh', overflow: 'auto', overflowX: 'hidden' });

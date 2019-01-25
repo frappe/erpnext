@@ -22,7 +22,7 @@
 			{% include "templates/generators/item/item_specifications.html" %}
 		</div>
 
-		{% if frappe.db.get_value('Products Settings', 'Products Settings', 'show_item_attribute_table') %}
+		{% if frappe.db.get_value('Products Settings', 'Products Settings', 'show_item_attribute_table') | int %}
 		<div class="row">
 			{% include "templates/generators/item/item_variant_table.html" %}
 		</div>

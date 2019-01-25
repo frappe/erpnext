@@ -3,7 +3,15 @@ import frappe
 from .item_variants_cache import ItemVariantsCacheManager
 
 def get_context(context):
-	context.items = get_products_for_website()
+
+	if frappe.form_dict:
+		search = frappe.form_dict.search
+		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
+		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+	else:
+		search = field_filters = attribute_filters = None
+
+	context.items = get_products_for_website(field_filters, attribute_filters, search)
 
 	product_settings = frappe.get_cached_doc('Products Settings')
 	context.field_filters = get_field_filter_data() \
@@ -14,6 +22,8 @@ def get_context(context):
 
 	context.product_settings = product_settings
 	context.page_length = product_settings.products_per_page
+
+	print(context.page_length)
 	context.no_cache = 1
 
 
@@ -58,14 +68,7 @@ def get_attribute_filter_data():
 	return attribute_docs
 
 
-def get_products_for_website(field_filters=None, attribute_filters=None):
-	search = None
-
-	if not (field_filters or attribute_filters):
-		if frappe.form_dict:
-			search = frappe.form_dict.search
-			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
-			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+def get_products_for_website(field_filters=None, attribute_filters=None, search=None):
 
 	if attribute_filters:
 		item_codes = get_item_codes_by_attributes(attribute_filters)
@@ -95,13 +98,7 @@ def get_products_for_website(field_filters=None, attribute_filters=None):
 		return items_intersection
 
 	if search:
-		search = '%' + search + '%'
-		return get_items(or_filters={
-			'name': ['like', search],
-			'item_name': ['like', search],
-			'description': ['like', search],
-			'item_group': ['like', search]
-		})
+		return get_items(search=search)
 
 	return get_items()
 
@@ -301,12 +298,28 @@ def get_items_by_fields(field_filters):
 	return get_items(filters)
 
 
-def get_items(filters=None, or_filters=None):
-	if not filters and not or_filters:
-		filters = {'variant_of': '', 'show_in_website': 1}
-
+def get_items(filters=None, search=None):
 	start = frappe.form_dict.start or 0
-	page_length = frappe.db.get_single_value('Products Settings', 'products_per_page')
+	products_settings = frappe.get_cached_doc('Products Settings')
+	page_length = products_settings.products_per_page
+
+	filters = filters or {}
+	or_filters = None
+
+	if products_settings.only_search_item_templates:
+		filters.update({
+			'has_variants': 1,
+			'show_in_website': 1
+		})
+
+	if search:
+		search = '%{}%'.format(search)
+		or_filters = {
+			'name': ['like', search],
+			'item_name': ['like', search],
+			'description': ['like', search],
+			'item_group': ['like', search]
+		}
 
 	return frappe.get_all('Item',
 		fields=['name', 'item_name', 'image', 'route', 'description'],
@@ -316,6 +329,54 @@ def get_items(filters=None, or_filters=None):
 		page_length=page_length
 	)
 
+
+def nested_filters():
+	sql_string = parse_nested_filters('Item',
+		['and', [
+			['has_variant', '=', 1],
+			['show_in_website', '=', 0],
+			['or', [
+				['variant_of', '=', 'test'],
+				['item_group', '=', 'product'],
+				['and', [
+					['item_code', '>', 'hello'],
+					['item_code', '<', 'test']
+				]]
+			]]
+		]]
+	)
+
+	print(sql_string)
+
+def parse_nested_filters(doctype, nested_filters, operator=None):
+
+	filter_string = ''
+
+	if operator:
+		simple_filters = [f for f in nested_filters if len(f) > 2]
+		nested_filters = [f for f in nested_filters if len(f) == 2]
+
+		simple_conditions = get_conditions(doctype, simple_filters)
+		nested_conditions = [parse_nested_filters(doctype, f) for f in nested_filters]
+
+		filter_string += '(' + (' ' + operator + ' ').join(simple_conditions + nested_conditions) + ')'
+		return filter_string
+
+	for val in nested_filters:
+		if isinstance(val, frappe.string_types):
+			operator = val
+		else:
+			filter_string = parse_nested_filters(doctype, val, operator)
+
+	return filter_string
+
+
+def get_conditions(doctype, filter_list):
+	from frappe.model.db_query import DatabaseQuery
+
+	conditions = []
+	DatabaseQuery(doctype).build_filter_conditions(filter_list, conditions)
+	return conditions
 
 # utilities
 
@@ -331,17 +392,11 @@ def get_item_attributes(item_code):
 
 	optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
 
-	reqd_attributes = []
-	opt_attributes = []
-
 	for a in attributes:
 		if a.attribute in optional_attributes:
 			a.optional = True
-			opt_attributes.append(a)
-		else:
-			reqd_attributes.append(a)
 
-	return reqd_attributes + opt_attributes
+	return attributes
 
 def get_html_for_items(items):
 	html = []
