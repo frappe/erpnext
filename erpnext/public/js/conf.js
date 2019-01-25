@@ -23,7 +23,7 @@ $(document).bind('toolbar_setup', function() {
 
 	// additional help links for erpnext
 	var $help_menu = $('.dropdown-help ul .documentation-links');
-	$('<li><a data-link-type="forum" href="https://erpnext.org/docs/user/manual" \
+	$('<li><a data-link-type="forum" href="https://erpnext.com/docs/user/manual" \
 		target="_blank">'+__('Documentation')+'</a></li>').insertBefore($help_menu);
 	$('<li><a data-link-type="forum" href="https://discuss.erpnext.com" \
 		target="_blank">'+__('User Forum')+'</a></li>').insertBefore($help_menu);
