@@ -2,11 +2,11 @@ import frappe
 import json
 from six import iteritems
 
-old_item_taxes = {}
-item_tax_templates = {}
-rename_template_to_untitled = []
-
 def execute():
+	old_item_taxes = {}
+	item_tax_templates = {}
+	rename_template_to_untitled = []
+
 	for d in frappe.db.sql("""select parent as item_code, tax_type, tax_rate from `tabItem Tax`""", as_dict=1):
 		old_item_taxes.setdefault(d.item_code, [])
 		old_item_taxes[d.item_code].append(d)
@@ -32,7 +32,8 @@ def execute():
 		for d in old_item_taxes[item_code]:
 			item_tax_map[d.tax_type] = d.tax_rate
 
-		item_tax_template_name = get_item_tax_template(item_tax_map, item_code)
+		item_tax_template_name = get_item_tax_template(item_tax_templates, rename_template_to_untitled,
+			item_tax_map, item_code)
 
 		# update the item tax table
 		item = frappe.get_doc("Item", item_code)
@@ -48,7 +49,8 @@ def execute():
 		for d in frappe.db.sql("""select name, parent, item_code, item_tax_rate from `tab{0} Item`
 								where ifnull(item_tax_rate, '') not in ('', '{{}}')""".format(dt), as_dict=1):
 			item_tax_map = json.loads(d.item_tax_rate)
-			item_tax_template = get_item_tax_template(item_tax_map, d.item_code, d.parent)
+			item_tax_template = get_item_tax_template(item_tax_templates, rename_template_to_untitled,
+				item_tax_map, d.item_code, d.parent)
 			frappe.db.set_value(dt + " Item", d.name, "item_tax_template", item_tax_template)
 
 	idx = 1
@@ -61,7 +63,7 @@ def execute():
 	settings.determine_address_tax_category_from = "Billing Address"
 	settings.save()
 
-def get_item_tax_template(item_tax_map, item_code, parent=None):
+def get_item_tax_template(item_tax_templates, rename_template_to_untitled, item_tax_map, item_code, parent=None):
 	# search for previously created item tax template by comparing tax maps
 	for template, item_tax_template_map in iteritems(item_tax_templates):
 		if item_tax_map == item_tax_template_map:
