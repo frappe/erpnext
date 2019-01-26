@@ -100,8 +100,6 @@ frappe.ready(() => {
 			],
 			primary_action_label: __('Save'),
 			primary_action: (values) => {
-				console.log(values)
-
 				frappe.call('erpnext.shopping_cart.cart.add_new_address', { doc: values })
 					.then(r => {
 						d.hide();
