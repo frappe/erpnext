@@ -33,16 +33,14 @@
 	</div>
 </div>
 
-<p class='small' style='padding-top: 15px;'>
-{% if doc.doctype == 'Supplier Quotation' %}
-	<b>{{ doc.supplier_name}}</b>
-{% else %}
-	<b>{{ doc.customer_name}}</b>
-{% endif %}
-{% if doc.contact_display %}
-	<br>
-	{{ doc.contact_display }}
-{% endif %}
+<p class="small my-3">
+	{%- set party_name = doc.supplier_name if doc.doctype == 'Supplier Quotation' else doc.customer_name %}
+	<b>{{ party_name }}</b>
+
+	{% if doc.contact_display and doc.contact_display != party_name %}
+		<br>
+		{{ doc.contact_display }}
+	{% endif %}
 </p>
 
 {% if doc._header %}
@@ -85,11 +83,10 @@
 	</div>
 
 	<!-- taxes -->
-	<div class="order-taxes row">
-		<div class="col-sm-6"><!-- empty --></div>
-		<div class="col-sm-6 text-right">
+	<div class="order-taxes d-flex justify-content-end">
+		<table>
 			{% include "erpnext/templates/includes/order/order_taxes.html" %}
-		</div>
+		</table>
 	</div>
 </div>
 

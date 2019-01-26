@@ -9,7 +9,9 @@
         </div>
         <div class="col-xs-8 col-sm-10">
             {{ d.item_code }}
-            <div class="text-muted small item-description">{{ d.description }}</div>
+            <div class="text-muted small item-description">
+				{{ html2text(d.description) | truncate(140) }}
+			</div>
         </div>
     </div>
 {% endmacro %}
