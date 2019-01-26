@@ -23,7 +23,6 @@ def get_context(context):
 	context.product_settings = product_settings
 	context.page_length = product_settings.products_per_page
 
-	print(context.page_length)
 	context.no_cache = 1
 
 
