@@ -520,6 +520,12 @@ def get_json():
 
 		out = get_b2b_json(res, gstin)
 		gst_json["b2b"] = out
+	elif filters["type_of_business"] == "B2C Large":
+		for item in report_data:
+			res.setdefault(item["place_of_supply"], []).append(item)
+
+		out = get_b2cl_json(res, gstin)
+		gst_json["b2cl"] = out
 	elif filters["type_of_business"] == "EXPORT":
 		for item in report_data:
 			res.setdefault(item["export_type"], []).append(item)
@@ -536,31 +542,40 @@ def get_b2b_json(res, gstin):
 		b2b_item, inv = {"ctin": gst_in, "inv": []}, []
 		if not gst_in: continue
 
-		for d in res[gst_in]:
-			inv_items = {}
-			inv_items.update({
-				"inum": d["invoice_number"],
-				"idt": getdate(d["posting_date"]).strftime('%d-%m-%Y'),
-				"val": d["invoice_value"],
-				"pos": "%02d" % int(d["place_of_supply"].split('-')[0]),
-				"rchrg": d["reverse_charge"],
-				"inv_typ": inv_type[d["invoice_type"]],
-			})
+		for row in res[gst_in]:
+			inv_item = get_basic_invoice_detail(row)
+			inv_item["pos"] = "%02d" % int(row["place_of_supply"].split('-')[0])
+			inv_item["rchrg"] = row["reverse_charge"]
+			inv_item["inv_typ"] = inv_type[row["invoice_type"]]
 
-			if inv_items["pos"]=="00": continue
+			if inv_item["pos"]=="00": continue
 
-			inv_items.update({
-				"itms": [{
-					"num": 1801,
-					"itm_det": get_rate_and_tax_details(d, gstin)
-				}]
-			})
+			inv_item["itms"] = [get_rate_and_tax_details(row, gstin)]
 
-			inv.append(inv_items)
+			inv.append(inv_item)
 
 		if not inv: continue
 		b2b_item["inv"] = inv
 		out.append(b2b_item)
+
+	return out
+
+def get_b2cl_json(res, gstin):
+	out = []
+	for pos in res:
+		b2cl_item, inv = {"pos": "%02d" % int(pos.split('-')[0]), "inv": []}, []
+
+		for row in res[pos]:
+			inv_item = get_basic_invoice_detail(row)
+			if row.get("sale_from_bonded_wh"):
+				inv_item["inv_typ"] = "CBW"
+
+			inv_item["itms"] = [get_rate_and_tax_details(row, gstin)]
+
+			inv.append(inv_item)
+
+		b2cl_item["inv"] = inv
+		out.append(b2cl_item)
 
 	return out
 
@@ -569,40 +584,48 @@ def get_export_json(res):
 	for exp_type in res:
 		exp_item, inv = {"exp_typ": exp_type, "inv": []}, []
 
-		for d in res[exp_type]:
-			inv_items = {
-				"inum": d["invoice_number"],
-				"idt": getdate(d["posting_date"]).strftime('%d-%m-%Y'),
-				"val": flt(d["invoice_value"], 2)
-			}
-
-			inv_items["itms"] = [{
-				"txval": flt(d["taxable_value"], 2),
-				"rt": d["rate"] or 0,
+		for row in res[exp_type]:
+			inv_item = get_basic_invoice_rowetail(row)
+			inv_item["itms"] = [{
+				"txval": flt(row["taxable_value"], 2),
+				"rt": row["rate"] or 0,
 				"iamt": 0,
 				"csamt": 0
 			}]
 
-			inv.append(inv_items)
+			inv.append(inv_item)
 
 		exp_item["inv"] = inv
 		out.append(exp_item)
 
 	return out
 
-def get_rate_and_tax_details(row, gstin):
-	itm_det = {"txval": row["taxable_value"],
-		"rt": row["rate"],
-		"csamt": (row["cess_amount"] or 0)
+def get_basic_invoice_detail(row):
+	return {
+		"inum": row["invoice_number"],
+		"idt": getdate(row["posting_date"]).strftime('%d-%m-%Y'),
+		"val": flt(row["invoice_value"], 2)
 	}
 
-	tax = flt(row["taxable_value"]/row["rate"], 2)
-	if gstin[0:2] == row["customer_gstin"][0:2]:
-		itm_det.update({"camt": flt(tax/2, 2), "samt": flt(tax/2, 2)})
+def get_rate_and_tax_details(row, gstin):
+	itm_det = {"txval": flt(row["taxable_value"], 2),
+		"rt": row["rate"],
+		"csamt": (flt(row.get("cess_amount"), 2) or 0)
+	}
+
+	# calculate rate
+	num = 1 if not row["rate"] else "%d%02d" % (row["rate"], 1)
+	rate = row.get("rate") or 0
+
+	# calculate tax amount added
+	tax = flt((row["taxable_value"]*rate)/100.0, 2)
+	frappe.errprint([tax, tax/2])
+	if row.get("customer_gstin") and gstin[0:2] == row["customer_gstin"][0:2]:
+		itm_det.update({"camt": flt(tax/2.0, 2), "samt": flt(tax/2.0, 2)})
 	else:
 		itm_det.update({"iamt": tax})
 
-	return itm_det
+	return {"num": int(num), "itm_det": itm_det}
 
 def get_company_gstin_number(company):
 	filters = [
