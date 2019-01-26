@@ -1,12 +1,10 @@
 {% extends 'frappe/templates/includes/navbar/navbar_items.html' %}
 
 {% block navbar_right_extension %}
-	<li class="shopping-cart dropdown hidden">
-		<div class="cart-icon">
-			<a class="nav-item nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="navLogin">
-				{{ _("Cart") }} <span class="badge badge-primary" id="cart-count"></span>
-			</a>
-			<div id="cart-overlay" class="dropdown-menu dropdown-menu-right shopping-cart-menu"></div>
-		</div>
+	<li class="shopping-cart cart-icon hidden">
+		<a href="/cart" class="nav-link">
+			{{ _("Cart") }}
+			<span class="badge badge-primary" id="cart-count"></span>
+		</a>
 	 </li>
 {% endblock %}
