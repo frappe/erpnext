@@ -250,10 +250,18 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 
 	valid_options_for_attributes = frappe._dict({})
 
+	for a in attribute_list:
+		valid_options_for_attributes[a] = set()
+
+		selected_attribute = selected_attributes.get(a, None)
+		if selected_attribute:
+			# already selected attribute values are valid options
+			valid_options_for_attributes[a].add(selected_attribute)
+
 	for row in item_variants_data:
 		item_code, attribute, attribute_value = row
 		if item_code in filtered_items and attribute not in selected_attributes and attribute in attribute_list:
-			valid_options_for_attributes.setdefault(attribute, set()).add(attribute_value)
+			valid_options_for_attributes[attribute].add(attribute_value)
 
 	optional_attributes = item_cache.get_optional_attributes()
 	exact_match = []

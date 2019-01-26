@@ -44,10 +44,13 @@ class ItemConfigure {
 				});
 				field.$wrapper.find('.help-box').append($a);
 			}
-		})
+		});
 
 		this.append_alert_box();
 		this.dialog.show();
+
+		this.dialog.set_values(JSON.parse(localStorage.getItem(this.get_cache_key())));
+
 		$('.btn-configure').prop('disabled', false);
 	}
 
@@ -55,14 +58,15 @@ class ItemConfigure {
 		const values = this.dialog.get_values();
 		if (Object.keys(values).length === 0) return;
 
+		// save state
+		localStorage.setItem(this.get_cache_key(), JSON.stringify(values));
+
 		// show
 		this.dialog.$item_status.addClass('d-flex').removeClass('hidden');
 		this.dialog.$item_status.text(__('Loading...'));
 
 		this.get_next_attribute_and_values(values)
 			.then(data => {
-				console.log(data)
-
 				const {
 					valid_options_for_attributes,
 				} = data;
@@ -76,6 +80,7 @@ class ItemConfigure {
 						o.disabled = !valid_options.includes(o.value);
 						return o;
 					});
+
 					this.dialog.set_df_property(attribute, 'options', new_options);
 					this.dialog.get_field(attribute).set_options();
 				}
@@ -101,7 +106,7 @@ class ItemConfigure {
 		}
 	}
 
-	get_alert_message({ filtered_items_count, exact_match }) {
+	get_alert_message({ filtered_items_count, filtered_items, exact_match }) {
 		const exact_match_message = __('1 exact match.');
 		const one_item = exact_match.length === 1 ?
 			exact_match[0] :
@@ -115,12 +120,12 @@ class ItemConfigure {
 		` : '';
 
 		const items_found = filtered_items_count === 1 ?
-			__('{0} items found.', [filtered_items_count]) :
-			__('{0} item found.', [filtered_items_count]);
+			__('{0} item found.', [filtered_items_count]) :
+			__('{0} items found.', [filtered_items_count]);
 
 		return `
 			<span>
-				${items_found}
+				${exact_match.length === 1 ? '' : items_found}
 				${exact_match.length === 1 ? `<span>${exact_match_message}</span>` : ''}
 			</span>
 			${add_to_cart}
@@ -130,6 +135,9 @@ class ItemConfigure {
 	append_alert_box() {
 		const $alert = $(`<div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert"></div>`);
 		$alert.on('click', '.btn-add-to-cart', (e) => {
+			if (frappe.session.user !== 'Guest') {
+				localStorage.removeItem(this.get_cache_key());
+			}
 			const item_code = $(e.currentTarget).data('item-code');
 			erpnext.shopping_cart.update_cart({
 				item_code,
@@ -154,6 +162,10 @@ class ItemConfigure {
 		return this.call('erpnext.www.products.index.get_attributes_and_values', {
 			item_code: this.item_code
 		});
+	}
+
+	get_cache_key() {
+		return `configure:${this.item_code}`;
 	}
 
 	call(method, args) {
