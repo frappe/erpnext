@@ -31,7 +31,10 @@ class ItemConfigure {
 
 		this.dialog = new frappe.ui.Dialog({
 			title: __('Configure {0}', [this.item_name]),
-			fields
+			fields,
+			on_hide: () => {
+				set_continue_configuration();
+			}
 		});
 
 		this.attribute_data.forEach(a => {
@@ -56,7 +59,11 @@ class ItemConfigure {
 
 	on_attribute_selection() {
 		const values = this.dialog.get_values();
-		if (Object.keys(values).length === 0) return;
+		if (Object.keys(values).length === 0) {
+			this.dialog.$item_status.addClass('hidden').removeClass('d-flex');
+			localStorage.removeItem(this.get_cache_key());
+			return;
+		}
 
 		// save state
 		localStorage.setItem(this.get_cache_key(), JSON.stringify(values));
@@ -117,7 +124,11 @@ class ItemConfigure {
 			<button class="btn btn-primary btn-add-to-cart" data-item-code="${one_item}">
 				${__('Add to cart')}
 			</button>
-		` : '';
+		` : `
+			<a href class="btn-clear-values">
+				${__('Clear values')}
+			</a>
+		`;
 
 		const items_found = filtered_items_count === 1 ?
 			__('{0} item found.', [filtered_items_count]) :
@@ -145,6 +156,11 @@ class ItemConfigure {
 			});
 			this.dialog.hide();
 		});
+		$alert.on('click', '.btn-clear-values', (e) => {
+			e.preventDefault();
+			this.dialog.clear();
+			this.on_attribute_selection();
+		})
 		$alert.addClass('hidden').removeClass('d-flex');
 		this.dialog.$item_status = $alert;
 		this.dialog.$wrapper.find('.modal-body').prepend($alert);
@@ -178,11 +194,25 @@ class ItemConfigure {
 	}
 }
 
+function set_continue_configuration() {
+	const $btn_configure = $('.btn-configure');
+	const { itemCode } = $btn_configure.data();
+
+	if (localStorage.getItem(`configure:${itemCode}`)) {
+		$btn_configure.text(__('Continue Configuration'));
+	} else {
+		$btn_configure.text(__('Configure'));
+	}
+}
+
 frappe.ready(() => {
-	$('.btn-configure').on('click', (e) => {
-		const $btn = $(e.target);
-		$btn.prop('disabled', true);
-		const { itemCode, itemName } = $(e.target).data();
+	const $btn_configure = $('.btn-configure');
+	const { itemCode, itemName } = $btn_configure.data();
+
+	set_continue_configuration();
+
+	$btn_configure.on('click', (e) => {
+		$btn_configure.prop('disabled', true);
 		new ItemConfigure(itemCode, itemName);
 	});
 });
