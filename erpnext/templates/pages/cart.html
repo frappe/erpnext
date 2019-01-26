@@ -37,15 +37,19 @@
 			<tr>
 				<th width="60%">{{ _('Item') }}</th>
 				<th width="20%" class="text-right">{{ _('Quantity') }}</th>
+				{% if cart_settings.enable_checkout %}
 				<th width="20%" class="text-right">{{ _('Subtotal') }}</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody class="cart-items">
 			{% include "templates/includes/cart/cart_items.html" %}
 		</tbody>
+		{% if cart_settings.enable_checkout %}
 		<tfoot class="cart-tax-items">
 			{% include "templates/includes/order/order_taxes.html" %}
 		</tfoot>
+		{% endif %}
 	</table>
 	{% else %}
 	<p class="text-muted">{{ _('Your cart is Empty') }}</p>
