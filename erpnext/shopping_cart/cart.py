@@ -162,6 +162,29 @@ def add_new_address(doc):
 
 	return address
 
+@frappe.whitelist(allow_guest=True)
+def create_lead_for_item_inquiry(lead, subject, message):
+	lead = frappe.parse_json(lead)
+	lead_doc = frappe.new_doc('Lead')
+	lead_doc.update(lead)
+	lead_doc.set('lead_owner', '')
+
+	try:
+		lead_doc.save(ignore_permissions=True)
+	except frappe.exceptions.DuplicateEntryError:
+		frappe.clear_messages()
+		lead_doc = frappe.get_doc('Lead', {'email_id': lead['email_id']})
+
+	lead_doc.add_comment('Comment', text='''
+		<div>
+			<h5>{subject}</h5>
+			<p>{message}</p>
+		</div>
+	'''.format(subject=subject, message=message))
+
+	return lead_doc
+
+
 @frappe.whitelist()
 def get_terms_and_conditions(terms_name):
 	return frappe.db.get_value('Terms and Conditions', terms_name, 'terms')
