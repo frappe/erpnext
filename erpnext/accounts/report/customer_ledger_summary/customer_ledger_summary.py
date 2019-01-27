@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
-from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint
-from six import iteritems
+from frappe import _
+from frappe.utils import getdate, nowdate
+from six import iteritems, itervalues
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
@@ -134,7 +134,7 @@ class PartyLedgerSummaryReport(object):
 		for gle in self.gl_entries:
 			self.party_data.setdefault(gle.party, frappe._dict({
 				"party": gle.party,
-				"party_name": "",  # TODO add party_name
+				"party_name": gle.party_name,
 				"opening_balance": 0,
 				"invoiced_amount": 0,
 				"paid_amount": 0,
@@ -159,7 +159,7 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for account, amount in iteritems(self.party_adjustment_details.get(party, {}))])
+				total_party_adjustment = sum([amount for amount in itervalues(self.party_adjustment_details.get(party, {}))])
 				row.paid_amount -= total_party_adjustment
 				row.discount_amount = self.party_adjustment_details.get(party, {}).get(self.discount_account, 0)
 				row.write_off_amount = self.party_adjustment_details.get(party, {}).get(self.write_off_account, 0)
@@ -171,16 +171,25 @@ class PartyLedgerSummaryReport(object):
 
 	def get_gl_entries(self):
 		conditions = self.prepare_conditions()
+		join = join_field = ""
+		if self.filters.party_type == "Customer":
+			join_field = ", p.customer_name as party_name"
+			join = "left join `tabCustomer` p on gle.party = p.name"
+		elif self.filters.party_type == "Supplier":
+			join_field = ", p.supplier_name as party_name"
+			join = "left join `tabSupplier` p on gle.party = p.name"
 
 		self.gl_entries = frappe.db.sql("""
 			select
-				posting_date, party, voucher_type, voucher_no, against_voucher_type, against_voucher, debit, credit
-			from
-				`tabGL Entry`
+				gle.posting_date, gle.party, gle.voucher_type, gle.voucher_no, gle.against_voucher_type,
+				gle.against_voucher, gle.debit, gle.credit {join_field}
+			from `tabGL Entry` gle
+			{join}
 			where
-				docstatus < 2 and party_type=%(party_type)s and ifnull(party, '') != '' and posting_date <= %(to_date)s
-				{0}
-			order by posting_date""".format(conditions), self.filters, as_dict=True)
+				gle.docstatus < 2 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
+				and gle.posting_date <= %(to_date)s {conditions}
+			order by gle.posting_date
+		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
 
 	def prepare_conditions(self):
 		conditions = [""]
@@ -230,9 +239,6 @@ class PartyLedgerSummaryReport(object):
 					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
 						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
 						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
-				#conditions.append("""party in (select parent from `tabSales Team`
-				#	where parenttype = 'Customer' and exists(select name from `tabSales Person`
-				#		where lft >= {0} and rgt <= {1} and name=`tabSales Team`.sales_person))""".format(lft, rgt))
 
 		if self.filters.party_type == "Supplier":
 			if self.filters.get("supplier_group"):
@@ -268,7 +274,6 @@ class PartyLedgerSummaryReport(object):
 					where gle.party_type=%(party_type)s and ifnull(party, '') != ''
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2 {conditions}
 				)
-			order by posting_date
 		""".format(conditions=conditions, income_or_expense=income_or_expense), self.filters, as_dict=True)
 
 		self.party_adjustment_details = {}
@@ -277,7 +282,7 @@ class PartyLedgerSummaryReport(object):
 			adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
 			adjustment_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
 
-		for voucher, voucher_gl_entries in iteritems(adjustment_voucher_entries):
+		for voucher_gl_entries in itervalues(adjustment_voucher_entries):
 			parties = {}
 			accounts = {}
 			has_irrelevant_entry = False

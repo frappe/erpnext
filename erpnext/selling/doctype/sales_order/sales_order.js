@@ -19,6 +19,20 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
+
+		frm.set_query('company_address', function(doc) {
+			if(!doc.company) {
+				frappe.throw(__('Please set Company'));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Company',
+					link_name: doc.company
+				}
+			};
+		})
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Deliver and Bill') {
@@ -374,7 +388,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 		]
 		var d = new frappe.ui.Dialog({
-			title: __("Select from Items having BOM"),
+			title: __("Items for Raw Material Request"),
 			fields: fields,
 			primary_action: function() {
 				var data = d.get_values();

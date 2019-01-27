@@ -1081,7 +1081,7 @@
    "allow_on_submit": 0, 
    "bold": 1, 
    "collapsible": 0, 
-   "columns": 3,
+   "columns": 3, 
    "fieldname": "rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 

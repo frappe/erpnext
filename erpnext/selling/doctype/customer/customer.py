@@ -184,6 +184,11 @@ class Customer(TransactionBase):
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
 	def on_trash(self):
+		if self.customer_primary_contact:
+			frappe.db.sql("""update `tabCustomer`
+				set customer_primary_contact=null, mobile_no=null, email_id=null
+				where name=%s""", self.name)
+
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
