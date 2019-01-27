@@ -25,7 +25,7 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = str(filters.get("party")).strip()
+		parties = cstr(filters.get("party")).strip()
 		filters.party = [d.strip() for d in parties.split(',') if d]
 
 	validate_filters(filters, account_details)
@@ -60,11 +60,11 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = str(filters.get("project")).strip()
+		projects = cstr(filters.get("project")).strip()
 		filters.project = [d.strip() for d in projects.split(',') if d]
 
 	if filters.get('cost_center'):
-		cost_centers = str(filters.get("cost_center")).strip()
+		cost_centers = cstr(filters.get("cost_center")).strip()
 		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
 
 
