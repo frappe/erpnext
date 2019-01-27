@@ -273,7 +273,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						// update cart
 						frappe.run_serially([
 							() => {
-								if (item.qty === 0) {
+								if (item.qty === 0
+									&& this.frm.pos_profile_data['remove_zero_qty_item_from_cart']) {
 									frappe.model.clear_doc(item.doctype, item.name);
 								}
 							},
@@ -320,7 +321,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		return this.frm.script_manager.trigger('qty', item.doctype, item.name)
 			.then(() => {
-				if (field === 'qty' && item.qty === 0) {
+				if (field === 'qty' && item.qty === 0
+					&& this.frm.pos_profile_data['remove_zero_qty_item_from_cart']) {
 					frappe.model.clear_doc(item.doctype, item.name);
 				}
 			})
@@ -524,6 +526,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
+						this.frm.pos_profile_data = r.message.pos_profile_data;
 						this.frm.doc.campaign = r.message.campaign;
 					}
 				}
@@ -941,7 +944,8 @@ class POSCart {
 		if (this.exists(item.item_code, item.batch_no)) {
 			// update quantity
 			this.update_item(item);
-		} else if (flt(item.qty) > 0.0) {
+		} else if (flt(item.qty) > 0.0 ||
+			!this.frm.pos_profile_data['remove_zero_qty_item_from_cart']) {
 			// add to cart
 			const $item = $(this.get_item_html(item));
 			$item.appendTo(this.$cart_items);
@@ -956,7 +960,8 @@ class POSCart {
 
 		const $item = this.$cart_items.find(item_selector);
 
-		if(item.qty > 0) {
+		if(item.qty > 0 ||
+			!this.frm.pos_profile_data['remove_zero_qty_item_from_cart']) {
 			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 			const remove_class = indicator_class == 'green' ? 'red' : 'green';

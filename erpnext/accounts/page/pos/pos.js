@@ -1299,7 +1299,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 				d[field] = flt(value);
 				d.amount = flt(d.rate) * flt(d.qty);
-				if (d.qty == 0) {
+				if (d.qty == 0 && me.pos_profile_data['remove_zero_qty_item_from_cart']) {
 					me.remove_item.push(d.idx)
 				}
 
@@ -1308,6 +1308,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			}
 		});
+
+		if (field == 'qty') {
+			this.remove_zero_qty_item();
+		}
 
 		this.update_paid_amount_status(false)
 	},
