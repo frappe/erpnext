@@ -13,6 +13,6 @@
 			</a>
 		</h5>
 		<p>{{ html2text(item.description) | truncate(140) }}</p>
-		<button class="btn btn-sm btn-light">{{ _('More details') }}</button>
+		<a href="{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
 	</div>
 </div>
