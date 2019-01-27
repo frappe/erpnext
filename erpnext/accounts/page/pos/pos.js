@@ -125,7 +125,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.page.add_menu_item(__("Cashier Closing"), function () {
 			frappe.set_route('List', 'Cashier Closing');
-		});		
+		});
 
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
@@ -313,6 +313,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.contacts = r.message.contacts;
 		this.address = r.message.address || {};
 		this.price_list_data = r.message.price_list_data;
+		this.customer_wise_price_list = r.message.customer_wise_price_list
 		this.bin_data = r.message.bin_data;
 		this.pricing_rules = r.message.pricing_rules;
 		this.print_template = r.message.print_template;
@@ -798,6 +799,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (item.action) {
 					$(this).val("");
 				}
+				me.make_item_list(item.customer_name);
 			});
 	},
 
@@ -1037,7 +1039,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.numeric_keypad.show();
 	},
 
-	make_item_list: function () {
+	make_item_list: function (customer=null) {
 		var me = this;
 		if (!this.price_list) {
 			frappe.msgprint(__("Price List not found or disabled"));
@@ -1051,10 +1053,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
+				let customer_price_list = me.customer_wise_price_list[customer];
+				let item_price
+				if (customer && customer_price_list && customer_price_list[obj.name]) {
+					item_price = format_currency(customer_price_list[obj.name], me.frm.doc.currency);
+				} else {
+					item_price = format_currency(me.price_list_data[obj.name], me.frm.doc.currency);
+				}
 				if(index < me.page_len) {
 					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
-						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
+						item_price: item_price,
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
 						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
@@ -1417,8 +1426,20 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.income_account = this.pos_profile_data['income_account'] || this.items[0].income_account;
 		this.child.warehouse = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][1] : (this.pos_profile_data['warehouse'] || this.items[0].default_warehouse));
-		this.child.price_list_rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
-		this.child.rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
+
+		customer = this.frm.doc.customer;
+		let rate
+
+		customer_price_list = this.customer_wise_price_list[customer]
+		if (customer_price_list && customer_price_list[this.child.item_code]){
+			rate = flt(this.customer_wise_price_list[customer][this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
+		}
+		else{
+			rate = flt(this.price_list_data[this.child.item_code] * this.child.conversion_factor, 9) / flt(this.frm.doc.conversion_rate, 9);
+		}
+
+		this.child.price_list_rate = rate;
+		this.child.rate = rate;
 		this.child.actual_qty = me.get_actual_qty(this.items[0]);
 		this.child.amount = flt(this.child.qty) * flt(this.child.rate);
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
