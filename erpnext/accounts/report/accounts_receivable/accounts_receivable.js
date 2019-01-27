@@ -113,6 +113,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"show_pdc_in_print",
 			"label": __("Show PDC in Print"),
 			"fieldtype": "Check",
+			on_change: function() { return false; }
+		},
+		{
+			"fieldname":"mark_overdue_in_print",
+			"label": __("Mark Overdue in Print"),
+			"fieldtype": "Check",
+			on_change: function() { return false; }
 		},
 		{
 			"fieldname":"based_on_payment_terms",
