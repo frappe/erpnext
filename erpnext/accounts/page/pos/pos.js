@@ -1137,7 +1137,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	apply_category: function() {
 		var me = this;
 		category = this.selected_item_group || "All Item Groups";
-
 		if(category == 'All Item Groups') {
 			return this.item_data
 		} else {

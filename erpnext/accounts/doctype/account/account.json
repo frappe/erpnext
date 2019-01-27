@@ -1,5 +1,6 @@
 {
  "allow_copy": 1, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 

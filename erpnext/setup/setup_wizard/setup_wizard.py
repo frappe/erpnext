@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from .operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
+
+from .operations import install_fixtures as fixtures, company_setup, taxes_setup, sample_data
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -61,16 +62,10 @@ def get_setup_stages(args=None):
 						'fail_msg': _("Failed to setup post company fixtures")
 					},
 					{
-						'fn': stage_three,
+						'fn': setup_defaults,
 						'args': args,
-						'fail_msg': _("Failed to set defaults")
-					}
-				]
-			},
-			{
-				'status': _('Making website'),
-				'fail_msg': _('Failed to create website'),
-				'tasks': [
+						'fail_msg': _("Failed to setup defaults")
+					},
 					{
 						'fn': stage_four,
 						'args': args,
@@ -93,38 +88,20 @@ def get_setup_stages(args=None):
 
 	return stages
 
-def setup_complete(args=None):
-	stage_fixtures(args)
-	setup_company(args)
-	setup_taxes(args)
-	setup_post_company_fixtures(args)
-	stage_three(args)
-	stage_four(args)
-	fin(args)
-
 def stage_fixtures(args):
-	install_fixtures.install(args.get("country"))
-	install_fixtures.add_market_segments()
-	install_fixtures.add_sale_stages()
+	fixtures.install(args.get('country'))
 
 def setup_company(args):
-	defaults_setup.create_price_lists(args)
-	company_setup.create_fiscal_year_and_company(args)
-	company_setup.enable_shopping_cart(args)
-	company_setup.create_bank_account(args)
+	fixtures.install_company(args)
 
 def setup_taxes(args):
 	taxes_setup.create_sales_tax(args)
 
 def setup_post_company_fixtures(args):
-	install_fixtures.install_post_company_fixtures(args.get("company_name"))
+	fixtures.install_post_company_fixtures(args)
 
-def stage_three(args):
-	defaults_setup.create_employee_for_self(args)
-	defaults_setup.set_default_settings(args)
-	defaults_setup.create_territories()
-	defaults_setup.create_feed_and_todo()
-	defaults_setup.set_no_copy_fields_in_variant_settings()
+def setup_defaults(args):
+	fixtures.install_defaults(frappe._dict(args))
 
 def stage_four(args):
 	company_setup.create_website(args)
@@ -149,3 +126,14 @@ def make_sample_data(domains):
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.login_as(args.get("email"))
+
+
+# Only for programmatical use
+def setup_complete(args=None):
+	stage_fixtures(args)
+	setup_company(args)
+	setup_taxes(args)
+	setup_post_company_fixtures(args)
+	setup_defaults(args)
+	stage_four(args)
+	fin(args)

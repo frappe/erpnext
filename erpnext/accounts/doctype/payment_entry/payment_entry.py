@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_ban
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account, get_bank_account_details
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
 
 from six import string_types, iteritems
@@ -60,13 +61,15 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 
+	def before_submit(self):
+		self.update_reference_details()
+
 	def on_submit(self):
 		self.set_remarks()
 		self.setup_party_account_field()
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.update_reference_details()
 		self.update_advance_paid()
 		self.update_expense_claim()
 
@@ -85,6 +88,16 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}")
 					.format(d.idx, d.reference_doctype, d.reference_name))
 			reference_names.append((d.reference_doctype, d.reference_name))
+
+	def set_bank_account_data(self):
+		if self.bank_account:
+			bank_data = get_bank_account_details(self.bank_account)
+
+			field = "paid_from" if self.payment_type == "Pay" else "paid_to"
+
+			self.bank = bank_data.bank
+			self.bank_account_no = bank_data.bank_account_no
+			self.set(field, bank_data.account)
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -116,11 +129,11 @@ class PaymentEntry(AccountsController):
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
-			if not self.party_balance:
+			if not self.get("party_balance"):
 				self.party_balance = get_balance_on(party_type=self.party_type,
 					party=self.party, date=self.posting_date, company=self.company)
 
-			if not self.party_account:
+			if not self.get("party_account"):
 				party_account = get_party_account(self.party_type, self.party, self.company)
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
@@ -667,6 +680,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date, cost_center=None):
+	bank_account = ''
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
 
@@ -677,13 +691,16 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	_party_name = "title" if party_type in ["Student", "Letter of Credit"] else scrub(party_type) + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
+	if party_type in ["Customer", "Supplier"]:
+		bank_account = get_party_bank_account(party_type, party)
 
 	return {
 		"party_account": party_account,
 		"party_name": party_name,
 		"party_account_currency": account_currency,
 		"party_balance": party_balance,
-		"account_balance": account_balance
+		"account_balance": account_balance,
+		"bank_account": bank_account
 	}
 
 
@@ -881,6 +898,11 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.received_amount = received_amount
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
+
+	if pe.party_type in ["Customer", "Supplier"]:
+		bank_account = get_party_bank_account(pe.party_type, pe.party)
+		pe.set("bank_account", bank_account)
+		pe.set_bank_account_data()
 
 	# only Purchase Invoice can be blocked individually
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():

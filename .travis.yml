@@ -33,8 +33,7 @@ before_script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
-  - bench reinstall --yes
-  - bench build
+  - bench reinstall --mariadb-root-username root --mariadb-root-password travis --yes
   - bench scheduler disable
   - sed -i 's/9000/9001/g' sites/common_site_config.json
   - bench start &

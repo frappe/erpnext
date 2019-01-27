@@ -1,7 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+# -*- coding: utf-8 -*-
 
-
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
@@ -251,6 +252,10 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
+		asset_items = [d.is_fixed_asset for d in self.items if d.is_fixed_asset]
+		if len(asset_items) > 0:
+			asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+
 		if self.update_stock:
 			self.validate_item_code()
 			self.validate_warehouse()
@@ -271,7 +276,8 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
-
+			elif item.is_fixed_asset and d.pr_detail:
+				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -430,7 +436,10 @@ class PurchaseInvoice(BuyingController):
 
 	def get_gl_entries(self, warehouse_account=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
-		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+		if self.auto_accounting_for_stock:
+			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+		else:
+			self.stock_received_but_not_billed = None
 		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
@@ -900,6 +909,10 @@ class PurchaseInvoice(BuyingController):
 			return
 
 		tax_withholding_details = get_party_tax_withholding_details(self)
+
+		if not tax_withholding_details:
+			return
+
 		accounts = []
 		for d in self.taxes:
 			if d.account_head == tax_withholding_details.get("account_head"):
@@ -908,6 +921,12 @@ class PurchaseInvoice(BuyingController):
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")]
+
+		for d in to_remove:
+			self.remove(d)
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()

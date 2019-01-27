@@ -11,14 +11,18 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	setup_company_independent_fixtures()
+	if not patch:
+		update_address_template()
+		make_fixtures(company)
+
+# TODO: for all countries
+def setup_company_independent_fixtures():
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-	if not patch:
-		update_address_template()
-		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
@@ -122,6 +126,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
+		]
+
+	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
 				options='input\ninput service\ncapital goods\nineligible', default="ineligible"),
@@ -148,6 +155,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				fetch_from='company_address.gstin', print_hide=1),
+		]
+
+	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' "),
@@ -210,9 +220,12 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
-		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
-		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields,
+		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
+		'Purchase Order': purchase_invoice_gst_fields,
+		'Purchase Receipt': purchase_invoice_gst_fields,
+		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields + sales_invoice_shipping_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
+		'Sales Order': sales_invoice_gst_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [

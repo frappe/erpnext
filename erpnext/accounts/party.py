@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 from frappe import _, msgprint, scrub
-from frappe.defaults import get_user_permissions
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cint, add_months, get_last_day)
@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_default_currency, get_company_currency
+from erpnext import get_company_currency
 
 from six import iteritems
 
@@ -146,10 +146,7 @@ def get_default_price_list(party):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = filter(None, get_user_permissions()
-		.get("Price List", {})
-		.get("docs", []))
-	price_list = list(price_list)
+	price_list = get_permitted_documents('Price List')
 
 	if price_list:
 		price_list = price_list[0]
@@ -452,7 +449,7 @@ def get_timeline_data(doctype, name):
 
 	return out
 
-def get_dashboard_info(party_type, party):
+def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
 	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
@@ -473,6 +470,19 @@ def get_dashboard_info(party_type, party):
 			and posting_date between %s and %s
 		group by company
 	""".format(doctype), [party_type, party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date], as_dict=1)
+
+	loyalty_point_details = []
+
+	if party_type == "Customer":
+		loyalty_point_details = frappe._dict(frappe.get_all("Loyalty Point Entry",
+			filters={
+				'customer': party,
+				'expiry_date': ('>=', getdate()),
+				},
+				group_by="company",
+				fields=["company", "sum(loyalty_points) as loyalty_points"],
+				as_list =1
+			))
 
 	company_wise_billing_this_year = frappe._dict()
 
@@ -500,11 +510,17 @@ def get_dashboard_info(party_type, party):
 
 		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
 
+		if loyalty_point_details:
+			loyalty_points = loyalty_point_details.get(d.company)
+
 		info = {}
 		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 		info["currency"] = party_account_currency
 		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
 		info["company"] = d.company
+
+		if party_type == "Customer" and loyalty_point_details:
+			info["loyalty_points"] = loyalty_points
 
 		if party_type == "Supplier":
 			info["billing_this_year"] = -1 * info["billing_this_year"]
@@ -532,7 +548,7 @@ def get_party_shipping_address(doctype, name):
 		'dl.link_doctype=%s '
 		'and dl.link_name=%s '
 		'and dl.parenttype="Address" '
-		'and '
+		'and ifnull(ta.disabled, 0) = 0 and'
 		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
 		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
 		(doctype, name)
@@ -541,3 +557,12 @@ def get_party_shipping_address(doctype, name):
 		return out[0][0]
 	else:
 		return ''
+
+def get_partywise_advanced_payment_amount(party_type="Customer"):
+	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
+		FROM `tabGL Entry`
+		WHERE party_type = %s and against_voucher is null GROUP BY party"""
+		.format(("credit - debit") if party_type == "Customer" else "debit") , party_type)
+
+	if data:
+		return frappe._dict(data)

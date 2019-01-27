@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Job Card', {
 	refresh: function(frm) {
-		if (frm.doc.items && frm.doc.docstatus==1) {
+		if(!frm.doc.__islocal && frm.doc.items && frm.doc.items.length) {
 			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
 				frm.add_custom_button(__("Material Request"), () => {
 					frm.trigger("make_material_request");
@@ -31,6 +31,7 @@ frappe.ui.form.on('Job Card', {
 				frm.add_custom_button(__("Complete Job"), () => {
 					frm.set_value('actual_end_date', frappe.datetime.now_datetime());
 					frm.save();
+					frm.savesubmit();
 				});
 			}
 		}
