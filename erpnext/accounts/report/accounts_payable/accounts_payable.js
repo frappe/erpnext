@@ -73,6 +73,13 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Sales Person",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
@@ -83,6 +90,19 @@ frappe.query_reports["Accounts Payable"] = {
 		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
+		});
+	},
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			hooks: {
+				totalAccumulator: function(column, values) {
+					const me = this;
+					values = values.filter(d => me.datamanager.getData(d.rowIndex).posting_date);
+					let type = column.fieldname == "age" ? "mean" : null;
+					return frappe.utils.report_total_accumulator(column, values, type);
+				}
+			}
 		});
 	}
 }

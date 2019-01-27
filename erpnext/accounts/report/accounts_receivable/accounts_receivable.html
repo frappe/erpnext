@@ -42,10 +42,10 @@
 
 {% if(filters.show_pdc_in_print) { %}
 	{% var balance_row = data.slice(-1).pop();
-		   var range1 = report.columns[11].label;
-		   var range2 = report.columns[12].label;
-		   var range3 = report.columns[13].label;
-		   var range4 = report.columns[14].label;
+		var range1 = report.columns.find(d => d.fieldname == "range1").label;
+		var range2 = report.columns.find(d => d.fieldname == "range2").label;
+		var range3 = report.columns.find(d => d.fieldname == "range3").label;
+		var range4 = report.columns.find(d => d.fieldname == "range4").label;
 	%}
 	{% if(balance_row) { %}
 	<table class="table table-bordered table-condensed">
@@ -144,9 +144,9 @@
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
-				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
+				{% if(data[i]["party"]) { %}
 					<td>{%= frappe.datetime.str_to_user(data[i]["posting_date"]) %}</td>
-					<td style="text-align: right">{%= data[i][__("Age (Days)")] %}</td>
+					<td style="text-align: right">{%= data[i]["age"] %}</td>
 					<td>
 						{% if(!filters.show_pdc_in_print) { %}
 							{%= data[i]["voucher_type"] %}
@@ -161,20 +161,22 @@
 
 					{% if(!filters.show_pdc_in_print) { %}
 					<td>
-						{% if(!(filters.customer || filters.supplier)) { %}
-							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
-							{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
-								<br> {%= data[i][__("Customer Name")] %}
-							{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
-								<br> {%= data[i][__("Supplier Name")] %}
+						{% if(!data[i]["posting_date"]) { %}
+							<strong>{%= data[i]["party"].substr(1, data[i]["party"].length-2) %}</strong>
+						{% } else { %}
+							{% if(!(filters.customer || filters.supplier)) { %}
+								{%= data[i]["party"] %}
+								{% if(data[i]["party_name"] && data[i]["party_name"] != data[i]["party"]) { %}
+									<br>{%= data[i]["party_name"] %}
+								{% } %}
 							{% } %}
 						{% } %}
+						{% if data[i]["remarks"] %}
 						<div>
-						{% if data[i][__("Remarks")] %}
-							{%= __("Remarks") %}:
-							{%= data[i][__("Remarks")] %}
-						{% } %}
+							{% if (!filters.customer && !filters.supplier) { %}{%= __("Remarks") %}:{% } %}
+							{%= data[i]["remarks"] %}
 						</div>
+						{% } %}
 					</td>
 					{% } %}
 
@@ -185,7 +187,7 @@
 						<td style="text-align: right">
 							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
 						<td style="text-align: right">
-							{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"]) : format_currency(data[i]["debit_note"], data[i]["currency"])  %}</td>
+							{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %}</td>
 					{% } %}
 					<td style="text-align: right">
 						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
@@ -209,52 +211,66 @@
 					<td></td>
 					{% } %}
 					<td></td>
-					<td style="text-align: right"><b>{%= __("Total") %}</b></td>
-					<td style="text-align: right">
-						{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
 
-					{% if(!filters.show_pdc_in_print) { %}
-						<td style="text-align: right">
-							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["credit_note"], data[i]["currency"])  : format_currency(data[i]["debit_note"], data[i]["currency"])  %} </td>
-					{% } %}
-					<td style="text-align: right">
-						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
-
-					{% if(filters.show_pdc_in_print) { %}
-						{% if(report.report_name === "Accounts Receivable") { %}
-							<td style="text-align: right">
-								{%= data[i][__("Customer LPO")] %}</td>
+					{% if($.isEmptyObject(data[i])) { %}
+						<td></td>
+						<td></td>
+						{% if(!filters.show_pdc_in_print) { %}
+							<td></td>
+							<td></td>
 						{% } %}
-						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
-						<td style="text-align: right">{%= data[i][("pdc/lc_ref")] %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
+						<td></td>
+						{% if(filters.show_pdc_in_print) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td></td>
+							{% } %}
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						{% } %}
+					{% } else { %}
+						<td style="text-align: right"><b>{%= __("Total") %}</b></td>
+						<td style="text-align: right">
+							{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
+
+						{% if(!filters.show_pdc_in_print) { %}
+							<td style="text-align: right">
+								{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %} </td>
+						{% } %}
+						<td style="text-align: right">
+							{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
+
+						{% if(filters.show_pdc_in_print) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td style="text-align: right">
+									{%= data[i]["po_no"] %}</td>
+							{% } %}
+							<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i]["pdc/lc_date"]) %}</td>
+							<td style="text-align: right">{%= data[i][("pdc/lc_ref")] %}</td>
+							<td style="text-align: right">{%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
+						{% } %}
 					{% } %}
 				{% } %}
 			{% } else { %}
-				{% if(data[i][__("Customer")] || data[i][__("Supplier")]|| "&nbsp;") { %}
-					{% if((data[i][__("Customer")] || data[i][__("Supplier")]) != __("'Total'")) { %}
-						<td>
-							{% if(!(filters.customer || filters.supplier)) { %}
-								{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
-								{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
-									<br> {%= data[i][__("Customer Name")] %}
-								{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
-									<br> {%= data[i][__("Supplier Name")] %}
-								{% } %}
+				{% if(data[i]["party"] != __("Total")) { %}
+					<td>
+						{% if(!(filters.customer || filters.supplier)) { %}
+							{%= data[i]["party"] %}
+							{% if(data[i]["party_name"] && data[i]["party_name"] != data[i]["party"]) { %}
+								<br>{%= data[i]["party_name"] %}
 							{% } %}
-							<br>{%= __("Remarks") %}:
-							{%= data[i][__("Remarks")] %}
-						</td>
-					{% } else { %}
-						<td><b>{%= __("Total") %}</b></td>
-					{% } %}
-					<td style="text-align: right">{%= format_currency(data[i][("total_invoiced_amt")], data[i]["currency"]) %}</td>
-					<td style="text-align: right">{%= format_currency(data[i][("total_paid_amt")], data[i]["currency"]) %}</td>
-					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("credit_note_amt")], data[i]["currency"]) : format_currency(data[i][__("debit_note_amt")], data[i]["currency"]) %}</td>
-					<td style="text-align: right">{%= format_currency(data[i][("total_outstanding_amt")], data[i]["currency"]) %}</td>
+						{% } %}
+					</td>
+				{% } else { %}
+					<td><b>{%= __("Total") %}</b></td>
 				{% } %}
+				<td style="text-align: right">{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 			{% } %}
 			</tr>
 		{% } %}
