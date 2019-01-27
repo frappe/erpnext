@@ -31,3 +31,13 @@ def make_bank_account(doctype, docname):
 	doc.is_default = 1
 
 	return doc
+
+@frappe.whitelist()
+def get_party_bank_account(party_type, party):
+	return frappe.db.get_value(party_type,
+		party, 'default_bank_account')
+
+@frappe.whitelist()
+def get_bank_account_details(bank_account):
+	return frappe.db.get_value("Bank Account",
+		bank_account, ['account', 'bank', 'bank_account_no'], as_dict=1)

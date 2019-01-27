@@ -494,7 +494,7 @@
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
-   "precision": "9",
+   "precision": "9", 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
