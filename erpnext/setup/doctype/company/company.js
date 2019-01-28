@@ -53,8 +53,9 @@ frappe.ui.form.on("Company", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.abbr && !frm.doc.__islocal) {
+		if(!frm.doc.__islocal) {
 			frm.set_df_property("abbr", "read_only", 1);
+			frm.set_df_property("parent_company", "read_only", 1);
 		}
 
 		frm.toggle_display('address_html', !frm.doc.__islocal);
