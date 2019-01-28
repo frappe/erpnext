@@ -76,6 +76,7 @@ var get_closing_voucher_details = function(frm) {
 					refresh_field("grand_total");
 					refresh_field("net_total");
 					refresh_field("total_quantity");
+					refresh_field("total_amount");
 
 					frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
 				}
