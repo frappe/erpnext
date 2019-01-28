@@ -1039,7 +1039,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.numeric_keypad.show();
 	},
 
-	make_item_list: function (customer=null) {
+	make_item_list: function (customer) {
 		var me = this;
 		if (!this.price_list) {
 			frappe.msgprint(__("Price List not found or disabled"));
@@ -1428,7 +1428,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			? this.item_serial_no[this.child.item_code][1] : (this.pos_profile_data['warehouse'] || this.items[0].default_warehouse));
 
 		customer = this.frm.doc.customer;
-		let rate
+		let rate;
 
 		customer_price_list = this.customer_wise_price_list[customer]
 		if (customer_price_list && customer_price_list[this.child.item_code]){
