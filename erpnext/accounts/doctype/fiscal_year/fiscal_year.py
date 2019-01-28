@@ -37,9 +37,10 @@ class FiscalYear(Document):
 		if getdate(self.year_start_date) > getdate(self.year_end_date):
 			frappe.throw(_("Fiscal Year Start Date should not be greater than Fiscal Year End Date"))
 
-		if (getdate(self.year_end_date) - getdate(self.year_start_date)).days > 366:
-			date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
-			self.year_end_date = date.strftime("%Y-%m-%d")
+		date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
+
+		if getdate(self.year_end_date) != date:
+			frappe.throw(_("The difference between the year start date and year end date must be 12 months."))
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
