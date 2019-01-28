@@ -360,7 +360,7 @@ class SalarySlip(TransactionBase):
 			elif not d.amount:
 				d.amount = d.default_amount
 			if not d.do_not_include_in_total:
-				self.set(total_field, self.get(total_field) + flt(d.amount))
+				self.set(total_field, self.get(total_field) + flt(d.amount, 2))
 
 	def calculate_net_pay(self):
 		if self.salary_structure:
