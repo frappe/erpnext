@@ -16,6 +16,14 @@ frappe.ui.form.on("Company", {
 				filters: {"is_additional_component": 1}
 			}
 		});
+
+		frm.set_df_property("create_chart_of_accounts_based_on", "read_only", frm.doc.parent_company ? 1 : 0);
+		frm.set_df_property("existing_company", "read_only", frm.doc.parent_company ? 1 : 0);
+		frm.set_query("parent_company", function() {
+			return {
+				filters: {"is_group": 1}
+			}
+		});
 	},
 
 	company_name: function(frm) {
@@ -26,6 +34,12 @@ frappe.ui.form.on("Company", {
 			}).join("");
 			frm.set_value("abbr", abbr);
 		}
+	},
+
+	parent_company: function(frm) {
+		if(!frm.doc.parent_company) return;
+		frm.set_value("create_chart_of_accounts_based_on", "Existing Company");
+		frm.set_value("existing_company", frm.doc.parent_company);
 	},
 
 	date_of_commencement: function(frm) {
