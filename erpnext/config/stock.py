@@ -73,6 +73,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Alternative",
+				},
+				{
+					"type": "doctype",
 					"name": "Product Bundle",
 				},
 				{
@@ -89,7 +93,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item Price",
-					"route": "Report/Item Price"
 				},
 				{
 					"type": "doctype",
@@ -165,6 +168,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Quality Inspection Template",
+				},
+				{
+					"type": "doctype",
 					"name": "Landed Cost Voucher",
 				}
 			]
@@ -211,10 +218,10 @@ def get_data():
 					"doctype": "Item Price",
 				},
 				{
-					"type": "page",
-					"name": "stock-analytics",
-					"label": _("Stock Analytics"),
-					"icon": "fa fa-bar-chart"
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Analytics",
+					"doctype": "Stock Entry"
 				},
 				{
 					"type": "report",

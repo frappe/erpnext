@@ -7,7 +7,7 @@ from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	
-	doc_list = ["Production Order", "BOM", "Purchase Invoice Item", "Sales Invoice", 
+	doc_list = ["Work Order", "BOM", "Purchase Invoice Item", "Sales Invoice", 
 		"Purchase Order Item", "Stock Entry", "Delivery Note", "Sales Order", 
 		"Purchase Receipt Item", "Supplier Quotation Item"]
 	

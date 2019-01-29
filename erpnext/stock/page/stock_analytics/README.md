@@ -1,1 +1,0 @@
-Trends of Items quantities and values.

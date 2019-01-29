@@ -1,22 +1,41 @@
 [
 	{
-			"doctype": "Salary Component",
-			"salary_component": "_Test Basic Salary"
+		"doctype": "Salary Component",
+		"salary_component": "_Test Basic Salary",
+		"type": "Earning",
+		"is_payable": 1,
+		"is_tax_applicable": 1
 	},
 	{
-			"doctype": "Salary Component",
-			"salary_component": "_Test Allowance"
+		"doctype": "Salary Component",
+		"salary_component": "_Test Allowance",
+		"type": "Earning",
+		"is_payable": 1,
+		"is_tax_applicable": 1
 	},
 	{
-			"doctype": "Salary Component",
-			"salary_component": "_Test Professional Tax"
+		"doctype": "Salary Component",
+		"salary_component": "_Test Professional Tax",
+		"type": "Deduction"
 	},
 	{
-			"doctype": "Salary Component",
-			"salary_component": "_Test TDS"
+		"doctype": "Salary Component",
+		"salary_component": "_Test TDS",
+		"type": "Deduction"
 	},
 	{
-			"doctype": "Salary Component",
-			"salary_component": "Basic"
+		"doctype": "Salary Component",
+		"salary_component": "Basic",
+		"type": "Earning",
+		"is_payable": 1,
+		"is_tax_applicable": 1
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "Leave Encashment",
+		"type": "Earning",
+		"is_payable": 1,
+		"is_tax_applicable": 1,
+		"is_additional_component": 1
 	}
 ]

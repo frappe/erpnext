@@ -1,6 +1,11 @@
 <div class="cart-dropdown-container">
 	<div id="cart-error" class="alert alert-danger"
 		style="display: none;"></div>
+	<div class="row checkout-btn">
+		<div class="col-sm-12 col-xs-12">
+			<a href="/cart" class="btn btn-block btn-primary">{{ _("Checkout") }}</a>
+		</div>
+	</div>
 	<div class="row cart-items-dropdown cart-item-header text-muted">
 		<div class="col-sm-6 col-xs-6 h6 text-uppercase">
 		{{ _("Item") }}
@@ -11,11 +16,10 @@
 	</div>
 
 	{% if doc.items %}
-	<div class="cart-items-dropdown">
-		{% include "templates/includes/cart/cart_items_dropdown.html" %}
-	</div>
-	<div class="checkout-btn">
-		<a href="/cart" class="btn btn-block btn-primary">{{ _("Checkout") }}</a>
+	<div class="row cart-items-dropdown">
+		<div class="col-sm-12 col-xs-12">
+			{% include "templates/includes/cart/cart_items_dropdown.html" %}
+		</div>
 	</div>
 	{% else %}
 	<p>{{ _("Cart is Empty") }}</p>

@@ -70,6 +70,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Project"),
 			"fieldtype": "Link",
 			"options": "Project"
+		},
+		{
+			"fieldname":"include_uom",
+			"label": __("Include UOM"),
+			"fieldtype": "Link",
+			"options": "UOM"
 		}
 	]
 }

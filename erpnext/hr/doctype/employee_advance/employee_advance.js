@@ -19,6 +19,7 @@ frappe.ui.form.on('Employee Advance', {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
+					"account_type": "Payable",
 					"company": frm.doc.company
 				}
 			};
@@ -31,6 +32,19 @@ frappe.ui.form.on('Employee Advance', {
 			&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+		}
+		else if (
+			frm.doc.docstatus === 1
+			&& flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount)
+			&& frappe.model.can_create("Expense Claim")
+		) {
+			frm.add_custom_button(
+				__("Expense Claim"),
+				function() {
+					frm.events.make_expense_claim(frm);
+				},
+				__("Make")
+			);
 		}
 	},
 
@@ -51,4 +65,37 @@ frappe.ui.form.on('Employee Advance', {
 			}
 		});
 	},
+
+	make_expense_claim: function(frm) {
+		return frappe.call({
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim",
+			args: {
+				"employee_name": frm.doc.employee,
+				"company": frm.doc.company,
+				"employee_advance_name": frm.doc.name,
+				"posting_date": frm.doc.posting_date,
+				"paid_amount": frm.doc.paid_amount,
+				"claimed_amount": frm.doc.claimed_amount
+			},
+			callback: function(r) {
+				const doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	employee: function (frm) {
+		if (frm.doc.employee) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_due_advance_amount",
+				args: {
+					"employee": frm.doc.employee,
+					"posting_date": frm.doc.posting_date
+				},
+				callback: function(r) {
+					frm.set_value("due_advance_amount",r.message);
+				}
+			});
+		}
+	}
 });

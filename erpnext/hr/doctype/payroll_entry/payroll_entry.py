@@ -6,15 +6,19 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT
+from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class PayrollEntry(Document):
-
 	def on_submit(self):
 		self.create_salary_slips()
+
+	def before_submit(self):
+		if self.validate_attendance:
+			if self.validate_employee_attendance():
+				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
 	def get_emp_list(self):
 		"""
@@ -28,28 +32,29 @@ class PayrollEntry(Document):
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": self.payroll_frequency}
 
-		sal_struct = frappe.db.sql("""
+		sal_struct = frappe.db.sql_list("""
 				select
 					name from `tabSalary Structure`
 				where
-					docstatus != 2 and
+					docstatus = 1 and
 					is_active = 'Yes'
 					and company = %(company)s and
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-
 		if sal_struct:
-			cond += "and t2.parent IN %(sal_struct)s "
+			cond += "and t2.salary_structure IN %(sal_struct)s "
+			cond += "and %(from_date)s >= t2.from_date"
 			emp_list = frappe.db.sql("""
 				select
-					t1.name as employee, t1.employee_name, t1.department, t1.designation
+					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
 				from
-					`tabEmployee` t1, `tabSalary Structure Employee` t2
+					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
-					t1.docstatus!=2
-					and t1.name = t2.employee
-			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
+					t1.name = t2.employee
+					and t2.docstatus = 1
+			%s order by t2.from_date desc
+			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):
@@ -60,6 +65,10 @@ class PayrollEntry(Document):
 
 		for d in employees:
 			self.append('employees', d)
+
+		self.number_of_employees = len(employees)
+		if self.validate_attendance:
+			return self.validate_employee_attendance()
 
 	def get_filter_condition(self):
 		self.check_mandatory()
@@ -88,38 +97,24 @@ class PayrollEntry(Document):
 			Creates salary slip for selected employees if already not created
 		"""
 		self.check_permission('write')
-		self.created = 1;
-		emp_list = self.get_emp_list()
-		ss_list = []
+		self.created = 1
+		emp_list = [d.employee for d in self.get_emp_list()]
 		if emp_list:
-			for emp in emp_list:
-				if not frappe.db.sql("""select
-						name from `tabSalary Slip`
-					where
-						docstatus!= 2 and
-						employee = %s and
-						start_date >= %s and
-						end_date <= %s and
-						company = %s
-						""", (emp['employee'], self.start_date, self.end_date, self.company)):
-					ss = frappe.get_doc({
-						"doctype": "Salary Slip",
-						"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
-						"payroll_frequency": self.payroll_frequency,
-						"start_date": self.start_date,
-						"end_date": self.end_date,
-						"employee": emp['employee'],
-						"employee_name": frappe.get_value("Employee", {"name":emp['employee']}, "employee_name"),
-						"company": self.company,
-						"posting_date": self.posting_date
-					})
-					ss.insert()
-					ss_dict = {}
-					ss_dict["Employee Name"] = ss.employee_name
-					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
-					ss_dict["Salary Slip"] = format_as_links(ss.name)[0]
-					ss_list.append(ss_dict)
-		return create_log(ss_list)
+			args = frappe._dict({
+				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
+				"payroll_frequency": self.payroll_frequency,
+				"start_date": self.start_date,
+				"end_date": self.end_date,
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"deduct_tax_for_unclaimed_employee_benefits": self.deduct_tax_for_unclaimed_employee_benefits,
+				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
+				"payroll_entry": self.name
+			})
+			if len(emp_list) > 30:
+				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
+			else:
+				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -135,43 +130,12 @@ class PayrollEntry(Document):
 		return ss_list
 
 	def submit_salary_slips(self):
-		"""
-			Submit all salary slips based on selected criteria
-		"""
 		self.check_permission('write')
-
-		# self.create_salary_slips()
-
-		jv_name = ""
 		ss_list = self.get_sal_slip_list(ss_status=0)
-		submitted_ss = []
-		not_submitted_ss = []
-		frappe.flags.via_payroll_entry = True
-		for ss in ss_list:
-			ss_obj = frappe.get_doc("Salary Slip",ss[0])
-			ss_dict = {}
-			ss_dict["Employee Name"] = ss_obj.employee_name
-			ss_dict["Total Pay"] = fmt_money(ss_obj.net_pay,
-				currency = frappe.defaults.get_global_default("currency"))
-			ss_dict["Salary Slip"] = format_as_links(ss_obj.name)[0]
-
-			if ss_obj.net_pay<0:
-				not_submitted_ss.append(ss_dict)
-			else:
-				try:
-					ss_obj.submit()
-					submitted_ss.append(ss_obj)
-
-				except frappe.ValidationError:
-					not_submitted_ss.append(ss_dict)
-		if submitted_ss:
-			jv_name = self.make_accrual_jv_entry()
-			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
-				.format(ss_obj.start_date, ss_obj.end_date))
-
-			self.email_salary_slip(submitted_ss)
-
-		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
+		if len(ss_list) > 30:
+			frappe.enqueue(submit_salary_slips_for_employees, timeout=600, payroll_entry=self, salary_slips=ss_list)
+		else:
+			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
 
 	def email_salary_slip(self, submitted_ss):
 		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
@@ -183,23 +147,13 @@ class PayrollEntry(Document):
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.employee_loan_account, eld.employee_loan,
+		return frappe.db.sql(""" select eld.loan_account, eld.loan,
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
 			where
 				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
-
-	def get_total_salary_amount(self):
-		"""
-			Get total salary amount from submitted salary slip based on selected criteria
-		"""
-		cond = self.get_filter_condition()
-		totals = frappe.db.sql(""" select sum(rounded_total) as rounded_total from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True)
-		return totals and totals[0] or None
 
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
@@ -224,7 +178,13 @@ class PayrollEntry(Document):
 		if salary_components:
 			component_dict = {}
 			for item in salary_components:
-				component_dict[item['salary_component']] = component_dict.get(item['salary_component'], 0) + item['amount']
+				add_component_to_accrual_jv_entry = True
+				if component_type == "earnings":
+					is_flexible_benefit, only_tax_impact = frappe.db.get_value("Salary Component", item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
+					if is_flexible_benefit == 1 and only_tax_impact ==1:
+						add_component_to_accrual_jv_entry = False
+				if add_component_to_accrual_jv_entry:
+					component_dict[item['salary_component']] = component_dict.get(item['salary_component'], 0) + item['amount']
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
 
@@ -236,8 +196,8 @@ class PayrollEntry(Document):
 		return account_dict
 
 	def get_default_payroll_payable_account(self):
-		payroll_payable_account = frappe.db.get_value("Company",
-			{"company_name": self.company}, "default_payroll_payable_account")
+		payroll_payable_account = frappe.get_cached_value('Company',
+			{"company_name": self.company},  "default_payroll_payable_account")
 
 		if not payroll_payable_account:
 			frappe.throw(_("Please set Default Payroll Payable Account in Company {0}")
@@ -285,15 +245,15 @@ class PayrollEntry(Document):
 						"project": self.project
 					})
 
-			# Employee loan
+			# Loan
 			for data in loan_details:
 				accounts.append({
-						"account": data.employee_loan_account,
+						"account": data.loan_account,
 						"credit_in_account_currency": data.principal_amount
 					})
 
 				if data.interest_amount and not data.interest_income_account:
-					frappe.throw(_("Select interest income account in employee loan {0}").format(data.employee_loan))
+					frappe.throw(_("Select interest income account in loan {0}").format(data.loan))
 
 				if data.interest_income_account and data.interest_amount:
 					accounts.append({
@@ -311,6 +271,7 @@ class PayrollEntry(Document):
 			})
 
 			journal_entry.set("accounts", accounts)
+			journal_entry.title = default_payroll_payable_account
 			journal_entry.save()
 
 			try:
@@ -324,50 +285,101 @@ class PayrollEntry(Document):
 
 	def make_payment_entry(self):
 		self.check_permission('write')
-		total_salary_amount = self.get_total_salary_amount()
+
+		cond = self.get_filter_condition()
+		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
+			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
+			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
+
+		if salary_slip_name_list and len(salary_slip_name_list) > 0:
+			salary_slip_total = 0
+			for salary_slip_name in salary_slip_name_list:
+				salary_slip = frappe.get_doc("Salary Slip", salary_slip_name[0])
+				for sal_detail in salary_slip.earnings:
+					is_flexible_benefit, only_tax_impact, creat_separate_je, statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component,
+						['is_flexible_benefit', 'only_tax_impact', 'create_separate_payment_entry_against_benefit_claim', 'statistical_component'])
+					if only_tax_impact != 1 and statistical_component != 1:
+						if is_flexible_benefit == 1 and creat_separate_je == 1:
+							self.create_journal_entry(sal_detail.amount, sal_detail.salary_component)
+						else:
+							salary_slip_total += sal_detail.amount
+				for sal_detail in salary_slip.deductions:
+					statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component, 'statistical_component')
+					if statistical_component != 1:
+						salary_slip_total -= sal_detail.amount
+			if salary_slip_total > 0:
+				self.create_journal_entry(salary_slip_total, "salary")
+
+	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
-		if total_salary_amount and total_salary_amount.rounded_total:
-			journal_entry = frappe.new_doc('Journal Entry')
-			journal_entry.voucher_type = 'Bank Entry'
-			journal_entry.user_remark = _('Payment of salary from {0} to {1}')\
-				.format(self.start_date, self.end_date)
-			journal_entry.company = self.company
-			journal_entry.posting_date = self.posting_date
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
+			.format(user_remark, self.start_date, self.end_date)
+		journal_entry.company = self.company
+		journal_entry.posting_date = self.posting_date
 
-			payment_amount = flt(total_salary_amount.rounded_total, precision)
+		payment_amount = flt(je_payment_amount, precision)
 
-			journal_entry.set("accounts", [
-				{
-					"account": self.payment_account,
-					"credit_in_account_currency": payment_amount
-				},
-				{
-					"account": default_payroll_payable_account,
-					"debit_in_account_currency": payment_amount,
-					"reference_type": self.doctype,
-					"reference_name": self.name
-				}
-			])
-			return journal_entry.as_dict()
-		else:
-			frappe.msgprint(
-				_("There are no submitted Salary Slips to process."),
-				title="Error", indicator="red"
-			)
+		journal_entry.set("accounts", [
+			{
+				"account": self.payment_account,
+				"credit_in_account_currency": payment_amount
+			},
+			{
+				"account": default_payroll_payable_account,
+				"debit_in_account_currency": payment_amount,
+				"reference_type": self.doctype,
+				"reference_name": self.name
+			}
+		])
+		journal_entry.save(ignore_permissions = True)
 
 	def update_salary_slip_status(self, jv_name = None):
 		ss_list = self.get_sal_slip_list(ss_status=1)
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
-			frappe.db.set_value("Salary Slip", ss_obj.name, "status", "Paid")
 			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
 		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
+	def validate_employee_attendance(self):
+		employees_to_mark_attendance = []
+		days_in_payroll, days_holiday, days_attendance_marked = 0, 0, 0
+		for employee_detail in self.employees:
+			days_holiday = self.get_count_holidays_of_employee(employee_detail.employee)
+			days_attendance_marked = self.get_count_employee_attendance(employee_detail.employee)
+			days_in_payroll = date_diff(self.end_date, self.start_date) + 1
+			if days_in_payroll > days_holiday + days_attendance_marked:
+				employees_to_mark_attendance.append({
+					"employee": employee_detail.employee,
+					"employee_name": employee_detail.employee_name
+					})
+		return employees_to_mark_attendance
+
+	def get_count_holidays_of_employee(self, employee):
+		holiday_list = get_holiday_list_for_employee(employee)
+		holidays = 0
+		if holiday_list:
+			days = frappe.db.sql("""select count(*) from tabHoliday where
+				parent=%s and holiday_date between %s and %s""", (holiday_list,
+				self.start_date, self.end_date))
+			if days and days[0][0]:
+				holidays = days[0][0]
+		return holidays
+
+	def get_count_employee_attendance(self, employee):
+		marked_days = 0
+		attendances = frappe.db.sql("""select count(*) from tabAttendance where
+			employee=%s and docstatus=1 and attendance_date between %s and %s""",
+			(employee, self.start_date, self.end_date))
+		if attendances and attendances[0][0]:
+			marked_days = attendances[0][0]
+		return marked_days
 
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
@@ -450,61 +462,6 @@ def get_month_details(year, month):
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
 
-
-@frappe.whitelist()
-def create_log(ss_list):
-	if not ss_list:
-		frappe.throw(
-			_("There's no employee for the given criteria. Check that Salary Slips have not already been created."),
-			title='Error'
-		)
-	return ss_list
-
-
-def format_as_links(salary_slip):
-	return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
-
-
-def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
-
-	if not submitted_ss and not not_submitted_ss:
-		frappe.msgprint("No salary slip found to submit for the above selected criteria OR salary slip already submitted")
-
-	if not_submitted_ss:
-		frappe.msgprint("Could not submit any Salary Slip <br>\
-			Possible reasons: <br>\
-			1. Net pay is less than 0. <br>\
-			2. Company Email Address specified in employee master is not valid. <br>")
-
-
-def get_salary_slip_list(name, docstatus, as_dict=0):
-	payroll_entry = frappe.get_doc('Payroll Entry', name)
-
-	salary_slip_list = frappe.db.sql(
-		"select t1.name, t1.salary_structure from `tabSalary Slip` t1 "
-		"where t1.docstatus = %s "
-		"and t1.start_date >= %s "
-		"and t1.end_date <= %s",
-		(docstatus, payroll_entry.start_date, payroll_entry.end_date),
-		as_dict=as_dict
-	)
-
-	return salary_slip_list
-
-
-@frappe.whitelist()
-def payroll_entry_has_created_slips(name):
-	response = {}
-
-	draft_salary_slips = get_salary_slip_list(name, docstatus=0)
-	submitted_salary_slips = get_salary_slip_list(name, docstatus=1)
-
-	response['draft'] = 1 if draft_salary_slips else 0
-	response['submitted'] = 1 if submitted_salary_slips else 0
-
-	return response
-
-
 def get_payroll_entry_bank_entries(payroll_entry_name):
 	journal_entries = frappe.db.sql(
 		'select name from `tabJournal Entry Account` '
@@ -520,12 +477,76 @@ def get_payroll_entry_bank_entries(payroll_entry_name):
 @frappe.whitelist()
 def payroll_entry_has_bank_entries(name):
 	response = {}
-
 	bank_entries = get_payroll_entry_bank_entries(name)
 	response['submitted'] = 1 if bank_entries else 0
 
 	return response
 
+def create_salary_slips_for_employees(employees, args, publish_progress=True):
+	salary_slips_exists_for = get_existing_salary_slips(employees, args)
+	count=0
+	for emp in employees:
+		if emp not in salary_slips_exists_for:
+			args.update({
+				"doctype": "Salary Slip",
+				"employee": emp
+			})
+			ss = frappe.get_doc(args)
+			ss.insert()
+			count+=1
+			if publish_progress:
+				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
+					title = _("Creating Salary Slips..."))
+
+	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
+	payroll_entry.db_set("salary_slips_created", 1)
+	payroll_entry.notify_update()
+
+def get_existing_salary_slips(employees, args):
+	return frappe.db.sql_list("""
+		select distinct employee from `tabSalary Slip`
+		where docstatus!= 2 and company = %s
+			and start_date >= %s and end_date <= %s
+			and employee in (%s)
+	""" % ('%s', '%s', '%s', ', '.join(['%s']*len(employees))),
+		[args.company, args.start_date, args.end_date] + employees)
+
+def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progress=True):
+	submitted_ss = []
+	not_submitted_ss = []
+	frappe.flags.via_payroll_entry = True
+
+	count = 0
+	for ss in salary_slips:
+		ss_obj = frappe.get_doc("Salary Slip",ss[0])
+		if ss_obj.net_pay<0:
+			not_submitted_ss.append(ss[0])
+		else:
+			try:
+				ss_obj.submit()
+				submitted_ss.append(ss_obj)
+			except frappe.ValidationError:
+				not_submitted_ss.append(ss[0])
+
+		count += 1
+		if publish_progress:
+			frappe.publish_progress(count*100/len(salary_slips), title = _("Submitting Salary Slips..."))
+
+	if submitted_ss:
+		payroll_entry.make_accrual_jv_entry()
+		frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
+			.format(ss_obj.start_date, ss_obj.end_date))
+
+		payroll_entry.email_salary_slip(submitted_ss)
+
+	payroll_entry.db_set("salary_slips_submitted", 1)
+	payroll_entry.notify_update()
+
+	if not submitted_ss and not not_submitted_ss:
+		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
+
+	if not_submitted_ss:
+		frappe.msgprint(_("Could not submit some Salary Slips"))
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`

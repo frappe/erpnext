@@ -22,7 +22,7 @@ frappe.ui.form.on("Request for Quotation",{
 	},
 
 	onload: function(frm) {
-		frm.add_fetch('standard_reply', 'response', 'message_for_supplier');
+		frm.add_fetch('email_template', 'response', 'message_for_supplier');
 
 		if(!frm.doc.message_for_supplier) {
 			frm.set_value("message_for_supplier", __("Please supply the specified items at the best possible rates"))
@@ -61,11 +61,11 @@ frappe.ui.form.on("Request for Quotation",{
 			fields: [
 				{	"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": "Tag\nSupplier Type", "reqd": 1 },
-				{	"fieldtype": "Link", "label": __("Supplier Type"),
-					"fieldname": "supplier_type",
-					"options": "Supplier Type",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Supplier Type'"},
+					"options": "Tag\nSupplier Group", "reqd": 1 },
+				{	"fieldtype": "Link", "label": __("Supplier Group"),
+					"fieldname": "supplier_group",
+					"options": "Supplier Group",	"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Supplier Group'"},
 				{	"fieldtype": "Data", "label": __("Tag"),
 					"fieldname": "tag",	"reqd": 0,
 					"depends_on": "eval:doc.search_type == 'Tag'" },
@@ -121,14 +121,14 @@ frappe.ui.form.on("Request for Quotation",{
 					},
 					callback: load_suppliers
 				});
-			} else if (args.supplier_type) {
+			} else if (args.supplier_group) {
 				return frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: "Supplier",
 						order_by: "name",
 						fields: ["name"],
-						filters: [["Supplier", "supplier_type", "=", args.supplier_type]]
+						filters: [["Supplier", "supplier_group", "=", args.supplier_group]]
 
 					},
 					callback: load_suppliers

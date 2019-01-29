@@ -41,8 +41,8 @@ def execute(filters=None):
 		cint(from_year), cint(from_month), cint(to_year), cint(to_month)
 
 	out = []
-	for year in xrange(from_year, to_year+1):
-		for month in xrange(from_month if year==from_year else 1, (to_month+1) if year==to_year else 13):
+	for year in range(from_year, to_year+1):
+		for month in range(from_month if year==from_year else 1, (to_month+1) if year==to_year else 13):
 			key = "{year}-{month:02d}".format(year=year, month=month)
 
 			new = new_customers_in.get(key, [0,0.0])

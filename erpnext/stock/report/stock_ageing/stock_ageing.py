@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import date_diff, flt
+from six import iteritems
 
 def execute(filters=None):
 
@@ -12,7 +13,7 @@ def execute(filters=None):
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
 	data = []
-	for item, item_dict in item_details.items():
+	for item, item_dict in iteritems(item_details):
 		fifo_queue = item_dict["fifo_queue"]
 		details = item_dict["details"]
 		if not fifo_queue: continue

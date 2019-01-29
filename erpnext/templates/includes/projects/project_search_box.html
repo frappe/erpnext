@@ -11,8 +11,8 @@
 
 <script>
 frappe.ready(function() {
-	if(get_url_arg("q")){
-	var txt = get_url_arg("q");
+	if(frappe.utils.get_url_arg("q")){
+	var txt = frappe.utils.get_url_arg("q");
 	$(".project-search-results").html("Search results for : " + encodeURIComponent(txt));
 	$(".clear").toggle(true);
 	}

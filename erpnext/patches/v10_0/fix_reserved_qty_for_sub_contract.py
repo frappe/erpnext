@@ -20,7 +20,7 @@ def execute():
 			pass
 
 	for d in frappe.db.sql("""select distinct item_code, source_warehouse
-		from `tabProduction Order Item`
+		from `tabWork Order Item`
 		where docstatus=1 and transferred_qty > required_qty
 			and source_warehouse is not null and source_warehouse != ''""", as_list=1):
 
