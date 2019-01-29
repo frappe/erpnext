@@ -13,4 +13,4 @@ erpnext/docs/current
 __pycache__
 *~
 .idea/
-node_modules
+node_modules/
