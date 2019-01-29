@@ -162,7 +162,7 @@ class Project(Document):
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
-		d = existing_task_data.get(row.task_id)
+		d = existing_task_data.get(row.task_id, {})
 
 		for field in fields:
 			if row.get(field) != d.get(field):

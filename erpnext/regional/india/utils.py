@@ -9,7 +9,7 @@ from erpnext.hr.utils import get_salary_assignment
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 
 def validate_gstin_for_india(doc, method):
-	if not hasattr(doc, 'gstin'):
+	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
 	doc.gstin = doc.gstin.upper().strip() if doc.gstin else ""
