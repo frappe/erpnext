@@ -582,3 +582,4 @@ erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
+erpnext.patches.v11_0.add_permissions_in_gst_settings
